@@ -6,6 +6,11 @@
     <PropertyGroup>
         <MetalamaPatternsVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaPatternsVersion>
         <MetalamaPatternsAssemblyVersion>$(MainVersion)</MetalamaPatternsAssemblyVersion>
+        <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
+        <xUnitVersion>2.4.1</xUnitVersion>
+        <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
+		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
+        <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
     </PropertyGroup>
 
     

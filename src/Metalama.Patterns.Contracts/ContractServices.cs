@@ -1,0 +1,44 @@
+﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
+// source-available license. Please see the LICENSE.md file in the repository root for details.
+
+namespace Metalama.Patterns.Contracts
+{
+    /// <summary>
+    /// This class provides services supporting Contract aspects. By adding your own classes to the ExceptionFactory chain, you can change the way the
+    /// exceptions are created when a contract is broken. By plugging into the LocalizedTextProvider chain, you can change the way the exception messages
+    /// are generated. See the documentation for the classes for more details: <see cref="ContractLocalizedTextProvider"/>, <see cref="ContractExceptionFactory"/>.
+    /// </summary>
+    public static class ContractServices
+    {
+        private static volatile ContractLocalizedTextProvider _localizedTextProvider = new ContractLocalizedTextProvider(null);
+
+        /// <summary>
+        /// Gets or sets the head of the ContractLocalizedTextProvider responsibility chain.
+        /// </summary>
+        public static ContractLocalizedTextProvider LocalizedTextProvider
+        {
+            get => _localizedTextProvider;
+            set => _localizedTextProvider = value ?? throw new ArgumentNullException( nameof(value) );
+        }
+
+        /// <summary>
+        /// The default exception factory is kept for the handling of the obsolete exception creation methods in LocationContractAttribute.
+        /// </summary>
+        internal static readonly ContractExceptionFactory DefaultExceptionFactory = new DefaultContractExceptionFactory( null );
+        private static volatile ContractExceptionFactory _exceptionFactory = DefaultExceptionFactory;
+
+        internal static void ResetExceptionFactory()
+        {
+            ExceptionFactory = DefaultExceptionFactory;
+        }
+
+        /// <summary>
+        /// Gets or sets the head of the ContractExceptionFactory responsibility chain.
+        /// </summary>
+        public static ContractExceptionFactory ExceptionFactory
+        {
+            get => _exceptionFactory;
+            set => _exceptionFactory = value ?? throw new ArgumentNullException( nameof(value) );
+        }
+    }
+}
