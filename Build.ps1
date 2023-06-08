@@ -4,6 +4,6 @@ if ( $env:VisualStudioVersion -eq $null ) {
 }
 
 (& dotnet nuget locals http-cache -c) | Out-Null
-& dotnet run --project "$PSScriptRoot\eng\src\BuildMyProduct.csproj" -- $args
+& dotnet run --project "$PSScriptRoot\eng\src\BuildMetalamaPatterns.csproj" -- $args
 exit $LASTEXITCODE
 

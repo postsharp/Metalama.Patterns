@@ -3,6 +3,7 @@
     <PropertyGroup>
         <RepoDirectory>$(MSBuildThisFileDirectory)</RepoDirectory>
         <RepoKind>GitHub</RepoKind> <!-- Valid values: AzureRepos | GitHub -->
+        <NoWarn>$(NoWarn);SA0001</NoWarn> <!-- XML comment analysis is disabled due to project configuration -->
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>

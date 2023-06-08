@@ -4,23 +4,23 @@
     <Import Project="MainVersion.props" />
     
     <PropertyGroup>
-        <MyProductVersion>$(MainVersion)$(PackageVersionSuffix)</MyProductVersion>
-        <MyProductAssemblyVersion>$(MainVersion)</MyProductAssemblyVersion>
+        <MetalamaPatternsVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaPatternsVersion>
+        <MetalamaPatternsAssemblyVersion>$(MainVersion)</MetalamaPatternsAssemblyVersion>
     </PropertyGroup>
 
     
     <!-- Set the default versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>1.0.99-preview</PostSharpEngineeringVersion>
-		<MetalamaVersion>branch:master</MetalamaVersion>
+        <PostSharpEngineeringVersion>2023.1.14-preview</PostSharpEngineeringVersion>
+        <MetalamaVersion></MetalamaVersion>
     </PropertyGroup>
 
     <!-- Override versions (both this product and dependencies) for the local build -->
     <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
 
     <PropertyGroup>
-        <AssemblyVersion>$(MyProductAssemblyVersion)</AssemblyVersion>
-        <Version>$(MyProductVersion)</Version>
+        <AssemblyVersion>$(MetalamaPatternsAssemblyVersion)</AssemblyVersion>
+        <Version>$(MetalamaPatternsVersion)</Version>
     </PropertyGroup>
 
 </Project>
