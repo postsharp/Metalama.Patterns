@@ -1,0 +1,6 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=2B6A66F1C4643048ADDBE70B7A839A65/AbsolutePath/@EntryValue">C:\src\PostSharp.Engineering.ProductTemplate\eng\style\CommonStyle.DotSettings</s:String>
+	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=2B6A66F1C4643048ADDBE70B7A839A65/RelativePath/@EntryValue">..\..\eng\style\CommonStyle.DotSettings</s:String>
+	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=2B6A66F1C4643048ADDBE70B7A839A65/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File2B6A66F1C4643048ADDBE70B7A839A65/@KeyIndexDefined">True</s:Boolean>
+	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File2B6A66F1C4643048ADDBE70B7A839A65/RelativePriority/@EntryValue">1</s:Double></wpf:ResourceDictionary>
