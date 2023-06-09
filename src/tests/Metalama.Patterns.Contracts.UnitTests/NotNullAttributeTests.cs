@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Patterns.Contracts;
 using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
-namespace PostSharp.Patterns.Contracts.Tests;
+namespace Metalama.Patterns.Contracts.Tests;
 
 // ReSharper disable InconsistentNaming
 public class NotNullAttributeTests

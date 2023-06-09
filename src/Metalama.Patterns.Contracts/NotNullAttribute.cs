@@ -18,14 +18,16 @@ public sealed class NotNullAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( f => f.Type.IsReferenceType != false || f.Type.IsNullable != false,
+        builder.MustSatisfy(
+            f => f.Type.IsReferenceType != false || f.Type.IsNullable != false,
             f => $"it is not of a nullable type" );
     }
 
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( p => p.Type.IsReferenceType != false || p.Type.IsNullable != false,
+        builder.MustSatisfy(
+            p => p.Type.IsReferenceType != false || p.Type.IsNullable != false,
             p => $"it is not of a nullable type" );
     }
 
@@ -35,16 +37,14 @@ public sealed class NotNullAttribute : ContractAspect
 
         if ( value == null! )
         {
-            var exceptionInfo = ContractExceptionInfo.Create(
-                typeof(ArgumentNullException),
-                typeof(NotNullAttribute),
+            throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                typeof( ArgumentNullException ),
+                typeof( NotNullAttribute ),
                 value,
                 targetName,
                 targetKind,
                 meta.Target.ContractDirection,
-                ContractLocalizedTextProvider.NotNullErrorMessage );
-
-            throw ContractServices.ExceptionFactory.CreateException( exceptionInfo );
+                ContractLocalizedTextProvider.NotNullErrorMessage ) );
         }
     }
 }

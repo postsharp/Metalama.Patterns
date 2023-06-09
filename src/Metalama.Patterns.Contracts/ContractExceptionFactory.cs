@@ -43,7 +43,10 @@ public abstract class ContractExceptionFactory
                 aspectName = aspectName.Substring( 0, aspectName.Length - attribute.Length );
             }
 
-            throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, template, aspectName,
+            throw new InvalidOperationException( string.Format(
+                CultureInfo.InvariantCulture,
+                template,
+                aspectName,
                 exceptionInfo.ExceptionType.Name ) );
         }
     }

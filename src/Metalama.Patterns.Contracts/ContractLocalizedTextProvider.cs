@@ -98,8 +98,12 @@ public class ContractLocalizedTextProvider
     /// <param name="additionalArguments">Optional arguments to be used in the message formatting.</param>
     /// <returns>A string derived from <c>errorMessage</c>, where placeholders have been
     /// replaced by their concrete value.</returns>
-    internal string FormatMessage( string errorMessage, object? value, string? targetName,
-        ContractTargetKind targetKind, object?[] additionalArguments )
+    internal string FormatMessage(
+        string errorMessage,
+        object? value,
+        string? targetName,
+        ContractTargetKind targetKind,
+        object?[] additionalArguments )
     {
         if ( errorMessage == null )
         {
@@ -111,7 +115,7 @@ public class ContractLocalizedTextProvider
     }
 
     /// <summary>
-    /// Returns an array of arguments that can be passed to the <see cref="string.Format(string,object[])"/> method
+    /// Returns an array of arguments that can be passed to the <see cref="string.Format(string,object[])"/> method.
     /// </summary>
     /// <param name="value">The incorrect value (passed, assigned or returned).</param>
     /// <param name="targetName">The name of the declaration being validated (or <c>null</c> if a return value is being validated).</param>
@@ -120,8 +124,11 @@ public class ContractLocalizedTextProvider
     /// <returns>An array of arguments that can be passed to the <see cref="string.Format(string,object[])"/> method,
     /// where the formatting strings can have parameters as described in the remarks of
     /// the documentation of the <see cref="ContractLocalizedTextProvider"/> class.</returns>
-    public static object?[] GetFormattingStringArguments( object? value, string? targetName,
-        ContractTargetKind targetKind, object?[] additionalArguments )
+    public static object?[] GetFormattingStringArguments(
+        object? value,
+        string? targetName,
+        ContractTargetKind targetKind,
+        object?[] additionalArguments )
     {
         additionalArguments ??= Array.Empty<object>();
 
@@ -242,8 +249,12 @@ public class ContractLocalizedTextProvider
     public string GetFormattedMessage( ContractExceptionInfo exceptionInfo )
     {
         var errorMessageTemplate = this.GetMessage( exceptionInfo.MessageId );
-        var errorMessage = this.FormatMessage( errorMessageTemplate, exceptionInfo.Value, exceptionInfo.TargetName,
-            exceptionInfo.TargetKind, exceptionInfo.MessageArguments );
+        var errorMessage = this.FormatMessage(
+            errorMessageTemplate,
+            exceptionInfo.Value,
+            exceptionInfo.TargetName,
+            exceptionInfo.TargetKind,
+            exceptionInfo.MessageArguments );
 
         return errorMessage;
     }
@@ -272,7 +283,8 @@ public class ContractLocalizedTextProvider
         }
         else if ( this._next == null )
         {
-            throw new ArgumentOutOfRangeException( nameof(messageId),
+            throw new ArgumentOutOfRangeException( 
+                nameof(messageId),
                 string.Format( CultureInfo.InvariantCulture, "No message defined for id {0}.", messageId ) );
         }
         else

@@ -52,20 +52,20 @@ public class ContractExceptionInfo
     private ContractExceptionInfo(
         Type exceptionType,
         Type aspectType,
-        object value,
-        string locationName,
+        object? value,
+        string? targetName,
         ContractTargetKind targetKind,
         ContractDirection direction,
         string messageId,
         object[] messageArguments )
     {
-        this.ExceptionType = exceptionType ?? throw new InvalidOperationException( "Exception type must be set" );
-        this.AspectType = aspectType ?? throw new InvalidOperationException( "Calling aspect type must be specified" );
+        this.ExceptionType = exceptionType;
+        this.AspectType = aspectType;
         this.Value = value;
-        this.TargetName = locationName ?? throw new InvalidOperationException( "Location name must be specified" );
+        this.TargetName = targetName;
         this.TargetKind = targetKind;
         this.Direction = direction;
-        this.MessageId = messageId ?? throw new InvalidOperationException( "Message ID must be specified" );
+        this.MessageId = messageId;
         this.MessageArguments = messageArguments;
     }
 
@@ -84,7 +84,7 @@ public class ContractExceptionInfo
         Type exceptionType,
         Type aspectType,
         object value,
-        string targetName,
+        string? targetName,
         ContractTargetKind targetKind,
         ContractDirection direction,
         string messageId,
@@ -95,14 +95,19 @@ public class ContractExceptionInfo
             exceptionType = typeof(PostconditionFailedException);
         }
 
+        if ( string.IsNullOrEmpty( targetName ) && targetKind != ContractTargetKind.ReturnValue )
+        {
+            throw new ArgumentNullException( nameof( targetName ) );
+        }
+
         return new ContractExceptionInfo(
-            exceptionType,
-            aspectType,
+            exceptionType ?? throw new ArgumentNullException( nameof( exceptionType ) ),
+            aspectType ?? throw new ArgumentNullException( nameof( aspectType ) ),
             value,
             targetName,
             targetKind,
             direction,
-            messageId,
+            messageId ?? throw new ArgumentNullException( nameof( messageId ) ),
             messageArguments );
     }
 }

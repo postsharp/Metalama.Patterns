@@ -1,207 +1,198 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using PostSharp.Patterns.Common.Tests.Helpers;
+using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
-using PostSharp.Patterns.Contracts;
+namespace Metalama.Patterns.Contracts.Tests;
 
-namespace PostSharp.Patterns.Contracts.Tests
+// ReSharper disable InconsistentNaming
+public class NotEmptyAttributeTests
 {
-    // ReSharper disable InconsistentNaming
-    public class NotEmptyAttributeTests
+    [Fact]
+    public void Given_StringMethodWithNotEmpty_When_CorrectValuePassed_Then_Success()
     {
-        [Fact]
-        public void Given_StringMethodWithNotEmpty_When_CorrectValuePassed_Then_Success()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
+        NotEmptyTestClass cut = new NotEmptyTestClass();
 
-            cut.StringMethod( "1234567890" );
-        }
-
-        [Fact]
-        public void Given_StringMethodWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethod( string.Empty ) );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "parameter", e.Message );
-        }
-
-        [Fact]
-        public void Given_StringFieldWithNotEmpty_When_CorrectValuePassed_Then_Success()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            cut.StringField = "1234567890";
-        }
-
-        [Fact]
-        public void Given_StringFieldWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = string.Empty );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "StringField", e.Message );
-        }
-
-        [Fact]
-        public void Given_ListMethodWithNotEmpty_When_CorrectValuePassed_Then_Success()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            cut.ListMethod( new List<int> {1, 2, 3} );
-        }
-
-        [Fact]
-        public void Given_ListMethodWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.ListMethod( new List<int>() ) );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "parameter", e.Message );
-        }
-
-        [Fact]
-        public void Given_ListFieldWithNotEmpty_When_CorrectValuePassed_Then_Success()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            cut.ListField = new List<int> { 1, 2, 3 };
-        }
-
-        [Fact]
-        public void Given_ListFieldWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.ListField = new List<int>() );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "ListField", e.Message );
-        }
-
-        [Fact]
-        public void Given_ICollectionPropertyWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.GenericCollectionProperty = new List<int>() );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "GenericCollectionProperty", e.Message );
-        }
-
-        [Fact]
-        public void Given_StringMethodWithNotEmptyRef_When_IncorrectValuePassed_Then_ExceptionThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-            
-            string p = "";
-            ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethodWithRef( "abc", ref p ) );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "parameter", e.Message );
-        }
-
-        [Fact]
-        public void Given_StringMethodWithNotEmptyRef_When_IncorrectValueReturned_Then_ExceptionThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            string p = "abc";
-            PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithRef( "", ref p ) );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "parameter", e.Message );
-        }
-
-        [Fact]
-        public void Given_StringMethodWithNotEmptyOut_When_IncorrectValueReturned_Then_ExceptionThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            string p;
-            PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithOut( "", out p ) );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "parameter", e.Message );
-        }
-
-        [Fact]
-        public void Given_StringMethodWithNotEmptyRetVal_When_IncorrectValueReturned_Then_ExceptionThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithRetVal( "" ) );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "return value", e.Message );
-        }
-
-#if READ_ONLY_COLLECTIONS
-        [Fact]
-        public void Given_IReadOnlyCollectionMethodWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionThrown()
-        {
-            NotEmptyTestClass cut = new NotEmptyTestClass();
-
-            ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.IReadOnlyCollectionMethod( new List<int>().AsReadOnly() ) );
-
-            Assert.NotNull( e );
-            Xunit.Assert.Contains( "parameter", e.Message );
-        }
-#endif
+        cut.StringMethod( "1234567890" );
     }
 
-    // ReSharper restore InconsistentNaming
-
-    public class NotEmptyTestClass
+    [Fact]
+    public void Given_StringMethodWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
     {
-        [NotEmpty] public string StringField;
+        NotEmptyTestClass cut = new NotEmptyTestClass();
 
-        [NotEmpty] public List<int> ListField;
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethod( string.Empty ) );
 
-        [NotEmpty]
-        public ICollection<int> GenericCollectionProperty { get; set; }
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "parameter", e.Message );
+    }
 
-        public string StringMethod( [NotEmpty] string parameter )
-        {
-            return parameter;
-        }
+    [Fact]
+    public void Given_StringFieldWithNotEmpty_When_CorrectValuePassed_Then_Success()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
 
-        public List<int> ListMethod( [NotEmpty] List<int> parameter )
-        {
-            return parameter;
-        }
+        cut.StringField = "1234567890";
+    }
 
-        public void StringMethodWithRef( string newVal, [NotEmpty] ref string parameter )
-        {
-            parameter = newVal;
-        }
+    [Fact]
+    public void Given_StringFieldWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
 
-        public void StringMethodWithOut( string newVal, [NotEmpty] out string parameter )
-        {
-            parameter = newVal;
-        }
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = string.Empty );
 
-        [return: NotEmpty]
-        public string StringMethodWithRetVal( string retVal )
-        {
-            return retVal;
-        }
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "StringField", e.Message );
+    }
 
-#if READ_ONLY_COLLECTIONS
-        public void IReadOnlyCollectionMethod<T>( [NotEmpty] IReadOnlyCollection<T> parameter )
-        {
-        }
-#endif
+    [Fact]
+    public void Given_ListMethodWithNotEmpty_When_CorrectValuePassed_Then_Success()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        cut.ListMethod( new List<int> {1, 2, 3} );
+    }
+
+    [Fact]
+    public void Given_ListMethodWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.ListMethod( new List<int>() ) );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "parameter", e.Message );
+    }
+
+    [Fact]
+    public void Given_ListFieldWithNotEmpty_When_CorrectValuePassed_Then_Success()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        cut.ListField = new List<int> { 1, 2, 3 };
+    }
+
+    [Fact]
+    public void Given_ListFieldWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.ListField = new List<int>() );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "ListField", e.Message );
+    }
+
+    [Fact]
+    public void Given_ICollectionPropertyWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.GenericCollectionProperty = new List<int>() );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "GenericCollectionProperty", e.Message );
+    }
+
+    [Fact]
+    public void Given_StringMethodWithNotEmptyRef_When_IncorrectValuePassed_Then_ExceptionThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+            
+        string p = "";
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethodWithRef( "abc", ref p ) );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "parameter", e.Message );
+    }
+
+    [Fact]
+    public void Given_StringMethodWithNotEmptyRef_When_IncorrectValueReturned_Then_ExceptionThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        string p = "abc";
+        PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithRef( "", ref p ) );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "parameter", e.Message );
+    }
+
+    [Fact]
+    public void Given_StringMethodWithNotEmptyOut_When_IncorrectValueReturned_Then_ExceptionThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        string p;
+        PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithOut( "", out p ) );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "parameter", e.Message );
+    }
+
+    [Fact]
+    public void Given_StringMethodWithNotEmptyRetVal_When_IncorrectValueReturned_Then_ExceptionThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithRetVal( "" ) );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "return value", e.Message );
+    }
+
+    [Fact]
+    public void Given_IReadOnlyCollectionMethodWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionThrown()
+    {
+        NotEmptyTestClass cut = new NotEmptyTestClass();
+
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.IReadOnlyCollectionMethod( new List<int>().AsReadOnly() ) );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "parameter", e.Message );
+    }
+}
+
+// ReSharper restore InconsistentNaming
+
+public class NotEmptyTestClass
+{
+    [NotEmpty] public string StringField;
+
+    [NotEmpty] public List<int> ListField;
+
+    [NotEmpty]
+    public ICollection<int> GenericCollectionProperty { get; set; }
+
+    public string StringMethod( [NotEmpty] string parameter )
+    {
+        return parameter;
+    }
+
+    public List<int> ListMethod( [NotEmpty] List<int> parameter )
+    {
+        return parameter;
+    }
+
+    public void StringMethodWithRef( string newVal, [NotEmpty] ref string parameter )
+    {
+        parameter = newVal;
+    }
+
+    public void StringMethodWithOut( string newVal, [NotEmpty] out string parameter )
+    {
+        parameter = newVal;
+    }
+
+    [return: NotEmpty]
+    public string StringMethodWithRetVal( string retVal )
+    {
+        return retVal;
+    }
+
+    public void IReadOnlyCollectionMethod<T>( [NotEmpty] IReadOnlyCollection<T> parameter )
+    {
     }
 }

@@ -47,6 +47,22 @@ internal static class CompileTimeHelpers
         }
     }
 
+    public static IType GetTargetType( IMetaTarget target )
+    {
+        if ( target == null )
+        {
+            throw new ArgumentNullException( nameof( target ) );
+        }
+
+        return target.Declaration.DeclarationKind switch
+        {
+            DeclarationKind.Parameter => target.Parameter.Type,
+            DeclarationKind.Property => target.Property.Type,
+            DeclarationKind.Field => target.Field.Type,
+            _ => throw new ArgumentOutOfRangeException( nameof( target ) + "." + nameof( target.Declaration ) + "." + nameof( target.Declaration.DeclarationKind ) )
+        };
+    }
+
     // TODO: Remove the block below if it remains unwanted.
 #if false // Probably overkill.
         public static string GetTargetKindDisplayName( this IDescribedObject<IFieldOrPropertyOrIndexer> describedObject )
