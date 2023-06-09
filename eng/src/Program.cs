@@ -10,7 +10,7 @@ var product = new Product( Dependencies.MetalamaPatterns )
 {
     Solutions = new Solution[]
     {
-        new DotNetSolution( "Metalama.Patterns.sln" )
+        new DotNetSolution( "Metalama.Patterns.sln" ) { CanFormatCode = true };
     },
     PublicArtifacts = Pattern.Create( "Metalama.Patterns.$(PackageVersion).nupkg" ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.Metalama }
