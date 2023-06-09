@@ -3,13 +3,13 @@
 namespace Metalama.Patterns.Contracts
 {
     /// <summary>
-    /// This class provides services supporting Contract aspects. By adding your own classes to the ExceptionFactory chain, you can change the way the
-    /// exceptions are created when a contract is broken. By plugging into the LocalizedTextProvider chain, you can change the way the exception messages
+    /// This class provides services supporting Contract aspects. By adding your own classes to the <see cref="ExceptionFactory"/> chain, you can change the way the
+    /// exceptions are created when a contract is broken. By plugging into the <see cref="ContractLocalizedTextProvider"/> chain, you can change the way the exception messages
     /// are generated. See the documentation for the classes for more details: <see cref="ContractLocalizedTextProvider"/>, <see cref="ContractExceptionFactory"/>.
     /// </summary>
     public static class ContractServices
     {
-        private static volatile ContractLocalizedTextProvider _localizedTextProvider = new ContractLocalizedTextProvider( null );
+        private static volatile ContractLocalizedTextProvider _localizedTextProvider = new( null );
 
         /// <summary>
         /// Gets or sets the head of the ContractLocalizedTextProvider responsibility chain.

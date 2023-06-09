@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Utilities;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace Metalama.Patterns.Contracts
 {
@@ -35,8 +36,10 @@ namespace Metalama.Patterns.Contracts
     ///     </item>
     /// </list>
     /// </remarks>
-    public class ContractLocalizedTextProvider : LocalizedTextProvider
+    public class ContractLocalizedTextProvider
     {
+        private readonly ContractLocalizedTextProvider? _next;
+
         private readonly Dictionary<string, string> _messages = new()
         {
             { CreditCardErrorMessage, "The {2} must be a valid credit card number." },
@@ -64,8 +67,25 @@ namespace Metalama.Patterns.Contracts
         /// </summary>
         /// <param name="next">The next node in the chain of responsibility.</param>
         public ContractLocalizedTextProvider( ContractLocalizedTextProvider? next )
-            : base( next )
         {
+            this._next = next;
+        }
+
+        /// <summary>
+        /// Formats a string. An implementation would typically invoke <see cref="string.Format(string,object[])"/>.
+        /// </summary>
+        /// <param name="format">Formatting string. Typically (but not necessarily) the string returned by <see cref="GetMessage"/>.</param>
+        /// <param name="arguments">Arguments.</param>
+        /// <returns>The formatted string.</returns>
+        [return: NotNullIfNotNull( nameof( format ) )]
+        public virtual string? FormatString( string format, object?[] arguments )
+        {
+            if ( format == null )
+            {
+                return null;
+            }
+
+            return string.Format( CultureInfo.CurrentCulture, format, arguments );
         }
 
         /// <summary>
@@ -225,8 +245,18 @@ namespace Metalama.Patterns.Contracts
             return errorMessage;
         }
 
-        /// <inheritdoc />
-        public override string GetMessage( string messageId )
+        /// <summary>
+        /// Gets a message declared by the <see cref="LocalizedTextProvider"/> or the rest of responsibility chain if applicable.
+        /// </summary>
+        /// <param name="messageId">Identifier of the message.</param>
+        /// <returns>Message represented by <paramref name="messageId"/>.  Returning <c>null</c> is not allowed.
+        /// </returns>
+        /// <remarks>
+        /// <para>An implementation must call the base implementation if it does not provide the requested message.
+        /// The base implementation is responsible to invoke the next provider in the chain of responsibility.
+        /// </para>
+        /// </remarks>
+        public virtual string GetMessage( string messageId )
         {
             if ( string.IsNullOrEmpty( messageId ) )
             {
@@ -237,9 +267,13 @@ namespace Metalama.Patterns.Contracts
             {
                 return message;
             }
+            else if ( this._next == null )
+            {
+                throw new ArgumentOutOfRangeException( nameof( messageId ), string.Format( CultureInfo.InvariantCulture, "No message defined for id {0}.", messageId ) );
+            }
             else
             {
-                return base.GetMessage( messageId );
+                return this._next.GetMessage( messageId );
             }
         }
     }

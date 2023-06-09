@@ -10,8 +10,6 @@
         <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Metalama.Patterns.Common\Metalama.Patterns.Common.csproj" />
-    </ItemGroup>
+	<Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 	
 </Project>
