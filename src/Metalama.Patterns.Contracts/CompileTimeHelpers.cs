@@ -8,7 +8,6 @@ namespace Metalama.Patterns.Contracts
     [CompileTime]
     internal static class CompileTimeHelpers
     {
-        // TODO: Review. Consider building this logic in to ContractAspect, perhaps store result as fields in ctor.
         public static void GetTargetKindAndName( IMetaTarget target, out ContractTargetKind kind, out string? name)
         {
             switch (target.Declaration.DeclarationKind)

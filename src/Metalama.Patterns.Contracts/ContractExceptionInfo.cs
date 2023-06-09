@@ -4,8 +4,6 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Contracts
 {
-    // TODO: Review terminology "application element" which is consistent with AttributeTargets.
-
     /// <summary>
     /// This class holds the information from which the <see cref="ContractExceptionFactory"/> should create the exception.
     /// </summary>
@@ -22,17 +20,17 @@ namespace Metalama.Patterns.Contracts
         public Type AspectType { get; }
 
         /// <summary>
-        /// Gets the value traversing the target application element.
+        /// Gets the value that applies the target declaration.
         /// </summary>
-        public object Value { get; }
+        public object? Value { get; }
 
         /// <summary>
-        /// Gets the name of the target application element.
+        /// Gets the name of the target declaration, or <see langword="null"/> for return values.
         /// </summary>
-        public string TargetName { get; }
+        public string? TargetName { get; }
 
         /// <summary>
-        /// Gets the kind of application element to which the exception applies.
+        /// Gets the kind of declaration to which the exception applies.
         /// </summary>
         public ContractTargetKind TargetKind { get; }
 
@@ -74,10 +72,10 @@ namespace Metalama.Patterns.Contracts
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractExceptionInfo"/> class.
         /// </summary>
-        /// <param name="exceptionType">Requested <see cref="Type"/> of the exception that should be created. <see cref="PostconditionFailedException"/> will be used instead when <see cref="Direction"/> is <see cref="ContractDirection.Output"/>.</param>
-        /// <param name="aspectType"></param>
-        /// <param name="value">The value traversing the target.</param>
-        /// <param name="targetName">Name of the target.</param>
+        /// <param name="exceptionType">Requested <see cref="Type"/> of the exception that should be created. <see cref="PostconditionFailedException"/> will be used instead when <see cref="direction"/> is <see cref="ContractDirection.Output"/>.</param>
+        /// <param name="aspectType">The type of the contract aspect.</param>
+        /// <param name="value">The value that applies to the target.</param>
+        /// <param name="targetName">Name of the target declaration.</param>
         /// <param name="targetKind">The target kind.</param>
         /// <param name="direction">The direction of data flow.</param>
         /// <param name="messageId">The id of the error message template to be used in the exception.</param>

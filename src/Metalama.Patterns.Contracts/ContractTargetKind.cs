@@ -4,11 +4,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Contracts
 {
-    // TODO: Review. This replaces PS LocationKind. Maybe this should live alongside ContractAspect.
-    // The term "location" does not seem to be used with ML, hence the name change. 
-
     /// <summary>
-    /// Specifies the application elements to which a <see cref="ContractAspect"/> can be applied.
+    /// Specifies the kinds of declaration to which a <see cref="ContractAspect"/> can be applied.
     /// </summary>
     [RunTimeOrCompileTime]
     public enum ContractTargetKind
