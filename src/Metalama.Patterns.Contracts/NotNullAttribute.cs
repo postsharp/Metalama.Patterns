@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
 namespace Metalama.Patterns.Contracts
 {
@@ -13,6 +15,18 @@ namespace Metalama.Patterns.Contracts
     /// </remarks>
     public sealed class NotNullAttribute : ContractAspect
     {
+        public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
+        {
+            base.BuildEligibility( builder );            
+            builder.MustSatisfy( f => f.Type.IsReferenceType != false || f.Type.IsNullable != false, f => $"it is not of a nullable type" );
+        }
+
+        public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
+        {
+            base.BuildEligibility( builder );
+            builder.MustSatisfy( p => p.Type.IsReferenceType != false || p.Type.IsNullable != false, p => $"it is not of a nullable type" );
+        }
+
         public override void Validate( dynamic? value )
         {
             CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
