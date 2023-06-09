@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Metalama.Patterns.Utilities
@@ -54,6 +55,7 @@ namespace Metalama.Patterns.Utilities
         /// <param name="format">Formatting string. Typically (but not necessarily) the string returned by <see cref="GetMessage"/>.</param>
         /// <param name="arguments">Arguments.</param>
         /// <returns>The formatted string.</returns>
+        [return: NotNullIfNotNull( nameof( format ) )]
         public virtual string? FormatString( string format, object[] arguments )
         {
             if ( format == null )

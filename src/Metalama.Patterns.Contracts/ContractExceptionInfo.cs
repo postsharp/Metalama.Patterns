@@ -50,17 +50,7 @@ namespace Metalama.Patterns.Contracts
         /// </summary>
         public object[] MessageArguments { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ContractExceptionInfo"/> class.
-        /// </summary>
-        /// <param name="exceptionType">Requested Type of the exception that should be created.</param>
-        /// <param name="value">Value being assigned to the location.</param>
-        /// <param name="locationName">Name of the location.</param>
-        /// <param name="targetKind">The target kind.</param>
-        /// <param name="direction">The direction of data flow.</param>
-        /// <param name="messageId">The id of the error message template to be used in the exception.</param>
-        /// <param name="messageArguments">Any additional parameters to be used in the exception message formatting.</param>
-        public ContractExceptionInfo(
+        private ContractExceptionInfo(
             Type exceptionType,
             Type aspectType,
             object value,
@@ -78,6 +68,43 @@ namespace Metalama.Patterns.Contracts
             this.Direction = direction;
             this.MessageId = messageId ?? throw new InvalidOperationException( "Message ID must be specified" );
             this.MessageArguments = messageArguments;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ContractExceptionInfo"/> class.
+        /// </summary>
+        /// <param name="exceptionType">Requested <see cref="Type"/> of the exception that should be created. <see cref="PostconditionFailedException"/> will be used instead when <see cref="Direction"/> is <see cref="ContractDirection.Output"/>.</param>
+        /// <param name="aspectType"></param>
+        /// <param name="value">The value traversing the target.</param>
+        /// <param name="targetName">Name of the target.</param>
+        /// <param name="targetKind">The target kind.</param>
+        /// <param name="direction">The direction of data flow.</param>
+        /// <param name="messageId">The id of the error message template to be used in the exception.</param>
+        /// <param name="messageArguments">Any additional parameters to be used in the exception message formatting.</param>
+        public static ContractExceptionInfo Create(
+            Type exceptionType,
+            Type aspectType,
+            object value,
+            string targetName,
+            ContractTargetKind targetKind,
+            ContractDirection direction,
+            string messageId,
+            params object[] messageArguments )
+        {
+            if ( direction == ContractDirection.Output )
+            {
+                exceptionType = typeof( PostconditionFailedException );
+            }
+
+            return new ContractExceptionInfo(
+                exceptionType,
+                aspectType,
+                value,
+                targetName,
+                targetKind,
+                direction,
+                messageId,
+                messageArguments );
         }
     }
 }

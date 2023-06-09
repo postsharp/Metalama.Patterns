@@ -25,7 +25,7 @@ namespace Metalama.Patterns.Contracts
         /// Creates the exception based on the contents of <see cref="ContractExceptionInfo"/>.
         /// </summary>
         /// <param name="exceptionInfo">Information to be used for the creation of the requested exception.</param>
-        /// <returns>The requested exception</returns>
+        /// <returns>The requested exception.</returns>
         public virtual Exception CreateException( ContractExceptionInfo exceptionInfo )
         {
             if ( this._next != null )

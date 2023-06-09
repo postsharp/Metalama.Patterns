@@ -74,14 +74,19 @@ namespace Metalama.Patterns.Contracts
         /// </summary>
         /// <param name="errorMessage">Message to be formatted and passed into the created exception</param>
         /// <param name="value">Value assigned to the location.</param>
-        /// <param name="locationName">Name of the location.</param>
-        /// <param name="locationKind">Location kind.</param>
+        /// <param name="targetName">The name of the declaration being validated (or <c>null</c> if a return value is being validated).</param>
+        /// <param name="targetKind">The kind of declaration being validated.</param>
         /// <param name="additionalArguments">Optional arguments to be used in the message formatting</param>
         /// <returns>A string derived from <c>errorMessage</c>, where placeholders have been
         /// replaced by their concrete value.</returns>
-        internal string? FormatMessage( string errorMessage, object value, string locationName, LocationKind locationKind, object[] additionalArguments )
+        internal string FormatMessage( string errorMessage, object value, string? targetName, ContractTargetKind targetKind, object[] additionalArguments )
         {
-            var arguments = GetFormattingStringArguments( value, locationName, locationKind, additionalArguments );
+            if ( errorMessage == null )
+            {
+                throw new ArgumentNullException( nameof( errorMessage ) );
+            }
+
+            var arguments = GetFormattingStringArguments( value, targetName, targetKind, additionalArguments );
             return this.FormatString( errorMessage, arguments );
         }
 
@@ -89,13 +94,13 @@ namespace Metalama.Patterns.Contracts
         /// Returns an array of arguments that can be passed to the <see cref="string.Format(string,object[])"/> method
         /// </summary>
         /// <param name="value">The incorrect value (passed, assigned or returned).</param>
-        /// <param name="locationName">The name of the declaration being validated (or <c>null</c> if a return value is being validated).</param>
-        /// <param name="locationKind">The kind of declaration being validated.</param>
+        /// <param name="targetName">The name of the declaration being validated (or <c>null</c> if a return value is being validated).</param>
+        /// <param name="targetKind">The kind of declaration being validated.</param>
         /// <param name="additionalArguments">Additional arguments appended to the array of arguments.</param>
         /// <returns>An array of arguments that can be passed to the <see cref="string.Format(string,object[])"/> method,
         /// where the formatting strings can have parameters as described in the remarks of
         /// the documentation of the <see cref="ContractLocalizedTextProvider"/> class.</returns>
-        public static object[] GetFormattingStringArguments(object value, string locationName, LocationKind locationKind, object[] additionalArguments)
+        public static object[] GetFormattingStringArguments(object value, string? targetName, ContractTargetKind targetKind, object[] additionalArguments)
         {
             if ( additionalArguments == null )
             {
@@ -104,9 +109,9 @@ namespace Metalama.Patterns.Contracts
 
             object[] arguments = new object[additionalArguments.Length + 4];
 
-            arguments[0] = locationName;
-            arguments[1] = locationKind.GetDisplayName();
-            arguments[2] = locationKind.GetDisplayName( locationName );
+            arguments[0] = targetName;
+            arguments[1] = targetKind.GetDisplayName();
+            arguments[2] = targetKind.GetDisplayName( targetName );
             arguments[3] = value;
 
             Array.Copy( additionalArguments, 0, arguments, 4, additionalArguments.Length );
@@ -219,7 +224,7 @@ namespace Metalama.Patterns.Contracts
         public string GetFormattedMessage( ContractExceptionInfo exceptionInfo )
         {
             var errorMessageTemplate = this.GetMessage( exceptionInfo.MessageId );
-            var errorMessage = this.FormatMessage( errorMessageTemplate, exceptionInfo.Value, exceptionInfo.TargetName, exceptionInfo.LocationKind, exceptionInfo.MessageArguments );
+            var errorMessage = this.FormatMessage( errorMessageTemplate, exceptionInfo.Value, exceptionInfo.TargetName, exceptionInfo.TargetKind, exceptionInfo.MessageArguments );
 
             return errorMessage;
         }

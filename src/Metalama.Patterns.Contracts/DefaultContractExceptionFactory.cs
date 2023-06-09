@@ -27,7 +27,7 @@ namespace Metalama.Patterns.Contracts
         {
             var errorMessage = ContractServices.LocalizedTextProvider.GetFormattedMessage( exceptionInfo );
 
-            string parameterName = exceptionInfo.LocationKind.GetParameterName( exceptionInfo.LocationName );
+            string parameterName = exceptionInfo.TargetKind.GetParameterName( exceptionInfo.TargetName );
 
             if ( exceptionInfo.ExceptionType == typeof(ArgumentException) )
             {
