@@ -3,50 +3,51 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Patterns.Contracts
+namespace Metalama.Patterns.Contracts;
+
+[CompileTime]
+internal static class CompileTimeHelpers
 {
-    [CompileTime]
-    internal static class CompileTimeHelpers
+    public static void GetTargetKindAndName( IMetaTarget target, out ContractTargetKind kind, out string? name )
     {
-        public static void GetTargetKindAndName( IMetaTarget target, out ContractTargetKind kind, out string? name)
+        if ( target == null )
         {
-            if ( target == null )
-            {
-                throw new ArgumentNullException( nameof( target ) );
-            }
-
-            switch (target.Declaration.DeclarationKind)
-            {
-                case DeclarationKind.Parameter:
-                    if ( target.Parameter.IsReturnParameter )
-                    {
-                        kind = ContractTargetKind.ReturnValue;
-                        name = null;
-                    }
-                    else
-                    {
-                        kind = ContractTargetKind.Parameter;
-                        name = target.Parameter.Name;
-                    }
-
-                    break;
-
-                case DeclarationKind.Property:
-                    kind = ContractTargetKind.Property;
-                    name = target.Property.Name;
-                    break;
-
-                case DeclarationKind.Field:
-                    kind = ContractTargetKind.Field;
-                    name = target.Field.Name;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException( nameof( target ) + "." + nameof( target.Declaration ) + "." + nameof( target.Declaration.DeclarationKind ) );
-            }
+            throw new ArgumentNullException( nameof(target) );
         }
 
-        // TODO: Remove the block below if it remains unwanted.
+        switch ( target.Declaration.DeclarationKind )
+        {
+            case DeclarationKind.Parameter:
+                if ( target.Parameter.IsReturnParameter )
+                {
+                    kind = ContractTargetKind.ReturnValue;
+                    name = null;
+                }
+                else
+                {
+                    kind = ContractTargetKind.Parameter;
+                    name = target.Parameter.Name;
+                }
+
+                break;
+
+            case DeclarationKind.Property:
+                kind = ContractTargetKind.Property;
+                name = target.Property.Name;
+                break;
+
+            case DeclarationKind.Field:
+                kind = ContractTargetKind.Field;
+                name = target.Field.Name;
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException( nameof(target) + "." + nameof(target.Declaration) + "." +
+                                                       nameof(target.Declaration.DeclarationKind) );
+        }
+    }
+
+    // TODO: Remove the block below if it remains unwanted.
 #if false // Probably overkill.
         public static string GetTargetKindDisplayName( this IDescribedObject<IFieldOrPropertyOrIndexer> describedObject )
         {
@@ -93,5 +94,4 @@ namespace Metalama.Patterns.Contracts
             return member.IsReturnParameter ? "return value" : "parameter";
         }
 #endif
-    }
 }

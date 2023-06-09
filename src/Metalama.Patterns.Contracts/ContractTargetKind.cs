@@ -2,32 +2,31 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Patterns.Contracts
+namespace Metalama.Patterns.Contracts;
+
+/// <summary>
+/// Specifies the kinds of declaration to which a <see cref="ContractAspect"/> can be applied.
+/// </summary>
+[RunTimeOrCompileTime]
+public enum ContractTargetKind
 {
     /// <summary>
-    /// Specifies the kinds of declaration to which a <see cref="ContractAspect"/> can be applied.
+    /// The contract is applied to a field.
     /// </summary>
-    [RunTimeOrCompileTime]
-    public enum ContractTargetKind
-    {
-        /// <summary>
-        /// The contract is applied to a field.
-        /// </summary>
-        Field,
+    Field,
 
-        /// <summary>
-        /// The contract is applied to a property.
-        /// </summary>
-        Property,
+    /// <summary>
+    /// The contract is applied to a property.
+    /// </summary>
+    Property,
 
-        /// <summary>
-        /// The contract is applied to a parameter.
-        /// </summary>
-        Parameter,
+    /// <summary>
+    /// The contract is applied to a parameter.
+    /// </summary>
+    Parameter,
 
-        /// <summary>
-        /// The contract is applied to a return value.
-        /// </summary>
-        ReturnValue
-    }
+    /// <summary>
+    /// The contract is applied to a return value.
+    /// </summary>
+    ReturnValue
 }
