@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Patterns.Tests.Helpers
 {
     public static class TestHelpers
     {
-        public static TException RecordException<TException>( Action action )
+        public static TException? RecordException<TException>( Action action )
             where TException : Exception
         {
             try

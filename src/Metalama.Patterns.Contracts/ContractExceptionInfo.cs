@@ -1,10 +1,11 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Contracts
 {
+    // TODO: Review terminology "application element" which is consistent with AttributeTargets.
+
     /// <summary>
     /// This class holds the information from which the <see cref="ContractExceptionFactory"/> should create the exception.
     /// </summary>

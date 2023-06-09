@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Patterns.Contracts
 {
@@ -10,7 +9,7 @@ namespace Metalama.Patterns.Contracts
     /// </summary>
     public static class ContractServices
     {
-        private static volatile ContractLocalizedTextProvider _localizedTextProvider = new ContractLocalizedTextProvider(null);
+        private static volatile ContractLocalizedTextProvider _localizedTextProvider = new ContractLocalizedTextProvider( null );
 
         /// <summary>
         /// Gets or sets the head of the ContractLocalizedTextProvider responsibility chain.
@@ -18,7 +17,7 @@ namespace Metalama.Patterns.Contracts
         public static ContractLocalizedTextProvider LocalizedTextProvider
         {
             get => _localizedTextProvider;
-            set => _localizedTextProvider = value ?? throw new ArgumentNullException( nameof(value) );
+            set => _localizedTextProvider = value ?? throw new ArgumentNullException( nameof( value ) );
         }
 
         /// <summary>
@@ -38,7 +37,7 @@ namespace Metalama.Patterns.Contracts
         public static ContractExceptionFactory ExceptionFactory
         {
             get => _exceptionFactory;
-            set => _exceptionFactory = value ?? throw new ArgumentNullException( nameof(value) );
+            set => _exceptionFactory = value ?? throw new ArgumentNullException( nameof( value ) );
         }
     }
 }

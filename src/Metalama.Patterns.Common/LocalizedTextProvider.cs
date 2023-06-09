@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -15,13 +14,13 @@ namespace Metalama.Patterns.Utilities
     /// </remarks>
     public abstract class LocalizedTextProvider
     {
-        private readonly LocalizedTextProvider _next;
+        private readonly LocalizedTextProvider? _next;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalizedTextProvider"/> class.
         /// </summary>
         /// <param name="next">Next <see cref="LocalizedTextProvider"/> in the responsibility chain.</param>
-        protected LocalizedTextProvider( LocalizedTextProvider next )
+        protected LocalizedTextProvider( LocalizedTextProvider? next )
         {
             this._next = next;
         }
@@ -56,7 +55,7 @@ namespace Metalama.Patterns.Utilities
         /// <param name="arguments">Arguments.</param>
         /// <returns>The formatted string.</returns>
         [return: NotNullIfNotNull( nameof( format ) )]
-        public virtual string? FormatString( string format, object[] arguments )
+        public virtual string? FormatString( string format, object?[] arguments )
         {
             if ( format == null )
             {

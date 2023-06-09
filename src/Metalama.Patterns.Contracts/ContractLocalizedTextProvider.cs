@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Utilities;
 
@@ -64,7 +63,7 @@ namespace Metalama.Patterns.Contracts
         /// Initializes a new instance of the <see cref="ContractLocalizedTextProvider"/> class.
         /// </summary>
         /// <param name="next">The next node in the chain of responsibility.</param>
-        public ContractLocalizedTextProvider( ContractLocalizedTextProvider next )
+        public ContractLocalizedTextProvider( ContractLocalizedTextProvider? next )
             : base( next )
         {
         }
@@ -72,14 +71,14 @@ namespace Metalama.Patterns.Contracts
         /// <summary>
         /// Formats an error message with concrete values.
         /// </summary>
-        /// <param name="errorMessage">Message to be formatted and passed into the created exception</param>
+        /// <param name="errorMessage">Message to be formatted and passed into the created exception.</param>
         /// <param name="value">Value assigned to the location.</param>
         /// <param name="targetName">The name of the declaration being validated (or <c>null</c> if a return value is being validated).</param>
         /// <param name="targetKind">The kind of declaration being validated.</param>
-        /// <param name="additionalArguments">Optional arguments to be used in the message formatting</param>
+        /// <param name="additionalArguments">Optional arguments to be used in the message formatting.</param>
         /// <returns>A string derived from <c>errorMessage</c>, where placeholders have been
         /// replaced by their concrete value.</returns>
-        internal string FormatMessage( string errorMessage, object value, string? targetName, ContractTargetKind targetKind, object[] additionalArguments )
+        internal string FormatMessage( string errorMessage, object value, string? targetName, ContractTargetKind targetKind, object?[] additionalArguments )
         {
             if ( errorMessage == null )
             {
@@ -100,14 +99,11 @@ namespace Metalama.Patterns.Contracts
         /// <returns>An array of arguments that can be passed to the <see cref="string.Format(string,object[])"/> method,
         /// where the formatting strings can have parameters as described in the remarks of
         /// the documentation of the <see cref="ContractLocalizedTextProvider"/> class.</returns>
-        public static object[] GetFormattingStringArguments(object value, string? targetName, ContractTargetKind targetKind, object[] additionalArguments)
+        public static object?[] GetFormattingStringArguments( object value, string? targetName, ContractTargetKind targetKind, object?[] additionalArguments )
         {
-            if ( additionalArguments == null )
-            {
-                additionalArguments = Array.Empty<object>();
-            }
+            additionalArguments ??= Array.Empty<object>();
 
-            object[] arguments = new object[additionalArguments.Length + 4];
+            var arguments = new object?[additionalArguments.Length + 4];
 
             arguments[0] = targetName;
             arguments[1] = targetKind.GetDisplayName();
@@ -234,10 +230,10 @@ namespace Metalama.Patterns.Contracts
         {
             if ( string.IsNullOrEmpty( messageId ) )
             {
-                throw new ArgumentNullException( nameof(messageId) );
+                throw new ArgumentNullException( nameof( messageId ) );
             }
 
-            if ( this._messages.TryGetValue( messageId, out string message ) )
+            if ( this._messages.TryGetValue( messageId, out var message ) )
             {
                 return message;
             }

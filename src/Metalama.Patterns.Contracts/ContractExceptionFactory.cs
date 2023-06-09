@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Globalization;
 
@@ -10,13 +9,13 @@ namespace Metalama.Patterns.Contracts
     /// </summary>
     public abstract class ContractExceptionFactory
     {
-        private readonly ContractExceptionFactory _next;
+        private readonly ContractExceptionFactory? _next;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractExceptionFactory"/> class.
         /// </summary>
         /// <param name="next">Next factory in chain.</param>
-        protected ContractExceptionFactory( ContractExceptionFactory next )
+        protected ContractExceptionFactory( ContractExceptionFactory? next )
         {
             this._next = next;
         }
