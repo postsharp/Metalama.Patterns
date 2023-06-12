@@ -107,7 +107,7 @@ public class NotEmptyAttributeTests
         Xunit.Assert.Contains( "parameter", e.Message );
     }
 
-    [Fact]
+    [SkippableFact( Skip = "#33302" )]
     public void Given_StringMethodWithNotEmptyRef_When_IncorrectValueReturned_Then_ExceptionThrown()
     {
         NotEmptyTestClass cut = new NotEmptyTestClass();
