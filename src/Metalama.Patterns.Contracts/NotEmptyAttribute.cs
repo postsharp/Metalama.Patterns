@@ -12,7 +12,8 @@ namespace Metalama.Patterns.Contracts;
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentNullException"/> if the target is assigned a null or empty value.
 /// The custom attributes can be added to locations of type <see cref="string"/> (where empty
-/// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/> or <see cref="IReadOnlyCollection{T}"/>  (where empty means zero items). 
+/// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/> or <see cref="IReadOnlyCollection{T}"/>
+/// (where empty means zero items). 
 /// </summary>
 /// <remarks>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotEmptyErrorMessage"/>.</para>
@@ -23,7 +24,7 @@ public sealed class NotEmptyAttribute : ContractAspect
     {        
         base.BuildEligibility( builder );
 
-        // TODO: Review: Fails during eligibility rule evaluation because TypeFactory.GetType leads to service is not available.
+        // TODO: #33296 Fails during eligibility rule evaluation because TypeFactory.GetType leads to service is not available.
 #if false 
         builder.MustSatisfy(
             f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )), 
@@ -88,7 +89,7 @@ public sealed class NotEmptyAttribute : ContractAspect
         }
     }
 
-    // TODO: Review: is there a simpler way to throw a compile time exception from a template?
+    // TODO: Review: is there a simpler way to throw a compile time exception from a template? (Pending #33294)
     [CompileTime]
     private static void ThrowValidateCalledOnIneligibleTarget()
     {
