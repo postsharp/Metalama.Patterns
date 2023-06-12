@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Contracts;
@@ -28,22 +29,10 @@ public sealed class UrlAttribute : RegularExpressionAttribute
     {
     }
 
-    // TODO: Review, aim to avoid wholesale override, see comment on base method.
-    public override void Validate( dynamic? value )
-    {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-
-        if ( value != null && !Regex.IsMatch( value, this.Pattern, this.Options ) )
-        {
-            throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                typeof( ArgumentException ),
-                typeof( UrlAttribute ),
-                value,
-                targetName,
-                targetKind,
-                meta.Target.ContractDirection,
-                ContractLocalizedTextProvider.UrlErrorMessage ) );
-            ;
-        }
-    }
+    [CompileTime]
+    protected override (Type ExceptionType, Type AspectType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
+    => (typeof( ArgumentException ),
+        typeof( UrlAttribute ),
+        GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.UrlErrorMessage ) ),
+        false);
 }

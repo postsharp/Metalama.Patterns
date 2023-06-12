@@ -2,12 +2,23 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Patterns.Contracts;
 
 [CompileTime]
 internal static class CompileTimeHelpers
 {
+    public static IExpression ToTypeOf( this Type type )
+    {
+        var expressionBuilder = new ExpressionBuilder();
+        expressionBuilder.AppendVerbatim( "typeof(" );
+        expressionBuilder.AppendTypeName( type );
+        expressionBuilder.AppendVerbatim( ")" );
+
+        return expressionBuilder.ToExpression();
+    }
+
     public static void GetTargetKindAndName( IMetaTarget target, out ContractTargetKind kind, out string? name )
     {
         if ( target == null )

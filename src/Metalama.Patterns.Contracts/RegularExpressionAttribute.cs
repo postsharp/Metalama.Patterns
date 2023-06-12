@@ -73,18 +73,47 @@ public class RegularExpressionAttribute : ContractAspect
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
+        var info = GetExceptioninfo();
 
-        if ( value != null && !Regex.IsMatch(value, this.Pattern, this.Options) )
+        if ( value != null && !Regex.IsMatch( value, this.Pattern, this.Options ) )
         {
-            throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                typeof( ArgumentException ),
-                typeof( RegularExpressionAttribute ),
-                value,
-                targetName,
-                targetKind,
-                meta.Target.ContractDirection,
-                ContractLocalizedTextProvider.RegularExpressionErrorMessage,
-                this.Pattern ) );
-        }        
+            if ( info.IncludePatternArgument )
+            {
+                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    info.ExceptionType.ToTypeOf().Value,
+                    info.AspectType.ToTypeOf().Value,
+                    value,
+                    targetName,
+                    targetKind,
+                    meta.Target.ContractDirection,
+                    info.
+                    MessageIdExpression.Value,
+                    this.Pattern ) );
+            }
+            else
+            {
+                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    info.ExceptionType.ToTypeOf().Value,
+                    info.AspectType.ToTypeOf().Value,
+                    value,
+                    targetName,
+                    targetKind,
+                    meta.Target.ContractDirection,
+                    info.
+                    MessageIdExpression.Value ) );
+            }
+        }
     }
+
+    [CompileTime]
+    internal static IExpression GetContractLocalizedTextProviderField( string fieldName )
+        => ((INamedType) TypeFactory.GetType( typeof( ContractLocalizedTextProvider ) )).Fields
+            .OfName( fieldName ).Single();
+
+    [CompileTime]
+    protected virtual (Type ExceptionType, Type AspectType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
+        => (typeof( ArgumentException ),
+            typeof( RegularExpressionAttribute ),
+            GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.RegularExpressionErrorMessage ) ),
+            true);
 }
