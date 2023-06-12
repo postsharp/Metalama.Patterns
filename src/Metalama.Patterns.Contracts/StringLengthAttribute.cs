@@ -28,6 +28,7 @@ namespace Metalama.Patterns.Contracts;
 ///     </description></item>
 /// </list></para>
 /// </remarks>
+[Inheritable]
 public sealed class StringLengthAttribute : ContractAspect
 {
     // TODO: Add diagnostics if the aspect construction is invalid (eg, max < min).

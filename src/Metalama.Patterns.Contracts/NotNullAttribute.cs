@@ -13,6 +13,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotNullErrorMessage"/>.</para>
 /// </remarks>
+[Inheritable]
 public sealed class NotNullAttribute : ContractAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )

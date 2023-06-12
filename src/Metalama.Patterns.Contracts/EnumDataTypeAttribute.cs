@@ -20,6 +20,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.EnumDataTypeErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to <see cref="EnumType"/> name.</para>
 /// </remarks>
+[Inheritable]
 public sealed class EnumDataTypeAttribute : ContractAspect
 {
     /// <summary>

@@ -18,6 +18,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotEmptyErrorMessage"/>.</para>
 /// </remarks>
+[Inheritable]
 public sealed class NotEmptyAttribute : ContractAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )

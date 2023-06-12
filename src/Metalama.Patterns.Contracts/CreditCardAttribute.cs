@@ -15,6 +15,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.CreditCardErrorMessage"/>.</para>
 /// </remarks>
+[Inheritable]
 public sealed class CreditCardAttribute : ContractAspect
 {
     /// <summary>

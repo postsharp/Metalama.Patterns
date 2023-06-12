@@ -17,6 +17,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.RegularExpressionErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the regular expression used.</para>
 /// </remarks>
+[Inheritable]
 public class RegularExpressionAttribute : ContractAspect
 {
     /// <summary>

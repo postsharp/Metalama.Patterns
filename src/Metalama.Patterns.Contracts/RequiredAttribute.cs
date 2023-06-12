@@ -20,6 +20,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.RequiredErrorMessage"/>.</para>
 /// </remarks>
+[Inheritable]
 public sealed class RequiredAttribute : ContractAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
