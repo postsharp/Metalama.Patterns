@@ -36,7 +36,7 @@ public sealed class PhoneAttribute : RegularExpressionAttribute
         {
             throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                 typeof( ArgumentException ),
-                this.GetType(),
+                typeof( PhoneAttribute ),
                 value,
                 targetName,
                 targetKind,

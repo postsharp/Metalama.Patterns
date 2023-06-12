@@ -37,12 +37,13 @@ public sealed class UrlAttribute : RegularExpressionAttribute
         {
             throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                 typeof( ArgumentException ),
-                this.GetType(),
+                typeof( UrlAttribute ),
                 value,
                 targetName,
                 targetKind,
                 meta.Target.ContractDirection,
                 ContractLocalizedTextProvider.UrlErrorMessage ) );
+            ;
         }
     }
 }

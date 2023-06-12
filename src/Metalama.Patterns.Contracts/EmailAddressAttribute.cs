@@ -36,7 +36,7 @@ public sealed class EmailAddressAttribute : RegularExpressionAttribute
         {
             throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                 typeof( ArgumentException ),
-                this.GetType(),
+                typeof( EmailAddressAttribute ),
                 value,
                 targetName,
                 targetKind,

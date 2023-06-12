@@ -78,7 +78,7 @@ public class RegularExpressionAttribute : ContractAspect
         {
             throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                 typeof( ArgumentException ),
-                this.GetType(),
+                typeof( RegularExpressionAttribute ),
                 value,
                 targetName,
                 targetKind,
