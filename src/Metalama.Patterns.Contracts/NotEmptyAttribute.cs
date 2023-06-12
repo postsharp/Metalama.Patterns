@@ -2,7 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -17,18 +19,28 @@ namespace Metalama.Patterns.Contracts;
 /// </remarks>
 public sealed class NotEmptyAttribute : ContractAspect
 {
+    public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
+    {        
+        base.BuildEligibility( builder );
+
+        // TODO: Review: Fails during eligibility rule evaluation because TypeFactory.GetType leads to service is not available.
+#if false 
+        builder.MustSatisfy(
+            f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )), 
+            f => $"is must be a string or implement ICollection, ICollection<T> or IReadOnlyCollection<T>" );
+#endif
+    }
+
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-
-        var typeOfICollection = (INamedType) TypeFactory.GetType( typeof( ICollection ) );
 
         var targetType = (INamedType) CompileTimeHelpers.GetTargetType( meta.Target );
 
         if ( targetType.Equals( SpecialType.String ) )
         {
             if ( string.IsNullOrEmpty( value ) )
-            {                
+            {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof( ArgumentNullException ),
                     typeof( NotEmptyAttribute ),
@@ -39,14 +51,11 @@ public sealed class NotEmptyAttribute : ContractAspect
                     ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
             }
         }
-        else if ( targetType.Is( typeOfICollection ) )
+        else if ( TryGetCompatibleTargetInterface( targetType, out var interfaceType, out var requiresCast ) )
         {
-            var countProperty = typeOfICollection.Properties.Single( p => p.Name == nameof( ICollection.Count ) );
-            targetType.TryFindImplementationForInterfaceMember( countProperty, out var countPropertyImpl );
-
-            if ( countPropertyImpl is { IsExplicitInterfaceImplementation: true } )
+            if ( requiresCast )
             {
-                if ( value == null || meta.Cast( typeOfICollection, value )!.Count <= 0 )
+                if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
                     throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                         typeof( ArgumentNullException ),
@@ -75,21 +84,47 @@ public sealed class NotEmptyAttribute : ContractAspect
         }
         else
         {
-            // TODO: Consider moving interface discovery to eligibility and set tags?
+            ThrowValidateCalledOnIneligibleTarget();
+        }
+    }
 
+    // TODO: Review: is there a simpler way to throw a compile time exception from a template?
+    [CompileTime]
+    private static void ThrowValidateCalledOnIneligibleTarget()
+    {
+        throw new InvalidOperationException( "Validate called on an ineligible target." );
+    }
+
+    [CompileTime]
+    private static bool TryGetCompatibleTargetInterface( INamedType targetType, [NotNullWhen( true )] out INamedType? interfaceType, out bool requiresCast )
+    {
+        var typeOfICollection = (INamedType) TypeFactory.GetType( typeof( ICollection ) );
+
+        if ( targetType.Is( typeOfICollection ) )
+        {
+            var countProperty = typeOfICollection.Properties.Single( p => p.Name == nameof( ICollection.Count ) );
+            targetType.TryFindImplementationForInterfaceMember( countProperty, out var countPropertyImpl );
+
+            interfaceType = typeOfICollection;
+            requiresCast = countPropertyImpl is { IsExplicitInterfaceImplementation: true };
+
+            return true;
+        }
+        else
+        {
             var typeOfIReadOnlyCollection1 = (INamedType) TypeFactory.GetType( typeof( IReadOnlyCollection<> ) );
             var typeOfICollection1 = (INamedType) TypeFactory.GetType( typeof( ICollection<> ) );
 
             INamedType? foundInterface = null;
 
-            foreach ( var interfaceType in GetSelfAndAllImplementedInterfaces( targetType ) )
+            foreach ( var t in CompileTimeHelpers.GetSelfAndAllImplementedInterfaces( targetType ) )
             {
-                if ( interfaceType.IsGeneric )
+                if ( t.IsGeneric )
                 {
-                    var originalDefinition = interfaceType.GetOriginalDefinition();
+                    var originalDefinition = t.GetOriginalDefinition();
                     if ( originalDefinition.Equals( typeOfIReadOnlyCollection1 ) || originalDefinition.Equals( typeOfICollection1 ) )
                     {
-                        foundInterface = interfaceType;
+                        foundInterface = t;
                         break;
                     }
                 }
@@ -97,53 +132,18 @@ public sealed class NotEmptyAttribute : ContractAspect
 
             if ( foundInterface != null )
             {
-
                 var countProperty = foundInterface.Properties.Single( p => p.Name == "Count" );
                 targetType.TryFindImplementationForInterfaceMember( countProperty, out var countPropertyImpl );
 
-                if ( countPropertyImpl is { IsExplicitInterfaceImplementation: true } )
-                {
-                    if ( value == null || meta.Cast( foundInterface, value )!.Count <= 0 )
-                    {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                            typeof( ArgumentNullException ),
-                            typeof( NotEmptyAttribute ),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
-                    }
-                }
-                else
-                {
-                    if ( value == null || value!.Count <= 0 )
-                    {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                            typeof( ArgumentNullException ),
-                            typeof( NotEmptyAttribute ),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
-                    }
-                }
+                interfaceType = foundInterface;
+                requiresCast = countPropertyImpl is { IsExplicitInterfaceImplementation: true };
+
+                return true;
             }
         }
-    }
 
-    [CompileTime]
-    static IEnumerable<INamedType> GetSelfAndAllImplementedInterfaces( INamedType type )
-    {        
-        if ( type.TypeKind == TypeKind.Interface )
-        {
-            yield return type;
-        }
-
-        foreach ( var i in type.AllImplementedInterfaces )
-        {
-            yield return i;
-        }
+        interfaceType = null;
+        requiresCast = false;
+        return false;
     }
 }

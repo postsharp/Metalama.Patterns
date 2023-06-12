@@ -63,6 +63,19 @@ internal static class CompileTimeHelpers
         };
     }
 
+    public static IEnumerable<INamedType> GetSelfAndAllImplementedInterfaces( INamedType type )
+    {
+        if ( type.TypeKind == TypeKind.Interface )
+        {
+            yield return type;
+        }
+
+        foreach ( var i in type.AllImplementedInterfaces )
+        {
+            yield return i;
+        }
+    }
+
     // TODO: Remove the block below if it remains unwanted.
 #if false // Probably overkill.
         public static string GetTargetKindDisplayName( this IDescribedObject<IFieldOrPropertyOrIndexer> describedObject )
