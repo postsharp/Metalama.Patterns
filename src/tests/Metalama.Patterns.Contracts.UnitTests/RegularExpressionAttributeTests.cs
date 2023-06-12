@@ -3,121 +3,120 @@
 using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
-namespace Metalama.Patterns.Contracts.Tests
+namespace Metalama.Patterns.Contracts.Tests;
+
+// ReSharper disable InconsistentNaming
+public class RegularExpressionAttributeTests
 {
-    // ReSharper disable InconsistentNaming
-    public class RegularExpressionAttributeTests
+    [Fact]
+    public void Given_MethodWithRegexMatch_When_CorrectValuePassed_Then_Success()
     {
-        [Fact]
-        public void Given_MethodWithRegexMatch_When_CorrectValuePassed_Then_Success()
-        {
-            var cut = new RegexTestClass();
+        var cut = new RegexTestClass();
 
-            cut.SetEmail("test@postsharp.test");
-        }
-
-        [Fact]
-        public void Given_MethodWithRegexMatch_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            var cut = new RegexTestClass();
-
-            var e = TestHelpers.RecordException<ArgumentException>(() => cut.SetEmail("asd"));
-
-            Assert.NotNull(e);
-            Xunit.Assert.Contains( "email", e.Message );
-        }
-
-        [Fact]
-        public void Given_FieldWithRegexMatch_When_CorrectValuePassed_Then_Success()
-        {
-            var cut = new RegexTestClass();
-
-            cut.Email = "test@postsharp.test";
-        }
-
-        [Fact]
-        public void Given_FieldWithRegexMatch_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            var cut = new RegexTestClass();
-
-            var e = TestHelpers.RecordException<ArgumentException>(() => cut.Email = "asd");
-
-            Assert.NotNull(e);
-            Xunit.Assert.Contains( "Email", e.Message );
-        }
-
-        [Fact]
-        public void Given_FieldWithEmail_When_CorrectValuePassed_Then_Success()
-        {
-            var cut = new RegexTestClass();
-
-            cut.Email2 = "test@postsharp.test";
-        }
-
-        [Fact]
-        public void Given_FieldEmail_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            var cut = new RegexTestClass();
-
-            var e = TestHelpers.RecordException<ArgumentException>(() => cut.Email2 = "asd");
-
-            Assert.NotNull(e);
-            Xunit.Assert.Contains( "Email2", e.Message );
-        }
-
-        [Fact]
-        public void Given_FieldWithPhone_When_CorrectValuePassed_Then_Success()
-        {
-            var cut = new RegexTestClass();
-
-            cut.PhoneField = "644-14-90";
-        }
-
-        [Fact]
-        public void Given_FieldPhone_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            var cut = new RegexTestClass();
-
-            var e = TestHelpers.RecordException<ArgumentException>(() => cut.PhoneField = "a123");
-
-            Assert.NotNull(e);
-            Xunit.Assert.Contains( "PhoneField", e.Message );
-        }
-
-        [Fact]
-        public void Given_FieldWithUrl_When_CorrectValuePassed_Then_Success()
-        {
-            var cut = new RegexTestClass();
-
-            cut.UrlField = "http://www.sharpcrafters.com/";
-        }
-
-        [Fact]
-        public void Given_FieldUrl_When_IncorrecValuePassed_Then_ExceptionIsThrown()
-        {
-            var cut = new RegexTestClass();
-
-            var e = TestHelpers.RecordException<ArgumentException>(() => cut.UrlField = "dslkfusd");
-
-            Assert.NotNull(e);
-            Xunit.Assert.Contains( "UrlField", e.Message );
-        }
+        cut.SetEmail("test@postsharp.test");
     }
-    // ReSharper restore InconsistentNaming
 
-    public class RegexTestClass
+    [Fact]
+    public void Given_MethodWithRegexMatch_When_IncorrecValuePassed_Then_ExceptionIsThrown()
     {
-        [RegularExpression(".+@.+")] public string Email;
+        var cut = new RegexTestClass();
 
-        [EmailAddress] public string Email2;
+        var e = TestHelpers.RecordException<ArgumentException>(() => cut.SetEmail("asd"));
 
-        [Phone] public string PhoneField;
+        Assert.NotNull(e);
+        Xunit.Assert.Contains( "email", e.Message );
+    }
 
-        [Url] public string UrlField;
+    [Fact]
+    public void Given_FieldWithRegexMatch_When_CorrectValuePassed_Then_Success()
+    {
+        var cut = new RegexTestClass();
 
-        public string SetEmail([RegularExpression(".+@.+")]string email)
-        {
-            return email;
-        }
+        cut.Email = "test@postsharp.test";
+    }
+
+    [Fact]
+    public void Given_FieldWithRegexMatch_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        var cut = new RegexTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(() => cut.Email = "asd");
+
+        Assert.NotNull(e);
+        Xunit.Assert.Contains( "Email", e.Message );
+    }
+
+    [Fact]
+    public void Given_FieldWithEmail_When_CorrectValuePassed_Then_Success()
+    {
+        var cut = new RegexTestClass();
+
+        cut.Email2 = "test@postsharp.test";
+    }
+
+    [Fact]
+    public void Given_FieldEmail_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        var cut = new RegexTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(() => cut.Email2 = "asd");
+
+        Assert.NotNull(e);
+        Xunit.Assert.Contains( "Email2", e.Message );
+    }
+
+    [Fact]
+    public void Given_FieldWithPhone_When_CorrectValuePassed_Then_Success()
+    {
+        var cut = new RegexTestClass();
+
+        cut.PhoneField = "644-14-90";
+    }
+
+    [Fact]
+    public void Given_FieldPhone_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        var cut = new RegexTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(() => cut.PhoneField = "a123");
+
+        Assert.NotNull(e);
+        Xunit.Assert.Contains( "PhoneField", e.Message );
+    }
+
+    [Fact]
+    public void Given_FieldWithUrl_When_CorrectValuePassed_Then_Success()
+    {
+        var cut = new RegexTestClass();
+
+        cut.UrlField = "http://www.sharpcrafters.com/";
+    }
+
+    [Fact]
+    public void Given_FieldUrl_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        var cut = new RegexTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(() => cut.UrlField = "dslkfusd");
+
+        Assert.NotNull(e);
+        Xunit.Assert.Contains( "UrlField", e.Message );
+    }
+}
+// ReSharper restore InconsistentNaming
+
+public class RegexTestClass
+{
+    [RegularExpression(".+@.+")] public string Email;
+
+    [EmailAddress] public string Email2;
+
+    [Phone] public string PhoneField;
+
+    [Url] public string UrlField;
+
+    public string SetEmail([RegularExpression(".+@.+")]string email)
+    {
+        return email;
     }
 }
