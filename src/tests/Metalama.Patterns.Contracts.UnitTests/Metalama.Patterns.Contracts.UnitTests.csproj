@@ -10,7 +10,6 @@
       <Compile Remove="CustomExceptionFactoryTests.cs" />
       <Compile Remove="EnumDataTypeTests.cs" />
       <Compile Remove="InterfaceTests.cs" />
-      <Compile Remove="LengthAttributeTests.cs" />
       <Compile Remove="LessOrGreaterThanMaximumValueTests.cs" />
       <Compile Remove="LessOrGreaterThanMinimumValueTests.cs" />
       <Compile Remove="LessOrGreaterThanNegativeValueTests.cs" />
@@ -33,7 +32,6 @@
       <None Include="CustomExceptionFactoryTests.cs" />
       <None Include="EnumDataTypeTests.cs" />
       <None Include="InterfaceTests.cs" />
-      <None Include="LengthAttributeTests.cs" />
       <None Include="LessOrGreaterThanMaximumValueTests.cs" />
       <None Include="LessOrGreaterThanMinimumValueTests.cs" />
       <None Include="LessOrGreaterThanNegativeValueTests.cs" />

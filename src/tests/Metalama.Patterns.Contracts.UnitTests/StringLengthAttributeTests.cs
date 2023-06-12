@@ -1,0 +1,84 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Patterns.Tests.Helpers;
+using Xunit;
+
+namespace Metalama.Patterns.Contracts.Tests;
+
+// ReSharper disable InconsistentNaming
+public class StringLengthAttributeTests
+{
+    [Fact]
+    public void Given_MethodWithMaxLength_When_CorrectValuePassed_Then_Success()
+    {
+        StringLengthTestClass cut = new StringLengthTestClass();
+
+        cut.StringMethod( "1234567890" );
+    }
+
+    [Fact]
+    public void Given_MethodWithMaxLength_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        StringLengthTestClass cut = new StringLengthTestClass();
+
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethod( "12345678901" ) );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "parameter", e.Message );
+    }
+
+    [Fact]
+    public void Given_FieldWithMinLengthAndMaxLength_When_CorrectValuePassed_Then_Success()
+    {
+        StringLengthTestClass cut = new StringLengthTestClass();
+
+        cut.StringField = "1234567890";
+    }
+
+    [Fact]
+    public void Given_FieldWithMaxLength_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        StringLengthTestClass cut = new StringLengthTestClass();
+
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = "12345678901" );
+
+        Assert.NotNull( e );
+        Xunit.Assert.Contains( "StringField", e.Message );
+    }
+
+    [Fact]
+    public void Given_FieldWithMinLength_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    {
+        StringLengthTestClass cut = new StringLengthTestClass();
+
+        ArgumentException e = TestHelpers.RecordException<ArgumentException>(() => cut.StringField = "1234");
+
+        Assert.NotNull(e);
+        Xunit.Assert.Contains( "StringField", e.Message );
+    }
+
+    [Fact]
+    public void Given_FieldWithMinLength_When_NullValuePassed_Then_Success()
+    {
+        StringLengthTestClass cut = new StringLengthTestClass();
+
+        cut.StringField = null;
+
+        Assert.Null( cut.StringField );
+    }
+
+
+}
+
+// ReSharper restore InconsistentNaming
+
+public class StringLengthTestClass
+{
+    [StringLength(5,10)]
+    public string StringField;
+
+    public string StringMethod( [StringLength( 10 )] string parameter )
+    {
+        return parameter;
+    }
+}
