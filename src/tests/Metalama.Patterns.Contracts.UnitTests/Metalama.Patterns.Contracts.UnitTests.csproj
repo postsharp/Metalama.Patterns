@@ -15,7 +15,6 @@
       <Compile Remove="LessOrGreaterThanZeroTests.cs" />
       <Compile Remove="NegativeOrPositiveAttributeTests.cs" />
       <Compile Remove="PrecisionTests.cs" />
-      <Compile Remove="RangeAttributeTests.cs" />
       <Compile Remove="RangeContractTestsBase.cs" />
       <Compile Remove="StrictlyLessOrGreaterThanMaximumValueTests.cs" />
       <Compile Remove="StrictlyLessOrGreaterThanMinimumValueTests.cs" />
@@ -35,7 +34,6 @@
       <None Include="LessOrGreaterThanZeroTests.cs" />
       <None Include="NegativeOrPositiveAttributeTests.cs" />
       <None Include="PrecisionTests.cs" />
-      <None Include="RangeAttributeTests.cs" />
       <None Include="RangeContractTestsBase.cs" />
       <None Include="StrictlyLessOrGreaterThanMaximumValueTests.cs" />
       <None Include="StrictlyLessOrGreaterThanMinimumValueTests.cs" />
