@@ -1,13 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using PostSharp.Patterns.Common.Tests;
-using PostSharp.Patterns.Common.Tests.Helpers;
+using Metalama.Patterns.Tests.Helpers;
 using Xunit;
-using PostSharp.Patterns.Contracts;
 
-namespace PostSharp.Patterns.Contracts.Tests
+namespace Metalama.Patterns.Contracts.Tests
 {
     // ReSharper disable InconsistentNaming
     public class RegularExpressionAttributeTests
