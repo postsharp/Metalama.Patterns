@@ -8,7 +8,6 @@
 
     <ItemGroup>
       <Compile Remove="CustomExceptionFactoryTests.cs" />
-      <Compile Remove="EnumDataTypeTests.cs" />
       <Compile Remove="InterfaceTests.cs" />
       <Compile Remove="LessOrGreaterThanMaximumValueTests.cs" />
       <Compile Remove="LessOrGreaterThanMinimumValueTests.cs" />
@@ -30,7 +29,6 @@
 
     <ItemGroup>
       <None Include="CustomExceptionFactoryTests.cs" />
-      <None Include="EnumDataTypeTests.cs" />
       <None Include="InterfaceTests.cs" />
       <None Include="LessOrGreaterThanMaximumValueTests.cs" />
       <None Include="LessOrGreaterThanMinimumValueTests.cs" />
