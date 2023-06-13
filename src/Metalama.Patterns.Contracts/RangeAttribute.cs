@@ -183,22 +183,27 @@ public class RangeAttribute : ContractAspect
         {
             invalidTypes |= TypeFlag.Byte;
         }
+
         if ( min > sbyte.MaxValue || max < sbyte.MinValue )
         {
             invalidTypes |= TypeFlag.SByte;
         }
+
         if ( min > short.MaxValue || max < short.MinValue )
         {
             invalidTypes |= TypeFlag.Int16;
         }
+
         if ( min > ushort.MaxValue || max < ushort.MinValue )
         {
             invalidTypes |= TypeFlag.UInt16;
         }
+
         if ( min > int.MaxValue || max < int.MinValue )
         {
             invalidTypes |= TypeFlag.Int32;
         }
+
         if ( min > uint.MaxValue || max < uint.MinValue )
         {
             invalidTypes |= TypeFlag.UInt32;
@@ -214,26 +219,32 @@ public class RangeAttribute : ContractAspect
         {
             invalidTypes |= TypeFlag.Byte;
         }
+
         if ( min > (ulong) sbyte.MaxValue )
         {
             invalidTypes |= TypeFlag.SByte;
         }
+
         if ( min > (ulong) short.MaxValue )
         {
             invalidTypes |= TypeFlag.Int16;
         }
+
         if ( min > ushort.MaxValue )
         {
             invalidTypes |= TypeFlag.UInt16;
         }
+
         if ( min > int.MaxValue )
         {
             invalidTypes |= TypeFlag.Int32;
         }
+
         if ( min > uint.MaxValue )
         {
             invalidTypes |= TypeFlag.UInt32;
         }
+
         if ( min > long.MaxValue )
         {
             invalidTypes |= TypeFlag.Int64;
@@ -249,34 +260,42 @@ public class RangeAttribute : ContractAspect
         {
             invalidTypes |= TypeFlag.Byte;
         }
+
         if ( min > sbyte.MaxValue || max < sbyte.MinValue )
         {
             invalidTypes |= TypeFlag.SByte;
         }
+
         if ( min > short.MaxValue || max < short.MinValue )
         {
             invalidTypes |= TypeFlag.Int16;
         }
+
         if ( min > ushort.MaxValue || max < ushort.MinValue )
         {
             invalidTypes |= TypeFlag.UInt16;
         }
+
         if ( min > int.MaxValue || max < int.MinValue )
         {
             invalidTypes |= TypeFlag.Int32;
         }
+
         if ( min > uint.MaxValue || max < uint.MinValue )
         {
             invalidTypes |= TypeFlag.UInt32;
         }
+
         if ( min > long.MaxValue || max < long.MinValue )
         {
             invalidTypes |= TypeFlag.Int64;
         }
+
         if ( min > ulong.MaxValue || max < ulong.MinValue )
         {
             invalidTypes |= TypeFlag.UInt64;
         }
+
         if ( min > (double) decimal.MaxValue || max < (double) decimal.MinValue )
         {
             invalidTypes |= TypeFlag.Decimal;
@@ -292,30 +311,37 @@ public class RangeAttribute : ContractAspect
         {
             invalidTypes |= TypeFlag.Byte;
         }
+
         if ( min > sbyte.MaxValue || max < sbyte.MinValue )
         {
             invalidTypes |= TypeFlag.SByte;
         }
+
         if ( min > short.MaxValue || max < short.MinValue )
         {
             invalidTypes |= TypeFlag.Int16;
         }
+
         if ( min > ushort.MaxValue || max < ushort.MinValue )
         {
             invalidTypes |= TypeFlag.UInt16;
         }
+
         if ( min > int.MaxValue || max < int.MinValue )
         {
             invalidTypes |= TypeFlag.Int32;
         }
+
         if ( min > uint.MaxValue || max < uint.MinValue )
         {
             invalidTypes |= TypeFlag.UInt32;
         }
+
         if ( min > long.MaxValue || max < long.MinValue )
         {
             invalidTypes |= TypeFlag.Int64;
         }
+
         if ( min > ulong.MaxValue || max < ulong.MinValue )
         {
             invalidTypes |= TypeFlag.UInt64;
@@ -397,6 +423,8 @@ public class RangeAttribute : ContractAspect
         return (ulong) value;
     }
 
+    // TODO: Remove
+#if false
     private static TypeFlag GetTypeFlag( Type locationType )
     {
         TypeFlag typeFlag;
@@ -443,6 +471,7 @@ public class RangeAttribute : ContractAspect
 
         return typeFlag;
     }
+#endif
 
     [CompileTime]
     private static TypeFlag GetTypeFlag( IType locationType )
@@ -555,16 +584,37 @@ public class RangeAttribute : ContractAspect
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
         var type = CompileTimeHelpers.GetTargetType( meta.Target );
+        var basicType = (INamedType) type.ToNonNullableType();
+        var isNullable = type.IsNullable == true;
 
         if ( type.SpecialType == SpecialType.Object )
         {
+            if ( value != null )
+            {
+                var rangeValues = new RangeValues( this._minInt64, this._maxInt64, this._minUInt64, this._maxUInt64,
+                    this._minDouble, this._maxDouble, this._minDecimal, this._maxDecimal );
 
+                var validateResult = RangeAttributeHelpers.Validate( value, rangeValues );
+
+                if ( !validateResult.IsInRange )
+                {
+                    // TODO: Maybe include validateResult.UnderlyingType in the message?
+
+                    throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        typeof( ArgumentOutOfRangeException ),
+                        typeof( RangeAttribute ),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.RangeErrorMessage,
+                        this.DisplayMinValue,
+                        this.DisplayMaxValue ) );
+                }
+            }
         }
         else
         {
-            var basicType = (INamedType) type.ToNonNullableType();
-            var isNullable = type.IsNullable == true;
-
             var (min, max) = this.GetMinAndMaxExpressions( basicType.SpecialType );
 
             if ( isNullable )
@@ -601,9 +651,4 @@ public class RangeAttribute : ContractAspect
             }
         }
     }
-}
-
-public static class RangeAttributeHelpers
-{
-
 }
