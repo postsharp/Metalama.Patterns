@@ -11,7 +11,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         cut.ZeroToTenMethod( 0 );
         cut.ZeroToTenMethod( 5 );
@@ -22,7 +22,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DecimalMethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         cut.ZeroToTenDecimal( 0.0m );
         cut.ZeroToTenDecimal( 0.1m );
@@ -34,7 +34,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DecimalMethodWithLargeInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         cut.LargeDecimalRange( decimal.MinValue );
         cut.LargeDecimalRange( decimal.MaxValue );
@@ -44,7 +44,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DoubleMethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         cut.ZeroToTenDouble( 0.0 );
         cut.ZeroToTenDouble( 0.1 );
@@ -56,7 +56,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_FloatMethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         cut.ZeroToTenFloat( 0.0f );
         cut.ZeroToTenFloat( 0.1f );
@@ -69,7 +69,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_FieldWithInRangeAttribute_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         cut.GreaterThanZeroField = 0;
         cut.GreaterThanZeroField = 5;
@@ -81,7 +81,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( -10 ) );
 
@@ -92,7 +92,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( 20 ) );
 
@@ -104,7 +104,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DoubleMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( 10.1 ) );
 
@@ -115,7 +115,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DoubleMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( -10.0 ) );
 
@@ -127,7 +127,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_FloatMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( 10.1f ) );
 
@@ -138,7 +138,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_FloatMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( -10.0f ) );
 
@@ -150,7 +150,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DecimalMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( 20.0m ) );
 
@@ -161,7 +161,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DecimalMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( -10.0m ) );
 
@@ -172,7 +172,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_NullableDecimalMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableDecimal( 20.0m ) );
 
@@ -183,7 +183,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_NullableDecimalMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableDecimal( -10.0m ) );
 
@@ -194,7 +194,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_NullableIntMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( 20 ) );
 
@@ -205,7 +205,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_NullableIntMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( -10 ) );
 
@@ -216,7 +216,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_FieldWithInRangeAttribute_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.GreaterThanZeroField = -10 );
 
@@ -227,7 +227,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_FieldWithInRangeAttribute_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.LessThanZeroField = 20 );
 
@@ -238,7 +238,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeRef_When_IncorrectValuePassed_Then_ExceptionThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         long? p = -1;
         ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableIntRef( 1, ref p ) );
@@ -250,7 +250,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeRef_When_IncorrectValueReturned_Then_ExceptionThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         long? p = 1;
         PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntRef( -1, ref p ) );
@@ -262,7 +262,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeOut_When_IncorrectValueReturned_Then_ExceptionThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         long? p;
         PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntOut( -1, out p ) );
@@ -274,7 +274,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeRetVal_When_IncorrectValueReturned_Then_ExceptionThrown()
     {
-        RangeTestCalss cut = new RangeTestCalss();
+        RangeTestClass cut = new RangeTestClass();
 
         PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
 
@@ -285,7 +285,7 @@ public class RangeAttributeTests
 
 // ReSharper restore InconsistentNaming
 
-public class RangeTestCalss
+public class RangeTestClass
 {
 
     //[GreaterThan( 0 )] 
