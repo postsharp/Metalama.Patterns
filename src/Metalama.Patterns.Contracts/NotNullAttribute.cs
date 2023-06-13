@@ -36,16 +36,36 @@ public sealed class NotNullAttribute : ContractAspect
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
 
-        if ( value == null! )
+        if ( meta.Target.Project.ContractsOptions().EmulatePostSharp )
         {
-            throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                typeof( ArgumentNullException ),
-                typeof( NotNullAttribute ),
-                value,
-                targetName,
-                targetKind,
-                meta.Target.ContractDirection,
-                ContractLocalizedTextProvider.NotNullErrorMessage ) );
+            if ( value == null! )
+            {
+                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    typeof( ArgumentNullException ),
+                    typeof( NotNullAttribute ),
+                    value,
+                    targetName,
+                    targetKind,
+                    meta.Target.ContractDirection,
+                    ContractLocalizedTextProvider.NotNullErrorMessage ) );
+            }
+        }
+        else
+        {
+            var newExceptionExpr = CompileTimeContractExceptionFactory.GetNewExceptionExpression(
+                meta.Target.Project.ContractsOptions().LocalizedTextProvider, ContractExceptionInfo.Create(
+                    typeof( ArgumentNullException ),
+                    typeof( NotNullAttribute ),
+                    null!, // TODO: Temporary hack - none of the default messages use the value placeholder ({3})
+                    targetName,
+                    targetKind,
+                    meta.Target.ContractDirection,
+                    ContractLocalizedTextProvider.NotNullErrorMessage ) );
+
+            if ( value == null! )
+            {
+                throw newExceptionExpr.Value!;
+            }
         }
     }
 }
