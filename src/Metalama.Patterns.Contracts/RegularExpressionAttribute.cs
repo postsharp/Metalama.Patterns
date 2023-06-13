@@ -87,8 +87,7 @@ public class RegularExpressionAttribute : ContractAspect
                     targetName,
                     targetKind,
                     meta.Target.ContractDirection,
-                    info.
-                    MessageIdExpression.Value,
+                    info.MessageIdExpression.Value,
                     this.Pattern ) );
             }
             else
@@ -100,21 +99,15 @@ public class RegularExpressionAttribute : ContractAspect
                     targetName,
                     targetKind,
                     meta.Target.ContractDirection,
-                    info.
-                    MessageIdExpression.Value ) );
+                    info.MessageIdExpression.Value ) );
             }
         }
     }
 
     [CompileTime]
-    internal static IExpression GetContractLocalizedTextProviderField( string fieldName )
-        => ((INamedType) TypeFactory.GetType( typeof( ContractLocalizedTextProvider ) )).Fields
-            .OfName( fieldName ).Single();
-
-    [CompileTime]
     protected virtual (Type ExceptionType, Type AspectType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
         => (typeof( ArgumentException ),
             typeof( RegularExpressionAttribute ),
-            GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.RegularExpressionErrorMessage ) ),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.RegularExpressionErrorMessage ) ),
             true);
 }

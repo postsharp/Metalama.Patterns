@@ -32,6 +32,6 @@ public sealed class PhoneAttribute : RegularExpressionAttribute
     protected override (Type ExceptionType, Type AspectType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
         => (typeof( ArgumentException ),
             typeof( PhoneAttribute ),
-            GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.PhoneErrorMessage ) ),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.PhoneErrorMessage ) ),
             false);
 }

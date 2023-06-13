@@ -9,6 +9,15 @@ namespace Metalama.Patterns.Contracts;
 [CompileTime]
 internal static class CompileTimeHelpers
 {
+    /// <summary>
+    /// Gets an expression representing a field of <see cref="ContractLocalizedTextProvider"/>.
+    /// </summary>
+    /// <param name="fieldName">Should be like <c>nameof( ContractLocalizedTextProvider.CreditCardErrorMessage )</c>.</param>
+    /// <returns></returns>
+    internal static IExpression GetContractLocalizedTextProviderField( string fieldName )
+        => ((INamedType) TypeFactory.GetType( typeof( ContractLocalizedTextProvider ) )).Fields
+            .OfName( fieldName ).Single();
+
     public static IExpression ToTypeOf( this Type type )
     {
         var expressionBuilder = new ExpressionBuilder();

@@ -288,10 +288,10 @@ public class RangeAttributeTests
 public class RangeTestClass
 {
 
-    //[GreaterThan( 0 )] 
+    [GreaterThan( 0 )] 
     public int GreaterThanZeroField;
 
-    //[LessThan( 0 )]
+    [LessThan( 0 )]
     public long LessThanZeroField { get; set; }
 
     public int ZeroToTenMethod( [Range( 0, 10 )] short parameter )
@@ -349,7 +349,4 @@ public class RangeTestClass
     {
         return retVal;
     }
-
-    //[Range( -1,10)]
-    //public object ObjectField;
 }

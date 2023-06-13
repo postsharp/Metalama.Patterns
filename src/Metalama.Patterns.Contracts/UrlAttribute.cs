@@ -33,6 +33,6 @@ public sealed class UrlAttribute : RegularExpressionAttribute
     protected override (Type ExceptionType, Type AspectType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
     => (typeof( ArgumentException ),
         typeof( UrlAttribute ),
-        GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.UrlErrorMessage ) ),
+        CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.UrlErrorMessage ) ),
         false);
 }
