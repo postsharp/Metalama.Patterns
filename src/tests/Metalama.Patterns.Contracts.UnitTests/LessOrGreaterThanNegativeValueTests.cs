@@ -1,16 +1,11 @@
-﻿using PostSharp.Patterns.Common.Tests.Helpers;
-using Xunit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using PostSharp.Patterns.Contracts;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Xunit;
 
 // This is a modified copy of LessOrGreaterThanPositiveValueTests.cs
 // Keep the testing logic equal for all the copies!
 
-namespace PostSharp.Patterns.Contracts.Tests
+namespace Metalama.Patterns.Contracts.Tests
 {
     public class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
     {

@@ -7,44 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="CustomExceptionFactoryTests.cs" />
-      <Compile Remove="LessOrGreaterThanMaximumValueTests.cs" />
-      <Compile Remove="LessOrGreaterThanMinimumValueTests.cs" />
-      <Compile Remove="LessOrGreaterThanNegativeValueTests.cs" />
-      <Compile Remove="LessOrGreaterThanPositiveValueTests.cs" />
-      <Compile Remove="LessOrGreaterThanZeroTests.cs" />
-      <Compile Remove="NegativeOrPositiveAttributeTests.cs" />
-      <Compile Remove="PrecisionTests.cs" />
-      <Compile Remove="RangeContractTestsBase.cs" />
-      <Compile Remove="StrictlyLessOrGreaterThanMaximumValueTests.cs" />
-      <Compile Remove="StrictlyLessOrGreaterThanMinimumValueTests.cs" />
-      <Compile Remove="StrictlyLessOrGreaterThanNegativeValueTests.cs" />
-      <Compile Remove="StrictlyLessOrGreaterThanPositiveValueTests.cs" />
-      <Compile Remove="StrictlyLessOrGreaterThanZeroTests.cs" />
-      <Compile Remove="StrictlyNegativeOrPositiveAttributeTests.cs" />
-      <Compile Remove="StrictRangeAttributeTests.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="CustomExceptionFactoryTests.cs" />
-      <None Include="LessOrGreaterThanMaximumValueTests.cs" />
-      <None Include="LessOrGreaterThanMinimumValueTests.cs" />
-      <None Include="LessOrGreaterThanNegativeValueTests.cs" />
-      <None Include="LessOrGreaterThanPositiveValueTests.cs" />
-      <None Include="LessOrGreaterThanZeroTests.cs" />
-      <None Include="NegativeOrPositiveAttributeTests.cs" />
-      <None Include="PrecisionTests.cs" />
-      <None Include="RangeContractTestsBase.cs" />
-      <None Include="StrictlyLessOrGreaterThanMaximumValueTests.cs" />
-      <None Include="StrictlyLessOrGreaterThanMinimumValueTests.cs" />
-      <None Include="StrictlyLessOrGreaterThanNegativeValueTests.cs" />
-      <None Include="StrictlyLessOrGreaterThanPositiveValueTests.cs" />
-      <None Include="StrictlyLessOrGreaterThanZeroTests.cs" />
-      <None Include="StrictlyNegativeOrPositiveAttributeTests.cs" />
-      <None Include="StrictRangeAttributeTests.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />

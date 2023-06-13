@@ -9,6 +9,8 @@
     <Import_RootNamespace>Metalama.Patterns.Tests.Helpers</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssertEx.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssertionFailedException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestHelpers.cs" />
   </ItemGroup>
 </Project>

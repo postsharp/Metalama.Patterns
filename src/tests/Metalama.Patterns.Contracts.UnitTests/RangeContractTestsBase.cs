@@ -1,95 +1,96 @@
-﻿using System;
-using PostSharp.Reflection;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace PostSharp.Patterns.Contracts.Tests
+using Metalama.Patterns.Tests.Helpers;
+using System.Reflection;
+
+namespace Metalama.Patterns.Contracts.Tests;
+
+public abstract class RangeContractTestsBase
 {
-    public abstract class RangeContractTestsBase
+    protected const double DoubleTolerance = 2.220446049250313E-16;
+    protected const decimal DecimalTolerance = 0.0000000000000000000000000001M;
+
+    protected static void AssertFails( Action<long?> method, long? longValue )
     {
-        protected const double DoubleTolerance = 2.220446049250313E-16;
-        protected const decimal DecimalTolerance = 0.0000000000000000000000000001M;
-
-        protected static void AssertFails( Action<long?> method, long? longValue )
+        try
         {
-            try
-            {
-                method( longValue );
-                throw new AssertionFailedException(
-                    string.Format( "{0}( long?:{1} ) did not fail.",
-                                   method.GetMethodInfo().Name,
-                                   NullableToString( longValue ) ) );
-            }
-            catch ( ArgumentOutOfRangeException )
-            {
-            }
+            method( longValue );
+            throw new AssertionFailedException(
+                string.Format( "{0}( long?:{1} ) did not fail.",
+                               method.GetMethodInfo().Name,
+                               NullableToString( longValue ) ) );
         }
-
-        protected static void AssertFails( Action<ulong?> method, ulong? ulongValue )
+        catch ( ArgumentOutOfRangeException )
         {
-            try
-            {
-                method( ulongValue );
-                throw new AssertionFailedException(
-                    string.Format( "{0}( ulong?:{1} ) did not fail.",
-                                   method.GetMethodInfo().Name,
-                                   NullableToString( ulongValue ) ) );
-            }
-            catch ( ArgumentOutOfRangeException )
-            {
-            }
         }
+    }
 
-        protected static void AssertFails( Action<double?> method, double? doubleValue )
+    protected static void AssertFails( Action<ulong?> method, ulong? ulongValue )
+    {
+        try
         {
-            try
-            {
-                method( doubleValue );
-                throw new AssertionFailedException(
-                    string.Format( "{0}( double?:{1} ) did not fail.",
-                                   method.GetMethodInfo().Name,
-                                   NullableToString( doubleValue ) ) );
-            }
-            catch ( ArgumentOutOfRangeException )
-            {
-            }
+            method( ulongValue );
+            throw new AssertionFailedException(
+                string.Format( "{0}( ulong?:{1} ) did not fail.",
+                               method.GetMethodInfo().Name,
+                               NullableToString( ulongValue ) ) );
         }
+        catch ( ArgumentOutOfRangeException )
+        {
+        }
+    }
 
-        protected static void AssertFails( Action<decimal?> method, decimal? decimalValue )
+    protected static void AssertFails( Action<double?> method, double? doubleValue )
+    {
+        try
         {
-            try
-            {
-                method( decimalValue );
-                throw new AssertionFailedException(
-                    string.Format( "{0}( decimal:{1} ) did not fail.",
-                                   method.GetMethodInfo().Name,
-                                   NullableToString( decimalValue ) ) );
-            }
-            catch ( ArgumentOutOfRangeException )
-            {
-            }
+            method( doubleValue );
+            throw new AssertionFailedException(
+                string.Format( "{0}( double?:{1} ) did not fail.",
+                               method.GetMethodInfo().Name,
+                               NullableToString( doubleValue ) ) );
         }
+        catch ( ArgumentOutOfRangeException )
+        {
+        }
+    }
 
-        protected static void AssertFails( Action<long?, ulong?, double?, decimal?> method, long? longValue, ulong? ulongValue, double? doubleValue,
-                                           decimal? decimalValue )
+    protected static void AssertFails( Action<decimal?> method, decimal? decimalValue )
+    {
+        try
         {
-            try
-            {
-                method( longValue, ulongValue, doubleValue, decimalValue );
-                throw new AssertionFailedException(
-                    string.Format( "{0}( long?:{1}, ulong?:{2}, double?:{3}, decimal?:{4} ) did not fail.",
-                                   method.GetMethodInfo().Name,
-                                   NullableToString( longValue ),
-                                   NullableToString( ulongValue ),
-                                   NullableToString( doubleValue ),
-                                   NullableToString( decimalValue ) ) );
-            }
-            catch ( ArgumentOutOfRangeException )
-            {
-            }
+            method( decimalValue );
+            throw new AssertionFailedException(
+                string.Format( "{0}( decimal:{1} ) did not fail.",
+                               method.GetMethodInfo().Name,
+                               NullableToString( decimalValue ) ) );
         }
+        catch ( ArgumentOutOfRangeException )
+        {
+        }
+    }
 
-        private static string NullableToString( object nullable )
+    protected static void AssertFails( Action<long?, ulong?, double?, decimal?> method, long? longValue, ulong? ulongValue, double? doubleValue,
+                                       decimal? decimalValue )
+    {
+        try
         {
-            return nullable == null ? "null" : nullable.ToString();
+            method( longValue, ulongValue, doubleValue, decimalValue );
+            throw new AssertionFailedException(
+                string.Format( "{0}( long?:{1}, ulong?:{2}, double?:{3}, decimal?:{4} ) did not fail.",
+                               method.GetMethodInfo().Name,
+                               NullableToString( longValue ),
+                               NullableToString( ulongValue ),
+                               NullableToString( doubleValue ),
+                               NullableToString( decimalValue ) ) );
         }
+        catch ( ArgumentOutOfRangeException )
+        {
+        }
+    }
+
+    private static string NullableToString( object nullable )
+    {
+        return nullable == null ? "null" : nullable.ToString();
     }
 }

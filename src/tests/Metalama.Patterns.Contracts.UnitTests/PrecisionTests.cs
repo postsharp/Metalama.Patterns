@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
 using System.Globalization;
-using System.Text;
-using PostSharp.Patterns.Common.Tests.Helpers;
 using Xunit;
-using PostSharp.Patterns.Contracts;
 
-namespace PostSharp.Patterns.Contracts.Tests
+namespace Metalama.Patterns.Contracts.Tests;
+
+public class PrecisionTests : RangeContractTestsBase
 {
-    public class PrecisionTests : RangeContractTestsBase
+    [Fact]
+    public void CheckDoubleTolerance()
     {
-        [Fact]
-        public void CheckDoubleTolerance()
-        {
-            Assert.Equal( DoubleTolerance.ToString( CultureInfo.InvariantCulture ), FloatingPointHelper.DoubleTolerance.ToString( CultureInfo.InvariantCulture ) );
-        }
+        Assert.Equal( DoubleTolerance.ToString( CultureInfo.InvariantCulture ), FloatingPointHelper.DoubleTolerance.ToString( CultureInfo.InvariantCulture ) );
+    }
 
-        [Fact]
-        public void CheckDecimalTolerance()
-        {
-            Assert.Equal( DecimalTolerance, FloatingPointHelper.DecimalTolerance );
-        }
+    [Fact]
+    public void CheckDecimalTolerance()
+    {
+        Assert.Equal( DecimalTolerance, FloatingPointHelper.DecimalTolerance );
     }
 }

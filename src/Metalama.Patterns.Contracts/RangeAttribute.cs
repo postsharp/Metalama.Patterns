@@ -592,6 +592,7 @@ public class RangeAttribute : ContractAspect
         var basicType = (INamedType) type.ToNonNullableType();
         var isNullable = type.IsNullable == true;
         var exceptionInfo = this.GetExceptioninfo();
+        var exceptionType = meta.CompileTime( this.GetType() );//.ToTypeOf().Value;
 
         if ( type.SpecialType == SpecialType.Object )
         {
@@ -610,7 +611,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -623,7 +624,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -635,7 +636,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -647,7 +648,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -670,7 +671,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -683,7 +684,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -695,7 +696,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -707,7 +708,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -724,7 +725,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -737,7 +738,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -749,7 +750,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,
@@ -761,7 +762,7 @@ public class RangeAttribute : ContractAspect
                     {
                         throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof( ArgumentOutOfRangeException ),
-                            this.GetType(),
+                            exceptionType,
                             value,
                             targetName,
                             targetKind,

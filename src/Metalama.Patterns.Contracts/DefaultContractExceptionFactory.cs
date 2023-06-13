@@ -28,19 +28,19 @@ public class DefaultContractExceptionFactory : ContractExceptionFactory
 
         var parameterName = exceptionInfo.TargetKind.GetParameterName( exceptionInfo.TargetName );
 
-        if ( exceptionInfo.ExceptionType == typeof(ArgumentException) )
+        if ( exceptionInfo.ExceptionType.Equals( typeof( ArgumentException ) ) )
         {
             return new ArgumentException( errorMessage, parameterName );
         }
-        else if ( exceptionInfo.ExceptionType == typeof(ArgumentNullException) )
+        else if ( exceptionInfo.ExceptionType.Equals( typeof( ArgumentNullException ) ) )
         {
             return new ArgumentNullException( parameterName, errorMessage );
         }
-        else if ( exceptionInfo.ExceptionType == typeof(ArgumentOutOfRangeException) )
+        else if ( exceptionInfo.ExceptionType.Equals( typeof( ArgumentOutOfRangeException ) ) )
         {
             return new ArgumentOutOfRangeException( parameterName, errorMessage );
         }
-        else if ( exceptionInfo.ExceptionType == typeof(PostconditionFailedException) )
+        else if ( exceptionInfo.ExceptionType.Equals( typeof( PostconditionFailedException ) ) )
         {
             return new PostconditionFailedException( errorMessage );
         }
