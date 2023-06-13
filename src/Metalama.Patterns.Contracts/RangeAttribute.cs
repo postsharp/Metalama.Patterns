@@ -6,6 +6,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 
@@ -99,7 +100,7 @@ public class RangeAttribute : ContractAspect
     }
 
     /// <summary>
-    /// Initializes a new <see cref="GreaterThanAttribute"/> and specify an integer bound.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying an integer bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
@@ -124,7 +125,7 @@ public class RangeAttribute : ContractAspect
     }
 
     /// <summary>
-    /// Initializes a new <see cref="GreaterThanAttribute"/> and specify a <see cref="ulong"/> bound.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying an unsigned integer bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
@@ -149,7 +150,7 @@ public class RangeAttribute : ContractAspect
     }
 
     /// <summary>
-    /// Initializes a new <see cref="GreaterThanAttribute"/> and specify a floating-point bound.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying a floating-point bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
@@ -496,7 +497,7 @@ public class RangeAttribute : ContractAspect
     private static readonly DiagnosticDefinition<(string, string, string)> _rangeCannotBeApplied = new(
         "ML5000",
         Severity.Error,
-        "{0} attribute cannot be applied to {1} because the value range cannot be satisfied by the type {2}." );
+        "{0} cannot be applied to {1} because the value range cannot be satisfied by the type {2}." );
 
     public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
     {
@@ -512,9 +513,93 @@ public class RangeAttribute : ContractAspect
         }
     }
 
+    [CompileTime]
+    private (IExpression Min, IExpression Max) GetMinAndMaxExpressions( SpecialType specialType )
+    {
+        var minBuilder = new ExpressionBuilder();
+        var maxBuilder = new ExpressionBuilder();
+
+        switch ( specialType )
+        {
+            case SpecialType.Byte:
+            case SpecialType.UInt16:
+            case SpecialType.UInt32:
+            case SpecialType.UInt64:
+                minBuilder.AppendLiteral( this._minUInt64 );
+                maxBuilder.AppendLiteral( this._maxUInt64 );
+                break;
+            case SpecialType.SByte:
+            case SpecialType.Int16:
+            case SpecialType.Int32:
+            case SpecialType.Int64:
+                minBuilder.AppendLiteral( this._minInt64 );
+                maxBuilder.AppendLiteral( this._maxInt64 );
+                break;
+            case SpecialType.Single:
+            case SpecialType.Double:
+                minBuilder.AppendLiteral( this._minDouble );
+                maxBuilder.AppendLiteral( this._maxDouble );
+                break;
+            case SpecialType.Decimal:
+                minBuilder.AppendLiteral( this._minDecimal );
+                maxBuilder.AppendLiteral( this._maxDecimal );
+                break;
+            default:
+                throw new InvalidOperationException( $"SpecialType.{specialType} was not expected here." );
+        }
+
+        return (minBuilder.ToExpression(), maxBuilder.ToExpression());
+    }
+
     public override void Validate( dynamic? value )
     {
-        //throw new NotImplementedException();
+        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
+        var type = CompileTimeHelpers.GetTargetType( meta.Target );
+
+        if ( type.SpecialType == SpecialType.Object )
+        {
+
+        }
+        else
+        {
+            var basicType = (INamedType) type.ToNonNullableType();
+            var isNullable = type.IsNullable == true;
+
+            var (min, max) = this.GetMinAndMaxExpressions( basicType.SpecialType );
+
+            if ( isNullable )
+            {
+                if ( value!.HasValue && ( value < min.Value || value > max.Value ) )
+                {
+                    throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        typeof( ArgumentOutOfRangeException ),
+                        typeof( RangeAttribute ),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.RangeErrorMessage,
+                        this.DisplayMinValue,
+                        this.DisplayMaxValue ) );
+                }
+            }
+            else
+            {
+                if ( value < min.Value || value > max.Value )
+                {
+                    throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        typeof( ArgumentOutOfRangeException ),
+                        typeof( RangeAttribute ),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.RangeErrorMessage,
+                        this.DisplayMinValue,
+                        this.DisplayMaxValue ) );
+                }
+            }
+        }
     }
 }
 
