@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Contracts
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedHelpers", "src\tests\SharedHelpers\SharedHelpers.shproj", "{31626078-D5D3-483E-9D0D-8591C060A155}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Contracts.AspectTests", "src\tests\Metalama.Patterns.Contracts.AspectTests\Metalama.Patterns.Contracts.AspectTests.csproj", "{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{C972CEEA-60FA-4DD4-BEEC-A5FDDF451D50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C972CEEA-60FA-4DD4-BEEC-A5FDDF451D50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C972CEEA-60FA-4DD4-BEEC-A5FDDF451D50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C972CEEA-60FA-4DD4-BEEC-A5FDDF451D50} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{31626078-D5D3-483E-9D0D-8591C060A155} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC2B6F6-5623-43F8-BBBB-ED8072670A80}

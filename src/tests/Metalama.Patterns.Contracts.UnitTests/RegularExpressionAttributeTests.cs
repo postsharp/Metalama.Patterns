@@ -102,4 +102,26 @@ public class RegularExpressionAttributeTests
         Assert.NotNull( e );
         Assert.Contains( "UrlField", e!.Message, StringComparison.Ordinal );
     }
+
+    [Fact]
+    public void Given_FieldWithRegexMatch_When_IncorrectValuePassed_Then_ExceptionMessageIsCorrect_1()
+    {
+        var cut = new RegexTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.PatternEscaping1 = "hello" );
+
+        Assert.NotNull( e );
+        Assert.Contains( "must match the regular expression '^[a-z]{4}$'.", e!.Message, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public void Given_FieldWithRegexMatch_When_IncorrectValuePassed_Then_ExceptionMessageIsCorrect_2()
+    {
+        var cut = new RegexTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.PatternEscaping2 = "{hello}" );
+
+        Assert.NotNull( e );
+        Assert.Contains( "must match the regular expression '^\\{[a-z]{4}}$'.", e!.Message, StringComparison.Ordinal );
+    }
 }

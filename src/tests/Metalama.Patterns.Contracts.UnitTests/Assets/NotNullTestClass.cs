@@ -13,4 +13,12 @@ public class NotNullTestClass
     public object ObjectParameterMethod( [NotNull] object parameter ) => parameter;
 
     public object ClassParameterMethod( [NotNull] NotNullAttributeTests parameter ) => parameter;
+
+    public class A { }
+
+    public class B<T>
+        where T : A
+    {
+        public B( [NotNull] T x ) { }
+    }
 }

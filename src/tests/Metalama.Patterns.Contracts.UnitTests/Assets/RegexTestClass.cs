@@ -17,4 +17,10 @@ public class RegexTestClass
     public string UrlField;
 
     public string SetEmail( [RegularExpression( ".+@.+" )] string email ) => email!;
+
+    [RegularExpression( @"^[a-z]{4}$" )]
+    public string PatternEscaping1;
+
+    [RegularExpression( @"^\{[a-z]{4}}$" )]
+    public string PatternEscaping2;
 }

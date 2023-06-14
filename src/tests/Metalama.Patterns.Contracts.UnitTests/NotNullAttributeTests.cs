@@ -78,4 +78,20 @@ public class NotNullAttributeTests
         Assert.Equal( "value", e!.ParamName );
         Assert.Contains( "ObjectField", e!.Message, StringComparison.Ordinal );
     }
+
+    [Fact]
+    public void Given_MethodWithNotNullGenericParameter_When_NotNullPassed_Then_Success()
+    {
+        _ = new NotNullTestClass.B<NotNullTestClass.A>( new NotNullTestClass.A() );
+    }
+
+    [Fact]
+    public void Given_MethodWithNotNullGenericParameter_When_NotNullPassed_Then_ExceptionIsThrown()
+    {
+        var e = TestHelpers.RecordException<ArgumentNullException>( () => new NotNullTestClass.B<NotNullTestClass.A>( null! ) );
+
+        Assert.NotNull( e );
+        Assert.Equal( "x", e!.ParamName );
+        Assert.Contains( "x", e!.Message, StringComparison.Ordinal );
+    }
 }
