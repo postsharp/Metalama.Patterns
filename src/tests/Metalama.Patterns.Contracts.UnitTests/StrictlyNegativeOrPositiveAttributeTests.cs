@@ -19,7 +19,8 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
     {
         AssertFails( TestMethodsWithStrictlyPositiveAspect, 0, 0, 0, 0 );
         AssertFails( TestMethodsWithStrictlyPositiveAspect, -100, 0, -100, -100 );
-        AssertFails( TestMethodsWithStrictlyPositiveAspect, long.MinValue, ulong.MinValue, double.MinValue, decimal.MinValue );
+        AssertFails( TestMethodsWithStrictlyPositiveAspect, long.MinValue, ulong.MinValue, double.MinValue,
+            decimal.MinValue );
     }
 
     [Fact]
@@ -35,10 +36,12 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
     {
         AssertFails( TestMethodsWithStrictlyNegativeAspect, 0, 0, 0, 0 );
         AssertFails( TestMethodsWithStrictlyNegativeAspect, 100, 0, 100, 100 );
-        AssertFails( TestMethodsWithStrictlyNegativeAspect, long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
+        AssertFails( TestMethodsWithStrictlyNegativeAspect, long.MaxValue, ulong.MaxValue, double.MaxValue,
+            decimal.MaxValue );
     }
 
-    private static void TestMethodsWithStrictlyPositiveAspect( long? longValue, ulong? ulongValue, double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithStrictlyPositiveAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+        decimal? decimalValue )
     {
         MethodWithStrictlyPositiveLong( longValue );
         MethodWithStrictlyPositiveUlong( ulongValue );
@@ -46,7 +49,8 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
         MethodWithStrictlyPositiveDecimal( decimalValue );
     }
 
-    private static void TestMethodsWithStrictlyNegativeAspect( long? longValue, ulong? ulongValue, double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithStrictlyNegativeAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+        decimal? decimalValue )
     {
         MethodWithStrictlyNegativeLong( longValue );
         MethodWithStrictlyNegativeUlong( ulongValue );

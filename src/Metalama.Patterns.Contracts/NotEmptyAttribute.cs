@@ -22,11 +22,11 @@ namespace Metalama.Patterns.Contracts;
 public sealed class NotEmptyAttribute : ContractAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
-    {        
+    {
         base.BuildEligibility( builder );
 
         // TODO: #33296 Fails during eligibility rule evaluation because TypeFactory.GetType leads to service is not available.
-#if false 
+#if false
         builder.MustSatisfy(
             f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )), 
             f => $"is must be a string or implement ICollection, ICollection<T> or IReadOnlyCollection<T>" );
@@ -44,8 +44,8 @@ public sealed class NotEmptyAttribute : ContractAspect
             if ( string.IsNullOrEmpty( value ) )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentNullException ),
-                    typeof( NotEmptyAttribute ),
+                    typeof(ArgumentNullException),
+                    typeof(NotEmptyAttribute),
                     value,
                     targetName,
                     targetKind,
@@ -60,8 +60,8 @@ public sealed class NotEmptyAttribute : ContractAspect
                 if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
                     throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentNullException ),
-                        typeof( NotEmptyAttribute ),
+                        typeof(ArgumentNullException),
+                        typeof(NotEmptyAttribute),
                         value,
                         targetName,
                         targetKind,
@@ -74,8 +74,8 @@ public sealed class NotEmptyAttribute : ContractAspect
                 if ( value == null || value!.Count <= 0 )
                 {
                     throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentNullException ),
-                        typeof( NotEmptyAttribute ),
+                        typeof(ArgumentNullException),
+                        typeof(NotEmptyAttribute),
                         value,
                         targetName,
                         targetKind,
@@ -92,19 +92,18 @@ public sealed class NotEmptyAttribute : ContractAspect
 
     // TODO: Review: is there a simpler way to throw a compile time exception from a template? (Pending #33294)
     [CompileTime]
-    private static void ThrowValidateCalledOnIneligibleTarget()
-    {
+    private static void ThrowValidateCalledOnIneligibleTarget() =>
         throw new InvalidOperationException( "Validate called on an ineligible target." );
-    }
 
     [CompileTime]
-    private static bool TryGetCompatibleTargetInterface( INamedType targetType, [NotNullWhen( true )] out INamedType? interfaceType, out bool requiresCast )
+    private static bool TryGetCompatibleTargetInterface( INamedType targetType,
+        [NotNullWhen( true )] out INamedType? interfaceType, out bool requiresCast )
     {
-        var typeOfICollection = (INamedType) TypeFactory.GetType( typeof( ICollection ) );
+        var typeOfICollection = (INamedType) TypeFactory.GetType( typeof(ICollection) );
 
         if ( targetType.Is( typeOfICollection ) )
         {
-            var countProperty = typeOfICollection.Properties.Single( p => p.Name == nameof( ICollection.Count ) );
+            var countProperty = typeOfICollection.Properties.Single( p => p.Name == nameof(ICollection.Count) );
             targetType.TryFindImplementationForInterfaceMember( countProperty, out var countPropertyImpl );
 
             interfaceType = typeOfICollection;
@@ -114,8 +113,8 @@ public sealed class NotEmptyAttribute : ContractAspect
         }
         else
         {
-            var typeOfIReadOnlyCollection1 = (INamedType) TypeFactory.GetType( typeof( IReadOnlyCollection<> ) );
-            var typeOfICollection1 = (INamedType) TypeFactory.GetType( typeof( ICollection<> ) );
+            var typeOfIReadOnlyCollection1 = (INamedType) TypeFactory.GetType( typeof(IReadOnlyCollection<>) );
+            var typeOfICollection1 = (INamedType) TypeFactory.GetType( typeof(ICollection<>) );
 
             INamedType? foundInterface = null;
 
@@ -124,7 +123,8 @@ public sealed class NotEmptyAttribute : ContractAspect
                 if ( t.IsGeneric )
                 {
                     var originalDefinition = t.GetOriginalDefinition();
-                    if ( originalDefinition.Equals( typeOfIReadOnlyCollection1 ) || originalDefinition.Equals( typeOfICollection1 ) )
+                    if ( originalDefinition.Equals( typeOfIReadOnlyCollection1 ) ||
+                         originalDefinition.Equals( typeOfICollection1 ) )
                     {
                         foundInterface = t;
                         break;

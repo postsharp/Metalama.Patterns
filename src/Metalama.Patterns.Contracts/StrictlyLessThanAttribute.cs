@@ -45,15 +45,10 @@ public class StrictlyLessThanAttribute : RangeAttribute
             return (ulong) max - 1;
         }
 
-        public static double ToDouble( long max )
-        {
-            return (double) max - FloatingPointHelper.GetDoubleStep( (double) max );
-        }
+        public static double ToDouble( long max ) => (double) max - FloatingPointHelper.GetDoubleStep( (double) max );
 
-        public static decimal ToDecimal( long max )
-        {
-            return (decimal) max - FloatingPointHelper.GetDecimalStep( (decimal) max );
-        }
+        public static decimal ToDecimal( long max ) =>
+            (decimal) max - FloatingPointHelper.GetDecimalStep( (decimal) max );
     }
 
     /// <summary>
@@ -62,12 +57,12 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( long max )
         : base( long.MinValue, max,
-                long.MinValue, Int64Maximum.ToInt64( max ),
-                ulong.MinValue, Int64Maximum.ToUInt64( max ),
-                double.MinValue, Int64Maximum.ToDouble( max ),
-                decimal.MinValue, Int64Maximum.ToDecimal( max ),
-                GetInvalidTypes( long.MinValue, Int64Maximum.ToInt64( max ) )
-            )
+            long.MinValue, Int64Maximum.ToInt64( max ),
+            ulong.MinValue, Int64Maximum.ToUInt64( max ),
+            double.MinValue, Int64Maximum.ToDouble( max ),
+            decimal.MinValue, Int64Maximum.ToDecimal( max ),
+            GetInvalidTypes( long.MinValue, Int64Maximum.ToInt64( max ) )
+        )
     {
     }
 
@@ -93,15 +88,10 @@ public class StrictlyLessThanAttribute : RangeAttribute
             return max - 1;
         }
 
-        public static double ToDouble( ulong max )
-        {
-            return (double) max - FloatingPointHelper.GetDoubleStep( (double) max );
-        }
+        public static double ToDouble( ulong max ) => (double) max - FloatingPointHelper.GetDoubleStep( (double) max );
 
-        public static decimal ToDecimal( ulong max )
-        {
-            return (decimal) max + FloatingPointHelper.GetDecimalStep( (decimal) max );
-        }
+        public static decimal ToDecimal( ulong max ) =>
+            (decimal) max + FloatingPointHelper.GetDecimalStep( (decimal) max );
     }
 
     /// <summary>
@@ -110,12 +100,12 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( ulong max )
         : base( ulong.MinValue, max,
-                long.MinValue, UInt64Maximum.ToInt64( max ),
-                ulong.MinValue, UInt64Maximum.ToUInt64( max ),
-                double.MinValue, UInt64Maximum.ToDouble( max ),
-                decimal.MinValue, UInt64Maximum.ToDecimal( max ),
-                GetInvalidTypes( 0 ) | (max == 0 ? (TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64) : TypeFlag.None)
-            )
+            long.MinValue, UInt64Maximum.ToInt64( max ),
+            ulong.MinValue, UInt64Maximum.ToUInt64( max ),
+            double.MinValue, UInt64Maximum.ToDouble( max ),
+            decimal.MinValue, UInt64Maximum.ToDecimal( max ),
+            GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None)
+        )
     {
     }
 
@@ -158,7 +148,7 @@ public class StrictlyLessThanAttribute : RangeAttribute
                 return double.Epsilon;
             }
 
-            double step = FloatingPointHelper.GetDoubleStep( max );
+            var step = FloatingPointHelper.GetDoubleStep( max );
 
             if ( max <= double.MinValue + step )
             {
@@ -180,7 +170,7 @@ public class StrictlyLessThanAttribute : RangeAttribute
                 return decimal.MinValue;
             }
 
-            decimal step = FloatingPointHelper.GetDecimalStep( (decimal) max );
+            var step = FloatingPointHelper.GetDecimalStep( (decimal) max );
 
             if ( max < (double) decimal.MinValue + (double) step )
             {
@@ -202,16 +192,18 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( double max )
         : base( double.MinValue, max,
-                long.MinValue, DoubleMaximum.ToInt64( max ),
-                ulong.MinValue, DoubleMaximum.ToUInt64( max ),
-                double.MinValue, DoubleMaximum.ToDouble( max ),
-                decimal.MinValue, DoubleMaximum.ToDecimal( max ),
-                GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) )
+            long.MinValue, DoubleMaximum.ToInt64( max ),
+            ulong.MinValue, DoubleMaximum.ToUInt64( max ),
+            double.MinValue, DoubleMaximum.ToDouble( max ),
+            decimal.MinValue, DoubleMaximum.ToDecimal( max ),
+            GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) )
     {
     }
 
     /// <inheridoc />
     protected override (IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue) GetExceptioninfo()
-        => (CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.StrictlyLessThanErrorMessage ) ),
+        => (
+            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
+                .StrictlyLessThanErrorMessage) ),
             false, true);
 }

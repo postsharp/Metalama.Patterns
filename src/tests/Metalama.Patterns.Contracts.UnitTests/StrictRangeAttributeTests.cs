@@ -5,7 +5,6 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.Tests;
 
-
 public class StrictRangeAttributeTests
 {
     private const long longMin = 100;
@@ -21,23 +20,24 @@ public class StrictRangeAttributeTests
     private const decimal decimalMax = 200;
 
     [Fact]
-    public void TestValuesInsideRange()
-    {
-        TestAllMethods(150, 150, 150, 150);
-    }
+    public void TestValuesInsideRange() => TestAllMethods( 150, 150, 150, 150 );
 
     [Fact]
     public void TestValuesOutsideRange()
     {
-        AssertEx.Throws<ArgumentOutOfRangeException>( () => TestAllMethods( longMin - 1, ulongMin - 1, doubleMin - 1, decimalMin - 1 ) );
-        AssertEx.Throws<ArgumentOutOfRangeException>( () => TestAllMethods( longMax + 1, ulongMax + 1, doubleMax + 1, decimalMax + 1 ) );
+        AssertEx.Throws<ArgumentOutOfRangeException>( () =>
+            TestAllMethods( longMin - 1, ulongMin - 1, doubleMin - 1, decimalMin - 1 ) );
+        AssertEx.Throws<ArgumentOutOfRangeException>( () =>
+            TestAllMethods( longMax + 1, ulongMax + 1, doubleMax + 1, decimalMax + 1 ) );
     }
 
     [Fact]
     public void TestValuesOnEdges()
     {
-        AssertEx.Throws<ArgumentOutOfRangeException>( () => TestAllMethods( longMin, ulongMin, doubleMin, decimalMin ) );
-        AssertEx.Throws<ArgumentOutOfRangeException>( () => TestAllMethods( longMax, ulongMax, doubleMax, decimalMax ) );
+        AssertEx.Throws<ArgumentOutOfRangeException>( () =>
+            TestAllMethods( longMin, ulongMin, doubleMin, decimalMin ) );
+        AssertEx.Throws<ArgumentOutOfRangeException>( () =>
+            TestAllMethods( longMax, ulongMax, doubleMax, decimalMax ) );
     }
 
     [Fact]

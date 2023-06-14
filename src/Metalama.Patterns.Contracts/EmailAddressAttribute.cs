@@ -29,8 +29,10 @@ public sealed class EmailAddressAttribute : RegularExpressionAttribute
     }
 
     [CompileTime]
-    protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
-    => (typeof( ArgumentException ),
-        CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.EmailAddressErrorMessage ) ),
-        false);
+    protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
+        GetExceptioninfo()
+        => (typeof(ArgumentException),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
+                .EmailAddressErrorMessage) ),
+            false);
 }

@@ -29,8 +29,10 @@ public sealed class PhoneAttribute : RegularExpressionAttribute
     }
 
     [CompileTime]
-    protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
-        => (typeof( ArgumentException ),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.PhoneErrorMessage ) ),
+    protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
+        GetExceptioninfo()
+        => (typeof(ArgumentException),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
+                .PhoneErrorMessage) ),
             false);
 }

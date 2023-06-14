@@ -27,7 +27,8 @@ public class LessOrGreaterThanZeroTests : RangeContractTestsBase
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Failure()
     {
-        AssertFails( TestMethodsWithGreaterThanAspect, longLimit - 1, null, doubleLimit - doubleStep, ((decimal) doubleLimit) - decimalStep );
+        AssertFails( TestMethodsWithGreaterThanAspect, longLimit - 1, null, doubleLimit - doubleStep,
+            (decimal) doubleLimit - decimalStep );
         AssertFails( TestMethodsWithGreaterThanAspect, -100, null, -100, -100 );
         AssertFails( TestMethodsWithGreaterThanAspect, long.MinValue, null, double.MinValue, decimal.MinValue );
     }
@@ -43,12 +44,14 @@ public class LessOrGreaterThanZeroTests : RangeContractTestsBase
     [Fact]
     public void TestMethodsWithLessThanAspect_Failure()
     {
-        AssertFails( TestMethodsWithLessThanAspect, longLimit + 1, 1, doubleLimit + doubleStep, ((decimal) doubleLimit) + decimalStep );
+        AssertFails( TestMethodsWithLessThanAspect, longLimit + 1, 1, doubleLimit + doubleStep,
+            (decimal) doubleLimit + decimalStep );
         AssertFails( TestMethodsWithLessThanAspect, 100, 100, 100, 100 );
         AssertFails( TestMethodsWithLessThanAspect, long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
     }
 
-    private static void TestMethodsWithGreaterThanAspect( long? longValue, ulong? ulongValue, double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithGreaterThanAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+        decimal? decimalValue )
     {
         MethodWithLongGreaterThanLong( longValue );
         MethodWithUlongGreaterThanLong( ulongValue );
@@ -66,7 +69,8 @@ public class LessOrGreaterThanZeroTests : RangeContractTestsBase
         MethodWithDecimalGreaterThanDouble( decimalValue );
     }
 
-    private static void TestMethodsWithLessThanAspect( long? longValue, ulong? ulongValue, double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithLessThanAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+        decimal? decimalValue )
     {
         MethodWithLongLessThanLong( longValue );
         MethodWithUlongLessThanLong( ulongValue );

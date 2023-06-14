@@ -87,8 +87,8 @@ public sealed class StringLengthAttribute : ContractAspect
             if ( value != null && value!.Length > this.MaximumLength )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentException ),
-                    typeof( StringLengthAttribute ),
+                    typeof(ArgumentException),
+                    typeof(StringLengthAttribute),
                     value,
                     targetName,
                     targetKind,
@@ -102,8 +102,8 @@ public sealed class StringLengthAttribute : ContractAspect
             if ( value != null && value!.Length < this.MinimumLength )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentException ),
-                    typeof( StringLengthAttribute ),
+                    typeof(ArgumentException),
+                    typeof(StringLengthAttribute),
                     value,
                     targetName,
                     targetKind,
@@ -117,8 +117,8 @@ public sealed class StringLengthAttribute : ContractAspect
             if ( value != null && (value!.Length < this.MinimumLength || value!.Length > this.MaximumLength) )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentException ),
-                    typeof( StringLengthAttribute ),
+                    typeof(ArgumentException),
+                    typeof(StringLengthAttribute),
                     value,
                     targetName,
                     targetKind,

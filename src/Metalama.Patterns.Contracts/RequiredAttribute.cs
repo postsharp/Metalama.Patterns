@@ -52,8 +52,8 @@ public sealed class RequiredAttribute : ContractAspect
                 if ( value == null! )
                 {
                     throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentNullException ),
-                        typeof( RequiredAttribute ),
+                        typeof(ArgumentNullException),
+                        typeof(RequiredAttribute),
                         value,
                         targetName,
                         targetKind,
@@ -63,8 +63,8 @@ public sealed class RequiredAttribute : ContractAspect
                 else
                 {
                     throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentOutOfRangeException ),
-                        typeof( RequiredAttribute ),
+                        typeof(ArgumentOutOfRangeException),
+                        typeof(RequiredAttribute),
                         value,
                         targetName,
                         targetKind,
@@ -78,8 +78,8 @@ public sealed class RequiredAttribute : ContractAspect
             if ( value == null! )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentNullException ),
-                    typeof( RequiredAttribute ),
+                    typeof(ArgumentNullException),
+                    typeof(RequiredAttribute),
                     value,
                     targetName,
                     targetKind,

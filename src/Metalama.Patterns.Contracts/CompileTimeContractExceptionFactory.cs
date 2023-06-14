@@ -10,35 +10,36 @@ namespace Metalama.Patterns.Contracts;
 [CompileTime]
 public static class CompileTimeContractExceptionFactory
 {
-    public static IExpression GetNewExceptionExpression( ContractLocalizedTextProvider localizedTextProvider, ContractExceptionInfo exceptionInfo )
+    public static IExpression GetNewExceptionExpression( ContractLocalizedTextProvider localizedTextProvider,
+        ContractExceptionInfo exceptionInfo )
     {
         var errorMessage = localizedTextProvider.GetFormattedMessage( exceptionInfo );
         var parameterName = exceptionInfo.TargetKind.GetParameterName( exceptionInfo.TargetName );
 
         var b = new ExpressionBuilder();
 
-        if ( exceptionInfo.ExceptionType.Equals( typeof( ArgumentException ) ) )
+        if ( exceptionInfo.ExceptionType.Equals( typeof(ArgumentException) ) )
         {
             b.AppendExpression( new ArgumentException( errorMessage, parameterName ) );
         }
-        else if ( exceptionInfo.ExceptionType.Equals( typeof( ArgumentNullException ) ) )
+        else if ( exceptionInfo.ExceptionType.Equals( typeof(ArgumentNullException) ) )
         {
             b.AppendVerbatim( "new " );
-            b.AppendTypeName( typeof( ArgumentNullException ) );
+            b.AppendTypeName( typeof(ArgumentNullException) );
             b.AppendVerbatim( "(" );
             b.AppendLiteral( parameterName );
             b.AppendVerbatim( "," );
             b.AppendLiteral( errorMessage );
             b.AppendVerbatim( ")" );
-            
+
             // TODO: Review - why doesn't this work?
             // b.AppendExpression( new ArgumentNullException( parameterName, errorMessage ) );
         }
-        else if ( exceptionInfo.ExceptionType.Equals( typeof( ArgumentOutOfRangeException ) ) )
+        else if ( exceptionInfo.ExceptionType.Equals( typeof(ArgumentOutOfRangeException) ) )
         {
             b.AppendExpression( new ArgumentOutOfRangeException( parameterName, errorMessage ) );
         }
-        else if ( exceptionInfo.ExceptionType.Equals( typeof( PostconditionFailedException ) ) )
+        else if ( exceptionInfo.ExceptionType.Equals( typeof(PostconditionFailedException) ) )
         {
             b.AppendExpression( new PostconditionFailedException( errorMessage ) );
         }

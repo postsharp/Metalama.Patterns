@@ -14,7 +14,7 @@ public class ContractsOptions : ProjectExtension
 
         if ( project.TryGetProperty( "Metalama_Patterns_Contracts_EmulatePostSharp", out var value ) )
         {
-            if ( bool.TryParse(value, out var boolValue ) )
+            if ( bool.TryParse( value, out var boolValue ) )
             {
                 this._emulatePostSharp = boolValue;
             }
@@ -41,5 +41,5 @@ public class ContractsOptions : ProjectExtension
     /// <summary>
     /// TEMPORARY SOLUTION! Not sure if we'll do it this way.
     /// </summary>
-    public ContractLocalizedTextProvider LocalizedTextProvider { get; } = new ContractLocalizedTextProvider( null );
+    public ContractLocalizedTextProvider LocalizedTextProvider { get; } = new(null);
 }

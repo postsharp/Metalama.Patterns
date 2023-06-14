@@ -11,7 +11,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         cut.ZeroToTenMethod( 0 );
         cut.ZeroToTenMethod( 5 );
@@ -22,7 +22,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DecimalMethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         cut.ZeroToTenDecimal( 0.0m );
         cut.ZeroToTenDecimal( 0.1m );
@@ -34,7 +34,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DecimalMethodWithLargeInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         cut.LargeDecimalRange( decimal.MinValue );
         cut.LargeDecimalRange( decimal.MaxValue );
@@ -44,7 +44,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_DoubleMethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         cut.ZeroToTenDouble( 0.0 );
         cut.ZeroToTenDouble( 0.1 );
@@ -56,7 +56,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_FloatMethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         cut.ZeroToTenFloat( 0.0f );
         cut.ZeroToTenFloat( 0.1f );
@@ -69,7 +69,7 @@ public class RangeAttributeTests
     [Fact]
     public void Given_FieldWithInRangeAttribute_When_CorrectValuePassed_Then_Success()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         cut.GreaterThanZeroField = 0;
         cut.GreaterThanZeroField = 5;
@@ -81,205 +81,209 @@ public class RangeAttributeTests
     [Fact]
     public void Given_MethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( -10 ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( -10 ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_MethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( 20 ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( 20 ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
 
     [Fact]
     public void Given_DoubleMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( 10.1 ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( 10.1 ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_DoubleMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( -10.0 ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( -10.0 ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
 
     [Fact]
     public void Given_FloatMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( 10.1f ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( 10.1f ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_FloatMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( -10.0f ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( -10.0f ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
 
     [Fact]
     public void Given_DecimalMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( 20.0m ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( 20.0m ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_DecimalMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( -10.0m ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( -10.0m ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_NullableDecimalMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableDecimal( 20.0m ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableDecimal( 20.0m ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_NullableDecimalMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableDecimal( -10.0m ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () =>
+            cut.ZeroToTenNullableDecimal( -10.0m ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_NullableIntMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( 20 ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( 20 ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_NullableIntMethodWithInRangeParameter_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( -10 ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( -10 ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_FieldWithInRangeAttribute_When_ToSmallValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.GreaterThanZeroField = -10 );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.GreaterThanZeroField = -10 );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "GreaterThanZeroField", e.Message );
+        Assert.Contains( "GreaterThanZeroField", e.Message );
     }
 
     [Fact]
     public void Given_FieldWithInRangeAttribute_When_ToLargeValuePassed_Then_ExceptionIsThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.LessThanZeroField = 20 );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.LessThanZeroField = 20 );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "LessThanZeroField", e.Message );
+        Assert.Contains( "LessThanZeroField", e.Message );
     }
 
     [Fact]
     public void Given_MethodWithInRangeRef_When_IncorrectValuePassed_Then_ExceptionThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         long? p = -1;
-        ArgumentOutOfRangeException e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableIntRef( 1, ref p ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>(
+            () => cut.ZeroToTenNullableIntRef( 1, ref p ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [SkippableFact( Skip = "#33302" )]
     public void Given_MethodWithInRangeRef_When_IncorrectValueReturned_Then_ExceptionThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         long? p = 1;
-        PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntRef( -1, ref p ) );
+        var e = TestHelpers.RecordException<PostconditionFailedException>( () =>
+            cut.ZeroToTenNullableIntRef( -1, ref p ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_MethodWithInRangeOut_When_IncorrectValueReturned_Then_ExceptionThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
         long? p;
-        PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntOut( -1, out p ) );
+        var e = TestHelpers.RecordException<PostconditionFailedException>( () =>
+            cut.ZeroToTenNullableIntOut( -1, out p ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e.Message );
     }
 
     [Fact]
     public void Given_MethodWithInRangeRetVal_When_IncorrectValueReturned_Then_ExceptionThrown()
     {
-        RangeTestClass cut = new RangeTestClass();
+        var cut = new RangeTestClass();
 
-        PostconditionFailedException e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
+        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
 
         Assert.NotNull( e );
-        Xunit.Assert.Contains( "return value", e.Message );
+        Assert.Contains( "return value", e.Message );
     }
 }
 
@@ -287,66 +291,32 @@ public class RangeAttributeTests
 
 public class RangeTestClass
 {
-
-    [GreaterThan( 0 )] 
+    [GreaterThan( 0 )]
     public int GreaterThanZeroField;
 
     [LessThan( 0 )]
     public long LessThanZeroField { get; set; }
 
-    public int ZeroToTenMethod( [Range( 0, 10 )] short parameter )
-    {
-        return parameter;
-    }
+    public int ZeroToTenMethod( [Range( 0, 10 )] short parameter ) => parameter;
 
-    public double ZeroToTenDouble( [Range( 0d, 10d )] double parameter )
-    {
-        return parameter;
-    }
+    public double ZeroToTenDouble( [Range( 0d, 10d )] double parameter ) => parameter;
 
-    public decimal ZeroToTenDecimal( [Range( 0d, 10d )] decimal parameter )
-    {
-        return parameter;
-    }
+    public decimal ZeroToTenDecimal( [Range( 0d, 10d )] decimal parameter ) => parameter;
 
-    public decimal? ZeroToTenNullableDecimal( [Range( 0d, 10d )] decimal? parameter )
-    {
-        return parameter;
-    }
+    public decimal? ZeroToTenNullableDecimal( [Range( 0d, 10d )] decimal? parameter ) => parameter;
 
-    public long? ZeroToTenNullableInt( [Range( 0, 10 )] long? parameter )
-    {
-        return parameter;
-    }
+    public long? ZeroToTenNullableInt( [Range( 0, 10 )] long? parameter ) => parameter;
 
-    public float ZeroToTenFloat( [Range(0, 10)] float parameter )
-    {
-        return parameter;
-    }
+    public float ZeroToTenFloat( [Range( 0, 10 )] float parameter ) => parameter;
 
-    public float? ZeroToTenNullableFloat( [Range( 0, 10 )] float? parameter )
-    {
-        return parameter;
-    }
+    public float? ZeroToTenNullableFloat( [Range( 0, 10 )] float? parameter ) => parameter;
 
-    public decimal LargeDecimalRange( [Range( double.MinValue, double.MaxValue )] decimal parameter )
-    {
-        return parameter;
-    }
+    public decimal LargeDecimalRange( [Range( double.MinValue, double.MaxValue )] decimal parameter ) => parameter;
 
-    public void ZeroToTenNullableIntRef( long? newVal, [Range( 0, 10 )] ref long? parameter )
-    {
-        parameter = newVal;
-    }
+    public void ZeroToTenNullableIntRef( long? newVal, [Range( 0, 10 )] ref long? parameter ) => parameter = newVal;
 
-    public void ZeroToTenNullableIntOut( long? newVal, [Range( 0, 10 )] out long? parameter )
-    {
-        parameter = newVal;
-    }
+    public void ZeroToTenNullableIntOut( long? newVal, [Range( 0, 10 )] out long? parameter ) => parameter = newVal;
 
     [return: Range( 0, 10 )]
-    public long? ZeroToTenNullableIntRetVal( long? retVal )
-    {
-        return retVal;
-    }
+    public long? ZeroToTenNullableIntRetVal( long? retVal ) => retVal;
 }

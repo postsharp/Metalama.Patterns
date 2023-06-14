@@ -14,10 +14,10 @@ public class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 
     // This has to be double because decimal is not allowed as attribute constructor value.
     // Loss of precision is a consequence.
-    private const double decimalLimit = (double) decimal.MinValue/(1 + DoubleTolerance);
+    private const double decimalLimit = (double) decimal.MinValue / (1 + DoubleTolerance);
 
     private static readonly double doubleStep = FloatingPointHelper.GetDoubleStep( doubleLimit );
-    private static readonly decimal decimalStep = Math.Abs( Decimal.MinValue )*DecimalTolerance;
+    private static readonly decimal decimalStep = Math.Abs( decimal.MinValue ) * DecimalTolerance;
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Success()
@@ -71,7 +71,8 @@ public class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
         AssertFails( TestMethodsWithLessThanAspect, long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
     }
 
-    private static void TestMethodsWithGreaterThanAspect( long? longValue, ulong? ulongValue, double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithGreaterThanAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+        decimal? decimalValue )
     {
         MethodWithLongGreaterThanLong( longValue );
         MethodWithUlongGreaterThanLong( ulongValue );
@@ -84,7 +85,8 @@ public class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
         MethodWithDecimalGreaterThanDouble( decimalValue );
     }
 
-    private static void TestMethodsWithLessThanAspect( long? longValue, ulong? ulongValue, double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithLessThanAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+        decimal? decimalValue )
     {
         MethodWithLongLessThanLong( longValue );
         MethodWithUlongLessThanLong( ulongValue );

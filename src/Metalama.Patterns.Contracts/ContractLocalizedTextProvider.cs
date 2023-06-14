@@ -285,7 +285,7 @@ public class ContractLocalizedTextProvider
         }
         else if ( this._next == null )
         {
-            throw new ArgumentOutOfRangeException( 
+            throw new ArgumentOutOfRangeException(
                 nameof(messageId),
                 string.Format( CultureInfo.InvariantCulture, "No message defined for id {0}.", messageId ) );
         }

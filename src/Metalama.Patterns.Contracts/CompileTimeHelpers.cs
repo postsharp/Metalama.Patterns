@@ -15,7 +15,7 @@ internal static class CompileTimeHelpers
     /// <param name="fieldName">Should be like <c>nameof( ContractLocalizedTextProvider.CreditCardErrorMessage )</c>.</param>
     /// <returns></returns>
     internal static IExpression GetContractLocalizedTextProviderField( string fieldName )
-        => ((INamedType) TypeFactory.GetType( typeof( ContractLocalizedTextProvider ) )).Fields
+        => ((INamedType) TypeFactory.GetType( typeof(ContractLocalizedTextProvider) )).Fields
             .OfName( fieldName ).Single();
 
     public static IExpression ToTypeOf( this Type type )
@@ -71,7 +71,7 @@ internal static class CompileTimeHelpers
     {
         if ( target == null )
         {
-            throw new ArgumentNullException( nameof( target ) );
+            throw new ArgumentNullException( nameof(target) );
         }
 
         return target.Declaration.DeclarationKind switch
@@ -79,7 +79,8 @@ internal static class CompileTimeHelpers
             DeclarationKind.Parameter => target.Parameter.Type,
             DeclarationKind.Property => target.Property.Type,
             DeclarationKind.Field => target.Field.Type,
-            _ => throw new ArgumentOutOfRangeException( nameof( target ) + "." + nameof( target.Declaration ) + "." + nameof( target.Declaration.DeclarationKind ) )
+            _ => throw new ArgumentOutOfRangeException( nameof(target) + "." + nameof(target.Declaration) + "." +
+                                                        nameof(target.Declaration.DeclarationKind) )
         };
     }
 

@@ -15,17 +15,16 @@ public class InterfaceTests
         var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.Bar( null! ) );
         Assert.NotNull( e );
     }
-    
-    interface IFoo
+
+    private interface IFoo
     {
         void Bar( [Required] string a );
     }
 
-    class Foo : IFoo
+    private class Foo : IFoo
     {
         public void Bar( string a )
         {
-            
         }
     }
 }

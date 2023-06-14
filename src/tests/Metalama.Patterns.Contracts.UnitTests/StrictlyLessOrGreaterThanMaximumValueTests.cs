@@ -11,29 +11,31 @@ public class StrictlyLessOrGreaterThanMaximumValueTests : RangeContractTestsBase
 {
     private const long longLimit = long.MaxValue - 1;
     private const ulong ulongLimit = ulong.MaxValue - 1;
-    private const double doubleLimit = double.MaxValue/(1 + DoubleTolerance);
+    private const double doubleLimit = double.MaxValue / (1 + DoubleTolerance);
 
     // This has to be double because decimal is not allowed as attribute constructor value.
     // Loss of precision is a consequence.
-    private const double decimalLimit = (double) decimal.MaxValue/(1 + DoubleTolerance);
+    private const double decimalLimit = (double) decimal.MaxValue / (1 + DoubleTolerance);
 
     private const double doubleStep = double.MaxValue - doubleLimit;
     private const decimal decimalStep = decimal.MaxValue - (decimal) decimalLimit;
 
     [Fact]
-    public void TestMethodsWithStrictlyGreaterThanAspect_Success()
-    {
+    public void TestMethodsWithStrictlyGreaterThanAspect_Success() =>
         TestMethodsWithStrictlyGreaterThanAspect( long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
-    }
 
     [Fact]
     public void TestMethodsWithStrictlyGreaterThanAspect_Failure()
     {
-        AssertFails( TestMethodsWithStrictlyGreaterThanAspect, longLimit, ulongLimit, doubleLimit, (decimal) decimalLimit );
-        AssertFails( TestMethodsWithStrictlyGreaterThanAspect, longLimit/2, ulongLimit/2, doubleLimit/2, (decimal) decimalLimit/2 );
+        AssertFails( TestMethodsWithStrictlyGreaterThanAspect, longLimit, ulongLimit, doubleLimit,
+            (decimal) decimalLimit );
+        AssertFails( TestMethodsWithStrictlyGreaterThanAspect, longLimit / 2, ulongLimit / 2, doubleLimit / 2,
+            (decimal) decimalLimit / 2 );
         AssertFails( TestMethodsWithStrictlyGreaterThanAspect, 0, 0, 0, 0 );
-        AssertFails( TestMethodsWithStrictlyGreaterThanAspect, longLimit/-2, null, doubleLimit/-2, (decimal) decimalLimit/-2 );
-        AssertFails( TestMethodsWithStrictlyGreaterThanAspect, long.MinValue, ulong.MinValue, double.MinValue, decimal.MinValue );
+        AssertFails( TestMethodsWithStrictlyGreaterThanAspect, longLimit / -2, null, doubleLimit / -2,
+            (decimal) decimalLimit / -2 );
+        AssertFails( TestMethodsWithStrictlyGreaterThanAspect, long.MinValue, ulong.MinValue, double.MinValue,
+            decimal.MinValue );
     }
 
     [Fact]
@@ -55,18 +57,21 @@ public class StrictlyLessOrGreaterThanMaximumValueTests : RangeContractTestsBase
         MethodWithDecimalStrictlyLessThanDouble( (decimal) decimalLimit - decimalStep );
 
         TestMethodsWithStrictlyLessThanAspect( 0, 0, 0, 0 );
-        TestMethodsWithStrictlyLessThanAspect( longLimit/-2, null, doubleLimit/-2, (decimal) decimalLimit/-2 );
+        TestMethodsWithStrictlyLessThanAspect( longLimit / -2, null, doubleLimit / -2, (decimal) decimalLimit / -2 );
         TestMethodsWithStrictlyLessThanAspect( long.MinValue, ulong.MinValue, double.MinValue, decimal.MinValue );
     }
 
     [Fact]
     public void TestMethodsWithStrictlyLessThanAspect_Failure()
     {
-        AssertFails( TestMethodsWithStrictlyLessThanAspect, longLimit, ulongLimit, doubleLimit, (decimal) decimalLimit );
-        AssertFails( TestMethodsWithStrictlyLessThanAspect, long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
+        AssertFails( TestMethodsWithStrictlyLessThanAspect, longLimit, ulongLimit, doubleLimit,
+            (decimal) decimalLimit );
+        AssertFails( TestMethodsWithStrictlyLessThanAspect, long.MaxValue, ulong.MaxValue, double.MaxValue,
+            decimal.MaxValue );
     }
 
-    private static void TestMethodsWithStrictlyGreaterThanAspect( long? longValue, ulong? ulongValue, double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithStrictlyGreaterThanAspect( long? longValue, ulong? ulongValue,
+        double? doubleValue, decimal? decimalValue )
     {
         MethodWithLongStrictlyGreaterThanLong( longValue );
         MethodWithUlongStrictlyGreaterThanLong( ulongValue );
@@ -84,7 +89,8 @@ public class StrictlyLessOrGreaterThanMaximumValueTests : RangeContractTestsBase
         MethodWithDecimalStrictlyGreaterThanDouble( decimalValue );
     }
 
-    private static void TestMethodsWithStrictlyLessThanAspect( long? longValue, ulong? ulongValue, double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithStrictlyLessThanAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+        decimal? decimalValue )
     {
         MethodWithLongStrictlyLessThanLong( longValue );
         MethodWithUlongStrictlyLessThanLong( ulongValue );
@@ -183,7 +189,8 @@ public class StrictlyLessOrGreaterThanMaximumValueTests : RangeContractTestsBase
     }
 
     // Cannot use doubleLimit by design. Covered by build test.
-    private static void MethodWithUlongStrictlyGreaterThanDouble( [StrictlyGreaterThan( (double) ulongLimit )] ulong? a )
+    private static void MethodWithUlongStrictlyGreaterThanDouble(
+        [StrictlyGreaterThan( (double) ulongLimit )] ulong? a )
     {
     }
 
@@ -192,7 +199,8 @@ public class StrictlyLessOrGreaterThanMaximumValueTests : RangeContractTestsBase
     }
 
     // Cannot use doubleLimit by design. Covered by build test.
-    private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( (double) decimalLimit )] decimal? a )
+    private static void MethodWithDecimalStrictlyGreaterThanDouble(
+        [StrictlyGreaterThan( (double) decimalLimit )] decimal? a )
     {
     }
 

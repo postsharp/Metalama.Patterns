@@ -17,8 +17,8 @@ public abstract class RangeContractTestsBase
             method( longValue );
             throw new AssertionFailedException(
                 string.Format( "{0}( long?:{1} ) did not fail.",
-                               method.GetMethodInfo().Name,
-                               NullableToString( longValue ) ) );
+                    method.GetMethodInfo().Name,
+                    NullableToString( longValue ) ) );
         }
         catch ( ArgumentOutOfRangeException )
         {
@@ -32,8 +32,8 @@ public abstract class RangeContractTestsBase
             method( ulongValue );
             throw new AssertionFailedException(
                 string.Format( "{0}( ulong?:{1} ) did not fail.",
-                               method.GetMethodInfo().Name,
-                               NullableToString( ulongValue ) ) );
+                    method.GetMethodInfo().Name,
+                    NullableToString( ulongValue ) ) );
         }
         catch ( ArgumentOutOfRangeException )
         {
@@ -47,8 +47,8 @@ public abstract class RangeContractTestsBase
             method( doubleValue );
             throw new AssertionFailedException(
                 string.Format( "{0}( double?:{1} ) did not fail.",
-                               method.GetMethodInfo().Name,
-                               NullableToString( doubleValue ) ) );
+                    method.GetMethodInfo().Name,
+                    NullableToString( doubleValue ) ) );
         }
         catch ( ArgumentOutOfRangeException )
         {
@@ -62,35 +62,33 @@ public abstract class RangeContractTestsBase
             method( decimalValue );
             throw new AssertionFailedException(
                 string.Format( "{0}( decimal:{1} ) did not fail.",
-                               method.GetMethodInfo().Name,
-                               NullableToString( decimalValue ) ) );
+                    method.GetMethodInfo().Name,
+                    NullableToString( decimalValue ) ) );
         }
         catch ( ArgumentOutOfRangeException )
         {
         }
     }
 
-    protected static void AssertFails( Action<long?, ulong?, double?, decimal?> method, long? longValue, ulong? ulongValue, double? doubleValue,
-                                       decimal? decimalValue )
+    protected static void AssertFails( Action<long?, ulong?, double?, decimal?> method, long? longValue,
+        ulong? ulongValue, double? doubleValue,
+        decimal? decimalValue )
     {
         try
         {
             method( longValue, ulongValue, doubleValue, decimalValue );
             throw new AssertionFailedException(
                 string.Format( "{0}( long?:{1}, ulong?:{2}, double?:{3}, decimal?:{4} ) did not fail.",
-                               method.GetMethodInfo().Name,
-                               NullableToString( longValue ),
-                               NullableToString( ulongValue ),
-                               NullableToString( doubleValue ),
-                               NullableToString( decimalValue ) ) );
+                    method.GetMethodInfo().Name,
+                    NullableToString( longValue ),
+                    NullableToString( ulongValue ),
+                    NullableToString( doubleValue ),
+                    NullableToString( decimalValue ) ) );
         }
         catch ( ArgumentOutOfRangeException )
         {
         }
     }
 
-    private static string NullableToString( object nullable )
-    {
-        return nullable == null ? "null" : nullable.ToString();
-    }
+    private static string NullableToString( object nullable ) => nullable == null ? "null" : nullable.ToString();
 }

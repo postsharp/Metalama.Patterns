@@ -106,8 +106,10 @@ public class RegularExpressionAttribute : ContractAspect
     }
 
     [CompileTime]
-    protected virtual (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
-        => (typeof( ArgumentException ),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.RegularExpressionErrorMessage ) ),
+    protected virtual (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
+        GetExceptioninfo()
+        => (typeof(ArgumentException),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
+                .RegularExpressionErrorMessage) ),
             true);
 }

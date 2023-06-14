@@ -40,13 +40,15 @@ public sealed class EnumDataTypeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( f => IsElibigleType( f.Type ), f => $"the type of {f} must be string, an integer type or a nullable integer type" );
+        builder.MustSatisfy( f => IsElibigleType( f.Type ),
+            f => $"the type of {f} must be string, an integer type or a nullable integer type" );
     }
 
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( p => IsElibigleType( p.Type ), p => $"the type of {p} must be string, an integer type or a nullable integer type" );
+        builder.MustSatisfy( p => IsElibigleType( p.Type ),
+            p => $"the type of {p} must be string, an integer type or a nullable integer type" );
     }
 
     [CompileTime]
@@ -54,15 +56,15 @@ public sealed class EnumDataTypeAttribute : ContractAspect
         => type.ToNonNullableType().SpecialType switch
         {
             SpecialType.String or
-            SpecialType.UInt16 or
-            SpecialType.UInt32 or
-            SpecialType.UInt64 or
-            SpecialType.Int16 or
-            SpecialType.Int32 or
-            SpecialType.Int64 or
-            SpecialType.Byte or
-            SpecialType.SByte or
-            SpecialType.Object => true,
+                SpecialType.UInt16 or
+                SpecialType.UInt32 or
+                SpecialType.UInt64 or
+                SpecialType.Int16 or
+                SpecialType.Int32 or
+                SpecialType.Int64 or
+                SpecialType.Byte or
+                SpecialType.SByte or
+                SpecialType.Object => true,
             _ => false
         };
 
@@ -77,8 +79,8 @@ public sealed class EnumDataTypeAttribute : ContractAspect
             if ( value != null! && !EnumDataTypeAttributeHelper.IsValidEnumValue( value, this.EnumType ) )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentException ),
-                    typeof( EnumDataTypeAttribute ),
+                    typeof(ArgumentException),
+                    typeof(EnumDataTypeAttribute),
                     value,
                     targetName,
                     targetKind,
@@ -97,8 +99,8 @@ public sealed class EnumDataTypeAttribute : ContractAspect
                 if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
                 {
                     throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentException ),
-                        typeof( EnumDataTypeAttribute ),
+                        typeof(ArgumentException),
+                        typeof(EnumDataTypeAttribute),
                         enumValue,
                         targetName,
                         targetKind,
@@ -116,8 +118,8 @@ public sealed class EnumDataTypeAttribute : ContractAspect
             if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentException ),
-                    typeof( EnumDataTypeAttribute ),
+                    typeof(ArgumentException),
+                    typeof(EnumDataTypeAttribute),
                     enumValue,
                     targetName,
                     targetKind,

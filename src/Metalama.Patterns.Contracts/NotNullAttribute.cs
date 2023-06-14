@@ -41,8 +41,8 @@ public sealed class NotNullAttribute : ContractAspect
             if ( value == null! )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentNullException ),
-                    typeof( NotNullAttribute ),
+                    typeof(ArgumentNullException),
+                    typeof(NotNullAttribute),
                     value,
                     targetName,
                     targetKind,
@@ -54,8 +54,8 @@ public sealed class NotNullAttribute : ContractAspect
         {
             var newExceptionExpr = CompileTimeContractExceptionFactory.GetNewExceptionExpression(
                 meta.Target.Project.ContractsOptions().LocalizedTextProvider, ContractExceptionInfo.Create(
-                    typeof( ArgumentNullException ),
-                    typeof( NotNullAttribute ),
+                    typeof(ArgumentNullException),
+                    typeof(NotNullAttribute),
                     null!, // TODO: Temporary hack - none of the default messages use the value placeholder ({3})
                     targetName,
                     targetKind,

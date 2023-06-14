@@ -13,7 +13,7 @@ public class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        cut.SetEmail("test@postsharp.test");
+        cut.SetEmail( "test@postsharp.test" );
     }
 
     [Fact]
@@ -21,10 +21,10 @@ public class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>(() => cut.SetEmail("asd"));
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.SetEmail( "asd" ) );
 
-        Assert.NotNull(e);
-        Xunit.Assert.Contains( "email", e.Message );
+        Assert.NotNull( e );
+        Assert.Contains( "email", e.Message );
     }
 
     [Fact]
@@ -40,10 +40,10 @@ public class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>(() => cut.Email = "asd");
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.Email = "asd" );
 
-        Assert.NotNull(e);
-        Xunit.Assert.Contains( "Email", e.Message );
+        Assert.NotNull( e );
+        Assert.Contains( "Email", e.Message );
     }
 
     [Fact]
@@ -59,10 +59,10 @@ public class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>(() => cut.Email2 = "asd");
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.Email2 = "asd" );
 
-        Assert.NotNull(e);
-        Xunit.Assert.Contains( "Email2", e.Message );
+        Assert.NotNull( e );
+        Assert.Contains( "Email2", e.Message );
     }
 
     [Fact]
@@ -78,10 +78,10 @@ public class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>(() => cut.PhoneField = "a123");
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.PhoneField = "a123" );
 
-        Assert.NotNull(e);
-        Xunit.Assert.Contains( "PhoneField", e.Message );
+        Assert.NotNull( e );
+        Assert.Contains( "PhoneField", e.Message );
     }
 
     [Fact]
@@ -97,26 +97,27 @@ public class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>(() => cut.UrlField = "dslkfusd");
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.UrlField = "dslkfusd" );
 
-        Assert.NotNull(e);
-        Xunit.Assert.Contains( "UrlField", e.Message );
+        Assert.NotNull( e );
+        Assert.Contains( "UrlField", e.Message );
     }
 }
 // ReSharper restore InconsistentNaming
 
 public class RegexTestClass
 {
-    [RegularExpression(".+@.+")] public string Email;
+    [RegularExpression( ".+@.+" )]
+    public string Email;
 
-    [EmailAddress] public string Email2;
+    [EmailAddress]
+    public string Email2;
 
-    [Phone] public string PhoneField;
+    [Phone]
+    public string PhoneField;
 
-    [Url] public string UrlField;
+    [Url]
+    public string UrlField;
 
-    public string SetEmail([RegularExpression(".+@.+")]string email)
-    {
-        return email;
-    }
+    public string SetEmail( [RegularExpression( ".+@.+" )] string email ) => email;
 }

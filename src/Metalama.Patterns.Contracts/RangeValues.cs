@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Contracts;
 public readonly struct RangeValues
 {
     public RangeValues( long minInt64, long maxInt64, ulong minUInt64, ulong maxUInt64, double minDouble,
-                            double maxDouble, decimal minDecimal, decimal maxDecimal )
+        double maxDouble, decimal minDecimal, decimal maxDecimal )
     {
         this.MinInt64 = minInt64;
         this.MaxInt64 = maxInt64;

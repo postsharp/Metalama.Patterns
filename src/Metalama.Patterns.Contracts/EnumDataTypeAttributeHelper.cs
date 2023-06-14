@@ -64,13 +64,9 @@ public static class EnumDataTypeAttributeHelper
         }
     }
 
-    private static bool IsEnumTypeInFlagsMode( Type enumType )
-    {
-        return enumType.GetCustomAttributes( typeof( FlagsAttribute ), false ).Length != 0;
-    }
+    private static bool IsEnumTypeInFlagsMode( Type enumType ) =>
+        enumType.GetCustomAttributes( typeof(FlagsAttribute), false ).Length != 0;
 
-    private static string GetUnderlyingTypeValueString( Type enumType, object enumValue )
-    {
-        return Convert.ChangeType( enumValue, Enum.GetUnderlyingType( enumType ), CultureInfo.InvariantCulture ).ToString();
-    }
+    private static string GetUnderlyingTypeValueString( Type enumType, object enumValue ) => Convert
+        .ChangeType( enumValue, Enum.GetUnderlyingType( enumType ), CultureInfo.InvariantCulture ).ToString();
 }

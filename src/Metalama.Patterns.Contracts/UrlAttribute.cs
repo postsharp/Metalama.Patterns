@@ -30,8 +30,10 @@ public sealed class UrlAttribute : RegularExpressionAttribute
     }
 
     [CompileTime]
-    protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
-    => (typeof( ArgumentException ),
-        CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.UrlErrorMessage ) ),
-        false);
+    protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
+        GetExceptioninfo()
+        => (typeof(ArgumentException),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
+                .UrlErrorMessage) ),
+            false);
 }

@@ -98,17 +98,17 @@ public class ContractExceptionInfo
 
         if ( string.IsNullOrEmpty( targetName ) && targetKind != ContractTargetKind.ReturnValue )
         {
-            throw new ArgumentNullException( nameof( targetName ) );
+            throw new ArgumentNullException( nameof(targetName) );
         }
 
         return new ContractExceptionInfo(
-            exceptionType ?? throw new ArgumentNullException( nameof( exceptionType ) ),
-            aspectType ?? throw new ArgumentNullException( nameof( aspectType ) ),
+            exceptionType ?? throw new ArgumentNullException( nameof(exceptionType) ),
+            aspectType ?? throw new ArgumentNullException( nameof(aspectType) ),
             value,
             targetName,
             targetKind,
             direction,
-            messageId ?? throw new ArgumentNullException( nameof( messageId ) ),
+            messageId ?? throw new ArgumentNullException( nameof(messageId) ),
             messageArguments );
     }
 }
