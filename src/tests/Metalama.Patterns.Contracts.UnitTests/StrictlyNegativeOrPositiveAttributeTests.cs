@@ -19,7 +19,10 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
     {
         AssertFails( TestMethodsWithStrictlyPositiveAspect, 0, 0, 0, 0 );
         AssertFails( TestMethodsWithStrictlyPositiveAspect, -100, 0, -100, -100 );
-        AssertFails( TestMethodsWithStrictlyPositiveAspect, long.MinValue, ulong.MinValue, double.MinValue,
+        AssertFails( TestMethodsWithStrictlyPositiveAspect,
+            long.MinValue,
+            ulong.MinValue,
+            double.MinValue,
             decimal.MinValue );
     }
 
@@ -36,11 +39,16 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
     {
         AssertFails( TestMethodsWithStrictlyNegativeAspect, 0, 0, 0, 0 );
         AssertFails( TestMethodsWithStrictlyNegativeAspect, 100, 0, 100, 100 );
-        AssertFails( TestMethodsWithStrictlyNegativeAspect, long.MaxValue, ulong.MaxValue, double.MaxValue,
+        AssertFails( TestMethodsWithStrictlyNegativeAspect,
+            long.MaxValue,
+            ulong.MaxValue,
+            double.MaxValue,
             decimal.MaxValue );
     }
 
-    private static void TestMethodsWithStrictlyPositiveAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+    private static void TestMethodsWithStrictlyPositiveAspect( long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
         decimal? decimalValue )
     {
         MethodWithStrictlyPositiveLong( longValue );
@@ -49,7 +57,9 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
         MethodWithStrictlyPositiveDecimal( decimalValue );
     }
 
-    private static void TestMethodsWithStrictlyNegativeAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+    private static void TestMethodsWithStrictlyNegativeAspect( long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
         decimal? decimalValue )
     {
         MethodWithStrictlyNegativeLong( longValue );

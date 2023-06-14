@@ -29,7 +29,9 @@ public class StrictRangeAttribute : RangeAttribute
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
     public StrictRangeAttribute( long min, long max )
-        : base( min, max,
+        : base( 
+            min,
+            max,
             StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
             StrictlyLessThanAttribute.Int64Maximum.ToInt64( max ),
             StrictlyGreaterThanAttribute.Int64Minimum.ToUInt64( min ),
@@ -38,7 +40,8 @@ public class StrictRangeAttribute : RangeAttribute
             StrictlyLessThanAttribute.Int64Maximum.ToDouble( max ),
             StrictlyGreaterThanAttribute.Int64Minimum.ToDecimal( min ),
             StrictlyLessThanAttribute.Int64Maximum.ToDecimal( max ),
-            GetInvalidTypes( StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
+            GetInvalidTypes( 
+                StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
                 StrictlyLessThanAttribute.Int64Maximum.ToInt64( max ) )
         )
     {
@@ -50,7 +53,9 @@ public class StrictRangeAttribute : RangeAttribute
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
     public StrictRangeAttribute( ulong min, ulong max )
-        : base( min, max,
+        : base( 
+            min,
+            max,
             StrictlyGreaterThanAttribute.UInt64Minimum.ToInt64( min ),
             StrictlyLessThanAttribute.UInt64Maximum.ToInt64( max ),
             StrictlyGreaterThanAttribute.UInt64Minimum.ToUInt64( min ),
@@ -70,7 +75,9 @@ public class StrictRangeAttribute : RangeAttribute
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
     public StrictRangeAttribute( double min, double max )
-        : base( min, max,
+        : base( 
+            min,
+            max,
             StrictlyGreaterThanAttribute.DoubleMinimum.ToInt64( min ),
             StrictlyLessThanAttribute.DoubleMaximum.ToInt64( max ),
             StrictlyGreaterThanAttribute.DoubleMinimum.ToUInt64( min ),
@@ -79,7 +86,8 @@ public class StrictRangeAttribute : RangeAttribute
             StrictlyLessThanAttribute.DoubleMaximum.ToDouble( max ),
             StrictlyGreaterThanAttribute.DoubleMinimum.ToDecimal( min ),
             StrictlyLessThanAttribute.DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes( min < double.MaxValue - 1 ? min + 1 : double.MaxValue,
+            GetInvalidTypes( 
+                min < double.MaxValue - 1 ? min + 1 : double.MaxValue,
                 max > double.MinValue + 1 ? max - 1 : double.MinValue ) )
     {
     }

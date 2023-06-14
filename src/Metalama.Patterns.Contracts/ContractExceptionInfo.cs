@@ -50,7 +50,7 @@ public class ContractExceptionInfo
     /// </summary>
     public object[] MessageArguments { get; }
 
-    private ContractExceptionInfo(
+    private ContractExceptionInfo( 
         Type exceptionType,
         Type aspectType,
         object? value,
@@ -81,7 +81,7 @@ public class ContractExceptionInfo
     /// <param name="direction">The direction of data flow.</param>
     /// <param name="messageId">The id of the error message template to be used in the exception.</param>
     /// <param name="messageArguments">Any additional parameters to be used in the exception message formatting.</param>
-    public static ContractExceptionInfo Create(
+    public static ContractExceptionInfo Create( 
         Type exceptionType,
         Type aspectType,
         object value,

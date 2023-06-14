@@ -56,11 +56,17 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( long max )
-        : base( long.MinValue, max,
-            long.MinValue, Int64Maximum.ToInt64( max ),
-            ulong.MinValue, Int64Maximum.ToUInt64( max ),
-            double.MinValue, Int64Maximum.ToDouble( max ),
-            decimal.MinValue, Int64Maximum.ToDecimal( max ),
+        : base(
+            long.MinValue,
+            max,
+            long.MinValue,
+            Int64Maximum.ToInt64( max ),
+            ulong.MinValue,
+            Int64Maximum.ToUInt64( max ),
+            double.MinValue,
+            Int64Maximum.ToDouble( max ),
+            decimal.MinValue,
+            Int64Maximum.ToDecimal( max ),
             GetInvalidTypes( long.MinValue, Int64Maximum.ToInt64( max ) )
         )
     {
@@ -99,11 +105,17 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( ulong max )
-        : base( ulong.MinValue, max,
-            long.MinValue, UInt64Maximum.ToInt64( max ),
-            ulong.MinValue, UInt64Maximum.ToUInt64( max ),
-            double.MinValue, UInt64Maximum.ToDouble( max ),
-            decimal.MinValue, UInt64Maximum.ToDecimal( max ),
+        : base(
+            ulong.MinValue,
+            max,
+            long.MinValue,
+            UInt64Maximum.ToInt64( max ),
+            ulong.MinValue,
+            UInt64Maximum.ToUInt64( max ),
+            double.MinValue,
+            UInt64Maximum.ToDouble( max ),
+            decimal.MinValue,
+            UInt64Maximum.ToDecimal( max ),
             GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None)
         )
     {
@@ -191,11 +203,17 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( double max )
-        : base( double.MinValue, max,
-            long.MinValue, DoubleMaximum.ToInt64( max ),
-            ulong.MinValue, DoubleMaximum.ToUInt64( max ),
-            double.MinValue, DoubleMaximum.ToDouble( max ),
-            decimal.MinValue, DoubleMaximum.ToDecimal( max ),
+        : base( 
+            double.MinValue,
+            max,
+            long.MinValue,
+            DoubleMaximum.ToInt64( max ),
+            ulong.MinValue,
+            DoubleMaximum.ToUInt64( max ),
+            double.MinValue,
+            DoubleMaximum.ToDouble( max ),
+            decimal.MinValue,
+            DoubleMaximum.ToDecimal( max ),
             GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) )
     {
     }

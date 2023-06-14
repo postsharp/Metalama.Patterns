@@ -17,7 +17,8 @@ public static class CreditCardAttributeHelper
 
 #if NET5_0_OR_GREATER
         var str2 =
- value.Replace( "-", "", StringComparison.OrdinalIgnoreCase ).Replace( " ", "", StringComparison.OrdinalIgnoreCase );
+            value.Replace( "-", "", StringComparison.OrdinalIgnoreCase )
+                .Replace( " ", "", StringComparison.OrdinalIgnoreCase );
 #else
         var str2 = value.Replace( "-", "" ).Replace( " ", "" );
 #endif

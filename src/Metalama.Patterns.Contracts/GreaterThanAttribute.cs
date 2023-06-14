@@ -22,11 +22,17 @@ public class GreaterThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public GreaterThanAttribute( long min )
-        : base( min, long.MaxValue,
-            min, long.MaxValue,
-            min < 0 ? 0 : (ulong) min, ulong.MaxValue,
-            min, double.MaxValue,
-            min, decimal.MaxValue,
+        : base( 
+            min,
+            long.MaxValue,
+            min,
+            long.MaxValue,
+            min < 0 ? 0 : (ulong) min,
+            ulong.MaxValue,
+            min,
+            double.MaxValue,
+            min,
+            decimal.MaxValue,
             GetInvalidTypes( min, long.MaxValue )
         )
     {
@@ -37,11 +43,17 @@ public class GreaterThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public GreaterThanAttribute( ulong min )
-        : base( min, ulong.MaxValue,
-            min > (ulong) long.MaxValue ? long.MaxValue : (long) min, long.MaxValue,
-            min, ulong.MaxValue,
-            min, double.MaxValue,
-            min, decimal.MaxValue,
+        : base( 
+            min,
+            ulong.MaxValue,
+            min > (ulong) long.MaxValue ? long.MaxValue : (long) min,
+            long.MaxValue,
+            min,
+            ulong.MaxValue,
+            min,
+            double.MaxValue,
+            min,
+            decimal.MaxValue,
             GetInvalidTypes( min )
         )
     {
@@ -52,11 +64,17 @@ public class GreaterThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public GreaterThanAttribute( double min )
-        : base( min, double.MaxValue,
-            DoubleMinimum.ToInt64( min ), long.MaxValue,
-            DoubleMinimum.ToUInt64( min ), ulong.MaxValue,
-            min, double.MaxValue,
-            DoubleMinimum.ToDecimal( min ), decimal.MaxValue,
+        : base( 
+            min,
+            double.MaxValue,
+            DoubleMinimum.ToInt64( min ),
+            long.MaxValue,
+            DoubleMinimum.ToUInt64( min ),
+            ulong.MaxValue,
+            min,
+            double.MaxValue,
+            DoubleMinimum.ToDecimal( min ),
+            decimal.MaxValue,
             GetInvalidTypes( min, double.MaxValue )
         )
     {

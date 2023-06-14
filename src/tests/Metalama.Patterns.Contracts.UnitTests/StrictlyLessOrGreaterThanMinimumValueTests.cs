@@ -49,17 +49,28 @@ public class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTestsBase
     public void TestMethodsWithStrictlyLessThanAspect_Failure()
     {
         AssertFails( TestMethodsWithStrictlyLessThanAspect, longLimit, null, doubleLimit, (decimal) decimalLimit );
-        AssertFails( TestMethodsWithStrictlyLessThanAspect, longLimit / 2, null, doubleLimit / 2,
+        AssertFails( TestMethodsWithStrictlyLessThanAspect,
+            longLimit / 2,
+            null,
+            doubleLimit / 2,
             (decimal) decimalLimit / 2 );
         AssertFails( TestMethodsWithStrictlyLessThanAspect, 0, 0, 0, 0 );
-        AssertFails( TestMethodsWithStrictlyLessThanAspect, longLimit / -2, null, doubleLimit / -2,
+        AssertFails( TestMethodsWithStrictlyLessThanAspect,
+            longLimit / -2,
+            null,
+            doubleLimit / -2,
             (decimal) decimalLimit / -2 );
-        AssertFails( TestMethodsWithStrictlyLessThanAspect, long.MaxValue, ulong.MaxValue, double.MaxValue,
+        AssertFails( TestMethodsWithStrictlyLessThanAspect,
+            long.MaxValue,
+            ulong.MaxValue,
+            double.MaxValue,
             decimal.MaxValue );
     }
 
-    private static void TestMethodsWithStrictlyGreaterThanAspect( long? longValue, ulong? ulongValue,
-        double? doubleValue, decimal? decimalValue )
+    private static void TestMethodsWithStrictlyGreaterThanAspect( long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
+        decimal? decimalValue )
     {
         MethodWithLongStrictlyGreaterThanLong( longValue );
         MethodWithUlongStrictlyGreaterThanLong( ulongValue );
@@ -72,7 +83,9 @@ public class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTestsBase
         MethodWithDecimalStrictlyGreaterThanDouble( decimalValue );
     }
 
-    private static void TestMethodsWithStrictlyLessThanAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+    private static void TestMethodsWithStrictlyLessThanAspect( long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
         decimal? decimalValue )
     {
         MethodWithLongStrictlyLessThanLong( longValue );

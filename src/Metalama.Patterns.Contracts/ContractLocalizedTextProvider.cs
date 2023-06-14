@@ -100,7 +100,7 @@ public class ContractLocalizedTextProvider
     /// <param name="additionalArguments">Optional arguments to be used in the message formatting.</param>
     /// <returns>A string derived from <c>errorMessage</c>, where placeholders have been
     /// replaced by their concrete value.</returns>
-    internal string FormatMessage(
+    internal string FormatMessage( 
         string errorMessage,
         object? value,
         string? targetName,
@@ -126,7 +126,7 @@ public class ContractLocalizedTextProvider
     /// <returns>An array of arguments that can be passed to the <see cref="string.Format(string,object[])"/> method,
     /// where the formatting strings can have parameters as described in the remarks of
     /// the documentation of the <see cref="ContractLocalizedTextProvider"/> class.</returns>
-    public static object?[] GetFormattingStringArguments(
+    public static object?[] GetFormattingStringArguments( 
         object? value,
         string? targetName,
         ContractTargetKind targetKind,

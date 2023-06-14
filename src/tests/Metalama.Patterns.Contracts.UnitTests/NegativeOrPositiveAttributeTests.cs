@@ -38,7 +38,9 @@ public class NegativeOrPositiveAttributeTests : RangeContractTestsBase
         AssertFails( TestMethodsWithNegativeAspect, long.MinValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
     }
 
-    private static void TestMethodsWithPositiveAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+    private static void TestMethodsWithPositiveAspect( long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
         decimal? decimalValue )
     {
         MethodWithPositiveLong( longValue );
@@ -47,7 +49,9 @@ public class NegativeOrPositiveAttributeTests : RangeContractTestsBase
         MethodWithPositiveDecimal( decimalValue );
     }
 
-    private static void TestMethodsWithNegativeAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+    private static void TestMethodsWithNegativeAspect( long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
         decimal? decimalValue )
     {
         MethodWithNegativeLong( longValue );

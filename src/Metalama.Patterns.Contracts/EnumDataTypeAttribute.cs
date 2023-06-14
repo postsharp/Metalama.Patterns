@@ -40,14 +40,16 @@ public sealed class EnumDataTypeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( f => IsElibigleType( f.Type ),
+        builder.MustSatisfy( 
+            f => IsElibigleType( f.Type ),
             f => $"the type of {f} must be string, an integer type or a nullable integer type" );
     }
 
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( p => IsElibigleType( p.Type ),
+        builder.MustSatisfy( 
+            p => IsElibigleType( p.Type ),
             p => $"the type of {p} must be string, an integer type or a nullable integer type" );
     }
 

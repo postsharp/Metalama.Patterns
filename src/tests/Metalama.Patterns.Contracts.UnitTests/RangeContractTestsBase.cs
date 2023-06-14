@@ -70,8 +70,10 @@ public abstract class RangeContractTestsBase
         }
     }
 
-    protected static void AssertFails( Action<long?, ulong?, double?, decimal?> method, long? longValue,
-        ulong? ulongValue, double? doubleValue,
+    protected static void AssertFails( Action<long?, ulong?, double?, decimal?> method,
+        long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
         decimal? decimalValue )
     {
         try

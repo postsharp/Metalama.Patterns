@@ -84,9 +84,18 @@ public class RangeAttribute : ContractAspect
 
     private readonly TypeFlag _invalidTypes;
 
-    internal RangeAttribute( object displayMin, object displayMax, long minInt64, long maxInt64, ulong minUInt64,
-        ulong maxUInt64, double minDouble,
-        double maxDouble, decimal minDecimal, decimal maxDecimal, TypeFlag invalidTypes )
+    internal RangeAttribute( 
+        object displayMin,
+        object displayMax,
+        long minInt64,
+        long maxInt64,
+        ulong minUInt64,
+        ulong maxUInt64,
+        double minDouble,
+        double maxDouble,
+        decimal minDecimal,
+        decimal maxDecimal,
+        TypeFlag invalidTypes )
     {
         this.DisplayMinValue = displayMin;
         this.DisplayMaxValue = displayMax;
@@ -447,14 +456,16 @@ public class RangeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( f => IsElibigleType( f.Type ),
+        builder.MustSatisfy( 
+            f => IsElibigleType( f.Type ),
             f => $"the type of {f} must be a numeric type, a nullable numeric type, or object" );
     }
 
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( p => IsElibigleType( p.Type ),
+        builder.MustSatisfy( 
+            p => IsElibigleType( p.Type ),
             p => $"the type of {p} must be a numeric type, a nullable numeric type, or object" );
     }
 
@@ -549,8 +560,15 @@ public class RangeAttribute : ContractAspect
         {
             if ( value != null )
             {
-                var rangeValues = new RangeValues( this._minInt64, this._maxInt64, this._minUInt64, this._maxUInt64,
-                    this._minDouble, this._maxDouble, this._minDecimal, this._maxDecimal );
+                var rangeValues = new RangeValues( 
+                    this._minInt64,
+                    this._maxInt64,
+                    this._minUInt64,
+                    this._maxUInt64,
+                    this._minDouble,
+                    this._maxDouble,
+                    this._minDecimal,
+                    this._maxDecimal );
 
                 var validateResult = RangeAttributeHelpers.Validate( value, rangeValues );
 

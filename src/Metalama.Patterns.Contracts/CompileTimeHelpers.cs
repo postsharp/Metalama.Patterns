@@ -16,7 +16,8 @@ internal static class CompileTimeHelpers
     /// <returns></returns>
     internal static IExpression GetContractLocalizedTextProviderField( string fieldName )
         => ((INamedType) TypeFactory.GetType( typeof(ContractLocalizedTextProvider) )).Fields
-            .OfName( fieldName ).Single();
+            .OfName( fieldName )
+            .Single();
 
     public static IExpression ToTypeOf( this Type type )
     {

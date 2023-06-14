@@ -71,7 +71,9 @@ public class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
         AssertFails( TestMethodsWithLessThanAspect, long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
     }
 
-    private static void TestMethodsWithGreaterThanAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+    private static void TestMethodsWithGreaterThanAspect( long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
         decimal? decimalValue )
     {
         MethodWithLongGreaterThanLong( longValue );
@@ -85,7 +87,9 @@ public class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
         MethodWithDecimalGreaterThanDouble( decimalValue );
     }
 
-    private static void TestMethodsWithLessThanAspect( long? longValue, ulong? ulongValue, double? doubleValue,
+    private static void TestMethodsWithLessThanAspect( long? longValue,
+        ulong? ulongValue,
+        double? doubleValue,
         decimal? decimalValue )
     {
         MethodWithLongLessThanLong( longValue );

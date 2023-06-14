@@ -92,7 +92,8 @@ public class AssertEx
 
     private static void AssertExceptionMessage( Exception ex, string expectedMessage ) =>
         Assert.True(
-            string.Equals( expectedMessage.ToLowerInvariant(), ex.Message.ToLowerInvariant(),
+            string.Equals( expectedMessage.ToLowerInvariant(),
+                ex.Message.ToLowerInvariant(),
                 StringComparison.Ordinal ),
             "Expected exception message failed." );
 

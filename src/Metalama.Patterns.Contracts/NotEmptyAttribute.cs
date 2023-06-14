@@ -96,8 +96,10 @@ public sealed class NotEmptyAttribute : ContractAspect
         throw new InvalidOperationException( "Validate called on an ineligible target." );
 
     [CompileTime]
-    private static bool TryGetCompatibleTargetInterface( INamedType targetType,
-        [NotNullWhen( true )] out INamedType? interfaceType, out bool requiresCast )
+    private static bool TryGetCompatibleTargetInterface( 
+        INamedType targetType,
+        [NotNullWhen( true )] out INamedType? interfaceType,
+        out bool requiresCast )
     {
         var typeOfICollection = (INamedType) TypeFactory.GetType( typeof(ICollection) );
 

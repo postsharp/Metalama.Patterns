@@ -2,14 +2,21 @@
 
 // #33303: Remove this definition when the Metalama framework sets COMPILE_TIME.
 // UPDATE: Despite defining COMPILE_TIME here, ML appears to exclude [Conditional("COMPILE_TIME")] methods, so for now, I've commented out all such [Conditional] uses.
-//#define COMPILE_TIME
+// #define COMPILE_TIME
 
 namespace Metalama.Patterns.Contracts;
 
 public readonly struct RangeValues
 {
-    public RangeValues( long minInt64, long maxInt64, ulong minUInt64, ulong maxUInt64, double minDouble,
-        double maxDouble, decimal minDecimal, decimal maxDecimal )
+    public RangeValues( 
+        long minInt64,
+        long maxInt64,
+        ulong minUInt64,
+        ulong maxUInt64,
+        double minDouble,
+        double maxDouble,
+        decimal minDecimal,
+        decimal maxDecimal )
     {
         this.MinInt64 = minInt64;
         this.MaxInt64 = maxInt64;

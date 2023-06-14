@@ -68,5 +68,6 @@ public static class EnumDataTypeAttributeHelper
         enumType.GetCustomAttributes( typeof(FlagsAttribute), false ).Length != 0;
 
     private static string GetUnderlyingTypeValueString( Type enumType, object enumValue ) => Convert
-        .ChangeType( enumValue, Enum.GetUnderlyingType( enumType ), CultureInfo.InvariantCulture ).ToString();
+        .ChangeType( enumValue, Enum.GetUnderlyingType( enumType ), CultureInfo.InvariantCulture )
+        .ToString();
 }

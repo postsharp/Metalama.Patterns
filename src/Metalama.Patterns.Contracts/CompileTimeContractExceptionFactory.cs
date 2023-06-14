@@ -10,7 +10,8 @@ namespace Metalama.Patterns.Contracts;
 [CompileTime]
 public static class CompileTimeContractExceptionFactory
 {
-    public static IExpression GetNewExceptionExpression( ContractLocalizedTextProvider localizedTextProvider,
+    public static IExpression GetNewExceptionExpression( 
+        ContractLocalizedTextProvider localizedTextProvider,
         ContractExceptionInfo exceptionInfo )
     {
         var errorMessage = localizedTextProvider.GetFormattedMessage( exceptionInfo );

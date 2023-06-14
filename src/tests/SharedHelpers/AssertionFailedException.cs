@@ -38,8 +38,7 @@ public sealed class AssertionFailedException : Exception
     {
     }
 
-    private AssertionFailedException(
-        SerializationInfo info,
+    private AssertionFailedException( SerializationInfo info,
         StreamingContext context ) : base( info, context )
     {
     }
