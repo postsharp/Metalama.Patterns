@@ -123,8 +123,7 @@ public class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        string p;
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithOut( "", out p ) );
+        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithOut( "", out var p ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );

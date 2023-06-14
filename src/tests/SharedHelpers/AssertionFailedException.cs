@@ -10,13 +10,6 @@ namespace Metalama.Patterns.Tests.Helpers;
 [Serializable]
 public sealed class AssertionFailedException : Exception
 {
-    //
-    // For guidelines regarding the creation of new exception types, see
-    //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
-    // and
-    //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
-    //
-
     /// <summary>
     /// Initializes a new instance of the <see cref="AssertionFailedException"/> class with the default error message.
     /// </summary>
@@ -38,7 +31,8 @@ public sealed class AssertionFailedException : Exception
     {
     }
 
-    private AssertionFailedException( SerializationInfo info,
+    private AssertionFailedException( 
+        SerializationInfo info,
         StreamingContext context ) : base( info, context )
     {
     }

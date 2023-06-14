@@ -49,13 +49,16 @@ public class AssertEx
         }
     }
 
-    // TODO Inline this.
-    public static void Throws<T>( Action task ) where T : Exception => Assert.Throws<T>( task );
+    public static void Throws<T>( Action task ) 
+        where T : Exception 
+        => Assert.Throws<T>( task );
 
-    // TODO Inline this.
-    public static Task ThrowsAsync<T>( Func<Task> task ) where T : Exception => Assert.ThrowsAsync<T>( task );
+    public static Task ThrowsAsync<T>( Func<Task> task ) 
+        where T : Exception 
+        => Assert.ThrowsAsync<T>( task );
 
-    public static void Throws<T>( string expectedMessage, Action task ) where T : Exception
+    public static void Throws<T>( string expectedMessage, Action task ) 
+        where T : Exception
     {
         try
         {
@@ -68,10 +71,11 @@ public class AssertEx
             return;
         }
 
-        Assert.True( false, string.Format( "Expected exception of type {0} but no exception was thrown.", typeof(T) ) );
+        Assert.True( false, $"Expected exception of type {typeof( T )} but no exception was thrown." );
     }
 
-    public static async Task ThrowsAsync<T>( string expectedMessage, Func<Task> task ) where T : Exception
+    public static async Task ThrowsAsync<T>( string expectedMessage, Func<Task> task ) 
+        where T : Exception
     {
         try
         {
@@ -84,7 +88,7 @@ public class AssertEx
             return;
         }
 
-        Assert.True( false, string.Format( "Expected exception of type {0} but no exception was thrown.", typeof(T) ) );
+        Assert.True( false, $"Expected exception of type {typeof( T )} but no exception was thrown." );
     }
 
     private static void AssertExceptionType<T>( Exception ex ) =>
@@ -92,7 +96,8 @@ public class AssertEx
 
     private static void AssertExceptionMessage( Exception ex, string expectedMessage ) =>
         Assert.True(
-            string.Equals( expectedMessage.ToLowerInvariant(),
+            string.Equals( 
+                expectedMessage.ToLowerInvariant(),
                 ex.Message.ToLowerInvariant(),
                 StringComparison.Ordinal ),
             "Expected exception message failed." );
@@ -104,7 +109,7 @@ public class AssertEx
 
         while ( true )
         {
-            var index = actualText.IndexOf( expectedText, nextStart );
+            var index = actualText.IndexOf( expectedText, nextStart, StringComparison.Ordinal );
 
             if ( index != -1 )
             {

@@ -37,7 +37,7 @@ public sealed class NotEmptyAttribute : ContractAspect
 #if false
         builder.MustSatisfy(
             f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )), 
-            f => $"is must be a string or implement ICollection, ICollection<T> or IReadOnlyCollection<T>" );
+            f => $"the type of {f} must string or implement ICollection, ICollection<T> or IReadOnlyCollection<T>" );
 #endif
     }
 

@@ -261,9 +261,8 @@ public class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        long? p;
         var e = TestHelpers.RecordException<PostconditionFailedException>( () =>
-            cut.ZeroToTenNullableIntOut( -1, out p ) );
+            cut.ZeroToTenNullableIntOut( -1, out var p ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
