@@ -1,9 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
-
 namespace Metalama.Patterns.Contracts;
 
 public static class CreditCardAttributeHelper
@@ -18,7 +14,7 @@ public static class CreditCardAttributeHelper
 #if NET5_0_OR_GREATER
         var str2 =
             value.Replace( "-", "", StringComparison.OrdinalIgnoreCase )
-                .Replace( " ", "", StringComparison.OrdinalIgnoreCase );
+                 .Replace( " ", "", StringComparison.OrdinalIgnoreCase );
 #else
         var str2 = value.Replace( "-", "" ).Replace( " ", "" );
 #endif

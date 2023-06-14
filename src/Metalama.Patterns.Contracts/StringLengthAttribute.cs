@@ -64,18 +64,21 @@ public sealed class StringLengthAttribute : ContractAspect
     /// </summary>
     public int MinimumLength { get; private set; }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
         builder.Type().MustBe<string>();
     }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
         builder.Type().MustBe<string>();
     }
 
+    /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
         // TODO: We assume that min and max are sensible (eg, non-negative) here. This should be validated ideally at compile time. See comment at head of class.

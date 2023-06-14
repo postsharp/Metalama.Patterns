@@ -21,6 +21,14 @@ namespace Metalama.Patterns.Contracts;
 [Inheritable]
 public sealed class NotEmptyAttribute : ContractAspect
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NotEmptyAttribute"/> class.
+    /// </summary>
+    public NotEmptyAttribute() 
+    { 
+    }
+
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
@@ -33,6 +41,7 @@ public sealed class NotEmptyAttribute : ContractAspect
 #endif
     }
 
+    /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
@@ -90,7 +99,7 @@ public sealed class NotEmptyAttribute : ContractAspect
         }
     }
 
-    // TODO: Review: is there a simpler way to throw a compile time exception from a template? (Pending #33294)
+    // TODO: #33294 Use simpler mechanism to throw a compile-time exception from a template if/when available.
     [CompileTime]
     private static void ThrowValidateCalledOnIneligibleTarget() =>
         throw new InvalidOperationException( "Validate called on an ineligible target." );

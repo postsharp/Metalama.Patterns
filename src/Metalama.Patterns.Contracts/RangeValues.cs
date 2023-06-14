@@ -1,13 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// #33303: Remove this definition when the Metalama framework sets COMPILE_TIME.
-// UPDATE: Despite defining COMPILE_TIME here, ML appears to exclude [Conditional("COMPILE_TIME")] methods, so for now, I've commented out all such [Conditional] uses.
-// #define COMPILE_TIME
-
 namespace Metalama.Patterns.Contracts;
 
+/// <summary>
+/// Describes a numeric range in the representation of various different numeric types.
+/// </summary>
+/// <seealso cref="RangeAttribute"/>
+/// <seealso cref="RangeAttributeHelpers.Validate{T}(T, in RangeValues)"/>
 public readonly struct RangeValues
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeValues"/> struct.
+    /// </summary>
     public RangeValues( 
         long minInt64,
         long maxInt64,

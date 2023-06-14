@@ -23,6 +23,14 @@ namespace Metalama.Patterns.Contracts;
 [Inheritable]
 public sealed class RequiredAttribute : ContractAspect
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RequiredAttribute"/> class.
+    /// </summary>
+    public RequiredAttribute()
+    {
+    }
+
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
@@ -31,6 +39,7 @@ public sealed class RequiredAttribute : ContractAspect
             f => $"the type of {f} must be a nullable" );
     }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
@@ -39,6 +48,7 @@ public sealed class RequiredAttribute : ContractAspect
             p => $"the type of {p} must be a nullable" );
     }
 
+    /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );

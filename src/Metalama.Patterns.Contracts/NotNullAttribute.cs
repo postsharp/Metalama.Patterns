@@ -16,22 +16,32 @@ namespace Metalama.Patterns.Contracts;
 [Inheritable]
 public sealed class NotNullAttribute : ContractAspect
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NotNullAttribute"/> class.
+    /// </summary>
+    public NotNullAttribute() 
+    {
+    }
+
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
         builder.MustSatisfy(
             f => f.Type.IsReferenceType != false || f.Type.IsNullable != false,
-            f => $"it is not of a nullable type" );
+            f => $"the type of {f} must be a nullable type" );
     }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
         builder.MustSatisfy(
             p => p.Type.IsReferenceType != false || p.Type.IsNullable != false,
-            p => $"it is not of a nullable type" );
+            p => $"the type of {p} must be a nullable type" );
     }
 
+    /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );

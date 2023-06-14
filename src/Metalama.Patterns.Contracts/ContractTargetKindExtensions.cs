@@ -6,6 +6,9 @@ namespace Metalama.Patterns.Contracts;
 
 public static class ContractTargetKindExtensions
 {
+    /// <summary>
+    /// Gets the display name for the specified <see cref="ContractTargetKind"/>.
+    /// </summary>
     public static string GetDisplayName( this ContractTargetKind targetKind ) =>
         targetKind switch
         {
@@ -16,6 +19,9 @@ public static class ContractTargetKindExtensions
             _ => throw new ArgumentOutOfRangeException( nameof(targetKind) )
         };
 
+    /// <summary>
+    /// Gets the display name for the specified <see cref="ContractTargetKind"/> followed by the name of the target declartion when applicable.
+    /// </summary>
     public static string GetDisplayName( this ContractTargetKind targetKind, string? targetName ) =>
         targetKind switch
         {
@@ -27,6 +33,9 @@ public static class ContractTargetKindExtensions
             _ => throw new ArgumentOutOfRangeException( nameof(targetKind) )
         };
 
+    /// <summary>
+    /// Gets a name to use for the parameter associated with the target declaration.
+    /// </summary>
     public static string GetParameterName( this ContractTargetKind targetKind, string? targetName ) =>
         targetKind switch
         {

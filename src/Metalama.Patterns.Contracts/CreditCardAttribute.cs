@@ -25,18 +25,21 @@ public sealed class CreditCardAttribute : ContractAspect
     {
     }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
         builder.Type().MustBe<string>();
     }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
         builder.Type().MustBe<string>();
     }
 
+    /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );

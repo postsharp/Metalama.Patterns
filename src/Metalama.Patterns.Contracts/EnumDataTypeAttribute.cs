@@ -37,6 +37,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
     /// </summary>
     public Type EnumType { get; }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
@@ -45,6 +46,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
             f => $"the type of {f} must be string, an integer type or a nullable integer type" );
     }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
@@ -70,6 +72,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
             _ => false
         };
 
+    /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );

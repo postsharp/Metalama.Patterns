@@ -129,7 +129,7 @@ public class LessThanAttribute : RangeAttribute
         }
     }
 
-    /// <inheridoc />
+    /// <inheritdoc/>
     protected override (IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue) GetExceptioninfo()
         => (
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider

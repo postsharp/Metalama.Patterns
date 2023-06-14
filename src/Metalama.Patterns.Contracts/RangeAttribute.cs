@@ -1,33 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// TODO #33303: The original PS impementation tried to avoid calling GetInvalidTypes at runtime, consider reinstating this behaviour.
-/* Note that it's not clear exactly why this was done in PS, my guess would be a performance issue under certain circumstances.
- */
+// TODO: #33303 The original PS impementation tried to avoid calling GetInvalidTypes at runtime, consider reinstating this behaviour.
+// Note that it's not clear exactly why this was done in PS.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Contracts;
-// TODO: Remove comment below once current non-string approach is proven.
-/* Important information regarding numbers (especially floating point) represented as strings:
- * 
- * https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings#RFormatString
- * https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings#GFormatString
- * 
- * tl;dr:
- * 
- * Use the following format specifiers to ensure roundtripable string representation:
- * 
- * double       "G17"
- * single       "G9"
- * half         "R"
- * BigInteger   "R"
- * 
- */
 
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
@@ -453,6 +435,7 @@ public class RangeAttribute : ContractAspect
             _ => TypeFlag.None
         };
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
@@ -461,6 +444,7 @@ public class RangeAttribute : ContractAspect
             f => $"the type of {f} must be a numeric type, a nullable numeric type, or object" );
     }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
@@ -494,6 +478,7 @@ public class RangeAttribute : ContractAspect
         Severity.Error,
         "{0} cannot be applied to {1} because the value range cannot be satisfied by the type {2}.");
 
+    /// <inheritdoc/>
     public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildAspect( builder );
@@ -547,6 +532,7 @@ public class RangeAttribute : ContractAspect
         return (minBuilder.ToExpression(), maxBuilder.ToExpression());
     }
 
+    /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
@@ -629,7 +615,6 @@ public class RangeAttribute : ContractAspect
         }
         else
         {
-#if true
             var (min, max) = this.GetMinAndMaxExpressions( basicType.SpecialType );
 
             if ( isNullable )
@@ -740,37 +725,13 @@ public class RangeAttribute : ContractAspect
                     }
                 }
             }
-#else // TODO: Why doesn't this work? Discuss with gael.
-            var (min, max) = this.GetMinAndMaxExpressions( basicType.SpecialType );
-
-            var b = new ExpressionBuilder();
-            if ( isNullable )
-            {
-                b.AppendExpression( value!.HasValue && (value < min.Value || value > max.Value) );
-            }
-            else
-            {
-                b.AppendExpression( value < min.Value || value > max.Value );
-            }
-
-            var expr = b.ToExpression();
-            if ( expr.Value )
-            {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof( ArgumentOutOfRangeException ),
-                    typeof( RangeAttribute ),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.RangeErrorMessage,
-                    this.DisplayMinValue,
-                    this.DisplayMaxValue ) );
-            }
-#endif
         }
     }
 
+    /// <summary>
+    /// Called by <see cref="Validate(dynamic?)"/> to determine the message to emit, and whether the minimum and maximum values
+    /// should be provided as formatting arguments.
+    /// </summary>
     [CompileTime]
     protected virtual (IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue) GetExceptioninfo()
         => (

@@ -50,27 +50,25 @@ public class RegularExpressionAttribute : ContractAspect
     /// </summary>
     public RegexOptions Options { get; }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
         builder.Type().MustBe<string>();
     }
 
+    /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
         builder.Type().MustBe<string>();
     }
 
-    // TODO: Vs PS, we don't have per-aspect-instance runtime state, so we can't so easily cache the regex object.
+    // TODO: Unlike PostSharp, we don't have per-aspect-instance runtime state, so we can't so easily cache the regex object.
     // Note that Regex has OOTB caching of compiled expressions (see eg Regex.CacheSize).
-    // For now, just using runtime eval.
+    // For now, just using runtime evaluation.
 
-    // TODO: PS allows derived aspects to throw exceptions with a specialized message ID, and typically
-    // without adding the _pattern arg. I've tried various ways to do this elegantly with ML, but every
-    // avenue is either blocked or undesirable. For now, derived aspects must override the whole
-    // Validate method, and _pattern and _options have been promoted to properties.
-
+    /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
@@ -105,6 +103,10 @@ public class RegularExpressionAttribute : ContractAspect
         }
     }
 
+    /// <summary>
+    /// Called by <see cref="Validate(dynamic?)"/> to determine the message to emit, and whether the pattern
+    /// should be provided as a formatting argument.
+    /// </summary>
     [CompileTime]
     protected virtual (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
         GetExceptioninfo()
