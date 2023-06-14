@@ -7,7 +7,6 @@ namespace Metalama.Patterns.Contracts.Tests;
 
 public class InterfaceTests
 {
-    // TODO: Review. This test fails.
     [Fact]
     public void TestInterfaceImpl()
     {

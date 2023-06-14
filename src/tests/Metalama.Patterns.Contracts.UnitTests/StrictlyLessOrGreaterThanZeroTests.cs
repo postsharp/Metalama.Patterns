@@ -9,20 +9,21 @@ namespace Metalama.Patterns.Contracts.Tests;
 
 public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
 {
-    private const long longLimit = 0;
-    private const ulong ulongLimit = 0;
-    private const double doubleLimit = 0;
+    private const long _longLimit = 0;
+    private const ulong _ulongLimit = 0;
+    private const double _doubleLimit = 0;
 
-    private static readonly double doubleStep = double.Epsilon;
-    private static readonly decimal decimalStep = DecimalTolerance;
+    private static readonly double _doubleStep = double.Epsilon;
+    private static readonly decimal _decimalStep = DecimalTolerance;
 
     [Fact]
     public void TestMethodsWithStrictlyGreaterThanAspect_Success()
     {
-        TestMethodsWithStrictlyGreaterThanAspect( longLimit + 1,
-            ulongLimit + 1,
-            doubleLimit + doubleStep,
-            (decimal) doubleLimit + decimalStep );
+        TestMethodsWithStrictlyGreaterThanAspect( 
+            _longLimit + 1,
+            _ulongLimit + 1,
+            _doubleLimit + _doubleStep,
+            (decimal) _doubleLimit + _decimalStep );
         TestMethodsWithStrictlyGreaterThanAspect( 100, 100, 100, 100 );
         TestMethodsWithStrictlyGreaterThanAspect( long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
     }
@@ -38,10 +39,11 @@ public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
     [Fact]
     public void TestMethodsWithStrictlyLessThanAspect_Success()
     {
-        TestMethodsWithStrictlyLessThanAspect( longLimit - 1,
+        TestMethodsWithStrictlyLessThanAspect( 
+            _longLimit - 1,
             null,
-            doubleLimit - doubleStep,
-            (decimal) doubleLimit - decimalStep );
+            _doubleLimit - _doubleStep,
+            (decimal) _doubleLimit - _decimalStep );
         TestMethodsWithStrictlyLessThanAspect( -100, null, -100, -100 );
         TestMethodsWithStrictlyLessThanAspect( long.MinValue, ulong.MinValue, double.MinValue, decimal.MinValue );
     }
@@ -51,14 +53,16 @@ public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
     {
         AssertFails( TestMethodsWithStrictlyLessThanAspect, 0, 0, 0, 0 );
         AssertFails( TestMethodsWithStrictlyLessThanAspect, 100, 100, 100, 100 );
-        AssertFails( TestMethodsWithStrictlyLessThanAspect,
+        AssertFails( 
+            TestMethodsWithStrictlyLessThanAspect,
             long.MaxValue,
             ulong.MaxValue,
             double.MaxValue,
             decimal.MaxValue );
     }
 
-    private static void TestMethodsWithStrictlyGreaterThanAspect( long? longValue,
+    private static void TestMethodsWithStrictlyGreaterThanAspect( 
+        long? longValue,
         ulong? ulongValue,
         double? doubleValue,
         decimal? decimalValue )
@@ -79,7 +83,8 @@ public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
         MethodWithDecimalStrictlyGreaterThanDouble( decimalValue );
     }
 
-    private static void TestMethodsWithStrictlyLessThanAspect( long? longValue,
+    private static void TestMethodsWithStrictlyLessThanAspect( 
+        long? longValue,
         ulong? ulongValue,
         double? doubleValue,
         decimal? decimalValue )
@@ -101,35 +106,35 @@ public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
 
     #region Long
 
-    private static void MethodWithLongStrictlyGreaterThanLong( [StrictlyGreaterThan( longLimit )] long? a )
+    private static void MethodWithLongStrictlyGreaterThanLong( [StrictlyGreaterThan( _longLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongStrictlyGreaterThanLong( [StrictlyGreaterThan( longLimit )] ulong? a )
+    private static void MethodWithUlongStrictlyGreaterThanLong( [StrictlyGreaterThan( _longLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleStrictlyGreaterThanLong( [StrictlyGreaterThan( longLimit )] double? a )
+    private static void MethodWithDoubleStrictlyGreaterThanLong( [StrictlyGreaterThan( _longLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalStrictlyGreaterThanLong( [StrictlyGreaterThan( longLimit )] decimal? a )
+    private static void MethodWithDecimalStrictlyGreaterThanLong( [StrictlyGreaterThan( _longLimit )] decimal? a )
     {
     }
 
-    private static void MethodWithLongStrictlyLessThanLong( [StrictlyLessThan( longLimit )] long? a )
+    private static void MethodWithLongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( longLimit )] ulong? a )
+    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleStrictlyLessThanLong( [StrictlyLessThan( longLimit )] double? a )
+    private static void MethodWithDoubleStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalStrictlyLessThanLong( [StrictlyLessThan( longLimit )] decimal? a )
+    private static void MethodWithDecimalStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] decimal? a )
     {
     }
 
@@ -137,31 +142,31 @@ public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
 
     #region Ulong
 
-    private static void MethodWithLongStrictlyGreaterThanUlong( [StrictlyGreaterThan( ulongLimit )] long? a )
+    private static void MethodWithLongStrictlyGreaterThanUlong( [StrictlyGreaterThan( _ulongLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongStrictlyGreaterThanUlong( [StrictlyGreaterThan( ulongLimit )] ulong? a )
+    private static void MethodWithUlongStrictlyGreaterThanUlong( [StrictlyGreaterThan( _ulongLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleStrictlyGreaterThanUlong( [StrictlyGreaterThan( ulongLimit )] double? a )
+    private static void MethodWithDoubleStrictlyGreaterThanUlong( [StrictlyGreaterThan( _ulongLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalStrictlyGreaterThanUlong( [StrictlyGreaterThan( ulongLimit )] decimal? a )
+    private static void MethodWithDecimalStrictlyGreaterThanUlong( [StrictlyGreaterThan( _ulongLimit )] decimal? a )
     {
     }
 
-    private static void MethodWithLongStrictlyLessThanUlong( [StrictlyLessThan( ulongLimit )] long? a )
+    private static void MethodWithLongStrictlyLessThanUlong( [StrictlyLessThan( _ulongLimit )] long? a )
     {
     }
 
-    private static void MethodWithDoubleStrictlyLessThanUlong( [StrictlyLessThan( ulongLimit )] double? a )
+    private static void MethodWithDoubleStrictlyLessThanUlong( [StrictlyLessThan( _ulongLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalStrictlyLessThanUlong( [StrictlyLessThan( ulongLimit )] decimal? a )
+    private static void MethodWithDecimalStrictlyLessThanUlong( [StrictlyLessThan( _ulongLimit )] decimal? a )
     {
     }
 
@@ -169,35 +174,35 @@ public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
 
     #region Double
 
-    private static void MethodWithLongStrictlyGreaterThanDouble( [StrictlyGreaterThan( doubleLimit )] long? a )
+    private static void MethodWithLongStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongStrictlyGreaterThanDouble( [StrictlyGreaterThan( doubleLimit )] ulong? a )
+    private static void MethodWithUlongStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleStrictlyGreaterThanDouble( [StrictlyGreaterThan( doubleLimit )] double? a )
+    private static void MethodWithDoubleStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( doubleLimit )] decimal? a )
+    private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] decimal? a )
     {
     }
 
-    private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( doubleLimit )] long? a )
+    private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongStrictlyLessThanDouble( [StrictlyLessThan( doubleLimit )] ulong? a )
+    private static void MethodWithUlongStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleStrictlyLessThanDouble( [StrictlyLessThan( doubleLimit )] double? a )
+    private static void MethodWithDoubleStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalStrictlyLessThanDouble( [StrictlyLessThan( doubleLimit )] decimal? a )
+    private static void MethodWithDecimalStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] decimal? a )
     {
     }
 

@@ -5,7 +5,6 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.Tests;
 
-// ReSharper disable InconsistentNaming
 public class NotNullAttributeTests
 {
     [Fact]
@@ -21,11 +20,11 @@ public class NotNullAttributeTests
     {
         var cut = new NotNullTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectParameterMethod( null ) );
+        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectParameterMethod( null! ) );
 
         Assert.NotNull( e );
-        Assert.Equal( "parameter", e.ParamName );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Equal( "parameter", e!.ParamName );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -33,11 +32,11 @@ public class NotNullAttributeTests
     {
         var cut = new NotNullTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ClassParameterMethod( null ) );
+        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ClassParameterMethod( null! ) );
 
         Assert.NotNull( e );
-        Assert.Equal( "parameter", e.ParamName );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Equal( "parameter", e!.ParamName );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -45,11 +44,11 @@ public class NotNullAttributeTests
     {
         var cut = new NotNullTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectProperty = null );
+        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectProperty = null! );
 
         Assert.NotNull( e );
-        Assert.Equal( "value", e.ParamName );
-        Assert.Contains( "ObjectProperty", e.Message );
+        Assert.Equal( "value", e!.ParamName );
+        Assert.Contains( "ObjectProperty", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -73,25 +72,10 @@ public class NotNullAttributeTests
     {
         var cut = new NotNullTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectField = null );
+        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectField = null! );
 
         Assert.NotNull( e );
-        Assert.Equal( "value", e.ParamName );
-        Assert.Contains( "ObjectField", e.Message );
+        Assert.Equal( "value", e!.ParamName );
+        Assert.Contains( "ObjectField", e!.Message, StringComparison.Ordinal );
     }
-}
-// ReSharper restore InconsistentNaming
-
-public class NotNullTestClass
-{
-    [NotNull]
-    public object ObjectField;
-
-    [NotNull]
-    public object ObjectProperty { get; set; }
-
-    public object ObjectParameterMethod( [NotNull] object parameter ) => parameter;
-
-
-    public object ClassParameterMethod( [NotNull] NotNullAttributeTests parameter ) => parameter;
 }

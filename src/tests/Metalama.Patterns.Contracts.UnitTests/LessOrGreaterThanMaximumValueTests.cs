@@ -5,20 +5,22 @@ using Xunit;
 // This is a modified copy of LessOrGreaterThanPositiveValueTests.cs
 // Keep the testing logic equal for all the copies!
 
+#pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+
 namespace Metalama.Patterns.Contracts.Tests;
 
 public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
 {
-    private const long longLimit = long.MaxValue;
-    private const ulong ulongLimit = ulong.MaxValue;
-    private const double doubleLimit = double.MaxValue;
+    private const long _longLimit = long.MaxValue;
+    private const ulong _ulongLimit = ulong.MaxValue;
+    private const double _doubleLimit = double.MaxValue;
 
     // This has to be double because decimal is not allowed as attribute constructor value.
     // Loss of precision is a consequence.
-    private const double decimalLimit = (double) decimal.MaxValue / (1 + DoubleTolerance);
+    private const double _decimalLimit = (double) decimal.MaxValue / (1 + DoubleTolerance);
 
-    private static readonly double doubleStep = FloatingPointHelper.GetDoubleStep( doubleLimit );
-    private static readonly decimal decimalStep = decimal.MaxValue * DecimalTolerance;
+    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly decimal _decimalStep = decimal.MaxValue * DecimalTolerance;
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Success() =>
@@ -27,23 +29,27 @@ public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Failure()
     {
-        AssertFails( TestMethodsWithGreaterThanAspect,
-            longLimit - 1,
-            ulongLimit - 1,
-            doubleLimit - doubleStep,
-            (decimal) decimalLimit - decimalStep );
-        AssertFails( TestMethodsWithGreaterThanAspect,
-            longLimit / 2,
-            ulongLimit / 2,
-            doubleLimit / 2,
-            (decimal) decimalLimit / 2 );
+        AssertFails( 
+            TestMethodsWithGreaterThanAspect,
+            _longLimit - 1,
+            _ulongLimit - 1,
+            _doubleLimit - _doubleStep,
+            (decimal) _decimalLimit - _decimalStep );
+        AssertFails( 
+            TestMethodsWithGreaterThanAspect,
+            _longLimit / 2,
+            _ulongLimit / 2,
+            _doubleLimit / 2,
+            (decimal) _decimalLimit / 2 );
         AssertFails( TestMethodsWithGreaterThanAspect, 0, 0, 0, 0 );
-        AssertFails( TestMethodsWithGreaterThanAspect,
-            longLimit / -2,
+        AssertFails( 
+            TestMethodsWithGreaterThanAspect,
+            _longLimit / -2,
             null,
-            doubleLimit / -2,
-            (decimal) decimalLimit / -2 );
-        AssertFails( TestMethodsWithGreaterThanAspect,
+            _doubleLimit / -2,
+            (decimal) _decimalLimit / -2 );
+        AssertFails( 
+            TestMethodsWithGreaterThanAspect,
             long.MinValue,
             ulong.MinValue,
             double.MinValue,
@@ -66,7 +72,7 @@ public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
         MethodWithLongLessThanDouble( long.MaxValue );
         MethodWithUlongLessThanDouble( ulong.MaxValue );
         MethodWithDoubleLessThanDouble( double.MaxValue );
-        MethodWithDecimalLessThanDouble( (decimal) decimalLimit );
+        MethodWithDecimalLessThanDouble( (decimal) _decimalLimit );
 
         TestMethodsWithLessThanAspect( 0, 0, 0, 0 );
         TestMethodsWithLessThanAspect( long.MinValue, ulong.MinValue, double.MinValue, decimal.MinValue );
@@ -78,20 +84,21 @@ public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
         AssertFails( MethodWithUlongLessThanLong, (ulong) long.MaxValue + 1 );
         AssertFails( MethodWithUlongLessThanLong, ulong.MaxValue );
 
-        AssertFails( MethodWithDoubleLessThanLong, (double) long.MaxValue + doubleStep );
+        AssertFails( MethodWithDoubleLessThanLong, (double) long.MaxValue + _doubleStep );
         AssertFails( MethodWithDoubleLessThanLong, double.MaxValue );
 
-        AssertFails( MethodWithDecimalLessThanLong, (decimal) long.MaxValue + decimalStep );
+        AssertFails( MethodWithDecimalLessThanLong, (decimal) long.MaxValue + _decimalStep );
         AssertFails( MethodWithDecimalLessThanLong, decimal.MaxValue );
 
-        AssertFails( MethodWithDoubleLessThanUlong, (double) ulong.MaxValue + doubleStep );
+        AssertFails( MethodWithDoubleLessThanUlong, (double) ulong.MaxValue + _doubleStep );
         AssertFails( MethodWithDoubleLessThanUlong, double.MaxValue );
 
-        AssertFails( MethodWithDecimalLessThanUlong, (decimal) ulong.MaxValue + decimalStep );
+        AssertFails( MethodWithDecimalLessThanUlong, (decimal) ulong.MaxValue + _decimalStep );
         AssertFails( MethodWithDecimalLessThanUlong, decimal.MaxValue );
     }
 
-    private static void TestMethodsWithGreaterThanAspect( long? longValue,
+    private static void TestMethodsWithGreaterThanAspect( 
+        long? longValue,
         ulong? ulongValue,
         double? doubleValue,
         decimal? decimalValue )
@@ -112,7 +119,8 @@ public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
         MethodWithDecimalGreaterThanDouble( decimalValue );
     }
 
-    private static void TestMethodsWithLessThanAspect( long? longValue,
+    private static void TestMethodsWithLessThanAspect( 
+        long? longValue,
         ulong? ulongValue,
         double? doubleValue,
         decimal? decimalValue )
@@ -135,35 +143,35 @@ public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
 
     #region Long
 
-    private static void MethodWithLongGreaterThanLong( [GreaterThan( longLimit )] long? a )
+    private static void MethodWithLongGreaterThanLong( [GreaterThan( _longLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongGreaterThanLong( [GreaterThan( longLimit )] ulong? a )
+    private static void MethodWithUlongGreaterThanLong( [GreaterThan( _longLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleGreaterThanLong( [GreaterThan( longLimit )] double? a )
+    private static void MethodWithDoubleGreaterThanLong( [GreaterThan( _longLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalGreaterThanLong( [GreaterThan( longLimit )] decimal? a )
+    private static void MethodWithDecimalGreaterThanLong( [GreaterThan( _longLimit )] decimal? a )
     {
     }
 
-    private static void MethodWithLongLessThanLong( [LessThan( longLimit )] long? a )
+    private static void MethodWithLongLessThanLong( [LessThan( _longLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongLessThanLong( [LessThan( longLimit )] ulong? a )
+    private static void MethodWithUlongLessThanLong( [LessThan( _longLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleLessThanLong( [LessThan( longLimit )] double? a )
+    private static void MethodWithDoubleLessThanLong( [LessThan( _longLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalLessThanLong( [LessThan( longLimit )] decimal? a )
+    private static void MethodWithDecimalLessThanLong( [LessThan( _longLimit )] decimal? a )
     {
     }
 
@@ -172,35 +180,35 @@ public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
     #region Ulong
 
     // Cannot use ulongLimit by design. Covered by build test.
-    private static void MethodWithLongGreaterThanUlong( [GreaterThan( longLimit )] long? a )
+    private static void MethodWithLongGreaterThanUlong( [GreaterThan( _longLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongGreaterThanUlong( [GreaterThan( ulongLimit )] ulong? a )
+    private static void MethodWithUlongGreaterThanUlong( [GreaterThan( _ulongLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleGreaterThanUlong( [GreaterThan( ulongLimit )] double? a )
+    private static void MethodWithDoubleGreaterThanUlong( [GreaterThan( _ulongLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalGreaterThanUlong( [GreaterThan( ulongLimit )] decimal? a )
+    private static void MethodWithDecimalGreaterThanUlong( [GreaterThan( _ulongLimit )] decimal? a )
     {
     }
 
-    private static void MethodWithLongLessThanUlong( [LessThan( ulongLimit )] long? a )
+    private static void MethodWithLongLessThanUlong( [LessThan( _ulongLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongLessThanUlong( [LessThan( ulongLimit )] ulong? a )
+    private static void MethodWithUlongLessThanUlong( [LessThan( _ulongLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleLessThanUlong( [LessThan( ulongLimit )] double? a )
+    private static void MethodWithDoubleLessThanUlong( [LessThan( _ulongLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalLessThanUlong( [LessThan( ulongLimit )] decimal? a )
+    private static void MethodWithDecimalLessThanUlong( [LessThan( _ulongLimit )] decimal? a )
     {
     }
 
@@ -209,37 +217,37 @@ public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
     #region Double
 
     // Cannot use doubleLimit by design. Covered by build test.
-    private static void MethodWithLongGreaterThanDouble( [GreaterThan( (double) longLimit )] long? a )
+    private static void MethodWithLongGreaterThanDouble( [GreaterThan( (double) _longLimit )] long? a )
     {
     }
 
     // Cannot use doubleLimit by design. Covered by build test.
-    private static void MethodWithUlongGreaterThanDouble( [GreaterThan( (double) ulongLimit )] ulong? a )
+    private static void MethodWithUlongGreaterThanDouble( [GreaterThan( (double) _ulongLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleGreaterThanDouble( [GreaterThan( doubleLimit )] double? a )
+    private static void MethodWithDoubleGreaterThanDouble( [GreaterThan( _doubleLimit )] double? a )
     {
     }
 
     // Cannot use doubleLimit by design. Covered by build test.
-    private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( (double) decimalLimit )] decimal? a )
+    private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( (double) _decimalLimit )] decimal? a )
     {
     }
 
-    private static void MethodWithLongLessThanDouble( [LessThan( doubleLimit )] long? a )
+    private static void MethodWithLongLessThanDouble( [LessThan( _doubleLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongLessThanDouble( [LessThan( doubleLimit )] ulong? a )
+    private static void MethodWithUlongLessThanDouble( [LessThan( _doubleLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleLessThanDouble( [LessThan( doubleLimit )] double? a )
+    private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalLessThanDouble( [LessThan( doubleLimit )] decimal? a )
+    private static void MethodWithDecimalLessThanDouble( [LessThan( _doubleLimit )] decimal? a )
     {
     }
 

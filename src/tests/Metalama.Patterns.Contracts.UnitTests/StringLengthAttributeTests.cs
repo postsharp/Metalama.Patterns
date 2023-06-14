@@ -5,7 +5,6 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.Tests;
 
-// ReSharper disable InconsistentNaming
 public class StringLengthAttributeTests
 {
     [Fact]
@@ -24,7 +23,7 @@ public class StringLengthAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethod( "12345678901" ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -43,7 +42,7 @@ public class StringLengthAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = "12345678901" );
 
         Assert.NotNull( e );
-        Assert.Contains( "StringField", e.Message );
+        Assert.Contains( "StringField", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -54,7 +53,7 @@ public class StringLengthAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = "1234" );
 
         Assert.NotNull( e );
-        Assert.Contains( "StringField", e.Message );
+        Assert.Contains( "StringField", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -62,18 +61,8 @@ public class StringLengthAttributeTests
     {
         var cut = new StringLengthTestClass();
 
-        cut.StringField = null;
+        cut.StringField = null!;
 
         Assert.Null( cut.StringField );
     }
-}
-
-// ReSharper restore InconsistentNaming
-
-public class StringLengthTestClass
-{
-    [StringLength( 5, 10 )]
-    public string StringField;
-
-    public string StringMethod( [StringLength( 10 )] string parameter ) => parameter;
 }

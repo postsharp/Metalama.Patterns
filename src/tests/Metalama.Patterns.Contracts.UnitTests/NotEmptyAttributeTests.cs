@@ -5,7 +5,6 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.Tests;
 
-// ReSharper disable InconsistentNaming
 public class NotEmptyAttributeTests
 {
     [Fact]
@@ -24,7 +23,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethod( string.Empty ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -43,7 +42,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = string.Empty );
 
         Assert.NotNull( e );
-        Assert.Contains( "StringField", e.Message );
+        Assert.Contains( "StringField", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -62,7 +61,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.ListMethod( new List<int>() ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -81,7 +80,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.ListField = new List<int>() );
 
         Assert.NotNull( e );
-        Assert.Contains( "ListField", e.Message );
+        Assert.Contains( "ListField", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -92,7 +91,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.GenericCollectionProperty = new List<int>() );
 
         Assert.NotNull( e );
-        Assert.Contains( "GenericCollectionProperty", e.Message );
+        Assert.Contains( "GenericCollectionProperty", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -104,7 +103,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethodWithRef( "abc", ref p ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [SkippableFact( Skip = "#33302" )]
@@ -116,7 +115,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithRef( "", ref p ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -128,7 +127,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithOut( "", out p ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -139,7 +138,7 @@ public class NotEmptyAttributeTests
         var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithRetVal( "" ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "return value", e.Message );
+        Assert.Contains( "return value", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -151,35 +150,6 @@ public class NotEmptyAttributeTests
             cut.IReadOnlyCollectionMethod( new List<int>().AsReadOnly() ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
-    }
-}
-
-// ReSharper restore InconsistentNaming
-
-public class NotEmptyTestClass
-{
-    [NotEmpty]
-    public string StringField;
-
-    [NotEmpty]
-    public List<int> ListField;
-
-    [NotEmpty]
-    public ICollection<int> GenericCollectionProperty { get; set; }
-
-    public string StringMethod( [NotEmpty] string parameter ) => parameter;
-
-    public List<int> ListMethod( [NotEmpty] List<int> parameter ) => parameter;
-
-    public void StringMethodWithRef( string newVal, [NotEmpty] ref string parameter ) => parameter = newVal;
-
-    public void StringMethodWithOut( string newVal, [NotEmpty] out string parameter ) => parameter = newVal;
-
-    [return: NotEmpty]
-    public string StringMethodWithRetVal( string retVal ) => retVal;
-
-    public void IReadOnlyCollectionMethod<T>( [NotEmpty] IReadOnlyCollection<T> parameter )
-    {
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 }

@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 
+#pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>

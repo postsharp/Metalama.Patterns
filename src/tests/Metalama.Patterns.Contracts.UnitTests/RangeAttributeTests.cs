@@ -5,7 +5,6 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.Tests;
 
-// ReSharper disable InconsistentNaming
 public class RangeAttributeTests
 {
     [Fact]
@@ -52,7 +51,6 @@ public class RangeAttributeTests
         cut.ZeroToTenDouble( 10.0 );
     }
 
-
     [Fact]
     public void Given_FloatMethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
     {
@@ -64,7 +62,6 @@ public class RangeAttributeTests
         cut.ZeroToTenFloat( 10.0f );
         cut.ZeroToTenNullableFloat( 10.0f );
     }
-
 
     [Fact]
     public void Given_FieldWithInRangeAttribute_When_CorrectValuePassed_Then_Success()
@@ -86,7 +83,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( -10 ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -97,9 +94,8 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( 20 ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
-
 
     [Fact]
     public void Given_DoubleMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
@@ -109,7 +105,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( 10.1 ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -120,9 +116,8 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( -10.0 ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
-
 
     [Fact]
     public void Given_FloatMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
@@ -132,7 +127,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( 10.1f ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -143,9 +138,8 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( -10.0f ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
-
 
     [Fact]
     public void Given_DecimalMethodWithInRangeParameter_When_ToLargeValuePassed_Then_ExceptionIsThrown()
@@ -155,7 +149,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( 20.0m ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -166,7 +160,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( -10.0m ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -177,7 +171,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableDecimal( 20.0m ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -189,7 +183,7 @@ public class RangeAttributeTests
             cut.ZeroToTenNullableDecimal( -10.0m ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -200,7 +194,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( 20 ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -211,7 +205,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( -10 ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -222,7 +216,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.GreaterThanZeroField = -10 );
 
         Assert.NotNull( e );
-        Assert.Contains( "GreaterThanZeroField", e.Message );
+        Assert.Contains( "GreaterThanZeroField", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -233,7 +227,7 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.LessThanZeroField = 20 );
 
         Assert.NotNull( e );
-        Assert.Contains( "LessThanZeroField", e.Message );
+        Assert.Contains( "LessThanZeroField", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -246,7 +240,7 @@ public class RangeAttributeTests
             () => cut.ZeroToTenNullableIntRef( 1, ref p ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [SkippableFact( Skip = "#33302" )]
@@ -259,7 +253,7 @@ public class RangeAttributeTests
             cut.ZeroToTenNullableIntRef( -1, ref p ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -272,7 +266,7 @@ public class RangeAttributeTests
             cut.ZeroToTenNullableIntOut( -1, out p ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "parameter", e.Message );
+        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -283,40 +277,6 @@ public class RangeAttributeTests
         var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
 
         Assert.NotNull( e );
-        Assert.Contains( "return value", e.Message );
+        Assert.Contains( "return value", e!.Message, StringComparison.Ordinal );
     }
-}
-
-// ReSharper restore InconsistentNaming
-
-public class RangeTestClass
-{
-    [GreaterThan( 0 )]
-    public int GreaterThanZeroField;
-
-    [LessThan( 0 )]
-    public long LessThanZeroField { get; set; }
-
-    public int ZeroToTenMethod( [Range( 0, 10 )] short parameter ) => parameter;
-
-    public double ZeroToTenDouble( [Range( 0d, 10d )] double parameter ) => parameter;
-
-    public decimal ZeroToTenDecimal( [Range( 0d, 10d )] decimal parameter ) => parameter;
-
-    public decimal? ZeroToTenNullableDecimal( [Range( 0d, 10d )] decimal? parameter ) => parameter;
-
-    public long? ZeroToTenNullableInt( [Range( 0, 10 )] long? parameter ) => parameter;
-
-    public float ZeroToTenFloat( [Range( 0, 10 )] float parameter ) => parameter;
-
-    public float? ZeroToTenNullableFloat( [Range( 0, 10 )] float? parameter ) => parameter;
-
-    public decimal LargeDecimalRange( [Range( double.MinValue, double.MaxValue )] decimal parameter ) => parameter;
-
-    public void ZeroToTenNullableIntRef( long? newVal, [Range( 0, 10 )] ref long? parameter ) => parameter = newVal;
-
-    public void ZeroToTenNullableIntOut( long? newVal, [Range( 0, 10 )] out long? parameter ) => parameter = newVal;
-
-    [return: Range( 0, 10 )]
-    public long? ZeroToTenNullableIntRetVal( long? retVal ) => retVal;
 }

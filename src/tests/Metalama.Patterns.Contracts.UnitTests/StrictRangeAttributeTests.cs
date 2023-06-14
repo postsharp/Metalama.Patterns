@@ -7,17 +7,17 @@ namespace Metalama.Patterns.Contracts.Tests;
 
 public class StrictRangeAttributeTests
 {
-    private const long longMin = 100;
-    private const long longMax = 200;
+    private const long _longMin = 100;
+    private const long _longMax = 200;
 
-    private const ulong ulongMin = 100;
-    private const ulong ulongMax = 200;
+    private const ulong _ulongMin = 100;
+    private const ulong _ulongMax = 200;
 
-    private const double doubleMin = 100;
-    private const double doubleMax = 200;
+    private const double _doubleMin = 100;
+    private const double _doubleMax = 200;
 
-    private const decimal decimalMin = 100;
-    private const decimal decimalMax = 200;
+    private const decimal _decimalMin = 100;
+    private const decimal _decimalMax = 200;
 
     [Fact]
     public void TestValuesInsideRange() => TestAllMethods( 150, 150, 150, 150 );
@@ -26,25 +26,25 @@ public class StrictRangeAttributeTests
     public void TestValuesOutsideRange()
     {
         AssertEx.Throws<ArgumentOutOfRangeException>( () =>
-            TestAllMethods( longMin - 1, ulongMin - 1, doubleMin - 1, decimalMin - 1 ) );
+            TestAllMethods( _longMin - 1, _ulongMin - 1, _doubleMin - 1, _decimalMin - 1 ) );
         AssertEx.Throws<ArgumentOutOfRangeException>( () =>
-            TestAllMethods( longMax + 1, ulongMax + 1, doubleMax + 1, decimalMax + 1 ) );
+            TestAllMethods( _longMax + 1, _ulongMax + 1, _doubleMax + 1, _decimalMax + 1 ) );
     }
 
     [Fact]
     public void TestValuesOnEdges()
     {
         AssertEx.Throws<ArgumentOutOfRangeException>( () =>
-            TestAllMethods( longMin, ulongMin, doubleMin, decimalMin ) );
+            TestAllMethods( _longMin, _ulongMin, _doubleMin, _decimalMin ) );
         AssertEx.Throws<ArgumentOutOfRangeException>( () =>
-            TestAllMethods( longMax, ulongMax, doubleMax, decimalMax ) );
+            TestAllMethods( _longMax, _ulongMax, _doubleMax, _decimalMax ) );
     }
 
     [Fact]
     public void TestDoubleTolerance()
     {
-        MethodWithDoubleInDoubleStrictRange( doubleMin + FloatingPointHelper.GetDoubleStep( doubleMin ) );
-        MethodWithDoubleInDoubleStrictRange( doubleMax - FloatingPointHelper.GetDoubleStep( doubleMax ) );
+        MethodWithDoubleInDoubleStrictRange( _doubleMin + FloatingPointHelper.GetDoubleStep( _doubleMin ) );
+        MethodWithDoubleInDoubleStrictRange( _doubleMax - FloatingPointHelper.GetDoubleStep( _doubleMax ) );
     }
 
     private static void TestAllMethods( long longValue, ulong ulongValue, double doubleValue, decimal decimalValue )
@@ -67,19 +67,19 @@ public class StrictRangeAttributeTests
 
     #region long
 
-    private static void MethodWithLongInLongStrictRange( [StrictRange( longMin, longMax )] long? value )
+    private static void MethodWithLongInLongStrictRange( [StrictRange( _longMin, _longMax )] long? value )
     {
     }
 
-    private static void MethodWithUlongInLongStrictRange( [StrictRange( longMin, longMax )] ulong? a )
+    private static void MethodWithUlongInLongStrictRange( [StrictRange( _longMin, _longMax )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleInLongStrictRange( [StrictRange( longMin, longMax )] double? a )
+    private static void MethodWithDoubleInLongStrictRange( [StrictRange( _longMin, _longMax )] double? a )
     {
     }
 
-    private static void MethodWithDecimalInLongStrictRange( [StrictRange( longMin, longMax )] decimal? a )
+    private static void MethodWithDecimalInLongStrictRange( [StrictRange( _longMin, _longMax )] decimal? a )
     {
     }
 
@@ -87,19 +87,19 @@ public class StrictRangeAttributeTests
 
     #region ulong
 
-    private static void MethodWithLongInULongStrictRange( [StrictRange( ulongMin, ulongMax )] long? value )
+    private static void MethodWithLongInULongStrictRange( [StrictRange( _ulongMin, _ulongMax )] long? value )
     {
     }
 
-    private static void MethodWithUlongInULongStrictRange( [StrictRange( ulongMin, ulongMax )] ulong? a )
+    private static void MethodWithUlongInULongStrictRange( [StrictRange( _ulongMin, _ulongMax )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleInULongStrictRange( [StrictRange( ulongMin, ulongMax )] double? a )
+    private static void MethodWithDoubleInULongStrictRange( [StrictRange( _ulongMin, _ulongMax )] double? a )
     {
     }
 
-    private static void MethodWithDecimalInULongStrictRange( [StrictRange( ulongMin, ulongMax )] decimal? a )
+    private static void MethodWithDecimalInULongStrictRange( [StrictRange( _ulongMin, _ulongMax )] decimal? a )
     {
     }
 
@@ -107,19 +107,19 @@ public class StrictRangeAttributeTests
 
     #region double
 
-    private static void MethodWithLongInDoubleStrictRange( [StrictRange( doubleMin, doubleMax )] long? value )
+    private static void MethodWithLongInDoubleStrictRange( [StrictRange( _doubleMin, _doubleMax )] long? value )
     {
     }
 
-    private static void MethodWithUlongInDoubleStrictRange( [StrictRange( doubleMin, doubleMax )] ulong? a )
+    private static void MethodWithUlongInDoubleStrictRange( [StrictRange( _doubleMin, _doubleMax )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleInDoubleStrictRange( [StrictRange( doubleMin, doubleMax )] double? a )
+    private static void MethodWithDoubleInDoubleStrictRange( [StrictRange( _doubleMin, _doubleMax )] double? a )
     {
     }
 
-    private static void MethodWithDecimalInDoubleStrictRange( [StrictRange( doubleMin, doubleMax )] decimal? a )
+    private static void MethodWithDecimalInDoubleStrictRange( [StrictRange( _doubleMin, _doubleMax )] decimal? a )
     {
     }
 

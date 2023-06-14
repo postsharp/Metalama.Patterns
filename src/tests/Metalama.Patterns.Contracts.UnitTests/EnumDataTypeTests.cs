@@ -5,7 +5,6 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.Tests;
 
-// ReSharper disable InconsistentNaming
 public class EnumDataTypeTests
 {
     [Fact]
@@ -37,7 +36,7 @@ public class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.IntEnum = 10 );
 
         Assert.NotNull( e );
-        Assert.Contains( "IntEnum", e.Message );
+        Assert.Contains( "IntEnum", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -48,7 +47,7 @@ public class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringEnum = "asd" );
 
         Assert.NotNull( e );
-        Assert.Contains( "StringEnum", e.Message );
+        Assert.Contains( "StringEnum", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -59,7 +58,7 @@ public class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.ObjectEnum = new object() );
 
         Assert.NotNull( e );
-        Assert.Contains( "ObjectEnum", e.Message );
+        Assert.Contains( "ObjectEnum", e!.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -77,35 +76,6 @@ public class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.IntFlag = 10 );
 
         Assert.NotNull( e );
-        Assert.Contains( "IntFlag", e.Message );
+        Assert.Contains( "IntFlag", e!.Message, StringComparison.Ordinal );
     }
-}
-// ReSharper restore InconsistentNaming
-
-public class EnumTestClass
-{
-    [EnumDataType( typeof(TestEnum) )]
-    public string StringEnum;
-
-    [EnumDataType( typeof(TestEnum) )]
-    public int IntEnum;
-
-    [EnumDataType( typeof(TestEnum) )]
-    public object ObjectEnum;
-
-    [EnumDataType( typeof(TestFlagsEnum) )]
-    public int IntFlag;
-}
-
-public enum TestEnum
-{
-    Foo,
-    Bar
-}
-
-[Flags]
-public enum TestFlagsEnum
-{
-    Foo = 1,
-    Bar = 2
 }

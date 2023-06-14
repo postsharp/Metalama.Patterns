@@ -9,68 +9,74 @@ namespace Metalama.Patterns.Contracts.Tests;
 
 public class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 {
-    private const long longLimit = -100;
-    private const double doubleLimit = -100;
+    private const long _longLimit = -100;
+    private const double _doubleLimit = -100;
 
-    private static readonly double doubleStep = FloatingPointHelper.GetDoubleStep( doubleLimit );
-    private static readonly decimal decimalStep = FloatingPointHelper.GetDecimalStep( (decimal) doubleLimit );
+    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly decimal _decimalStep = FloatingPointHelper.GetDecimalStep( (decimal) _doubleLimit );
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Success()
     {
-        TestMethodsWithGreaterThanAspect( longLimit, null, doubleLimit, (decimal) doubleLimit );
-        TestMethodsWithGreaterThanAspect( longLimit / 2, null, doubleLimit / 2, (decimal) doubleLimit / 2 );
+        TestMethodsWithGreaterThanAspect( _longLimit, null, _doubleLimit, (decimal) _doubleLimit );
+        TestMethodsWithGreaterThanAspect( _longLimit / 2, null, _doubleLimit / 2, (decimal) _doubleLimit / 2 );
         TestMethodsWithGreaterThanAspect( 0, 0, 0, 0 );
-        TestMethodsWithGreaterThanAspect( longLimit * -2,
-            (ulong) Math.Abs( longLimit ) * 2,
-            doubleLimit * -2,
-            (decimal) doubleLimit * -2 );
+        TestMethodsWithGreaterThanAspect( 
+            _longLimit * -2,
+            (ulong) Math.Abs( _longLimit ) * 2,
+            _doubleLimit * -2,
+            (decimal) _doubleLimit * -2 );
         TestMethodsWithGreaterThanAspect( long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
     }
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Failure()
     {
-        AssertFails( TestMethodsWithGreaterThanAspect,
-            longLimit - 1,
+        AssertFails( 
+            TestMethodsWithGreaterThanAspect,
+            _longLimit - 1,
             null,
-            doubleLimit - doubleStep,
-            (decimal) doubleLimit - decimalStep );
-        AssertFails( TestMethodsWithGreaterThanAspect,
-            longLimit * 2,
+            _doubleLimit - _doubleStep,
+            (decimal) _doubleLimit - _decimalStep );
+        AssertFails( 
+            TestMethodsWithGreaterThanAspect,
+            _longLimit * 2,
             null,
-            doubleLimit * 2,
-            (decimal) doubleLimit * 2 );
+            _doubleLimit * 2,
+            (decimal) _doubleLimit * 2 );
         AssertFails( TestMethodsWithGreaterThanAspect, long.MinValue, null, double.MinValue, decimal.MinValue );
     }
 
     [Fact]
     public void TestMethodsWithLessThanAspect_Success()
     {
-        TestMethodsWithLessThanAspect( longLimit, null, doubleLimit, (decimal) doubleLimit );
-        TestMethodsWithLessThanAspect( longLimit * 2, null, doubleLimit * 2, (decimal) doubleLimit * 2 );
+        TestMethodsWithLessThanAspect( _longLimit, null, _doubleLimit, (decimal) _doubleLimit );
+        TestMethodsWithLessThanAspect( _longLimit * 2, null, _doubleLimit * 2, (decimal) _doubleLimit * 2 );
         TestMethodsWithLessThanAspect( long.MinValue, null, double.MinValue, decimal.MinValue );
     }
 
     [Fact]
     public void TestMethodsWithLessThanAspect_Failure()
     {
-        AssertFails( TestMethodsWithLessThanAspect,
-            longLimit + 1,
+        AssertFails(
+            TestMethodsWithLessThanAspect,
+            _longLimit + 1,
             null,
-            doubleLimit + doubleStep,
-            (decimal) doubleLimit + decimalStep );
-        AssertFails( TestMethodsWithLessThanAspect, longLimit / 2, null, doubleLimit / 2, (decimal) doubleLimit / 2 );
+            _doubleLimit + _doubleStep,
+            (decimal) _doubleLimit + _decimalStep );
+        AssertFails( TestMethodsWithLessThanAspect, _longLimit / 2, null, _doubleLimit / 2, (decimal) _doubleLimit / 2 );
         AssertFails( TestMethodsWithLessThanAspect, 0, 0, 0, 0 );
-        AssertFails( TestMethodsWithLessThanAspect,
-            longLimit * -2,
-            (ulong) Math.Abs( longLimit ) * 2,
-            doubleLimit * -2,
-            (decimal) doubleLimit * -2 );
+        AssertFails( 
+            TestMethodsWithLessThanAspect,
+            _longLimit * -2,
+            (ulong) Math.Abs( _longLimit ) * 2,
+            _doubleLimit * -2,
+            (decimal) _doubleLimit * -2 );
         AssertFails( TestMethodsWithLessThanAspect, long.MaxValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
     }
 
-    private static void TestMethodsWithGreaterThanAspect( long? longValue,
+    private static void TestMethodsWithGreaterThanAspect( 
+        long? longValue,
         ulong? ulongValue,
         double? doubleValue,
         decimal? decimalValue )
@@ -86,7 +92,8 @@ public class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
         MethodWithDecimalGreaterThanDouble( decimalValue );
     }
 
-    private static void TestMethodsWithLessThanAspect( long? longValue,
+    private static void TestMethodsWithLessThanAspect( 
+        long? longValue,
         ulong? ulongValue,
         double? doubleValue,
         decimal? decimalValue )
@@ -102,31 +109,31 @@ public class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 
     #region Long
 
-    private static void MethodWithLongGreaterThanLong( [GreaterThan( longLimit )] long? a )
+    private static void MethodWithLongGreaterThanLong( [GreaterThan( _longLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongGreaterThanLong( [GreaterThan( longLimit )] ulong? a )
+    private static void MethodWithUlongGreaterThanLong( [GreaterThan( _longLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleGreaterThanLong( [GreaterThan( longLimit )] double? a )
+    private static void MethodWithDoubleGreaterThanLong( [GreaterThan( _longLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalGreaterThanLong( [GreaterThan( longLimit )] decimal? a )
+    private static void MethodWithDecimalGreaterThanLong( [GreaterThan( _longLimit )] decimal? a )
     {
     }
 
-    private static void MethodWithLongLessThanLong( [LessThan( longLimit )] long? a )
+    private static void MethodWithLongLessThanLong( [LessThan( _longLimit )] long? a )
     {
     }
 
-    private static void MethodWithDoubleLessThanLong( [LessThan( longLimit )] double? a )
+    private static void MethodWithDoubleLessThanLong( [LessThan( _longLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalLessThanLong( [LessThan( longLimit )] decimal? a )
+    private static void MethodWithDecimalLessThanLong( [LessThan( _longLimit )] decimal? a )
     {
     }
 
@@ -134,31 +141,31 @@ public class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 
     #region Double
 
-    private static void MethodWithLongGreaterThanDouble( [GreaterThan( doubleLimit )] long? a )
+    private static void MethodWithLongGreaterThanDouble( [GreaterThan( _doubleLimit )] long? a )
     {
     }
 
-    private static void MethodWithUlongGreaterThanDouble( [GreaterThan( doubleLimit )] ulong? a )
+    private static void MethodWithUlongGreaterThanDouble( [GreaterThan( _doubleLimit )] ulong? a )
     {
     }
 
-    private static void MethodWithDoubleGreaterThanDouble( [GreaterThan( doubleLimit )] double? a )
+    private static void MethodWithDoubleGreaterThanDouble( [GreaterThan( _doubleLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( doubleLimit )] decimal? a )
+    private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( _doubleLimit )] decimal? a )
     {
     }
 
-    private static void MethodWithLongLessThanDouble( [LessThan( doubleLimit )] long? a )
+    private static void MethodWithLongLessThanDouble( [LessThan( _doubleLimit )] long? a )
     {
     }
 
-    private static void MethodWithDoubleLessThanDouble( [LessThan( doubleLimit )] double? a )
+    private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleLimit )] double? a )
     {
     }
 
-    private static void MethodWithDecimalLessThanDouble( [LessThan( doubleLimit )] decimal? a )
+    private static void MethodWithDecimalLessThanDouble( [LessThan( _doubleLimit )] decimal? a )
     {
     }
 

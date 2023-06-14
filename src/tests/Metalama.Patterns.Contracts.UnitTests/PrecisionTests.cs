@@ -8,7 +8,8 @@ namespace Metalama.Patterns.Contracts.Tests;
 public class PrecisionTests : RangeContractTestsBase
 {
     [Fact]
-    public void CheckDoubleTolerance() => Assert.Equal( DoubleTolerance.ToString( CultureInfo.InvariantCulture ),
+    public void CheckDoubleTolerance() => Assert.Equal( 
+        DoubleTolerance.ToString( CultureInfo.InvariantCulture ),
         FloatingPointHelper.DoubleTolerance.ToString( CultureInfo.InvariantCulture ) );
 
     [Fact]
