@@ -75,6 +75,7 @@ public class RegularExpressionAttribute : ContractAspect
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
         var info = this.GetExceptioninfo();
+        var aspectType = meta.CompileTime( this.GetType() );
 
         if ( value != null && !Regex.IsMatch( value, this.Pattern, this.Options ) )
         {
@@ -82,7 +83,7 @@ public class RegularExpressionAttribute : ContractAspect
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     info.ExceptionType,
-                    info.AspectType,
+                    aspectType,
                     value,
                     targetName,
                     targetKind,
@@ -94,7 +95,7 @@ public class RegularExpressionAttribute : ContractAspect
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     info.ExceptionType,
-                    info.AspectType,
+                    aspectType,
                     value,
                     targetName,
                     targetKind,
@@ -105,9 +106,8 @@ public class RegularExpressionAttribute : ContractAspect
     }
 
     [CompileTime]
-    protected virtual (Type ExceptionType, Type AspectType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
+    protected virtual (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument) GetExceptioninfo()
         => (typeof( ArgumentException ),
-            typeof( RegularExpressionAttribute ),
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider.RegularExpressionErrorMessage ) ),
             true);
 }
