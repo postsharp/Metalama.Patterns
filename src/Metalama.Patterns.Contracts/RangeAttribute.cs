@@ -592,7 +592,7 @@ public class RangeAttribute : ContractAspect
         var basicType = (INamedType) type.ToNonNullableType();
         var isNullable = type.IsNullable == true;
         var exceptionInfo = this.GetExceptioninfo();
-        var exceptionType = meta.CompileTime( this.GetType() );//.ToTypeOf().Value;
+        var exceptionType = meta.CompileTime( this.GetType() );
 
         if ( type.SpecialType == SpecialType.Object )
         {

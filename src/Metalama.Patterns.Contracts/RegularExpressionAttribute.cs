@@ -74,15 +74,15 @@ public class RegularExpressionAttribute : ContractAspect
     public override void Validate( dynamic? value )
     {
         CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-        var info = GetExceptioninfo();
+        var info = this.GetExceptioninfo();
 
         if ( value != null && !Regex.IsMatch( value, this.Pattern, this.Options ) )
         {
             if ( info.IncludePatternArgument )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    info.ExceptionType.ToTypeOf().Value,
-                    info.AspectType.ToTypeOf().Value,
+                    info.ExceptionType,
+                    info.AspectType,
                     value,
                     targetName,
                     targetKind,
@@ -93,8 +93,8 @@ public class RegularExpressionAttribute : ContractAspect
             else
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    info.ExceptionType.ToTypeOf().Value,
-                    info.AspectType.ToTypeOf().Value,
+                    info.ExceptionType,
+                    info.AspectType,
                     value,
                     targetName,
                     targetKind,
