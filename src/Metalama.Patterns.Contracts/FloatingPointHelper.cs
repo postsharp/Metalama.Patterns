@@ -38,10 +38,10 @@ internal static class FloatingPointHelper
         double lastGoodValue = 1;
 
         // ReSharper disable once CompareOfFloatsByEqualityOperator
-        while ( 1 != 1 + value )
+        while ( 1 + value != 1 )
         {
             lastGoodValue = value;
-            value = value / 2;
+            value /= 2;
         }
 
         return lastGoodValue;
@@ -55,7 +55,7 @@ internal static class FloatingPointHelper
         while ( 1 + value != 1 )
         {
             lastGoodValue = value;
-            value = value / 10;
+            value /= 10;
         }
 
         return lastGoodValue;
