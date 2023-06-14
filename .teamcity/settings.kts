@@ -6,6 +6,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.sshAgent
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.Swabra
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.swabra
+import jetbrains.buildServer.configs.kotlin.v2019_2.failureConditions.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.powerShell
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.*
 
@@ -15,9 +16,8 @@ project {
 
    buildType(DebugBuild)
    buildType(PublicBuild)
-   buildType(PublicDeployment)
    buildType(VersionBump)
-   buildTypesOrder = arrayListOf(DebugBuild,PublicBuild,PublicDeployment,VersionBump)
+   buildTypesOrder = arrayListOf(DebugBuild,PublicBuild,VersionBump)
 }
 
 object DebugBuild : BuildType({
@@ -46,12 +46,36 @@ object DebugBuild : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "test --configuration Debug --buildNumber %build.number%")
+            param("jetbrains_powershell_scriptArguments", "test --configuration Debug --buildNumber %build.number% --buildType %system.teamcity.buildType.id%")
+        }
+
+        // Step to kill all dotnet or VBCSCompiler processes that might be locking files that Swabra deletes in the beginning of another build.
+        powerShell {
+            name = "Kill background processes after build"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools kill")
+            executionMode = BuildStep.ExecutionMode.ALWAYS
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            threshold = 300
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
         }
     }
 
     requirements {
-        equals("env.BuildAgentType", "caravela03")
+        equals("env.BuildAgentType", "caravela04cloud")
     }
 
     features {
@@ -74,9 +98,44 @@ object DebugBuild : BuildType({
 
     dependencies {
 
-        snapshot(AbsoluteId("Metalama_Metalama_DebugBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20232_Metalama_DebugBuild")) {
+            snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
-                }
+            }
+
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama"
+            }
+
+        }
+
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaBackstage_ReleaseBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
+            }
+
+        }
+
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaCompiler_ReleaseBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/packages/Release/Shipping/**/*=>dependencies/Metalama.Compiler"
+            }
+
+        }
 
      }
 
@@ -108,54 +167,36 @@ object PublicBuild : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "test --configuration Public --buildNumber %build.number%")
+            param("jetbrains_powershell_scriptArguments", "test --configuration Public --buildNumber %build.number% --buildType %system.teamcity.buildType.id%")
         }
-    }
 
-    requirements {
-        equals("env.BuildAgentType", "caravela03")
-    }
-
-    features {
-        swabra {
-            lockingProcesses = Swabra.LockingProcessPolicy.KILL
-            verbose = true
-        }
-    }
-
-    dependencies {
-
-        snapshot(AbsoluteId("Metalama_Metalama_PublicBuild")) {
-                     onDependencyFailure = FailureAction.FAIL_TO_START
-                }
-
-     }
-
-})
-
-object PublicDeployment : BuildType({
-
-    name = "Deploy [Public]"
-
-    type = Type.DEPLOYMENT
-
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-
-    steps {
+        // Step to kill all dotnet or VBCSCompiler processes that might be locking files that Swabra deletes in the beginning of another build.
         powerShell {
-            name = "Deploy [Public]"
+            name = "Kill background processes after build"
             scriptMode = file {
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "publish --configuration Public")
+            param("jetbrains_powershell_scriptArguments", "tools kill")
+            executionMode = BuildStep.ExecutionMode.ALWAYS
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            threshold = 300
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
         }
     }
 
     requirements {
-        equals("env.BuildAgentType", "caravela03")
+        equals("env.BuildAgentType", "caravela04cloud")
     }
 
     features {
@@ -163,27 +204,47 @@ object PublicDeployment : BuildType({
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
         }
-        sshAgent {
-            // By convention, the SSH key name is always PostSharp.Engineering for all repositories using SSH to connect.
-            teamcitySshKey = "PostSharp.Engineering"
-        }
     }
 
     dependencies {
 
-        snapshot(AbsoluteId("Metalama_Metalama_PublicDeployment")) {
-                     onDependencyFailure = FailureAction.FAIL_TO_START
-                }
-
-        dependency(PublicBuild) {
+        dependency(AbsoluteId("Metalama_Metalama20232_Metalama_PublicBuild")) {
             snapshot {
-                onDependencyFailure = FailureAction.FAIL_TO_START
+                     onDependencyFailure = FailureAction.FAIL_TO_START
             }
+
 
             artifacts {
                 cleanDestination = true
-                artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private\n+:artifacts/testResults/**/*=>artifacts/testResults"
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama"
             }
+
+        }
+
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaBackstage_PublicBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
+            }
+
+        }
+
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaCompiler_PublicBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/packages/Release/Shipping/**/*=>dependencies/Metalama.Compiler"
+            }
+
         }
 
      }
@@ -209,10 +270,34 @@ object VersionBump : BuildType({
             noProfile = false
             param("jetbrains_powershell_scriptArguments", "bump")
         }
+
+        // Step to kill all dotnet or VBCSCompiler processes that might be locking files that Swabra deletes in the beginning of another build.
+        powerShell {
+            name = "Kill background processes after build"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools kill")
+            executionMode = BuildStep.ExecutionMode.ALWAYS
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            threshold = 300
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
+        }
     }
 
     requirements {
-        equals("env.BuildAgentType", "caravela03")
+        equals("env.BuildAgentType", "caravela04cloud")
     }
 
     features {
