@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using System.Runtime.Serialization;
 
 namespace Metalama.Patterns.Contracts;
@@ -9,7 +8,6 @@ namespace Metalama.Patterns.Contracts;
 /// The exception that is thrown when a postcondition contract was not fulfilled by a method.
 /// </summary>
 [Serializable]
-[RunTimeOrCompileTime]
 public class PostconditionFailedException : Exception
 {
     /// <summary>

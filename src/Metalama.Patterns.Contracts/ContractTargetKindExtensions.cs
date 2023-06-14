@@ -1,11 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using System.Globalization;
 
 namespace Metalama.Patterns.Contracts;
 
-[RunTimeOrCompileTime]
 public static class ContractTargetKindExtensions
 {
     public static string GetDisplayName( this ContractTargetKind targetKind ) =>
