@@ -1,1 +1,1 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// Error LAMA5001 on `field`: `GreaterThanAttribute cannot be applied to Range_InvalidType_Byte4.field because the value range cannot be satisfied by the type Byte.`

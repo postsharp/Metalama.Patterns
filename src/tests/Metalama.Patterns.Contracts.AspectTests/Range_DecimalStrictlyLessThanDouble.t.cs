@@ -1,1 +1,1 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// Error LAMA5006 on `a`: `StrictlyLessThanAttribute cannot be applied to Range_DecimalStrictlyLessThanDouble.MethodWithDecimalStrictlyLessThanDouble(decimal?)/a because the value range cannot be satisfied by the type Decimal.`

@@ -1,13 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// #ExpectedMessage(COM010)
-
 using Metalama.Patterns.Contracts;
 
 public class Range_DecimalStrictlyLessThanDouble
 {
-    private void MethodWithDecimalStrictlyLessThanDouble(
-        [StrictlyLessThan( (double) decimal.MinValue + (double) decimal.MinValue*1e-6 )] decimal? a )
+    public void MethodWithDecimalStrictlyLessThanDouble(
+        [StrictlyLessThan( (double) decimal.MinValue + ((double) decimal.MinValue * 1e-6) )] decimal? a )
     {
     }
 }

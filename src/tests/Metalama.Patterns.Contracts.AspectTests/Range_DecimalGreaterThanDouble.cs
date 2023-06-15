@@ -2,9 +2,9 @@
 
 using Metalama.Patterns.Contracts;
 
-class Range_DecimalGreaterThanDouble
+public class Range_DecimalGreaterThanDouble
 {
-    private void MethodWithDecimalGreaterThanDouble( [GreaterThan( (double) decimal.MaxValue + (double) decimal.MaxValue*1e-6 )] decimal? a )
+    public void MethodWithDecimalGreaterThanDouble( [GreaterThan( (double) decimal.MaxValue + ((double) decimal.MaxValue * 1e-6) )] decimal? a )
     {
     }
 }
