@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
 
@@ -135,4 +136,11 @@ public class LessThanAttribute : RangeAttribute
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .LessThanErrorMessage) ),
             false, true);
+
+    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
+        CreateCannotBeAppliedDiagosticDefinition( "LAMA5002", nameof( LessThanAttribute) );
+
+    /// <inheritdoc/>
+    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+        => _rangeCannotBeApplied;
 }

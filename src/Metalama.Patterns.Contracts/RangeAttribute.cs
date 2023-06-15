@@ -472,26 +472,57 @@ public class RangeAttribute : ContractAspect
             _ => false
         };
 
-    // COM010 in PostSharp
-    private static readonly DiagnosticDefinition<(string, string, string)> _rangeCannotBeApplied = new(
-        "ML5000",
-        Severity.Error,
-        "{0} cannot be applied to {1} because the value range cannot be satisfied by the type {2}.");
+    /// <summary>
+    /// Creates a <see cref="DiagnosticDefinition"/> using the standard template for errors like "RangeAttribute cannot be
+    /// applied to Foo/A because the value range cannot be satisfied by the type int", where the title and diagnostic ID must be
+    /// specific to each derived aspect. Derived aspects should store the result in a <c>readonly static</c> field, the value of
+    /// which should be returned by an override of <see cref="GetCannotBeAppliedDiagosticDefinition"/>.
+    /// </summary>
+    /// <param name="id">The diagnostic ID, for example "LAMA5000".</param>
+    /// <param name="attributeTypeName">The name of the attribute type (for example, "RangeAttribute").</param>
+    protected static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> CreateCannotBeAppliedDiagosticDefinition(
+        string id,
+        string attributeTypeName )
+        => new(
+            id,
+            Severity.Error,
+            $"{attributeTypeName} cannot be applied to {{0}} because the value range cannot be satisfied by the type {{1}}.",
+            $"{attributeTypeName} cannot be applied.",
+            "Metalama.Patterns.Contracts" );
 
-    /// <inheritdoc/>
-    public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
+    // Was COM010 in PostSharp
+    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
+        CreateCannotBeAppliedDiagosticDefinition( "LAMA5000", nameof( RangeAttribute ) );
+
+    protected virtual DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+        => _rangeCannotBeApplied;
+
+    private void BuildAspect( IAspectBuilder builder, IType targetType )
     {
-        base.BuildAspect( builder );
-
-        var basicType = (INamedType) builder.Target.Type.ToNonNullableType();
+        var basicType = (INamedType) targetType.ToNonNullableType();
         var typeFlag = GetTypeFlag( basicType );
 
         if ( (typeFlag & this._invalidTypes) != 0 )
         {
             builder.Diagnostics.Report(
-                _rangeCannotBeApplied.WithArguments( (this.GetType().Name, builder.Target.ToDisplayString(),
-                    basicType.Name) ) );
+                this.GetCannotBeAppliedDiagosticDefinition().WithArguments(
+                    (builder.Target,
+                     basicType.Name) ) );
         }
+    }
+
+    /// <inheritdoc/>
+    public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
+    {
+        base.BuildAspect( builder );
+        this.BuildAspect( builder, builder.Target.Type );
+    }
+
+    /// <inheritdoc/>
+    public override void BuildAspect( IAspectBuilder<IParameter> builder )
+    {
+        base.BuildAspect( builder );
+        this.BuildAspect( builder, builder.Target.Type );
     }
 
     [CompileTime]

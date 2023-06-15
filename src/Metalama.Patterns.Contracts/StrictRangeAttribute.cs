@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -98,4 +99,11 @@ public class StrictRangeAttribute : RangeAttribute
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .StrictRangeErrorMessage) ),
             true, true);
+
+    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
+        CreateCannotBeAppliedDiagosticDefinition( "LAMA5009", nameof( StrictRangeAttribute ) );
+
+    /// <inheritdoc/>
+    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+        => _rangeCannotBeApplied;
 }
