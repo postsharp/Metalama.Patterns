@@ -13,7 +13,6 @@
 // #SkipILVerify
 
 using System;
-using Metalama.Patterns.Contracts;
 
 namespace Metalama.Patterns.Contracts.AspectTests
 {

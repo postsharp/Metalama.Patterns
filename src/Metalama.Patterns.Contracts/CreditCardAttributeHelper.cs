@@ -4,7 +4,7 @@ namespace Metalama.Patterns.Contracts;
 
 public static class CreditCardAttributeHelper
 {
-    public static bool IsValidCreditCardNumber( string value )
+    public static bool IsValidCreditCardNumber( string? value )
     {
         if ( value == null )
         {

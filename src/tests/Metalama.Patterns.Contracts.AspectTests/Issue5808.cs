@@ -12,7 +12,6 @@
  */
 
 using System;
-using Metalama.Patterns.Contracts;
 
 namespace PostSharp.Patterns.Model.BuildTests.Contracts
 {

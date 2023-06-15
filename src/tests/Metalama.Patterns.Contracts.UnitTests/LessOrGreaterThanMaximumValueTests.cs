@@ -6,8 +6,9 @@ using Xunit;
 // Keep the testing logic equal for all the copies!
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+// Resharper disable RedundantCast
 
-namespace Metalama.Patterns.Contracts.Tests;
+namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
 {

@@ -5,3 +5,5 @@
 dotnet_diagnostic.SA1124.severity = none
 
 resharper_inconsistent_naming_highlighting=none
+
+resharper_unused_parameter_local_highlighting=none

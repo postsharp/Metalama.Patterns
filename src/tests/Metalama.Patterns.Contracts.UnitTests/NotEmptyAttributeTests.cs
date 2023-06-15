@@ -3,7 +3,7 @@
 using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
-namespace Metalama.Patterns.Contracts.Tests;
+namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class NotEmptyAttributeTests
 {
@@ -123,7 +123,7 @@ public class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithOut( "", out var p ) );
+        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithOut( "", out _ ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );

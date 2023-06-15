@@ -6,7 +6,7 @@ namespace Metalama.Patterns.Contracts;
 /// Describes a numeric range in the representation of various different numeric types.
 /// </summary>
 /// <seealso cref="RangeAttribute"/>
-/// <seealso cref="RangeAttributeHelpers.Validate{T}(T, in RangeValues)"/>
+/// <seealso cref="RangeAttributeHelpers.Validate{T}"/>
 public readonly struct RangeValues
 {
     /// <summary>

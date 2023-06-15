@@ -43,12 +43,12 @@ public class RangeAttribute : ContractAspect
     }
 
     /// <summary>
-    /// Gets the minimal value to be used when generating the error message, typically in the implementation of <see cref="GetErrorMessageArguments"/>.
+    /// Gets the minimal value to be used when generating the error message.
     /// </summary>
     protected object DisplayMinValue { get; private set; }
 
     /// <summary>
-    /// Gets the maximal value to be used when generating the error message, typically in the implementation of <see cref="GetErrorMessageArguments"/>.
+    /// Gets the maximal value to be used when generating the error message.
     /// </summary>
     protected object DisplayMaxValue { get; private set; }
 
@@ -376,34 +376,6 @@ public class RangeAttribute : ContractAspect
     }
 
     private static ulong ConvertDoubleToUInt64( double value )
-    {
-        if ( value < ulong.MinValue )
-        {
-            return ulong.MinValue;
-        }
-        else if ( value > long.MaxValue )
-        {
-            return long.MaxValue;
-        }
-
-        return (ulong) value;
-    }
-
-    internal static long ConvertDecimalToInt64( decimal value )
-    {
-        if ( value < long.MinValue )
-        {
-            return long.MinValue;
-        }
-        else if ( value > long.MaxValue )
-        {
-            return long.MaxValue;
-        }
-
-        return (long) value;
-    }
-
-    private static ulong ConvertDecimalToUInt64( decimal value )
     {
         if ( value < ulong.MinValue )
         {
@@ -760,7 +732,7 @@ public class RangeAttribute : ContractAspect
     }
 
     /// <summary>
-    /// Called by <see cref="Validate(dynamic?)"/> to determine the message to emit, and whether the minimum and maximum values
+    /// Called by <see cref="Validate(object?)"/> to determine the message to emit, and whether the minimum and maximum values
     /// should be provided as formatting arguments.
     /// </summary>
     [CompileTime]

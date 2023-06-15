@@ -18,7 +18,6 @@ using PostSharp.Aspects;
 using PostSharp.Aspects.Configuration;
 using PostSharp.Aspects.Serialization;
 using PostSharp.Extensibility;
-using Metalama.Patterns.Contracts;
 using PostSharp.Reflection;
 
 namespace Metalama.Patterns.Contracts.AspectTests

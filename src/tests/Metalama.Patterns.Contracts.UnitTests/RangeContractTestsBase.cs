@@ -3,7 +3,7 @@
 using Metalama.Patterns.Tests.Helpers;
 using System.Reflection;
 
-namespace Metalama.Patterns.Contracts.Tests;
+namespace Metalama.Patterns.Contracts.UnitTests;
 
 public abstract class RangeContractTestsBase
 {
@@ -80,5 +80,9 @@ public abstract class RangeContractTestsBase
         }
     }
 
-    private static string NullableToString( object? nullable ) => nullable == null ? "null" : nullable.ToString() ?? string.Empty;
+    // Incorrect warning.
+#pragma warning disable CS8603 // Possible null reference return.
+    private static string NullableToString( object? nullable ) => nullable == null ? "null" : nullable.ToString();
+#pragma warning restore CS8603 // Possible null reference return.
+
 }

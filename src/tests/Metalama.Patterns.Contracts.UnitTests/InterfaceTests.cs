@@ -3,7 +3,7 @@
 using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
-namespace Metalama.Patterns.Contracts.Tests;
+namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class InterfaceTests
 {

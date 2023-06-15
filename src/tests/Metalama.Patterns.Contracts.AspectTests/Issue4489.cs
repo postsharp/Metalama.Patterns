@@ -12,7 +12,6 @@
 using System;
 using PostSharp.Aspects;
 using PostSharp.Constraints.Internals;
-using Metalama.Patterns.Contracts;
 using PostSharp.Reflection;
 
 namespace PostSharp.Patterns.Model.BuildTests.Contracts

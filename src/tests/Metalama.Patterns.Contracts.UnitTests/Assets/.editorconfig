@@ -15,3 +15,8 @@ dotnet_diagnostic.SA1124.severity = none
 
 # CA1822: Mark members as static
 dotnet_diagnostic.CA1822.severity = none
+
+resharper_redundant_assignment_highlighting=none
+resharper_check_namespace_highlighting=none
+resharper_unused_auto_property_accessor_global_highlighting=none
+resharper_unused_method_return_value_local_highlighting=none

@@ -117,7 +117,9 @@ public sealed class StringLengthAttribute : ContractAspect
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength != int.MaxValue )
         {
-            if ( value != null && (value!.Length < this.MinimumLength || value!.Length > this.MaximumLength) )
+            // Incorrect warning derferencing `value` after checking for null.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
             {
                 throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
@@ -130,6 +132,7 @@ public sealed class StringLengthAttribute : ContractAspect
                     this.MinimumLength,
                     this.MaximumLength ) );
             }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         // else: min is zero, max is maxval, all strings are valid, no need to check.

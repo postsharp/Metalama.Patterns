@@ -5,7 +5,7 @@ using Xunit;
 // This is a modified copy of StrictlyLessOrGreaterThanPositiveValueTests.cs
 // Keep the testing logic equal for all the copies!
 
-namespace Metalama.Patterns.Contracts.Tests;
+namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
 {

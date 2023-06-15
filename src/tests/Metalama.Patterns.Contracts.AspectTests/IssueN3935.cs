@@ -16,7 +16,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using PostSharp.Aspects;
-using Metalama.Patterns.Contracts;
 using PostSharp.Reflection;
 using PostSharp.Serialization;
 

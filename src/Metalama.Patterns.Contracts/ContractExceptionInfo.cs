@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Contracts;
@@ -7,6 +8,7 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// This class holds the information from which the <see cref="ContractExceptionFactory"/> should create the exception.
 /// </summary>
+[PublicAPI]
 public class ContractExceptionInfo
 {
     /// <summary>

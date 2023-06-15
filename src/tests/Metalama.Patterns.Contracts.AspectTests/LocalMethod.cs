@@ -7,15 +7,14 @@
  * Action: Skiping, PS specific (or at least a fabric concern, not a Contracts concern).
  */
 
-// @MinToolsVersion(15.0)
-// @ExpectedMessage(LA0167//"PostSharp\\.Patterns\\.Common\\.BuildTests\\.Contracts\\.LocalMethod\\.Program\\.Main\\.MyPrivateMethod")
+// #MinToolsVersion(15.0)
+// #ExpectedMessage(LA0167//"PostSharp\\.Patterns\\.Common\\.BuildTests\\.Contracts\\.LocalMethod\\.Program\\.Main\\.MyPrivateMethod")
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using PostSharp.Aspects;
-using Metalama.Patterns.Contracts;
 using PostSharp.Reflection;
 
 namespace Metalama.Patterns.Contracts.AspectTests

@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using System.Globalization;
 
 namespace Metalama.Patterns.Contracts;
 

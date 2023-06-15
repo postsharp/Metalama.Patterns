@@ -3,7 +3,7 @@
 using System.Globalization;
 using Xunit;
 
-namespace Metalama.Patterns.Contracts.Tests;
+namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class PrecisionTests : RangeContractTestsBase
 {

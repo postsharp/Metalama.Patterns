@@ -104,7 +104,7 @@ public class RegularExpressionAttribute : ContractAspect
     }
 
     /// <summary>
-    /// Called by <see cref="Validate(dynamic?)"/> to determine the message to emit, and whether the pattern
+    /// Called by <see cref="Validate(object?)"/> to determine the message to emit, and whether the pattern
     /// should be provided as a formatting argument.
     /// </summary>
     [CompileTime]

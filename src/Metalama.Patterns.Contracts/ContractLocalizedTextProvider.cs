@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -49,7 +47,6 @@ public class ContractLocalizedTextProvider
         { EnumDataTypeErrorMessage, "The {2} must be a valid {4}." },
         { GreaterThanErrorMessage, "The {2} must be greater than {4}." },
         { LessThanErrorMessage, "The {2} must be less than {4}." },
-        { LocationContractErrorMessage, "The {2} has an invalid value." },
         { NotEmptyErrorMessage, "The {2} cannot be null or empty." },
         { NotNullErrorMessage, "The {2} must not be null." },
         { PhoneErrorMessage, "The {2} should be a valid phone number." },
@@ -80,7 +77,7 @@ public class ContractLocalizedTextProvider
     /// <param name="arguments">Arguments.</param>
     /// <returns>The formatted string.</returns>
     [return: NotNullIfNotNull( nameof(format) )]
-    public virtual string? FormatString( string format, object?[] arguments )
+    public virtual string? FormatString( string? format, object?[] arguments )
     {
         if ( format == null )
         {
@@ -130,7 +127,7 @@ public class ContractLocalizedTextProvider
         object? value,
         string? targetName,
         ContractTargetKind targetKind,
-        object?[] additionalArguments )
+        object?[]? additionalArguments )
     {
         additionalArguments ??= Array.Empty<object>();
 
@@ -170,11 +167,6 @@ public class ContractLocalizedTextProvider
     /// Identifier of the error message shown when <see cref="LessThanAttribute"/> constraint is violated.
     /// </summary>
     public const string LessThanErrorMessage = "LessThanErrorMessage";
-
-    /// <summary>
-    /// Identifier of the error message shown when <see cref="LocationContractAttribute"/> constraint is violated.
-    /// </summary>
-    public const string LocationContractErrorMessage = "LocationContractErrorMessage";
 
     /// <summary>
     /// Identifier of the error message shown when <see cref="NotEmptyAttribute"/> constraint is violated.
@@ -262,7 +254,7 @@ public class ContractLocalizedTextProvider
     }
 
     /// <summary>
-    /// Gets a message declared by the <see cref="LocalizedTextProvider"/> or the rest of responsibility chain if applicable.
+    /// Gets a message declared by the <see cref="ContractLocalizedTextProvider"/> or the rest of responsibility chain if applicable.
     /// </summary>
     /// <param name="messageId">Identifier of the message.</param>
     /// <returns>Message represented by <paramref name="messageId"/>.  Returning <c>null</c> is not allowed.

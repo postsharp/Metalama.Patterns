@@ -3,7 +3,7 @@
 using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
-namespace Metalama.Patterns.Contracts.Tests;
+namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class RangeAttributeTests
 {
@@ -262,7 +262,7 @@ public class RangeAttributeTests
         var cut = new RangeTestClass();
 
         var e = TestHelpers.RecordException<PostconditionFailedException>( () =>
-            cut.ZeroToTenNullableIntOut( -1, out var p ) );
+            cut.ZeroToTenNullableIntOut( -1, out _ ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
