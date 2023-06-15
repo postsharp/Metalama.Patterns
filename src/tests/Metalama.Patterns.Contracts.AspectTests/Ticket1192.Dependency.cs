@@ -1,4 +1,5 @@
-﻿// @Skipped(PENDING)
+﻿// @Skipped(Not a Contracts concern)
+// See comment in Ticket1192.cs.
 
 using System;
 using System.Collections;
@@ -8,9 +9,7 @@ using Metalama.Patterns.Contracts;
 namespace PostSharp.Patterns.Model.BuildTests.Contracts
 {
     namespace Ticket1192
-    {
-      
-
+    {     
         public class XoomType
         {
         }

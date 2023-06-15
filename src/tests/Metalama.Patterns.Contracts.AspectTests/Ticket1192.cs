@@ -1,4 +1,11 @@
-﻿// @Skipped(PENDING)
+﻿// @Skipped(Not a Contracts concern)
+
+/* Ported from PostSharp.
+ * 
+ * Old PS issue 1192, addressed "It seems there's a bug in inheritance of parameter-level aspects accross assemblies."
+ * 
+ * Action: Skipping, not a Contracts concern.
+ */
 
 using System;
 using System.Collections;
@@ -16,8 +23,6 @@ namespace PostSharp.Patterns.Model.BuildTests.Contracts
                 return 0;
             }
         }
-
-      
 
         public class ManagedXoomTypeCollection : XoomTypeCollection, ICollection<XoomManagedType>
         {
