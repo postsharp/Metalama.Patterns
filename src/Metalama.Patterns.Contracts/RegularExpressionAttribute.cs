@@ -104,13 +104,19 @@ public class RegularExpressionAttribute : ContractAspect
     }
 
     /// <summary>
+    /// Describes exception information as returned by <see cref="GetExceptionInfo"/>.
+    /// </summary>
+    [CompileTime]
+    protected record struct ExceptionInfo( Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument );
+
+    /// <summary>
     /// Called by <see cref="Validate(object?)"/> to determine the message to emit, and whether the pattern
     /// should be provided as a formatting argument.
     /// </summary>
     [CompileTime]
-    protected virtual (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
-        GetExceptionInfo()
-        => (typeof(ArgumentException),
+    protected virtual ExceptionInfo GetExceptionInfo()
+        => new(
+            typeof(ArgumentException),
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .RegularExpressionErrorMessage) ),
             true);

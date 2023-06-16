@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Contracts;
@@ -31,9 +30,9 @@ public sealed class UrlAttribute : RegularExpressionAttribute
 
     /// <inheritdoc/>
     [CompileTime]
-    protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
-        GetExceptionInfo()
-        => (typeof(ArgumentException),
+    protected override ExceptionInfo GetExceptionInfo()
+        => new(
+            typeof(ArgumentException),
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .UrlErrorMessage) ),
             false);
