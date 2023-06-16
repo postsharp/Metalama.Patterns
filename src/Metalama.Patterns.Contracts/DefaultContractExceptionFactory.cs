@@ -24,7 +24,7 @@ public class DefaultContractExceptionFactory : ContractExceptionFactory
     /// <inheritdoc/>
     public override Exception CreateException( ContractExceptionInfo exceptionInfo )
     {
-        var errorMessage = ContractsServices.LocalizedTextProvider.GetFormattedMessage( exceptionInfo );
+        var errorMessage = ContractsServices.Default.LocalizedTextProvider.GetFormattedMessage( exceptionInfo );
 
         var parameterName = exceptionInfo.TargetKind.GetParameterName( exceptionInfo.TargetName );
 

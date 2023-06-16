@@ -7,35 +7,49 @@ namespace Metalama.Patterns.Contracts;
 /// exceptions are created when a contract is broken. By plugging into the <see cref="ContractLocalizedTextProvider"/> chain, you can change the way the exception messages
 /// are generated. See the documentation for the classes for more details: <see cref="ContractLocalizedTextProvider"/>, <see cref="ContractExceptionFactory"/>.
 /// </summary>
-public static class ContractsServices
+public class ContractsServices
 {
-    private static volatile ContractLocalizedTextProvider _localizedTextProvider = new(null);
-
     /// <summary>
-    /// Gets or sets the head of the ContractLocalizedTextProvider responsibility chain.
+    /// The default instance of <see cref="ContractsServices"/>.
     /// </summary>
-    public static ContractLocalizedTextProvider LocalizedTextProvider
-    {
-        get => _localizedTextProvider;
-        set => _localizedTextProvider = value ?? throw new ArgumentNullException( nameof(value) );
-    }
+    public static readonly ContractsServices Default;
 
     /// <summary>
     /// The default exception factory is kept for the handling of the obsolete exception creation methods in LocationContractAttribute.
     /// </summary>
-    internal static readonly ContractExceptionFactory DefaultExceptionFactory =
-        new DefaultContractExceptionFactory( null );
+    internal static readonly ContractExceptionFactory DefaultExceptionFactory;        
 
-    private static volatile ContractExceptionFactory _exceptionFactory = DefaultExceptionFactory;
+    static ContractsServices()
+    {
+        DefaultExceptionFactory = new DefaultContractExceptionFactory( null );
+        Default = new ContractsServices();
+    }
 
-    internal static void ResetExceptionFactory() => ExceptionFactory = DefaultExceptionFactory;
+    private ContractsServices()
+    {
+    }
+
+    private volatile ContractLocalizedTextProvider _localizedTextProvider = new(null);
+
+    /// <summary>
+    /// Gets or sets the head of the ContractLocalizedTextProvider responsibility chain.
+    /// </summary>
+    public ContractLocalizedTextProvider LocalizedTextProvider
+    {
+        get => this._localizedTextProvider;
+        set => this._localizedTextProvider = value ?? throw new ArgumentNullException( nameof(value) );
+    }
+
+    private volatile ContractExceptionFactory _exceptionFactory = DefaultExceptionFactory;
+
+    internal void ResetExceptionFactory() => this.ExceptionFactory = DefaultExceptionFactory;
 
     /// <summary>
     /// Gets or sets the head of the ContractExceptionFactory responsibility chain.
     /// </summary>
-    public static ContractExceptionFactory ExceptionFactory
+    public ContractExceptionFactory ExceptionFactory
     {
-        get => _exceptionFactory;
-        set => _exceptionFactory = value ?? throw new ArgumentNullException( nameof(value) );
+        get => this._exceptionFactory;
+        set => this._exceptionFactory = value ?? throw new ArgumentNullException( nameof(value) );
     }
 }

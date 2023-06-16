@@ -48,7 +48,7 @@ public sealed class NotNullAttribute : ContractAspect
 
         if ( value == null! )
         {
-            throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+            throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                 typeof( ArgumentNullException ),
                 typeof( NotNullAttribute ),
                 value,

@@ -79,7 +79,7 @@ public class RegularExpressionAttribute : ContractAspect
         {
             if ( info.IncludePatternArgument )
             {
-                throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     info.ExceptionType,
                     aspectType,
                     value,
@@ -91,7 +91,7 @@ public class RegularExpressionAttribute : ContractAspect
             }
             else
             {
-                throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     info.ExceptionType,
                     aspectType,
                     value,

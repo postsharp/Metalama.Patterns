@@ -82,7 +82,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
         {
             if ( value != null! && !EnumDataTypeAttributeHelper.IsValidEnumValue( value, this.EnumType ) )
             {
-                throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(EnumDataTypeAttribute),
                     value,
@@ -102,7 +102,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
                 if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
                 {
-                    throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                         typeof(ArgumentException),
                         typeof(EnumDataTypeAttribute),
                         enumValue,
@@ -121,7 +121,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
             if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
             {
-                throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(EnumDataTypeAttribute),
                     enumValue,
