@@ -9,163 +9,162 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Collections.Concurrent;
 
-namespace Flashtrace.Formatters
-{
-    // Must be a separate class because we want to share among different generic types.
-    internal static class DefaultFormatterHelper
-    {
-        private static readonly ConcurrentDictionary<Type, bool> hasCustomToStringMethod
-            = new ConcurrentDictionary<Type, bool>();
+namespace Flashtrace.Formatters;
 
-        public static bool HasCustomToStringMethod(Type type)
+// Must be a separate class because we want to share among different generic types.
+internal static class DefaultFormatterHelper
+{
+    private static readonly ConcurrentDictionary<Type, bool> hasCustomToStringMethod
+        = new ConcurrentDictionary<Type, bool>();
+
+    public static bool HasCustomToStringMethod(Type type)
+    {
+        return hasCustomToStringMethod.GetOrAdd( type, t =>
+            t.GetMethod( "ToString", Type.EmptyTypes, BindingFlags.Public | BindingFlags.Instance )?.DeclaringType != typeof( object )
+        );
+    }
+}
+
+/// <summary>
+/// The default formatter that formats objects by calling <see cref="object.ToString"/>.
+/// </summary>
+public sealed class DefaultFormatter<TRole,TValue> : Formatter<TValue> where TRole : FormattingRole, new()
+{
+    private static readonly bool isValueType = typeof(TValue).IsValueType();
+
+    private static readonly bool hasCustomToStringMethod = DefaultFormatterHelper.HasCustomToStringMethod(typeof(TValue));
+
+    private static readonly Type valueType = typeof(TValue);
+
+    
+    private readonly FormattingOptions options;
+    static readonly DefaultFormatter<TRole, TValue> unquotedFormatter = new DefaultFormatter<TRole, TValue>( FormattingOptions.Unquoted );
+
+    /// <summary>
+    /// Gets the default instance of the <see cref="DefaultFormatter{TRole, TValue}"/> class.
+    /// </summary>
+    [SuppressMessage("Microsoft.Design", "CA1000")]
+    public static DefaultFormatter<TRole, TValue> Instance { get; } = new DefaultFormatter<TRole, TValue>();
+
+    /// <summary>
+    /// Initializes a new <see cref="DefaultFormatter{TRole, TValue}"/>.
+    /// </summary>
+    public DefaultFormatter() : this(FormattingOptions.Default)
+    {
+    }
+
+    private DefaultFormatter( FormattingOptions options )
+    {
+        this.options = options;
+
+
+    }
+
+    /// <inheritdoc/>
+    public override FormatterAttributes Attributes => FormatterAttributes.Default;
+
+    /// <inheritdoc />
+    public override IOptionAwareFormatter WithOptions( FormattingOptions options )
+    {
+        if ( options.RequiresUnquotedStrings )
         {
-            return hasCustomToStringMethod.GetOrAdd( type, t =>
-                t.GetMethod( "ToString", Type.EmptyTypes, BindingFlags.Public | BindingFlags.Instance )?.DeclaringType != typeof( object )
-            );
+            return unquotedFormatter;
+        }
+        else
+        {
+            return this;
         }
     }
-   
-    /// <summary>
-    /// The default formatter that formats objects by calling <see cref="object.ToString"/>.
-    /// </summary>
-    public sealed class DefaultFormatter<TRole,TValue> : Formatter<TValue> where TRole : FormattingRole, new()
+
+
+    /// <inheritdoc />
+    [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+    public override void Write( UnsafeStringBuilder stringBuilder, TValue value )
     {
-        private static readonly bool isValueType = typeof(TValue).IsValueType();
+        bool useToString = hasCustomToStringMethod;
+        Type thisValueType = valueType;
 
-        private static readonly bool hasCustomToStringMethod = DefaultFormatterHelper.HasCustomToStringMethod(typeof(TValue));
+        if ( isValueType )
+        {
+            IFormatter<TValue> formatter = FormatterRepository<TRole>.Get<TValue>().WithOptions( this.options );
 
-        private static readonly Type valueType = typeof(TValue);
+            if ( (formatter.Attributes & FormatterAttributes.Default) == 0 )
+            {
+                formatter.Write( stringBuilder, value );
+                return;
+            }
+        }
+        else
+        {
+            // ReSharper disable HeapView.PossibleBoxingAllocation
+
+            if ( value == null )
+            {
+                stringBuilder.Append( 'n', 'u', 'l', 'l' );
+                return;
+            }
 
         
-        private readonly FormattingOptions options;
-        static readonly DefaultFormatter<TRole, TValue> unquotedFormatter = new DefaultFormatter<TRole, TValue>( FormattingOptions.Unquoted );
+            IFormatter formatter = FormatterRepository<TRole>.Get( value.GetType() ).WithOptions( this.options );
 
-        /// <summary>
-        /// Gets the default instance of the <see cref="DefaultFormatter{TRole, TValue}"/> class.
-        /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1000")]
-        public static DefaultFormatter<TRole, TValue> Instance { get; } = new DefaultFormatter<TRole, TValue>();
+            if ( (formatter.Attributes & FormatterAttributes.Default) == 0 )
+            {
+                formatter.Write( stringBuilder, value );
+                return;
+            }
 
-        /// <summary>
-        /// Initializes a new <see cref="DefaultFormatter{TRole, TValue}"/>.
-        /// </summary>
-        public DefaultFormatter() : this(FormattingOptions.Default)
-        {
+            thisValueType = value.GetType();
+            if ( thisValueType != typeof( TValue ) )
+            {
+                // We get here because the caller called the static Get<T> and we have a value of the derived type,
+                // not the exact type. 
+                useToString = DefaultFormatterHelper.HasCustomToStringMethod( thisValueType );
+             
+            }
+
+            // ReSharper restore HeapView.PossibleBoxingAllocation
+
         }
 
-        private DefaultFormatter( FormattingOptions options )
+        if ( useToString )
         {
-            this.options = options;
-
-
-        }
-
-        /// <inheritdoc/>
-        public override FormatterAttributes Attributes => FormatterAttributes.Default;
-
-        /// <inheritdoc />
-        public override IOptionAwareFormatter WithOptions( FormattingOptions options )
-        {
-            if ( options.RequiresUnquotedStrings )
+            string text;
+            try
             {
-                return unquotedFormatter;
+                text = value.ToString();
             }
-            else
+            catch ( Exception e )
             {
-                return this;
-            }
-        }
-
-
-        /// <inheritdoc />
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override void Write( UnsafeStringBuilder stringBuilder, TValue value )
-        {
-            bool useToString = hasCustomToStringMethod;
-            Type thisValueType = valueType;
-
-            if ( isValueType )
-            {
-                IFormatter<TValue> formatter = FormatterRepository<TRole>.Get<TValue>().WithOptions( this.options );
-
-                if ( (formatter.Attributes & FormatterAttributes.Default) == 0 )
-                {
-                    formatter.Write( stringBuilder, value );
-                    return;
-                }
-            }
-            else
-            {
-                // ReSharper disable HeapView.PossibleBoxingAllocation
-
-                if ( value == null )
-                {
-                    stringBuilder.Append( 'n', 'u', 'l', 'l' );
-                    return;
-                }
-
-            
-                IFormatter formatter = FormatterRepository<TRole>.Get( value.GetType() ).WithOptions( this.options );
-
-                if ( (formatter.Attributes & FormatterAttributes.Default) == 0 )
-                {
-                    formatter.Write( stringBuilder, value );
-                    return;
-                }
-
-                thisValueType = value.GetType();
-                if ( thisValueType != typeof( TValue ) )
-                {
-                    // We get here because the caller called the static Get<T> and we have a value of the derived type,
-                    // not the exact type. 
-                    useToString = DefaultFormatterHelper.HasCustomToStringMethod( thisValueType );
-                 
-                }
-
-                // ReSharper restore HeapView.PossibleBoxingAllocation
-
+                text = e.GetType().ToString();
             }
 
-            if ( useToString )
-            {
-                string text;
-                try
-                {
-                    text = value.ToString();
-                }
-                catch ( Exception e )
-                {
-                    text = e.GetType().ToString();
-                }
+            bool braces = !value.GetType().IsPrimitive();
 
-                bool braces = !value.GetType().IsPrimitive();
-
-                if ( braces )
-                {
-                    stringBuilder.Append( '{' );
-                }
-
-                // ToString can return null.
-                if ( text == null )
-                {
-                    stringBuilder.Append( 'n', 'u', 'l', 'l' );
-                }
-                else
-                {
-                    stringBuilder.Append( text );
-                }
-
-                if ( braces )
-                {
-                    stringBuilder.Append( '}' );
-                }
-            }
-            else
+            if ( braces )
             {
                 stringBuilder.Append( '{' );
-                FormatterRepository<TRole>.Get<Type>(  ).Write( stringBuilder, thisValueType );
+            }
+
+            // ToString can return null.
+            if ( text == null )
+            {
+                stringBuilder.Append( 'n', 'u', 'l', 'l' );
+            }
+            else
+            {
+                stringBuilder.Append( text );
+            }
+
+            if ( braces )
+            {
                 stringBuilder.Append( '}' );
             }
+        }
+        else
+        {
+            stringBuilder.Append( '{' );
+            FormatterRepository<TRole>.Get<Type>(  ).Write( stringBuilder, thisValueType );
+            stringBuilder.Append( '}' );
         }
     }
 }

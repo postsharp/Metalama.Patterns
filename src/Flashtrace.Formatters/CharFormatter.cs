@@ -5,62 +5,61 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Flashtrace.Formatters
+namespace Flashtrace.Formatters;
+
+/// <summary>
+/// A formatter for <see cref="char"/> values.
+/// </summary>
+public sealed class CharFormatter : Formatter<char>
 {
     /// <summary>
-    /// A formatter for <see cref="char"/> values.
+    /// The singleton instance of <see cref="CharFormatter"/>.
     /// </summary>
-    public sealed class CharFormatter : Formatter<char>
+    [SuppressMessage("Microsoft.Security", "CA2104")]
+    public static readonly CharFormatter Instance = new CharFormatter();
+
+    private CharFormatter()
     {
-        /// <summary>
-        /// The singleton instance of <see cref="CharFormatter"/>.
-        /// </summary>
-        [SuppressMessage("Microsoft.Security", "CA2104")]
-        public static readonly CharFormatter Instance = new CharFormatter();
-
-        private CharFormatter()
-        {
-        }
-
-        /// <inheritdoc />
-        public override void Write( UnsafeStringBuilder stringBuilder, char value )
-        {
-            stringBuilder.Append('\'', value, '\'');
-        }
-
-        /// <inheritdoc />
-        public override IOptionAwareFormatter WithOptions( FormattingOptions options )
-        {
-            if ( options.RequiresUnquotedStrings )
-            {
-                return NonQuotingCharFormatter.Instance;
-            }
-            else
-            {
-                return this;
-            }
-        }
     }
 
-    internal sealed class NonQuotingCharFormatter : Formatter<char>
+    /// <inheritdoc />
+    public override void Write( UnsafeStringBuilder stringBuilder, char value )
     {
-        public static readonly NonQuotingCharFormatter Instance = new NonQuotingCharFormatter();
+        stringBuilder.Append('\'', value, '\'');
+    }
 
-        private NonQuotingCharFormatter()
+    /// <inheritdoc />
+    public override IOptionAwareFormatter WithOptions( FormattingOptions options )
+    {
+        if ( options.RequiresUnquotedStrings )
         {
-
+            return NonQuotingCharFormatter.Instance;
         }
-
-        public override void Write( UnsafeStringBuilder stringBuilder, char value )
+        else
         {
-            if ( value == '\0' )
-            {
-                // Don't emit anything for \0. We would need another escaping formatter.
-            }
-            else
-            {
-                stringBuilder.Append( value );
-            }
+            return this;
+        }
+    }
+}
+
+internal sealed class NonQuotingCharFormatter : Formatter<char>
+{
+    public static readonly NonQuotingCharFormatter Instance = new NonQuotingCharFormatter();
+
+    private NonQuotingCharFormatter()
+    {
+
+    }
+
+    public override void Write( UnsafeStringBuilder stringBuilder, char value )
+    {
+        if ( value == '\0' )
+        {
+            // Don't emit anything for \0. We would need another escaping formatter.
+        }
+        else
+        {
+            stringBuilder.Append( value );
         }
     }
 }

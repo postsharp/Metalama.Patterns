@@ -4,27 +4,26 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Flashtrace.Formatters
+namespace Flashtrace.Formatters;
+
+/// <summary>
+/// Efficient formatter for <see cref="int"/>.
+/// </summary>
+public sealed class Int32Formatter : Formatter<int>
 {
     /// <summary>
-    /// Efficient formatter for <see cref="int"/>.
+    /// The singleton instance of <see cref="Int32Formatter"/>.
     /// </summary>
-    public sealed class Int32Formatter : Formatter<int>
+    [SuppressMessage("Microsoft.Security", "CA2104")]
+    public static readonly Int32Formatter Instance = new Int32Formatter();
+
+    private Int32Formatter()
     {
-        /// <summary>
-        /// The singleton instance of <see cref="Int32Formatter"/>.
-        /// </summary>
-        [SuppressMessage("Microsoft.Security", "CA2104")]
-        public static readonly Int32Formatter Instance = new Int32Formatter();
+    }
 
-        private Int32Formatter()
-        {
-        }
-
-        /// <inheritdoc />
-        public override void Write( UnsafeStringBuilder stringBuilder, int value )
-        {
-            stringBuilder.Append( value );
-        }
+    /// <inheritdoc />
+    public override void Write( UnsafeStringBuilder stringBuilder, int value )
+    {
+        stringBuilder.Append( value );
     }
 }

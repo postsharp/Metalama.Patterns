@@ -4,27 +4,26 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Flashtrace.Formatters
+namespace Flashtrace.Formatters;
+
+/// <summary>
+/// Efficient formatter for <see cref="short"/>.
+/// </summary>
+public sealed class Int16Formatter : Formatter<short>
 {
     /// <summary>
-    /// Efficient formatter for <see cref="short"/>.
+    /// The singleton instance of <see cref="Int16Formatter"/>.
     /// </summary>
-    public sealed class Int16Formatter : Formatter<short>
+    [SuppressMessage("Microsoft.Security", "CA2104")]
+    public static readonly Int16Formatter Instance = new Int16Formatter();
+
+    private Int16Formatter()
     {
-        /// <summary>
-        /// The singleton instance of <see cref="Int16Formatter"/>.
-        /// </summary>
-        [SuppressMessage("Microsoft.Security", "CA2104")]
-        public static readonly Int16Formatter Instance = new Int16Formatter();
+    }
 
-        private Int16Formatter()
-        {
-        }
-
-        /// <inheritdoc />
-        public override void Write(UnsafeStringBuilder stringBuilder, short value)
-        {
-            stringBuilder.Append( value );
-        }
+    /// <inheritdoc />
+    public override void Write(UnsafeStringBuilder stringBuilder, short value)
+    {
+        stringBuilder.Append( value );
     }
 }

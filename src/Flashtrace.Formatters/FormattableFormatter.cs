@@ -5,22 +5,21 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Flashtrace.Formatters
+namespace Flashtrace.Formatters;
+
+internal sealed class FormattableFormatter<TValue,TRole> : Formatter<TValue> 
+    where TRole : FormattingRole, new()
+    where TValue : IFormattable
 {
-    internal sealed class FormattableFormatter<TValue,TRole> : Formatter<TValue> 
-        where TRole : FormattingRole, new()
-        where TValue : IFormattable
+    public override void Write( UnsafeStringBuilder stringBuilder, TValue value )
     {
-        public override void Write( UnsafeStringBuilder stringBuilder, TValue value )
+        if ( value == null )
         {
-            if ( value == null )
-            {
-                stringBuilder.Append( 'n', 'u', 'l', 'l' );
-            }
-            else
-            {
-                value.Format( stringBuilder, FormatterRepository<TRole>.Role );
-            }
+            stringBuilder.Append( 'n', 'u', 'l', 'l' );
+        }
+        else
+        {
+            value.Format( stringBuilder, FormatterRepository<TRole>.Role );
         }
     }
 }

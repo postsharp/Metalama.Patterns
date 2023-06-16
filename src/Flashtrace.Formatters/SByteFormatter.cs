@@ -4,27 +4,26 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Flashtrace.Formatters
+namespace Flashtrace.Formatters;
+
+/// <summary>
+/// Efficient formatter for <see cref="sbyte"/>.
+/// </summary>
+public sealed class SByteFormatter : Formatter<sbyte>
 {
     /// <summary>
-    /// Efficient formatter for <see cref="sbyte"/>.
+    /// The singleton instance of <see cref="SByteFormatter"/>.
     /// </summary>
-    public sealed class SByteFormatter : Formatter<sbyte>
+    [SuppressMessage("Microsoft.Security", "CA2104")]
+    public static readonly SByteFormatter Instance = new SByteFormatter();
+
+    private SByteFormatter()
     {
-        /// <summary>
-        /// The singleton instance of <see cref="SByteFormatter"/>.
-        /// </summary>
-        [SuppressMessage("Microsoft.Security", "CA2104")]
-        public static readonly SByteFormatter Instance = new SByteFormatter();
+    }
 
-        private SByteFormatter()
-        {
-        }
-
-        /// <inheritdoc />
-        public override void Write( UnsafeStringBuilder stringBuilder, sbyte value )
-        {
-            stringBuilder.Append( value );
-        }
+    /// <inheritdoc />
+    public override void Write( UnsafeStringBuilder stringBuilder, sbyte value )
+    {
+        stringBuilder.Append( value );
     }
 }

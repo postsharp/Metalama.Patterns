@@ -4,39 +4,38 @@
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace Flashtrace.Formatters
+namespace Flashtrace.Formatters;
+
+internal sealed class FormatterConverter<TargetType, SourceType> : FormatterConverter<TargetType>
 {
-    internal sealed class FormatterConverter<TargetType, SourceType> : FormatterConverter<TargetType>
+    
+    private readonly IFormatter wrapped;
+
+    public FormatterConverter( IFormatter wrapped ) : base(wrapped)
     {
-        
-        private readonly IFormatter wrapped;
-
-        public FormatterConverter( IFormatter wrapped ) : base(wrapped)
-        {
-            this.wrapped = wrapped;
-        }
-
-        
+        this.wrapped = wrapped;
     }
 
-    internal class FormatterConverter<TargetType> : Formatter<TargetType>
+    
+}
+
+internal class FormatterConverter<TargetType> : Formatter<TargetType>
+{
+    private readonly IFormatter wrapped;
+    private static readonly ConcurrentDictionary<IFormatter, FormatterConverter<TargetType>> cache = new ConcurrentDictionary<IFormatter, FormatterConverter<TargetType>>();
+
+    public FormatterConverter( IFormatter wrapped )
     {
-        private readonly IFormatter wrapped;
-        private static readonly ConcurrentDictionary<IFormatter, FormatterConverter<TargetType>> cache = new ConcurrentDictionary<IFormatter, FormatterConverter<TargetType>>();
-
-        public FormatterConverter( IFormatter wrapped )
-        {
-            this.wrapped = wrapped;
-        }
-
-        public static IFormatter<TargetType> Convert( IFormatter formatter ) => 
-            formatter == null ? null : formatter as IFormatter<TargetType> ?? cache.GetOrAdd( formatter, f => new FormatterConverter<TargetType>( f ) );
-
-        public override void Write( UnsafeStringBuilder stringBuilder, TargetType value )
-        {
-            this.wrapped.Write( stringBuilder, value );
-        }
-
-        public override FormatterAttributes Attributes => this.wrapped.Attributes | FormatterAttributes.Converter;
+        this.wrapped = wrapped;
     }
+
+    public static IFormatter<TargetType> Convert( IFormatter formatter ) => 
+        formatter == null ? null : formatter as IFormatter<TargetType> ?? cache.GetOrAdd( formatter, f => new FormatterConverter<TargetType>( f ) );
+
+    public override void Write( UnsafeStringBuilder stringBuilder, TargetType value )
+    {
+        this.wrapped.Write( stringBuilder, value );
+    }
+
+    public override FormatterAttributes Attributes => this.wrapped.Attributes | FormatterAttributes.Converter;
 }
