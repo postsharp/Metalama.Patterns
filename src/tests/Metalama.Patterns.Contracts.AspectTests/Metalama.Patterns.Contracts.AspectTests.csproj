@@ -6,20 +6,6 @@
         <Configurations>Debug;Release;LamaDebug</Configurations>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Compile Remove="DefaultInterfaceMethods.cs" />
-      <Compile Remove="Issue15135.cs" />
-      <Compile Remove="Issue24728.cs" />
-      <Compile Remove="Issue4165.cs" />
-      <Compile Remove="Issue4165.Dependency.cs" />
-      <Compile Remove="Issue4489.cs" />
-      <Compile Remove="Issue5808.cs" />
-      <Compile Remove="IssueN3935.cs" />
-      <Compile Remove="LocalMethod.cs" />
-      <Compile Remove="Ticket1192.cs" />
-      <Compile Remove="Ticket1192.Dependency.cs" />
-    </ItemGroup>
-
     <ItemGroup>        
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
@@ -29,20 +15,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="DefaultInterfaceMethods.cs" />
-      <None Include="Issue15135.cs" />
-      <None Include="Issue24728.cs" />
-      <None Include="Issue4165.cs" />
-      <None Include="Issue4165.Dependency.cs" />
-      <None Include="Issue4489.cs" />
-      <None Include="Issue5808.cs" />
-      <None Include="IssueN3935.cs" />
-      <None Include="LocalMethod.cs" />
-      <None Include="Ticket1192.cs" />
-      <None Include="Ticket1192.Dependency.cs" />
     </ItemGroup>
 
 </Project>
