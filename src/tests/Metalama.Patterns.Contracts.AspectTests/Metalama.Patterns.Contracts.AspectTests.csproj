@@ -3,6 +3,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
+        <Configurations>Debug;Release;LamaDebug</Configurations>
     </PropertyGroup>
 
     <ItemGroup>
