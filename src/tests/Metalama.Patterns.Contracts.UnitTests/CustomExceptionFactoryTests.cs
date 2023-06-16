@@ -19,7 +19,7 @@ public partial class CustomExceptionFactoryTests : IDisposable
 
     private static void ResetExceptionFactory()
     {
-        ContractServices.ResetExceptionFactory();
+        ContractsServices.ResetExceptionFactory();
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public partial class CustomExceptionFactoryTests : IDisposable
     [Fact]
     public void TestCustomExceptionFactory_Fallback()
     {
-        ContractServices.ExceptionFactory = new EmptyContractExceptionFactory( ContractServices.ExceptionFactory );
+        ContractsServices.ExceptionFactory = new EmptyContractExceptionFactory( ContractsServices.ExceptionFactory );
         var testingObject = new ContractTesting();
         AssertEx.Throws<ArgumentNullException>( () => testingObject.Method( null! ) );
     }
@@ -40,7 +40,7 @@ public partial class CustomExceptionFactoryTests : IDisposable
     [Fact]
     public void TestCustomExceptionFactory_UnknownExceptionType()
     {
-        ContractServices.ExceptionFactory = new EmptyContractExceptionFactory( null! );
+        ContractsServices.ExceptionFactory = new EmptyContractExceptionFactory( null! );
         var testingObject = new ContractTesting();
         var message = "The [Required] contract failed with ArgumentNullException, but the current ContractExceptionFactory is not configured to instantiate this exception type";
         AssertEx.Throws<InvalidOperationException>( message, () => testingObject.Method( null! ) );
@@ -49,7 +49,7 @@ public partial class CustomExceptionFactoryTests : IDisposable
     [Fact]
     public void TestCustomExceptionFactory_Success()
     {
-        ContractServices.ExceptionFactory = new CustomContractExceptionFactory( ContractServices.ExceptionFactory );
+        ContractsServices.ExceptionFactory = new CustomContractExceptionFactory( ContractsServices.ExceptionFactory );
         var testingObject = new ContractTesting();
         AssertEx.Throws<TestException>( () => testingObject.Method( null! ) );
     }
@@ -72,7 +72,7 @@ public partial class CustomExceptionFactoryTests : IDisposable
     {
         var check = new Action<Type>(
             ( exceptionType ) => Assert.Equal( typeof( ArgumentException ), exceptionType ) );
-        ContractServices.ExceptionFactory = new CustomContractExceptionFactory( ContractServices.ExceptionFactory, check );
+        ContractsServices.ExceptionFactory = new CustomContractExceptionFactory( ContractsServices.ExceptionFactory, check );
         var testingObject = new ContractTesting();
         AssertEx.Throws<ArgumentException>( () => testingObject.Method2( "123456" ) );
     }

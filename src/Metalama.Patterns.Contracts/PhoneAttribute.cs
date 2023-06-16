@@ -31,7 +31,7 @@ public sealed class PhoneAttribute : RegularExpressionAttribute
     /// <inheritdoc/>
     [CompileTime]
     protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
-        GetExceptioninfo()
+        GetExceptionInfo()
         => (typeof(ArgumentException),
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .PhoneErrorMessage) ),

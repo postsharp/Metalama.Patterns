@@ -7,7 +7,7 @@ namespace Metalama.Patterns.Contracts;
 /// exceptions are created when a contract is broken. By plugging into the <see cref="ContractLocalizedTextProvider"/> chain, you can change the way the exception messages
 /// are generated. See the documentation for the classes for more details: <see cref="ContractLocalizedTextProvider"/>, <see cref="ContractExceptionFactory"/>.
 /// </summary>
-public static class ContractServices
+public static class ContractsServices
 {
     private static volatile ContractLocalizedTextProvider _localizedTextProvider = new(null);
 

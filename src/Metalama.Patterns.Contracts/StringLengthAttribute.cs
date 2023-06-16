@@ -89,7 +89,7 @@ public sealed class StringLengthAttribute : ContractAspect
         {
             if ( value != null && value!.Length > this.MaximumLength )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(StringLengthAttribute),
                     value,
@@ -104,7 +104,7 @@ public sealed class StringLengthAttribute : ContractAspect
         {
             if ( value != null && value!.Length < this.MinimumLength )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(StringLengthAttribute),
                     value,
@@ -121,7 +121,7 @@ public sealed class StringLengthAttribute : ContractAspect
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(StringLengthAttribute),
                     value,

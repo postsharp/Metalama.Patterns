@@ -52,7 +52,7 @@ public sealed class NotEmptyAttribute : ContractAspect
         {
             if ( string.IsNullOrEmpty( value ) )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentNullException),
                     typeof(NotEmptyAttribute),
                     value,
@@ -68,7 +68,7 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
-                    throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                         typeof(ArgumentNullException),
                         typeof(NotEmptyAttribute),
                         value,
@@ -82,7 +82,7 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( value == null || value!.Count <= 0 )
                 {
-                    throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                         typeof(ArgumentNullException),
                         typeof(NotEmptyAttribute),
                         value,

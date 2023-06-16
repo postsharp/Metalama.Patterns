@@ -10,7 +10,7 @@ public class DefaultContractExceptionFactory : ContractExceptionFactory
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultContractExceptionFactory"/> class.
     /// </summary>
-    public DefaultContractExceptionFactory() : this( ContractServices.DefaultExceptionFactory )
+    public DefaultContractExceptionFactory() : this( ContractsServices.DefaultExceptionFactory )
     {
     }
 
@@ -24,7 +24,7 @@ public class DefaultContractExceptionFactory : ContractExceptionFactory
     /// <inheritdoc/>
     public override Exception CreateException( ContractExceptionInfo exceptionInfo )
     {
-        var errorMessage = ContractServices.LocalizedTextProvider.GetFormattedMessage( exceptionInfo );
+        var errorMessage = ContractsServices.LocalizedTextProvider.GetFormattedMessage( exceptionInfo );
 
         var parameterName = exceptionInfo.TargetKind.GetParameterName( exceptionInfo.TargetName );
 

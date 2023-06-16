@@ -567,7 +567,7 @@ public class RangeAttribute : ContractAspect
                 {
                     if ( exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -580,7 +580,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else if ( exceptionInfo.IncludeMinValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -592,7 +592,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else if ( exceptionInfo.IncludeMaxValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -604,7 +604,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -626,7 +626,7 @@ public class RangeAttribute : ContractAspect
                 {
                     if ( exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -639,7 +639,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else if ( exceptionInfo.IncludeMinValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -651,7 +651,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else if ( exceptionInfo.IncludeMaxValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -663,7 +663,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -680,7 +680,7 @@ public class RangeAttribute : ContractAspect
                 {
                     if ( exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -693,7 +693,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else if ( exceptionInfo.IncludeMinValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -705,7 +705,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else if ( exceptionInfo.IncludeMaxValue )
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,
@@ -717,7 +717,7 @@ public class RangeAttribute : ContractAspect
                     }
                     else
                     {
-                        throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                        throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                             typeof(ArgumentOutOfRangeException),
                             aspectType,
                             value,

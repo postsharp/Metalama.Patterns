@@ -46,7 +46,7 @@ public sealed class CreditCardAttribute : ContractAspect
 
         if ( !CreditCardAttributeHelper.IsValidCreditCardNumber( value ) )
         {
-            throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+            throw ContractsServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                 typeof(ArgumentNullException),
                 typeof(CreditCardAttribute),
                 value,

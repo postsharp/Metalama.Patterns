@@ -32,7 +32,7 @@ public sealed class UrlAttribute : RegularExpressionAttribute
     /// <inheritdoc/>
     [CompileTime]
     protected override (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
-        GetExceptioninfo()
+        GetExceptionInfo()
         => (typeof(ArgumentException),
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .UrlErrorMessage) ),
