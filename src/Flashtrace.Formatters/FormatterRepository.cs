@@ -8,7 +8,7 @@ using PostSharp.Patterns.Threading.Primitives;
 using PostSharp.Patterns.Utilities;
 using PostSharp.Reflection;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// Allows to get and register formatters for a specific type.

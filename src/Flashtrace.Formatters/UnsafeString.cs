@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using PostSharp.Patterns.Utilities;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// A generalized representation of a string that can be either backed by a system <see cref="string"/>,

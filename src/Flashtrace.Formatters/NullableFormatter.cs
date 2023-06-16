@@ -4,7 +4,7 @@
 using System;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// Formatter for <see cref="Nullable{T}"/>

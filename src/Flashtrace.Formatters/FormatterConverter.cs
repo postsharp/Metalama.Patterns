@@ -4,7 +4,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     internal sealed class FormatterConverter<TargetType, SourceType> : FormatterConverter<TargetType>
     {

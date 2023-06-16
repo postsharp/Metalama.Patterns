@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using PostSharp.Patterns.Utilities;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// A class similar to <see cref="System.Text.StringBuilder"/>, but implemented using unsafe C#.

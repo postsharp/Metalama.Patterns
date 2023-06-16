@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// Represents a span of <see cref="char"/> by encapsulating a substring or a range of a <see cref="char"/> array.

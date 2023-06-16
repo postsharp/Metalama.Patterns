@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     internal sealed class FormattableFormatter<TValue,TRole> : Formatter<TValue> 
         where TRole : FormattingRole, new()

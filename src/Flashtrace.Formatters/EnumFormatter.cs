@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     // See http://www.codeproject.com/Articles/278820/Optimized-Enum-ToString
     // for a much more complicated enum formatter. But that one always boxes

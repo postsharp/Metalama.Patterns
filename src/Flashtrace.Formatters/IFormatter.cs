@@ -4,7 +4,7 @@
 using System;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// Appends the description of an object into an <see cref="UnsafeStringBuilder"/>. Weakly-typed variant of <see cref="IFormatter{T}"/>.

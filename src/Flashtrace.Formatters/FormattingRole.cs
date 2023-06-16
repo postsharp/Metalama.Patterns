@@ -3,7 +3,7 @@
 
 using PostSharp.Patterns.Diagnostics;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// Base for kind marker types for <see cref="FormatterRepository{TRole}"/>.

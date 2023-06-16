@@ -1,10 +1,10 @@
-﻿using PostSharp.Patterns.Formatters;
+﻿using Flashtrace.Formatters;
 using PostSharp.Patterns.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// The formatted used to for anonymous types by default.

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     internal sealed class DynamicFormatter<TValue, TRole> : Formatter<TValue> 
         where TRole : FormattingRole, new()

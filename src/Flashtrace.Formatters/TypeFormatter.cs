@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using PostSharp.Reflection;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
 
     /// <summary>

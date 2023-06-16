@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// Exposes a <see cref="Format"/> method, which allows an object to format itself into an <see cref="UnsafeStringBuilder"/>.

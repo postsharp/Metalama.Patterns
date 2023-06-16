@@ -4,7 +4,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// A formatter for <see cref="uint"/> values.

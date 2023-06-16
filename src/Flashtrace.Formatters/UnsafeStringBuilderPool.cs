@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     /// <summary>
     /// A thread-safe pool of <see cref="UnsafeStringBuilder"/>.

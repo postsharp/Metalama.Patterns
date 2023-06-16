@@ -4,12 +4,12 @@
 using System;
 using System.Text;
 using PostSharp.Reflection;
-using PostSharp.Patterns.Formatters;
+using Flashtrace.Formatters;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Collections.Concurrent;
 
-namespace PostSharp.Patterns.Formatters
+namespace Flashtrace.Formatters
 {
     // Must be a separate class because we want to share among different generic types.
     internal static class DefaultFormatterHelper
