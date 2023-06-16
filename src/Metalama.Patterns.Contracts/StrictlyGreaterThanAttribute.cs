@@ -223,11 +223,12 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
     }
 
     /// <inheritdoc/>
-    protected override (IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue) GetExceptioninfo()
-        => (
+    protected override ExceptionInfo GetExceptionInfo()
+        => new(
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .StrictlyGreaterThanErrorMessage) ),
-            true, false);
+            true,
+            false);
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
         CreateCannotBeAppliedDiagosticDefinition( "LAMA5005", nameof( StrictlyGreaterThanAttribute ) );

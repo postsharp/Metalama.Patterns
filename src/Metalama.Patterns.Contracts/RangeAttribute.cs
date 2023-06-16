@@ -542,7 +542,7 @@ public class RangeAttribute : ContractAspect
         var type = CompileTimeHelpers.GetTargetType( meta.Target );
         var basicType = (INamedType) type.ToNonNullableType();
         var isNullable = type.IsNullable == true;
-        var exceptionInfo = this.GetExceptioninfo();
+        var exceptionInfo = this.GetExceptionInfo();
         var aspectType = meta.CompileTime( this.GetType() );
 
         if ( type.SpecialType == SpecialType.Object )
@@ -732,13 +732,20 @@ public class RangeAttribute : ContractAspect
     }
 
     /// <summary>
+    /// Describes exception information as returned by <see cref="GetExceptionInfo"/>.
+    /// </summary>
+    [CompileTime]
+    protected record struct ExceptionInfo( IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue );
+
+    /// <summary>
     /// Called by <see cref="Validate(object?)"/> to determine the message to emit, and whether the minimum and maximum values
     /// should be provided as formatting arguments.
     /// </summary>
     [CompileTime]
-    protected virtual (IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue) GetExceptioninfo()
-        => (
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .RangeErrorMessage) ),
-            true, true);
+    protected virtual ExceptionInfo GetExceptionInfo()
+        => new(
+            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider
+                .RangeErrorMessage ) ),
+            true,
+            true );
 }

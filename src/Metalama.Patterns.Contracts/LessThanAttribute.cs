@@ -132,11 +132,12 @@ public class LessThanAttribute : RangeAttribute
     }
 
     /// <inheritdoc/>
-    protected override (IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue) GetExceptioninfo()
-        => (
+    protected override ExceptionInfo GetExceptionInfo()
+        => new(
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .LessThanErrorMessage) ),
-            false, true);
+            false,
+            true);
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
         CreateCannotBeAppliedDiagosticDefinition( "LAMA5002", nameof( LessThanAttribute) );
