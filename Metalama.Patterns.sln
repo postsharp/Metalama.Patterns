@@ -13,6 +13,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedHelpers", "src\tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Contracts.AspectTests", "src\tests\Metalama.Patterns.Contracts.AspectTests\Metalama.Patterns.Contracts.AspectTests.csproj", "{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.Formatters", "src\Flashtrace.Formatters\Flashtrace.Formatters.csproj", "{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -45,6 +51,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\tests\SharedHelpers\SharedHelpers.projitems*{31626078-d5d3-483e-9d0d-8591c060a155}*SharedItemsImports = 13
-		src\tests\SharedHelpers\SharedHelpers.projitems*{c972ceea-60fa-4dd4-beec-a5fddf451d50}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
