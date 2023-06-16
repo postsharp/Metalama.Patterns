@@ -1,8 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -11,13 +7,7 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class Int16Formatter : Formatter<short>
 {
-    /// <summary>
-    /// The singleton instance of <see cref="Int16Formatter"/>.
-    /// </summary>
-    [SuppressMessage("Microsoft.Security", "CA2104")]
-    public static readonly Int16Formatter Instance = new Int16Formatter();
-
-    private Int16Formatter()
+    public Int16Formatter( IFormatterRepository repository ) : base( repository )
     {
     }
 

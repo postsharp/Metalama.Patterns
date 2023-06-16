@@ -1,33 +1,29 @@
-﻿using Flashtrace.Formatters;
-using PostSharp.Patterns.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
 /// <summary>
-/// The formatted used to for anonymous types by default.
+/// The formatter used to for anonymous types by default.
 /// </summary>
-/// <typeparam name="TKind">The formatting role.</typeparam>
-public sealed class AnonymousTypeFormatter<TKind> : IFormatter
-      where TKind : FormattingRole, new()
+public sealed class AnonymousTypeFormatter : IFormatter
 {
-    private readonly Func<object, UnknownObjectAccessor> accessorFactory;
+    private readonly Func<object, UnknownObjectAccessor> _accessorFactory;
 
     /// <summary>
-    /// Initializes a new <see cref="AnonymousTypeFormatter{TKind}"/> for a given <see cref="Type"/>.
+    /// Initializes a new instance of the <see cref="AnonymousTypeFormatter"/> class for the specified <see cref="Type"/>.
     /// </summary>
-    /// <param name="type">A type.</param>
-    public AnonymousTypeFormatter( Type type )
+    public AnonymousTypeFormatter( IFormatterRepository repository, Type type )
     {
         if ( type == null )
         {
             throw new ArgumentNullException( nameof(type) );
         }
 
-        this.accessorFactory = UnknownObjectAccessor.GetFactory( type );
+        this.Repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
+        this._accessorFactory = UnknownObjectAccessor.GetFactory( type );        
     }
+    
+    public IFormatterRepository Repository { get; }
 
     /// <inheritdoc/>
     public FormatterAttributes Attributes => FormatterAttributes.Normal;
@@ -35,7 +31,7 @@ public sealed class AnonymousTypeFormatter<TKind> : IFormatter
     /// <inheritdoc/>
     public void Write( UnsafeStringBuilder stringBuilder, object value )
     {
-        UnknownObjectAccessor accessor = this.accessorFactory( value );
+        UnknownObjectAccessor accessor = this._accessorFactory( value );
 
         stringBuilder.Append( '{', ' ' );
 
@@ -52,11 +48,10 @@ public sealed class AnonymousTypeFormatter<TKind> : IFormatter
                 stringBuilder.Append( property.Key );
                 stringBuilder.Append( ' ', '=', ' ' );
 
-                FormatterRepository<TKind>.Get( property.Value.GetType() ).Write( stringBuilder, property.Value );
+                this.Repository.Get( property.Value.GetType() ).Write( stringBuilder, property.Value );
             }
 
             i++;
-
         }
 
         stringBuilder.Append( ' ', '}' );

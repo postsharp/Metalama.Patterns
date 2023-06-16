@@ -1,62 +1,50 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using PostSharp.Reflection;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
-
 
 /// <summary>
 /// A <see cref="Formatter{T}"/> for <see cref="Type"/> values.
 /// </summary>
 public sealed class TypeFormatter : Formatter<Type>
 {
-    private readonly bool includeNamespace;
+    private readonly bool _includeNamespace;
 
-    private static readonly Dictionary<Type, string> specialTypeNames = new Dictionary<Type, string>()
-                                                                        {
-                                                                            {typeof(string), "string"},
-                                                                            {typeof(int), "int"},
-                                                                            {typeof(bool), "bool"},
-                                                                            {typeof(uint), "uint"},
-                                                                            {typeof(long), "long"},
-                                                                            {typeof(ulong), "ulong"},
-                                                                            {typeof(short), "short"},
-                                                                            {typeof(ushort), "ushort"},
-                                                                            {typeof(char), "char"},
-                                                                            {typeof(byte), "byte"},
-                                                                            {typeof(sbyte), "sbyte"},
-                                                                            {typeof(decimal), "decimal"},
-                                                                            {typeof(object), "object"},
-                                                                            {typeof(float), "float"},
-                                                                            {typeof(double), "double"}
-                                                                        };
-
-    /// <summary>
-    /// The default instance of <see cref="TypeFormatter"/>, which includes namespaces.
-    /// </summary>
-    [SuppressMessage( "Microsoft.Security", "CA2104" )]
-    public static readonly TypeFormatter Instance = new TypeFormatter();
+    private static readonly Dictionary<Type, string> _specialTypeNames =
+        new()
+        {
+            {typeof(string), "string"},
+            {typeof(int), "int"},
+            {typeof(bool), "bool"},
+            {typeof(uint), "uint"},
+            {typeof(long), "long"},
+            {typeof(ulong), "ulong"},
+            {typeof(short), "short"},
+            {typeof(ushort), "ushort"},
+            {typeof(char), "char"},
+            {typeof(byte), "byte"},
+            {typeof(sbyte), "sbyte"},
+            {typeof(decimal), "decimal"},
+            {typeof(object), "object"},
+            {typeof(float), "float"},
+            {typeof(double), "double"}
+        };
 
     /// <summary>
-    /// Initializes a new <see cref="TypeFormatter"/> and specifies whether it should include namespaces.
+    /// Initializes a new instance of the <see cref="TypeFormatter"/> class specifying whether it should include namespaces.
     /// </summary>
-    /// <param name="includeNamespace"></param>
-    public TypeFormatter( bool includeNamespace = true )
+    public TypeFormatter( IFormatterRepository repository, bool includeNamespace = true )
+        : base( repository )
     {
-        this.includeNamespace = includeNamespace;
+        this._includeNamespace = includeNamespace;
     }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, Type value )
+    public override void Write( UnsafeStringBuilder stringBuilder, Type? value )
     {
         this.WriteCore( stringBuilder, value );
     }
 
-    private void WriteCore( UnsafeStringBuilder stringBuilder, Type type, bool removeArity = false, Type[] genericArguments = null )
+    private void WriteCore( UnsafeStringBuilder stringBuilder, Type? type, bool removeArity = false, Type[]? genericArguments = null )
     {
         try
         {
@@ -75,12 +63,12 @@ public sealed class TypeFormatter : Formatter<Type>
             if ( type.DeclaringType != null )
             {
                 // For generic inner type instance, pass the fully specified types on (for A<int>.B<int> argument array contains {int, int}).
-                genericArguments ??= (type.IsGenericType() && !type.IsGenericTypeDefinition()) ? type.GetGenericArguments() : null;
+                genericArguments ??= (type.IsGenericType && !type.IsGenericTypeDefinition) ? type.GetGenericArguments() : null;
                 this.WriteCore( stringBuilder, type.DeclaringType, genericArguments: genericArguments );
                 stringBuilder.Append( '.' );
             }
 
-            if ( type.IsGenericType() && type.GetGenericTypeDefinition() == typeof(Nullable<>) )
+            if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) )
             {
                 this.Write( stringBuilder, type.GetGenericArguments()[0] );
                 stringBuilder.Append( '?' );
@@ -96,7 +84,7 @@ public sealed class TypeFormatter : Formatter<Type>
 
                 stringBuilder.Append( ']' );
             }
-            else if ( type.IsGenericType() && (!type.IsGenericTypeDefinition() || genericArguments != null) )
+            else if ( type.IsGenericType && (!type.IsGenericTypeDefinition || genericArguments != null) )
             {
                 // If generic arguments are set, formatting was started on type instance and the passed array should be used as it contains actual arguments.
                 // Otherwise formatting runs on type definition, where we use the local array.
@@ -124,7 +112,7 @@ public sealed class TypeFormatter : Formatter<Type>
 
                 stringBuilder.Append( '>' );
             }
-            else if ( type.IsGenericTypeDefinition() )
+            else if ( type.IsGenericTypeDefinition )
             {
                 stringBuilder.Append( RemoveArity( this.GetTypeName( type ), true ) );
                 if ( !removeArity )
@@ -171,7 +159,7 @@ public sealed class TypeFormatter : Formatter<Type>
 
     private string GetTypeName( Type type )
     {
-        if ( specialTypeNames.TryGetValue( type, out string typeName ) )
+        if ( _specialTypeNames.TryGetValue( type, out string typeName ) )
         {
             return typeName;
         }
@@ -186,7 +174,7 @@ public sealed class TypeFormatter : Formatter<Type>
 
     private bool IsTrivialNamespace( Type type )
     {
-        if ( this.includeNamespace )
+        if ( this._includeNamespace )
         {
             switch ( type.Namespace )
             {

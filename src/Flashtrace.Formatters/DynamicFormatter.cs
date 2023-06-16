@@ -1,34 +1,30 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace Flashtrace.Formatters;
 
-internal sealed class DynamicFormatter<TValue, TRole> : Formatter<TValue> 
-    where TRole : FormattingRole, new()
+internal sealed class DynamicFormatter<TValue> : Formatter<TValue> 
 {
-    private readonly FormattingOptions options;
+    private readonly FormattingOptions _options;
 
-    public DynamicFormatter() : this( FormattingOptions.Default ) 
+    public DynamicFormatter( IFormatterRepository repository ) : this( repository, FormattingOptions.Default ) 
     {
     }
 
-    private DynamicFormatter( FormattingOptions options )
+    private DynamicFormatter( IFormatterRepository repository, FormattingOptions options )
+        : base( repository )
     {
-        this.options = options ?? FormattingOptions.Default;
+        this._options = options ?? FormattingOptions.Default;
     }
 
-    private DynamicFormatter<TValue, TRole> otherFormatter;
+    private DynamicFormatter<TValue>? otherFormatter;
 
     public override FormatterAttributes Attributes => FormatterAttributes.Dynamic;
 
     public override IOptionAwareFormatter WithOptions( FormattingOptions options )
     {
-        if ( options == this.options )
+        if ( options == this._options )
         {
             return this;
         }
@@ -37,7 +33,7 @@ internal sealed class DynamicFormatter<TValue, TRole> : Formatter<TValue>
             if ( this.otherFormatter == null )
             {
                 // There are just two options currently.
-                this.otherFormatter = new DynamicFormatter<TValue, TRole>( options );
+                this.otherFormatter = new DynamicFormatter<TValue>( this.Repository, this._options );
             }
 
             return this.otherFormatter;
@@ -52,7 +48,7 @@ internal sealed class DynamicFormatter<TValue, TRole> : Formatter<TValue>
         }
         else
         {
-            IFormatter formatter = FormatterRepository<TRole>.Get(value.GetType() ).WithOptions(this.options);
+            IFormatter formatter = this.Repository.Get(value.GetType() ).WithOptions(this._options);
 
             if ( formatter == null )
                 throw new AssertionFailedException( string.Format( CultureInfo.InvariantCulture, "Cannot get a formatter for type {0}.", value.GetType() ) );

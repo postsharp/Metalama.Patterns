@@ -1,33 +1,27 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using PostSharp.Patterns.Diagnostics;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
 /// <summary>
-/// Base for kind marker types for <see cref="FormatterRepository{TRole}"/>.
+/// Describes a formatting role.
 /// </summary>
-/// <remarks>
-/// Types derived from this type are not meant to have members or instances,
-/// they're used only as markers.
-/// </remarks>
-public abstract class FormattingRole
+public class FormattingRole
 {
     /// <summary>
-    /// Initializes a new <see cref="FormattingRole"/>.
+    /// Initializes a new instance of the <see cref="FormattingRole"/> class.
     /// </summary>
-    protected FormattingRole()
+    public FormattingRole( string name )
     {
+        if ( string.IsNullOrWhiteSpace( name ) )
+        {
+            throw new ArgumentNullException( nameof( name ) );
+        }
+
+        this.Name = name;
     }
 
     /// <summary>
     /// Gets the name of the <see cref="FormattingRole"/>.
     /// </summary>
-    public abstract string Name { get; }
-
-    /// <summary>
-    /// Gets the logging role name (see <see cref="LoggingRoles"/>).
-    /// </summary>
-    public abstract string LoggingRole { get; }
+    public string Name { get; }
 }

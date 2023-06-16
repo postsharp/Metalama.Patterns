@@ -1,41 +1,34 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Collections.Concurrent;
-using System.Text;
 
 namespace Flashtrace.Formatters;
 
-internal sealed class FormatterConverter<TargetType, SourceType> : FormatterConverter<TargetType>
+internal sealed class FormatterConverter<TTarget, TSource> : FormatterConverter<TTarget>
 {
-    
-    private readonly IFormatter wrapped;
-
-    public FormatterConverter( IFormatter wrapped ) : base(wrapped)
+    public FormatterConverter( IFormatterRepository repository, IFormatter wrapped ) : base( repository, wrapped )
     {
-        this.wrapped = wrapped;
     }
-
-    
 }
 
-internal class FormatterConverter<TargetType> : Formatter<TargetType>
+internal class FormatterConverter<TTarget> : Formatter<TTarget>
 {
-    private readonly IFormatter wrapped;
-    private static readonly ConcurrentDictionary<IFormatter, FormatterConverter<TargetType>> cache = new ConcurrentDictionary<IFormatter, FormatterConverter<TargetType>>();
+    private readonly IFormatter _wrapped;
+    private readonly ConcurrentDictionary<IFormatter, FormatterConverter<TTarget>> _cache = new();
 
-    public FormatterConverter( IFormatter wrapped )
+    public FormatterConverter( IFormatterRepository repository, IFormatter wrapped )
+        : base( repository )
     {
-        this.wrapped = wrapped;
+        this._wrapped = wrapped;
     }
 
-    public static IFormatter<TargetType> Convert( IFormatter formatter ) => 
-        formatter == null ? null : formatter as IFormatter<TargetType> ?? cache.GetOrAdd( formatter, f => new FormatterConverter<TargetType>( f ) );
+    public IFormatter<TTarget>? Convert( IFormatter formatter ) => 
+        formatter == null ? null : formatter as IFormatter<TTarget> ?? this._cache.GetOrAdd( formatter, f => new FormatterConverter<TTarget>( this.Repository, f ) );
 
-    public override void Write( UnsafeStringBuilder stringBuilder, TargetType value )
+    public override void Write( UnsafeStringBuilder stringBuilder, TTarget? value )
     {
-        this.wrapped.Write( stringBuilder, value );
+        this._wrapped.Write( stringBuilder, value );
     }
 
-    public override FormatterAttributes Attributes => this.wrapped.Attributes | FormatterAttributes.Converter;
+    public override FormatterAttributes Attributes => this._wrapped.Attributes | FormatterAttributes.Converter;
 }

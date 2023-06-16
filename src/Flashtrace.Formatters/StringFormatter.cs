@@ -1,9 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -12,19 +7,23 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class StringFormatter : Formatter<string>
 {
-    /// <summary>
-    /// The singleton instance of <see cref="StringFormatter"/>.
-    /// </summary>
-    [SuppressMessage("Microsoft.Security", "CA2104")]
-    public static readonly StringFormatter Instance = new StringFormatter();
+    private NonQuotingStringFormatter _nonQuotingStringFormatter;
 
-    private StringFormatter()
+    public StringFormatter( IFormatterRepository repository ) : base( repository )
     {
-        
+    }
+
+    private NonQuotingStringFormatter NonQuotingStringFormatter
+    {
+        get
+        {
+            this._nonQuotingStringFormatter ??= new NonQuotingStringFormatter( this.Repository );
+            return this._nonQuotingStringFormatter;
+        }
     }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, string value )
+    public override void Write( UnsafeStringBuilder stringBuilder, string? value )
     {
         if (value == null)
         {
@@ -46,7 +45,7 @@ public sealed class StringFormatter : Formatter<string>
     {
         if ( options.RequiresUnquotedStrings )
         {
-            return NonQuotingStringFormatter.Instance;
+            return this.NonQuotingStringFormatter;
         }
         else
         {
@@ -57,14 +56,11 @@ public sealed class StringFormatter : Formatter<string>
 
 internal sealed class NonQuotingStringFormatter : Formatter<string>
 {
-    public static readonly NonQuotingStringFormatter Instance = new NonQuotingStringFormatter();
-
-    private NonQuotingStringFormatter()
+    public NonQuotingStringFormatter( IFormatterRepository repository ) : base( repository )
     {
-
     }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, string value )
+    public override void Write( UnsafeStringBuilder stringBuilder, string? value )
     {
         if ( value == null )
         {

@@ -1,8 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System;
-using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -12,11 +8,16 @@ namespace Flashtrace.Formatters;
 public interface IFormatter
 {
     /// <summary>
+    /// Gets the <see cref="IFormatterRepository"/> which current <see cref="IFormatter"/> uses to get formatters for other types.
+    /// </summary>
+    IFormatterRepository Repository { get; }
+
+    /// <summary>
     /// Appends the description of an object into given <see cref="UnsafeStringBuilder"/> (weakly-typed variant).
     /// </summary>
     /// <param name="stringBuilder">The target <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="value">The value to be formatted.</param>
-    void Write( UnsafeStringBuilder stringBuilder, object value );
+    void Write( UnsafeStringBuilder stringBuilder, object? value );
 
     /// <summary>
     /// Gets the formatter attributes.
@@ -169,7 +170,7 @@ public interface IFormatter<in T> : IFormatter
     /// </summary>
     /// <param name="stringBuilder">The target <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="value">The value to be formatted.</param>
-    void Write( UnsafeStringBuilder stringBuilder, T value );
+    void Write( UnsafeStringBuilder stringBuilder, T? value );
 }
 
 /// <summary>
@@ -178,14 +179,25 @@ public interface IFormatter<in T> : IFormatter
 /// <typeparam name="T"></typeparam>
 public abstract class Formatter<T> : IFormatter<T>, IOptionAwareFormatter
 {
-    /// <inheritdoc />  
-    public void Write( UnsafeStringBuilder stringBuilder, object value )
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Formatter{T}"/> class using the specified <see cref="IFormatterRepository"/>
+    /// to access formatters for other types.
+    /// </summary>
+    protected Formatter( IFormatterRepository repository ) 
     {
-        this.Write( stringBuilder, (T) value );
+        this.Repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
+    }
+    
+    public IFormatterRepository Repository { get; }
+
+    /// <inheritdoc />  
+    public void Write( UnsafeStringBuilder stringBuilder, object? value )
+    {
+        this.Write( stringBuilder, (T?) value );
     }
 
     /// <inheritdoc />
-    public abstract void Write( UnsafeStringBuilder stringBuilder, T value );
+    public abstract void Write( UnsafeStringBuilder stringBuilder, T? value );
 
     /// <inheritdoc />
     public virtual IOptionAwareFormatter WithOptions( FormattingOptions options ) => this;

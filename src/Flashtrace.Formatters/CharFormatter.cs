@@ -1,9 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -12,14 +7,23 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class CharFormatter : Formatter<char>
 {
-    /// <summary>
-    /// The singleton instance of <see cref="CharFormatter"/>.
-    /// </summary>
-    [SuppressMessage("Microsoft.Security", "CA2104")]
-    public static readonly CharFormatter Instance = new CharFormatter();
+    private NonQuotingCharFormatter? _nonQuotingCharFormatter;
 
-    private CharFormatter()
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CharFormatter"/> class.
+    /// </summary>
+    /// <param name="repository"></param>
+    public CharFormatter( IFormatterRepository repository ) : base( repository )
+    {        
+    }
+
+    private NonQuotingCharFormatter NonQuotingCharFormatter
     {
+        get
+        {
+            this._nonQuotingCharFormatter ??= new NonQuotingCharFormatter( this.Repository );
+            return this._nonQuotingCharFormatter;
+        }
     }
 
     /// <inheritdoc />
@@ -33,7 +37,7 @@ public sealed class CharFormatter : Formatter<char>
     {
         if ( options.RequiresUnquotedStrings )
         {
-            return NonQuotingCharFormatter.Instance;
+            return this.NonQuotingCharFormatter;
         }
         else
         {
@@ -44,11 +48,8 @@ public sealed class CharFormatter : Formatter<char>
 
 internal sealed class NonQuotingCharFormatter : Formatter<char>
 {
-    public static readonly NonQuotingCharFormatter Instance = new NonQuotingCharFormatter();
-
-    private NonQuotingCharFormatter()
+    public NonQuotingCharFormatter( IFormatterRepository repository ) : base( repository )
     {
-
     }
 
     public override void Write( UnsafeStringBuilder stringBuilder, char value )

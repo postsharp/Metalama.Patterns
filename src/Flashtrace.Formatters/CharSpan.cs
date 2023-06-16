@@ -1,17 +1,17 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System;
-using System.Diagnostics.CodeAnalysis;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
 /// <summary>
 /// Represents a span of <see cref="char"/> by encapsulating a substring or a range of a <see cref="char"/> array.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "TODO")]
-public readonly struct CharSpan 
+public readonly struct CharSpan : CharSpan.IArrayAccessor
 {
+    public interface IArrayAccessor
+    {
+        object? Array { get; }
+    }
+
     internal int StartIndex { get; }
 
     /// <summary>
@@ -20,44 +20,49 @@ public readonly struct CharSpan
     public int Length { get;  }
 
     /// <summary>
-    /// Determines whether the current instance represents a null string.
+    /// Gets a value indicating whether the current instance represents a null string.
     /// </summary>
-    public bool IsNull => this.Array == null;
+    public bool IsNull => this._array == null;
 
+    private readonly object? _array;
+
+    /* TODO: Review TG - discuss replacement pattern. I considered exposing Array publicly to be too unsafe.
     [ExplicitCrossPackageInternal]
-    internal object Array { get;  }
+    internal object _array { get;  }
+    */
+    object? CharSpan.IArrayAccessor.Array => this._array;
 
     /// <summary>
-    /// Initializes a new <see cref="CharSpan"/> from an array of <see cref="char"/>.
+    /// Initializes a new instance of the <see cref="CharSpan"/> struct from an array of <see cref="char"/>.
     /// </summary>
     /// <param name="array">An array of <see cref="char"/>.</param>
     /// <param name="start">The start index of the span in the <paramref name="array"/>.</param>
     /// <param name="length">The number of characters in the span.</param>
     public CharSpan( char[] array, int start, int length )
     {
-        this.Array = array;
+        this._array = array;
         this.StartIndex = start;
         this.Length = length;
     }
 
     /// <summary>
-    /// Initializes a new <see cref="CharSpan"/> from a <see cref="string"/> and specifies the start and lenght of the substring.
+    /// Initializes a new instance of the <see cref="CharSpan"/> struct from a <see cref="string"/> and specifies the start and lenght of the substring.
     /// </summary>
     /// <param name="str">A string.</param>
     /// <param name="start">The index of the first character of the span in <paramref name="str"/>.</param>
     /// <param name="length">The number of characters in the span.</param>
     public CharSpan( string str, int start, int length )
     {
-        this.Array = str;
+        this._array = str;
         this.StartIndex = start;
         this.Length = length;
     }
 
     /// <summary>
-    /// Initializes a new <see cref="CharSpan"/> from a <see cref="string"/>, and takes the whole string.
+    /// Initializes a new instance of the <see cref="CharSpan"/> struct from a <see cref="string"/>, and takes the whole string.
     /// </summary>
     /// <param name="str">A string.</param>
-    public CharSpan( string str ) : this ( str, (int) 0, str == null ? 0 : str.Length )
+    public CharSpan( string str ) : this ( str, 0, str == null ? 0 : str.Length )
     {
     }
 
@@ -86,15 +91,15 @@ public readonly struct CharSpan
     public static CharSpan FromArraySegment( ArraySegment<char> str ) => new CharSpan( str.Array, str.Offset, str.Count );
 
     /// <summary>
-    /// Determines whether the current <see cref="CharSpan"/> is backed by a <c>char[]</c>. In this case,
+    /// Gets a value indicating whether the current <see cref="CharSpan"/> is backed by a <c>char[]</c>. In this case,
     /// the <see cref="ToCharArraySegment"/> method does not allocate memory.
     /// </summary>
-    public bool IsBackedByCharArray => this.Array is char[];
+    public bool IsBackedByCharArray => this._array is char[];
     
     /// <inheritdoc/>
-    public override string ToString()
+    public override string? ToString()
     {
-        switch ( this.Array )
+        switch ( this._array )
         {
             case string s:
                 return s.Substring( this.StartIndex, this.Length );
@@ -114,7 +119,7 @@ public readonly struct CharSpan
     /// <returns></returns>
     public ArraySegment<char> ToCharArraySegment()
     {
-        switch ( this.Array )
+        switch ( this._array )
         {
             case string s:
                 return new ArraySegment<char>( s.ToCharArray(), this.StartIndex, this.Length );
@@ -125,7 +130,5 @@ public readonly struct CharSpan
             default:
                 return default;
         }
-    }
-
-   
+    }  
 }

@@ -1,8 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -11,13 +7,7 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class Int64Formatter : Formatter<long>
 {
-    /// <summary>
-    /// The singleton instance of <see cref="Int64Formatter"/>.
-    /// </summary>
-    [SuppressMessage("Microsoft.Security", "CA2104")]
-    public static readonly Int64Formatter Instance = new Int64Formatter();
-
-    private Int64Formatter()
+    public Int64Formatter( IFormatterRepository repository ) : base( repository )
     {
     }
 

@@ -1,8 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -11,13 +7,7 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class ByteFormatter : Formatter<byte>
 {
-    /// <summary>
-    /// The singleton instance of <see cref="ByteFormatter"/>.
-    /// </summary>
-    [SuppressMessage("Microsoft.Security", "CA2104")]
-    public static readonly ByteFormatter Instance = new ByteFormatter();
-
-    private ByteFormatter()
+    public ByteFormatter( IFormatterRepository repository ) : base( repository )
     {
     }
 
@@ -26,6 +16,4 @@ public sealed class ByteFormatter : Formatter<byte>
     {
         stringBuilder.Append( value );
     }
-
-
 }

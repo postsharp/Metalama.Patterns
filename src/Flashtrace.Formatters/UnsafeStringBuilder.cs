@@ -387,7 +387,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     public bool Append( in CharSpan span)
     {
 
-        switch ( span.Array )
+        switch ( span._array )
         {
             case string s:
                 return this.Append( s, span.StartIndex, span.Length );

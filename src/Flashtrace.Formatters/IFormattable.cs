@@ -1,9 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System;
-using System.Collections.Generic;
-using System.Text;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -17,6 +12,6 @@ public interface IFormattable
     /// Appends a description of the current object to a given <see cref="UnsafeStringBuilder"/>.
     /// </summary>
     /// <param name="stringBuilder">The <see cref="UnsafeStringBuilder"/> to which the object description should be written.</param>
-    /// <param name="role">An object describing in which context the object is being formatted (e.g. caching or logging).</param>
-    void Format( UnsafeStringBuilder stringBuilder, FormattingRole role );
+    /// <param name="formatterRepository">The <see cref="IFormatterRepository"/> which should be used to obtain formatters.</param>
+    void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository );
 }

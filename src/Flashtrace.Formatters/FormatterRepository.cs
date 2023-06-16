@@ -1,51 +1,36 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
+using System.Collections.Concurrent;
 using System.Reflection;
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Patterns.Threading.Primitives;
-using PostSharp.Patterns.Utilities;
-using PostSharp.Reflection;
 
 namespace Flashtrace.Formatters;
+
+public interface IFormatterRepository
+{
+    IFormatter<T> Get<T>();
+
+    IFormatter Get( Type objectType );
+}
 
 /// <summary>
 /// Allows to get and register formatters for a specific type.
 /// </summary>
-/// <typeparam name="TRole">Marker type used to differentiate FormattingServices for different purposes (e.g. caching or logging).</typeparam>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-public abstract class FormatterRepository<TRole> where TRole : FormattingRole, new()
+public abstract class FormatterRepository : IFormatterRepository
 {
-    internal static readonly FormattingRole Role = new TRole();
+    private readonly CovariantTypeExtensionFactory<IFormatter> _formatterFactory;
+    private readonly CovariantTypeExtensionFactory<IFormatter> _dynamicFormatterFactory;
+    private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>> _dynamicFormatterCache =
+        new ConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>>();
 
-    private static readonly CovariantTypeExtensionFactory<IFormatter> formatterFactory;
-    private static readonly CovariantTypeExtensionFactory<IFormatter> dynamicFormatterFactory;
-    private static readonly PortableConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>> dynamicFormatterCache =
-        new PortableConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>>();
-    private static readonly LogSource logger;
-
-
-    /// <summary>
-    /// Initializes a new <see cref="FormatterRepository{TRole}"/>.
-    /// </summary>
     protected FormatterRepository()
     {
-
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
-    static FormatterRepository()
-    {
-        logger = LogSourceFactory.ForRole3( Role.LoggingRole ).GetLogSource( typeof(FormatterRepository<TRole>));
-
-        formatterFactory = new CovariantTypeExtensionFactory<IFormatter>(typeof(IFormatter<>), typeof(FormatterConverter<,>), typeof(TRole), logger);
-        dynamicFormatterFactory = new CovariantTypeExtensionFactory<IFormatter>(typeof(IFormatter<>), typeof(FormatterConverter<,>), typeof(TRole), logger);
+        this._formatterFactory = new CovariantTypeExtensionFactory<IFormatter>(typeof(IFormatter<>), typeof(FormatterConverter<,>) );
+        this._dynamicFormatterFactory = new CovariantTypeExtensionFactory<IFormatter>(typeof(IFormatter<>), typeof(FormatterConverter<,>) );
         
         RegisterDefaultFormatters();
     }
 
-    private static void RegisterDefaultFormatters()
+    protected void RegisterDefaultFormatters()
     {
         Register(typeof(string), StringFormatter.Instance);
         Register(typeof(char), CharFormatter.Instance);
@@ -58,16 +43,16 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
         Register(typeof(int), Int32Formatter.Instance);
         Register(typeof(ulong), UInt64Formatter.Instance);
         Register(typeof(long), Int64Formatter.Instance);
-        Register(typeof(float), new DefaultFormatter<TRole, float>());
-        Register(typeof(double), new DefaultFormatter<TRole, double>());
-        Register(typeof(decimal), new DefaultFormatter<TRole, decimal>());
-        Register(typeof(UIntPtr), new DefaultFormatter<TRole, UIntPtr>());
-        Register(typeof(IntPtr), new DefaultFormatter<TRole, IntPtr>());
-        Register(typeof(DateTime), new DefaultFormatter<TRole, DateTime>());
-        Register(typeof(DateTimeOffset), new DefaultFormatter<TRole, DateTimeOffset>());
-        Register(typeof(Guid), new DefaultFormatter<TRole, Guid>());
-        Register(typeof(TimeSpan), new DefaultFormatter<TRole, TimeSpan>());
-        Register(typeof(IFormattable), new FormattableFormatter<IFormattable, TRole>());
+        Register(typeof(float), new DefaultFormatter<float>());
+        Register(typeof(double), new DefaultFormatter<double>());
+        Register(typeof(decimal), new DefaultFormatter<decimal>());
+        Register(typeof(UIntPtr), new DefaultFormatter<UIntPtr>());
+        Register(typeof(IntPtr), new DefaultFormatter<IntPtr>());
+        Register(typeof(DateTime), new DefaultFormatter<DateTime>());
+        Register(typeof(DateTimeOffset), new DefaultFormatter<DateTimeOffset>());
+        Register(typeof(Guid), new DefaultFormatter<Guid>());
+        Register(typeof(TimeSpan), new DefaultFormatter<TimeSpan>());
+        Register(typeof(IFormattable), new FormattableFormatter<IFormattable>());
         Register(typeof(Nullable<>), typeof(NullableFormatter<,>));
         Register(typeof(Type), TypeFormatter.Instance);
         Register(typeof(MethodBase), MethodFormatter.Instance);
@@ -84,7 +69,7 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
     public static void SetDynamic<T>() where T : class
     {
-        formatterFactory.RegisterTypeExtension( typeof(T), new DynamicFormatter<T, TRole>() );
+        _formatterFactory.RegisterTypeExtension( typeof(T), new DynamicFormatter<T, TRole>() );
     }
 
     /// <summary>
@@ -109,13 +94,9 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
     public static void Register(Type targetType, IFormatter formatter)
     {
-        formatterFactory.RegisterTypeExtension(targetType, formatter);
-        dynamicFormatterFactory.RegisterTypeExtension(targetType, formatter);
+        _formatterFactory.RegisterTypeExtension(targetType, formatter);
+        _dynamicFormatterFactory.RegisterTypeExtension(targetType, formatter);
     }
-
-
-
-
 
     /// <summary>
     /// Registers the given <paramref name="formatterType"/> for the given <paramref name="targetType"/>.
@@ -134,11 +115,9 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
     public static void Register(Type targetType, Type formatterType)
     {
-        formatterFactory.RegisterTypeExtension(targetType, formatterType);
-        dynamicFormatterFactory.RegisterTypeExtension(targetType, formatterType);
+        _formatterFactory.RegisterTypeExtension(targetType, formatterType);
+        _dynamicFormatterFactory.RegisterTypeExtension(targetType, formatterType);
     }
-
-
 
     /// <summary>
     /// Returns the formatter for the type <typeparamref name="T"/>. 
@@ -159,7 +138,7 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
     public static IFormatter Get(Type objectType)
     {
-        return dynamicFormatterCache.GetOrAdd(objectType, getFormatterFunc).Extension;
+        return _dynamicFormatterCache.GetOrAdd(objectType, getFormatterFunc).Extension;
     }
 
 
@@ -169,9 +148,9 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
         while (true)
         {
             TypeExtensionInfo<IFormatter> oldFormatterInfo;
-            if (!dynamicFormatterCache.TryGetValue(objectType, out oldFormatterInfo))
+            if (!_dynamicFormatterCache.TryGetValue(objectType, out oldFormatterInfo))
             {
-                dynamicFormatterCache.TryAdd(objectType, newFormatterInfo);
+                _dynamicFormatterCache.TryAdd(objectType, newFormatterInfo);
                 return;
             }
 
@@ -180,7 +159,7 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
                 return;
             }
 
-            if (dynamicFormatterCache.TryUpdate(objectType, newFormatterInfo, oldFormatterInfo))
+            if (_dynamicFormatterCache.TryUpdate(objectType, newFormatterInfo, oldFormatterInfo))
             {
                 return;
             }
@@ -191,7 +170,7 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
 
     private static readonly Func<Type, TypeExtensionInfo<IFormatter>> getFormatterFunc = delegate (Type type)
     {
-        return dynamicFormatterFactory.GetTypeExtension(type,newFormatterInfo => UpdateFormatterCache(type, newFormatterInfo), () => CreateDefaultFormatter(type));
+        return _dynamicFormatterFactory.GetTypeExtension(type,newFormatterInfo => UpdateFormatterCache(type, newFormatterInfo), () => CreateDefaultFormatter(type));
     };
 
 
@@ -202,7 +181,7 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
     public static void Reset()
     {
-        formatterFactory.Clear();
+        _formatterFactory.Clear();
         RegisterDefaultFormatters();
     }
 
@@ -224,7 +203,7 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static FormatterCache()
         {
-            formatterInfo = formatterFactory.GetTypeExtension(typeof(T), UpdateStaticCacheCallback, CreateDefaultFormatterStatic);
+            formatterInfo = _formatterFactory.GetTypeExtension(typeof(T), UpdateStaticCacheCallback, CreateDefaultFormatterStatic);
             formatter = (IFormatter<T>)formatterInfo.Extension;
         }
 
@@ -248,7 +227,7 @@ public abstract class FormatterRepository<TRole> where TRole : FormattingRole, n
         {
             if (typeExtensionInfo.ShouldOverwrite(formatterInfo))
             {
-                formatter = (IFormatter<T>)formatterFactory.Convert(typeExtensionInfo.Extension, typeof(T));
+                formatter = (IFormatter<T>)_formatterFactory.Convert(typeExtensionInfo.Extension, typeof(T));
                 formatterInfo = typeExtensionInfo;
             }
         }

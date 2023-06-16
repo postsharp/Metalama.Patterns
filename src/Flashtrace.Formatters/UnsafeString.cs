@@ -53,7 +53,8 @@ public sealed class UnsafeString
         this.array = array;
     }
 
-    [ExplicitCrossPackageInternal]
+    // TODO: Review ExplicitCrossPackageInternal
+    //[ExplicitCrossPackageInternal]
     internal UnsafeStringBuilder StringBuilder { get; private set; }
 
     /// <summary>

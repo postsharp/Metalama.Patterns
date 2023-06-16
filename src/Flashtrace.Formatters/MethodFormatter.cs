@@ -1,9 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -15,9 +12,9 @@ namespace Flashtrace.Formatters;
 public sealed class MethodFormatter : Formatter<MethodBase>
 {
 #if COMPILED_REGEX
-    private const RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.CultureInvariant;
+    private const RegexOptions _regexOptions = RegexOptions.Compiled | RegexOptions.CultureInvariant;
 #else
-     private const RegexOptions regexOptions = RegexOptions.CultureInvariant;
+    private const RegexOptions _regexOptions = RegexOptions.CultureInvariant;
 #endif
 
     // (See #26919) We do not create a static Regex instance because it may result in the incorrect AppContext switch values when invoked via module initializer.
@@ -26,19 +23,21 @@ public sealed class MethodFormatter : Formatter<MethodBase>
     //private static readonly Regex anonymousMethodRegex = new Regex("^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)", regexOptions);
     //private static readonly Regex localFunctionRegex = new Regex("<[^>]+>g__[0-9A-Fa-f]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    private readonly ConcurrentDictionary<MethodBase,Match> matchCache = new ConcurrentDictionary<MethodBase, Match>();
+    private readonly ConcurrentDictionary<MethodBase, Match> _matchCache = new ConcurrentDictionary<MethodBase, Match>();
+    private IFormatter<Type>? _typeFormatter;
 
-    /// <summary>
-    /// The singleton instance of <see cref="MethodFormatter"/>.
-    /// </summary>
-    [SuppressMessage("Microsoft.Security", "CA2104")]
-    public static readonly MethodFormatter Instance = new MethodFormatter();
-
-    private MethodFormatter()
+    private IFormatter<Type> TypeFormatter
     {
-
+        get
+        {
+            this._typeFormatter ??= this.Repository.Get<Type>();
+            return this._typeFormatter;
+        }
     }
 
+    public MethodFormatter( IFormatterRepository repository ) : base( repository )
+    {
+    }
 
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, MethodBase value )
@@ -48,19 +47,19 @@ public sealed class MethodFormatter : Formatter<MethodBase>
             stringBuilder.Append( 'n', 'u', 'l', 'l' );
             return;
         }
-        
+
         try
         {
-            string methodName = value is ConstructorInfo ? ( value.IsStatic ? "StaticConstructor" : "new") : value.Name;
+            string methodName = value is ConstructorInfo ? (value.IsStatic ? "StaticConstructor" : "new") : value.Name;
             char c = methodName[0];
             if ( c == '<' || c == '_' )
             {
                 Match anonymousMethodMatch;
 
-                if ( !this.matchCache.TryGetValue( value, out anonymousMethodMatch ) )
+                if ( !this._matchCache.TryGetValue( value, out anonymousMethodMatch ) )
                 {
-                    anonymousMethodMatch = Regex.Match( methodName, anonymousMethodRegexPattern, regexOptions );
-                    this.matchCache[value] = anonymousMethodMatch;
+                    anonymousMethodMatch = Regex.Match( methodName, anonymousMethodRegexPattern, _regexOptions );
+                    this._matchCache[value] = anonymousMethodMatch;
                 }
 
                 if ( anonymousMethodMatch.Success )
@@ -70,11 +69,11 @@ public sealed class MethodFormatter : Formatter<MethodBase>
                         if ( value.DeclaringType.Name[0] == '<' )
                         {
                             // Don't write the name of the closure class, if any.
-                            TypeFormatter.Instance.Write( stringBuilder, value.DeclaringType.DeclaringType );
+                            this.TypeFormatter.Write( stringBuilder, value.DeclaringType.DeclaringType );
                         }
                         else
                         {
-                            TypeFormatter.Instance.Write( stringBuilder, value.DeclaringType );
+                            this.TypeFormatter.Write( stringBuilder, value.DeclaringType );
                         }
 
                         stringBuilder.Append( '.' );
@@ -96,7 +95,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
                 }
             }
 
-            TypeFormatter.Instance.Write( stringBuilder, value.DeclaringType );
+            this.TypeFormatter.Write( stringBuilder, value.DeclaringType );
             stringBuilder.Append( '.' );
 
             stringBuilder.Append( methodName );
@@ -111,7 +110,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
                         stringBuilder.Append( ',' );
                     }
 
-                    TypeFormatter.Instance.Write( stringBuilder, genericArguments[i] );
+                    this.TypeFormatter.Write( stringBuilder, genericArguments[i] );
                 }
 
                 stringBuilder.Append( '>' );
@@ -127,7 +126,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
                     stringBuilder.Append( ',' );
                 }
 
-                TypeFormatter.Instance.Write( stringBuilder, parameters[i].ParameterType );
+                this.TypeFormatter.Write( stringBuilder, parameters[i].ParameterType );
             }
 
             stringBuilder.Append( ')' );

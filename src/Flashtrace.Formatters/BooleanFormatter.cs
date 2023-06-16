@@ -1,8 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -12,12 +8,10 @@ namespace Flashtrace.Formatters;
 public sealed class BooleanFormatter : Formatter<bool>
 {
     /// <summary>
-    /// The singleton instance of <see cref="BooleanFormatter"/>.
+    /// Initializes a new instance of the <see cref="BooleanFormatter"/> class.
     /// </summary>
-    [SuppressMessage("Microsoft.Security", "CA2104")]
-    public static readonly BooleanFormatter Instance = new BooleanFormatter();
-
-    private BooleanFormatter()
+    /// <param name="repository"></param>
+    public BooleanFormatter( IFormatterRepository repository ) : base( repository )
     {
     }
 
