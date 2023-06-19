@@ -16,7 +16,7 @@ internal class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
         this._contextArray = new object?[] { context };
     }
 
-    public T? Convert( T o, Type targetObjectType ) 
+    public T? Convert( T? o, Type targetObjectType ) 
         => this.Convert( o, targetObjectType, this._contextArray );
 
     public void RegisterTypeExtension( Type targetType, Type typeExtensionType )
@@ -43,7 +43,7 @@ internal class TypeExtensionFactory<T> : TypeExtensionFactoryBase<T>
     {
     }
 
-    public T? Convert( T o, Type targetObjectType ) 
+    public T? Convert( T? o, Type targetObjectType ) 
         => this.Convert( o, targetObjectType, null );
 
     public void RegisterTypeExtension( Type targetType, Type typeExtensionType ) 
@@ -322,7 +322,7 @@ internal class TypeExtensionFactoryBase<T>
         }
     }
 
-    protected T? Convert( T o, Type targetObjectType, object?[]? additionalConstructorArgs )
+    protected T? Convert( T? o, Type targetObjectType, object?[]? additionalConstructorArgs )
     {
         if ( o == null )
         {

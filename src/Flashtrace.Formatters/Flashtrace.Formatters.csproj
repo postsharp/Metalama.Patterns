@@ -12,6 +12,10 @@
 		<InternalsVisibleTo Include="Flashtrace.Formatters.UnitTests" />
     </ItemGroup>
 
+	<ItemGroup>
+		<Using Remove="System.Net.Http" />
+	</ItemGroup>
+
 	<Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 	
 </Project>
