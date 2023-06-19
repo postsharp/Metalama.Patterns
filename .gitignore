@@ -27,7 +27,6 @@
 [Bb]in/
 [Oo]bj/
 .vs/
-.vscode
 _ReSharper*/
 /artifacts/
 .packages/
@@ -44,3 +43,4 @@ launchSettings.json
 *.Import.props
 *.g.props
 *.log
+/.tools/

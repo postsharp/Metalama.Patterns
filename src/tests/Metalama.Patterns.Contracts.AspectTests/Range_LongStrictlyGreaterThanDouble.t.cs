@@ -1,0 +1,1 @@
+// Error LAMA5005 on `a`: `StrictlyGreaterThanAttribute cannot be applied to Range_LongStrictlyGreaterThanDouble.MethodWithLongStrictlyGreaterThanDouble(long?)/a because the value range cannot be satisfied by the type Int64.`

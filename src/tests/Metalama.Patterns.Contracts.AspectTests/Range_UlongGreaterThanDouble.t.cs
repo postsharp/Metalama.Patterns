@@ -1,0 +1,1 @@
+// Error LAMA5001 on `a`: `GreaterThanAttribute cannot be applied to Range_UlongGreaterThanDouble.MethodWithUlongGreaterThanDouble(ulong?)/a because the value range cannot be satisfied by the type UInt64.`

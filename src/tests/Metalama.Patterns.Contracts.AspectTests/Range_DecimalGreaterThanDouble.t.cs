@@ -1,0 +1,1 @@
+// Error LAMA5001 on `a`: `GreaterThanAttribute cannot be applied to Range_DecimalGreaterThanDouble.MethodWithDecimalGreaterThanDouble(decimal?)/a because the value range cannot be satisfied by the type Decimal.`
