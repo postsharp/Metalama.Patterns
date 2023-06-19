@@ -71,7 +71,8 @@ public class RegularExpressionAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
+        var targetKind = meta.Target.GetTargetKind();
+        var targetName = meta.Target.GetTargetName();
         var info = this.GetExceptionInfo();
         var aspectType = meta.CompileTime( this.GetType() );
 

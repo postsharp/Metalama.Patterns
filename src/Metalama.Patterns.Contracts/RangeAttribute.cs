@@ -538,8 +538,9 @@ public class RangeAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-        var type = CompileTimeHelpers.GetTargetType( meta.Target );
+        var targetKind = meta.Target.GetTargetKind();
+        var targetName = meta.Target.GetTargetName();
+        var type = meta.Target.GetTargetType();
         var basicType = (INamedType) type.ToNonNullableType();
         var isNullable = type.IsNullable == true;
         var exceptionInfo = this.GetExceptionInfo();

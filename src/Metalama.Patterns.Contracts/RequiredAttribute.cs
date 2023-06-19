@@ -51,9 +51,9 @@ public sealed class RequiredAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-
-        var targetType = CompileTimeHelpers.GetTargetType( meta.Target );
+        var targetKind = meta.Target.GetTargetKind();
+        var targetName = meta.Target.GetTargetName();
+        var targetType = meta.Target.GetTargetType();
 
         if ( targetType.SpecialType == SpecialType.String )
         {

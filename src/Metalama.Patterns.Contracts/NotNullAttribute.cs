@@ -44,16 +44,14 @@ public sealed class NotNullAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-
         if ( value == null! )
         {
             throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                 typeof( ArgumentNullException ),
                 typeof( NotNullAttribute ),
                 value,
-                targetName,
-                targetKind,
+                meta.Target.GetTargetName(),
+                meta.Target.GetTargetKind(),
                 meta.Target.ContractDirection,
                 ContractLocalizedTextProvider.NotNullErrorMessage ) );
         }
