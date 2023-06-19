@@ -185,6 +185,8 @@ public class FormatterRepository : IFormatterRepository
         }
     }
 
+    // TODO: Remove Rests() if unused.
+
     /// <summary>
     /// Clears formatters, but doesn't reset registrations.
     /// </summary>

@@ -3,11 +3,16 @@
 using Flashtrace.Formatters.UnitTests.Formatters;
 using System.Globalization;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Flashtrace.Formatters.UnitTests;
 
 public class IntegerFormatterTests : FormattersTestsBase
 {
+    public IntegerFormatterTests( ITestOutputHelper logger ) : base( logger )
+    {
+    }
+
     [Fact]
     public void ByteTest()
     {

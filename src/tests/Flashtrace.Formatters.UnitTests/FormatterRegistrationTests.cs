@@ -1,36 +1,26 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if APP_DOMAIN
-
-using System;
+using Flashtrace.Formatters.UnitTests.Formatters;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using PostSharp.Patterns.Common.Tests.Helpers;
 using Xunit;
-using PostSharp.Patterns.Formatters;
+using Xunit.Abstractions;
 
-
-namespace PostSharp.Patterns.Common.Tests.Formatters
+namespace Flashtrace.Formatters.UnitTests
 {
-    public class FormatterRegistrationTests : AppDomainTestsBaseClass<FormatterRegistrationTests>
+    public class FormatterRegistrationTests : FormattersTestsBase
     {
+        public FormatterRegistrationTests( ITestOutputHelper logger ) : base( logger )
+        {
+        }
+
         [Fact]
         public void RegisterBeforeFirstGet()
         {
-            ExecuteTest( tc => tc.RegisterBeforeFirstGetMethod() );
-        }
+            var formatter = new EnumerableFormatter<int>( this.DefaultRepository );
+            this.DefaultRepository.Register( formatter );
 
-        private void RegisterBeforeFirstGetMethod()
-        {
-            EnumerableFormatter<int> formatter = new EnumerableFormatter<int>();
-            FormatterRepository<TestRole>.Register( formatter );
-
-            IFormatter<IEnumerable<int>> afterFormatter = FormatterRepository<TestRole>.Get<IEnumerable<int>>();
+            var afterFormatter = this.DefaultRepository.Get<IEnumerable<int>>();
 
             Assert.Same( formatter, afterFormatter );
         }
@@ -38,41 +28,24 @@ namespace PostSharp.Patterns.Common.Tests.Formatters
         [Fact]
         public void RegisterAfterFirstGet()
         {
-            ExecuteTest( tc => tc.RegisterAfterFirstGetMethod() );
-        }
+            var beforeFormatter = this.DefaultRepository.Get<IEnumerable<int>>();
+            Assert.Equal( "DynamicFormatter`1", beforeFormatter!.GetType().Name );
 
-        private void RegisterAfterFirstGetMethod()
-        {
-            IFormatter<IEnumerable<int>> beforeFormatter = FormatterRepository<TestRole>.Get<IEnumerable<int>>();
-            Assert.Equal( "DynamicFormatter`2", beforeFormatter.GetType().Name );
+            var formatter = new EnumerableFormatter<int>( this.DefaultRepository );
+            this.DefaultRepository.Register( formatter );
 
-            EnumerableFormatter<int> formatter = new EnumerableFormatter<int>();
-            FormatterRepository<TestRole>.Register( formatter );
-
-            IFormatter<IEnumerable<int>> afterFormatter = FormatterRepository<TestRole>.Get<IEnumerable<int>>();
+            var afterFormatter = this.DefaultRepository.Get<IEnumerable<int>>();
 
             Assert.Same( formatter, afterFormatter );
-        }
-
-        private static string Format<T>(T value)
-        {
-            UnsafeStringBuilder stringBuilder = new UnsafeStringBuilder(1024);
-            FormatterRepository<TestRole>.Get<T>().Write(stringBuilder, value);
-            return stringBuilder.ToString();
         }
 
         [Fact]
         public void RegisterBeforeFirstLog()
         {
-            ExecuteTest( tc => tc.RegisterBeforeFirstLogMethod() );
-        }
+            var formatter = new EnumerableFormatter<int>( this.DefaultRepository );
+            this.DefaultRepository.Register( formatter );
 
-        private void RegisterBeforeFirstLogMethod()
-        {
-            EnumerableFormatter<int> formatter = new EnumerableFormatter<int>();
-            FormatterRepository<TestRole>.Register( formatter );
-
-            string result = Format<IEnumerable<int>>( new[] {1, 2, 3} );
+            var result = this.FormatDefault<IEnumerable<int>>( new[] { 1, 2, 3 } );
 
             Assert.Equal( "[1,2,3]", result );
         }
@@ -80,17 +53,12 @@ namespace PostSharp.Patterns.Common.Tests.Formatters
         [Fact]
         public void RegisterAfterFirstLog()
         {
-            ExecuteTest( tc => tc.RegisterAfterFirstLogMethod() );
-        }
-
-        private void RegisterAfterFirstLogMethod()
-        {
-            string result = Format<IEnumerable<int>>( new[] {1, 2, 3} );
+            var result = this.FormatDefault<IEnumerable<int>>( new[] { 1, 2, 3 } );
             Assert.Equal( "{int[]}", result );
 
-            FormatterRepository<TestRole>.Register( new EnumerableFormatter<int>() );
+            this.DefaultRepository.Register( new EnumerableFormatter<int>( this.DefaultRepository ) );
 
-            result = Format<IEnumerable<int>>( new[] {1, 2, 3} );
+            result = this.FormatDefault<IEnumerable<int>>( new[] { 1, 2, 3 } );
 
             Assert.Equal( "[1,2,3]", result );
         }
@@ -98,259 +66,220 @@ namespace PostSharp.Patterns.Common.Tests.Formatters
         [Fact]
         public void CanChangeBack()
         {
-            ExecuteTest( tc => tc.CanChangeBackMethod() );
-        }
+            int[] array = { 1, 2, 3 };
 
-        private void CanChangeBackMethod()
-        {
-            int[] array = {1, 2, 3};
+            var result = this.FormatDefault<IEnumerable<int>>( array );
+            Assert.Equal( "{int[]}", result );
 
-            string result = Format<IEnumerable<int>>( array );
-            Assert.Equal("{int[]}", result );
+            this.DefaultRepository.Register( new EnumerableFormatter<int>( this.DefaultRepository ) );
 
-            FormatterRepository<TestRole>.Register( new EnumerableFormatter<int>() );
-
-            result = Format<IEnumerable<int>>( array );
+            result = this.FormatDefault<IEnumerable<int>>( array );
             Assert.Equal( "[1,2,3]", result );
 
-            FormatterRepository<TestRole>.Register( new DefaultFormatter<TestRole,IEnumerable<int>>() );
+            this.DefaultRepository.Register( new DefaultFormatter<IEnumerable<int>>( this.DefaultRepository ) );
 
-            result = Format<IEnumerable<int>>( array );
-            Assert.Equal("{int[]}", result );
+            result = this.FormatDefault<IEnumerable<int>>( array );
+            Assert.Equal( "{int[]}", result );
         }
 
         [Fact]
         public void EnumerableIntFormatter()
         {
-            ExecuteTest( tc => tc.EnumerableIntFormatterMethod( false, new EnumerableFormatter<int>() ) );
-            ExecuteTest( tc => tc.EnumerableIntFormatterMethod( true, new EnumerableFormatter<int>() ) );
-            ExecuteTest( tc => tc.EnumerableIntFormatterMethod( false, new EnumerableIntFormatter() ) );
-            ExecuteTest( tc => tc.EnumerableIntFormatterMethod( true, new EnumerableIntFormatter() ) );
+            this.EnumerableIntFormatterMethod( false, new EnumerableFormatter<int>( this.DefaultRepository ) );
+            this.EnumerableIntFormatterMethod( true, new EnumerableFormatter<int>( this.DefaultRepository ) );
+            this.EnumerableIntFormatterMethod( false, new EnumerableIntFormatter( this.DefaultRepository ) );
+            this.EnumerableIntFormatterMethod( true, new EnumerableIntFormatter( this.DefaultRepository ) );
         }
 
         private void EnumerableIntFormatterMethod( bool logFirst, Formatter<IEnumerable<int>> formatter )
         {
-            int[] array = {1, 2, 3};
+            int[] array = { 1, 2, 3 };
 
             if ( logFirst )
             {
-                FormatterRepository<TestRole>.Get<int[]>();
-                FormatterRepository<TestRole>.Get<IEnumerable<int>>();
-                FormatterRepository<TestRole>.Get<IEnumerable>();
+                this.DefaultRepository.Get<int[]>();
+                this.DefaultRepository.Get<IEnumerable<int>>();
+                this.DefaultRepository.Get<IEnumerable>();
             }
 
-            FormatterRepository<TestRole>.Register( formatter );
+            this.DefaultRepository.Register( formatter );
 
-            Assert.Equal( "[1,2,3]", Format<int[]>( array ) );
-            Assert.Equal( "[1,2,3]", Format<IEnumerable<int>>( array ) );
-            Assert.Equal("[1,2,3]", Format<IEnumerable>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<int[]>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable<int>>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable>( array ) );
         }
 
-        [Fact]
-        public void EnumerableTFormatter()
+        [InlineData( true )]
+        [InlineData( false )]
+        [Theory]
+        public void EnumerableTFormatter( bool logFirst )
         {
-            ExecuteTest( tc => tc.EnumerableTFormatterMethod( false ) );
-            ExecuteTest( tc => tc.EnumerableTFormatterMethod( true ) );
-        }
-
-        private void EnumerableTFormatterMethod( bool logFirst )
-        {
-            int[] array = {1, 2, 3};
+            int[] array = { 1, 2, 3 };
 
             if ( logFirst )
             {
-                FormatterRepository<TestRole>.Get<int[]>();
-                FormatterRepository<TestRole>.Get<IEnumerable<int>>();
-                FormatterRepository<TestRole>.Get<IEnumerable>();
+                this.DefaultRepository.Get<int[]>();
+                this.DefaultRepository.Get<IEnumerable<int>>();
+                this.DefaultRepository.Get<IEnumerable>();
             }
 
-            FormatterRepository<TestRole>.Register( typeof(IEnumerable<>), typeof(EnumerableFormatter<>) );
+            this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( EnumerableFormatter<> ) );
 
-            Assert.Equal( "[1,2,3]", Format<int[]>( array ) );
-            Assert.Equal( "[1,2,3]", Format<IEnumerable<int>>( array ) );
-            Assert.Equal("[1,2,3]", Format<IEnumerable>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<int[]>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable<int>>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable>( array ) );
         }
 
-        [Fact]
-        public void CollectionTFormatter()
+        [InlineData( true )]
+        [InlineData( false )]
+        [Theory]
+        public void CollectionTFormatter( bool logFirst )
         {
-            ExecuteTest( tc => tc.CollectionTFormatterMethod( false ) );
-            ExecuteTest( tc => tc.CollectionTFormatterMethod( true ) );
-        }
-
-        private void CollectionTFormatterMethod( bool logFirst )
-        {
-            ObservableCollection<int> collection = new ObservableCollection<int> {1, 2, 3};
+            var collection = new ObservableCollection<int> { 1, 2, 3 };
 
             if ( logFirst )
             {
-                FormatterRepository<TestRole>.Get<ObservableCollection<int>>();
-                FormatterRepository<TestRole>.Get<Collection<int>>();
-                FormatterRepository<TestRole>.Get<IEnumerable<int>>();
+                this.DefaultRepository.Get<ObservableCollection<int>>();
+                this.DefaultRepository.Get<Collection<int>>();
+                this.DefaultRepository.Get<IEnumerable<int>>();
             }
 
-            FormatterRepository<TestRole>.Register( typeof(Collection<>), typeof(EnumerableFormatter<>) );
+            this.DefaultRepository.Register( typeof( Collection<> ), typeof( EnumerableFormatter<> ) );
 
-            Assert.Equal( "[1,2,3]", Format<ObservableCollection<int>>( collection ) );
-            Assert.Equal( "[1,2,3]", Format<Collection<int>>( collection ) );
-            Assert.Equal("[1,2,3]", Format<IEnumerable<int>>( collection ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<ObservableCollection<int>>( collection ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<Collection<int>>( collection ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable<int>>( collection ) );
         }
 
-        [Fact]
-        public void ArrayFormatter()
+        [InlineData( true )]
+        [InlineData( false )]
+        [Theory]
+        public void ArrayFormatter( bool logFirst )
         {
-            ExecuteTest( tc => tc.ArrayFormatterMethod( false ) );
-            ExecuteTest( tc => tc.ArrayFormatterMethod( true ) );
-        }
-
-        private void ArrayFormatterMethod( bool logFirst )
-        {
-            int[] array = {1, 2, 3};
+            int[] array = { 1, 2, 3 };
 
             if ( logFirst )
             {
-                FormatterRepository<TestRole>.Get<int[]>();
-                FormatterRepository<TestRole>.Get<IEnumerable<int>>();
-                FormatterRepository<TestRole>.Get<IEnumerable>();
+                this.DefaultRepository.Get<int[]>();
+                this.DefaultRepository.Get<IEnumerable<int>>();
+                this.DefaultRepository.Get<IEnumerable>();
             }
 
-            FormatterRepository<TestRole>.Register( typeof(Array), typeof(EnumerableFormatter<>) );
+            this.DefaultRepository.Register( typeof( Array ), typeof( EnumerableFormatter<> ) );
 
-            Assert.Equal( "[1,2,3]", Format<int[]>( array ) );
-            Assert.Equal("[1,2,3]", Format<IEnumerable<int>>( array ) );
-            Assert.Equal("[1,2,3]", Format<IEnumerable>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<int[]>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable<int>>( array ) );
+            Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable>( array ) );
         }
 
-        [Fact]
-        public void DictionaryFormatter()
+        [InlineData( true )]
+        [InlineData( false )]
+        [Theory]
+        public void DictionaryFormatter( bool logFirst )
         {
-            ExecuteTest( tc => tc.DictionaryFormatterMethod( false ) );
-            ExecuteTest( tc => tc.DictionaryFormatterMethod( true ) );
-        }
-
-        private void DictionaryFormatterMethod( bool logFirst )
-        {
-            Dictionary<int, string> dictionary = new Dictionary<int, string> {{1, "uno"}, {2, "dos"}, {3, "tres"}};
+            var dictionary = new Dictionary<int, string> { { 1, "uno" }, { 2, "dos" }, { 3, "tres" } };
 
             if ( logFirst )
             {
-                FormatterRepository<TestRole>.Get<Dictionary<int, string>>();
-                FormatterRepository<TestRole>.Get<IDictionary<int, string>>();
-                FormatterRepository<TestRole>.Get<IDictionary>();
+                this.DefaultRepository.Get<Dictionary<int, string>>();
+                this.DefaultRepository.Get<IDictionary<int, string>>();
+                this.DefaultRepository.Get<IDictionary>();
             }
 
-            FormatterRepository<TestRole>.Register( typeof(IDictionary<,>), typeof(DictionaryFormatter<,>) );
+            this.DefaultRepository.Register( typeof( IDictionary<,> ), typeof( DictionaryFormatter<,> ) );
 
-            Assert.Equal( "{1:uno,2:dos,3:tres}", Format<Dictionary<int, string>>( dictionary ) );
-            Assert.Equal( "{1:uno,2:dos,3:tres}", Format<IDictionary<int, string>>( dictionary ) );
-            Assert.Equal("{1:uno,2:dos,3:tres}", Format<IDictionary>( dictionary ) );
+            Assert.Equal( "{1:uno,2:dos,3:tres}", this.FormatDefault<Dictionary<int, string>>( dictionary ) );
+            Assert.Equal( "{1:uno,2:dos,3:tres}", this.FormatDefault<IDictionary<int, string>>( dictionary ) );
+            Assert.Equal( "{1:uno,2:dos,3:tres}", this.FormatDefault<IDictionary>( dictionary ) );
         }
 
-        [Fact]
-        public void NullableFormatter()
-        {
-            ExecuteTest( tc => tc.NullableFormatterMethod( false ) );
-            ExecuteTest( tc => tc.NullableFormatterMethod( true ) );
-        }
-
-        private void NullableFormatterMethod( bool logFirst )
+        [InlineData( true )]
+        [InlineData( false )]
+        [Theory]
+        public void NullableFormatter( bool logFirst )
         {
             if ( logFirst )
             {
-                FormatterRepository<TestRole>.Get<int?>();
-                FormatterRepository<TestRole>.Get<int>();
+                this.DefaultRepository.Get<int?>();
+                this.DefaultRepository.Get<int>();
             }
 
-            FormatterRepository<TestRole>.Register( typeof(int?), typeof(NullableFormatter<int>) );
+            this.DefaultRepository.Register( typeof( int? ), typeof( NullableFormatter<int> ) );
 
-            Assert.Equal( "<null>", Format<int?>( null ) );
-            Assert.Equal( "2", Format<int>( 2 ) );
+            Assert.Equal( "<null>", this.FormatDefault<int?>( null ) );
+            Assert.Equal( "2", this.FormatDefault<int>( 2 ) );
         }
 
-        [Fact]
-        public void GenericNullableFormatter()
-        {
-            ExecuteTest( tc => tc.GenericNullableFormatterMethod( false ) );
-            ExecuteTest( tc => tc.GenericNullableFormatterMethod( true ) );
-        }
-
-        private void GenericNullableFormatterMethod( bool logFirst )
+        [InlineData( true )]
+        [InlineData( false )]
+        [Theory]
+        public void GenericNullableFormatter( bool logFirst )
         {
             if ( logFirst )
             {
-                FormatterRepository<TestRole>.Get<int?>();
-                FormatterRepository<TestRole>.Get<int>();
+                this.DefaultRepository.Get<int?>();
+                this.DefaultRepository.Get<int>();
             }
 
-            FormatterRepository<TestRole>.Register( typeof(Nullable<>), typeof(NullableFormatter<>) );
+            this.DefaultRepository.Register( typeof( Nullable<> ), typeof( NullableFormatter<> ) );
 
-            Assert.Equal( "<null>", Format<int?>( null ) );
-            Assert.Equal( "2", Format<int>( 2 ) );
+            Assert.Equal( "<null>", this.FormatDefault<int?>( null ) );
+            Assert.Equal( "2", this.FormatDefault<int>( 2 ) );
         }
 
-        [Fact]
-        public void NonNullableFormatter()
-        {
-            ExecuteTest( tc => tc.NonNullableFormatterMethod( false ) );
-            ExecuteTest( tc => tc.NonNullableFormatterMethod( true ) );
-        }
-
-        private void NonNullableFormatterMethod( bool logFirst )
+        [InlineData( true )]
+        [InlineData( false )]
+        [Theory]
+        public void NonNullableFormatter( bool logFirst )
         {
             if ( logFirst )
             {
-                FormatterRepository<TestRole>.Get<int?>();
-                FormatterRepository<TestRole>.Get<int>();
+                this.DefaultRepository.Get<int?>();
+                this.DefaultRepository.Get<int>();
             }
 
-            FormatterRepository<TestRole>.Register( typeof(int), typeof(NonNullableFormatter<int>) );
+            this.DefaultRepository.Register( typeof( int ), typeof( NonNullableFormatter<int> ) );
 
-            Assert.Equal( "null", Format<int?>( null ) );
-            Assert.Equal( "[2]", Format<int>( 2 ) );
+            Assert.Equal( "null", this.FormatDefault<int?>( null ) );
+            Assert.Equal( "[2]", this.FormatDefault<int>( 2 ) );
         }
 
         [Fact]
         public void FormatterExceptions()
         {
-            ExecuteTest( tc => tc.FormatterExceptionsMethod() );
-        }
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int[] ), typeof( EnumerableFormatter<> ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int ), typeof( EnumerableFormatter<int> ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( EnumerableFormatter<int> ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( IEnumerable<int> ), typeof( EnumerableFormatter<> ) ) );
+            AssertEx.Throws<MissingMethodException>( () => this.DefaultRepository.Register( typeof( int ), typeof( int ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( IEnumerable<> ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( Dictionary<,> ), typeof( EnumerableFormatter<> ) ) );
 
-        private void FormatterExceptionsMethod()
-        {
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(int[]), typeof(EnumerableFormatter<>) ) );
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(int), typeof(EnumerableFormatter<int>) ) );
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(IEnumerable<>), typeof(EnumerableFormatter<int>) ) );
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(IEnumerable<int>), typeof(EnumerableFormatter<>) ) );
-            AssertEx.Throws<InvalidCastException>( () => FormatterRepository<TestRole>.Register( typeof(int), typeof(int) ) );
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(IEnumerable<>), typeof(IEnumerable<>) ) );
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(Dictionary<,>), typeof(EnumerableFormatter<>) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( IEnumerable<> ), new EnumerableFormatter<int>( this.DefaultRepository ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int ), new EnumerableFormatter<int>( this.DefaultRepository ) ) );
 
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(IEnumerable<>), new EnumerableFormatter<int>() ) );
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(int), new EnumerableFormatter<int>() ) );
-
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(int), typeof(NullableFormatter<int>) ) );
-            AssertEx.Throws<ArgumentException>( () => FormatterRepository<TestRole>.Register( typeof(int?), typeof(NonNullableFormatter<int>) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int ), typeof( NullableFormatter<int> ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int? ), typeof( NonNullableFormatter<int> ) ) );
         }
 
         [Fact]
         public void NoVariance()
         {
-            ExecuteTest( tc => tc.NoVarianceMethod() );
-        }
+            this.DefaultRepository.Register( new EnumerableFormatter<object>( this.DefaultRepository ) );
 
-        private void NoVarianceMethod()
-        {
-            FormatterRepository<TestRole>.Register( new EnumerableFormatter<object>() );
+            string[] array = { "foo", "bar", "baz" };
 
-            string[] array = {"foo", "bar", "baz"};
-
-            Assert.Equal( "{string[]}", Format<IEnumerable<string>>( array ) );
-            Assert.Equal( "[foo,bar,baz]", Format<IEnumerable<object>>( array ) );
+            Assert.Equal( "{string[]}", this.FormatDefault<IEnumerable<string>>( array ) );
+            Assert.Equal( "[foo,bar,baz]", this.FormatDefault<IEnumerable<object>>( array ) );
         }
     }
 
     internal class EnumerableFormatter<T> : Formatter<IEnumerable<T>>
     {
+        public EnumerableFormatter( IFormatterRepository repository ) : base( repository )
+        {
+        }
+
         public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
         {
             stringBuilder.Append( '[' );
@@ -361,10 +290,17 @@ namespace PostSharp.Patterns.Common.Tests.Formatters
 
     internal class EnumerableIntFormatter : EnumerableFormatter<int>
     {
+        public EnumerableIntFormatter( IFormatterRepository repository ) : base( repository )
+        {
+        }
     }
 
     internal class DictionaryFormatter<TKey, TValue> : Formatter<IDictionary<TKey, TValue>>
     {
+        public DictionaryFormatter( IFormatterRepository repository ) : base( repository )
+        {
+        }
+
         public override void Write( UnsafeStringBuilder stringBuilder, IDictionary<TKey, TValue> value )
         {
             stringBuilder.Append(
@@ -375,6 +311,10 @@ namespace PostSharp.Patterns.Common.Tests.Formatters
     internal class NonNullableFormatter<T> : Formatter<T>
         where T : struct
     {
+        public NonNullableFormatter( IFormatterRepository repository ) : base( repository )
+        {
+        }
+
         public override void Write( UnsafeStringBuilder stringBuilder, T value )
         {
             stringBuilder.Append( '[' );
@@ -386,6 +326,10 @@ namespace PostSharp.Patterns.Common.Tests.Formatters
     internal class NullableFormatter<T> : Formatter<T?>
         where T : struct
     {
+        public NullableFormatter( IFormatterRepository repository ) : base( repository )
+        {
+        }
+
         public override void Write( UnsafeStringBuilder stringBuilder, T? value )
         {
             stringBuilder.Append( '<' );
@@ -394,5 +338,3 @@ namespace PostSharp.Patterns.Common.Tests.Formatters
         }
     }
 }
-
-#endif

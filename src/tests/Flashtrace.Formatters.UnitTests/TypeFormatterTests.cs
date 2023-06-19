@@ -3,6 +3,7 @@
 using Flashtrace.Formatters.UnitTests.Formatters;
 using System.Collections;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Flashtrace.Formatters.UnitTests
 {
@@ -10,7 +11,7 @@ namespace Flashtrace.Formatters.UnitTests
     {
         private TypeFormatter DefaultTypeFormatter { get; }
 
-        public TypeFormatterTests()
+        public TypeFormatterTests( ITestOutputHelper logger ) : base( logger )
         {
             this.DefaultTypeFormatter = new TypeFormatter( this.DefaultRepository );
         }

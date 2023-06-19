@@ -8,23 +8,9 @@ namespace Flashtrace.Formatters.UnitTests.Formatters;
 
 public class FormattersTests : FormattersTestsBase
 {
-    private readonly ITestOutputHelper _logger;
-
-    public FormattersTests( ITestOutputHelper logger )
+    public FormattersTests( ITestOutputHelper logger ) 
+        : base( logger )
     {
-        this._logger = logger;
-    }
-
-    private string FormatDefault<T>( T value )
-        => this.Format<T>( this.DefaultRepository, value );
-
-    private string Format<T>( IFormatterRepository formatterRepository, T value )
-    {
-        var stringBuilder = new UnsafeStringBuilder( 1024 );
-        formatterRepository.Get<T>()!.Write( stringBuilder, value );
-        var result = stringBuilder.ToString();
-        this._logger.WriteLine( "'" + value?.ToString() + "' => '" + result + "'" );
-        return result;
     }
 
     struct TestStruct
