@@ -1,22 +1,12 @@
-﻿using PostSharp.Patterns.Formatters;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace PostSharp.Patterns.Common.Tests.Formatters
+namespace Flashtrace.Formatters.UnitTests;
+
+internal sealed class TestRole : FormattingRole
 {
-    sealed class TestRole : FormattingRole
+    public static readonly TestRole Instance = new TestRole();
+
+    private TestRole() : base( nameof( TestRole ) )
     {
-        public TestRole() 
-        {
-
-        }
-
-        public override string Name
-        {
-            get { return "TestRole"; }
-        }
-
-        public override string LoggingRole
-        {
-            get { return this.Name; }
-        }
     }
 }

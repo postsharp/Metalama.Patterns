@@ -14,7 +14,7 @@ internal static class DefaultFormatterHelper
     public static bool HasCustomToStringMethod( Type type )
     {
         return _hasCustomToStringMethod.GetOrAdd( type, t =>
-            t.GetMethod( "ToString", BindingFlags.Public | BindingFlags.Instance )?.DeclaringType != typeof( object ) );
+            t.GetMethod( "ToString", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null )?.DeclaringType != typeof( object ) );
     }
 }
 
@@ -31,20 +31,23 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
     
     private readonly FormattingOptions _options;
 
-    private readonly DefaultFormatter<TValue> _unquotedFormatter;
+    private readonly DefaultFormatter<TValue> _otherQuotingFormatter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultFormatter{TValue}"/> class.
     /// </summary>
-    public DefaultFormatter( IFormatterRepository repository ) : this( repository, FormattingOptions.Default )
+    public DefaultFormatter( IFormatterRepository repository ) 
+        : base( repository )
     {
+        this._options = FormattingOptions.Default;
+        this._otherQuotingFormatter = new DefaultFormatter<TValue>( repository, FormattingOptions.Unquoted, this );
     }
 
-    private DefaultFormatter( IFormatterRepository repository, FormattingOptions options )
+    private DefaultFormatter( IFormatterRepository repository, FormattingOptions options, DefaultFormatter<TValue> otherQuotingFormatter )
         : base( repository )
     {
         this._options = options;
-        this._unquotedFormatter = new DefaultFormatter<TValue>( repository, FormattingOptions.Unquoted );
+        this._otherQuotingFormatter = otherQuotingFormatter;
     }
 
     /// <inheritdoc/>
@@ -55,16 +58,16 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
     {
         if ( options.RequiresUnquotedStrings )
         {
-            return this._unquotedFormatter;
+            return this._options == FormattingOptions.Unquoted ? this : this._otherQuotingFormatter;
         }
         else
         {
-            return this;
+            return this._options == FormattingOptions.Default ? this : this._otherQuotingFormatter;
         }
     }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, TValue value )
+    public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
     {
         bool useToString = _hasCustomToStringMethod;
         Type thisValueType = _valueType;

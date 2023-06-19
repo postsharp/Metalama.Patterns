@@ -1,22 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using PostSharp.Patterns.Common.Tests.Helpers;
-using Xunit;
-using PostSharp.Patterns.Formatters;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Flashtrace.Formatters.UnitTests.Formatters;
 using System.Collections;
-using System.IO;
+using Xunit;
 
-
-namespace PostSharp.Patterns.Common.Tests.Formatters
+namespace Flashtrace.Formatters.UnitTests
 {
-    public class TypeFormatterTests
+    public class TypeFormatterTests : FormattersTestsBase
     {
-        private void TestFormatter( Type type, string expectedString )
+        private TypeFormatter DefaultTypeFormatter { get; }
+
+        public TypeFormatterTests()
         {
-            
-            UnsafeStringBuilder sb = new UnsafeStringBuilder();
-            TypeFormatter.Instance.Write(sb, type);
+            this.DefaultTypeFormatter = new TypeFormatter( this.DefaultRepository );
+        }
+
+        private void TestFormatter( Type type, string expectedString )
+        {            
+            var sb = new UnsafeStringBuilder();
+            this.DefaultTypeFormatter.Write(sb, type);
             Assert.Equal(expectedString, sb.ToString());
         }
 
@@ -113,8 +115,6 @@ namespace PostSharp.Patterns.Common.Tests.Formatters
                 typeof( IEnumerable<TestType.InnerType<TestType1, TestType2>.MoreInnerType<TestType3, TestType4>.EvenMoreInnerType<TestType5, TestType6>> ),
                 "IEnumerable<TestType.InnerType<TestType1,TestType2>.MoreInnerType<TestType3,TestType4>.EvenMoreInnerType<TestType5,TestType6>>" );
         }
-
-
     }
 }
 

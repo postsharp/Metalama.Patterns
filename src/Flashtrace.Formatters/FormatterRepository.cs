@@ -10,12 +10,17 @@ public interface IFormatterRepository
     IFormatter<T>? Get<T>();
 
     IFormatter? Get( Type objectType );
+
+    /// <summary>
+    /// Gets the <see cref="FormattingRole"/> associated with the current formatter repository.
+    /// </summary>
+    FormattingRole Role { get; }
 }
 
 /// <summary>
 /// Allows to get and register formatters for a specific type.
 /// </summary>
-public abstract class FormatterRepository : IFormatterRepository
+public class FormatterRepository : IFormatterRepository
 {
     private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _formatterFactory;
     private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _dynamicFormatterFactory;
@@ -24,11 +29,16 @@ public abstract class FormatterRepository : IFormatterRepository
     private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>> _dynamicFormatterCache =new();
 
     private readonly Func<Type, TypeExtensionInfo<IFormatter>> _getFormatterFunc;
-
     private readonly Func<Type, FormatterCache> _getInvariantFormatterFunc;
 
-    protected FormatterRepository()
+    public FormatterRepository( FormattingRole role )
+        : this( role, true )
     {
+    }
+
+    public FormatterRepository( FormattingRole role, bool registerDefaultFormatters )
+    {
+        this.Role = role ?? throw new ArgumentNullException( nameof( role ) );
         this._formatterFactory = new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof( IFormatter<> ), typeof( FormatterConverter<,> ), this );
         this._dynamicFormatterFactory = new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof( IFormatter<> ), typeof( FormatterConverter<,> ), this );
 
@@ -40,8 +50,11 @@ public abstract class FormatterRepository : IFormatterRepository
 
         this._getInvariantFormatterFunc = ( Type type ) =>
             (FormatterCache) Activator.CreateInstance( typeof( FormatterCache<> ).MakeGenericType( type ), this );
-        
-        this.RegisterDefaultFormatters();
+
+        if ( registerDefaultFormatters )
+        {
+            this.RegisterDefaultFormatters();
+        }
     }
 
     protected void RegisterDefaultFormatters()
@@ -71,6 +84,9 @@ public abstract class FormatterRepository : IFormatterRepository
         this.Register( typeof( Type ), new TypeFormatter( this ) );
         this.Register( typeof( MethodBase ), new MethodFormatter( this ) );
     }
+
+    /// <inheritdoc />
+    public FormattingRole Role { get; }
 
     /// <summary>
     /// Requests that formatters for parameters of a given type will be resolved according
@@ -179,15 +195,12 @@ public abstract class FormatterRepository : IFormatterRepository
         this.RegisterDefaultFormatters();
     }
 
-    private static readonly Type[] _defaultFormatterCtorArgTypes = new[] { typeof( IFormatterRepository ) };
-
     private IFormatter CreateDefaultFormatter( Type type )
         => type.IsAnonymous() ? 
             new AnonymousTypeFormatter( this, type ) :
-            (IFormatter) typeof( DefaultFormatter<> )
-                .MakeGenericType( type )
-                .GetConstructor( _defaultFormatterCtorArgTypes )
-                .Invoke( null );
+            (IFormatter) Activator.CreateInstance(
+                typeof( DefaultFormatter<> ).MakeGenericType( type ),
+                this );
 
     private IFormatter CreateDefaultFormatter<T>()
        => typeof( T ).IsAnonymous() ?

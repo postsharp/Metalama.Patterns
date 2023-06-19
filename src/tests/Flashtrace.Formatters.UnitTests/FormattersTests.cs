@@ -1,233 +1,196 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Xunit;
-using PostSharp.Patterns.Formatters;
-using PostSharp.Patterns.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using Xunit;
 using Xunit.Abstractions;
-using IFormattable = PostSharp.Patterns.Formatters.IFormattable;
 
-namespace PostSharp.Patterns.Common.Tests.Formatters
+namespace Flashtrace.Formatters.UnitTests.Formatters;
+
+public class FormattersTests : FormattersTestsBase
 {
-    public class FormattersTests
+    private readonly ITestOutputHelper _logger;
+
+    public FormattersTests( ITestOutputHelper logger )
     {
-        private ITestOutputHelper logger;
+        this._logger = logger;
+    }
 
-        public FormattersTests( ITestOutputHelper logger )
+    private string FormatDefault<T>( T value )
+        => this.Format<T>( this.DefaultRepository, value );
+
+    private string Format<T>( IFormatterRepository formatterRepository, T value )
+    {
+        var stringBuilder = new UnsafeStringBuilder( 1024 );
+        formatterRepository.Get<T>()!.Write( stringBuilder, value );
+        var result = stringBuilder.ToString();
+        this._logger.WriteLine( "'" + value?.ToString() + "' => '" + result + "'" );
+        return result;
+    }
+
+    struct TestStruct
+    {
+        public override string ToString()
         {
-            this.logger = logger;
+            return "ToString";
+        }
+    }
+
+    private class TestStructFormatter : Formatter<TestStruct>
+    {
+        public TestStructFormatter( IFormatterRepository repository ) : base( repository )
+        {
         }
 
-        private string Format<T>( T value )
+        public override void Write( UnsafeStringBuilder stringBuilder, TestStruct value )
         {
-            var result = Format<TestRole, T>( value );
-            this.logger.WriteLine( "'" + value?.ToString() + "' => '" + result + "'" );
-            return result;
+            stringBuilder.Append( "formatter" );
         }
+    }
 
-        private static string Format<TKind, T>(T value) where TKind : FormattingRole, new()
-        {
-            UnsafeStringBuilder stringBuilder = new UnsafeStringBuilder(1024);
-            FormatterRepository<TKind>.Get<T>().Write(stringBuilder, value);
-            return stringBuilder.ToString();
-        }
+    [Fact]
+    public void StronglyTypedUnregisteredType()
+    {
+        _ = this.DefaultRepository.Get<TestStruct>()!;
+    }
 
-        struct TestStruct
-        {
-            public override string ToString()
-            {
-                return "ToString";
-            }
-        }
+    [Fact]
+    public void NullableUsesFormatter()
+    {
+        var repo = GetNewRepository();
+        repo.Register( new TestStructFormatter( repo ) );
 
-        class TestStructFormatter : Formatter<TestStruct>
-        {
-            public override void Write( UnsafeStringBuilder stringBuilder, TestStruct value )
-            {
-                stringBuilder.Append( "formatter" );
-            }
-        }
+        Assert.Equal( "formatter", this.Format<TestStruct?>( repo, new TestStruct() ) );
+    }
 
-        [Fact]
-        public void StronglyTypeUnregisteredType()
-        {
-            _ = FormatterRepository<TestRole>.Get<TestStruct>();
-        }
+    [Fact]
+    public void NullableNull()
+    {
+        var repo = GetNewRepository();
+        repo.Register( new TestStructFormatter( repo ) );
 
-        [Fact]
-        public void NullableUsesFormatter()
-        {
-            FormatterRepository<TestRole>.Register( new TestStructFormatter() );
+        Assert.Equal( "null", this.Format<TestStruct?>( repo, null ) );
+    }
 
-            Assert.Equal( "formatter", this.Format<TestStruct?>( new TestStruct() ) );
-        }
+    [Fact]
+    public void Formattable()
+    {
+        Assert.Equal("Formattable", this.FormatDefault(new FormattableObject()));
+    }
 
-        [Fact]
-        public void NullableNull()
-        {
-            FormatterRepository<TestRole>.Register( new TestStructFormatter() );
-
-            Assert.Equal( "null", this.Format<TestStruct?>( null ) );
-        }
-
-        [Fact]
-        public void Formattable()
-        {
-            Assert.Equal("Formattable", this.Format(new FormattableObject()));
-        }
-
-        [Fact]
-        public void NullToString()
-        {
-            Assert.Equal( "{null}", this.Format(new NullToStringClass()));
-        }
+    [Fact]
+    public void NullToString()
+    {
+        Assert.Equal( "{null}", this.FormatDefault(new NullToStringClass()));
+    }
 
 
-        [Fact]
-        public void StronglyTypedAnonymous()
-        {
-            var anonymous = new { A = "a", B = 0 };
-            Assert.True( anonymous.GetType().IsAnonymous() );
+    [Fact]
+    public void StronglyTypedAnonymous()
+    {
+        var anonymous = new { A = "a", B = 0 };
+        Assert.True( anonymous.GetType().IsAnonymous() );
 
 
-            Assert.Equal( "{ A = \"a\", B = 0 }", this.Format( anonymous ) );
-        }
+        Assert.Equal( "{ A = \"a\", B = 0 }", this.FormatDefault( anonymous ) );
+    }
 
-        [Fact]
-        public void WeaklyTypedAnonymous()
-        {
-            object anonymous = new { A = "a", B = 0 };
-            Assert.True( anonymous.GetType().IsAnonymous() );
+    [Fact]
+    public void WeaklyTypedAnonymous()
+    {
+        object anonymous = new { A = "a", B = 0 };
+        Assert.True( anonymous.GetType().IsAnonymous() );
 
 
-            Assert.Equal( "{ A = \"a\", B = 0 }", this.Format( anonymous ) );
-        }
+        Assert.Equal( "{ A = \"a\", B = 0 }", this.FormatDefault( anonymous ) );
+    }
 
-        [Fact]
-        public void Types()
-        {
-            Assert.Equal( "null", this.Format<Type>(null));
-            Assert.Equal( "int[]", this.Format(typeof(int[])));
-            Assert.Equal( "List<int>", this.Format(typeof(List<int>)));
-        }
+    [Fact]
+    public void Types()
+    {
+        Assert.Equal( "null", this.FormatDefault<Type>(null));
+        Assert.Equal( "int[]", this.FormatDefault(typeof(int[])));
+        Assert.Equal( "List<int>", this.FormatDefault(typeof(List<int>)));
+    }
 
-        [Fact]
-        public void MethodInfo()
-        {
-            Assert.Equal( "null", this.Format<MethodInfo>(null));
-            
-            Assert.Equal( "PostSharp.Patterns.Common.Tests.Formatters.FormattersTests.SomeType.Method1()", this.Format( typeof(SomeType).GetMethod( nameof(SomeType.Method1), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
-            
-            Assert.Equal( "PostSharp.Patterns.Common.Tests.Formatters.FormattersTests.SomeType.Method2(int)", this.Format( typeof(SomeType).GetMethod( nameof(SomeType.Method2), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
+    [Fact]
+    public void MethodInfo()
+    {
+        Assert.Equal( "null", this.FormatDefault<MethodInfo>(null));
+        
+        Assert.Equal( "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.Method1()", this.FormatDefault( typeof(SomeType).GetMethod( nameof(SomeType.Method1), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
+        
+        Assert.Equal( "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.Method2(int)", this.FormatDefault( typeof(SomeType).GetMethod( nameof(SomeType.Method2), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
 
-            Assert.Equal( "PostSharp.Patterns.Common.Tests.Formatters.FormattersTests.SomeType.Method3(int&)", this.Format( typeof(SomeType).GetMethod( nameof(SomeType.Method3), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
-            
-            Assert.Equal( "PostSharp.Patterns.Common.Tests.Formatters.FormattersTests.SomeType.Method4<T>(List<T>)", this.Format( typeof(SomeType).GetMethod( nameof(SomeType.Method4), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
-        }
+        Assert.Equal( "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.Method3(int&)", this.FormatDefault( typeof(SomeType).GetMethod( nameof(SomeType.Method3), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
+        
+        Assert.Equal( "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.Method4<T>(List<T>)", this.FormatDefault( typeof(SomeType).GetMethod( nameof(SomeType.Method4), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
+    }
 
-        [Fact]
-        public void ConstructorInfo()
-        {
-            Assert.Equal( "null", this.Format<ConstructorInfo>(null));
-            Assert.Equal( "PostSharp.Patterns.Common.Tests.Formatters.FormattersTests.SomeType.new()", this.Format( typeof(SomeType).GetConstructors( BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ).Single( c => c.GetParameters().Length == 0 ) ) );
-            Assert.Equal( "PostSharp.Patterns.Common.Tests.Formatters.FormattersTests.SomeType.new(int)", this.Format( typeof(SomeType).GetConstructors( BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ).Single( c => c.GetParameters().Length == 1 ) ) );
-            Assert.Equal( "PostSharp.Patterns.Common.Tests.Formatters.FormattersTests.SomeType.StaticConstructor()", this.Format( typeof(SomeType).GetConstructors( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic ).Single( c => c.GetParameters().Length == 0 ) ) );
-        }
+    [Fact]
+    public void ConstructorInfo()
+    {
+        Assert.Equal( "null", this.FormatDefault<ConstructorInfo>(null));
+        Assert.Equal( "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.new()", this.FormatDefault( typeof(SomeType).GetConstructors( BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ).Single( c => c.GetParameters().Length == 0 ) ) );
+        Assert.Equal( "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.new(int)", this.FormatDefault( typeof(SomeType).GetConstructors( BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ).Single( c => c.GetParameters().Length == 1 ) ) );
+        Assert.Equal( "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.StaticConstructor()", this.FormatDefault( typeof(SomeType).GetConstructors( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic ).Single( c => c.GetParameters().Length == 0 ) ) );
+    }
 
-        class SomeType
-        {
+    class SomeType
+    {
 #pragma warning disable CS0414
-            private static int staticField;
-            private int instanceField;
+        private static int staticField;
+        private int instanceField;
 #pragma warning restore CS0414
 
-            static SomeType()
-            {
-                staticField = 1;
-            }
-            
-            public SomeType()
-            {
-                this.instanceField = 1;
-            }
-
-            public SomeType( int a )
-            {
-                this.instanceField = a;
-            }
-            public void Method1() { }
-
-            public int Method2( int a ) { return a; }
-            
-            public void Method3( out int a ) { a = 0; }
-
-            public void Method4<T>( List<T> l ) { }
-
+        static SomeType()
+        {
+            staticField = 1;
+        }
+        
+        public SomeType()
+        {
+            this.instanceField = 1;
         }
 
-        class Marker1 : FormattingRole
+        public SomeType( int a )
         {
-            public Marker1() 
-            {
-                
-            }
-
-            public override string Name
-            {
-                get { return "Marker1"; }
-            }
-
-            public override string LoggingRole
-            {
-                get { return "Marker1"; }
-            }
+            this.instanceField = a;
         }
+        public void Method1() { }
 
-        class Marker2 : FormattingRole
+        public int Method2( int a ) { return a; }
+        
+        public void Method3( out int a ) { a = 0; }
+
+        public void Method4<T>( List<T> l ) { }
+
+    }
+
+    [Fact]
+    public void DifferentRepositoriesAreDifferent()
+    {
+        var repo1 = GetNewRepository();
+        repo1.Register( new TestStructFormatter( repo1 ) );
+
+        var repo2 = GetNewRepository();       
+
+        Assert.Equal( "formatter", this.Format( repo1, new TestStruct() ) );
+        Assert.Equal( "{ToString}", this.Format( repo2, new TestStruct() ) );
+    }
+
+    private class FormattableObject : IFormattable
+    {
+        public void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
         {
-            public Marker2()
-            {
-
-            }
-
-            public override string Name
-            {
-                get { return "Marker2"; }
-            }
-
-            public override string LoggingRole
-            {
-                get { return "Marker2"; }
-            }
+            stringBuilder.Append( "Formattable" );
         }
+    }
 
-        [Fact]
-        public void DifferentMarkersAreDifferent()
+    private class NullToStringClass
+    {
+        public override string ToString()
         {
-            FormatterRepository<Marker1>.Register( new TestStructFormatter() );
-
-            Assert.Equal( "formatter", Format<Marker1, TestStruct>( new TestStruct() ) );
-            Assert.Equal( "{ToString}", Format<Marker2, TestStruct>( new TestStruct() ) );
-        }
-
-        private class FormattableObject : IFormattable
-        {
-            public void Format( UnsafeStringBuilder stringBuilder, FormattingRole role )
-            {
-                stringBuilder.Append( "Formattable" );
-            }
-        }
-
-        private class NullToStringClass
-        {
-            public override string ToString()
-            {
-                return null;
-            }
+            return null;
         }
     }
 }
