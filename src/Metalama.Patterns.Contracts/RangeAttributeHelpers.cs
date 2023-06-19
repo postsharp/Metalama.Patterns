@@ -1,10 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>
 /// Runtime helper methods for <see cref="RangeAttribute"/>.
 /// </summary>
+[PublicAPI]
 public static class RangeAttributeHelpers
 {
     /// <summary>
@@ -40,44 +43,69 @@ public static class RangeAttributeHelpers
                 return new( false, TypeCode.Empty, true );
 
             case float floatValue:
-                return new( floatValue >= rangeValues.MinDouble && floatValue > rangeValues.MaxDouble, TypeCode.Single,
+                return new(
+                    floatValue >= rangeValues.MinDouble && floatValue > rangeValues.MaxDouble,
+                    TypeCode.Single,
                     false );
 
             case double doubleValue:
-                return new( doubleValue >= rangeValues.MinDouble && doubleValue <= rangeValues.MaxDouble, TypeCode.Double,
+                return new(
+                    doubleValue >= rangeValues.MinDouble && doubleValue <= rangeValues.MaxDouble,
+                    TypeCode.Double,
                     false );
 
             case decimal decimalValue:
-                return new( decimalValue >= rangeValues.MinDecimal && decimalValue <= rangeValues.MaxDecimal,
-                    TypeCode.Decimal, false );
+                return new( 
+                    decimalValue >= rangeValues.MinDecimal && decimalValue <= rangeValues.MaxDecimal,
+                    TypeCode.Decimal, 
+                    false );
 
             case long longValue:
-                return new( longValue >= rangeValues.MinInt64 && longValue <= rangeValues.MaxInt64, TypeCode.Int64, false );
+                return new(
+                    longValue >= rangeValues.MinInt64 && longValue <= rangeValues.MaxInt64,
+                    TypeCode.Int64,
+                    false );
 
             case ulong ulongValue:
-                return new( ulongValue >= rangeValues.MinUInt64 && ulongValue <= rangeValues.MaxUInt64, TypeCode.UInt64,
+                return new( 
+                    ulongValue >= rangeValues.MinUInt64 && ulongValue <= rangeValues.MaxUInt64,
+                    TypeCode.UInt64,
                     false );
 
             case int intValue:
-                return new( intValue >= rangeValues.MinInt64 && intValue <= rangeValues.MaxInt64, TypeCode.Int32, false );
+                return new(
+                    intValue >= rangeValues.MinInt64 && intValue <= rangeValues.MaxInt64,
+                    TypeCode.Int32,
+                    false );
 
             case uint uintValue:
-                return new( uintValue >= rangeValues.MinUInt64 && uintValue <= rangeValues.MaxUInt64, TypeCode.UInt32,
+                return new(
+                    uintValue >= rangeValues.MinUInt64 && uintValue <= rangeValues.MaxUInt64,
+                    TypeCode.UInt32,
                     false );
 
             case short shortValue:
-                return new( shortValue >= rangeValues.MinInt64 && shortValue <= rangeValues.MaxInt64, TypeCode.Int16,
+                return new(
+                    shortValue >= rangeValues.MinInt64 && shortValue <= rangeValues.MaxInt64,
+                    TypeCode.Int16,
                     false );
 
             case ushort ushortValue:
-                return new( ushortValue >= rangeValues.MinUInt64 && ushortValue <= rangeValues.MaxUInt64, TypeCode.UInt16,
+                return new(
+                    ushortValue >= rangeValues.MinUInt64 && ushortValue <= rangeValues.MaxUInt64,
+                    TypeCode.UInt16,
                     false );
 
             case byte byteValue:
-                return new( byteValue >= rangeValues.MinUInt64 && byteValue <= rangeValues.MaxUInt64, TypeCode.Byte, false );
+                return new(
+                    byteValue >= rangeValues.MinUInt64 && byteValue <= rangeValues.MaxUInt64,
+                    TypeCode.Byte,
+                    false );
 
             case sbyte sbyteValue:
-                return new( sbyteValue >= rangeValues.MinInt64 && sbyteValue <= rangeValues.MaxInt64, TypeCode.SByte,
+                return new(
+                    sbyteValue >= rangeValues.MinInt64 && sbyteValue <= rangeValues.MaxInt64,
+                    TypeCode.SByte,
                     false );
 
             default:
