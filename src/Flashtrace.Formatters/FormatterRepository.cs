@@ -185,18 +185,6 @@ public class FormatterRepository : IFormatterRepository
         }
     }
 
-    // TODO: Remove Rests() if unused.
-
-    /// <summary>
-    /// Clears formatters, but doesn't reset registrations.
-    /// </summary>
-    /// <remarks>Used by unit tests to clear standard formatters.</remarks>
-    public void Reset()
-    {
-        this._formatterFactory.Clear();
-        this.RegisterDefaultFormatters();
-    }
-
     private IFormatter CreateDefaultFormatter( Type type )
         => type.IsAnonymous() ? 
             new AnonymousTypeFormatter( this, type ) :

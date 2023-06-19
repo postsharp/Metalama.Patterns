@@ -1,102 +1,74 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if APP_DOMAIN
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using PostSharp.Patterns.Common.Tests.Helpers;
+using Flashtrace.Formatters.UnitTests.Formatters;
 using Xunit;
-using PostSharp.Patterns.Formatters;
+using Xunit.Abstractions;
 
+namespace Flashtrace.Formatters.UnitTests;
 
-namespace PostSharp.Patterns.Common.Tests.Formatters
+public class FormatterNoLoggingExceptionTests : FormattersTestsBase
 {
-    public class FormatterNoLoggingExceptionTests : AppDomainTestsBaseClass<FormatterNoLoggingExceptionTests>
+    public FormatterNoLoggingExceptionTests( ITestOutputHelper logger ) : base( logger )
     {
-        private static string Format<T>( T value )
-        {
-            UnsafeStringBuilder stringBuilder = new UnsafeStringBuilder(1024);
-            FormatterRepository<TestRole>.Get<T>().Write( stringBuilder, value );
-            return stringBuilder.ToString();
-        }
-
-        [Fact]
-        public void ThrowingConstructor()
-        {
-            ExecuteTest( tc => tc.ThrowingConstructorMethod() );
-        }
-
-        private void ThrowingConstructorMethod()
-        {
-            FormatterRepository<TestRole>.Register( typeof(IEnumerable<>), typeof(ThrowingFormatter<>) );
-
-            string result = Format<IEnumerable<int>>( new int[0] );
-
-            Assert.True( ThrowingFormatter<int>.Ran );
-            Assert.Equal( "{int[]}", result );
-        }
-
-        [Fact]
-        public void PrivateConstructor()
-        {
-            ExecuteTest( tc => tc.PrivateConstructorMethod() );
-        }
-
-        private void PrivateConstructorMethod()
-        {
-            FormatterRepository<TestRole>.Register( typeof(IEnumerable<>), typeof(NoConstructorFormatter<>) );
-
-            string result = Format<IEnumerable<int>>( new int[0] );
-
-            Assert.Equal( "{int[]}", result );
-        }
-
-        [Fact]
-        public void BadRegistration()
-        {
-            ExecuteTest( tc => tc.BadRegistrationMethod() );
-        }
-
-        private void BadRegistrationMethod()
-        {
-            FormatterRepository<TestRole>.Register( typeof(IComparable<>), typeof(ThrowingFormatter<>) );
-
-            string result = Format<IComparable<int>>( 0 );
-
-            Assert.True( ThrowingFormatter<int>.Ran );
-            Assert.Equal( "0", result );
-        }
     }
 
-    internal class ThrowingFormatter<T> : Formatter<IEnumerable<T>>
+    [Fact]
+    public void ThrowingConstructor()
     {
-        public static bool Ran;
+        this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( ThrowingFormatter<> ) );
 
-        public ThrowingFormatter()
-        {
-            Ran = true;
-            throw new Exception();
-        }
+        var result = this.FormatDefault<IEnumerable<int>>( new int[0] );
 
-        public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
-        {
-            throw new NotSupportedException();
-        }
+        Assert.True( ThrowingFormatter<int>.Ran );
+        Assert.Equal( "{int[]}", result );
     }
 
-    internal class NoConstructorFormatter<T> : Formatter<IEnumerable<T>>
+    [Fact]
+    public void PrivateConstructor()
     {
-        private NoConstructorFormatter()
-        {
-        }
+        this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( NoConstructorFormatter<> ) );
 
-        public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
-        {
-            throw new NotSupportedException();
-        }
+        var result = this.FormatDefault<IEnumerable<int>>( new int[0] );
+
+        Assert.Equal( "{int[]}", result );
+    }
+
+    [Fact]
+    public void BadRegistration()
+    {
+        this.DefaultRepository.Register( typeof(IComparable<>), typeof(ThrowingFormatter<>) );
+
+        var result = this.FormatDefault<IComparable<int>>( 0 );
+
+        Assert.True( ThrowingFormatter<int>.Ran );
+        Assert.Equal( "0", result );
     }
 }
 
-#endif
+internal class ThrowingFormatter<T> : Formatter<IEnumerable<T>>
+{
+    public static bool Ran;
+
+    public ThrowingFormatter( IFormatterRepository repository ) : base( repository )
+    {
+        Ran = true;
+        throw new Exception();
+    }
+
+    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
+    {
+        throw new NotSupportedException();
+    }
+}
+
+internal class NoConstructorFormatter<T> : Formatter<IEnumerable<T>>
+{
+    private NoConstructorFormatter() : base( null! )
+    {
+    }
+
+    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
+    {
+        throw new NotSupportedException();
+    }
+}
