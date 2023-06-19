@@ -1,11 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
@@ -13,38 +6,43 @@ namespace Flashtrace.Formatters;
 // for a much more complicated enum formatter. But that one always boxes
 // (because ToInt32 boxes), which would not be easy to work around.
 
+public sealed class EnumFormatter<T> : Formatter<T>
+    where T : Enum
+{
+    public EnumFormatter( IFormatterRepository repository ) : base( repository )
+    {
+    }
+
+    public override void Write( UnsafeStringBuilder stringBuilder, T? value )
+    {
+        EnumFormatterCache<T>.Write( stringBuilder, value );
+    }
+}
+
 /// <summary>
 /// Efficient formatter for enums.
 /// </summary>
-public sealed class EnumFormatter<T> : Formatter<T>
+internal static class EnumFormatterCache<T>
+    where T : Enum
 {
-    /// <summary>
-    /// The singleton instance of <see cref="EnumFormatter{T}"/>.
-    /// </summary>
-    [SuppressMessage("Microsoft.Security", "CA2104")]
-    [SuppressMessage("Microsoft.Design", "CA1000")]
-    public static readonly EnumFormatter<T> Instance = new EnumFormatter<T>();
-
     // To make this formatter efficient (i.e. to avoid allocations) and thread-safe,
     // names of named values of the enum are stored in simpleNames, which is never mutated.
     // Other names (bitwise ORs for [Flags], unnamed values) are cached per thread in otherNames.
 
-    private static readonly Dictionary<T, string> simpleNames;
+    private static readonly Dictionary<T, string> _simpleNames;
 
     [ThreadStatic]
-    private static Dictionary<T, string> otherNames;
+    private static Dictionary<T, string>? _otherNames;
 
-    [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
-    static EnumFormatter()
+    static EnumFormatterCache()
     {
-        T[] values = (T[]) Enum.GetValues( typeof(T) );
+        var values = (T[]) Enum.GetValues( typeof(T) );
 
         // Distinct is required, because GetValues() returns duplicates for values with multiple names
-        simpleNames = values.Distinct().ToDictionary( v => v, v => v.ToString() );
+        _simpleNames = values.Distinct().ToDictionary( v => v, v => v.ToString() );
     }
 
-    /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, T value )
+    public static void Write( UnsafeStringBuilder stringBuilder, T value )
     {
         stringBuilder.Append( GetString( value ) );
     }
@@ -52,40 +50,45 @@ public sealed class EnumFormatter<T> : Formatter<T>
     /// <summary>
     /// Returns the string value of the given enum value.
     /// </summary>
-    [SuppressMessage("Microsoft.Design", "CA1000")]
     public static string GetString( T value )
     {
+        if ( value == null )
+        {
+            throw new ArgumentNullException( nameof( value ) );
+        }
+
         string name;
 
-        if ( simpleNames.TryGetValue( value, out name ) )
+        if ( _simpleNames.TryGetValue( value, out name ) )
         {
             return name;
         }
 
-        if ( otherNames == null )
-        {
-            otherNames = new Dictionary<T, string>();
-        }
+        _otherNames ??= new Dictionary<T, string>();
 
-        if ( otherNames.TryGetValue( value, out name ) )
+        if ( _otherNames.TryGetValue( value, out name ) )
         {
             return name;
         }
 
-        return otherNames[value] = value.ToString();
+        return _otherNames[value] = value.ToString();
     }
 }
+
+// TODO: Remove class.
 
 /// <summary>
 /// Efficient formatter for enums.
 /// </summary>
+[Obsolete( "Do we need this?", true )]
 public static class EnumFormatter
 {
     /// <summary>
     /// Returns the string value of the given enum value.
     /// </summary>
     public static string GetString<T>( T value )
+        where T : Enum
     {
-        return EnumFormatter<T>.GetString( value );
+        return EnumFormatterCache<T>.GetString( value );
     }
 }

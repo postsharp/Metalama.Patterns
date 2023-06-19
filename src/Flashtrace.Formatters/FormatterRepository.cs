@@ -12,52 +12,68 @@ public interface IFormatterRepository
     IFormatter Get( Type objectType );
 }
 
+/* Initial Port (June 2023)
+ * ------------------------
+ * 
+ * <TRole> is removed.
+ * 
+ * 
+ */
 /// <summary>
 /// Allows to get and register formatters for a specific type.
 /// </summary>
 public abstract class FormatterRepository : IFormatterRepository
 {
-    private readonly CovariantTypeExtensionFactory<IFormatter> _formatterFactory;
-    private readonly CovariantTypeExtensionFactory<IFormatter> _dynamicFormatterFactory;
-    private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>> _dynamicFormatterCache =
-        new ConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>>();
+    private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _formatterFactory;
+    private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _dynamicFormatterFactory;
+
+    private readonly ConcurrentDictionary<Type, FormatterCache> _stronglyTypedFormatterCache = new();
+    private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>> _dynamicFormatterCache =new();
+
+    private readonly Func<Type, TypeExtensionInfo<IFormatter>> _getFormatterFunc;
+
+    //private readonly Func<Type, FormatterCache> _getStronglyTypedFormatterFunc;
 
     protected FormatterRepository()
     {
-        this._formatterFactory = new CovariantTypeExtensionFactory<IFormatter>(typeof(IFormatter<>), typeof(FormatterConverter<,>) );
-        this._dynamicFormatterFactory = new CovariantTypeExtensionFactory<IFormatter>(typeof(IFormatter<>), typeof(FormatterConverter<,>) );
-        
-        RegisterDefaultFormatters();
+        this._formatterFactory = new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof( IFormatter<> ), typeof( FormatterConverter<,> ), this );
+        this._dynamicFormatterFactory = new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof( IFormatter<> ), typeof( FormatterConverter<,> ), this );
+        this._getFormatterFunc = ( Type type ) =>
+            this._dynamicFormatterFactory.GetTypeExtension(
+                type,
+                newFormatterInfo => this.UpdateFormatterCache( type, newFormatterInfo ),
+                () => this.CreateDefaultFormatter( type ) );
+
+        this.RegisterDefaultFormatters();
     }
 
     protected void RegisterDefaultFormatters()
     {
-        Register(typeof(string), StringFormatter.Instance);
-        Register(typeof(char), CharFormatter.Instance);
-        Register(typeof(bool), BooleanFormatter.Instance);
-        Register(typeof(byte), ByteFormatter.Instance);
-        Register(typeof(sbyte), SByteFormatter.Instance);
-        Register(typeof(ushort), UInt16Formatter.Instance);
-        Register(typeof(short), Int16Formatter.Instance);
-        Register(typeof(uint), UInt32Formatter.Instance);
-        Register(typeof(int), Int32Formatter.Instance);
-        Register(typeof(ulong), UInt64Formatter.Instance);
-        Register(typeof(long), Int64Formatter.Instance);
-        Register(typeof(float), new DefaultFormatter<float>());
-        Register(typeof(double), new DefaultFormatter<double>());
-        Register(typeof(decimal), new DefaultFormatter<decimal>());
-        Register(typeof(UIntPtr), new DefaultFormatter<UIntPtr>());
-        Register(typeof(IntPtr), new DefaultFormatter<IntPtr>());
-        Register(typeof(DateTime), new DefaultFormatter<DateTime>());
-        Register(typeof(DateTimeOffset), new DefaultFormatter<DateTimeOffset>());
-        Register(typeof(Guid), new DefaultFormatter<Guid>());
-        Register(typeof(TimeSpan), new DefaultFormatter<TimeSpan>());
-        Register(typeof(IFormattable), new FormattableFormatter<IFormattable>());
-        Register(typeof(Nullable<>), typeof(NullableFormatter<,>));
-        Register(typeof(Type), TypeFormatter.Instance);
-        Register(typeof(MethodBase), MethodFormatter.Instance);
+        this.Register( typeof( string ), new StringFormatter( this ) );
+        this.Register( typeof( char ), new CharFormatter( this ) );
+        this.Register( typeof( bool ), new BooleanFormatter( this ) );
+        this.Register( typeof( byte ), new ByteFormatter( this ) );
+        this.Register( typeof( sbyte ), new SByteFormatter( this ) );
+        this.Register( typeof( ushort ), new UInt16Formatter( this ) );
+        this.Register( typeof( short ), new Int16Formatter( this ) );
+        this.Register( typeof( uint ), new UInt32Formatter( this ) );
+        this.Register( typeof( int ), new Int32Formatter( this ) );
+        this.Register( typeof( ulong ), new UInt64Formatter( this ) );
+        this.Register( typeof( long ), new Int64Formatter( this ) );
+        this.Register( typeof( float ), new DefaultFormatter<float>( this ) );
+        this.Register( typeof( double ), new DefaultFormatter<double>( this ) );
+        this.Register( typeof( decimal ), new DefaultFormatter<decimal>( this ) );
+        this.Register( typeof( UIntPtr ), new DefaultFormatter<UIntPtr>( this ) );
+        this.Register( typeof( IntPtr ), new DefaultFormatter<IntPtr>( this ) );
+        this.Register( typeof( DateTime ), new DefaultFormatter<DateTime>( this ) );
+        this.Register( typeof( DateTimeOffset ), new DefaultFormatter<DateTimeOffset>( this ) );
+        this.Register( typeof( Guid ), new DefaultFormatter<Guid>( this ) );
+        this.Register( typeof( TimeSpan ), new DefaultFormatter<TimeSpan>( this ) );
+        this.Register( typeof( IFormattable ), new FormattableFormatter<IFormattable>( this ) );
+        this.Register( typeof( Nullable<> ), typeof( NullableFormatter<> ) );
+        this.Register( typeof( Type ), new TypeFormatter( this ) );
+        this.Register( typeof( MethodBase ), new MethodFormatter( this ) );
     }
-
 
     /// <summary>
     /// Requests that formatters for parameters of a given type will be resolved according
@@ -65,37 +81,33 @@ public abstract class FormatterRepository : IFormatterRepository
     /// always resolved dynamically.
     /// </summary>
     /// <typeparam name="T">Type of the parameter.</typeparam>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
-    public static void SetDynamic<T>() where T : class
+    public void SetDynamic<T>() 
+        where T : class
     {
-        _formatterFactory.RegisterTypeExtension( typeof(T), new DynamicFormatter<T, TRole>() );
+        this._formatterFactory.RegisterTypeExtension( typeof( T ), new DynamicFormatter<T>( this ) );
     }
 
     /// <summary>
     /// Registers the given <paramref name="formatter"/> for the type <typeparamref name="T"/>.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
-    public static void Register<T>(IFormatter<T> formatter)
+    public void Register<T>( IFormatter<T> formatter )
     {
-        if (formatter == null)
+        if ( formatter == null )
         {
-            throw new ArgumentNullException(nameof(formatter));
+            throw new ArgumentNullException( nameof( formatter ) );
         }
 
-        Register(typeof(T), formatter);
+        this.Register( typeof( T ), formatter );
     }
 
     /// <summary>
     /// Registers the given <paramref name="formatter"/> for the given <paramref name="targetType"/>.
     /// </summary>
     /// <remarks>The formatter will work for the given target type, and also for any type that inherits/implements the target type.</remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-    public static void Register(Type targetType, IFormatter formatter)
+    public void Register(Type targetType, IFormatter formatter)
     {
-        _formatterFactory.RegisterTypeExtension(targetType, formatter);
-        _dynamicFormatterFactory.RegisterTypeExtension(targetType, formatter);
+        this._formatterFactory.RegisterTypeExtension(targetType, formatter);
+        this._dynamicFormatterFactory.RegisterTypeExtension(targetType, formatter);
     }
 
     /// <summary>
@@ -112,22 +124,20 @@ public abstract class FormatterRepository : IFormatterRepository
     /// and then log a parameter of type <c>Dictionary&lt;int, string&gt;</c>, the formatter for that parameter will be created
     /// by calling <c>new MyDictionaryFormatter&lt;int, string&gt;</c>.
     /// </example>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-    public static void Register(Type targetType, Type formatterType)
+    public void Register(Type targetType, Type formatterType)
     {
-        _formatterFactory.RegisterTypeExtension(targetType, formatterType);
-        _dynamicFormatterFactory.RegisterTypeExtension(targetType, formatterType);
+        this._formatterFactory.RegisterTypeExtension(targetType, formatterType);
+        this._dynamicFormatterFactory.RegisterTypeExtension(targetType, formatterType);
     }
 
     /// <summary>
     /// Returns the formatter for the type <typeparamref name="T"/>. 
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-    public static IFormatter<T> Get<T>()
+    public IFormatter<T> Get<T>()
     {
-        return FormatterCache<T>.GetInstance();
+        // TODO: Review performance re delegate allocation. 
+        return (IFormatter<T>?) this._stronglyTypedFormatterCache.GetOrAdd( typeof( T ), t => new FormatterCache<T>( this ) ).GetInstance();
     }
-
 
     /// <summary>
     /// Returns a formatter for a specific object. This overload should be used when the type of the object
@@ -135,22 +145,19 @@ public abstract class FormatterRepository : IFormatterRepository
     /// </summary>
     /// <param name="objectType">Object type.</param>
     /// <returns>The formatter the object <paramref name="objectType"/>.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-    public static IFormatter Get(Type objectType)
+    public IFormatter Get(Type objectType)
     {
-        return _dynamicFormatterCache.GetOrAdd(objectType, getFormatterFunc).Extension;
+        return this._dynamicFormatterCache.GetOrAdd(objectType, this._getFormatterFunc).Extension;
     }
 
-
-
-    private static void UpdateFormatterCache(Type objectType, TypeExtensionInfo<IFormatter> newFormatterInfo)
+    private void UpdateFormatterCache(Type objectType, TypeExtensionInfo<IFormatter> newFormatterInfo)
     {
         while (true)
         {
             TypeExtensionInfo<IFormatter> oldFormatterInfo;
-            if (!_dynamicFormatterCache.TryGetValue(objectType, out oldFormatterInfo))
+            if (!this._dynamicFormatterCache.TryGetValue(objectType, out oldFormatterInfo))
             {
-                _dynamicFormatterCache.TryAdd(objectType, newFormatterInfo);
+                this._dynamicFormatterCache.TryAdd(objectType, newFormatterInfo);
                 return;
             }
 
@@ -159,83 +166,81 @@ public abstract class FormatterRepository : IFormatterRepository
                 return;
             }
 
-            if (_dynamicFormatterCache.TryUpdate(objectType, newFormatterInfo, oldFormatterInfo))
+            if ( this._dynamicFormatterCache.TryUpdate(objectType, newFormatterInfo, oldFormatterInfo))
             {
                 return;
             }
-
         }
-
     }
-
-    private static readonly Func<Type, TypeExtensionInfo<IFormatter>> getFormatterFunc = delegate (Type type)
-    {
-        return _dynamicFormatterFactory.GetTypeExtension(type,newFormatterInfo => UpdateFormatterCache(type, newFormatterInfo), () => CreateDefaultFormatter(type));
-    };
-
 
     /// <summary>
     /// Clears formatters, but doesn't reset registrations.
     /// </summary>
     /// <remarks>Used by unit tests to clear standard formatters.</remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-    public static void Reset()
+    public void Reset()
     {
-        _formatterFactory.Clear();
-        RegisterDefaultFormatters();
+        this._formatterFactory.Clear();
+        this.RegisterDefaultFormatters();
     }
 
-    private static IFormatter CreateDefaultFormatter( Type type )
-        => type.IsAnonymous() ? (IFormatter) new AnonymousTypeFormatter<TRole>( type ) :
-        (IFormatter)
-        typeof( DefaultFormatter<,> ).MakeGenericType( typeof( TRole ), type ).GetConstructor(Type.EmptyTypes).Invoke( null );
+    private static readonly Type[] _defaultFormatterCtorArgTypes = new[] { typeof( IFormatterRepository ) };
 
-    private static IFormatter CreateDefaultFormatter<T>( )
-       => typeof(T).IsAnonymous() ? (IFormatter) new AnonymousTypeFormatter<TRole>( typeof(T) ) :
-       (IFormatter) new DefaultFormatter<TRole,T>();
+    private IFormatter CreateDefaultFormatter( Type type )
+        => type.IsAnonymous() ? 
+            new AnonymousTypeFormatter( this, type ) :
+            (IFormatter) typeof( DefaultFormatter<> )
+                .MakeGenericType( type )
+                .GetConstructor( _defaultFormatterCtorArgTypes )
+                .Invoke( null );
 
+    private IFormatter CreateDefaultFormatter<T>()
+       => typeof( T ).IsAnonymous() ?
+            new AnonymousTypeFormatter( this, typeof( T ) ) :
+            new DefaultFormatter<T>( this );
 
-    private static class FormatterCache<T>
+    private abstract class FormatterCache
     {
-        private static IFormatter<T> formatter;
-        private static TypeExtensionInfo<IFormatter> formatterInfo;
+        public abstract IFormatter? GetInstance();
+    }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
-        static FormatterCache()
+    private sealed class FormatterCache<T> : FormatterCache
+    {
+        private readonly FormatterRepository _parent;
+        private IFormatter<T>? _formatter;
+        private TypeExtensionInfo<IFormatter> _formatterInfo;
+
+        public FormatterCache( FormatterRepository parent )
         {
-            formatterInfo = _formatterFactory.GetTypeExtension(typeof(T), UpdateStaticCacheCallback, CreateDefaultFormatterStatic);
-            formatter = (IFormatter<T>)formatterInfo.Extension;
+            this._parent = parent;
+            this._formatterInfo = parent._formatterFactory.GetTypeExtension( typeof( T ), this.UpdateStaticCacheCallback, this.CreateDefaultFormatterStatic );
+            this._formatter = (IFormatter<T>?) this._formatterInfo.Extension;
         }
 
-        private static IFormatter CreateDefaultFormatterStatic()
+        private IFormatter CreateDefaultFormatterStatic()
         {
-            if ( typeof( T ) == typeof( object ) || typeof( T ).IsInterface() || typeof( T ).IsAbstract() )
+            if ( typeof( T ) == typeof( object ) || typeof( T ).IsInterface || typeof( T ).IsAbstract )
             {
-                return new DynamicFormatter<T, TRole>();
+                return new DynamicFormatter<T>( this._parent );
             }
-            else if ( typeof(T).IsEnum() )
+            else if ( typeof(T).IsEnum )
             {
-                return new EnumFormatter<T>();
+                return (IFormatter) Activator.CreateInstance( typeof( EnumFormatter<> ).MakeGenericType( typeof( T ) ), this._parent );
             }
             else
             {
-                return CreateDefaultFormatter<T>( );
+                return this._parent.CreateDefaultFormatter<T>();
             }
         }
 
-        private static void UpdateStaticCacheCallback(TypeExtensionInfo<IFormatter> typeExtensionInfo)
+        private void UpdateStaticCacheCallback(TypeExtensionInfo<IFormatter> typeExtensionInfo)
         {
-            if (typeExtensionInfo.ShouldOverwrite(formatterInfo))
+            if (typeExtensionInfo.ShouldOverwrite( this._formatterInfo ))
             {
-                formatter = (IFormatter<T>)_formatterFactory.Convert(typeExtensionInfo.Extension, typeof(T));
-                formatterInfo = typeExtensionInfo;
+                this._formatter = (IFormatter<T>?) this._parent._formatterFactory.Convert( typeExtensionInfo.Extension, typeof( T ) );
+                this._formatterInfo = typeExtensionInfo;
             }
         }
 
-        public static IFormatter<T> GetInstance()
-        {
-            return formatter;
-        }
-
+        public override IFormatter? GetInstance() => this._formatter;
     }
 }

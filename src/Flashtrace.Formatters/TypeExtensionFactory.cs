@@ -4,8 +4,62 @@ using System.Globalization;
 
 namespace Flashtrace.Formatters;
 
-[Obsolete("Maybe not required post-TRole?", true)]
-internal class TypeExtensionFactory<T> 
+// TContext is eg IFormatterRepository
+internal class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
+    where T : class
+{
+    private readonly object?[] _contextArray;
+
+    public TypeExtensionFactory( Type genericInterfaceType, Type converterType, TContext? context ) 
+        : base( genericInterfaceType, converterType )
+    {
+        this._contextArray = new object?[] { context };
+    }
+
+    public T? Convert( T o, Type targetObjectType ) 
+        => this.Convert( o, targetObjectType, this._contextArray );
+
+    public void RegisterTypeExtension( Type targetType, Type typeExtensionType )
+        => this.RegisterTypeExtension( targetType, typeExtensionType, this._contextArray );
+
+    public TypeExtensionInfo<T> GetTypeExtension(
+        Type objectType,
+        TypeExtensionCacheUpdateCallback<T> cacheUpdateCallback,
+        Func<T> createDefault,
+        Action<Exception>? onExceptionWhileCreatingTypeExtension = null )
+        => this.GetTypeExtension(
+            objectType,
+            this._contextArray,
+            cacheUpdateCallback,
+            createDefault,
+            onExceptionWhileCreatingTypeExtension );
+}
+
+// No context
+internal class TypeExtensionFactory<T> : TypeExtensionFactoryBase<T>
+    where T : class
+{
+    public TypeExtensionFactory( Type genericInterfaceType, Type converterType ) : base( genericInterfaceType, converterType )
+    {
+    }
+
+    public T? Convert( T o, Type targetObjectType ) 
+        => this.Convert( o, targetObjectType, null );
+
+    public void RegisterTypeExtension( Type targetType, Type typeExtensionType ) 
+        => this.RegisterTypeExtension( targetType, typeExtensionType, null );
+
+    public TypeExtensionInfo<T> GetTypeExtension(
+        Type objectType,
+        TypeExtensionCacheUpdateCallback<T> cacheUpdateCallback,
+        Func<T> createDefault,
+        Action<Exception>? onExceptionWhileCreatingTypeExtension = null )
+        => this.GetTypeExtension( objectType, null, cacheUpdateCallback, createDefault, onExceptionWhileCreatingTypeExtension );
+}
+
+// T is eg IFormatter here, IValueAdapter in caching.
+// TODO: Remove?
+internal class TypeExtensionFactoryBase<T> 
     where T : class
 {
     private readonly Type _genericInterfaceType;
@@ -16,7 +70,7 @@ internal class TypeExtensionFactory<T>
     private readonly Dictionary<Type, TypeExtensionCacheUpdateCallback<T>> _cacheInvalidationCallbacks =
         new Dictionary<Type, TypeExtensionCacheUpdateCallback<T>>();
 
-    public TypeExtensionFactory( Type genericInterfaceType, Type converterType )
+    public TypeExtensionFactoryBase( Type genericInterfaceType, Type converterType )
     {
         this._genericInterfaceType = genericInterfaceType;
         this._converterType = converterType;
@@ -68,64 +122,68 @@ internal class TypeExtensionFactory<T>
         }
     }
 
-    public void RegisterTypeExtension(Type targetType, Type typeExtensionType)
+    protected void RegisterTypeExtension( Type targetType, Type typeExtensionType, object?[]? constructorArgs )
     {
-        if (targetType == null)
+        if ( targetType == null )
         {
-            throw new ArgumentNullException(nameof( targetType ));
+            throw new ArgumentNullException( nameof( targetType ) );
         }
 
-        if (typeExtensionType == null)
+        if ( typeExtensionType == null )
         {
-            throw new ArgumentNullException(nameof( typeExtensionType ));
+            throw new ArgumentNullException( nameof( typeExtensionType ) );
         }
 
-        if (!typeExtensionType.IsGenericTypeDefinition)
+        if ( !typeExtensionType.IsGenericTypeDefinition )
         {
-            if (targetType.IsGenericTypeDefinition)
+            if ( targetType.IsGenericTypeDefinition )
             {
-                throw new ArgumentException("When type extension type is not generic, target type cannot be generic.");
+                throw new ArgumentException( "When type extension type is not generic, target type cannot be generic." );
             }
 
-            this.RegisterTypeExtension(targetType, (T)Activator.CreateInstance(typeExtensionType));
+            this.RegisterTypeExtension( targetType, (T) Activator.CreateInstance( typeExtensionType, constructorArgs ) );
             return;
         }
 
-        var foundBase = this.FindInterfaceGenericInstance(typeExtensionType);
-        if (foundBase == null)
+        var foundBase = this.FindInterfaceGenericInstance( typeExtensionType ) ??
+            throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, "{0} type has to inherit from {1}.", typeExtensionType, this._genericInterfaceType ), nameof( typeExtensionType ) );
+
+        if ( !targetType.IsGenericTypeDefinition && targetType != typeof( Array ) )
         {
-            throw new ArgumentException( string.Format(CultureInfo.InvariantCulture, "{0} type has to inherit from {1}.", typeExtensionType, this._genericInterfaceType ), nameof( typeExtensionType ));
+            throw new ArgumentException( "When a type extension is generic, target type has to be generic." );
         }
 
-        if (!targetType.IsGenericTypeDefinition && targetType != typeof(Array))
-        {
-            throw new ArgumentException("When a type extension is generic, target type has to be generic.");
-        }
+        // TODO: Cleanup.
 
-        var targetTypeParametersCount = targetType == typeof(Array) ? 1 : targetType.GetGenericArguments().Length;
+        var targetTypeParametersCount = targetType == typeof( Array ) ? 1 : targetType.GetGenericArguments().Length;
         var extensionTypeParametersCount = typeExtensionType.GetGenericArguments().Length;
-        var hasKindMarkerTypeParameter = this.HasRoleTypeParameter(typeExtensionType);
+        //var hasKindMarkerTypeParameter = this.HasRoleTypeParameter(typeExtensionType);
 
-        if (!((targetTypeParametersCount == extensionTypeParametersCount && !hasKindMarkerTypeParameter) ||
-              (targetTypeParametersCount == extensionTypeParametersCount - 1 && hasKindMarkerTypeParameter)))
+        //if (!((targetTypeParametersCount == extensionTypeParametersCount && !hasKindMarkerTypeParameter) ||
+        //      (targetTypeParametersCount == extensionTypeParametersCount - 1 && hasKindMarkerTypeParameter)))
+
+        if ( targetTypeParametersCount != extensionTypeParametersCount )
         {
-
-            throw new ArgumentException("The number of generic parameters of target type and extension type are not compatible.");
+            throw new ArgumentException( "The number of generic parameters of target type and extension type are not compatible." );
         }
 
-        lock ( this._instances)
+        lock ( this._instances )
         {
             this._genericExtensionTypes[targetType] = typeExtensionType;
 
-            foreach (var kvp in this._cacheInvalidationCallbacks)
+            foreach ( var kvp in this._cacheInvalidationCallbacks )
             {
-                this.TryInitialize(targetType, typeExtensionType, kvp.Key, kvp.Value);
+                this.TryInitialize( targetType, typeExtensionType, kvp.Key, kvp.Value, constructorArgs );
             }
         }
     }
 
     private void TryInitialize(
-        Type typeExtensionTargetType, Type typeExtensionType, Type registrationType, TypeExtensionCacheUpdateCallback<T> cacheUpdateCallback)
+        Type typeExtensionTargetType,
+        Type typeExtensionType,
+        Type registrationType,
+        TypeExtensionCacheUpdateCallback<T> cacheUpdateCallback,
+        object?[]? constructorArgs )
     {
         foreach (var assignableType in this.GetAssignableTypes(registrationType))
         {
@@ -137,7 +195,7 @@ internal class TypeExtensionFactory<T>
 
                 var genericTypeExtensionType = this.MakeGenericExtensionType(typeExtensionType, genericArguments);
 
-                var extension = (T)Activator.CreateInstance(genericTypeExtensionType);
+                var extension = (T) Activator.CreateInstance( genericTypeExtensionType, constructorArgs );
 
                 var typeExtensionInfo = new TypeExtensionInfo<T>(
                     extension, MakeGenericType(typeExtensionTargetType, genericArguments), true
@@ -148,7 +206,14 @@ internal class TypeExtensionFactory<T>
         }
     }
 
-    private T? GetExtensionCore(Type objectType, out bool isExtensionGeneric, out Type targetType, Action<Exception>? onExceptionWhileCreatingTypeExtension )
+    // TODO: Review onExceptionWhileCreatingTypeExtension - this replaces a log message.
+        
+    private T? GetExtensionCore(
+        Type objectType,
+        object?[]? constructorArgs,
+        out bool isExtensionGeneric,
+        out Type targetType,
+        Action<Exception>? onExceptionWhileCreatingTypeExtension )
     {
         T? bestExtension = null;
         targetType = typeof(object);
@@ -183,7 +248,7 @@ internal class TypeExtensionFactory<T>
                         bestExtension = null;
                         targetType = assignableType;
                         bestExtensionFactory =
-                            () => (T)Activator.CreateInstance(genericExtensionType);
+                            () => (T) Activator.CreateInstance( genericExtensionType, constructorArgs );
                         isExtensionGeneric = true;
                     }
                 }
@@ -206,7 +271,7 @@ internal class TypeExtensionFactory<T>
                 // Extension constructor threw, so remove it from the dictionary and try again
                 var targetGenericTypeDefinition = GetGenericTypeDefinition(targetType);
                 this._genericExtensionTypes.Remove(targetGenericTypeDefinition);
-                return this.GetExtensionCore( objectType, out isExtensionGeneric, out targetType, onExceptionWhileCreatingTypeExtension );
+                return this.GetExtensionCore( objectType, constructorArgs, out isExtensionGeneric, out targetType, onExceptionWhileCreatingTypeExtension );
             }
         }
 
@@ -222,14 +287,21 @@ internal class TypeExtensionFactory<T>
         }
     }    
 
-    public TypeExtensionInfo<T> GetTypeExtension(Type objectType, TypeExtensionCacheUpdateCallback<T> cacheUpdateCallback, Func<T> createDefault, Action<Exception>? onExceptionWhileCreatingTypeExtension = null )
+    protected TypeExtensionInfo<T> GetTypeExtension(
+        Type objectType,
+        object?[]? constructorArgs,
+        TypeExtensionCacheUpdateCallback<T> cacheUpdateCallback,
+        Func<T> createDefault,
+        Action<Exception>? onExceptionWhileCreatingTypeExtension = null )
     {
         lock ( this._instances)
         {
             bool isGeneric;
             Type targetType;
 
-            var bestTypeExtension = this.GetExtensionCore(objectType, out isGeneric, out targetType, onExceptionWhileCreatingTypeExtension) ?? createDefault();
+            var bestTypeExtension = 
+                this.GetExtensionCore(objectType, constructorArgs, out isGeneric, out targetType, onExceptionWhileCreatingTypeExtension) ??
+                createDefault();
 
             if (cacheUpdateCallback != null)
             {
@@ -244,13 +316,13 @@ internal class TypeExtensionFactory<T>
                 }
             }
 
-            bestTypeExtension = this.Convert(bestTypeExtension, objectType);
+            bestTypeExtension = this.Convert( bestTypeExtension, objectType, constructorArgs );
 
             return new TypeExtensionInfo<T>(bestTypeExtension, targetType, isGeneric);
         }
-    }    
+    }
 
-    public T? Convert(T o, Type targetObjectType)
+    protected T? Convert( T o, Type targetObjectType, object?[]? additionalConstructorArgs )
     {
         if ( o == null )
         {
@@ -259,7 +331,7 @@ internal class TypeExtensionFactory<T>
 
         var targetType = this._genericInterfaceType.MakeGenericType( targetObjectType );
 
-        if(targetType.IsAssignableFrom(o.GetType()))
+        if ( targetType.IsAssignableFrom( o.GetType() ) )
         {
             return o;
         }
@@ -275,10 +347,23 @@ internal class TypeExtensionFactory<T>
         else
         {
             // The formatter does not implement a strongly-typed interface.
-            wrapperType = this._converterType.MakeGenericType( targetObjectType, typeof(object) );
+            wrapperType = this._converterType.MakeGenericType( targetObjectType, typeof( object ) );
         }
 
-        return (T) Activator.CreateInstance(wrapperType, o);
+        object[] ctorArgs;
+
+        if ( additionalConstructorArgs == null || additionalConstructorArgs.Length == 0 )
+        {
+            ctorArgs = new object[] { 0 };
+        }
+        else
+        {
+            ctorArgs = new object[additionalConstructorArgs.Length + 1];
+            ctorArgs[0] = o;
+            Array.Copy( additionalConstructorArgs, 0, ctorArgs, 1, additionalConstructorArgs.Length );
+        }
+
+        return (T) Activator.CreateInstance( wrapperType, ctorArgs );
     }
 
     /// <remarks>This logic is supposed to mimic overload resolution in C#.</remarks>
@@ -365,7 +450,6 @@ internal class TypeExtensionFactory<T>
 
         return extensionType.MakeGenericType(genericArguments);
     }
-
 
     private static Type? GetGenericTypeDefinition( Type type )
     {

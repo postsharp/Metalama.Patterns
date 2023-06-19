@@ -32,6 +32,8 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     */
     object? CharSpan.IArrayAccessor.Array => this._array;
 
+    internal object? Array => this._array;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CharSpan"/> struct from an array of <see cref="char"/>.
     /// </summary>

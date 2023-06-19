@@ -1,7 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
 using System.Collections.Concurrent;
 
 namespace Flashtrace.Formatters;
@@ -11,18 +9,18 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class UnsafeStringBuilderPool : IDisposable
 {
-    private readonly ConcurrentStack<UnsafeStringBuilder> instances = new ConcurrentStack<UnsafeStringBuilder>();
+    private readonly ConcurrentStack<UnsafeStringBuilder> _instances = new ConcurrentStack<UnsafeStringBuilder>();
 
     /// <summary>
     /// Gets the maximum number of characters in instances of the <see cref="UnsafeStringBuilder"/> class managed by the current pool.
     /// </summary>
     public int StringBuilderCapacity { get; }
 
-    private readonly bool throwOnOverflow;
-    private readonly int maxInstances;
+    private readonly bool _throwOnOverflow;
+    private readonly int _maxInstances;
 
     /// <summary>
-    /// Initializes a new <see cref="UnsafeStringBuilderPool"/>.
+    /// Initializes a new instance of the <see cref="UnsafeStringBuilderPool"/> class.
     /// </summary>
     /// <param name="stringBuilderCapacity">Maximal number of characters in the <see cref="UnsafeStringBuilder"/> in the pool.</param>
     /// <param name="throwOnOverflow"><c>true</c> if an <see cref="OverflowException"/> should be thrown when
@@ -31,21 +29,20 @@ public sealed class UnsafeStringBuilderPool : IDisposable
     public UnsafeStringBuilderPool( int stringBuilderCapacity, bool throwOnOverflow, int maxInstances = 32 )
     {
         this.StringBuilderCapacity = stringBuilderCapacity;
-        this.throwOnOverflow = throwOnOverflow;
-        this.maxInstances = maxInstances;
+        this._throwOnOverflow = throwOnOverflow;
+        this._maxInstances = maxInstances;
     }
 
     /// <summary>
     /// Gets an instance from the pool.
     /// </summary>
     /// <returns>An <see cref="UnsafeStringBuilder"/>.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
     public UnsafeStringBuilder GetInstance()
     {
         UnsafeStringBuilder stringBuilder;
-        if ( !this.instances.TryPop( out stringBuilder ) )
+        if ( !this._instances.TryPop( out stringBuilder ) )
         {
-            stringBuilder = new UnsafeStringBuilder( this.StringBuilderCapacity, this.throwOnOverflow );
+            stringBuilder = new UnsafeStringBuilder( this.StringBuilderCapacity, this._throwOnOverflow );
         }
 
         return stringBuilder;
@@ -59,32 +56,37 @@ public sealed class UnsafeStringBuilderPool : IDisposable
     public void ReturnInstance( UnsafeStringBuilder stringBuilder )
     {
         if ( stringBuilder == null )
+        {
             throw new ArgumentNullException( nameof( stringBuilder ) );
-        
+        }
+
         if ( stringBuilder.IsDisposed )
+        {
             throw new ObjectDisposedException(nameof(UnsafeStringBuilder));
+        }
 
-        if ( stringBuilder.Capacity != this.StringBuilderCapacity || stringBuilder.ThrowOnOverflow != this.throwOnOverflow )
+        if ( stringBuilder.Capacity != this.StringBuilderCapacity || stringBuilder.ThrowOnOverflow != this._throwOnOverflow )
+        {
             throw new ArgumentOutOfRangeException(nameof(stringBuilder));
+        }
 
-        if ( this.instances.Count >= this.maxInstances )
+        if ( this._instances.Count >= this._maxInstances )
         {
             stringBuilder.Dispose();
         }
         else
         {
             stringBuilder.Clear();
-            this.instances.Push( stringBuilder );
+            this._instances.Push( stringBuilder );
         }
 
     }
 
     /// <inheritdoc />
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public void Dispose()
     {
         UnsafeStringBuilder stringBuilder;
-        while ( this.instances.TryPop( out stringBuilder ) )
+        while ( this._instances.TryPop( out stringBuilder ) )
         {
             stringBuilder.Dispose();
         }

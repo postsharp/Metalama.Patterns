@@ -1,6 +1,6 @@
-using System;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
 using System.Globalization;
-using PostSharp.Patterns.Utilities;
 
 namespace Flashtrace.Formatters;
 
@@ -19,53 +19,52 @@ namespace Flashtrace.Formatters;
 /// </remarks>
 public sealed class UnsafeString
 {
-    private int version;
-    private char[] array;
-    private string str;
+    private int _version;
+#pragma warning disable IDE0032 // Use auto property
+    private char[]? _array;
+#pragma warning restore IDE0032 // Use auto property
+    private string? _str;
 
     internal UnsafeString( UnsafeStringBuilder stringBuilder )
     {
         this.StringBuilder = stringBuilder;
-        this.version = stringBuilder.Version;
+        this._version = stringBuilder.Version;
         this.Length = stringBuilder.Length;
     }
 
     /// <summary>
-    /// Initializes a new <see cref="UnsafeString"/> backed by a <see cref="string"/>.
+    /// Initializes a new instance of the <see cref="UnsafeString"/> class backed by a <see cref="string"/>.
     /// </summary>
     /// <param name="str">A non-null <see cref="string"/>.</param>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "str")]
     public UnsafeString( string str )
     {
-        if (str == null) throw new ArgumentNullException(nameof( str ));
-
-        this.str = str;
+        this._str = str ?? throw new ArgumentNullException( nameof( str ) );
     }
 
     /// <summary>
-    /// Initializes a new <see cref="UnsafeString"/> backed by an array of <see cref="char"/>.
+    /// Initializes a new instance of the <see cref="UnsafeString"/> class backed by an array of <see cref="char"/>.
     /// </summary>
     /// <param name="array">A non-null array of <see cref="char"/>.</param>
     public UnsafeString( char[] array )
     {
-        if (array == null) throw new ArgumentNullException(nameof(array));
-
-        this.array = array;
+        this._array = array ?? throw new ArgumentNullException( nameof( array ) );
     }
 
-    // TODO: Review ExplicitCrossPackageInternal
+    // TODO: Review use of ExplicitCrossPackageInternal
     //[ExplicitCrossPackageInternal]
-    internal UnsafeStringBuilder StringBuilder { get; private set; }
+    internal UnsafeStringBuilder? StringBuilder { get; private set; }
 
     /// <summary>
     /// Gets an unmanaged pointer to the string.
     /// </summary>
     public IntPtr Buffer => this.StringBuilder.Buffer;
 
-    internal char[] CharArray => this.array;
+#pragma warning disable IDE0032 // Use auto property
+    internal char[] CharArray => this._array;
+#pragma warning restore IDE0032 // Use auto property
 
     /// <summary>
-    /// Determines whether the current <see cref="UnsafeString"/> is immutable
+    /// Gets a value indicating whether the current <see cref="UnsafeString"/> is immutable
     /// or, when the value of this property is <c>false</c>, if still bound to a mutable.
     /// Call the <see cref="MakeImmutable"/> method to make the <see cref="UnsafeString"/> immutable.
     /// </summary>
@@ -78,19 +77,19 @@ public sealed class UnsafeString
 
     internal bool Recycle()
     {
-        if (this.IsImmutable)
+        if ( this.IsImmutable )
         {
             // The current object can no longer be changed.
             return false;
         }
 
-        if (this.version != this.StringBuilder.Version || this.Length != this.StringBuilder.Length )
+        if ( this._version != this.StringBuilder.Version || this.Length != this.StringBuilder.Length )
         {
             // The current object is not shared but we need to reset the cached value.
-            this.array = null;
-            this.str = null;
+            this._array = null;
+            this._str = null;
             this.Length = this.StringBuilder.Length;
-            this.version = this.StringBuilder.Version;
+            this._version = this.StringBuilder.Version;
         }
 
         return true;
@@ -108,14 +107,16 @@ public sealed class UnsafeString
         this.CheckVersion();
 
         if ( this.IsImmutable )
-            return;
-
-        if (this.array == null && this.str == null)
         {
-            this.array = new char[this.Length];
-            fixed (char* pDestination = this.array)
+            return;
+        }
+
+        if ( this._array == null && this._str == null )
+        {
+            this._array = new char[this.Length];
+            fixed ( char* pDestination = this._array )
             {
-                BufferHelper.CopyMemory(pDestination, (void*) this.StringBuilder.Buffer, this.Length * sizeof(char));
+                BufferHelper.CopyMemory( pDestination, (void*) this.StringBuilder.Buffer, this.Length * sizeof( char ) );
             }
 
         }
@@ -136,56 +137,53 @@ public sealed class UnsafeString
 
             if ( this.StringBuilder.CharArray != null )
             {
-                return new ArraySegment<char>(this.StringBuilder.CharArray, 0, this.StringBuilder.Length);
+                return new ArraySegment<char>( this.StringBuilder.CharArray, 0, this.StringBuilder.Length );
             }
             else
             {
                 // There is no backing managed array, so we need to allocate managed memory anyway.
-                this.str = this.StringBuilder.ToStringImpl();
-                this.array = this.str.ToCharArray();
-                return new ArraySegment<char>(this.array);
+                this._str = this.StringBuilder.ToStringImpl();
+                this._array = this._str.ToCharArray();
+                return new ArraySegment<char>( this._array );
             }
         }
-        else if ( this.array != null )
+        else if ( this._array != null )
         {
-            return new ArraySegment<char>(this.array);
+            return new ArraySegment<char>( this._array );
         }
-        else if ( this.str != null )
+        else if ( this._str != null )
         {
-            this.array = this.str.ToCharArray();
-            return new ArraySegment<char>(this.array);
+            this._array = this._str.ToCharArray();
+            return new ArraySegment<char>( this._array );
         }
         else
         {
-            return default(ArraySegment<char>);
+            return default;
         }
     }
 
-
     private void CheckVersion()
     {
-        if (this.StringBuilder.Version != this.version || this.StringBuilder.Length != this.Length )
+        if ( this.StringBuilder.Version != this._version || this.StringBuilder.Length != this.Length )
         {
-            throw new InvalidOperationException(string.Format( CultureInfo.InvariantCulture, "The {0} has changed.", nameof(UnsafeStringBuilder) ));
+            throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, "The {0} has changed.", nameof( UnsafeStringBuilder ) ) );
         }
     }
 
     /// <inheritdoc />
-    public override string ToString()
+    public override string? ToString()
     {
         // We need to take a copy of the buffer anyway, so we also create
         if ( this.StringBuilder != null )
         {
             this.CheckVersion();
-            this.str = this.StringBuilder.ToStringImpl();
+            this._str = this.StringBuilder.ToStringImpl();
         }
-        else if ( this.array != null )
+        else if ( this._array != null )
         {
-            this.str = new string(this.array);
+            this._str = new string( this._array );
         }
 
-        return this.str;
-        
+        return this._str;
     }
-
 }

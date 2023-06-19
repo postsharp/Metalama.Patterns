@@ -1,13 +1,30 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
-using System;
-using System.Collections.Generic;
-using System.Text;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Formatters;
 
-[Obsolete( "Maybe not required post-TRole?", true )]
+internal static class CovariantTypeExtensionFactoryHelpers
+{
+    public static IEnumerable<Type> GetAssignableTypes( Type type )
+    {
+        yield return type;
+
+        var baseType = type.BaseType;
+
+        while ( baseType != null && baseType != typeof( object ) )
+        {
+            yield return baseType;
+            baseType = baseType.BaseType;
+        }
+
+        foreach ( var interfaceType in type.GetInterfaces() )
+        {
+            yield return interfaceType;
+        }
+
+        yield return typeof( object );
+    }
+}
+
 internal class CovariantTypeExtensionFactory<T> : TypeExtensionFactory<T>
     where T : class
 {
@@ -16,27 +33,18 @@ internal class CovariantTypeExtensionFactory<T> : TypeExtensionFactory<T>
     {
     }
 
-    protected override IEnumerable<Type> GetAssignableTypes(Type type)
-    {
-        yield return type;
-
-        var baseType = type.BaseType;
-
-        while (baseType != null && baseType != typeof(object))
-        {
-            yield return baseType;
-            baseType = baseType.BaseType;
-        }
-
-        foreach (var interfaceType in type.GetInterfaces())
-        {
-            yield return interfaceType;
-        }
-
-        yield return typeof(object);
-    }
-
+    protected override IEnumerable<Type> GetAssignableTypes( Type type )
+        => CovariantTypeExtensionFactoryHelpers.GetAssignableTypes( type );
 }
 
-internal delegate void TypeExtensionCacheUpdateCallback<T>(TypeExtensionInfo<T> typeExtension) 
-    where T : class;
+internal class CovariantTypeExtensionFactory<T, TContext> : TypeExtensionFactory<T, TContext>
+    where T : class
+{
+    public CovariantTypeExtensionFactory( Type genericInterfaceType, Type converterType, TContext? context )
+        : base( genericInterfaceType, converterType, context )
+    {
+    }
+
+    protected override IEnumerable<Type> GetAssignableTypes( Type type )
+        => CovariantTypeExtensionFactoryHelpers.GetAssignableTypes( type );
+}
