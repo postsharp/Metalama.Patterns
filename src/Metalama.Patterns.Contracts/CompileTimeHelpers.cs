@@ -29,46 +29,41 @@ internal static class CompileTimeHelpers
         return expressionBuilder.ToExpression();
     }
 
-    public static void GetTargetKindAndName( IMetaTarget target, out ContractTargetKind kind, out string? name )
+    public static string? GetTargetName( this IMetaTarget target )
     {
         if ( target == null )
         {
-            throw new ArgumentNullException( nameof(target) );
+            throw new ArgumentNullException( nameof( target ) );
         }
 
-        switch ( target.Declaration.DeclarationKind )
+        return target.Declaration.DeclarationKind switch
         {
-            case DeclarationKind.Parameter:
-                if ( target.Parameter.IsReturnParameter )
-                {
-                    kind = ContractTargetKind.ReturnValue;
-                    name = null;
-                }
-                else
-                {
-                    kind = ContractTargetKind.Parameter;
-                    name = target.Parameter.Name;
-                }
-
-                break;
-
-            case DeclarationKind.Property:
-                kind = ContractTargetKind.Property;
-                name = target.Property.Name;
-                break;
-
-            case DeclarationKind.Field:
-                kind = ContractTargetKind.Field;
-                name = target.Field.Name;
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException( nameof(target) + "." + nameof(target.Declaration) + "." +
-                                                       nameof(target.Declaration.DeclarationKind) );
-        }
+            DeclarationKind.Parameter => target.Parameter.IsReturnParameter ? null : target.Parameter.Name,
+            DeclarationKind.Property => target.Property.Name,
+            DeclarationKind.Field => target.Field.Name,
+            _ => throw new ArgumentOutOfRangeException( nameof( target ) + "." + nameof( target.Declaration ) + "." +
+                                                                   nameof( target.Declaration.DeclarationKind ) ),
+        };
     }
 
-    public static IType GetTargetType( IMetaTarget target )
+    public static ContractTargetKind GetTargetKind( this IMetaTarget target)
+    {
+        if ( target == null )
+        {
+            throw new ArgumentNullException( nameof( target ) );
+        }
+
+        return target.Declaration.DeclarationKind switch
+        {
+            DeclarationKind.Parameter => target.Parameter.IsReturnParameter ? ContractTargetKind.ReturnValue : ContractTargetKind.Parameter,
+            DeclarationKind.Property => ContractTargetKind.Property,
+            DeclarationKind.Field => ContractTargetKind.Field,
+            _ => throw new ArgumentOutOfRangeException( nameof( target ) + "." + nameof( target.Declaration ) + "." +
+                                                                   nameof( target.Declaration.DeclarationKind ) ),
+        };
+    }
+
+    public static IType GetTargetType( this IMetaTarget target )
     {
         if ( target == null )
         {
@@ -85,8 +80,13 @@ internal static class CompileTimeHelpers
         };
     }
 
-    public static IEnumerable<INamedType> GetSelfAndAllImplementedInterfaces( INamedType type )
+    public static IEnumerable<INamedType> GetSelfAndAllImplementedInterfaces( this INamedType type )
     {
+        if ( type == null )
+        {
+            throw new ArgumentNullException( nameof( type ) );
+        }
+
         if ( type.TypeKind == TypeKind.Interface )
         {
             yield return type;

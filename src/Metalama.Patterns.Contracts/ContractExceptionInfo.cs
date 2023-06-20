@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Contracts;
 /// This class holds the information from which the <see cref="ContractExceptionFactory"/> should create the exception.
 /// </summary>
 [PublicAPI]
-public class ContractExceptionInfo
+public sealed class ContractExceptionInfo
 {
     /// <summary>
     /// Gets the type of the exception that should be created.

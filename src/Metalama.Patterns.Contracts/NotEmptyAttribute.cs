@@ -44,15 +44,15 @@ public sealed class NotEmptyAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-
-        var targetType = (INamedType) CompileTimeHelpers.GetTargetType( meta.Target );
+        var targetKind = meta.Target.GetTargetKind();
+        var targetName = meta.Target.GetTargetName();
+        var targetType = (INamedType) meta.Target.GetTargetType();
 
         if ( targetType.Equals( SpecialType.String ) )
         {
             if ( string.IsNullOrEmpty( value ) )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentNullException),
                     typeof(NotEmptyAttribute),
                     value,
@@ -68,7 +68,7 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
-                    throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                         typeof(ArgumentNullException),
                         typeof(NotEmptyAttribute),
                         value,
@@ -82,7 +82,7 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( value == null || value!.Count <= 0 )
                 {
-                    throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                         typeof(ArgumentNullException),
                         typeof(NotEmptyAttribute),
                         value,
@@ -129,7 +129,7 @@ public sealed class NotEmptyAttribute : ContractAspect
 
             INamedType? foundInterface = null;
 
-            foreach ( var t in CompileTimeHelpers.GetSelfAndAllImplementedInterfaces( targetType ) )
+            foreach ( var t in targetType.GetSelfAndAllImplementedInterfaces() )
             {
                 if ( t.IsGeneric )
                 {

@@ -71,15 +71,16 @@ public class RegularExpressionAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-        var info = this.GetExceptioninfo();
+        var targetKind = meta.Target.GetTargetKind();
+        var targetName = meta.Target.GetTargetName();
+        var info = this.GetExceptionInfo();
         var aspectType = meta.CompileTime( this.GetType() );
 
         if ( value != null && !Regex.IsMatch( value, this.Pattern, this.Options ) )
         {
             if ( info.IncludePatternArgument )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     info.ExceptionType,
                     aspectType,
                     value,
@@ -91,7 +92,7 @@ public class RegularExpressionAttribute : ContractAspect
             }
             else
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     info.ExceptionType,
                     aspectType,
                     value,
@@ -104,13 +105,19 @@ public class RegularExpressionAttribute : ContractAspect
     }
 
     /// <summary>
+    /// Describes exception information as returned by <see cref="GetExceptionInfo"/>.
+    /// </summary>
+    [CompileTime]
+    protected record struct ExceptionInfo( Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument );
+
+    /// <summary>
     /// Called by <see cref="Validate(object?)"/> to determine the message to emit, and whether the pattern
     /// should be provided as a formatting argument.
     /// </summary>
     [CompileTime]
-    protected virtual (Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument)
-        GetExceptioninfo()
-        => (typeof(ArgumentException),
+    protected virtual ExceptionInfo GetExceptionInfo()
+        => new(
+            typeof(ArgumentException),
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .RegularExpressionErrorMessage) ),
             true);

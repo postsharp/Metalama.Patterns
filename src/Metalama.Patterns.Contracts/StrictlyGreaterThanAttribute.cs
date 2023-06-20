@@ -25,36 +25,8 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.StrictlyGreaterThanErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
-public class StrictlyGreaterThanAttribute : RangeAttribute
+public partial class StrictlyGreaterThanAttribute : RangeAttribute
 {
-    internal static class Int64Minimum
-    {
-        public static long ToInt64( long min )
-        {
-            if ( min == long.MaxValue )
-            {
-                return long.MaxValue;
-            }
-
-            return min + 1;
-        }
-
-        public static ulong ToUInt64( long min )
-        {
-            if ( min < 0 )
-            {
-                return 0;
-            }
-
-            return (ulong) min + 1;
-        }
-
-        public static double ToDouble( long min ) => (double) min + FloatingPointHelper.GetDoubleStep( (double) min );
-
-        public static decimal ToDecimal( long min ) =>
-            (decimal) min + FloatingPointHelper.GetDecimalStep( (decimal) min );
-    }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying an integer bound.
     /// </summary>
@@ -74,34 +46,6 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
             GetInvalidTypes( Int64Minimum.ToInt64( min ), long.MaxValue )
         )
     {
-    }
-
-    internal static class UInt64Minimum
-    {
-        public static long ToInt64( ulong min )
-        {
-            if ( min > (ulong) long.MaxValue + 1 )
-            {
-                return long.MaxValue;
-            }
-
-            return (long) min + 1;
-        }
-
-        public static ulong ToUInt64( ulong min )
-        {
-            if ( min == ulong.MaxValue )
-            {
-                return ulong.MaxValue;
-            }
-
-            return min + 1;
-        }
-
-        public static double ToDouble( ulong min ) => (double) min + FloatingPointHelper.GetDoubleStep( (double) min );
-
-        public static decimal ToDecimal( ulong min ) =>
-            (decimal) min + FloatingPointHelper.GetDecimalStep( (decimal) min );
     }
 
     /// <summary>
@@ -125,83 +69,6 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
     {
     }
 
-    internal static class DoubleMinimum
-    {
-        public static long ToInt64( double min )
-        {
-            if ( min < (double) long.MinValue )
-            {
-                return long.MinValue;
-            }
-
-            if ( min + 1 > (double) long.MaxValue )
-            {
-                return long.MaxValue;
-            }
-
-            return (long) min + 1;
-        }
-
-        public static ulong ToUInt64( double min )
-        {
-            if ( min < 0 )
-            {
-                return 0;
-            }
-
-            if ( min + 1 > (double) ulong.MaxValue )
-            {
-                return ulong.MaxValue;
-            }
-
-            return (ulong) min + 1;
-        }
-
-        public static double ToDouble( double min )
-        {
-            if ( Math.Abs( min ) <= double.Epsilon )
-            {
-                return double.Epsilon;
-            }
-
-            var step = FloatingPointHelper.GetDoubleStep( min );
-
-            if ( min >= double.MaxValue - step )
-            {
-                return double.MaxValue;
-            }
-
-            return min + step;
-        }
-
-        public static decimal ToDecimal( double min )
-        {
-            if ( min > (double) decimal.MaxValue )
-            {
-                return decimal.MaxValue;
-            }
-
-            if ( min < (double) decimal.MinValue )
-            {
-                return decimal.MinValue;
-            }
-
-            var step = FloatingPointHelper.GetDecimalStep( (decimal) min );
-
-            if ( min > (double) decimal.MaxValue - (double) step )
-            {
-                return decimal.MaxValue;
-            }
-
-            if ( Math.Abs( min ) <= (double) step )
-            {
-                return step;
-            }
-
-            return (decimal) min + step;
-        }
-    }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a floating-point bound.
     /// </summary>
@@ -223,11 +90,12 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
     }
 
     /// <inheritdoc/>
-    protected override (IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue) GetExceptioninfo()
-        => (
+    protected override ExceptionInfo GetExceptionInfo()
+        => new(
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .StrictlyGreaterThanErrorMessage) ),
-            true, false);
+            true,
+            false);
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
         CreateCannotBeAppliedDiagosticDefinition( "LAMA5005", nameof( StrictlyGreaterThanAttribute ) );

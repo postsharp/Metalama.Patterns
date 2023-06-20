@@ -83,13 +83,14 @@ public sealed class StringLengthAttribute : ContractAspect
     {
         // TODO: We assume that min and max are sensible (eg, non-negative) here. This should be validated ideally at compile time. See comment at head of class.
 
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
+        var targetKind = meta.Target.GetTargetKind();
+        var targetName = meta.Target.GetTargetName();
 
         if ( this.MinimumLength == 0 && this.MaximumLength != int.MaxValue )
         {
             if ( value != null && value!.Length > this.MaximumLength )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(StringLengthAttribute),
                     value,
@@ -104,7 +105,7 @@ public sealed class StringLengthAttribute : ContractAspect
         {
             if ( value != null && value!.Length < this.MinimumLength )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(StringLengthAttribute),
                     value,
@@ -121,7 +122,7 @@ public sealed class StringLengthAttribute : ContractAspect
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(StringLengthAttribute),
                     value,

@@ -42,16 +42,14 @@ public sealed class CreditCardAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-
         if ( !CreditCardAttributeHelper.IsValidCreditCardNumber( value ) )
         {
-            throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+            throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                 typeof(ArgumentNullException),
                 typeof(CreditCardAttribute),
                 value,
-                targetName,
-                targetKind,
+                meta.Target.GetTargetName(),
+                meta.Target.GetTargetKind(),
                 meta.Target.ContractDirection,
                 ContractLocalizedTextProvider.CreditCardErrorMessage ) );
         }

@@ -94,11 +94,12 @@ public class StrictRangeAttribute : RangeAttribute
     }
 
     /// <inheritdoc/>
-    protected override (IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue) GetExceptioninfo()
-        => (
+    protected override ExceptionInfo GetExceptionInfo()
+        => new(
             CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
                 .StrictRangeErrorMessage) ),
-            true, true);
+            true,
+            true);
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
         CreateCannotBeAppliedDiagosticDefinition( "LAMA5009", nameof( StrictRangeAttribute ) );

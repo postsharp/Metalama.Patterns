@@ -74,15 +74,15 @@ public sealed class EnumDataTypeAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        CompileTimeHelpers.GetTargetKindAndName( meta.Target, out var targetKind, out var targetName );
-
-        var targetType = CompileTimeHelpers.GetTargetType( meta.Target );
+        var targetKind = meta.Target.GetTargetKind();
+        var targetName = meta.Target.GetTargetName();
+        var targetType = meta.Target.GetTargetType();
 
         if ( targetType.SpecialType == SpecialType.String || targetType.SpecialType == SpecialType.Object )
         {
             if ( value != null! && !EnumDataTypeAttributeHelper.IsValidEnumValue( value, this.EnumType ) )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(EnumDataTypeAttribute),
                     value,
@@ -102,7 +102,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
                 if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
                 {
-                    throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                         typeof(ArgumentException),
                         typeof(EnumDataTypeAttribute),
                         enumValue,
@@ -121,7 +121,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
             if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
             {
-                throw ContractServices.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
+                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
                     typeof(ArgumentException),
                     typeof(EnumDataTypeAttribute),
                     enumValue,
