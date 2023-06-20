@@ -8,13 +8,14 @@ namespace Flashtrace.Formatters;
 // Must be a separate class because we want to share among different generic types.
 internal static class DefaultFormatterHelper
 {
-    private static readonly ConcurrentDictionary<Type, bool> _hasCustomToStringMethod
-        = new ConcurrentDictionary<Type, bool>();
+    private static readonly ConcurrentDictionary<Type, bool> _hasCustomToStringMethod = new();
 
     public static bool HasCustomToStringMethod( Type type )
     {
-        return _hasCustomToStringMethod.GetOrAdd( type, t =>
-            t.GetMethod( "ToString", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null )?.DeclaringType != typeof( object ) );
+        return _hasCustomToStringMethod.GetOrAdd(
+            type,
+            t =>
+                t.GetMethod( "ToString", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null )?.DeclaringType != typeof(object) );
     }
 }
 
@@ -25,10 +26,10 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
 {
     private static readonly bool _isValueType = typeof(TValue).IsValueType;
 
-    private static readonly bool _hasCustomToStringMethod = DefaultFormatterHelper.HasCustomToStringMethod(typeof(TValue));
+    private static readonly bool _hasCustomToStringMethod = DefaultFormatterHelper.HasCustomToStringMethod( typeof(TValue) );
 
     private static readonly Type _valueType = typeof(TValue);
-    
+
     private readonly FormattingOptions _options;
 
     private readonly DefaultFormatter<TValue> _otherQuotingFormatter;
@@ -36,7 +37,7 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultFormatter{TValue}"/> class.
     /// </summary>
-    public DefaultFormatter( IFormatterRepository repository ) 
+    public DefaultFormatter( IFormatterRepository repository )
         : base( repository )
     {
         this._options = FormattingOptions.Default;
@@ -69,8 +70,8 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
     {
-        bool useToString = _hasCustomToStringMethod;
-        Type thisValueType = _valueType;
+        var useToString = _hasCustomToStringMethod;
+        var thisValueType = _valueType;
 
         if ( _isValueType )
         {
@@ -79,6 +80,7 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
             if ( (formatter.Attributes & FormatterAttributes.Default) == 0 )
             {
                 formatter.Write( stringBuilder, value );
+
                 return;
             }
         }
@@ -89,23 +91,26 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
             if ( value == null )
             {
                 stringBuilder.Append( 'n', 'u', 'l', 'l' );
+
                 return;
             }
-        
+
             var formatter = this.Repository.Get( value.GetType() ).WithOptions( this._options );
 
             if ( (formatter.Attributes & FormatterAttributes.Default) == 0 )
             {
                 formatter.Write( stringBuilder, value );
+
                 return;
             }
 
             thisValueType = value.GetType();
-            if ( thisValueType != typeof( TValue ) )
+
+            if ( thisValueType != typeof(TValue) )
             {
                 // We get here because the caller called the static Get<T> and we have a value of the derived type,
                 // not the exact type. 
-                useToString = DefaultFormatterHelper.HasCustomToStringMethod( thisValueType );             
+                useToString = DefaultFormatterHelper.HasCustomToStringMethod( thisValueType );
             }
 
             // ReSharper restore HeapView.PossibleBoxingAllocation
@@ -114,6 +119,7 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
         if ( useToString )
         {
             string text;
+
             try
             {
                 text = value.ToString();
@@ -123,7 +129,7 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
                 text = e.GetType().ToString();
             }
 
-            bool braces = !value.GetType().IsPrimitive;
+            var braces = !value.GetType().IsPrimitive;
 
             if ( braces )
             {

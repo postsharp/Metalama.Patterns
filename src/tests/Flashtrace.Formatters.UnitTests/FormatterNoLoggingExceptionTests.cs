@@ -8,14 +8,12 @@ namespace Flashtrace.Formatters.UnitTests;
 
 public class FormatterNoLoggingExceptionTests : FormattersTestsBase
 {
-    public FormatterNoLoggingExceptionTests( ITestOutputHelper logger ) : base( logger )
-    {
-    }
+    public FormatterNoLoggingExceptionTests( ITestOutputHelper logger ) : base( logger ) { }
 
     [Fact]
     public void ThrowingConstructor()
     {
-        this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( ThrowingFormatter<> ) );
+        this.DefaultRepository.Register( typeof(IEnumerable<>), typeof(ThrowingFormatter<>) );
 
         var result = this.FormatDefault<IEnumerable<int>>( new int[0] );
 
@@ -26,7 +24,7 @@ public class FormatterNoLoggingExceptionTests : FormattersTestsBase
     [Fact]
     public void PrivateConstructor()
     {
-        this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( NoConstructorFormatter<> ) );
+        this.DefaultRepository.Register( typeof(IEnumerable<>), typeof(NoConstructorFormatter<>) );
 
         var result = this.FormatDefault<IEnumerable<int>>( new int[0] );
 
@@ -52,6 +50,7 @@ internal class ThrowingFormatter<T> : Formatter<IEnumerable<T>>
     public ThrowingFormatter( IFormatterRepository repository ) : base( repository )
     {
         Ran = true;
+
         throw new Exception();
     }
 
@@ -63,9 +62,7 @@ internal class ThrowingFormatter<T> : Formatter<IEnumerable<T>>
 
 internal class NoConstructorFormatter<T> : Formatter<IEnumerable<T>>
 {
-    private NoConstructorFormatter() : base( null! )
-    {
-    }
+    private NoConstructorFormatter() : base( null! ) { }
 
     public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
     {

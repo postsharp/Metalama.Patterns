@@ -14,7 +14,7 @@ public class FormattingRole
     {
         if ( string.IsNullOrWhiteSpace( name ) )
         {
-            throw new ArgumentNullException( nameof( name ) );
+            throw new ArgumentNullException( nameof(name) );
         }
 
         this.Name = name;
@@ -24,4 +24,6 @@ public class FormattingRole
     /// Gets the name of the <see cref="FormattingRole"/>.
     /// </summary>
     public string Name { get; }
+
+    public override string ToString() => this.Name;
 }

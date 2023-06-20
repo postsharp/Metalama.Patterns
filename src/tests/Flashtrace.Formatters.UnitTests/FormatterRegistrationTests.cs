@@ -10,9 +10,7 @@ namespace Flashtrace.Formatters.UnitTests
 {
     public class FormatterRegistrationTests : FormattersTestsBase
     {
-        public FormatterRegistrationTests( ITestOutputHelper logger ) : base( logger )
-        {
-        }
+        public FormatterRegistrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Fact]
         public void RegisterBeforeFirstGet()
@@ -123,7 +121,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<IEnumerable>();
             }
 
-            this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( EnumerableFormatter<> ) );
+            this.DefaultRepository.Register( typeof(IEnumerable<>), typeof(EnumerableFormatter<>) );
 
             Assert.Equal( "[1,2,3]", this.FormatDefault<int[]>( array ) );
             Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable<int>>( array ) );
@@ -144,7 +142,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<IEnumerable<int>>();
             }
 
-            this.DefaultRepository.Register( typeof( Collection<> ), typeof( EnumerableFormatter<> ) );
+            this.DefaultRepository.Register( typeof(Collection<>), typeof(EnumerableFormatter<>) );
 
             Assert.Equal( "[1,2,3]", this.FormatDefault<ObservableCollection<int>>( collection ) );
             Assert.Equal( "[1,2,3]", this.FormatDefault<Collection<int>>( collection ) );
@@ -165,7 +163,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<IEnumerable>();
             }
 
-            this.DefaultRepository.Register( typeof( Array ), typeof( EnumerableFormatter<> ) );
+            this.DefaultRepository.Register( typeof(Array), typeof(EnumerableFormatter<>) );
 
             Assert.Equal( "[1,2,3]", this.FormatDefault<int[]>( array ) );
             Assert.Equal( "[1,2,3]", this.FormatDefault<IEnumerable<int>>( array ) );
@@ -186,7 +184,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<IDictionary>();
             }
 
-            this.DefaultRepository.Register( typeof( IDictionary<,> ), typeof( DictionaryFormatter<,> ) );
+            this.DefaultRepository.Register( typeof(IDictionary<,>), typeof(DictionaryFormatter<,>) );
 
             Assert.Equal( "{1:uno,2:dos,3:tres}", this.FormatDefault<Dictionary<int, string>>( dictionary ) );
             Assert.Equal( "{1:uno,2:dos,3:tres}", this.FormatDefault<IDictionary<int, string>>( dictionary ) );
@@ -204,7 +202,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<int>();
             }
 
-            this.DefaultRepository.Register( typeof( int? ), typeof( NullableFormatter<int> ) );
+            this.DefaultRepository.Register( typeof(int?), typeof(NullableFormatter<int>) );
 
             Assert.Equal( "<null>", this.FormatDefault<int?>( null ) );
             Assert.Equal( "2", this.FormatDefault<int>( 2 ) );
@@ -221,7 +219,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<int>();
             }
 
-            this.DefaultRepository.Register( typeof( Nullable<> ), typeof( NullableFormatter<> ) );
+            this.DefaultRepository.Register( typeof(Nullable<>), typeof(NullableFormatter<>) );
 
             Assert.Equal( "<null>", this.FormatDefault<int?>( null ) );
             Assert.Equal( "2", this.FormatDefault<int>( 2 ) );
@@ -238,7 +236,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<int>();
             }
 
-            this.DefaultRepository.Register( typeof( int ), typeof( NonNullableFormatter<int> ) );
+            this.DefaultRepository.Register( typeof(int), typeof(NonNullableFormatter<int>) );
 
             Assert.Equal( "null", this.FormatDefault<int?>( null ) );
             Assert.Equal( "[2]", this.FormatDefault<int>( 2 ) );
@@ -247,19 +245,21 @@ namespace Flashtrace.Formatters.UnitTests
         [Fact]
         public void FormatterExceptions()
         {
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int[] ), typeof( EnumerableFormatter<> ) ) );
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int ), typeof( EnumerableFormatter<int> ) ) );
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( EnumerableFormatter<int> ) ) );
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( IEnumerable<int> ), typeof( EnumerableFormatter<> ) ) );
-            AssertEx.Throws<MissingMethodException>( () => this.DefaultRepository.Register( typeof( int ), typeof( int ) ) );
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( IEnumerable<> ), typeof( IEnumerable<> ) ) );
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( Dictionary<,> ), typeof( EnumerableFormatter<> ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int[]), typeof(EnumerableFormatter<>) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int), typeof(EnumerableFormatter<int>) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(IEnumerable<>), typeof(EnumerableFormatter<int>) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(IEnumerable<int>), typeof(EnumerableFormatter<>) ) );
+            AssertEx.Throws<MissingMethodException>( () => this.DefaultRepository.Register( typeof(int), typeof(int) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(IEnumerable<>), typeof(IEnumerable<>) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(Dictionary<,>), typeof(EnumerableFormatter<>) ) );
 
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( IEnumerable<> ), new EnumerableFormatter<int>( this.DefaultRepository ) ) );
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int ), new EnumerableFormatter<int>( this.DefaultRepository ) ) );
+            AssertEx.Throws<ArgumentException>(
+                () => this.DefaultRepository.Register( typeof(IEnumerable<>), new EnumerableFormatter<int>( this.DefaultRepository ) ) );
 
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int ), typeof( NullableFormatter<int> ) ) );
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof( int? ), typeof( NonNullableFormatter<int> ) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int), new EnumerableFormatter<int>( this.DefaultRepository ) ) );
+
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int), typeof(NullableFormatter<int>) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int?), typeof(NonNullableFormatter<int>) ) );
         }
 
         [Fact]
@@ -276,9 +276,7 @@ namespace Flashtrace.Formatters.UnitTests
 
     internal class EnumerableFormatter<T> : Formatter<IEnumerable<T>>
     {
-        public EnumerableFormatter( IFormatterRepository repository ) : base( repository )
-        {
-        }
+        public EnumerableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
         public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
         {
@@ -290,30 +288,23 @@ namespace Flashtrace.Formatters.UnitTests
 
     internal class EnumerableIntFormatter : EnumerableFormatter<int>
     {
-        public EnumerableIntFormatter( IFormatterRepository repository ) : base( repository )
-        {
-        }
+        public EnumerableIntFormatter( IFormatterRepository repository ) : base( repository ) { }
     }
 
     internal class DictionaryFormatter<TKey, TValue> : Formatter<IDictionary<TKey, TValue>>
     {
-        public DictionaryFormatter( IFormatterRepository repository ) : base( repository )
-        {
-        }
+        public DictionaryFormatter( IFormatterRepository repository ) : base( repository ) { }
 
         public override void Write( UnsafeStringBuilder stringBuilder, IDictionary<TKey, TValue> value )
         {
-            stringBuilder.Append(
-                "{" + string.Join( ",", value.Select( kvp => string.Format( "{0}:{1}", kvp.Key, kvp.Value ) ) ) + "}" );
+            stringBuilder.Append( "{" + string.Join( ",", value.Select( kvp => string.Format( "{0}:{1}", kvp.Key, kvp.Value ) ) ) + "}" );
         }
     }
 
     internal class NonNullableFormatter<T> : Formatter<T>
         where T : struct
     {
-        public NonNullableFormatter( IFormatterRepository repository ) : base( repository )
-        {
-        }
+        public NonNullableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
         public override void Write( UnsafeStringBuilder stringBuilder, T value )
         {
@@ -326,9 +317,7 @@ namespace Flashtrace.Formatters.UnitTests
     internal class NullableFormatter<T> : Formatter<T?>
         where T : struct
     {
-        public NullableFormatter( IFormatterRepository repository ) : base( repository )
-        {
-        }
+        public NullableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
         public override void Write( UnsafeStringBuilder stringBuilder, T? value )
         {

@@ -12,21 +12,21 @@ public sealed class TypeFormatter : Formatter<Type>
     private static readonly Dictionary<Type, string> _specialTypeNames =
         new()
         {
-            {typeof(string), "string"},
-            {typeof(int), "int"},
-            {typeof(bool), "bool"},
-            {typeof(uint), "uint"},
-            {typeof(long), "long"},
-            {typeof(ulong), "ulong"},
-            {typeof(short), "short"},
-            {typeof(ushort), "ushort"},
-            {typeof(char), "char"},
-            {typeof(byte), "byte"},
-            {typeof(sbyte), "sbyte"},
-            {typeof(decimal), "decimal"},
-            {typeof(object), "object"},
-            {typeof(float), "float"},
-            {typeof(double), "double"}
+            { typeof(string), "string" },
+            { typeof(int), "int" },
+            { typeof(bool), "bool" },
+            { typeof(uint), "uint" },
+            { typeof(long), "long" },
+            { typeof(ulong), "ulong" },
+            { typeof(short), "short" },
+            { typeof(ushort), "ushort" },
+            { typeof(char), "char" },
+            { typeof(byte), "byte" },
+            { typeof(sbyte), "sbyte" },
+            { typeof(decimal), "decimal" },
+            { typeof(object), "object" },
+            { typeof(float), "float" },
+            { typeof(double), "double" }
         };
 
     /// <summary>
@@ -51,12 +51,14 @@ public sealed class TypeFormatter : Formatter<Type>
             if ( type == null )
             {
                 stringBuilder.Append( 'n', 'u', 'l', 'l' );
+
                 return;
             }
 
             if ( type.IsGenericParameter )
             {
                 stringBuilder.Append( type.Name );
+
                 return;
             }
 
@@ -77,7 +79,8 @@ public sealed class TypeFormatter : Formatter<Type>
             {
                 this.Write( stringBuilder, type.GetElementType() );
                 stringBuilder.Append( '[' );
-                for ( int i = 1; i < type.GetArrayRank(); i++ )
+
+                for ( var i = 1; i < type.GetArrayRank(); i++ )
                 {
                     stringBuilder.Append( ',' );
                 }
@@ -90,13 +93,14 @@ public sealed class TypeFormatter : Formatter<Type>
                 // Otherwise formatting runs on type definition, where we use the local array.
                 genericArguments ??= type.GetGenericArguments();
                 Type[] genericParameters = type.GetGenericArguments();
-                bool appendComma = false;
+                var appendComma = false;
 
                 stringBuilder.Append( RemoveArity( this.GetTypeName( type ), true ) );
                 stringBuilder.Append( '<' );
 
-                int startIndex = type.DeclaringType?.GetGenericArguments()?.Length ?? 0;
-                for ( int i = startIndex; i < genericParameters.Length; i++ )
+                var startIndex = type.DeclaringType?.GetGenericArguments()?.Length ?? 0;
+
+                for ( var i = startIndex; i < genericParameters.Length; i++ )
                 {
                     if ( appendComma )
                     {
@@ -115,14 +119,16 @@ public sealed class TypeFormatter : Formatter<Type>
             else if ( type.IsGenericTypeDefinition )
             {
                 stringBuilder.Append( RemoveArity( this.GetTypeName( type ), true ) );
+
                 if ( !removeArity )
                 {
                     stringBuilder.Append( '<' );
 
                     // Only include number of parameters declared on this type (array contains parameters of declaring types).
-                    int startIndex = (type.DeclaringType?.GetGenericArguments()?.Length ?? 0) + 1;
-                    int length = type.GetGenericArguments().Length;
-                    for ( int i = startIndex; i < length; i++ )
+                    var startIndex = (type.DeclaringType?.GetGenericArguments()?.Length ?? 0) + 1;
+                    var length = type.GetGenericArguments().Length;
+
+                    for ( var i = startIndex; i < length; i++ )
                     {
                         stringBuilder.Append( ',' );
                     }
@@ -159,7 +165,7 @@ public sealed class TypeFormatter : Formatter<Type>
 
     private string GetTypeName( Type type )
     {
-        if ( _specialTypeNames.TryGetValue( type, out string typeName ) )
+        if ( _specialTypeNames.TryGetValue( type, out var typeName ) )
         {
             return typeName;
         }
@@ -183,6 +189,7 @@ public sealed class TypeFormatter : Formatter<Type>
                 case "System.Collections":
                 case "System.Collections.Generic":
                     return true;
+
                 default:
                     return false;
             }
@@ -197,7 +204,8 @@ public sealed class TypeFormatter : Formatter<Type>
     {
         if ( condition )
         {
-            int indexOfQuote = typeName.LastIndexOf( '`' );
+            var indexOfQuote = typeName.LastIndexOf( '`' );
+
             if ( indexOfQuote > 0 )
             {
                 return typeName.Substring( 0, indexOfQuote );

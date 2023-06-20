@@ -19,10 +19,10 @@ public sealed class AnonymousTypeFormatter : IFormatter
             throw new ArgumentNullException( nameof(type) );
         }
 
-        this.Repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
-        this._accessorFactory = UnknownObjectAccessor.GetFactory( type );        
+        this.Repository = repository ?? throw new ArgumentNullException( nameof(repository) );
+        this._accessorFactory = UnknownObjectAccessor.GetFactory( type );
     }
-    
+
     public IFormatterRepository Repository { get; }
 
     /// <inheritdoc/>
@@ -31,12 +31,13 @@ public sealed class AnonymousTypeFormatter : IFormatter
     /// <inheritdoc/>
     public void Write( UnsafeStringBuilder stringBuilder, object value )
     {
-        UnknownObjectAccessor accessor = this._accessorFactory( value );
+        var accessor = this._accessorFactory( value );
 
         stringBuilder.Append( '{', ' ' );
 
-        int i = 0;
-        foreach ( KeyValuePair<string, object> property in accessor )
+        var i = 0;
+
+        foreach ( var property in accessor )
         {
             if ( i > 0 )
             {

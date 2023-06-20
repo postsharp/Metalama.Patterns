@@ -71,7 +71,7 @@ public enum FormatterAttributes
     /// <summary>
     /// A default formatter, using <see cref="object.ToString"/>.
     /// </summary>
-    Default = 8,
+    Default = 8
 }
 
 /// <summary>
@@ -90,12 +90,12 @@ public class FormattingOptions
     /// <summary>
     /// Gets the default <see cref="FormattingOptions"/>.
     /// </summary>
-    public static FormattingOptions Default { get; } = new FormattingOptions( false );
+    public static FormattingOptions Default { get; } = new( false );
 
     /// <summary>
     /// Gets the <see cref="FormattingOptions"/> indicating that string should not be quoted.
     /// </summary>
-    public static FormattingOptions Unquoted { get; } = new FormattingOptions( true );
+    public static FormattingOptions Unquoted { get; } = new( true );
 
     /// <summary>
     /// Initializes a new instance of <see cref="FormattingOptions"/> by copying all values from another <see cref="FormattingOptions"/>.
@@ -110,7 +110,7 @@ public class FormattingOptions
     {
         this.RequiresUnquotedStrings = unquotedStrings;
     }
-    
+
     /// <summary>
     /// Gets a value indicating whether the formatters should not use quotation when formatting strings.
     /// </summary>
@@ -183,11 +183,11 @@ public abstract class Formatter<T> : IFormatter<T>, IOptionAwareFormatter
     /// Initializes a new instance of the <see cref="Formatter{T}"/> class using the specified <see cref="IFormatterRepository"/>
     /// to access formatters for other types.
     /// </summary>
-    protected Formatter( IFormatterRepository repository ) 
+    protected Formatter( IFormatterRepository repository )
     {
-        this.Repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
+        this.Repository = repository ?? throw new ArgumentNullException( nameof(repository) );
     }
-    
+
     public IFormatterRepository Repository { get; }
 
     /// <inheritdoc />  
@@ -201,10 +201,9 @@ public abstract class Formatter<T> : IFormatter<T>, IOptionAwareFormatter
 
     /// <inheritdoc />
     public virtual IOptionAwareFormatter WithOptions( FormattingOptions options ) => this;
-    
+
     IOptionAwareFormatter IOptionAwareFormatter.WithOptions( FormattingOptions options ) => this.WithOptions( options );
-    
+
     /// <inheritdoc />
     public virtual FormatterAttributes Attributes => FormatterAttributes.Normal;
-
 }

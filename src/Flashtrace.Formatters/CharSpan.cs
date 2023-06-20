@@ -17,7 +17,7 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// <summary>
     /// Gets the number of <see cref="char"/> in the span.
     /// </summary>
-    public int Length { get;  }
+    public int Length { get; }
 
     /// <summary>
     /// Gets a value indicating whether the current instance represents a null string.
@@ -30,7 +30,7 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     [ExplicitCrossPackageInternal]
     internal object _array { get;  }
     */
-    object? CharSpan.IArrayAccessor.Array => this._array;
+    object? IArrayAccessor.Array => this._array;
 
     internal object? Array => this._array;
 
@@ -64,40 +64,38 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// Initializes a new instance of the <see cref="CharSpan"/> struct from a <see cref="string"/>, and takes the whole string.
     /// </summary>
     /// <param name="str">A string.</param>
-    public CharSpan( string str ) : this ( str, 0, str == null ? 0 : str.Length )
-    {
-    }
+    public CharSpan( string str ) : this( str, 0, str == null ? 0 : str.Length ) { }
 
     /// <summary>
     /// Converts a <see cref="string"/> into a <see cref="CharSpan"/>.
     /// </summary>
     /// <param name="str"></param>
-    public static implicit operator CharSpan ( string str ) => FromString(str);
+    public static implicit operator CharSpan( string str ) => FromString( str );
 
     /// <summary>
     /// Converts a <see cref="string"/> into a <see cref="CharSpan"/>.
     /// </summary>
     /// <param name="str"></param>
-    public static CharSpan FromString( string str ) => new CharSpan( str );
+    public static CharSpan FromString( string str ) => new( str );
 
     /// <summary>
     /// Converts an <see cref=" System.ArraySegment{T}"/> into a <see cref="CharSpan"/>.
     /// </summary>
     /// <param name="str"></param>
-    public static implicit operator CharSpan( ArraySegment<char> str ) => FromArraySegment(str);
+    public static implicit operator CharSpan( ArraySegment<char> str ) => FromArraySegment( str );
 
     /// <summary>
     /// Converts a <see cref="string"/> into a <see cref="CharSpan"/>.
     /// </summary>
     /// <param name="str"></param>
-    public static CharSpan FromArraySegment( ArraySegment<char> str ) => new CharSpan( str.Array, str.Offset, str.Count );
+    public static CharSpan FromArraySegment( ArraySegment<char> str ) => new( str.Array, str.Offset, str.Count );
 
     /// <summary>
     /// Gets a value indicating whether the current <see cref="CharSpan"/> is backed by a <c>char[]</c>. In this case,
     /// the <see cref="ToCharArraySegment"/> method does not allocate memory.
     /// </summary>
     public bool IsBackedByCharArray => this._array is char[];
-    
+
     /// <inheritdoc/>
     public override string? ToString()
     {
@@ -132,5 +130,5 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
             default:
                 return default;
         }
-    }  
+    }
 }

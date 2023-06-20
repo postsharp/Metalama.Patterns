@@ -9,15 +9,14 @@ public sealed class StringFormatter : Formatter<string>
 {
     private NonQuotingStringFormatter _nonQuotingStringFormatter;
 
-    public StringFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public StringFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     private NonQuotingStringFormatter NonQuotingStringFormatter
     {
         get
         {
             this._nonQuotingStringFormatter ??= new NonQuotingStringFormatter( this.Repository );
+
             return this._nonQuotingStringFormatter;
         }
     }
@@ -25,18 +24,18 @@ public sealed class StringFormatter : Formatter<string>
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, string? value )
     {
-        if (value == null)
+        if ( value == null )
         {
-            stringBuilder.Append('n');
-            stringBuilder.Append('u');
-            stringBuilder.Append('l');
-            stringBuilder.Append('l');
+            stringBuilder.Append( 'n' );
+            stringBuilder.Append( 'u' );
+            stringBuilder.Append( 'l' );
+            stringBuilder.Append( 'l' );
         }
         else
         {
-            stringBuilder.Append('"');
-            stringBuilder.Append(value);
-            stringBuilder.Append('"');
+            stringBuilder.Append( '"' );
+            stringBuilder.Append( value );
+            stringBuilder.Append( '"' );
         }
     }
 
@@ -56,9 +55,7 @@ public sealed class StringFormatter : Formatter<string>
 
 internal sealed class NonQuotingStringFormatter : Formatter<string>
 {
-    public NonQuotingStringFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public NonQuotingStringFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     public override void Write( UnsafeStringBuilder stringBuilder, string? value )
     {

@@ -11,9 +11,7 @@ public sealed class BooleanFormatter : Formatter<bool>
     /// Initializes a new instance of the <see cref="BooleanFormatter"/> class.
     /// </summary>
     /// <param name="repository"></param>
-    public BooleanFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public BooleanFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, bool value )

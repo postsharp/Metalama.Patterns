@@ -7,9 +7,7 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class Int64Formatter : Formatter<long>
 {
-    public Int64Formatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public Int64Formatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, long value )

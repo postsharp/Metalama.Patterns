@@ -18,6 +18,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     private UnknownObjectAccessor( object? instance )
     {
         this._instance = instance;
+
         if ( instance == null )
         {
             this._type = null;
@@ -26,7 +27,6 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
         {
             this._type = AccessorType.GetInstance( instance.GetType() );
         }
-        
     }
 
     private UnknownObjectAccessor( AccessorType? type, object? instance )
@@ -42,7 +42,8 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// <returns>A delegate that takes the object as input and returns its <see cref="UnknownObjectAccessor"/>.</returns>
     public static Func<T, UnknownObjectAccessor> GetFactory<T>()
     {
-        AccessorType type = AccessorType.GetInstance( typeof( T ) );
+        var type = AccessorType.GetInstance( typeof(T) );
+
         return o => new UnknownObjectAccessor( type, o );
     }
 
@@ -53,9 +54,9 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// <returns>A delegate that takes the object as input and returns its <see cref="UnknownObjectAccessor"/>.</returns>
     public static Func<object, UnknownObjectAccessor> GetFactory( Type type )
     {
-        AccessorType accessorType = AccessorType.GetInstance( type );
-        return o => new UnknownObjectAccessor( accessorType, o );
+        var accessorType = AccessorType.GetInstance( type );
 
+        return o => new UnknownObjectAccessor( accessorType, o );
     }
 
     /// <summary>
@@ -63,7 +64,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// </summary>
     /// <param name="value">The wrapped object.</param>
     /// <returns>A wrapper for <paramref name="value"/>.</returns>
-    public static UnknownObjectAccessor GetInstance( object value ) => new UnknownObjectAccessor( value );
+    public static UnknownObjectAccessor GetInstance( object value ) => new( value );
 
     /// <summary>
     /// Gets the value of a named property for the current <see cref="UnknownObjectAccessor"/>.
@@ -77,6 +78,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
         if ( this._type == null || this._instance == null )
         {
             value = default!;
+
             return false;
         }
 
@@ -85,11 +87,13 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
             if ( weaklyTypedValue is T typedValue )
             {
                 value = typedValue;
+
                 return true;
             }
         }
 
         value = default!;
+
         return false;
     }
 
@@ -101,8 +105,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// <param name="name">Property name.</param>
     /// <param name="value">Returns the property value if a property named <paramref name="name"/> exists and its value can be cast to <typeparamref name="T"/>, otherwise <c>default</c>.</param>
     /// <returns><c>true</c> if the property value if a property named <paramref name="name"/> exists and its value can be cast to <typeparamref name="T"/>, otherwise <c>false</c>.</returns>
-
-    public static bool TryGetProperty<T>( object instance, string name, out T value ) => UnknownObjectAccessor.GetInstance( instance ).TryGetProperty( name, out value );
+    public static bool TryGetProperty<T>( object instance, string name, out T value ) => GetInstance( instance ).TryGetProperty( name, out value );
 
     /// <summary>
     /// Converts the wrapped object to an array of name-value tuples.
@@ -130,7 +133,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// as a set of <c>KeyValuePair&lt;string, object&gt;</c>.
     /// </summary>
     /// <returns></returns>
-    public Enumerator GetEnumerator() => new Enumerator( this );
+    public Enumerator GetEnumerator() => new( this );
 
     IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator() => this.GetEnumerator();
 
@@ -147,11 +150,12 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     public void VisitProperties<TState>( IUnknownObjectPropertyVisitor<TState> visitor, ref TState state )
     {
         if ( this._instance == null )
+        {
             return;
+        }
 
         this._type.VisitProperties( this._instance, visitor, ref state );
     }
-
 
     /// <summary>
     /// Determines if two <see cref="UnknownObjectAccessor"/> are equal.
@@ -190,7 +194,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
         }
 
         /// <inheritdoc/>
-        public KeyValuePair<string, object> Current => new KeyValuePair<string, object>( this.enumerator.Current.Key, this.enumerator.Current.Value( this.instance ) );
+        public KeyValuePair<string, object> Current => new( this.enumerator.Current.Key, this.enumerator.Current.Value( this.instance ) );
 
         object IEnumerator.Current => this.Current;
 
@@ -202,14 +206,14 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
 
         /// <inheritdoc/>
         public void Reset() => throw new NotSupportedException();
-
     }
 
     internal static IEnumerable<PropertyInfo> GetProperties( Type type )
     {
-        foreach ( PropertyInfo property in type.GetRuntimeProperties() )
+        foreach ( var property in type.GetRuntimeProperties() )
         {
-            MethodInfo getter = property.GetMethod;
+            var getter = property.GetMethod;
+
             if ( getter != null && !getter.IsStatic && getter.IsPublic && getter.GetParameters().Length == 0 )
             {
                 yield return property;
@@ -217,23 +221,22 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
         }
     }
 
-
     private class AccessorType
     {
-        private static readonly ConcurrentDictionary<Type, AccessorType> instances = new ConcurrentDictionary<Type, AccessorType>();
+        private static readonly ConcurrentDictionary<Type, AccessorType> instances = new();
         private readonly Dictionary<string, Func<object, object>> accessors;
-        private readonly ConcurrentDictionary<Type, object> visitorListCache = new ConcurrentDictionary<Type, object>();
+        private readonly ConcurrentDictionary<Type, object> visitorListCache = new();
         private readonly Type type;
 
         private AccessorType( Type type )
         {
             this.accessors = new Dictionary<string, Func<object, object>>();
 
-            foreach ( PropertyInfo property in GetProperties(type ))
+            foreach ( var property in GetProperties( type ) )
             {
-                MethodInfo getter = property.GetMethod;
-                ParameterExpression param = Expression.Parameter( typeof( object ) );
-                UnaryExpression expression = Expression.Convert( Expression.Property( Expression.Convert( param, type ), property ), typeof( object ) );
+                var getter = property.GetMethod;
+                var param = Expression.Parameter( typeof(object) );
+                var expression = Expression.Convert( Expression.Property( Expression.Convert( param, type ), property ), typeof(object) );
                 Expression<Func<object, object>> lambda = Expression.Lambda<Func<object, object>>( expression, param );
                 this.accessors.Add( property.Name, lambda.Compile() );
             }
@@ -243,7 +246,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
 
         public IReadOnlyList<(string, object)> ToTuples( object value )
         {
-            List<ValueTuple<string, object>> properties = new List<(string, object)>( this.accessors.Count );
+            List<ValueTuple<string, object>> properties = new( this.accessors.Count );
 
             foreach ( KeyValuePair<string, Func<object, object>> accessor in this.accessors )
             {
@@ -262,55 +265,66 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
             if ( this.accessors.TryGetValue( name, out Func<object, object> func ) )
             {
                 value = func( o );
+
                 return true;
             }
             else
             {
                 value = null;
+
                 return false;
             }
         }
 
-        public void VisitProperties<TState>( object o, IUnknownObjectPropertyVisitor<TState> visitor,  ref TState state )
+        public void VisitProperties<TState>( object o, IUnknownObjectPropertyVisitor<TState> visitor, ref TState state )
         {
-            Dictionary<string, VisitDelegate<TState>> actions = (Dictionary<string, VisitDelegate<TState>>) this.visitorListCache.GetOrAdd( typeof( TState ), _ => this.GetVisitors<TState>() );
+            Dictionary<string, VisitDelegate<TState>> actions =
+                (Dictionary<string, VisitDelegate<TState>>) this.visitorListCache.GetOrAdd( typeof(TState), _ => this.GetVisitors<TState>() );
+
             foreach ( KeyValuePair<string, VisitDelegate<TState>> action in actions )
             {
                 if ( visitor.MustVisit( action.Key, ref state ) )
                 {
                     try
                     {
-                    
-                            action.Value( visitor, o, ref state );
-                    
+                        action.Value( visitor, o, ref state );
                     }
-                    catch
-                    {
-
-                    }
+                    catch { }
                 }
             }
         }
 
-        private Dictionary<string,VisitDelegate<TState>> GetVisitors<TState>()
+        private Dictionary<string, VisitDelegate<TState>> GetVisitors<TState>()
         {
-            Dictionary<string, VisitDelegate<TState>> list = new Dictionary<string, VisitDelegate<TState>>();
+            Dictionary<string, VisitDelegate<TState>> list = new();
 
-            MethodInfo visitMethod = typeof( IUnknownObjectPropertyVisitor<TState> ).GetMethod( "Visit" );
-            foreach ( PropertyInfo property in this.type.GetRuntimeProperties() )
+            var visitMethod = typeof(IUnknownObjectPropertyVisitor<TState>).GetMethod( "Visit" );
+
+            foreach ( var property in this.type.GetRuntimeProperties() )
             {
-                MethodInfo getter = property.GetMethod;
-                if ( getter != null && !getter.IsStatic && getter.IsPublic &&  getter.GetParameters().Length == 0 )
+                var getter = property.GetMethod;
+
+                if ( getter != null && !getter.IsStatic && getter.IsPublic && getter.GetParameters().Length == 0 )
                 {
+                    var visitorParameter = Expression.Parameter( typeof(IUnknownObjectPropertyVisitor<TState>) );
+                    var objectParameter = Expression.Parameter( typeof(object) );
+                    var stateParameter = Expression.Parameter( typeof(TState).MakeByRefType() );
 
-                    ParameterExpression visitorParameter = Expression.Parameter( typeof( IUnknownObjectPropertyVisitor<TState> ) );
-                    ParameterExpression objectParameter = Expression.Parameter( typeof( object ) );
-                    ParameterExpression stateParameter = Expression.Parameter( typeof( TState ).MakeByRefType() );
+                    var getValue = Expression.Property( Expression.Convert( objectParameter, this.type ), property );
 
-                    MemberExpression getValue = Expression.Property( Expression.Convert( objectParameter, this.type ), property );
-                    MethodCallExpression callExpression = Expression.Call( visitorParameter, visitMethod.MakeGenericMethod( property.PropertyType ), Expression.Constant( property.Name ), getValue, stateParameter );
+                    var callExpression = Expression.Call(
+                        visitorParameter,
+                        visitMethod.MakeGenericMethod( property.PropertyType ),
+                        Expression.Constant( property.Name ),
+                        getValue,
+                        stateParameter );
 
-                    Expression<VisitDelegate<TState>> lambda = Expression.Lambda<VisitDelegate<TState>>( callExpression, visitorParameter, objectParameter, stateParameter );
+                    Expression<VisitDelegate<TState>> lambda = Expression.Lambda<VisitDelegate<TState>>(
+                        callExpression,
+                        visitorParameter,
+                        objectParameter,
+                        stateParameter );
+
                     list.Add( property.Name, lambda.Compile() );
                 }
             }

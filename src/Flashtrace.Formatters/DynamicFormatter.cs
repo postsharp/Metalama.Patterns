@@ -4,13 +4,11 @@ using System.Globalization;
 
 namespace Flashtrace.Formatters;
 
-internal sealed class DynamicFormatter<TValue> : Formatter<TValue> 
+internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
 {
     private readonly FormattingOptions _options;
 
-    public DynamicFormatter( IFormatterRepository repository ) : this( repository, FormattingOptions.Default ) 
-    {
-    }
+    public DynamicFormatter( IFormatterRepository repository ) : this( repository, FormattingOptions.Default ) { }
 
     private DynamicFormatter( IFormatterRepository repository, FormattingOptions options )
         : base( repository )
@@ -48,13 +46,19 @@ internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
         }
         else
         {
-            IFormatter formatter = this.Repository.Get(value.GetType() ).WithOptions(this._options);
+            var formatter = this.Repository.Get( value.GetType() ).WithOptions( this._options );
 
             if ( formatter == null )
-                throw new AssertionFailedException( string.Format( CultureInfo.InvariantCulture, "Cannot get a formatter for type {0}.", value.GetType() ) );
+            {
+                throw new FlashtraceAssertionFailedException(
+                    string.Format( CultureInfo.InvariantCulture, "Cannot get a formatter for type {0}.", value.GetType() ) );
+            }
 
             if ( (formatter.Attributes & FormatterAttributes.Dynamic) != 0 )
-                throw new AssertionFailedException( string.Format( CultureInfo.InvariantCulture, "Infinite loop in resolving formatters for type {0}.", value.GetType() ) );
+            {
+                throw new FlashtraceAssertionFailedException(
+                    string.Format( CultureInfo.InvariantCulture, "Infinite loop in resolving formatters for type {0}.", value.GetType() ) );
+            }
 
             formatter.Write( stringBuilder, value );
         }

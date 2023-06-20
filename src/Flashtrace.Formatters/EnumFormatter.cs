@@ -9,9 +9,7 @@ namespace Flashtrace.Formatters;
 public sealed class EnumFormatter<T> : Formatter<T>
     where T : Enum
 {
-    public EnumFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public EnumFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     public override void Write( UnsafeStringBuilder stringBuilder, T? value )
     {
@@ -54,7 +52,7 @@ internal static class EnumFormatterCache<T>
     {
         if ( value == null )
         {
-            throw new ArgumentNullException( nameof( value ) );
+            throw new ArgumentNullException( nameof(value) );
         }
 
         string name;

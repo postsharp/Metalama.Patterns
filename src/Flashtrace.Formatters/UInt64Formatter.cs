@@ -7,13 +7,11 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class UInt64Formatter : Formatter<ulong>
 {
-    public UInt64Formatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public UInt64Formatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write(UnsafeStringBuilder stringBuilder, ulong value)
+    public override void Write( UnsafeStringBuilder stringBuilder, ulong value )
     {
-         stringBuilder.Append( value );
-    }   
+        stringBuilder.Append( value );
+    }
 }

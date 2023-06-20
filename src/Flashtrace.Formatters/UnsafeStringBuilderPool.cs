@@ -9,7 +9,7 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class UnsafeStringBuilderPool : IDisposable
 {
-    private readonly ConcurrentStack<UnsafeStringBuilder> _instances = new ConcurrentStack<UnsafeStringBuilder>();
+    private readonly ConcurrentStack<UnsafeStringBuilder> _instances = new();
 
     /// <summary>
     /// Gets the maximum number of characters in instances of the <see cref="UnsafeStringBuilder"/> class managed by the current pool.
@@ -40,6 +40,7 @@ public sealed class UnsafeStringBuilderPool : IDisposable
     public UnsafeStringBuilder GetInstance()
     {
         UnsafeStringBuilder stringBuilder;
+
         if ( !this._instances.TryPop( out stringBuilder ) )
         {
             stringBuilder = new UnsafeStringBuilder( this.StringBuilderCapacity, this._throwOnOverflow );
@@ -57,17 +58,17 @@ public sealed class UnsafeStringBuilderPool : IDisposable
     {
         if ( stringBuilder == null )
         {
-            throw new ArgumentNullException( nameof( stringBuilder ) );
+            throw new ArgumentNullException( nameof(stringBuilder) );
         }
 
         if ( stringBuilder.IsDisposed )
         {
-            throw new ObjectDisposedException(nameof(UnsafeStringBuilder));
+            throw new ObjectDisposedException( nameof(UnsafeStringBuilder) );
         }
 
         if ( stringBuilder.Capacity != this.StringBuilderCapacity || stringBuilder.ThrowOnOverflow != this._throwOnOverflow )
         {
-            throw new ArgumentOutOfRangeException(nameof(stringBuilder));
+            throw new ArgumentOutOfRangeException( nameof(stringBuilder) );
         }
 
         if ( this._instances.Count >= this._maxInstances )
@@ -79,13 +80,13 @@ public sealed class UnsafeStringBuilderPool : IDisposable
             stringBuilder.Clear();
             this._instances.Push( stringBuilder );
         }
-
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
         UnsafeStringBuilder stringBuilder;
+
         while ( this._instances.TryPop( out stringBuilder ) )
         {
             stringBuilder.Dispose();

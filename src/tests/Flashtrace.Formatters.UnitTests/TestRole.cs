@@ -4,9 +4,7 @@ namespace Flashtrace.Formatters.UnitTests;
 
 internal sealed class TestRole : FormattingRole
 {
-    public static readonly TestRole Instance = new TestRole();
+    public static readonly TestRole Instance = new();
 
-    private TestRole() : base( nameof( TestRole ) )
-    {
-    }
+    private TestRole() : base( nameof(TestRole) ) { }
 }

@@ -38,7 +38,7 @@ public sealed class UnsafeString
     /// <param name="str">A non-null <see cref="string"/>.</param>
     public UnsafeString( string str )
     {
-        this._str = str ?? throw new ArgumentNullException( nameof( str ) );
+        this._str = str ?? throw new ArgumentNullException( nameof(str) );
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public sealed class UnsafeString
     /// <param name="array">A non-null array of <see cref="char"/>.</param>
     public UnsafeString( char[] array )
     {
-        this._array = array ?? throw new ArgumentNullException( nameof( array ) );
+        this._array = array ?? throw new ArgumentNullException( nameof(array) );
     }
 
     // TODO: Review use of ExplicitCrossPackageInternal
@@ -93,7 +93,6 @@ public sealed class UnsafeString
         }
 
         return true;
-
     }
 
     /// <summary>
@@ -114,15 +113,14 @@ public sealed class UnsafeString
         if ( this._array == null && this._str == null )
         {
             this._array = new char[this.Length];
+
             fixed ( char* pDestination = this._array )
             {
-                BufferHelper.CopyMemory( pDestination, (void*) this.StringBuilder.Buffer, this.Length * sizeof( char ) );
+                BufferHelper.CopyMemory( pDestination, (void*) this.StringBuilder.Buffer, this.Length * sizeof(char) );
             }
-
         }
 
         this.StringBuilder = null;
-
     }
 
     /// <summary>
@@ -144,6 +142,7 @@ public sealed class UnsafeString
                 // There is no backing managed array, so we need to allocate managed memory anyway.
                 this._str = this.StringBuilder.ToStringImpl();
                 this._array = this._str.ToCharArray();
+
                 return new ArraySegment<char>( this._array );
             }
         }
@@ -154,6 +153,7 @@ public sealed class UnsafeString
         else if ( this._str != null )
         {
             this._array = this._str.ToCharArray();
+
             return new ArraySegment<char>( this._array );
         }
         else
@@ -166,7 +166,7 @@ public sealed class UnsafeString
     {
         if ( this.StringBuilder.Version != this._version || this.StringBuilder.Length != this.Length )
         {
-            throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, "The {0} has changed.", nameof( UnsafeStringBuilder ) ) );
+            throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, "The {0} has changed.", nameof(UnsafeStringBuilder) ) );
         }
     }
 

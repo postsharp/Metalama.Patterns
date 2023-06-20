@@ -10,8 +10,8 @@ namespace Flashtrace.Formatters
     internal static class ReflectionHelpers
     {
         // TODO: Remove method.
-        [Obsolete("Not supported, requires PostSharp.", true)]
-        public static IList<TAttribute> GetCustomAttributesFromMethodOrProperty<TAttribute>(this MethodInfo methodInfo)
+        [Obsolete( "Not supported, requires PostSharp.", true )]
+        public static IList<TAttribute> GetCustomAttributesFromMethodOrProperty<TAttribute>( this MethodInfo methodInfo )
             where TAttribute : Attribute
         {
             throw new NotSupportedException();
@@ -40,9 +40,10 @@ namespace Flashtrace.Formatters
         /// <param name="attributeType">type of the attribute</param>
         /// <param name="inherit"></param>
         /// <returns></returns>
+
         // TODO: Remove method.
         [Obsolete( "Not supported, requires PostSharp.", true )]
-        public static IEnumerable<FieldInfo> GetFieldsWithAttributeOnFieldOrProperty(Type type, Type attributeType, bool inherit)
+        public static IEnumerable<FieldInfo> GetFieldsWithAttributeOnFieldOrProperty( Type type, Type attributeType, bool inherit )
         {
             throw new NotSupportedException();
 #if false
@@ -58,7 +59,7 @@ namespace Flashtrace.Formatters
 
         // TODO: Remove method.
         [Obsolete( "Not supported, requires PostSharp.", true )]
-        public static bool IsDefinedOnFieldOrProperty(FieldInfo fieldInfo, Type attributeType, bool inherit)
+        public static bool IsDefinedOnFieldOrProperty( FieldInfo fieldInfo, Type attributeType, bool inherit )
         {
             throw new NotSupportedException();
 #if false
@@ -79,7 +80,7 @@ namespace Flashtrace.Formatters
 
         // TODO: Remove method.
         [Obsolete( "Not supported, requires PostSharp.", true )]
-        public static bool IsDefinedOnMethodOrProperty(this MethodInfo methodInfo, Type attributeType, bool inherit)
+        public static bool IsDefinedOnMethodOrProperty( this MethodInfo methodInfo, Type attributeType, bool inherit )
         {
             throw new NotSupportedException();
 #if false
@@ -101,11 +102,11 @@ namespace Flashtrace.Formatters
 #endif
         }
 
-        public static bool IsAnonymous(this Type type)
+        public static bool IsAnonymous( this Type type )
         {
-            return type.IsDefined( typeof( CompilerGeneratedAttribute ), false )
-                && type.Name.Contains( "AnonymousType" )
-                && (type.Name.StartsWith( "<>", StringComparison.OrdinalIgnoreCase ) || type.Name.StartsWith( "VB$", StringComparison.OrdinalIgnoreCase ));        
+            return type.IsDefined( typeof(CompilerGeneratedAttribute), false )
+                   && type.Name.Contains( "AnonymousType" )
+                   && (type.Name.StartsWith( "<>", StringComparison.OrdinalIgnoreCase ) || type.Name.StartsWith( "VB$", StringComparison.OrdinalIgnoreCase ));
         }
     }
 }

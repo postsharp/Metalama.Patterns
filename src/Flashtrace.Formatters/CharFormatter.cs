@@ -13,15 +13,14 @@ public sealed class CharFormatter : Formatter<char>
     /// Initializes a new instance of the <see cref="CharFormatter"/> class.
     /// </summary>
     /// <param name="repository"></param>
-    public CharFormatter( IFormatterRepository repository ) : base( repository )
-    {        
-    }
+    public CharFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     private NonQuotingCharFormatter NonQuotingCharFormatter
     {
         get
         {
             this._nonQuotingCharFormatter ??= new NonQuotingCharFormatter( this.Repository );
+
             return this._nonQuotingCharFormatter;
         }
     }
@@ -29,7 +28,7 @@ public sealed class CharFormatter : Formatter<char>
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, char value )
     {
-        stringBuilder.Append('\'', value, '\'');
+        stringBuilder.Append( '\'', value, '\'' );
     }
 
     /// <inheritdoc />
@@ -48,9 +47,7 @@ public sealed class CharFormatter : Formatter<char>
 
 internal sealed class NonQuotingCharFormatter : Formatter<char>
 {
-    public NonQuotingCharFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public NonQuotingCharFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     public override void Write( UnsafeStringBuilder stringBuilder, char value )
     {

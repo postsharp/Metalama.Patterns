@@ -16,7 +16,7 @@ public abstract class FormattersTestsBase
     /// <summary>
     /// Gets a new instance of <see cref="FormatterRepository"/>.
     /// </summary>
-    protected static FormatterRepository GetNewRepository() => new FormatterRepository( TestRole.Instance );
+    protected static FormatterRepository GetNewRepository() => new( TestRole.Instance );
 
     /// <summary>
     /// Gets a shared instance of <see cref="FormatterRepository"/>.
@@ -26,8 +26,7 @@ public abstract class FormattersTestsBase
     /// <summary>
     /// Formats a value using <see cref="DefaultRepository"/>.
     /// </summary>
-    protected string FormatDefault<T>( T value )
-        => this.Format<T>( this.DefaultRepository, value );
+    protected string FormatDefault<T>( T value ) => this.Format<T>( this.DefaultRepository, value );
 
     /// <summary>
     /// Formats a value using the specified <see cref="IFormatterRepository"/>.
@@ -37,6 +36,7 @@ public abstract class FormattersTestsBase
         var stringBuilder = new UnsafeStringBuilder( 1024 );
         formatterRepository.Get<T>()!.Write( stringBuilder, value );
         var result = stringBuilder.ToString();
+
         //this._logger?.WriteLine( "'" + value?.ToString() + "' => '" + result + "'" );
         return result;
     }

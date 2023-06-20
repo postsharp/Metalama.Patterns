@@ -20,10 +20,11 @@ public sealed class MethodFormatter : Formatter<MethodBase>
     // (See #26919) We do not create a static Regex instance because it may result in the incorrect AppContext switch values when invoked via module initializer.
     // TODO: revert back to the static Regex instance when #27182 is fixed.
     private const string anonymousMethodRegexPattern = "^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)";
+
     //private static readonly Regex anonymousMethodRegex = new Regex("^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)", regexOptions);
     //private static readonly Regex localFunctionRegex = new Regex("<[^>]+>g__[0-9A-Fa-f]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    private readonly ConcurrentDictionary<MethodBase, Match> _matchCache = new ConcurrentDictionary<MethodBase, Match>();
+    private readonly ConcurrentDictionary<MethodBase, Match> _matchCache = new();
     private IFormatter<Type>? _typeFormatter;
 
     private IFormatter<Type> TypeFormatter
@@ -31,13 +32,12 @@ public sealed class MethodFormatter : Formatter<MethodBase>
         get
         {
             this._typeFormatter ??= this.Repository.Get<Type>();
+
             return this._typeFormatter;
         }
     }
 
-    public MethodFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public MethodFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, MethodBase value )
@@ -45,13 +45,15 @@ public sealed class MethodFormatter : Formatter<MethodBase>
         if ( value == null )
         {
             stringBuilder.Append( 'n', 'u', 'l', 'l' );
+
             return;
         }
 
         try
         {
-            string methodName = value is ConstructorInfo ? (value.IsStatic ? "StaticConstructor" : "new") : value.Name;
-            char c = methodName[0];
+            var methodName = value is ConstructorInfo ? (value.IsStatic ? "StaticConstructor" : "new") : value.Name;
+            var c = methodName[0];
+
             if ( c == '<' || c == '_' )
             {
                 Match anonymousMethodMatch;
@@ -79,7 +81,8 @@ public sealed class MethodFormatter : Formatter<MethodBase>
                         stringBuilder.Append( '.' );
                     }
 
-                    Group parentGroup = anonymousMethodMatch.Groups["parent"];
+                    var parentGroup = anonymousMethodMatch.Groups["parent"];
+
                     if ( parentGroup != null )
                     {
                         stringBuilder.Append( parentGroup.Value );
@@ -90,7 +93,6 @@ public sealed class MethodFormatter : Formatter<MethodBase>
                         stringBuilder.Append( "Anonymous" );
                     }
 
-
                     return;
                 }
             }
@@ -99,11 +101,13 @@ public sealed class MethodFormatter : Formatter<MethodBase>
             stringBuilder.Append( '.' );
 
             stringBuilder.Append( methodName );
+
             if ( value.IsGenericMethod )
             {
                 Type[] genericArguments = value.GetGenericArguments();
                 stringBuilder.Append( '<' );
-                for ( int i = 0; i < genericArguments.Length; i++ )
+
+                for ( var i = 0; i < genericArguments.Length; i++ )
                 {
                     if ( i > 0 )
                     {
@@ -114,12 +118,12 @@ public sealed class MethodFormatter : Formatter<MethodBase>
                 }
 
                 stringBuilder.Append( '>' );
-
             }
 
             stringBuilder.Append( '(' );
             ParameterInfo[] parameters = value.GetParameters();
-            for ( int i = 0; i < parameters.Length; i++ )
+
+            for ( var i = 0; i < parameters.Length; i++ )
             {
                 if ( i > 0 )
                 {

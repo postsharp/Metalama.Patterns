@@ -7,9 +7,7 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class ByteFormatter : Formatter<byte>
 {
-    public ByteFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public ByteFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, byte value )

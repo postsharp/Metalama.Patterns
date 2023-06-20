@@ -8,19 +8,17 @@ namespace Flashtrace.Formatters;
 internal sealed class NullableFormatter<T> : Formatter<T?>
     where T : struct
 {
-    public NullableFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public NullableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, T? value )
     {
         if ( value == null )
         {
-            stringBuilder.Append('n');
-            stringBuilder.Append('u');
-            stringBuilder.Append('l');
-            stringBuilder.Append('l');
+            stringBuilder.Append( 'n' );
+            stringBuilder.Append( 'u' );
+            stringBuilder.Append( 'l' );
+            stringBuilder.Append( 'l' );
         }
         else
         {

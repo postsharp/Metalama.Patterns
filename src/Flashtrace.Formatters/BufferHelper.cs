@@ -25,31 +25,33 @@ internal static unsafe class BufferHelper
 #if AGGRESSIVE_INLINING
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    public static void CopyMemory(void* destination, void* source, int length)
+    public static void CopyMemory( void* destination, void* source, int length )
     {
 #if MEMORY_COPY
         Buffer.MemoryCopy(source, destination, length, length);
 #else
-        if (sizeof(IntPtr) == 4)
+        if ( sizeof(IntPtr) == 4 )
         {
-            ManagedMemoryCopy32((byte*)destination, (byte*)source, (uint)length);
+            ManagedMemoryCopy32( (byte*) destination, (byte*) source, (uint) length );
         }
         else
         {
-            ManagedMemoryCopy64((byte*)destination, (byte*)source, (uint)length);
+            ManagedMemoryCopy64( (byte*) destination, (byte*) source, (uint) length );
         }
 
 #endif
     }
 
 #if !MEMORY_COPY
-    private static void ManagedMemoryCopy32(byte* dest, byte* src, uint len)
+    private static void ManagedMemoryCopy32( byte* dest, byte* src, uint len )
     {
         // P/Invoke into the native version when the buffers are overlapping and the copy needs to be performed backwards
         // This check can produce false positives for lengths greater than Int32.MaxInt. It is fine because we want to use PInvoke path for the large lengths anyway.
 #if DEBUG
-        if ((uint)dest - (uint)src < len)
+        if ( (uint) dest - (uint) src < len )
+        {
             throw new ArgumentException( "Incorrect overlap of memory blocks.", nameof(dest) );
+        }
 #endif
 
         // This is portable version of memcpy. It mirrors what the hand optimized assembly versions of memcpy typically do.
@@ -63,130 +65,174 @@ internal static unsafe class BufferHelper
         // The switch will be very fast since it can be implemented using a jump
         // table in assembly. See http://stackoverflow.com/a/449297/4077294 for more info.
 
-        switch (len)
+        switch ( len )
         {
             case 0:
                 return;
+
             case 1:
                 *dest = *src;
+
                 return;
+
             case 2:
-                *(short*)dest = *(short*)src;
+                *(short*) dest = *(short*) src;
+
                 return;
+
             case 3:
-                *(short*)dest = *(short*)src;
+                *(short*) dest = *(short*) src;
                 *(dest + 2) = *(src + 2);
+
                 return;
+
             case 4:
-                *(int*)dest = *(int*)src;
+                *(int*) dest = *(int*) src;
+
                 return;
+
             case 5:
-                *(int*)dest = *(int*)src;
+                *(int*) dest = *(int*) src;
                 *(dest + 4) = *(src + 4);
+
                 return;
+
             case 6:
-                *(int*)dest = *(int*)src;
-                *(short*)(dest + 4) = *(short*)(src + 4);
+                *(int*) dest = *(int*) src;
+                *(short*) (dest + 4) = *(short*) (src + 4);
+
                 return;
+
             case 7:
-                *(int*)dest = *(int*)src;
-                *(short*)(dest + 4) = *(short*)(src + 4);
+                *(int*) dest = *(int*) src;
+                *(short*) (dest + 4) = *(short*) (src + 4);
                 *(dest + 6) = *(src + 6);
+
                 return;
+
             case 8:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+
                 return;
+
             case 9:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
                 *(dest + 8) = *(src + 8);
+
                 return;
+
             case 10:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(short*)(dest + 8) = *(short*)(src + 8);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(short*) (dest + 8) = *(short*) (src + 8);
+
                 return;
+
             case 11:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(short*)(dest + 8) = *(short*)(src + 8);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(short*) (dest + 8) = *(short*) (src + 8);
                 *(dest + 10) = *(src + 10);
+
                 return;
+
             case 12:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+
                 return;
+
             case 13:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
                 *(dest + 12) = *(src + 12);
+
                 return;
+
             case 14:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(short*)(dest + 12) = *(short*)(src + 12);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(short*) (dest + 12) = *(short*) (src + 12);
+
                 return;
+
             case 15:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(short*)(dest + 12) = *(short*)(src + 12);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(short*) (dest + 12) = *(short*) (src + 12);
                 *(dest + 14) = *(src + 14);
+
                 return;
+
             case 16:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(int*)(dest + 12) = *(int*)(src + 12);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(int*) (dest + 12) = *(int*) (src + 12);
+
                 return;
+
             case 17:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(int*)(dest + 12) = *(int*)(src + 12);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(int*) (dest + 12) = *(int*) (src + 12);
                 *(dest + 16) = *(src + 16);
+
                 return;
+
             case 18:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(int*)(dest + 12) = *(int*)(src + 12);
-                *(short*)(dest + 16) = *(short*)(src + 16);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(int*) (dest + 12) = *(int*) (src + 12);
+                *(short*) (dest + 16) = *(short*) (src + 16);
+
                 return;
+
             case 19:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(int*)(dest + 12) = *(int*)(src + 12);
-                *(short*)(dest + 16) = *(short*)(src + 16);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(int*) (dest + 12) = *(int*) (src + 12);
+                *(short*) (dest + 16) = *(short*) (src + 16);
                 *(dest + 18) = *(src + 18);
+
                 return;
+
             case 20:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(int*)(dest + 12) = *(int*)(src + 12);
-                *(int*)(dest + 16) = *(int*)(src + 16);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(int*) (dest + 12) = *(int*) (src + 12);
+                *(int*) (dest + 16) = *(int*) (src + 16);
+
                 return;
+
             case 21:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(int*)(dest + 12) = *(int*)(src + 12);
-                *(int*)(dest + 16) = *(int*)(src + 16);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(int*) (dest + 12) = *(int*) (src + 12);
+                *(int*) (dest + 16) = *(int*) (src + 16);
                 *(dest + 20) = *(src + 20);
+
                 return;
+
             case 22:
-                *(int*)dest = *(int*)src;
-                *(int*)(dest + 4) = *(int*)(src + 4);
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(int*)(dest + 12) = *(int*)(src + 12);
-                *(int*)(dest + 16) = *(int*)(src + 16);
-                *(short*)(dest + 20) = *(short*)(src + 20);
+                *(int*) dest = *(int*) src;
+                *(int*) (dest + 4) = *(int*) (src + 4);
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(int*) (dest + 12) = *(int*) (src + 12);
+                *(int*) (dest + 16) = *(int*) (src + 16);
+                *(short*) (dest + 20) = *(short*) (src + 20);
+
                 return;
         }
 
@@ -200,28 +246,32 @@ internal static unsafe class BufferHelper
 
         uint i = 0; // byte offset at which we're copying
 
-        if (((int)dest & 3) != 0)
+        if ( ((int) dest & 3) != 0 )
         {
-            if (((int)dest & 1) != 0)
+            if ( ((int) dest & 1) != 0 )
             {
                 *(dest + i) = *(src + i);
                 i += 1;
-                if (((int)dest & 2) != 0)
+
+                if ( ((int) dest & 2) != 0 )
+                {
                     goto IntAligned;
+                }
             }
-            *(short*)(dest + i) = *(short*)(src + i);
+
+            *(short*) (dest + i) = *(short*) (src + i);
             i += 2;
         }
 
-        IntAligned:
+    IntAligned:
 
-        uint end = len - 16;
+        var end = len - 16;
         len -= i; // lower 4 bits of len represent how many bytes are left *after* the unrolled loop
 
         // We know due to the above switch-case that this loop will always run 1 iteration; max
         // bytes we copy before checking is 23 (7 to align the pointers, 16 for 1 iteration) so
         // the switch handles lengths 0-22.
-        Debug.Assert(end >= 7 && i <= end);
+        Debug.Assert( end >= 7 && i <= end );
 
         // This is separated out into a different variable, so the i + 16 addition can be
         // performed at the start of the pipeline and the loop condition does not have
@@ -239,36 +289,41 @@ internal static unsafe class BufferHelper
             // So the only cost is a bit of code size, which is made up for by the fact that
             // we save on writes to dest/src.
 
-            *(int*)(dest + i) = *(int*)(src + i);
-            *(int*)(dest + i + 4) = *(int*)(src + i + 4);
-            *(int*)(dest + i + 8) = *(int*)(src + i + 8);
-            *(int*)(dest + i + 12) = *(int*)(src + i + 12);
+            *(int*) (dest + i) = *(int*) (src + i);
+            *(int*) (dest + i + 4) = *(int*) (src + i + 4);
+            *(int*) (dest + i + 8) = *(int*) (src + i + 8);
+            *(int*) (dest + i + 12) = *(int*) (src + i + 12);
 
             i = counter;
 
             // See notes above for why this wasn't used instead
             // i += 16;
-        } while (counter <= end);
+        }
+        while ( counter <= end );
 
-        if ((len & 8) != 0)
+        if ( (len & 8) != 0 )
         {
-            *(int*)(dest + i) = *(int*)(src + i);
-            *(int*)(dest + i + 4) = *(int*)(src + i + 4);
+            *(int*) (dest + i) = *(int*) (src + i);
+            *(int*) (dest + i + 4) = *(int*) (src + i + 4);
             i += 8;
         }
-        if ((len & 4) != 0)
+
+        if ( (len & 4) != 0 )
         {
-            *(int*)(dest + i) = *(int*)(src + i);
+            *(int*) (dest + i) = *(int*) (src + i);
             i += 4;
         }
-        if ((len & 2) != 0)
+
+        if ( (len & 2) != 0 )
         {
-            *(short*)(dest + i) = *(short*)(src + i);
+            *(short*) (dest + i) = *(short*) (src + i);
             i += 2;
         }
-        if ((len & 1) != 0)
+
+        if ( (len & 1) != 0 )
         {
             *(dest + i) = *(src + i);
+
             // We're not using i after this, so not needed
             // i += 1;
         }
@@ -276,7 +331,7 @@ internal static unsafe class BufferHelper
         return;
     }
 
-    private static void ManagedMemoryCopy64(byte* dest, byte* src, ulong len)
+    private static void ManagedMemoryCopy64( byte* dest, byte* src, ulong len )
     {
         // This is portable version of memcpy. It mirrors what the hand optimized assembly versions of memcpy typically do.
         //
@@ -289,108 +344,152 @@ internal static unsafe class BufferHelper
         // The switch will be very fast since it can be implemented using a jump
         // table in assembly. See http://stackoverflow.com/a/449297/4077294 for more info.
 
-        switch (len)
+        switch ( len )
         {
             case 0:
                 return;
+
             case 1:
                 *dest = *src;
+
                 return;
+
             case 2:
-                *(short*)dest = *(short*)src;
+                *(short*) dest = *(short*) src;
+
                 return;
+
             case 3:
-                *(short*)dest = *(short*)src;
+                *(short*) dest = *(short*) src;
                 *(dest + 2) = *(src + 2);
+
                 return;
+
             case 4:
-                *(int*)dest = *(int*)src;
+                *(int*) dest = *(int*) src;
+
                 return;
+
             case 5:
-                *(int*)dest = *(int*)src;
+                *(int*) dest = *(int*) src;
                 *(dest + 4) = *(src + 4);
+
                 return;
+
             case 6:
-                *(int*)dest = *(int*)src;
-                *(short*)(dest + 4) = *(short*)(src + 4);
+                *(int*) dest = *(int*) src;
+                *(short*) (dest + 4) = *(short*) (src + 4);
+
                 return;
+
             case 7:
-                *(int*)dest = *(int*)src;
-                *(short*)(dest + 4) = *(short*)(src + 4);
+                *(int*) dest = *(int*) src;
+                *(short*) (dest + 4) = *(short*) (src + 4);
                 *(dest + 6) = *(src + 6);
+
                 return;
+
             case 8:
-                *(long*)dest = *(long*)src;
+                *(long*) dest = *(long*) src;
+
                 return;
+
             case 9:
-                *(long*)dest = *(long*)src;
+                *(long*) dest = *(long*) src;
                 *(dest + 8) = *(src + 8);
+
                 return;
+
             case 10:
-                *(long*)dest = *(long*)src;
-                *(short*)(dest + 8) = *(short*)(src + 8);
+                *(long*) dest = *(long*) src;
+                *(short*) (dest + 8) = *(short*) (src + 8);
+
                 return;
+
             case 11:
-                *(long*)dest = *(long*)src;
-                *(short*)(dest + 8) = *(short*)(src + 8);
+                *(long*) dest = *(long*) src;
+                *(short*) (dest + 8) = *(short*) (src + 8);
                 *(dest + 10) = *(src + 10);
+
                 return;
+
             case 12:
-                *(long*)dest = *(long*)src;
-                *(int*)(dest + 8) = *(int*)(src + 8);
+                *(long*) dest = *(long*) src;
+                *(int*) (dest + 8) = *(int*) (src + 8);
+
                 return;
+
             case 13:
-                *(long*)dest = *(long*)src;
-                *(int*)(dest + 8) = *(int*)(src + 8);
+                *(long*) dest = *(long*) src;
+                *(int*) (dest + 8) = *(int*) (src + 8);
                 *(dest + 12) = *(src + 12);
+
                 return;
+
             case 14:
-                *(long*)dest = *(long*)src;
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(short*)(dest + 12) = *(short*)(src + 12);
+                *(long*) dest = *(long*) src;
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(short*) (dest + 12) = *(short*) (src + 12);
+
                 return;
+
             case 15:
-                *(long*)dest = *(long*)src;
-                *(int*)(dest + 8) = *(int*)(src + 8);
-                *(short*)(dest + 12) = *(short*)(src + 12);
+                *(long*) dest = *(long*) src;
+                *(int*) (dest + 8) = *(int*) (src + 8);
+                *(short*) (dest + 12) = *(short*) (src + 12);
                 *(dest + 14) = *(src + 14);
+
                 return;
+
             case 16:
-                *(long*)dest = *(long*)src;
-                *(long*)(dest + 8) = *(long*)(src + 8);
+                *(long*) dest = *(long*) src;
+                *(long*) (dest + 8) = *(long*) (src + 8);
+
                 return;
+
             case 17:
-                *(long*)dest = *(long*)src;
-                *(long*)(dest + 8) = *(long*)(src + 8);
+                *(long*) dest = *(long*) src;
+                *(long*) (dest + 8) = *(long*) (src + 8);
                 *(dest + 16) = *(src + 16);
+
                 return;
+
             case 18:
-                *(long*)dest = *(long*)src;
-                *(long*)(dest + 8) = *(long*)(src + 8);
-                *(short*)(dest + 16) = *(short*)(src + 16);
+                *(long*) dest = *(long*) src;
+                *(long*) (dest + 8) = *(long*) (src + 8);
+                *(short*) (dest + 16) = *(short*) (src + 16);
+
                 return;
+
             case 19:
-                *(long*)dest = *(long*)src;
-                *(long*)(dest + 8) = *(long*)(src + 8);
-                *(short*)(dest + 16) = *(short*)(src + 16);
+                *(long*) dest = *(long*) src;
+                *(long*) (dest + 8) = *(long*) (src + 8);
+                *(short*) (dest + 16) = *(short*) (src + 16);
                 *(dest + 18) = *(src + 18);
+
                 return;
+
             case 20:
-                *(long*)dest = *(long*)src;
-                *(long*)(dest + 8) = *(long*)(src + 8);
-                *(int*)(dest + 16) = *(int*)(src + 16);
+                *(long*) dest = *(long*) src;
+                *(long*) (dest + 8) = *(long*) (src + 8);
+                *(int*) (dest + 16) = *(int*) (src + 16);
+
                 return;
+
             case 21:
-                *(long*)dest = *(long*)src;
-                *(long*)(dest + 8) = *(long*)(src + 8);
-                *(int*)(dest + 16) = *(int*)(src + 16);
+                *(long*) dest = *(long*) src;
+                *(long*) (dest + 8) = *(long*) (src + 8);
+                *(int*) (dest + 16) = *(int*) (src + 16);
                 *(dest + 20) = *(src + 20);
+
                 return;
+
             case 22:
-                *(long*)dest = *(long*)src;
-                *(long*)(dest + 8) = *(long*)(src + 8);
-                *(int*)(dest + 16) = *(int*)(src + 16);
-                *(short*)(dest + 20) = *(short*)(src + 20);
+                *(long*) dest = *(long*) src;
+                *(long*) (dest + 8) = *(long*) (src + 8);
+                *(int*) (dest + 16) = *(int*) (src + 16);
+                *(short*) (dest + 20) = *(short*) (src + 20);
+
                 return;
         }
 
@@ -404,20 +503,24 @@ internal static unsafe class BufferHelper
 
         ulong i = 0; // byte offset at which we're copying
 
-        if (((int)dest & 3) != 0)
+        if ( ((int) dest & 3) != 0 )
         {
-            if (((int)dest & 1) != 0)
+            if ( ((int) dest & 1) != 0 )
             {
                 *(dest + i) = *(src + i);
                 i += 1;
-                if (((int)dest & 2) != 0)
+
+                if ( ((int) dest & 2) != 0 )
+                {
                     goto IntAligned;
+                }
             }
-            *(short*)(dest + i) = *(short*)(src + i);
+
+            *(short*) (dest + i) = *(short*) (src + i);
             i += 2;
         }
 
-        IntAligned:
+    IntAligned:
 
         // On 64-bit IntPtr.Size == 8, so we want to advance to the next 8-aligned address. If
         // (int)dest % 8 is 0, 5, 6, or 7, we will already have advanced by 0, 3, 2, or 1
@@ -427,19 +530,19 @@ internal static unsafe class BufferHelper
         // The thing 1, 2, 3, and 4 have in common that the others don't is that if you
         // subtract one from them, their 3rd lsb will not be set. Hence, the below check.
 
-        if ((((int)dest - 1) & 4) == 0)
+        if ( (((int) dest - 1) & 4) == 0 )
         {
-            *(int*)(dest + i) = *(int*)(src + i);
+            *(int*) (dest + i) = *(int*) (src + i);
             i += 4;
         }
 
-        ulong end = len - 16;
+        var end = len - 16;
         len -= i; // lower 4 bits of len represent how many bytes are left *after* the unrolled loop
 
         // We know due to the above switch-case that this loop will always run 1 iteration; max
         // bytes we copy before checking is 23 (7 to align the pointers, 16 for 1 iteration) so
         // the switch handles lengths 0-22.
-        Debug.Assert(end >= 7 && i <= end);
+        Debug.Assert( end >= 7 && i <= end );
 
         // This is separated out into a different variable, so the i + 16 addition can be
         // performed at the start of the pipeline and the loop condition does not have
@@ -457,33 +560,38 @@ internal static unsafe class BufferHelper
             // So the only cost is a bit of code size, which is made up for by the fact that
             // we save on writes to dest/src.
 
-            *(long*)(dest + i) = *(long*)(src + i);
-            *(long*)(dest + i + 8) = *(long*)(src + i + 8);
+            *(long*) (dest + i) = *(long*) (src + i);
+            *(long*) (dest + i + 8) = *(long*) (src + i + 8);
 
             i = counter;
 
             // See notes above for why this wasn't used instead
             // i += 16;
-        } while (counter <= end);
+        }
+        while ( counter <= end );
 
-        if ((len & 8) != 0)
+        if ( (len & 8) != 0 )
         {
-            *(long*)(dest + i) = *(long*)(src + i);
+            *(long*) (dest + i) = *(long*) (src + i);
             i += 8;
         }
-        if ((len & 4) != 0)
+
+        if ( (len & 4) != 0 )
         {
-            *(int*)(dest + i) = *(int*)(src + i);
+            *(int*) (dest + i) = *(int*) (src + i);
             i += 4;
         }
-        if ((len & 2) != 0)
+
+        if ( (len & 2) != 0 )
         {
-            *(short*)(dest + i) = *(short*)(src + i);
+            *(short*) (dest + i) = *(short*) (src + i);
             i += 2;
         }
-        if ((len & 1) != 0)
+
+        if ( (len & 1) != 0 )
         {
             *(dest + i) = *(src + i);
+
             // We're not using i after this, so not needed
             // i += 1;
         }
@@ -493,51 +601,57 @@ internal static unsafe class BufferHelper
 
 #endif
 
-    public static int HashMemory(byte* source, int count)
+    public static int HashMemory( byte* source, int count )
     {
-        return HashMemory(source, count, count);
+        return HashMemory( source, count, count );
     }
 
-    public static int HashMemory(IntPtr source, int count, int initialHashCode)
+    public static int HashMemory( IntPtr source, int count, int initialHashCode )
     {
-        return HashMemory((byte*)source, count, initialHashCode);
+        return HashMemory( (byte*) source, count, initialHashCode );
     }
-    public static int HashMemory(byte* source, int count, int initialHashCode)
-    {
-        int hashCode = initialHashCode;
-        byte* src = source;
 
-        if (count >= 0x10)
+    public static int HashMemory( byte* source, int count, int initialHashCode )
+    {
+        var hashCode = initialHashCode;
+        var src = source;
+
+        if ( count >= 0x10 )
         {
             do
             {
-                hashCode = ((hashCode << 13) + hashCode) + *((int*)src);
-                hashCode = ((hashCode << 13) + hashCode) + *((int*)(src + 4));
-                hashCode = ((hashCode << 13) + hashCode) + *((int*)(src + 8));
-                hashCode = ((hashCode << 13) + hashCode) + *((int*)(src + 12));
+                hashCode = ((hashCode << 13) + hashCode) + *((int*) src);
+                hashCode = ((hashCode << 13) + hashCode) + *((int*) (src + 4));
+                hashCode = ((hashCode << 13) + hashCode) + *((int*) (src + 8));
+                hashCode = ((hashCode << 13) + hashCode) + *((int*) (src + 12));
 
                 src += 0x10;
-            } while ((count -= 0x10) >= 0x10);
+            }
+            while ( (count -= 0x10) >= 0x10 );
         }
-        if (count > 0)
+
+        if ( count > 0 )
         {
-            if ((count & 8) != 0)
+            if ( (count & 8) != 0 )
             {
-                hashCode = ((hashCode << 13) + hashCode) + *((int*)src);
-                hashCode = ((hashCode << 13) + hashCode) + *((int*)(src + 4));
+                hashCode = ((hashCode << 13) + hashCode) + *((int*) src);
+                hashCode = ((hashCode << 13) + hashCode) + *((int*) (src + 4));
                 src += 8;
             }
-            if ((count & 4) != 0)
+
+            if ( (count & 4) != 0 )
             {
-                hashCode = ((hashCode << 13) + hashCode) + *((int*)src);
+                hashCode = ((hashCode << 13) + hashCode) + *((int*) src);
                 src += 4;
             }
-            if ((count & 2) != 0)
+
+            if ( (count & 2) != 0 )
             {
-                hashCode = ((hashCode << 13) + hashCode) + *((short*)src);
+                hashCode = ((hashCode << 13) + hashCode) + *((short*) src);
                 src += 2;
             }
-            if ((count & 1) != 0)
+
+            if ( (count & 1) != 0 )
             {
                 hashCode = ((hashCode << 13) + hashCode) + *src;
             }
@@ -546,7 +660,7 @@ internal static unsafe class BufferHelper
         return hashCode;
     }
 
-    public static bool CompareMemory(byte* left, byte* right, int count)
+    public static bool CompareMemory( byte* left, byte* right, int count )
     {
 #if WINDOWS_PINVOKE && UNSECURE_PINVOKE
         if ( RunningOnWindows )
@@ -556,7 +670,7 @@ internal static unsafe class BufferHelper
         else
 #endif
         {
-            return ManagedCompareMemory(left, right, count);
+            return ManagedCompareMemory( left, right, count );
         }
     }
 
@@ -575,60 +689,87 @@ internal static unsafe class BufferHelper
     }
 #endif
 
-
-    private static bool ManagedCompareMemory(byte* left, byte* right, int count)
+    private static bool ManagedCompareMemory( byte* left, byte* right, int count )
     {
-        if (left == right) return true;
+        if ( left == right )
+        {
+            return true;
+        }
 
+        var l = left;
+        var r = right;
 
-        byte* l = left;
-        byte* r = right;
-
-        if (count >= 0x10)
+        if ( count >= 0x10 )
         {
             do
             {
-                int l1 = *((int*)r), r1 = *((int*)l);
-                int l2 = *((int*)(r + 4)), r2 = *((int*)(l + 4));
-                int l3 = *((int*)(r + 8)), r3 = *((int*)(l + 8));
-                int l4 = *((int*)(r + 12)), r4 = *((int*)(l + 12));
-                if (l1 != r1 || l2 != r2 || l3 != r3 || l4 != r4) return false;
+                int l1 = *((int*) r), r1 = *((int*) l);
+                int l2 = *((int*) (r + 4)), r2 = *((int*) (l + 4));
+                int l3 = *((int*) (r + 8)), r3 = *((int*) (l + 8));
+                int l4 = *((int*) (r + 12)), r4 = *((int*) (l + 12));
+
+                if ( l1 != r1 || l2 != r2 || l3 != r3 || l4 != r4 )
+                {
+                    return false;
+                }
+
                 r += 0x10;
                 l += 0x10;
-            } while ((count -= 0x10) >= 0x10);
+            }
+            while ( (count -= 0x10) >= 0x10 );
         }
-        if (count > 0)
+
+        if ( count > 0 )
         {
-            if ((count & 8) != 0)
+            if ( (count & 8) != 0 )
             {
-                int l1 = *((int*)r), r1 = *((int*)l);
-                int l2 = *((int*)(r + 4)), r2 = *((int*)(l + 4));
-                if (l1 != r1 || l2 != r2) return false;
+                int l1 = *((int*) r), r1 = *((int*) l);
+                int l2 = *((int*) (r + 4)), r2 = *((int*) (l + 4));
+
+                if ( l1 != r1 || l2 != r2 )
+                {
+                    return false;
+                }
+
                 r += 8;
                 l += 8;
             }
-            if ((count & 4) != 0)
+
+            if ( (count & 4) != 0 )
             {
-                if (*((int*)r) != *((int*)l)) return false;
+                if ( *((int*) r) != *((int*) l) )
+                {
+                    return false;
+                }
+
                 r += 4;
                 l += 4;
             }
-            if ((count & 2) != 0)
+
+            if ( (count & 2) != 0 )
             {
-                if (*((short*)r) != *((short*)l)) return false;
+                if ( *((short*) r) != *((short*) l) )
+                {
+                    return false;
+                }
+
                 r += 2;
                 l += 2;
             }
-            if ((count & 1) != 0)
+
+            if ( (count & 1) != 0 )
             {
-                if (*r != *l) return false;
+                if ( *r != *l )
+                {
+                    return false;
+                }
             }
         }
 
         return true;
     }
 
-    public static void ZeroMemory(byte* target, int count)
+    public static void ZeroMemory( byte* target, int count )
     {
 #if WINDOWS_PINVOKE && UNSECURE_PINVOKE
         if (RunningOnWindows)
@@ -638,38 +779,43 @@ internal static unsafe class BufferHelper
         }
 #endif
 
-        byte* dest = target;
+        var dest = target;
 
-        if (count >= 0x10)
+        if ( count >= 0x10 )
         {
             do
             {
-                *((int*)dest) = 0;
-                *((int*)(dest + 4)) = 0;
-                *((int*)(dest + 8)) = 0;
-                *((int*)(dest + 12)) = 0;
+                *((int*) dest) = 0;
+                *((int*) (dest + 4)) = 0;
+                *((int*) (dest + 8)) = 0;
+                *((int*) (dest + 12)) = 0;
                 dest += 0x10;
-            } while ((count -= 0x10) >= 0x10);
+            }
+            while ( (count -= 0x10) >= 0x10 );
         }
-        if (count > 0)
+
+        if ( count > 0 )
         {
-            if ((count & 8) != 0)
+            if ( (count & 8) != 0 )
             {
-                *((int*)dest) = 0;
-                *((int*)(dest + 4)) = 0;
+                *((int*) dest) = 0;
+                *((int*) (dest + 4)) = 0;
                 dest += 8;
             }
-            if ((count & 4) != 0)
+
+            if ( (count & 4) != 0 )
             {
-                *((int*)dest) = 0;
+                *((int*) dest) = 0;
                 dest += 4;
             }
-            if ((count & 2) != 0)
+
+            if ( (count & 2) != 0 )
             {
-                *((short*)dest) = 0;
+                *((short*) dest) = 0;
                 dest += 2;
             }
-            if ((count & 1) != 0)
+
+            if ( (count & 1) != 0 )
             {
                 *dest = 0;
             }

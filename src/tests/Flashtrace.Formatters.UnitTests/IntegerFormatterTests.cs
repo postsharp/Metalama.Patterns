@@ -9,17 +9,15 @@ namespace Flashtrace.Formatters.UnitTests;
 
 public class IntegerFormatterTests : FormattersTestsBase
 {
-    public IntegerFormatterTests( ITestOutputHelper logger ) : base( logger )
-    {
-    }
+    public IntegerFormatterTests( ITestOutputHelper logger ) : base( logger ) { }
 
     [Fact]
     public void ByteTest()
     {
-        byte[] values = {0, 1, 13, 42, 127, 128, 255};
+        byte[] values = { 0, 1, 13, 42, 127, 128, 255 };
 
         var formatter = new ByteFormatter( this.DefaultRepository );
-        var stringBuilder = new UnsafeStringBuilder(1024);
+        var stringBuilder = new UnsafeStringBuilder( 1024 );
 
         foreach ( var value in values )
         {
@@ -34,9 +32,9 @@ public class IntegerFormatterTests : FormattersTestsBase
     [Fact]
     public void SByteTest()
     {
-        sbyte[] values = {0, 1, 13, 42, 127, -1, -13, -127, -128};
+        sbyte[] values = { 0, 1, 13, 42, 127, -1, -13, -127, -128 };
 
-        var formatter = new SByteFormatter(this.DefaultRepository);
+        var formatter = new SByteFormatter( this.DefaultRepository );
         var stringBuilder = new UnsafeStringBuilder();
 
         foreach ( var value in values )
@@ -54,14 +52,14 @@ public class IntegerFormatterTests : FormattersTestsBase
     {
         ushort[] values = { 0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, 32768, 65534, 65535 };
 
-        var formatter = new UInt16Formatter(this.DefaultRepository);
+        var formatter = new UInt16Formatter( this.DefaultRepository );
         var stringBuilder = new UnsafeStringBuilder();
 
-        foreach (var value in values)
+        foreach ( var value in values )
         {
-            formatter.Write(stringBuilder, value);
+            formatter.Write( stringBuilder, value );
 
-            Assert.Equal(value.ToString(CultureInfo.InvariantCulture), stringBuilder.ToString());
+            Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
             stringBuilder.Clear();
         }
@@ -72,14 +70,14 @@ public class IntegerFormatterTests : FormattersTestsBase
     {
         short[] values = { 0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, -1, -13, -127, -128, -10000, -32767, -32768 };
 
-        var formatter = new Int16Formatter(this.DefaultRepository);
+        var formatter = new Int16Formatter( this.DefaultRepository );
         var stringBuilder = new UnsafeStringBuilder();
 
-        foreach (var value in values)
+        foreach ( var value in values )
         {
-            formatter.Write(stringBuilder, value);
+            formatter.Write( stringBuilder, value );
 
-            Assert.Equal(value.ToString(CultureInfo.InvariantCulture), stringBuilder.ToString());
+            Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
             stringBuilder.Clear();
         }
@@ -90,18 +88,37 @@ public class IntegerFormatterTests : FormattersTestsBase
     {
         uint[] values =
         {
-            0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, 32768, 65534, 65535, 65536, 142857, 1000000, 33550336, 2147483647, 2147483648,
-            4294967294, 4294967295
+            0,
+            1,
+            13,
+            42,
+            127,
+            128,
+            255,
+            256,
+            10000,
+            32767,
+            32768,
+            65534,
+            65535,
+            65536,
+            142857,
+            1000000,
+            33550336,
+            2147483647,
+            2147483648,
+            4294967294,
+            4294967295
         };
 
-        var formatter = new UInt32Formatter(this.DefaultRepository);
+        var formatter = new UInt32Formatter( this.DefaultRepository );
         var stringBuilder = new UnsafeStringBuilder();
 
-        foreach (var value in values)
+        foreach ( var value in values )
         {
-            formatter.Write(stringBuilder, value);
+            formatter.Write( stringBuilder, value );
 
-            Assert.Equal(value.ToString(CultureInfo.InvariantCulture), stringBuilder.ToString());
+            Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
             stringBuilder.Clear();
         }
@@ -112,18 +129,44 @@ public class IntegerFormatterTests : FormattersTestsBase
     {
         int[] values =
         {
-            0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, 32768, 65534, 65535, 65536, 142857, 1000000, 33550336, 2147483647, -1, -13, -127, -128, -10000,
-            -32767, -32768, -65536, -2147483647, -2147483648
+            0,
+            1,
+            13,
+            42,
+            127,
+            128,
+            255,
+            256,
+            10000,
+            32767,
+            32768,
+            65534,
+            65535,
+            65536,
+            142857,
+            1000000,
+            33550336,
+            2147483647,
+            -1,
+            -13,
+            -127,
+            -128,
+            -10000,
+            -32767,
+            -32768,
+            -65536,
+            -2147483647,
+            -2147483648
         };
 
-        var formatter = new Int32Formatter(this.DefaultRepository);
+        var formatter = new Int32Formatter( this.DefaultRepository );
         var stringBuilder = new UnsafeStringBuilder();
 
-        foreach (var value in values)
+        foreach ( var value in values )
         {
-            formatter.Write(stringBuilder, value);
+            formatter.Write( stringBuilder, value );
 
-            Assert.Equal(value.ToString(CultureInfo.InvariantCulture), stringBuilder.ToString());
+            Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
             stringBuilder.Clear();
         }
@@ -152,18 +195,43 @@ public class IntegerFormatterTests : FormattersTestsBase
     {
         ulong[] values =
         {
-            0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, 32768, 65534, 65535, 65536, 142857, 1000000, 33550336, 2147483647, 2147483648,
-            4294967294, 4294967295, 8589869056, 137438691328, 2305843008139952128, 9223372036854775807, 9223372036854775808, 18446744073709551615
+            0,
+            1,
+            13,
+            42,
+            127,
+            128,
+            255,
+            256,
+            10000,
+            32767,
+            32768,
+            65534,
+            65535,
+            65536,
+            142857,
+            1000000,
+            33550336,
+            2147483647,
+            2147483648,
+            4294967294,
+            4294967295,
+            8589869056,
+            137438691328,
+            2305843008139952128,
+            9223372036854775807,
+            9223372036854775808,
+            18446744073709551615
         };
 
-        var formatter = new UInt64Formatter(this.DefaultRepository);
+        var formatter = new UInt64Formatter( this.DefaultRepository );
         var stringBuilder = new UnsafeStringBuilder();
 
-        foreach (var value in values)
+        foreach ( var value in values )
         {
-            formatter.Write(stringBuilder, value);
+            formatter.Write( stringBuilder, value );
 
-            Assert.Equal(value.ToString(CultureInfo.InvariantCulture), stringBuilder.ToString());
+            Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
             stringBuilder.Clear();
         }
@@ -174,19 +242,55 @@ public class IntegerFormatterTests : FormattersTestsBase
     {
         long[] values =
         {
-            0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, 32768, 65534, 65535, 65536, 142857, 1000000, 33550336, 2147483647, 2147483648,
-            4294967294, 4294967295, 8589869056, 137438691328, 2305843008139952128, 9223372036854775807, -1, -13, -127, -128, -10000, -32767, -32768, -65536,
-            -2147483647, -2147483648, -4294967294, -2305843008139952128, -9223372036854775807, -9223372036854775808
+            0,
+            1,
+            13,
+            42,
+            127,
+            128,
+            255,
+            256,
+            10000,
+            32767,
+            32768,
+            65534,
+            65535,
+            65536,
+            142857,
+            1000000,
+            33550336,
+            2147483647,
+            2147483648,
+            4294967294,
+            4294967295,
+            8589869056,
+            137438691328,
+            2305843008139952128,
+            9223372036854775807,
+            -1,
+            -13,
+            -127,
+            -128,
+            -10000,
+            -32767,
+            -32768,
+            -65536,
+            -2147483647,
+            -2147483648,
+            -4294967294,
+            -2305843008139952128,
+            -9223372036854775807,
+            -9223372036854775808
         };
 
-        var formatter = new Int64Formatter(this.DefaultRepository);
+        var formatter = new Int64Formatter( this.DefaultRepository );
         var stringBuilder = new UnsafeStringBuilder();
 
-        foreach (var value in values)
+        foreach ( var value in values )
         {
-            formatter.Write(stringBuilder, value);
+            formatter.Write( stringBuilder, value );
 
-            Assert.Equal(value.ToString(CultureInfo.InvariantCulture), stringBuilder.ToString());
+            Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
             stringBuilder.Clear();
         }

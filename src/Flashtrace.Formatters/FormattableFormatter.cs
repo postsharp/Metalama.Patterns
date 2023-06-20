@@ -2,12 +2,10 @@
 
 namespace Flashtrace.Formatters;
 
-internal sealed class FormattableFormatter<TValue> : Formatter<TValue> 
+internal sealed class FormattableFormatter<TValue> : Formatter<TValue>
     where TValue : IFormattable
 {
-    public FormattableFormatter( IFormatterRepository repository ) : base( repository )
-    {
-    }
+    public FormattableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     public override void Write( UnsafeStringBuilder stringBuilder, TValue value )
     {
