@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Collections.Concurrent;
 
 namespace Flashtrace.Formatters;
@@ -7,6 +8,7 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// A thread-safe pool of <see cref="UnsafeStringBuilder"/>.
 /// </summary>
+[PublicAPI]
 public sealed class UnsafeStringBuilderPool : IDisposable
 {
     private readonly ConcurrentStack<UnsafeStringBuilder> _instances = new();
@@ -39,9 +41,7 @@ public sealed class UnsafeStringBuilderPool : IDisposable
     /// <returns>An <see cref="UnsafeStringBuilder"/>.</returns>
     public UnsafeStringBuilder GetInstance()
     {
-        UnsafeStringBuilder stringBuilder;
-
-        if ( !this._instances.TryPop( out stringBuilder ) )
+        if ( !this._instances.TryPop( out var stringBuilder ) )
         {
             stringBuilder = new UnsafeStringBuilder( this.StringBuilderCapacity, this._throwOnOverflow );
         }
@@ -85,9 +85,7 @@ public sealed class UnsafeStringBuilderPool : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        UnsafeStringBuilder stringBuilder;
-
-        while ( this._instances.TryPop( out stringBuilder ) )
+        while ( this._instances.TryPop( out var stringBuilder ) )
         {
             stringBuilder.Dispose();
         }

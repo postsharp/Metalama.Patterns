@@ -1,12 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace.Formatters.UnitTests.Formatters;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable UseArrayEmptyMethod
+#pragma warning disable CA1825
+
 namespace Flashtrace.Formatters.UnitTests;
 
-public class FormatterNoLoggingExceptionTests : FormattersTestsBase
+public sealed class FormatterNoLoggingExceptionTests : FormattersTestsBase
 {
     public FormatterNoLoggingExceptionTests( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -40,32 +42,5 @@ public class FormatterNoLoggingExceptionTests : FormattersTestsBase
 
         Assert.True( ThrowingFormatter<int>.Ran );
         Assert.Equal( "0", result );
-    }
-}
-
-internal class ThrowingFormatter<T> : Formatter<IEnumerable<T>>
-{
-    public static bool Ran;
-
-    public ThrowingFormatter( IFormatterRepository repository ) : base( repository )
-    {
-        Ran = true;
-
-        throw new Exception();
-    }
-
-    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
-    {
-        throw new NotSupportedException();
-    }
-}
-
-internal class NoConstructorFormatter<T> : Formatter<IEnumerable<T>>
-{
-    private NoConstructorFormatter() : base( null! ) { }
-
-    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
-    {
-        throw new NotSupportedException();
     }
 }

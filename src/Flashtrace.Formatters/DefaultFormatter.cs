@@ -1,23 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Collections.Concurrent;
-using System.Reflection;
-
 namespace Flashtrace.Formatters;
 
 // Must be a separate class because we want to share among different generic types.
-internal static class DefaultFormatterHelper
-{
-    private static readonly ConcurrentDictionary<Type, bool> _hasCustomToStringMethod = new();
-
-    public static bool HasCustomToStringMethod( Type type )
-    {
-        return _hasCustomToStringMethod.GetOrAdd(
-            type,
-            t =>
-                t.GetMethod( "ToString", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null )?.DeclaringType != typeof(object) );
-    }
-}
 
 /// <summary>
 /// The default formatter that formats objects by calling <see cref="object.ToString"/>.
@@ -87,7 +72,8 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
         else
         {
             // ReSharper disable HeapView.PossibleBoxingAllocation
-
+            // ReSharper disable once CompareNonConstrainedGenericWithNull
+            
             if ( value == null )
             {
                 stringBuilder.Append( 'n', 'u', 'l', 'l' );
@@ -118,18 +104,18 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
 
         if ( useToString )
         {
-            string text;
+            string? text;
 
             try
             {
-                text = value.ToString();
+                text = value!.ToString();
             }
             catch ( Exception e )
             {
                 text = e.GetType().ToString();
             }
 
-            var braces = !value.GetType().IsPrimitive;
+            var braces = !value!.GetType().IsPrimitive;
 
             if ( braces )
             {
@@ -137,6 +123,7 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
             }
 
             // ToString can return null.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if ( text == null )
             {
                 stringBuilder.Append( 'n', 'u', 'l', 'l' );

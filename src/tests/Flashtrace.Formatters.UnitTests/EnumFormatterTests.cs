@@ -16,7 +16,7 @@ public class EnumFormatterTests
             Assert.Equal( value.ToString(), EnumFormatterCache<FlagsEnum>.GetString( value ) );
         }
     }
-
+    
     [Flags]
     public enum FlagsEnum
     {
@@ -27,6 +27,7 @@ public class EnumFormatterTests
     [Fact]
     public void SimpleEnumEqualsToStringTest()
     {
+        // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
         SimpleEnum[] values = { 0, SimpleEnum.A, SimpleEnum.B, SimpleEnum.A | SimpleEnum.B, (SimpleEnum) ulong.MaxValue };
 
         foreach ( var value in values )

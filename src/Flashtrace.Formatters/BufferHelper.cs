@@ -1,13 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable CommentTypo
 
 namespace Flashtrace.Formatters;
 
 // TODO: Review performance-related #if's, use of PInvoke etc.
 
 // TODO: Review use of ExplicitCrossPackageInternal
-//[ExplicitCrossPackageInternal]
+// [ExplicitCrossPackageInternal]
+[SuppressMessage( "StyleCop.CSharp.MaintainabilityRules", "SA1405:Debug.Assert should provide message text", Justification = "Ported from old code, original intent not known." )]
 internal static unsafe class BufferHelper
 {
 #if WINDOWS_PINVOKE && UNSECURE_PINVOKE
@@ -327,8 +332,6 @@ internal static unsafe class BufferHelper
             // We're not using i after this, so not needed
             // i += 1;
         }
-
-        return;
     }
 
     private static void ManagedMemoryCopy64( byte* dest, byte* src, ulong len )
@@ -595,8 +598,6 @@ internal static unsafe class BufferHelper
             // We're not using i after this, so not needed
             // i += 1;
         }
-
-        return;
     }
 
 #endif
@@ -620,10 +621,10 @@ internal static unsafe class BufferHelper
         {
             do
             {
-                hashCode = ((hashCode << 13) + hashCode) + *((int*) src);
-                hashCode = ((hashCode << 13) + hashCode) + *((int*) (src + 4));
-                hashCode = ((hashCode << 13) + hashCode) + *((int*) (src + 8));
-                hashCode = ((hashCode << 13) + hashCode) + *((int*) (src + 12));
+                hashCode = (hashCode << 13) + hashCode + *(int*) src;
+                hashCode = (hashCode << 13) + hashCode + *(int*) (src + 4);
+                hashCode = (hashCode << 13) + hashCode + *(int*) (src + 8);
+                hashCode = (hashCode << 13) + hashCode + *(int*) (src + 12);
 
                 src += 0x10;
             }
@@ -634,26 +635,26 @@ internal static unsafe class BufferHelper
         {
             if ( (count & 8) != 0 )
             {
-                hashCode = ((hashCode << 13) + hashCode) + *((int*) src);
-                hashCode = ((hashCode << 13) + hashCode) + *((int*) (src + 4));
+                hashCode = (hashCode << 13) + hashCode + *(int*) src;
+                hashCode = (hashCode << 13) + hashCode + *(int*) (src + 4);
                 src += 8;
             }
 
             if ( (count & 4) != 0 )
             {
-                hashCode = ((hashCode << 13) + hashCode) + *((int*) src);
+                hashCode = (hashCode << 13) + hashCode + *(int*) src;
                 src += 4;
             }
 
             if ( (count & 2) != 0 )
             {
-                hashCode = ((hashCode << 13) + hashCode) + *((short*) src);
+                hashCode = (hashCode << 13) + hashCode + *(short*) src;
                 src += 2;
             }
 
             if ( (count & 1) != 0 )
             {
-                hashCode = ((hashCode << 13) + hashCode) + *src;
+                hashCode = (hashCode << 13) + hashCode + *src;
             }
         }
 
@@ -703,10 +704,10 @@ internal static unsafe class BufferHelper
         {
             do
             {
-                int l1 = *((int*) r), r1 = *((int*) l);
-                int l2 = *((int*) (r + 4)), r2 = *((int*) (l + 4));
-                int l3 = *((int*) (r + 8)), r3 = *((int*) (l + 8));
-                int l4 = *((int*) (r + 12)), r4 = *((int*) (l + 12));
+                int l1 = *(int*) r, r1 = *(int*) l;
+                int l2 = *(int*) (r + 4), r2 = *(int*) (l + 4);
+                int l3 = *(int*) (r + 8), r3 = *(int*) (l + 8);
+                int l4 = *(int*) (r + 12), r4 = *(int*) (l + 12);
 
                 if ( l1 != r1 || l2 != r2 || l3 != r3 || l4 != r4 )
                 {
@@ -723,8 +724,8 @@ internal static unsafe class BufferHelper
         {
             if ( (count & 8) != 0 )
             {
-                int l1 = *((int*) r), r1 = *((int*) l);
-                int l2 = *((int*) (r + 4)), r2 = *((int*) (l + 4));
+                int l1 = *(int*) r, r1 = *(int*) l;
+                int l2 = *(int*) (r + 4), r2 = *(int*) (l + 4);
 
                 if ( l1 != r1 || l2 != r2 )
                 {
@@ -737,7 +738,7 @@ internal static unsafe class BufferHelper
 
             if ( (count & 4) != 0 )
             {
-                if ( *((int*) r) != *((int*) l) )
+                if ( *(int*) r != *(int*) l )
                 {
                     return false;
                 }
@@ -748,7 +749,7 @@ internal static unsafe class BufferHelper
 
             if ( (count & 2) != 0 )
             {
-                if ( *((short*) r) != *((short*) l) )
+                if ( *(short*) r != *(short*) l )
                 {
                     return false;
                 }
@@ -785,10 +786,10 @@ internal static unsafe class BufferHelper
         {
             do
             {
-                *((int*) dest) = 0;
-                *((int*) (dest + 4)) = 0;
-                *((int*) (dest + 8)) = 0;
-                *((int*) (dest + 12)) = 0;
+                *(int*) dest = 0;
+                *(int*) (dest + 4) = 0;
+                *(int*) (dest + 8) = 0;
+                *(int*) (dest + 12) = 0;
                 dest += 0x10;
             }
             while ( (count -= 0x10) >= 0x10 );
@@ -798,20 +799,20 @@ internal static unsafe class BufferHelper
         {
             if ( (count & 8) != 0 )
             {
-                *((int*) dest) = 0;
-                *((int*) (dest + 4)) = 0;
+                *(int*) dest = 0;
+                *(int*) (dest + 4) = 0;
                 dest += 8;
             }
 
             if ( (count & 4) != 0 )
             {
-                *((int*) dest) = 0;
+                *(int*) dest = 0;
                 dest += 4;
             }
 
             if ( (count & 2) != 0 )
             {
-                *((short*) dest) = 0;
+                *(short*) dest = 0;
                 dest += 2;
             }
 

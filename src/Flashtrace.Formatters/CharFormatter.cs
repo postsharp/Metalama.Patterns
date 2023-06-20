@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace.Formatters;
 
 /// <summary>
 /// A formatter for <see cref="char"/> values.
 /// </summary>
+[PublicAPI]
 public sealed class CharFormatter : Formatter<char>
 {
     private NonQuotingCharFormatter? _nonQuotingCharFormatter;
@@ -15,14 +18,11 @@ public sealed class CharFormatter : Formatter<char>
     /// <param name="repository"></param>
     public CharFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-    private NonQuotingCharFormatter NonQuotingCharFormatter
+    private NonQuotingCharFormatter GetNonQuotingCharFormatter()
     {
-        get
-        {
-            this._nonQuotingCharFormatter ??= new NonQuotingCharFormatter( this.Repository );
+        this._nonQuotingCharFormatter ??= new NonQuotingCharFormatter( this.Repository, this );
 
-            return this._nonQuotingCharFormatter;
-        }
+        return this._nonQuotingCharFormatter;
     }
 
     /// <inheritdoc />
@@ -36,28 +36,45 @@ public sealed class CharFormatter : Formatter<char>
     {
         if ( options.RequiresUnquotedStrings )
         {
-            return this.NonQuotingCharFormatter;
+            return this.GetNonQuotingCharFormatter();
         }
         else
         {
             return this;
         }
     }
-}
-
-internal sealed class NonQuotingCharFormatter : Formatter<char>
-{
-    public NonQuotingCharFormatter( IFormatterRepository repository ) : base( repository ) { }
-
-    public override void Write( UnsafeStringBuilder stringBuilder, char value )
+    
+    private sealed class NonQuotingCharFormatter : Formatter<char>
     {
-        if ( value == '\0' )
+        private readonly CharFormatter _defaultCharFormatter;
+
+        public NonQuotingCharFormatter( IFormatterRepository repository, CharFormatter defaultCharFormatter ) : base( repository )
         {
-            // Don't emit anything for \0. We would need another escaping formatter.
+            this._defaultCharFormatter = defaultCharFormatter;
         }
-        else
+
+        public override void Write( UnsafeStringBuilder stringBuilder, char value )
         {
-            stringBuilder.Append( value );
+            if ( value == '\0' )
+            {
+                // Don't emit anything for \0. We would need another escaping formatter.
+            }
+            else
+            {
+                stringBuilder.Append( value );
+            }
         }
-    }
+
+        public override IOptionAwareFormatter WithOptions( FormattingOptions options )
+        {
+            if ( options.RequiresUnquotedStrings )
+            {
+                return this;
+            }
+            else
+            {
+                return this._defaultCharFormatter;
+            }
+        }
+    }    
 }

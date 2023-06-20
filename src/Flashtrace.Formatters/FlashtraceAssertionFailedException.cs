@@ -2,6 +2,8 @@
 
 using System.Runtime.Serialization;
 
+// TODO: Remove disable once moved to new project.
+// ReSharper disable once CheckNamespace
 namespace Flashtrace;
 
 /// <summary>

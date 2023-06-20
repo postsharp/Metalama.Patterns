@@ -46,15 +46,15 @@ public sealed class TypeFormatter : Formatter<Type>
 
     private void WriteCore( UnsafeStringBuilder stringBuilder, Type? type, bool removeArity = false, Type[]? genericArguments = null )
     {
+        if ( type == null )
+        {
+            stringBuilder.Append( 'n', 'u', 'l', 'l' );
+
+            return;
+        }
+        
         try
         {
-            if ( type == null )
-            {
-                stringBuilder.Append( 'n', 'u', 'l', 'l' );
-
-                return;
-            }
-
             if ( type.IsGenericParameter )
             {
                 stringBuilder.Append( type.Name );
@@ -65,7 +65,7 @@ public sealed class TypeFormatter : Formatter<Type>
             if ( type.DeclaringType != null )
             {
                 // For generic inner type instance, pass the fully specified types on (for A<int>.B<int> argument array contains {int, int}).
-                genericArguments ??= (type.IsGenericType && !type.IsGenericTypeDefinition) ? type.GetGenericArguments() : null;
+                genericArguments ??= type is { IsGenericType: true, IsGenericTypeDefinition: false } ? type.GetGenericArguments() : null;
                 this.WriteCore( stringBuilder, type.DeclaringType, genericArguments: genericArguments );
                 stringBuilder.Append( '.' );
             }
@@ -92,13 +92,13 @@ public sealed class TypeFormatter : Formatter<Type>
                 // If generic arguments are set, formatting was started on type instance and the passed array should be used as it contains actual arguments.
                 // Otherwise formatting runs on type definition, where we use the local array.
                 genericArguments ??= type.GetGenericArguments();
-                Type[] genericParameters = type.GetGenericArguments();
+                var genericParameters = type.GetGenericArguments();
                 var appendComma = false;
 
                 stringBuilder.Append( RemoveArity( this.GetTypeName( type ), true ) );
                 stringBuilder.Append( '<' );
 
-                var startIndex = type.DeclaringType?.GetGenericArguments()?.Length ?? 0;
+                var startIndex = type.DeclaringType?.GetGenericArguments().Length ?? 0;
 
                 for ( var i = startIndex; i < genericParameters.Length; i++ )
                 {
@@ -125,7 +125,7 @@ public sealed class TypeFormatter : Formatter<Type>
                     stringBuilder.Append( '<' );
 
                     // Only include number of parameters declared on this type (array contains parameters of declaring types).
-                    var startIndex = (type.DeclaringType?.GetGenericArguments()?.Length ?? 0) + 1;
+                    var startIndex = (type.DeclaringType?.GetGenericArguments().Length ?? 0) + 1;
                     var length = type.GetGenericArguments().Length;
 
                     for ( var i = startIndex; i < length; i++ )
@@ -175,7 +175,9 @@ public sealed class TypeFormatter : Formatter<Type>
             return type.Name;
         }
 
-        return this.IsTrivialNamespace( type ) ? type.Name : type.FullName;
+        return this.IsTrivialNamespace( type ) 
+            ? type.Name 
+            : type.FullName ?? type.Name;
     }
 
     private bool IsTrivialNamespace( Type type )

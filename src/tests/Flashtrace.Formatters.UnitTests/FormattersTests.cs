@@ -4,7 +4,7 @@ using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Flashtrace.Formatters.UnitTests.Formatters;
+namespace Flashtrace.Formatters.UnitTests;
 
 public class FormattersTests : FormattersTestsBase
 {
@@ -19,7 +19,7 @@ public class FormattersTests : FormattersTestsBase
         }
     }
 
-    private class TestStructFormatter : Formatter<TestStruct>
+    private sealed class TestStructFormatter : Formatter<TestStruct>
     {
         public TestStructFormatter( IFormatterRepository repository ) : base( repository ) { }
 
@@ -32,7 +32,7 @@ public class FormattersTests : FormattersTestsBase
     [Fact]
     public void StronglyTypedUnregisteredType()
     {
-        _ = this.DefaultRepository.Get<TestStruct>()!;
+        _ = this.DefaultRepository.Get<TestStruct>();
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class FormattersTests : FormattersTestsBase
         var repo = GetNewRepository();
         repo.Register( new TestStructFormatter( repo ) );
 
-        Assert.Equal( "formatter", this.Format<TestStruct?>( repo, new TestStruct() ) );
+        Assert.Equal( "formatter", this.Format<TestStruct?>( repo, default(TestStruct) ) );
     }
 
     [Fact]
@@ -97,22 +97,22 @@ public class FormattersTests : FormattersTestsBase
         Assert.Equal( "null", this.FormatDefault<MethodInfo>( null ) );
 
         Assert.Equal(
-            "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.Method1()",
+            "Flashtrace.Formatters.UnitTests.FormattersTests.SomeType.Method1()",
             this.FormatDefault(
                 typeof(SomeType).GetMethod( nameof(SomeType.Method1), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
 
         Assert.Equal(
-            "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.Method2(int)",
+            "Flashtrace.Formatters.UnitTests.FormattersTests.SomeType.Method2(int)",
             this.FormatDefault(
                 typeof(SomeType).GetMethod( nameof(SomeType.Method2), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
 
         Assert.Equal(
-            "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.Method3(int&)",
+            "Flashtrace.Formatters.UnitTests.FormattersTests.SomeType.Method3(int&)",
             this.FormatDefault(
                 typeof(SomeType).GetMethod( nameof(SomeType.Method3), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
 
         Assert.Equal(
-            "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.Method4<T>(List<T>)",
+            "Flashtrace.Formatters.UnitTests.FormattersTests.SomeType.Method4<T>(List<T>)",
             this.FormatDefault(
                 typeof(SomeType).GetMethod( nameof(SomeType.Method4), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic ) ) );
     }
@@ -123,29 +123,38 @@ public class FormattersTests : FormattersTestsBase
         Assert.Equal( "null", this.FormatDefault<ConstructorInfo>( null ) );
 
         Assert.Equal(
-            "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.new()",
+            "Flashtrace.Formatters.UnitTests.FormattersTests.SomeType.new()",
             this.FormatDefault(
                 typeof(SomeType).GetConstructors( BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
                     .Single( c => c.GetParameters().Length == 0 ) ) );
 
         Assert.Equal(
-            "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.new(int)",
+            "Flashtrace.Formatters.UnitTests.FormattersTests.SomeType.new(int)",
             this.FormatDefault(
                 typeof(SomeType).GetConstructors( BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
                     .Single( c => c.GetParameters().Length == 1 ) ) );
 
         Assert.Equal(
-            "Flashtrace.Formatters.UnitTests.Formatters.FormattersTests.SomeType.StaticConstructor()",
+            "Flashtrace.Formatters.UnitTests.FormattersTests.SomeType.StaticConstructor()",
             this.FormatDefault(
                 typeof(SomeType).GetConstructors( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
                     .Single( c => c.GetParameters().Length == 0 ) ) );
     }
 
-    private class SomeType
+    // ReSharper disable UnusedMember.Local
+    // ReSharper disable once NotAccessedField.Local
+
+    private sealed class SomeType
     {
 #pragma warning disable CS0414
+#pragma warning disable IDE0044
+#pragma warning disable IDE0052
+#pragma warning disable IDE1006
         private static int staticField;
         private int instanceField;
+#pragma warning restore IDE1006
+#pragma warning restore IDE0052
+#pragma warning restore IDE0044
 #pragma warning restore CS0414
 
         static SomeType()
@@ -163,6 +172,7 @@ public class FormattersTests : FormattersTestsBase
             this.instanceField = a;
         }
 
+#pragma warning disable CA1822
         public void Method1() { }
 
         public int Method2( int a ) { return a; }
@@ -170,6 +180,7 @@ public class FormattersTests : FormattersTestsBase
         public void Method3( out int a ) { a = 0; }
 
         public void Method4<T>( List<T> l ) { }
+#pragma warning restore CA1822
     }
 
     [Fact]
@@ -180,11 +191,11 @@ public class FormattersTests : FormattersTestsBase
 
         var repo2 = GetNewRepository();
 
-        Assert.Equal( "formatter", this.Format( repo1, new TestStruct() ) );
-        Assert.Equal( "{ToString}", this.Format( repo2, new TestStruct() ) );
+        Assert.Equal( "formatter", this.Format( repo1, default(TestStruct) ) );
+        Assert.Equal( "{ToString}", this.Format( repo2, default(TestStruct) ) );
     }
 
-    private class FormattableObject : IFormattable
+    private sealed class FormattableObject : IFormattable
     {
         public void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
         {
@@ -192,9 +203,9 @@ public class FormattersTests : FormattersTestsBase
         }
     }
 
-    private class NullToStringClass
+    private sealed class NullToStringClass
     {
-        public override string ToString()
+        public override string? ToString()
         {
             return null;
         }

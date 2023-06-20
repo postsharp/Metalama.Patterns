@@ -7,7 +7,7 @@ internal sealed class FormattableFormatter<TValue> : Formatter<TValue>
 {
     public FormattableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, TValue value )
+    public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
     {
         if ( value == null )
         {

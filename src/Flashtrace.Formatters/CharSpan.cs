@@ -1,14 +1,30 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace.Formatters;
 
 /// <summary>
 /// Represents a span of <see cref="char"/> by encapsulating a substring or a range of a <see cref="char"/> array.
 /// </summary>
+[PublicAPI]
 public readonly struct CharSpan : CharSpan.IArrayAccessor
 {
+    /* TODO: Review TG - discuss replacement pattern. I considered exposing Array publicly to be too unsafe.
+    [ExplicitCrossPackageInternal]
+    internal object _array { get;  }
+    */
+
+    /// <summary>
+    /// Provides access to the internal storage of <see cref="CharSpan"/>. 
+    /// </summary>
+    [PublicAPI]
     public interface IArrayAccessor
     {
+        /// <summary>
+        /// Gets the internal storage object. <see cref="Array"/> will be <see langword="null"/>, array of <see cref="char"/>, or <see cref="string"/>.
+        /// Do not mutate the returned object.
+        /// </summary>
         object? Array { get; }
     }
 
@@ -22,17 +38,11 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// <summary>
     /// Gets a value indicating whether the current instance represents a null string.
     /// </summary>
-    public bool IsNull => this._array == null;
+    public bool IsNull => this.Array == null;
 
-    private readonly object? _array;
+    object? IArrayAccessor.Array => this.Array;
 
-    /* TODO: Review TG - discuss replacement pattern. I considered exposing Array publicly to be too unsafe.
-    [ExplicitCrossPackageInternal]
-    internal object _array { get;  }
-    */
-    object? IArrayAccessor.Array => this._array;
-
-    internal object? Array => this._array;
+    internal object? Array { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharSpan"/> struct from an array of <see cref="char"/>.
@@ -40,9 +50,9 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// <param name="array">An array of <see cref="char"/>.</param>
     /// <param name="start">The start index of the span in the <paramref name="array"/>.</param>
     /// <param name="length">The number of characters in the span.</param>
-    public CharSpan( char[] array, int start, int length )
+    public CharSpan( char[]? array, int start, int length )
     {
-        this._array = array;
+        this.Array = array;
         this.StartIndex = start;
         this.Length = length;
     }
@@ -53,18 +63,20 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// <param name="str">A string.</param>
     /// <param name="start">The index of the first character of the span in <paramref name="str"/>.</param>
     /// <param name="length">The number of characters in the span.</param>
-    public CharSpan( string str, int start, int length )
+    public CharSpan( string? str, int start, int length )
     {
-        this._array = str;
+        this.Array = str;
         this.StartIndex = start;
         this.Length = length;
     }
 
+    // ReSharper disable once MergeConditionalExpression
+    
     /// <summary>
     /// Initializes a new instance of the <see cref="CharSpan"/> struct from a <see cref="string"/>, and takes the whole string.
     /// </summary>
     /// <param name="str">A string.</param>
-    public CharSpan( string str ) : this( str, 0, str == null ? 0 : str.Length ) { }
+    public CharSpan( string? str ) : this( str, 0, str == null ? 0 : str.Length ) { }
 
     /// <summary>
     /// Converts a <see cref="string"/> into a <see cref="CharSpan"/>.
@@ -94,12 +106,12 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// Gets a value indicating whether the current <see cref="CharSpan"/> is backed by a <c>char[]</c>. In this case,
     /// the <see cref="ToCharArraySegment"/> method does not allocate memory.
     /// </summary>
-    public bool IsBackedByCharArray => this._array is char[];
+    public bool IsBackedByCharArray => this.Array is char[];
 
     /// <inheritdoc/>
     public override string? ToString()
     {
-        switch ( this._array )
+        switch ( this.Array )
         {
             case string s:
                 return s.Substring( this.StartIndex, this.Length );
@@ -119,7 +131,7 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// <returns></returns>
     public ArraySegment<char> ToCharArraySegment()
     {
-        switch ( this._array )
+        switch ( this.Array )
         {
             case string s:
                 return new ArraySegment<char>( s.ToCharArray(), this.StartIndex, this.Length );

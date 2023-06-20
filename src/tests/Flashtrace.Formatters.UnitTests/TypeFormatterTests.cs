@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace.Formatters.UnitTests.Formatters;
 using System.Collections;
 using Xunit;
 using Xunit.Abstractions;
@@ -120,6 +119,13 @@ namespace Flashtrace.Formatters.UnitTests
         }
     }
 }
+
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable UnusedTypeParameter
+#pragma warning disable SA1314
+#pragma warning disable SA1403
+#pragma warning disable SA1402
 
 namespace System
 {

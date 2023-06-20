@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,23 +10,30 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// A class similar to <see cref="System.Text.StringBuilder"/>, but implemented using unsafe C#.
 /// </summary>
+[PublicAPI]
+[SuppressMessage( "Style", "IDE0047:Remove unnecessary parentheses", Justification = "If the parentheses are removed, these warnings are replaced with 'Arithmetic expressions should declare precedence' warnings instead." )]
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+[SuppressMessage( "ReSharper", "ArrangeRedundantParentheses", Justification = "If the parentheses are removed, these warnings are replaced with 'Arithmetic expressions should declare precedence' warnings instead." )]
+#pragma warning restore IDE0079 // Remove unnecessary suppression
 public sealed unsafe class UnsafeStringBuilder : IDisposable
 {
-    private char[] array;
-    private char* cursor;
-    private char* start;
-    private char* end;
-    private GCHandle gcHandle;
-    private UnsafeString unsafeString;
+#pragma warning disable IDE0032
+    private char[]? _array;
+#pragma warning restore IDE0032
+    private char* _cursor;
+    private char* _start;
+    private char* _end;
+    private GCHandle _gcHandle;
+    private UnsafeString _unsafeString;
 
     /// <summary>
-    /// <c>true</c> if an <see cref="OverflowException"/> should be thrown when
-    /// the buffer capacity is insufficient, <c>false</c> if the <c>Append</c> method should return <c>false</c> without exception.
+    /// Gets a value indicating whether  an <see cref="OverflowException"/> should be thrown when
+    /// the buffer capacity is insufficient. If <c>false</c>, the <c>Append</c> method should return <c>false</c> without exception.
     /// </summary>
     public bool ThrowOnOverflow { get; }
 
     /// <summary>
-    /// Initializes a new <see cref="UnsafeStringBuilder"/> and allocates a new buffer.
+    /// Initializes a new instance of the <see cref="UnsafeStringBuilder"/> class and allocates a new buffer.
     /// </summary>
     /// <param name="capacity">The capacity of the new <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="throwOnOverflow"><c>true</c> if an <see cref="OverflowException"/> should be thrown when
@@ -33,15 +41,15 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     public UnsafeStringBuilder( int capacity = 2048, bool throwOnOverflow = true )
     {
         this.ThrowOnOverflow = throwOnOverflow;
-        this.array = new char[capacity];
-        this.gcHandle = GCHandle.Alloc( this.CharArray, GCHandleType.Pinned );
-        this.cursor = this.start = (char*) this.gcHandle.AddrOfPinnedObject();
-        this.end = this.start + capacity;
-        this.unsafeString = new UnsafeString( this );
+        this._array = new char[capacity];
+        this._gcHandle = GCHandle.Alloc( this.CharArray, GCHandleType.Pinned );
+        this._cursor = this._start = (char*) this._gcHandle.AddrOfPinnedObject();
+        this._end = this._start + capacity;
+        this._unsafeString = new UnsafeString( this );
     }
 
     /// <summary>
-    /// Initializes a new <see cref="UnsafeStringBuilder"/> with a pre-allocated buffer/
+    /// Initializes a new instance of the <see cref="UnsafeStringBuilder"/> class with a pre-allocated buffer.
     /// </summary>
     /// <param name="buffer">Pointer to the buffer.</param>
     /// <param name="size">Number of <c>char</c> in the buffer.</param>
@@ -50,18 +58,18 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     public UnsafeStringBuilder( char* buffer, int size, bool throwOnOverflow = true )
     {
         this.ThrowOnOverflow = throwOnOverflow;
-        this.array = null;
-        this.start = buffer;
-        this.cursor = buffer;
-        this.end = this.start + size;
-        this.unsafeString = new UnsafeString( this );
+        this._array = null;
+        this._start = buffer;
+        this._cursor = buffer;
+        this._end = this._start + size;
+        this._unsafeString = new UnsafeString( this );
         GC.SuppressFinalize( this );
     }
 
     /// <summary>
     /// Gets the capacity (number of <c>char</c>) of the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    public int Capacity => (int) (this.end - this.start);
+    public int Capacity => (int) (this._end - this._start);
 
     [MethodImpl( MethodImplOptions.NoInlining )]
     private bool OnOverflow()
@@ -79,16 +87,15 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// </summary>
     /// <param name="c">A <c>char</c>.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
     public bool Append( char c )
     {
-        if ( this.cursor + 1 > this.end )
+        if ( this._cursor + 1 > this._end )
         {
             return this.OnOverflow();
         }
 
-        *this.cursor = c;
-        this.cursor++;
+        *this._cursor = c;
+        this._cursor++;
 
         return true;
     }
@@ -96,20 +103,19 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends two <c>char</c> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="c1">A <c>char</c>.</param>
-    /// <param name="c2">A <c>char</c>.</param>
+    /// <param name="c1">The first <c>char</c> to append.</param>
+    /// <param name="c2">The second <c>char</c> to append.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
     public bool Append( char c1, char c2 )
     {
-        if ( this.cursor + 2 > this.end )
+        if ( this._cursor + 2 > this._end )
         {
             return this.OnOverflow();
         }
 
-        *this.cursor = c1;
-        *(this.cursor + 1) = c2;
-        this.cursor += 2;
+        *this._cursor = c1;
+        *(this._cursor + 1) = c2;
+        this._cursor += 2;
 
         return true;
     }
@@ -117,22 +123,21 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends three <c>char</c> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="c1">A <c>char</c>.</param>
-    /// <param name="c2">A <c>char</c>.</param>
-    /// <param name="c3">A <c>char</c>.</param>
+    /// <param name="c1">The first <c>char</c> to append.</param>
+    /// <param name="c2">The second <c>char</c> to append.</param>
+    /// <param name="c3">The third <c>char</c> to append.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
     public bool Append( char c1, char c2, char c3 )
     {
-        if ( this.cursor + 3 > this.end )
+        if ( this._cursor + 3 > this._end )
         {
             return this.OnOverflow();
         }
 
-        *this.cursor = c1;
-        *(this.cursor + 1) = c2;
-        *(this.cursor + 2) = c3;
-        this.cursor += 3;
+        *this._cursor = c1;
+        *(this._cursor + 1) = c2;
+        *(this._cursor + 2) = c3;
+        this._cursor += 3;
 
         return true;
     }
@@ -140,24 +145,23 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends four <c>char</c> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="c1">A <c>char</c>.</param>
-    /// <param name="c2">A <c>char</c>.</param>
-    /// <param name="c3">A <c>char</c>.</param>
-    /// <param name="c4">A <c>char</c>.</param>
+    /// <param name="c1">The first <c>char</c> to append.</param>
+    /// <param name="c2">The second <c>char</c> to append.</param>
+    /// <param name="c3">The third <c>char</c> to append.</param>
+    /// <param name="c4">The fourth <c>char</c> to append.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
     public bool Append( char c1, char c2, char c3, char c4 )
     {
-        if ( this.cursor + 4 > this.end )
+        if ( this._cursor + 4 > this._end )
         {
             return this.OnOverflow();
         }
 
-        *this.cursor = c1;
-        *(this.cursor + 1) = c2;
-        *(this.cursor + 2) = c3;
-        *(this.cursor + 3) = c4;
-        this.cursor += 4;
+        *this._cursor = c1;
+        *(this._cursor + 1) = c2;
+        *(this._cursor + 2) = c3;
+        *(this._cursor + 3) = c4;
+        this._cursor += 4;
 
         return true;
     }
@@ -165,26 +169,25 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends five <c>char</c> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="c1">A <c>char</c>.</param>
-    /// <param name="c2">A <c>char</c>.</param>
-    /// <param name="c3">A <c>char</c>.</param>
-    /// <param name="c4">A <c>char</c>.</param>
-    /// <param name="c5">A <c>char</c>.</param>
+    /// <param name="c1">The first <c>char</c> to append.</param>
+    /// <param name="c2">The second <c>char</c> to append.</param>
+    /// <param name="c3">The third <c>char</c> to append.</param>
+    /// <param name="c4">The fourth <c>char</c> to append.</param>
+    /// <param name="c5">The fifth <c>char</c> to append.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
     public bool Append( char c1, char c2, char c3, char c4, char c5 )
     {
-        if ( this.cursor + 5 > this.end )
+        if ( this._cursor + 5 > this._end )
         {
             return this.OnOverflow();
         }
 
-        *this.cursor = c1;
-        *(this.cursor + 1) = c2;
-        *(this.cursor + 2) = c3;
-        *(this.cursor + 3) = c4;
-        *(this.cursor + 4) = c5;
-        this.cursor += 5;
+        *this._cursor = c1;
+        *(this._cursor + 1) = c2;
+        *(this._cursor + 2) = c3;
+        *(this._cursor + 3) = c4;
+        *(this._cursor + 4) = c5;
+        this._cursor += 5;
 
         return true;
     }
@@ -196,9 +199,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <param name="offset">Index of the first <c>char</c> to be appended.</param>
     /// <param name="count">Number of <c>char</c> to be appended.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "count*2" )]
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
-    public bool Append( char[] c, int offset, int count )
+    public bool Append( char[]? c, int offset, int count )
     {
         if ( c == null || c.Length == 0 )
         {
@@ -210,17 +211,17 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             throw new ArgumentOutOfRangeException( nameof(c) );
         }
 
-        if ( this.cursor + count > this.end )
+        if ( this._cursor + count > this._end )
         {
             return this.OnOverflow();
         }
 
         fixed ( char* theirArray = c )
         {
-            BufferHelper.CopyMemory( this.cursor, theirArray + offset, count * sizeof(char) );
+            BufferHelper.CopyMemory( this._cursor, theirArray + offset, count * sizeof(char) );
         }
 
-        this.cursor += count;
+        this._cursor += count;
 
         return true;
     }
@@ -231,8 +232,6 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <param name="c">A non-null pointer to an unmanaged array of <c>char</c>.</param>
     /// <param name="count">Number of <c>char</c> to be appended.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "count*2" )]
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
     public bool Append( char* c, int count )
     {
         if ( c == null || count == 0 )
@@ -240,13 +239,13 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             return true;
         }
 
-        if ( this.cursor + count > this.end )
+        if ( this._cursor + count > this._end )
         {
             return this.OnOverflow();
         }
 
-        BufferHelper.CopyMemory( this.cursor, c, count * sizeof(char) );
-        this.cursor += count;
+        BufferHelper.CopyMemory( this._cursor, c, count * sizeof(char) );
+        this._cursor += count;
 
         return true;
     }
@@ -257,21 +256,20 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <param name="c">A <c>char</c>.</param>
     /// <param name="count">The number of times <paramref name="c"/> has to be appended.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
     public bool Append( char c, int count )
     {
-        if ( this.cursor + count > this.end )
+        if ( this._cursor + count > this._end )
         {
             return this.OnOverflow();
         }
 
         for ( var i = 0; i < count / 4; i++ )
         {
-            *(this.cursor + 0) = c;
-            *(this.cursor + 1) = c;
-            *(this.cursor + 2) = c;
-            *(this.cursor + 3) = c;
-            this.cursor += 4;
+            *(this._cursor + 0) = c;
+            *(this._cursor + 1) = c;
+            *(this._cursor + 2) = c;
+            *(this._cursor + 3) = c;
+            this._cursor += 4;
         }
 
         switch ( count % 4 )
@@ -280,23 +278,23 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
                 break;
 
             case 1:
-                *(this.cursor + 0) = c;
-                this.cursor += 1;
+                *(this._cursor + 0) = c;
+                this._cursor += 1;
 
                 break;
 
             case 2:
-                *(this.cursor + 0) = c;
-                *(this.cursor + 1) = c;
-                this.cursor += 2;
+                *(this._cursor + 0) = c;
+                *(this._cursor + 1) = c;
+                this._cursor += 2;
 
                 break;
 
             case 3:
-                *(this.cursor + 0) = c;
-                *(this.cursor + 1) = c;
-                *(this.cursor + 2) = c;
-                this.cursor += 3;
+                *(this._cursor + 0) = c;
+                *(this._cursor + 1) = c;
+                *(this._cursor + 2) = c;
+                this._cursor += 3;
 
                 break;
         }
@@ -307,10 +305,9 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends an array of <c>char</c> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="c">A non-null array of <c>char</c>.</param>
+    /// <param name="c">An array of <c>char</c>.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "c" )]
-    public bool Append( char[] c )
+    public bool Append( char[]? c )
     {
         if ( c == null || c.Length == 0 )
         {
@@ -319,17 +316,17 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
 
         var count = c.Length;
 
-        if ( this.cursor + count > this.end )
+        if ( this._cursor + count > this._end )
         {
             return this.OnOverflow();
         }
 
         fixed ( char* theirArray = c )
         {
-            BufferHelper.CopyMemory( this.cursor, theirArray, count * sizeof(char) );
+            BufferHelper.CopyMemory( this._cursor, theirArray, count * sizeof(char) );
         }
 
-        this.cursor += count;
+        this._cursor += count;
 
         return true;
     }
@@ -337,10 +334,9 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends a <see cref="string"/> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="str">A non-null <see cref="string"/>.</param>
+    /// <param name="str">A <see cref="string"/>.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "s" )]
-    public bool Append( string str )
+    public bool Append( string? str )
     {
         if ( str == null )
         {
@@ -353,29 +349,28 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends a part of a <see cref="string"/> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="str">A non-null <see cref="string"/></param>
+    /// <param name="str">A <see cref="string"/>.</param>
     /// <param name="startIndex">The index of the first character of the string to append.</param>
     /// <param name="length">The number of characters to append.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Usage", "CA2233:OperationsShouldNotOverflow" )]
-    public bool Append( string str, int startIndex, int length )
+    public bool Append( string? str, int startIndex, int length )
     {
         if ( str == null || length == 0 )
         {
             return true;
         }
 
-        if ( this.cursor + length > this.end )
+        if ( this._cursor + length > this._end )
         {
             return this.OnOverflow();
         }
 
         fixed ( char* theirArray = str )
         {
-            BufferHelper.CopyMemory( this.cursor, theirArray + startIndex, length * sizeof(char) );
+            BufferHelper.CopyMemory( this._cursor, theirArray + startIndex, length * sizeof(char) );
         }
 
-        this.cursor += length;
+        this._cursor += length;
 
         return true;
     }
@@ -406,10 +401,9 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends an <see cref="UnsafeString"/> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="s">A non-null <see cref="UnsafeString"/>.</param>
+    /// <param name="s">An <see cref="UnsafeString"/>.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "s" )]
-    public bool Append( UnsafeString s )
+    public bool Append( UnsafeString? s )
     {
         if ( s == null || s.Length == 0 )
         {
@@ -424,7 +418,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
         {
             var count = s.Length;
 
-            if ( this.cursor + count > this.end )
+            if ( this._cursor + count > this._end )
             {
                 return this.OnOverflow();
             }
@@ -433,18 +427,18 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             {
                 fixed ( char* source = s.CharArray )
                 {
-                    BufferHelper.CopyMemory( this.cursor, source, count * sizeof(char) );
+                    BufferHelper.CopyMemory( this._cursor, source, count * sizeof(char) );
                 }
             }
             else
             {
                 fixed ( char* source = s.ToString() )
                 {
-                    BufferHelper.CopyMemory( this.cursor, source, count * sizeof(char) );
+                    BufferHelper.CopyMemory( this._cursor, source, count * sizeof(char) );
                 }
             }
 
-            this.cursor += count;
+            this._cursor += count;
         }
 
         return true;
@@ -453,9 +447,9 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <summary>
     /// Appends the current value of a <see cref="UnsafeStringBuilder"/> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="stringBuilder">A <see cref="UnsafeStringBuilder"/>.</param>
+    /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    public bool Append( UnsafeStringBuilder stringBuilder )
+    public bool Append( UnsafeStringBuilder? stringBuilder )
     {
         if ( stringBuilder == null || stringBuilder.Length == 0 )
         {
@@ -464,14 +458,14 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
 
         var count = stringBuilder.Length;
 
-        if ( this.cursor + count > this.end )
+        if ( this._cursor + count > this._end )
         {
             return this.OnOverflow();
         }
 
-        BufferHelper.CopyMemory( this.cursor, stringBuilder.start, count * sizeof(char) );
+        BufferHelper.CopyMemory( this._cursor, stringBuilder._start, count * sizeof(char) );
 
-        this.cursor += count;
+        this._cursor += count;
 
         return true;
     }
@@ -483,7 +477,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( byte value )
     {
-        if ( this.cursor + 3 > this.end )
+        if ( this._cursor + 3 > this._end )
         {
             return this.OnOverflow();
         }
@@ -500,7 +494,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( sbyte value )
     {
-        if ( this.cursor + 4 > this.end )
+        if ( this._cursor + 4 > this._end )
         {
             return this.OnOverflow();
         }
@@ -513,8 +507,8 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             }
             else
             {
-                *this.cursor = '-';
-                this.cursor++;
+                *this._cursor = '-';
+                this._cursor++;
                 this.AppendByte( (byte) -value );
             }
         }
@@ -528,24 +522,24 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
         {
             if ( value >= 100 )
             {
-                *(this.cursor + 0) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 3;
+                this._cursor += 3;
             }
             else if ( value >= 10 )
             {
-                *(this.cursor + 0) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 2;
+                this._cursor += 2;
             }
             else
             {
-                *(this.cursor + 0) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 1;
+                this._cursor += 1;
             }
         }
     }
@@ -557,7 +551,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( ushort value )
     {
-        if ( this.cursor + 5 > this.end )
+        if ( this._cursor + 5 > this._end )
         {
             return this.OnOverflow();
         }
@@ -574,7 +568,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( short value )
     {
-        if ( this.cursor + 6 > this.end )
+        if ( this._cursor + 6 > this._end )
         {
             return this.OnOverflow();
         }
@@ -587,8 +581,8 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             }
             else
             {
-                *this.cursor = '-';
-                this.cursor++;
+                *this._cursor = '-';
+                this._cursor++;
                 this.AppendUInt16( (ushort) -value );
             }
         }
@@ -602,43 +596,43 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
         {
             if ( value >= 10000 )
             {
-                *(this.cursor + 0) = (char) (((value / 10000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 4) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 10000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 4) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 5;
+                this._cursor += 5;
             }
             else if ( value >= 1000 )
             {
-                *(this.cursor + 0) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 4;
+                this._cursor += 4;
             }
             else if ( value >= 100 )
             {
-                *(this.cursor + 0) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 3;
+                this._cursor += 3;
             }
             else if ( value >= 10 )
             {
-                *(this.cursor + 0) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 2;
+                this._cursor += 2;
             }
             else
             {
-                *(this.cursor + 0) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 1;
+                this._cursor += 1;
             }
         }
     }
@@ -650,7 +644,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( uint value )
     {
-        if ( this.cursor + 10 > this.end )
+        if ( this._cursor + 10 > this._end )
         {
             return this.OnOverflow();
         }
@@ -667,7 +661,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( int value )
     {
-        if ( this.cursor + 11 > this.end )
+        if ( this._cursor + 11 > this._end )
         {
             return this.OnOverflow();
         }
@@ -680,8 +674,8 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             }
             else
             {
-                *this.cursor = '-';
-                this.cursor++;
+                *this._cursor = '-';
+                this._cursor++;
                 this.AppendUInt32( (uint) -value );
             }
         }
@@ -695,108 +689,108 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
         {
             if ( value >= 1000000000 )
             {
-                *(this.cursor + 0) = (char) (((value / 1000000000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 100000000) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 10000000) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 1000000) % 10) + '0');
-                *(this.cursor + 4) = (char) (((value / 100000) % 10) + '0');
-                *(this.cursor + 5) = (char) (((value / 10000) % 10) + '0');
-                *(this.cursor + 6) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 7) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 8) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 9) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 1000000000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 100000000) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 10000000) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 1000000) % 10) + '0');
+                *(this._cursor + 4) = (char) (((value / 100000) % 10) + '0');
+                *(this._cursor + 5) = (char) (((value / 10000) % 10) + '0');
+                *(this._cursor + 6) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 7) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 8) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 9) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 10;
+                this._cursor += 10;
             }
             else if ( value >= 100000000 )
             {
-                *(this.cursor + 0) = (char) (((value / 100000000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 10000000) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 1000000) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 100000) % 10) + '0');
-                *(this.cursor + 4) = (char) (((value / 10000) % 10) + '0');
-                *(this.cursor + 5) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 6) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 7) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 8) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 100000000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 10000000) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 1000000) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 100000) % 10) + '0');
+                *(this._cursor + 4) = (char) (((value / 10000) % 10) + '0');
+                *(this._cursor + 5) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 6) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 7) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 8) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 9;
+                this._cursor += 9;
             }
             else if ( value >= 10000000 )
             {
-                *(this.cursor + 0) = (char) (((value / 10000000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 1000000) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 100000) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 10000) % 10) + '0');
-                *(this.cursor + 4) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 5) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 6) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 7) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 10000000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 1000000) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 100000) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 10000) % 10) + '0');
+                *(this._cursor + 4) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 5) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 6) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 7) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 8;
+                this._cursor += 8;
             }
             else if ( value >= 1000000 )
             {
-                *(this.cursor + 0) = (char) (((value / 1000000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 100000) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 10000) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 4) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 5) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 6) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 1000000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 100000) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 10000) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 4) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 5) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 6) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 7;
+                this._cursor += 7;
             }
             else if ( value >= 100000 )
             {
-                *(this.cursor + 0) = (char) (((value / 100000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 10000) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 4) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 5) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 100000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 10000) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 4) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 5) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 6;
+                this._cursor += 6;
             }
             else if ( value >= 10000 )
             {
-                *(this.cursor + 0) = (char) (((value / 10000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 4) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 10000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 4) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 5;
+                this._cursor += 5;
             }
             else if ( value >= 1000 )
             {
-                *(this.cursor + 0) = (char) (((value / 1000) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 3) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 1000) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 3) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 4;
+                this._cursor += 4;
             }
             else if ( value >= 100 )
             {
-                *(this.cursor + 0) = (char) (((value / 100) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 2) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 100) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 2) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 3;
+                this._cursor += 3;
             }
             else if ( value >= 10 )
             {
-                *(this.cursor + 0) = (char) (((value / 10) % 10) + '0');
-                *(this.cursor + 1) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 10) % 10) + '0');
+                *(this._cursor + 1) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 2;
+                this._cursor += 2;
             }
             else
             {
-                *(this.cursor + 0) = (char) (((value / 1) % 10) + '0');
+                *(this._cursor + 0) = (char) (((value / 1) % 10) + '0');
 
-                this.cursor += 1;
+                this._cursor += 1;
             }
         }
     }
@@ -810,17 +804,17 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
 
         unchecked
         {
-            *(this.cursor + 0) = (char) (((value / 100000000) % 10) + '0');
-            *(this.cursor + 1) = (char) (((value / 10000000) % 10) + '0');
-            *(this.cursor + 2) = (char) (((value / 1000000) % 10) + '0');
-            *(this.cursor + 3) = (char) (((value / 100000) % 10) + '0');
-            *(this.cursor + 4) = (char) (((value / 10000) % 10) + '0');
-            *(this.cursor + 5) = (char) (((value / 1000) % 10) + '0');
-            *(this.cursor + 6) = (char) (((value / 100) % 10) + '0');
-            *(this.cursor + 7) = (char) (((value / 10) % 10) + '0');
-            *(this.cursor + 8) = (char) (((value / 1) % 10) + '0');
+            *(this._cursor + 0) = (char) (((value / 100000000) % 10) + '0');
+            *(this._cursor + 1) = (char) (((value / 10000000) % 10) + '0');
+            *(this._cursor + 2) = (char) (((value / 1000000) % 10) + '0');
+            *(this._cursor + 3) = (char) (((value / 100000) % 10) + '0');
+            *(this._cursor + 4) = (char) (((value / 10000) % 10) + '0');
+            *(this._cursor + 5) = (char) (((value / 1000) % 10) + '0');
+            *(this._cursor + 6) = (char) (((value / 100) % 10) + '0');
+            *(this._cursor + 7) = (char) (((value / 10) % 10) + '0');
+            *(this._cursor + 8) = (char) (((value / 1) % 10) + '0');
 
-            this.cursor += 9;
+            this._cursor += 9;
         }
     }
 
@@ -831,7 +825,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( ulong value )
     {
-        if ( this.cursor + 20 > this.end )
+        if ( this._cursor + 20 > this._end )
         {
             return this.OnOverflow();
         }
@@ -848,7 +842,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( long value )
     {
-        if ( this.cursor + 22 > this.end )
+        if ( this._cursor + 22 > this._end )
         {
             return this.OnOverflow();
         }
@@ -861,8 +855,8 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             }
             else
             {
-                *this.cursor = '-';
-                this.cursor++;
+                *this._cursor = '-';
+                this._cursor++;
                 this.AppendUInt64( (ulong) -value );
             }
         }
@@ -890,7 +884,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             // max: 18 446 744 073
             var valueMedHigh = value / uintMaxValueDecimal;
 
-            var valueLow = (uint) (value - uintMaxValueDecimal * valueMedHigh);
+            var valueLow = (uint) (value - (uintMaxValueDecimal * valueMedHigh));
 
             if ( valueMedHigh <= uint.MaxValue )
             {
@@ -901,7 +895,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
                 // max: 18
                 var valueHigh = (byte) (valueMedHigh / uintMaxValueDecimal);
 
-                var valueMed = (uint) (valueMedHigh - uintMaxValueDecimal * valueHigh);
+                var valueMed = (uint) (valueMedHigh - (uintMaxValueDecimal * valueHigh));
 
                 this.AppendByte( valueHigh );
                 this.AppendPaddedUInt32( valueMed );
@@ -912,7 +906,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     }
 
     /// <summary>
-    /// Appends a <see cref="bool"/> (<c>true</c> or <c>false</c>, litterally) to the current <see cref="UnsafeStringBuilder"/>.
+    /// Appends a <see cref="bool"/> (<c>true</c> or <c>false</c>, literally) to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
     /// <param name="value">The value to be appended.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
@@ -934,11 +928,11 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     public void Clear()
     {
         this.Version++;
-        this.cursor = this.start;
+        this._cursor = this._start;
     }
 
     /// <inheritdoc />
-    public override string ToString()
+    public override string? ToString()
     {
         // Cache through an UnsafeString.
         return this.ToUnsafeString().ToString();
@@ -962,16 +956,17 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns>The substring starting from <paramref name="startIndex"/> having <paramref name="length"/> characters.</returns>
     public string Substring( int startIndex, int length )
     {
-        var a = this.CharArray;
-
+        // Exception condition added when porting code to satisfy nullable rules.
+        var a = this.CharArray ?? throw new InvalidOperationException( "CharArray is unexpectedly null." );
+        
         return new string( a, startIndex, length );
     }
 
     internal string ToStringImpl()
     {
-        var len = (int) (this.cursor - this.start);
+        var len = (int) (this._cursor - this._start);
 
-        return new string( this.start, 0, len );
+        return new string( this._start, 0, len );
     }
 
     /// <summary>
@@ -981,39 +976,40 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     public int Version { get; private set; }
 
     /// <summary>
-    /// Determines whether the current <see cref="UnsafeStringBuilder"/> has been disposed.
+    /// Gets a value indicating whether the current <see cref="UnsafeStringBuilder"/> has been disposed.
     /// </summary>
-    public bool IsDisposed => this.cursor == null;
+    public bool IsDisposed => this._cursor == null;
 
     /// <summary>
     /// Gets the current number of characters in the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
     public int Length
     {
-#if AGGRESSIVE_INLINING
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        get { return (int) (this.cursor - this.start); }
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        get => (int) (this._cursor - this._start);
     }
 
     /// <summary>
     /// Truncates the string to a maximum length.
     /// </summary>
-    /// <param name="length">The wished length of the string after truncation</param>
+    /// <param name="length">The wished length of the string after truncation.</param>
     public void Truncate( int length )
     {
         if ( this.Length > length )
         {
-            this.cursor = this.start + length;
+            this._cursor = this._start + length;
         }
     }
 
     /// <summary>
     /// Gets a pointer to the unmanaged buffer of the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    public IntPtr Buffer => (IntPtr) this.start;
+    public IntPtr Buffer => (IntPtr) this._start;
 
-    internal char[] CharArray => this.array;
+    // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+#pragma warning disable IDE0032
+    internal char[]? CharArray => this._array;
+#pragma warning restore IDE0032
 
     /// <summary>
     /// Gets an <see cref="UnsafeString"/> that provides read-only access to the current <see cref="UnsafeStringBuilder"/>.
@@ -1021,12 +1017,12 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns>An <see cref="UnsafeString"/> that provides read-only access to the current <see cref="UnsafeStringBuilder"/>.</returns>
     public UnsafeString ToUnsafeString()
     {
-        if ( !this.unsafeString.Recycle() )
+        if ( !this._unsafeString.Recycle() )
         {
-            this.unsafeString = new UnsafeString( this );
+            this._unsafeString = new UnsafeString( this );
         }
 
-        return this.unsafeString;
+        return this._unsafeString;
     }
 
     /// <summary>
@@ -1038,19 +1034,19 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// and the string length was decreased by 1.</returns>
     public bool SetNullTermination()
     {
-        if ( this.cursor + 1 > this.end )
+        if ( this._cursor + 1 > this._end )
         {
             if ( this.OnOverflow() )
             {
                 // If we're to overflow, we suppress the last character.
-                this.cursor--;
-                *this.cursor = '\0';
+                this._cursor--;
+                *this._cursor = '\0';
 
                 return false;
             }
         }
 
-        *this.cursor = '\0';
+        *this._cursor = '\0';
 
         return true;
     }
@@ -1062,25 +1058,24 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns>The <c>char</c> at position <paramref name="index"/>.</returns>
     public char this[ int index ]
     {
-        get { return *(this.start + index); }
-        set { *(this.start + index) = value; }
+        get => *(this._start + index);
+        set => *(this._start + index) = value;
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        if ( this.start != null )
+        if ( this._start != null )
         {
-            this.gcHandle.Free();
-            this.cursor = this.start = this.end = null;
-            this.array = null;
+            this._gcHandle.Free();
+            this._cursor = this._start = this._end = null;
+            this._array = null;
             GC.SuppressFinalize( this );
         }
     }
 
-    /// <inheritdoc />
     ~UnsafeStringBuilder()
     {
-        this.gcHandle.Free();
+        this._gcHandle.Free();
     }
 }

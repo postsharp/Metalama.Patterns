@@ -2,16 +2,22 @@
 
 using Xunit.Abstractions;
 
-namespace Flashtrace.Formatters.UnitTests.Formatters;
+namespace Flashtrace.Formatters.UnitTests;
 
 public abstract class FormattersTestsBase
 {
-    protected readonly ITestOutputHelper _logger;
+#pragma warning disable SA1401
+#pragma warning disable IDE1006
+    protected readonly ITestOutputHelper? _logger;
+#pragma warning restore IDE1006
+#pragma warning restore SA1401
 
-    public FormattersTestsBase( ITestOutputHelper logger )
+    protected FormattersTestsBase( ITestOutputHelper? logger )
     {
         this._logger = logger;
     }
+
+    protected bool EnableLogging { get; set; }
 
     /// <summary>
     /// Gets a new instance of <see cref="FormatterRepository"/>.
@@ -26,18 +32,22 @@ public abstract class FormattersTestsBase
     /// <summary>
     /// Formats a value using <see cref="DefaultRepository"/>.
     /// </summary>
-    protected string FormatDefault<T>( T value ) => this.Format<T>( this.DefaultRepository, value );
+    protected string? FormatDefault<T>( T? value ) => this.Format( this.DefaultRepository, value );
 
     /// <summary>
     /// Formats a value using the specified <see cref="IFormatterRepository"/>.
     /// </summary>
-    protected string Format<T>( IFormatterRepository formatterRepository, T value )
+    protected string? Format<T>( IFormatterRepository formatterRepository, T? value )
     {
         var stringBuilder = new UnsafeStringBuilder( 1024 );
-        formatterRepository.Get<T>()!.Write( stringBuilder, value );
+        formatterRepository.Get<T>().Write( stringBuilder, value );
         var result = stringBuilder.ToString();
 
-        //this._logger?.WriteLine( "'" + value?.ToString() + "' => '" + result + "'" );
+        if ( this.EnableLogging )
+        {
+            this._logger?.WriteLine( "'" + value?.ToString() + "' => '" + result + "'" );
+        }
+
         return result;
     }
 }

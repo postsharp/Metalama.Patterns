@@ -1,14 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Flashtrace.Formatters;
 
+// TODO: Review modern-day impact of #27182 here (especially wrt supported platforms), reinstate compiled regex if possible.
+
 /// <summary>
 /// A formatter for <see cref="MethodBase"/> values.
 /// </summary>
+[PublicAPI]
 public sealed class MethodFormatter : Formatter<MethodBase>
 {
 #if COMPILED_REGEX
@@ -19,10 +23,10 @@ public sealed class MethodFormatter : Formatter<MethodBase>
 
     // (See #26919) We do not create a static Regex instance because it may result in the incorrect AppContext switch values when invoked via module initializer.
     // TODO: revert back to the static Regex instance when #27182 is fixed.
-    private const string anonymousMethodRegexPattern = "^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)";
+    private const string _anonymousMethodRegexPattern = "^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)";
 
-    //private static readonly Regex anonymousMethodRegex = new Regex("^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)", regexOptions);
-    //private static readonly Regex localFunctionRegex = new Regex("<[^>]+>g__[0-9A-Fa-f]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    // private static readonly Regex anonymousMethodRegex = new Regex("^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)", regexOptions);
+    // private static readonly Regex localFunctionRegex = new Regex("<[^>]+>g__[0-9A-Fa-f]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private readonly ConcurrentDictionary<MethodBase, Match> _matchCache = new();
     private IFormatter<Type>? _typeFormatter;
@@ -40,7 +44,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
     public MethodFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, MethodBase value )
+    public override void Write( UnsafeStringBuilder stringBuilder, MethodBase? value )
     {
         if ( value == null )
         {
@@ -51,16 +55,17 @@ public sealed class MethodFormatter : Formatter<MethodBase>
 
         try
         {
-            var methodName = value is ConstructorInfo ? (value.IsStatic ? "StaticConstructor" : "new") : value.Name;
+            var methodName = value is ConstructorInfo 
+                ? value.IsStatic ? "StaticConstructor" : "new" 
+                : value.Name;
+            
             var c = methodName[0];
 
-            if ( c == '<' || c == '_' )
+            if ( c is '<' or '_' )
             {
-                Match anonymousMethodMatch;
-
-                if ( !this._matchCache.TryGetValue( value, out anonymousMethodMatch ) )
+                if ( !this._matchCache.TryGetValue( value, out var anonymousMethodMatch ) )
                 {
-                    anonymousMethodMatch = Regex.Match( methodName, anonymousMethodRegexPattern, _regexOptions );
+                    anonymousMethodMatch = Regex.Match( methodName, _anonymousMethodRegexPattern, _regexOptions );
                     this._matchCache[value] = anonymousMethodMatch;
                 }
 
@@ -83,6 +88,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
 
                     var parentGroup = anonymousMethodMatch.Groups["parent"];
 
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                     if ( parentGroup != null )
                     {
                         stringBuilder.Append( parentGroup.Value );
@@ -104,7 +110,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
 
             if ( value.IsGenericMethod )
             {
-                Type[] genericArguments = value.GetGenericArguments();
+                var genericArguments = value.GetGenericArguments();
                 stringBuilder.Append( '<' );
 
                 for ( var i = 0; i < genericArguments.Length; i++ )
@@ -121,7 +127,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
             }
 
             stringBuilder.Append( '(' );
-            ParameterInfo[] parameters = value.GetParameters();
+            var parameters = value.GetParameters();
 
             for ( var i = 0; i < parameters.Length; i++ )
             {

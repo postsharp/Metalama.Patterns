@@ -7,18 +7,15 @@ namespace Flashtrace.Formatters;
 /// </summary>
 public sealed class StringFormatter : Formatter<string>
 {
-    private NonQuotingStringFormatter _nonQuotingStringFormatter;
+    private NonQuotingStringFormatter? _nonQuotingStringFormatter;
 
     public StringFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-    private NonQuotingStringFormatter NonQuotingStringFormatter
+    private NonQuotingStringFormatter GetNonQuotingStringFormatter()
     {
-        get
-        {
-            this._nonQuotingStringFormatter ??= new NonQuotingStringFormatter( this.Repository );
+        this._nonQuotingStringFormatter ??= new NonQuotingStringFormatter( this.Repository, this );
 
-            return this._nonQuotingStringFormatter;
-        }
+        return this._nonQuotingStringFormatter;
     }
 
     /// <inheritdoc />
@@ -44,28 +41,45 @@ public sealed class StringFormatter : Formatter<string>
     {
         if ( options.RequiresUnquotedStrings )
         {
-            return this.NonQuotingStringFormatter;
+            return this.GetNonQuotingStringFormatter();
         }
         else
         {
             return this;
         }
     }
-}
 
-internal sealed class NonQuotingStringFormatter : Formatter<string>
-{
-    public NonQuotingStringFormatter( IFormatterRepository repository ) : base( repository ) { }
-
-    public override void Write( UnsafeStringBuilder stringBuilder, string? value )
+    private sealed class NonQuotingStringFormatter : Formatter<string>
     {
-        if ( value == null )
+        private readonly StringFormatter _defaultStringFormatter;
+
+        public NonQuotingStringFormatter( IFormatterRepository repository, StringFormatter defaultStringFormatter ) : base( repository ) 
         {
-            // We don't differentiate empty strings and null strings with this formatter.
+            this._defaultStringFormatter = defaultStringFormatter;
         }
-        else
+
+        public override void Write( UnsafeStringBuilder stringBuilder, string? value )
         {
-            stringBuilder.Append( value );
+            if ( value == null )
+            {
+                // We don't differentiate empty strings and null strings with this formatter.
+            }
+            else
+            {
+                stringBuilder.Append( value );
+            }
+        }
+
+        public override IOptionAwareFormatter WithOptions( FormattingOptions options )
+        {
+            if ( options.RequiresUnquotedStrings )
+            {
+                return this;
+            }
+            else
+            {
+                return this._defaultStringFormatter;
+            }
         }
     }
 }

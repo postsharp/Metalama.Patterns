@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace.Formatters.UnitTests.Formatters;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using Xunit;
@@ -208,7 +207,7 @@ public class FormatterOverwritingTest : FormattersTestsBase
     {
         var testCaseRecord = EnsureOverwritesTestCases().Single( t => t.Description == testCase );
 
-        typeof(FormatterOverwritingTest).GetMethod( nameof(this.EnsureOverwritesCore), BindingFlags.Instance | BindingFlags.NonPublic )
+        typeof(FormatterOverwritingTest).GetMethod( nameof(this.EnsureOverwritesCore), BindingFlags.Instance | BindingFlags.NonPublic )!
             .MakeGenericMethod( testCaseRecord.TValue )
             .Invoke(
                 this,
@@ -231,10 +230,10 @@ public class FormatterOverwritingTest : FormattersTestsBase
         bool logBefore,
         bool logBetween )
     {
-        var oldExpectedOutput = "0";
-        var newExpectedOutput = "1";
+        const string oldExpectedOutput = "0";
+        const string newExpectedOutput = "1";
 
-        string result;
+        string? result;
 
         if ( logBefore )
         {
@@ -369,7 +368,7 @@ public class FormatterOverwritingTest : FormattersTestsBase
     {
         var testCaseRecord = EnsureDoesntOverwriteTestCases().Single( t => t.Description == testCase );
 
-        typeof(FormatterOverwritingTest).GetMethod( nameof(this.EnsureDoesntOverwriteCore), BindingFlags.Instance | BindingFlags.NonPublic )
+        typeof(FormatterOverwritingTest).GetMethod( nameof(this.EnsureDoesntOverwriteCore), BindingFlags.Instance | BindingFlags.NonPublic )!
             .MakeGenericMethod( testCaseRecord.TValue )
             .Invoke(
                 this,
@@ -392,9 +391,9 @@ public class FormatterOverwritingTest : FormattersTestsBase
         bool logBefore,
         bool logBetween )
     {
-        var oldExpectedOutput = "0";
+        const string oldExpectedOutput = "0";
 
-        string result;
+        string? result;
 
         if ( logBefore )
         {
@@ -417,35 +416,3 @@ public class FormatterOverwritingTest : FormattersTestsBase
         Assert.Equal( oldExpectedOutput, result );
     }
 }
-
-internal class ZeroFormatter<T> : Formatter<T>
-{
-    public ZeroFormatter( IFormatterRepository repository ) : base( repository ) { }
-
-    public override void Write( UnsafeStringBuilder stringBuilder, T value )
-    {
-        stringBuilder.Append( 0 );
-    }
-}
-
-internal class ZeroEnumerableFormatter<T> : ZeroFormatter<IEnumerable<T>>
-{
-    public ZeroEnumerableFormatter( IFormatterRepository repository ) : base( repository ) { }
-}
-
-internal class OneFormatter<T> : Formatter<T>
-{
-    public OneFormatter( IFormatterRepository repository ) : base( repository ) { }
-
-    public override void Write( UnsafeStringBuilder stringBuilder, T value )
-    {
-        stringBuilder.Append( 1 );
-    }
-}
-
-internal class OneEnumerableFormatter<T> : OneFormatter<IEnumerable<T>>
-{
-    public OneEnumerableFormatter( IFormatterRepository repository ) : base( repository ) { }
-}
-
-internal class MyObservableCollection<T> : ObservableCollection<T> { }

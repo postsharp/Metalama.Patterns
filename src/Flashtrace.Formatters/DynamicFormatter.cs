@@ -1,22 +1,24 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Globalization;
 
 namespace Flashtrace.Formatters;
 
-internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
+[PublicAPI]
+public sealed class DynamicFormatter<TValue> : Formatter<TValue>
 {
     private readonly FormattingOptions _options;
 
     public DynamicFormatter( IFormatterRepository repository ) : this( repository, FormattingOptions.Default ) { }
 
-    private DynamicFormatter( IFormatterRepository repository, FormattingOptions options )
+    public DynamicFormatter( IFormatterRepository repository, FormattingOptions? options )
         : base( repository )
     {
         this._options = options ?? FormattingOptions.Default;
     }
 
-    private DynamicFormatter<TValue>? otherFormatter;
+    private DynamicFormatter<TValue>? _otherFormatter;
 
     public override FormatterAttributes Attributes => FormatterAttributes.Dynamic;
 
@@ -28,17 +30,17 @@ internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
         }
         else
         {
-            if ( this.otherFormatter == null )
+            if ( this._otherFormatter == null )
             {
                 // There are just two options currently.
-                this.otherFormatter = new DynamicFormatter<TValue>( this.Repository, this._options );
+                this._otherFormatter = new DynamicFormatter<TValue>( this.Repository, this._options );
             }
 
-            return this.otherFormatter;
+            return this._otherFormatter;
         }
     }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, TValue value )
+    public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
     {
         if ( value == null )
         {

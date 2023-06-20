@@ -3,7 +3,7 @@
 namespace Flashtrace.Formatters;
 
 /// <summary>
-/// Formatter for <see cref="Nullable{T}"/>
+/// Formatter for <see cref="Nullable{T}"/>.
 /// </summary>
 internal sealed class NullableFormatter<T> : Formatter<T?>
     where T : struct

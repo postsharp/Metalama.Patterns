@@ -1,10 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace.Formatters.UnitTests.Formatters;
 using System.Collections;
 using System.Collections.ObjectModel;
 using Xunit;
 using Xunit.Abstractions;
+
+// ReSharper disable RedundantTypeArgumentsOfMethod
 
 namespace Flashtrace.Formatters.UnitTests
 {
@@ -27,7 +28,7 @@ namespace Flashtrace.Formatters.UnitTests
         public void RegisterAfterFirstGet()
         {
             var beforeFormatter = this.DefaultRepository.Get<IEnumerable<int>>();
-            Assert.Equal( "DynamicFormatter`1", beforeFormatter!.GetType().Name );
+            Assert.Equal( "DynamicFormatter`1", beforeFormatter.GetType().Name );
 
             var formatter = new EnumerableFormatter<int>( this.DefaultRepository );
             this.DefaultRepository.Register( formatter );
@@ -271,59 +272,6 @@ namespace Flashtrace.Formatters.UnitTests
 
             Assert.Equal( "{string[]}", this.FormatDefault<IEnumerable<string>>( array ) );
             Assert.Equal( "[foo,bar,baz]", this.FormatDefault<IEnumerable<object>>( array ) );
-        }
-    }
-
-    internal class EnumerableFormatter<T> : Formatter<IEnumerable<T>>
-    {
-        public EnumerableFormatter( IFormatterRepository repository ) : base( repository ) { }
-
-        public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
-        {
-            stringBuilder.Append( '[' );
-            stringBuilder.Append( string.Join( ",", value ) );
-            stringBuilder.Append( ']' );
-        }
-    }
-
-    internal class EnumerableIntFormatter : EnumerableFormatter<int>
-    {
-        public EnumerableIntFormatter( IFormatterRepository repository ) : base( repository ) { }
-    }
-
-    internal class DictionaryFormatter<TKey, TValue> : Formatter<IDictionary<TKey, TValue>>
-    {
-        public DictionaryFormatter( IFormatterRepository repository ) : base( repository ) { }
-
-        public override void Write( UnsafeStringBuilder stringBuilder, IDictionary<TKey, TValue> value )
-        {
-            stringBuilder.Append( "{" + string.Join( ",", value.Select( kvp => string.Format( "{0}:{1}", kvp.Key, kvp.Value ) ) ) + "}" );
-        }
-    }
-
-    internal class NonNullableFormatter<T> : Formatter<T>
-        where T : struct
-    {
-        public NonNullableFormatter( IFormatterRepository repository ) : base( repository ) { }
-
-        public override void Write( UnsafeStringBuilder stringBuilder, T value )
-        {
-            stringBuilder.Append( '[' );
-            stringBuilder.Append( value.ToString() );
-            stringBuilder.Append( ']' );
-        }
-    }
-
-    internal class NullableFormatter<T> : Formatter<T?>
-        where T : struct
-    {
-        public NullableFormatter( IFormatterRepository repository ) : base( repository ) { }
-
-        public override void Write( UnsafeStringBuilder stringBuilder, T? value )
-        {
-            stringBuilder.Append( '<' );
-            stringBuilder.Append( value == null ? "null" : value.ToString() );
-            stringBuilder.Append( '>' );
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace.Formatters.UnitTests.Formatters;
 using System.Globalization;
 using Xunit;
 using Xunit.Abstractions;

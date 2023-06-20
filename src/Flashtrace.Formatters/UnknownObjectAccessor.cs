@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
@@ -10,7 +11,8 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// A convenience wrapper for instances of anonymous types (or any unknown type) that exposes properties.
 /// </summary>
-public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>, IEnumerable<KeyValuePair<string, object>>
+[PublicAPI]
+public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>, IEnumerable<KeyValuePair<string, object?>>
 {
     private readonly AccessorType? _type;
     private readonly object? _instance;
@@ -18,20 +20,12 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     private UnknownObjectAccessor( object? instance )
     {
         this._instance = instance;
-
-        if ( instance == null )
-        {
-            this._type = null;
-        }
-        else
-        {
-            this._type = AccessorType.GetInstance( instance.GetType() );
-        }
+        this._type = instance == null ? null : AccessorType.GetInstance( instance.GetType() );
     }
 
-    private UnknownObjectAccessor( AccessorType? type, object? instance )
+    private UnknownObjectAccessor( AccessorType type, object? instance )
     {
-        this._type = type;
+        this._type = type ?? throw new ArgumentNullException( nameof(type) );
         this._instance = instance;
     }
 
@@ -52,7 +46,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// </summary>
     /// <param name="type">Type of the objects to be wrapped. It must be the final type (cannot be <c>object</c>, for instance).</param>
     /// <returns>A delegate that takes the object as input and returns its <see cref="UnknownObjectAccessor"/>.</returns>
-    public static Func<object, UnknownObjectAccessor> GetFactory( Type type )
+    public static Func<object?, UnknownObjectAccessor> GetFactory( Type type )
     {
         var accessorType = AccessorType.GetInstance( type );
 
@@ -111,10 +105,10 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// Converts the wrapped object to an array of name-value tuples.
     /// </summary>
     /// <returns></returns>
-    public IReadOnlyList<(string name, object value)> ToTuples() => this._type.ToTuples( this._instance );
+    public IReadOnlyList<(string Name, object? Value)> ToTuples() => this._type?.ToTuples( this._instance ) ?? Array.Empty<(string Name, object? Value)>();
 
     /// <inheritdoc/>
-    public override bool Equals( object obj ) => obj is UnknownObjectAccessor other && this.Equals( other );
+    public override bool Equals( object? obj ) => obj is UnknownObjectAccessor other && this.Equals( other );
 
     /// <inheritdoc/>
     public override int GetHashCode()
@@ -135,7 +129,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// <returns></returns>
     public Enumerator GetEnumerator() => new( this );
 
-    IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator() => this.GetEnumerator();
+    IEnumerator<KeyValuePair<string, object?>> IEnumerable<KeyValuePair<string, object?>>.GetEnumerator() => this.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
@@ -149,7 +143,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// <param name="state">The opaque state passed to the  <see cref="IUnknownObjectPropertyVisitor{TState}.Visit{TValue}(string, TValue, ref TState)"/> method.</param>
     public void VisitProperties<TState>( IUnknownObjectPropertyVisitor<TState> visitor, ref TState state )
     {
-        if ( this._instance == null )
+        if ( this._instance == null || this._type == null )
         {
             return;
         }
@@ -174,35 +168,49 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
     /// <param name="left"></param>
     /// <param name="right"></param>
     /// <returns></returns>
-    public static bool operator !=( UnknownObjectAccessor left, UnknownObjectAccessor right )
-    {
-        return !(left == right);
-    }
+    public static bool operator !=( UnknownObjectAccessor left, UnknownObjectAccessor right ) => !(left == right);
 
     /// <summary>
-    /// A value type that implements <c>IEnumerator&lt;KeyValuePair&lt;lt;string, object&gt;gt;</c>
+    /// A value type that implements <see cref="IEnumerator{T}"/> of <see cref="KeyValuePair{TKey,TValue}"/> of <see cref="string"/> and <see cref="object"/>.
     /// </summary>
-    public struct Enumerator : IEnumerator<KeyValuePair<string, object>>
+    public struct Enumerator : IEnumerator<KeyValuePair<string, object?>>
     {
-        private readonly object instance;
-        private Dictionary<string, Func<object, object>>.Enumerator enumerator;
+        private readonly object? _instance;
+        private Dictionary<string, Func<object, object?>>.Enumerator _enumerator;
 
         internal Enumerator( in UnknownObjectAccessor accessor )
         {
-            this.instance = accessor._instance;
-            this.enumerator = accessor._type.GetAccessorEnumerator();
+            if ( accessor is { _instance: not null, _type: null } )
+            {
+                throw new ArgumentException( "State is not valid.", nameof(accessor) );
+            }
+            
+            this._instance = accessor._instance;
+
+            this._enumerator = accessor._type == null || accessor._instance == null
+                ? default
+                : accessor._type.GetAccessorEnumerator();
         }
 
         /// <inheritdoc/>
-        public KeyValuePair<string, object> Current => new( this.enumerator.Current.Key, this.enumerator.Current.Value( this.instance ) );
+        public KeyValuePair<string, object?> Current
+            => this._instance != null
+                ? new( this._enumerator.Current.Key, this._enumerator.Current.Value( this._instance ) )
+                : default;
 
-        object IEnumerator.Current => this.Current;
+        object IEnumerator.Current => this._instance != null ? this.Current : null!;
 
         /// <inheritdoc/>
-        public void Dispose() => this.enumerator.Dispose();
+        public void Dispose()
+        {
+            if ( this._instance != null )
+            {
+                this._enumerator.Dispose();
+            }
+        }
 
         /// <inheritdoc/>
-        public bool MoveNext() => this.enumerator.MoveNext();
+        public bool MoveNext() => this._instance != null && this._enumerator.MoveNext();
 
         /// <inheritdoc/>
         public void Reset() => throw new NotSupportedException();
@@ -214,7 +222,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
         {
             var getter = property.GetMethod;
 
-            if ( getter != null && !getter.IsStatic && getter.IsPublic && getter.GetParameters().Length == 0 )
+            if ( getter != null && getter is { IsStatic: false, IsPublic: true } && getter.GetParameters().Length == 0 )
             {
                 yield return property;
             }
@@ -223,32 +231,36 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
 
     private class AccessorType
     {
-        private static readonly ConcurrentDictionary<Type, AccessorType> instances = new();
-        private readonly Dictionary<string, Func<object, object>> accessors;
-        private readonly ConcurrentDictionary<Type, object> visitorListCache = new();
-        private readonly Type type;
+        private static readonly ConcurrentDictionary<Type, AccessorType> _instances = new();
+        private readonly Dictionary<string, Func<object, object?>> _accessors;
+        private readonly ConcurrentDictionary<Type, object> _visitorListCache = new();
+        private readonly Type _type;
 
         private AccessorType( Type type )
         {
-            this.accessors = new Dictionary<string, Func<object, object>>();
+            this._accessors = new Dictionary<string, Func<object, object?>>();
 
             foreach ( var property in GetProperties( type ) )
             {
-                var getter = property.GetMethod;
                 var param = Expression.Parameter( typeof(object) );
                 var expression = Expression.Convert( Expression.Property( Expression.Convert( param, type ), property ), typeof(object) );
-                Expression<Func<object, object>> lambda = Expression.Lambda<Func<object, object>>( expression, param );
-                this.accessors.Add( property.Name, lambda.Compile() );
+                var lambda = Expression.Lambda<Func<object, object?>>( expression, param );
+                this._accessors.Add( property.Name, lambda.Compile() );
             }
 
-            this.type = type;
+            this._type = type;
         }
 
-        public IReadOnlyList<(string, object)> ToTuples( object value )
+        public IReadOnlyList<(string Name, object? Value)> ToTuples( object? value )
         {
-            List<ValueTuple<string, object>> properties = new( this.accessors.Count );
+            if ( value == null )
+            {
+                return Array.Empty<(string Name, object? Value)>();
+            }
+            
+            List<ValueTuple<string, object?>> properties = new( this._accessors.Count );
 
-            foreach ( KeyValuePair<string, Func<object, object>> accessor in this.accessors )
+            foreach ( var accessor in this._accessors )
             {
                 properties.Add( (accessor.Key, accessor.Value( value )) );
             }
@@ -256,13 +268,14 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
             return properties;
         }
 
-        internal Dictionary<string, Func<object, object>>.Enumerator GetAccessorEnumerator() => this.accessors.GetEnumerator();
+        internal Dictionary<string, Func<object, object?>>.Enumerator GetAccessorEnumerator() => this._accessors.GetEnumerator();
 
-        public static AccessorType GetInstance( Type type ) => instances.GetOrAdd( type, t => new AccessorType( t ) );
+        public static AccessorType GetInstance( Type type )
+            => _instances.GetOrAdd( type ?? throw new ArgumentNullException( nameof(type) ), t => new AccessorType( t ) );
 
-        public bool TryGetProperty( object o, string name, out object value )
+        public bool TryGetProperty( object o, string name, out object? value )
         {
-            if ( this.accessors.TryGetValue( name, out Func<object, object> func ) )
+            if ( this._accessors.TryGetValue( name, out var func ) )
             {
                 value = func( o );
 
@@ -278,10 +291,10 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
 
         public void VisitProperties<TState>( object o, IUnknownObjectPropertyVisitor<TState> visitor, ref TState state )
         {
-            Dictionary<string, VisitDelegate<TState>> actions =
-                (Dictionary<string, VisitDelegate<TState>>) this.visitorListCache.GetOrAdd( typeof(TState), _ => this.GetVisitors<TState>() );
+            var actions =
+                (Dictionary<string, VisitDelegate<TState>>) this._visitorListCache.GetOrAdd( typeof(TState), _ => this.GetVisitors<TState>() );
 
-            foreach ( KeyValuePair<string, VisitDelegate<TState>> action in actions )
+            foreach ( var action in actions )
             {
                 if ( visitor.MustVisit( action.Key, ref state ) )
                 {
@@ -289,7 +302,10 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
                     {
                         action.Value( visitor, o, ref state );
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
         }
@@ -298,19 +314,19 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
         {
             Dictionary<string, VisitDelegate<TState>> list = new();
 
-            var visitMethod = typeof(IUnknownObjectPropertyVisitor<TState>).GetMethod( "Visit" );
+            var visitMethod = typeof(IUnknownObjectPropertyVisitor<TState>).GetMethod( nameof(IUnknownObjectPropertyVisitor<TState>.Visit) )!;
 
-            foreach ( var property in this.type.GetRuntimeProperties() )
+            foreach ( var property in this._type.GetRuntimeProperties() )
             {
                 var getter = property.GetMethod;
 
-                if ( getter != null && !getter.IsStatic && getter.IsPublic && getter.GetParameters().Length == 0 )
+                if ( getter != null && getter is { IsStatic: false, IsPublic: true } && getter.GetParameters().Length == 0 )
                 {
                     var visitorParameter = Expression.Parameter( typeof(IUnknownObjectPropertyVisitor<TState>) );
                     var objectParameter = Expression.Parameter( typeof(object) );
                     var stateParameter = Expression.Parameter( typeof(TState).MakeByRefType() );
 
-                    var getValue = Expression.Property( Expression.Convert( objectParameter, this.type ), property );
+                    var getValue = Expression.Property( Expression.Convert( objectParameter, this._type ), property );
 
                     var callExpression = Expression.Call(
                         visitorParameter,
@@ -319,7 +335,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
                         getValue,
                         stateParameter );
 
-                    Expression<VisitDelegate<TState>> lambda = Expression.Lambda<VisitDelegate<TState>>(
+                    var lambda = Expression.Lambda<VisitDelegate<TState>>(
                         callExpression,
                         visitorParameter,
                         objectParameter,

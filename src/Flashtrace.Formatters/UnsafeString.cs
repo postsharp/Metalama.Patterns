@@ -14,7 +14,7 @@ namespace Flashtrace.Formatters;
 /// type, and is generally pooled and reused for different purposes, 
 /// it is generally not safe to evaluate an <see cref="UnsafeString"/> at a different moment than the one designed by
 /// the API that exposes the <see cref="UnsafeString"/>. To make it safe to evaluate the <see cref="UnsafeString"/> at any
-/// moment, call the <see cref="MakeImmutable"/> method, which unbounds the <see cref="UnsafeString"/> from
+/// moment, call the <see cref="MakeImmutable"/> method, which unbinds the <see cref="UnsafeString"/> from
 /// its parent <see cref="UnsafeStringBuilder"/>.</para>
 /// </remarks>
 public sealed class UnsafeString
@@ -51,21 +51,38 @@ public sealed class UnsafeString
     }
 
     // TODO: Review use of ExplicitCrossPackageInternal
-    //[ExplicitCrossPackageInternal]
+    // [ExplicitCrossPackageInternal]
     internal UnsafeStringBuilder? StringBuilder { get; private set; }
+
+    private void ThrowIfImmutable()
+    {
+        if ( this.IsImmutable )
+        {
+            throw new InvalidOperationException( "The current " + nameof(UnsafeString) + " is immutable." );
+        }
+    }
 
     /// <summary>
     /// Gets an unmanaged pointer to the string.
     /// </summary>
-    public IntPtr Buffer => this.StringBuilder.Buffer;
+    /// <exception cref="InvalidOperationException">The current <see cref="UnsafeString"/> is immutable.</exception>
+    public IntPtr Buffer
+    {
+        get
+        {
+            this.ThrowIfImmutable();
 
+            return this.StringBuilder!.Buffer;
+        }
+    }
+
+    // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
 #pragma warning disable IDE0032 // Use auto property
-    internal char[] CharArray => this._array;
+    internal char[]? CharArray => this._array;
 #pragma warning restore IDE0032 // Use auto property
 
     /// <summary>
-    /// Gets a value indicating whether the current <see cref="UnsafeString"/> is immutable
-    /// or, when the value of this property is <c>false</c>, if still bound to a mutable.
+    /// Gets a value indicating whether the current <see cref="UnsafeString"/> is immutable.
     /// Call the <see cref="MakeImmutable"/> method to make the <see cref="UnsafeString"/> immutable.
     /// </summary>
     public bool IsImmutable => this.StringBuilder == null;
@@ -83,7 +100,7 @@ public sealed class UnsafeString
             return false;
         }
 
-        if ( this._version != this.StringBuilder.Version || this.Length != this.StringBuilder.Length )
+        if ( this._version != this.StringBuilder!.Version || this.Length != this.StringBuilder.Length )
         {
             // The current object is not shared but we need to reset the cached value.
             this._array = null;
@@ -103,12 +120,12 @@ public sealed class UnsafeString
     /// </summary>
     public unsafe void MakeImmutable()
     {
-        this.CheckVersion();
-
         if ( this.IsImmutable )
         {
             return;
         }
+
+        this.CheckVersion();
 
         if ( this._array == null && this._str == null )
         {
@@ -116,7 +133,7 @@ public sealed class UnsafeString
 
             fixed ( char* pDestination = this._array )
             {
-                BufferHelper.CopyMemory( pDestination, (void*) this.StringBuilder.Buffer, this.Length * sizeof(char) );
+                BufferHelper.CopyMemory( pDestination, (void*) this.StringBuilder!.Buffer, this.Length * sizeof(char) );
             }
         }
 
@@ -164,7 +181,7 @@ public sealed class UnsafeString
 
     private void CheckVersion()
     {
-        if ( this.StringBuilder.Version != this._version || this.StringBuilder.Length != this.Length )
+        if ( this.StringBuilder != null && (this.StringBuilder.Version != this._version || this.StringBuilder.Length != this.Length) )
         {
             throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, "The {0} has changed.", nameof(UnsafeStringBuilder) ) );
         }

@@ -1,13 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace.Formatters;
 
 /// <summary>
 /// The formatter used to for anonymous types by default.
 /// </summary>
+[PublicAPI]
 public sealed class AnonymousTypeFormatter : IFormatter
 {
-    private readonly Func<object, UnknownObjectAccessor> _accessorFactory;
+    private readonly Func<object?, UnknownObjectAccessor> _accessorFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnonymousTypeFormatter"/> class for the specified <see cref="Type"/>.
@@ -29,7 +32,7 @@ public sealed class AnonymousTypeFormatter : IFormatter
     public FormatterAttributes Attributes => FormatterAttributes.Normal;
 
     /// <inheritdoc/>
-    public void Write( UnsafeStringBuilder stringBuilder, object value )
+    public void Write( UnsafeStringBuilder stringBuilder, object? value )
     {
         var accessor = this._accessorFactory( value );
 

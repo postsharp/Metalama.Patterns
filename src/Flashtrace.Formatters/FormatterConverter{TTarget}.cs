@@ -1,13 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Collections.Concurrent;
 
 namespace Flashtrace.Formatters;
-
-internal sealed class FormatterConverter<TTarget, TSource> : FormatterConverter<TTarget>
-{
-    public FormatterConverter( IFormatter wrapped, IFormatterRepository repository ) : base( wrapped, repository ) { }
-}
 
 internal class FormatterConverter<TTarget> : Formatter<TTarget>
 {
@@ -20,7 +15,7 @@ internal class FormatterConverter<TTarget> : Formatter<TTarget>
         this._wrapped = wrapped;
     }
 
-    public IFormatter<TTarget>? Convert( IFormatter formatter )
+    public IFormatter<TTarget>? Convert( IFormatter? formatter )
         => formatter == null
             ? null
             : formatter as IFormatter<TTarget> ?? this._cache.GetOrAdd( formatter, f => new FormatterConverter<TTarget>( f, this.Repository ) );

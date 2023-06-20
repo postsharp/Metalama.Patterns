@@ -1,40 +1,27 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace Flashtrace.Formatters;
 
-public interface IFormatterRepository
-{
-    IFormatter<T>? Get<T>();
-
-    IFormatter? Get( Type objectType );
-
-    /// <summary>
-    /// Gets the <see cref="FormattingRole"/> associated with the current formatter repository.
-    /// </summary>
-    FormattingRole Role { get; }
-}
-
 /// <summary>
 /// Allows to get and register formatters for a specific type.
 /// </summary>
+[PublicAPI]
 public class FormatterRepository : IFormatterRepository
 {
     private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _formatterFactory;
     private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _dynamicFormatterFactory;
 
-    private readonly ConcurrentDictionary<Type, FormatterCache> _invariantFormatterCache = new();
+    private readonly ConcurrentDictionary<Type, InvariantFormatterCacheEntry> _invariantFormatterCache = new();
     private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IFormatter>> _dynamicFormatterCache = new();
 
     private readonly Func<Type, TypeExtensionInfo<IFormatter>> _getFormatterFunc;
-    private readonly Func<Type, FormatterCache> _getInvariantFormatterFunc;
+    private readonly Func<Type, InvariantFormatterCacheEntry> _getInvariantFormatterFunc;
 
-    public FormatterRepository( FormattingRole role )
-        : this( role, true ) { }
-
-    public FormatterRepository( FormattingRole role, bool registerDefaultFormatters )
+    public FormatterRepository( FormattingRole role, bool registerDefaultFormatters = true )
     {
         this.Role = role ?? throw new ArgumentNullException( nameof(role) );
 
@@ -44,14 +31,14 @@ public class FormatterRepository : IFormatterRepository
         this._dynamicFormatterFactory =
             new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof(IFormatter<>), typeof(FormatterConverter<,>), this );
 
-        this._getFormatterFunc = ( Type type ) =>
+        this._getFormatterFunc = type =>
             this._dynamicFormatterFactory.GetTypeExtension(
                 type,
                 newFormatterInfo => this.UpdateFormatterCache( type, newFormatterInfo ),
                 () => this.CreateDefaultFormatter( type ) );
 
-        this._getInvariantFormatterFunc = ( Type type ) =>
-            (FormatterCache) Activator.CreateInstance( typeof(FormatterCache<>).MakeGenericType( type ), this );
+        this._getInvariantFormatterFunc = type =>
+            (InvariantFormatterCacheEntry) Activator.CreateInstance( typeof(InvariantFormatterCacheEntry<>).MakeGenericType( type ), this )!;
 
         if ( registerDefaultFormatters )
         {
@@ -148,10 +135,8 @@ public class FormatterRepository : IFormatterRepository
     /// <summary>
     /// Returns the formatter for the type <typeparamref name="T"/>. 
     /// </summary>
-    public IFormatter<T>? Get<T>()
-    {
-        return (IFormatter<T>?) this._invariantFormatterCache.GetOrAdd( typeof(T), this._getInvariantFormatterFunc ).GetInstance();
-    }
+    public IFormatter<T> Get<T>() 
+        => (IFormatter<T>) this._invariantFormatterCache.GetOrAdd( typeof(T), this._getInvariantFormatterFunc ).GetInstance();
 
     /// <summary>
     /// Returns a formatter for a specific object. This overload should be used when the type of the object
@@ -159,7 +144,7 @@ public class FormatterRepository : IFormatterRepository
     /// </summary>
     /// <param name="objectType">Object type.</param>
     /// <returns>The formatter the object <paramref name="objectType"/>.</returns>
-    public IFormatter? Get( Type objectType )
+    public IFormatter Get( Type objectType )
     {
         return this._dynamicFormatterCache.GetOrAdd( objectType, this._getFormatterFunc ).Extension;
     }
@@ -168,9 +153,7 @@ public class FormatterRepository : IFormatterRepository
     {
         while ( true )
         {
-            TypeExtensionInfo<IFormatter> oldFormatterInfo;
-
-            if ( !this._dynamicFormatterCache.TryGetValue( objectType, out oldFormatterInfo ) )
+            if ( !this._dynamicFormatterCache.TryGetValue( objectType, out var oldFormatterInfo ) )
             {
                 this._dynamicFormatterCache.TryAdd( objectType, newFormatterInfo );
 
@@ -194,26 +177,29 @@ public class FormatterRepository : IFormatterRepository
             ? new AnonymousTypeFormatter( this, type )
             : (IFormatter) Activator.CreateInstance(
                 typeof(DefaultFormatter<>).MakeGenericType( type ),
-                this );
+                this )!;
 
-    private IFormatter CreateDefaultFormatter<T>() => typeof(T).IsAnonymous() ? new AnonymousTypeFormatter( this, typeof(T) ) : new DefaultFormatter<T>( this );
+    private IFormatter CreateDefaultFormatter<T>() 
+        => typeof(T).IsAnonymous() 
+            ? new AnonymousTypeFormatter( this, typeof(T) ) 
+            : new DefaultFormatter<T>( this );
 
-    private abstract class FormatterCache
+    private abstract class InvariantFormatterCacheEntry
     {
-        public abstract IFormatter? GetInstance();
+        public abstract IFormatter GetInstance();
     }
 
-    private sealed class FormatterCache<T> : FormatterCache
+    private sealed class InvariantFormatterCacheEntry<T> : InvariantFormatterCacheEntry
     {
         private readonly FormatterRepository _parent;
-        private IFormatter<T>? _formatter;
+        private IFormatter<T> _formatter;
         private TypeExtensionInfo<IFormatter> _formatterInfo;
 
-        public FormatterCache( FormatterRepository parent )
+        public InvariantFormatterCacheEntry( FormatterRepository parent )
         {
             this._parent = parent;
             this._formatterInfo = parent._formatterFactory.GetTypeExtension( typeof(T), this.UpdateCacheCallback, this.CreateDefaultFormatter );
-            this._formatter = (IFormatter<T>?) this._formatterInfo.Extension;
+            this._formatter = (IFormatter<T>) this._formatterInfo.Extension;
         }
 
         private IFormatter CreateDefaultFormatter()
@@ -224,7 +210,7 @@ public class FormatterRepository : IFormatterRepository
             }
             else if ( typeof(T).IsEnum )
             {
-                return (IFormatter) Activator.CreateInstance( typeof(EnumFormatter<>).MakeGenericType( typeof(T) ), this._parent );
+                return (IFormatter) Activator.CreateInstance( typeof(EnumFormatter<>).MakeGenericType( typeof(T) ), this._parent )!;
             }
             else
             {
@@ -236,11 +222,11 @@ public class FormatterRepository : IFormatterRepository
         {
             if ( typeExtensionInfo.ShouldOverwrite( this._formatterInfo ) )
             {
-                this._formatter = (IFormatter<T>?) this._parent._formatterFactory.Convert( typeExtensionInfo.Extension, typeof(T) );
+                this._formatter = (IFormatter<T>) this._parent._formatterFactory.Convert( typeExtensionInfo.Extension, typeof(T) );
                 this._formatterInfo = typeExtensionInfo;
             }
         }
 
-        public override IFormatter? GetInstance() => this._formatter;
+        public override IFormatter GetInstance() => this._formatter;
     }
 }
