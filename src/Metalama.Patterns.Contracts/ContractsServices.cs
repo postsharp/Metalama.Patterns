@@ -17,7 +17,7 @@ public class ContractsServices
     /// <summary>
     /// The default exception factory is kept for the handling of the obsolete exception creation methods in LocationContractAttribute.
     /// </summary>
-    internal static readonly ContractExceptionFactory DefaultExceptionFactory;        
+    internal static readonly ContractExceptionFactory DefaultExceptionFactory;
 
     static ContractsServices()
     {
@@ -25,11 +25,9 @@ public class ContractsServices
         Default = new ContractsServices();
     }
 
-    private ContractsServices()
-    {
-    }
+    private ContractsServices() { }
 
-    private volatile ContractLocalizedTextProvider _localizedTextProvider = new(null);
+    private volatile ContractLocalizedTextProvider _localizedTextProvider = new( null );
 
     /// <summary>
     /// Gets or sets the head of the ContractLocalizedTextProvider responsibility chain.

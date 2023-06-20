@@ -44,10 +44,14 @@ Global
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
 		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
 		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
@@ -66,5 +70,6 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\tests\SharedHelpers\SharedHelpers.projitems*{31626078-d5d3-483e-9d0d-8591c060a155}*SharedItemsImports = 13
 		src\tests\SharedHelpers\SharedHelpers.projitems*{b4dedff6-9bbc-4c2b-90bb-7a1c8473cdc0}*SharedItemsImports = 5
+		src\tests\SharedHelpers\SharedHelpers.projitems*{c972ceea-60fa-4dd4-beec-a5fddf451d50}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

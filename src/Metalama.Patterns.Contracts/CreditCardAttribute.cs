@@ -21,9 +21,7 @@ public sealed class CreditCardAttribute : ContractAspect
     /// <summary>
     /// Initializes a new instance of the <see cref="CreditCardAttribute"/> class.
     /// </summary>
-    public CreditCardAttribute()
-    {
-    }
+    public CreditCardAttribute() { }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -44,14 +42,15 @@ public sealed class CreditCardAttribute : ContractAspect
     {
         if ( !CreditCardAttributeHelper.IsValidCreditCardNumber( value ) )
         {
-            throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                typeof(ArgumentNullException),
-                typeof(CreditCardAttribute),
-                value,
-                meta.Target.GetTargetName(),
-                meta.Target.GetTargetKind(),
-                meta.Target.ContractDirection,
-                ContractLocalizedTextProvider.CreditCardErrorMessage ) );
+            throw ContractsServices.Default.ExceptionFactory.CreateException(
+                ContractExceptionInfo.Create(
+                    typeof(ArgumentNullException),
+                    typeof(CreditCardAttribute),
+                    value,
+                    meta.Target.GetTargetName(),
+                    meta.Target.GetTargetKind(),
+                    meta.Target.ContractDirection,
+                    ContractLocalizedTextProvider.CreditCardErrorMessage ) );
         }
     }
 }

@@ -23,16 +23,15 @@ public sealed class PhoneAttribute : RegularExpressionAttribute
     /// Initializes a new instance of the <see cref="PhoneAttribute"/> class.
     /// </summary>
     public PhoneAttribute()
-        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture )
-    {
-    }
+        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
 
     /// <inheritdoc/>
     [CompileTime]
     protected override ExceptionInfo GetExceptionInfo()
         => new(
             typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .PhoneErrorMessage) ),
-            false);
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .PhoneErrorMessage) ),
+            false );
 }

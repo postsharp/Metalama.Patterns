@@ -145,8 +145,9 @@ public class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () =>
-            cut.IReadOnlyCollectionMethod( new List<int>().AsReadOnly() ) );
+        var e = TestHelpers.RecordException<ArgumentException>(
+            () =>
+                cut.IReadOnlyCollectionMethod( new List<int>().AsReadOnly() ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );

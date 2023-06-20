@@ -24,16 +24,15 @@ public sealed class UrlAttribute : RegularExpressionAttribute
     /// Initializes a new instance of the <see cref="UrlAttribute"/> class.
     /// </summary>
     public UrlAttribute()
-        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture )
-    {
-    }
+        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
 
     /// <inheritdoc/>
     [CompileTime]
     protected override ExceptionInfo GetExceptionInfo()
         => new(
             typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .UrlErrorMessage) ),
-            false);
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .UrlErrorMessage) ),
+            false );
 }

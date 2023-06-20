@@ -23,9 +23,11 @@ public class NotNullAttributeTests
         var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectParameterMethod( null! ) );
 
         Assert.NotNull( e );
+
         // Resharper disable RedundantSuppressNullableWarningExpression
         Assert.Equal( "parameter", e!.ParamName );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
+
         // Resharper restore RedundantSuppressNullableWarningExpression
     }
 
@@ -37,9 +39,11 @@ public class NotNullAttributeTests
         var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ClassParameterMethod( null! ) );
 
         Assert.NotNull( e );
+
         // Resharper disable RedundantSuppressNullableWarningExpression
         Assert.Equal( "parameter", e!.ParamName );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
+
         // Resharper restore RedundantSuppressNullableWarningExpression
     }
 
@@ -51,9 +55,11 @@ public class NotNullAttributeTests
         var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectProperty = null! );
 
         Assert.NotNull( e );
+
         // Resharper disable RedundantSuppressNullableWarningExpression
         Assert.Equal( "value", e!.ParamName );
         Assert.Contains( "ObjectProperty", e!.Message, StringComparison.Ordinal );
+
         // Resharper restore RedundantSuppressNullableWarningExpression
     }
 
@@ -81,9 +87,11 @@ public class NotNullAttributeTests
         var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectField = null! );
 
         Assert.NotNull( e );
+
         // Resharper disable RedundantSuppressNullableWarningExpression
         Assert.Equal( "value", e!.ParamName );
         Assert.Contains( "ObjectField", e!.Message, StringComparison.Ordinal );
+
         // Resharper restore RedundantSuppressNullableWarningExpression
     }
 
@@ -100,9 +108,11 @@ public class NotNullAttributeTests
         var e = TestHelpers.RecordException<ArgumentNullException>( () => new NotNullTestClass.B<NotNullTestClass.A>( null! ) );
 
         Assert.NotNull( e );
+
         // Resharper disable RedundantSuppressNullableWarningExpression
         Assert.Equal( "x", e!.ParamName );
         Assert.Contains( "x", e!.Message, StringComparison.Ordinal );
+
         // Resharper restore RedundantSuppressNullableWarningExpression
-   }
+    }
 }

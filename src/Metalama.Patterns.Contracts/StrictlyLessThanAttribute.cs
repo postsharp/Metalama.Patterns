@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+
 // Resharper disable RedundantCast
 
 namespace Metalama.Patterns.Contracts;
@@ -43,10 +44,7 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             Int64Maximum.ToDouble( max ),
             decimal.MinValue,
             Int64Maximum.ToDecimal( max ),
-            GetInvalidTypes( long.MinValue, Int64Maximum.ToInt64( max ) )
-        )
-    {
-    }
+            GetInvalidTypes( long.MinValue, Int64Maximum.ToInt64( max ) ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an unsinged integer bound.
@@ -64,17 +62,14 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             UInt64Maximum.ToDouble( max ),
             decimal.MinValue,
             UInt64Maximum.ToDecimal( max ),
-            GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None)
-        )
-    {
-    }
+            GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a floating-point bound.
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( double max )
-        : base( 
+        : base(
             double.MinValue,
             max,
             long.MinValue,
@@ -85,20 +80,19 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             DoubleMaximum.ToDouble( max ),
             decimal.MinValue,
             DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) )
-    {
-    }
+            GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) ) { }
 
     /// <inheritdoc/>
     protected override ExceptionInfo GetExceptionInfo()
         => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .StrictlyLessThanErrorMessage) ),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .StrictlyLessThanErrorMessage) ),
             false,
-            true);
+            true );
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5006", nameof( StrictlyLessThanAttribute ) );
+        CreateCannotBeAppliedDiagosticDefinition( "LAMA5006", nameof(StrictlyLessThanAttribute) );
 
     /// <inheritdoc/>
     protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()

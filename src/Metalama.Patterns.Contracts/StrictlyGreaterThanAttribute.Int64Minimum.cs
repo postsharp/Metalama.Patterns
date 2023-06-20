@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+
 // Resharper disable RedundantCast
 
 using Metalama.Framework.Aspects;
@@ -34,7 +35,6 @@ public partial class StrictlyGreaterThanAttribute
 
         public static double ToDouble( long min ) => (double) min + FloatingPointHelper.GetDoubleStep( (double) min );
 
-        public static decimal ToDecimal( long min ) =>
-            (decimal) min + FloatingPointHelper.GetDecimalStep( (decimal) min );
+        public static decimal ToDecimal( long min ) => (decimal) min + FloatingPointHelper.GetDecimalStep( (decimal) min );
     }
 }

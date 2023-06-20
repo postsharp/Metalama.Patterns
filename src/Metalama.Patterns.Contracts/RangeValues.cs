@@ -12,7 +12,7 @@ public readonly struct RangeValues
     /// <summary>
     /// Initializes a new instance of the <see cref="RangeValues"/> struct.
     /// </summary>
-    public RangeValues( 
+    public RangeValues(
         long minInt64,
         long maxInt64,
         ulong minUInt64,

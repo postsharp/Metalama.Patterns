@@ -25,9 +25,7 @@ public class RegularExpressionAttribute : ContractAspect
     /// </summary>
     /// <param name="pattern">The regular expression.</param>
     public RegularExpressionAttribute( string pattern )
-        : this( pattern, RegexOptions.None )
-    {
-    }
+        : this( pattern, RegexOptions.None ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RegularExpressionAttribute"/> class.
@@ -80,26 +78,28 @@ public class RegularExpressionAttribute : ContractAspect
         {
             if ( info.IncludePatternArgument )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    info.ExceptionType,
-                    aspectType,
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    info.MessageIdExpression.Value,
-                    this.Pattern ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        info.ExceptionType,
+                        aspectType,
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        info.MessageIdExpression.Value,
+                        this.Pattern ) );
             }
             else
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    info.ExceptionType,
-                    aspectType,
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    info.MessageIdExpression.Value ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        info.ExceptionType,
+                        aspectType,
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        info.MessageIdExpression.Value ) );
             }
         }
     }
@@ -118,7 +118,8 @@ public class RegularExpressionAttribute : ContractAspect
     protected virtual ExceptionInfo GetExceptionInfo()
         => new(
             typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .RegularExpressionErrorMessage) ),
-            true);
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .RegularExpressionErrorMessage) ),
+            true );
 }

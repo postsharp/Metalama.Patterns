@@ -23,16 +23,15 @@ public sealed class EmailAddressAttribute : RegularExpressionAttribute
     /// Initializes a new instance of the <see cref="EmailAddressAttribute"/> class.
     /// </summary>
     public EmailAddressAttribute()
-        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture )
-    {
-    }
+        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
 
     /// <inheritdoc/>
     [CompileTime]
     protected override ExceptionInfo GetExceptionInfo()
         => new(
             typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .EmailAddressErrorMessage) ),
-            false);
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .EmailAddressErrorMessage) ),
+            false );
 }

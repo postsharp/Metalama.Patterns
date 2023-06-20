@@ -20,12 +20,10 @@ public class NegativeAttribute : LessThanAttribute
     /// <summary>
     /// Initializes a new instance of the <see cref="NegativeAttribute"/> class.
     /// </summary>
-    public NegativeAttribute() : base( 0 )
-    {
-    }
+    public NegativeAttribute() : base( 0 ) { }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5003", nameof( NegativeAttribute ) );
+        CreateCannotBeAppliedDiagosticDefinition( "LAMA5003", nameof(NegativeAttribute) );
 
     /// <inheritdoc/>
     protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
