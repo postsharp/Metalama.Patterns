@@ -2,9 +2,12 @@
 
 using Xunit;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedParameter.Global
+
 namespace Metalama.Patterns.Tests.Helpers;
 
-public class AssertEx
+internal static class AssertEx
 {
     // NOTE: Xunit doesn't support assert messages by design (except for True and False methods).
 
@@ -94,7 +97,7 @@ public class AssertEx
         Assert.True( false, $"Expected exception of type {typeof(T)} but no exception was thrown." );
     }
 
-    private static void AssertExceptionType<T>( Exception ex ) => Assert.True( ex.GetType().Equals( typeof(T) ), "Expected exception type failed." );
+    private static void AssertExceptionType<T>( Exception ex ) => Assert.True( ex.GetType() == typeof(T), "Expected exception type failed." );
 
     private static void AssertExceptionMessage( Exception ex, string expectedMessage )
         => Assert.True(

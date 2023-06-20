@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -20,6 +21,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.GreaterThanErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
+[PublicAPI]
 public class GreaterThanAttribute : RangeAttribute
 {
     /// <summary>
@@ -134,9 +136,9 @@ public class GreaterThanAttribute : RangeAttribute
             false );
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5001", nameof(GreaterThanAttribute) );
+        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5001", nameof(GreaterThanAttribute) );
 
     /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
         => _rangeCannotBeApplied;
 }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using System.Text.RegularExpressions;
 
@@ -15,6 +16,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.UrlErrorMessage"/>.</para>
 /// </remarks>
+[PublicAPI]
 public sealed class UrlAttribute : RegularExpressionAttribute
 {
     private const string _pattern =

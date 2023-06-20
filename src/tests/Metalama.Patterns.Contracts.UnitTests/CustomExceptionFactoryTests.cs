@@ -43,7 +43,7 @@ public partial class CustomExceptionFactoryTests : IDisposable
         ContractsServices.Default.ExceptionFactory = new EmptyContractExceptionFactory( null! );
         var testingObject = new ContractTesting();
 
-        var message =
+        const string message = 
             "The [Required] contract failed with ArgumentNullException, but the current ContractExceptionFactory is not configured to instantiate this exception type";
 
         AssertEx.Throws<InvalidOperationException>( message, () => testingObject.Method( null! ) );

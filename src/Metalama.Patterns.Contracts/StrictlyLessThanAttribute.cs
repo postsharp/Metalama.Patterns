@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -26,6 +27,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.StrictlyLessThanErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
+[PublicAPI]
 public partial class StrictlyLessThanAttribute : RangeAttribute
 {
     /// <summary>
@@ -47,7 +49,7 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             GetInvalidTypes( long.MinValue, Int64Maximum.ToInt64( max ) ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an unsinged integer bound.
+    /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an unsigned integer bound.
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( ulong max )
@@ -92,9 +94,9 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             true );
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5006", nameof(StrictlyLessThanAttribute) );
+        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5006", nameof(StrictlyLessThanAttribute) );
 
     /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
         => _rangeCannotBeApplied;
 }

@@ -20,7 +20,7 @@ public class InterfaceTests
         void Bar( [Required] string a );
     }
 
-    private class Foo : IFoo
+    private sealed class Foo : IFoo
     {
         public void Bar( string a ) { }
     }

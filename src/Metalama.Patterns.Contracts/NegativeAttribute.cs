@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -15,6 +16,7 @@ namespace Metalama.Patterns.Contracts;
 /// </para>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.LessThanErrorMessage"/>.</para>
 /// </remarks>
+[PublicAPI]
 public class NegativeAttribute : LessThanAttribute
 {
     /// <summary>
@@ -23,9 +25,9 @@ public class NegativeAttribute : LessThanAttribute
     public NegativeAttribute() : base( 0 ) { }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5003", nameof(NegativeAttribute) );
+        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5003", nameof(NegativeAttribute) );
 
     /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
         => _rangeCannotBeApplied;
 }

@@ -13,8 +13,8 @@ public class LessOrGreaterThanZeroTests : RangeContractTestsBase
     private const ulong _ulongLimit = 0;
     private const double _doubleLimit = 0;
 
-    private static readonly double _doubleStep = double.Epsilon;
-    private static readonly decimal _decimalStep = DecimalTolerance;
+    private const double _doubleStep = double.Epsilon;
+    private const decimal _decimalStep = DecimalTolerance;
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Success()

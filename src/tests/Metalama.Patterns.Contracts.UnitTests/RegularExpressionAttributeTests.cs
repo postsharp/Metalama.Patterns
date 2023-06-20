@@ -17,7 +17,7 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_MethodWithRegexMatch_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_MethodWithRegexMatch_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
@@ -36,7 +36,7 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_FieldWithRegexMatch_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldWithRegexMatch_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
@@ -55,7 +55,7 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_FieldEmail_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldEmail_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
@@ -74,7 +74,7 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_FieldPhone_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldPhone_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
@@ -93,10 +93,11 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_FieldUrl_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldUrl_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
+        // ReSharper disable once StringLiteralTypo
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.UrlField = "dslkfusd" );
 
         Assert.NotNull( e );
