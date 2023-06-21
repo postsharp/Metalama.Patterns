@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Metalama.Patterns.Contracts;
 /// exceptions are created when a contract is broken. By plugging into the <see cref="ContractLocalizedTextProvider"/> chain, you can change the way the exception messages
 /// are generated. See the documentation for the classes for more details: <see cref="ContractLocalizedTextProvider"/>, <see cref="ContractExceptionFactory"/>.
 /// </summary>
+[PublicAPI]
 public class ContractsServices
 {
     /// <summary>
@@ -17,7 +20,7 @@ public class ContractsServices
     /// <summary>
     /// The default exception factory is kept for the handling of the obsolete exception creation methods in LocationContractAttribute.
     /// </summary>
-    internal static readonly ContractExceptionFactory DefaultExceptionFactory;        
+    internal static readonly ContractExceptionFactory DefaultExceptionFactory;
 
     static ContractsServices()
     {
@@ -25,11 +28,9 @@ public class ContractsServices
         Default = new ContractsServices();
     }
 
-    private ContractsServices()
-    {
-    }
+    private ContractsServices() { }
 
-    private volatile ContractLocalizedTextProvider _localizedTextProvider = new(null);
+    private volatile ContractLocalizedTextProvider _localizedTextProvider = new( null );
 
     /// <summary>
     /// Gets or sets the head of the ContractLocalizedTextProvider responsibility chain.

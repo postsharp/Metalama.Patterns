@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -17,6 +18,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.RegularExpressionErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the regular expression used.</para>
 /// </remarks>
+[PublicAPI]
 [Inheritable]
 public class RegularExpressionAttribute : ContractAspect
 {
@@ -25,9 +27,7 @@ public class RegularExpressionAttribute : ContractAspect
     /// </summary>
     /// <param name="pattern">The regular expression.</param>
     public RegularExpressionAttribute( string pattern )
-        : this( pattern, RegexOptions.None )
-    {
-    }
+        : this( pattern, RegexOptions.None ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RegularExpressionAttribute"/> class.
@@ -65,7 +65,7 @@ public class RegularExpressionAttribute : ContractAspect
     }
 
     // TODO: Unlike PostSharp, we don't have per-aspect-instance runtime state, so we can't so easily cache the regex object.
-    // Note that Regex has OOTB caching of compiled expressions (see eg Regex.CacheSize).
+    // Note that Regex has built-in caching of compiled expressions (see eg Regex.CacheSize).
     // For now, just using runtime evaluation.
 
     /// <inheritdoc/>
@@ -80,26 +80,28 @@ public class RegularExpressionAttribute : ContractAspect
         {
             if ( info.IncludePatternArgument )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    info.ExceptionType,
-                    aspectType,
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    info.MessageIdExpression.Value,
-                    this.Pattern ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        info.ExceptionType,
+                        aspectType,
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        info.MessageIdExpression.Value,
+                        this.Pattern ) );
             }
             else
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    info.ExceptionType,
-                    aspectType,
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    info.MessageIdExpression.Value ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        info.ExceptionType,
+                        aspectType,
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        info.MessageIdExpression.Value ) );
             }
         }
     }
@@ -118,7 +120,8 @@ public class RegularExpressionAttribute : ContractAspect
     protected virtual ExceptionInfo GetExceptionInfo()
         => new(
             typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .RegularExpressionErrorMessage) ),
-            true);
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .RegularExpressionErrorMessage) ),
+            true );
 }

@@ -1,25 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>
 /// Default implementation of <see cref="ContractExceptionFactory"/>.
 /// </summary>
+[PublicAPI]
 public class DefaultContractExceptionFactory : ContractExceptionFactory
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultContractExceptionFactory"/> class.
     /// </summary>
-    public DefaultContractExceptionFactory() : this( ContractsServices.DefaultExceptionFactory )
-    {
-    }
+    public DefaultContractExceptionFactory() : this( ContractsServices.DefaultExceptionFactory ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultContractExceptionFactory"/> class.
     /// </summary>
-    public DefaultContractExceptionFactory( ContractExceptionFactory? next ) : base( next )
-    {
-    }
+    public DefaultContractExceptionFactory( ContractExceptionFactory? next ) : base( next ) { }
 
     /// <inheritdoc/>
     public override Exception CreateException( ContractExceptionInfo exceptionInfo )

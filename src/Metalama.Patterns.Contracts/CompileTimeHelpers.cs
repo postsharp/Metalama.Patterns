@@ -4,6 +4,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
+// ReSharper disable UnusedMember.Global
+
 namespace Metalama.Patterns.Contracts;
 
 [CompileTime]
@@ -33,7 +35,7 @@ internal static class CompileTimeHelpers
     {
         if ( target == null )
         {
-            throw new ArgumentNullException( nameof( target ) );
+            throw new ArgumentNullException( nameof(target) );
         }
 
         return target.Declaration.DeclarationKind switch
@@ -41,16 +43,17 @@ internal static class CompileTimeHelpers
             DeclarationKind.Parameter => target.Parameter.IsReturnParameter ? null : target.Parameter.Name,
             DeclarationKind.Property => target.Property.Name,
             DeclarationKind.Field => target.Field.Name,
-            _ => throw new ArgumentOutOfRangeException( nameof( target ) + "." + nameof( target.Declaration ) + "." +
-                                                                   nameof( target.Declaration.DeclarationKind ) ),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(target) + "." + nameof(target.Declaration) + "." +
+                nameof(target.Declaration.DeclarationKind) )
         };
     }
 
-    public static ContractTargetKind GetTargetKind( this IMetaTarget target)
+    public static ContractTargetKind GetTargetKind( this IMetaTarget target )
     {
         if ( target == null )
         {
-            throw new ArgumentNullException( nameof( target ) );
+            throw new ArgumentNullException( nameof(target) );
         }
 
         return target.Declaration.DeclarationKind switch
@@ -58,8 +61,9 @@ internal static class CompileTimeHelpers
             DeclarationKind.Parameter => target.Parameter.IsReturnParameter ? ContractTargetKind.ReturnValue : ContractTargetKind.Parameter,
             DeclarationKind.Property => ContractTargetKind.Property,
             DeclarationKind.Field => ContractTargetKind.Field,
-            _ => throw new ArgumentOutOfRangeException( nameof( target ) + "." + nameof( target.Declaration ) + "." +
-                                                                   nameof( target.Declaration.DeclarationKind ) ),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(target) + "." + nameof(target.Declaration) + "." +
+                nameof(target.Declaration.DeclarationKind) )
         };
     }
 
@@ -75,8 +79,9 @@ internal static class CompileTimeHelpers
             DeclarationKind.Parameter => target.Parameter.Type,
             DeclarationKind.Property => target.Property.Type,
             DeclarationKind.Field => target.Field.Type,
-            _ => throw new ArgumentOutOfRangeException( nameof(target) + "." + nameof(target.Declaration) + "." +
-                                                        nameof(target.Declaration.DeclarationKind) )
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(target) + "." + nameof(target.Declaration) + "." +
+                nameof(target.Declaration.DeclarationKind) )
         };
     }
 
@@ -84,7 +89,7 @@ internal static class CompileTimeHelpers
     {
         if ( type == null )
         {
-            throw new ArgumentNullException( nameof( type ) );
+            throw new ArgumentNullException( nameof(type) );
         }
 
         if ( type.TypeKind == TypeKind.Interface )

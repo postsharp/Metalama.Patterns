@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using System.Text.RegularExpressions;
 
@@ -14,6 +15,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.PhoneErrorMessage"/>.</para>
 /// </remarks>
+[PublicAPI]
 public sealed class PhoneAttribute : RegularExpressionAttribute
 {
     private const string _pattern =
@@ -23,16 +25,15 @@ public sealed class PhoneAttribute : RegularExpressionAttribute
     /// Initializes a new instance of the <see cref="PhoneAttribute"/> class.
     /// </summary>
     public PhoneAttribute()
-        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture )
-    {
-    }
+        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
 
     /// <inheritdoc/>
     [CompileTime]
     protected override ExceptionInfo GetExceptionInfo()
         => new(
             typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .PhoneErrorMessage) ),
-            false);
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .PhoneErrorMessage) ),
+            false );
 }

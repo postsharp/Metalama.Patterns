@@ -2,9 +2,12 @@
 
 using Xunit;
 
-namespace Metalama.Patterns.Tests.Helpers;
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedParameter.Global
 
-public class AssertEx
+namespace Metalama.Patterns.Contracts.UnitTests;
+
+internal static class AssertEx
 {
     // NOTE: Xunit doesn't support assert messages by design (except for True and False methods).
 
@@ -12,8 +15,7 @@ public class AssertEx
 
     public static void Null( object expectedNull, string message ) => Assert.Null( expectedNull );
 
-    public static void NotEqual( object notExpected, object actual, string message ) =>
-        Assert.NotEqual( notExpected, actual );
+    public static void NotEqual( object notExpected, object actual, string message ) => Assert.NotEqual( notExpected, actual );
 
     public static void Equal( object expected, object actual, string message ) => Assert.Equal( expected, actual );
 
@@ -21,25 +23,27 @@ public class AssertEx
 
     public static void Equal( int expected, int actual, string message ) => Assert.Equal( expected, actual );
 
-    public static void NotSame( object notExpected, object actual, string message ) =>
-        Assert.NotSame( notExpected, actual );
+    public static void NotSame( object notExpected, object actual, string message ) => Assert.NotSame( notExpected, actual );
 
-    public static void Inconclusive() =>
-        // TODO: implement a replacement for Inconclusive, see https://github.com/AArnott/Xunit.SkippableFact
-        // Xunit doesn't support inconclusive tests
-        Assert.True( true, "Inconclusive" );
+    public static void Inconclusive()
+        =>
 
-    public static void Inconclusive( string message ) =>
-        // TODO: implement a replacement for Inconclusive, see https://github.com/AArnott/Xunit.SkippableFact
-        // Xunit doesn't support inconclusive tests
-        Assert.True( true, message );
+            // TODO: implement a replacement for Inconclusive, see https://github.com/AArnott/Xunit.SkippableFact
+            // Xunit doesn't support inconclusive tests
+            Assert.True( true, "Inconclusive" );
+
+    public static void Inconclusive( string message )
+        =>
+
+            // TODO: implement a replacement for Inconclusive, see https://github.com/AArnott/Xunit.SkippableFact
+            // Xunit doesn't support inconclusive tests
+            Assert.True( true, message );
 
     public static void Fail( string message ) => Assert.True( false, message );
 
     public static void Fail() => Assert.True( false );
 
-    public static void EqualSet<T>( IEnumerable<T> expected, IEnumerable<T> actual ) =>
-        Assert.Equal( new HashSet<T>( expected ), new HashSet<T>( actual ) );
+    public static void EqualSet<T>( IEnumerable<T> expected, IEnumerable<T> actual ) => Assert.Equal( new HashSet<T>( expected ), new HashSet<T>( actual ) );
 
     public static void ContainsAll<T>( IEnumerable<T> expected, ICollection<T> actual )
     {
@@ -49,15 +53,15 @@ public class AssertEx
         }
     }
 
-    public static void Throws<T>( Action task ) 
-        where T : Exception 
+    public static void Throws<T>( Action task )
+        where T : Exception
         => Assert.Throws<T>( task );
 
-    public static Task ThrowsAsync<T>( Func<Task> task ) 
-        where T : Exception 
+    public static Task ThrowsAsync<T>( Func<Task> task )
+        where T : Exception
         => Assert.ThrowsAsync<T>( task );
 
-    public static void Throws<T>( string expectedMessage, Action task ) 
+    public static void Throws<T>( string expectedMessage, Action task )
         where T : Exception
     {
         try
@@ -68,13 +72,14 @@ public class AssertEx
         {
             AssertExceptionType<T>( ex );
             AssertExceptionMessage( ex, expectedMessage );
+
             return;
         }
 
-        Assert.True( false, $"Expected exception of type {typeof( T )} but no exception was thrown." );
+        Assert.True( false, $"Expected exception of type {typeof(T)} but no exception was thrown." );
     }
 
-    public static async Task ThrowsAsync<T>( string expectedMessage, Func<Task> task ) 
+    public static async Task ThrowsAsync<T>( string expectedMessage, Func<Task> task )
         where T : Exception
     {
         try
@@ -85,18 +90,18 @@ public class AssertEx
         {
             AssertExceptionType<T>( ex );
             AssertExceptionMessage( ex, expectedMessage );
+
             return;
         }
 
-        Assert.True( false, $"Expected exception of type {typeof( T )} but no exception was thrown." );
+        Assert.True( false, $"Expected exception of type {typeof(T)} but no exception was thrown." );
     }
 
-    private static void AssertExceptionType<T>( Exception ex ) =>
-        Assert.True( ex.GetType().Equals( typeof(T) ), "Expected exception type failed." );
+    private static void AssertExceptionType<T>( Exception ex ) => Assert.True( ex.GetType() == typeof(T), "Expected exception type failed." );
 
-    private static void AssertExceptionMessage( Exception ex, string expectedMessage ) =>
-        Assert.True(
-            string.Equals( 
+    private static void AssertExceptionMessage( Exception ex, string expectedMessage )
+        => Assert.True(
+            string.Equals(
                 expectedMessage.ToLowerInvariant(),
                 ex.Message.ToLowerInvariant(),
                 StringComparison.Ordinal ),

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
+public sealed class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
 {
     [Fact]
     public void TestMethodsWithStrictlyPositiveAspect_Success()
@@ -19,7 +19,8 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
     {
         AssertFails( TestMethodsWithStrictlyPositiveAspect, 0, 0, 0, 0 );
         AssertFails( TestMethodsWithStrictlyPositiveAspect, -100, 0, -100, -100 );
-        AssertFails( 
+
+        AssertFails(
             TestMethodsWithStrictlyPositiveAspect,
             long.MinValue,
             ulong.MinValue,
@@ -40,7 +41,8 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
     {
         AssertFails( TestMethodsWithStrictlyNegativeAspect, 0, 0, 0, 0 );
         AssertFails( TestMethodsWithStrictlyNegativeAspect, 100, 0, 100, 100 );
-        AssertFails( 
+
+        AssertFails(
             TestMethodsWithStrictlyNegativeAspect,
             long.MaxValue,
             ulong.MaxValue,
@@ -48,7 +50,7 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
             decimal.MaxValue );
     }
 
-    private static void TestMethodsWithStrictlyPositiveAspect( 
+    private static void TestMethodsWithStrictlyPositiveAspect(
         long? longValue,
         ulong? ulongValue,
         double? doubleValue,
@@ -60,7 +62,7 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
         MethodWithStrictlyPositiveDecimal( decimalValue );
     }
 
-    private static void TestMethodsWithStrictlyNegativeAspect( 
+    private static void TestMethodsWithStrictlyNegativeAspect(
         long? longValue,
         ulong? ulongValue,
         double? doubleValue,
@@ -72,35 +74,19 @@ public class StrictlyNegativeOrPositiveAttributeTests : RangeContractTestsBase
         MethodWithStrictlyNegativeDecimal( decimalValue );
     }
 
-    private static void MethodWithStrictlyPositiveLong( [StrictlyPositive] long? a )
-    {
-    }
+    private static void MethodWithStrictlyPositiveLong( [StrictlyPositive] long? a ) { }
 
-    private static void MethodWithStrictlyPositiveUlong( [StrictlyPositive] ulong? a )
-    {
-    }
+    private static void MethodWithStrictlyPositiveUlong( [StrictlyPositive] ulong? a ) { }
 
-    private static void MethodWithStrictlyPositiveDouble( [StrictlyPositive] double? a )
-    {
-    }
+    private static void MethodWithStrictlyPositiveDouble( [StrictlyPositive] double? a ) { }
 
-    private static void MethodWithStrictlyPositiveDecimal( [StrictlyPositive] decimal? a )
-    {
-    }
+    private static void MethodWithStrictlyPositiveDecimal( [StrictlyPositive] decimal? a ) { }
 
-    private static void MethodWithStrictlyNegativeLong( [StrictlyNegative] long? a )
-    {
-    }
+    private static void MethodWithStrictlyNegativeLong( [StrictlyNegative] long? a ) { }
 
-    private static void MethodWithStrictlyNegativeUlong( [StrictlyNegative] ulong? a )
-    {
-    }
+    private static void MethodWithStrictlyNegativeUlong( [StrictlyNegative] ulong? a ) { }
 
-    private static void MethodWithStrictlyNegativeDouble( [StrictlyNegative] double? a )
-    {
-    }
+    private static void MethodWithStrictlyNegativeDouble( [StrictlyNegative] double? a ) { }
 
-    private static void MethodWithStrictlyNegativeDecimal( [StrictlyNegative] decimal? a )
-    {
-    }
+    private static void MethodWithStrictlyNegativeDecimal( [StrictlyNegative] decimal? a ) { }
 }

@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public partial class CustomExceptionFactoryTests : IDisposable
+public sealed partial class CustomExceptionFactoryTests : IDisposable
 {
     public CustomExceptionFactoryTests()
     {
@@ -42,7 +41,10 @@ public partial class CustomExceptionFactoryTests : IDisposable
     {
         ContractsServices.Default.ExceptionFactory = new EmptyContractExceptionFactory( null! );
         var testingObject = new ContractTesting();
-        var message = "The [Required] contract failed with ArgumentNullException, but the current ContractExceptionFactory is not configured to instantiate this exception type";
+
+        const string message = 
+            "The [Required] contract failed with ArgumentNullException, but the current ContractExceptionFactory is not configured to instantiate this exception type";
+
         AssertEx.Throws<InvalidOperationException>( message, () => testingObject.Method( null! ) );
     }
 
@@ -70,8 +72,7 @@ public partial class CustomExceptionFactoryTests : IDisposable
     [Fact]
     public void TestCustomExceptionFactory_ArgumentPassing()
     {
-        var check = new Action<Type>(
-            ( exceptionType ) => Assert.Equal( typeof( ArgumentException ), exceptionType ) );
+        var check = new Action<Type>( ( exceptionType ) => Assert.Equal( typeof(ArgumentException), exceptionType ) );
         ContractsServices.Default.ExceptionFactory = new CustomContractExceptionFactory( ContractsServices.Default.ExceptionFactory, check );
         var testingObject = new ContractTesting();
         AssertEx.Throws<ArgumentException>( () => testingObject.Method2( "123456" ) );

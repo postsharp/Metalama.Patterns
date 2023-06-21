@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -28,6 +29,7 @@ namespace Metalama.Patterns.Contracts;
 ///     </description></item>
 /// </list></para>
 /// </remarks>
+[PublicAPI]
 [Inheritable]
 public sealed class StringLengthAttribute : ContractAspect
 {
@@ -57,12 +59,12 @@ public sealed class StringLengthAttribute : ContractAspect
     /// <summary>
     /// Gets the maximum length.
     /// </summary>
-    public int MaximumLength { get; private set; }
+    public int MaximumLength { get; }
 
     /// <summary>
     /// Gets the minimum length.
     /// </summary>
-    public int MinimumLength { get; private set; }
+    public int MinimumLength { get; }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -90,52 +92,55 @@ public sealed class StringLengthAttribute : ContractAspect
         {
             if ( value != null && value!.Length > this.MaximumLength )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentException),
-                    typeof(StringLengthAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.StringLengthMaxErrorMessage,
-                    this.MaximumLength ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentException),
+                        typeof(StringLengthAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.StringLengthMaxErrorMessage,
+                        this.MaximumLength ) );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength == int.MaxValue )
         {
             if ( value != null && value!.Length < this.MinimumLength )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentException),
-                    typeof(StringLengthAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.StringLengthMinErrorMessage,
-                    this.MinimumLength ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentException),
+                        typeof(StringLengthAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.StringLengthMinErrorMessage,
+                        this.MinimumLength ) );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength != int.MaxValue )
         {
-            // Incorrect warning derferencing `value` after checking for null.
+            // Incorrect warning dereferencing `value` after checking for null.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentException),
-                    typeof(StringLengthAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.StringLengthRangeErrorMessage,
-                    this.MinimumLength,
-                    this.MaximumLength ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentException),
+                        typeof(StringLengthAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.StringLengthRangeErrorMessage,
+                        this.MinimumLength,
+                        this.MaximumLength ) );
             }
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
-        // else: min is zero, max is maxval, all strings are valid, no need to check.
+        // else: min is zero, max is int.MaxVal, all strings are valid, no need to check.
     }
 }

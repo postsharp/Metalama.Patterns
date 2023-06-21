@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -36,6 +37,7 @@ namespace Metalama.Patterns.Contracts;
 ///     </item>
 /// </list>
 /// </remarks>
+[PublicAPI]
 public class ContractLocalizedTextProvider
 {
     private readonly ContractLocalizedTextProvider? _next;
@@ -97,7 +99,7 @@ public class ContractLocalizedTextProvider
     /// <param name="additionalArguments">Optional arguments to be used in the message formatting.</param>
     /// <returns>A string derived from <c>errorMessage</c>, where placeholders have been
     /// replaced by their concrete value.</returns>
-    internal string FormatMessage( 
+    internal string FormatMessage(
         string errorMessage,
         object? value,
         string? targetName,
@@ -110,6 +112,7 @@ public class ContractLocalizedTextProvider
         }
 
         var arguments = GetFormattingStringArguments( value, targetName, targetKind, additionalArguments );
+
         return this.FormatString( errorMessage, arguments );
     }
 
@@ -123,7 +126,7 @@ public class ContractLocalizedTextProvider
     /// <returns>An array of arguments that can be passed to the <see cref="string.Format(string,object[])"/> method,
     /// where the formatting strings can have parameters as described in the remarks of
     /// the documentation of the <see cref="ContractLocalizedTextProvider"/> class.</returns>
-    public static object?[] GetFormattingStringArguments( 
+    public static object?[] GetFormattingStringArguments(
         object? value,
         string? targetName,
         ContractTargetKind targetKind,
@@ -243,6 +246,7 @@ public class ContractLocalizedTextProvider
     public string GetFormattedMessage( ContractExceptionInfo exceptionInfo )
     {
         var errorMessageTemplate = this.GetMessage( exceptionInfo.MessageId );
+
         var errorMessage = this.FormatMessage(
             errorMessageTemplate,
             exceptionInfo.Value,

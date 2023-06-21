@@ -5,12 +5,13 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class PrecisionTests : RangeContractTestsBase
+public sealed class PrecisionTests : RangeContractTestsBase
 {
     [Fact]
-    public void CheckDoubleTolerance() => Assert.Equal( 
-        DoubleTolerance.ToString( CultureInfo.InvariantCulture ),
-        FloatingPointHelper.DoubleTolerance.ToString( CultureInfo.InvariantCulture ) );
+    public void CheckDoubleTolerance()
+        => Assert.Equal(
+            DoubleTolerance.ToString( CultureInfo.InvariantCulture ),
+            FloatingPointHelper.DoubleTolerance.ToString( CultureInfo.InvariantCulture ) );
 
     [Fact]
     public void CheckDecimalTolerance() => Assert.Equal( DecimalTolerance, FloatingPointHelper.DecimalTolerance );

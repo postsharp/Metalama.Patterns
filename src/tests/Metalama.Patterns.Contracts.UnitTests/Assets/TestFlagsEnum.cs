@@ -6,5 +6,5 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 public enum TestFlagsEnum
 {
     Foo = 1,
-    Bar = 2,
+    Bar = 2
 }

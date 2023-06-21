@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -18,15 +19,14 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotEmptyErrorMessage"/>.</para>
 /// </remarks>
+[PublicAPI]
 [Inheritable]
 public sealed class NotEmptyAttribute : ContractAspect
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotEmptyAttribute"/> class.
     /// </summary>
-    public NotEmptyAttribute() 
-    { 
-    }
+    public NotEmptyAttribute() { }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -52,14 +52,15 @@ public sealed class NotEmptyAttribute : ContractAspect
         {
             if ( string.IsNullOrEmpty( value ) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentNullException),
-                    typeof(NotEmptyAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentNullException),
+                        typeof(NotEmptyAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
             }
         }
         else if ( TryGetCompatibleTargetInterface( targetType, out var interfaceType, out var requiresCast ) )
@@ -68,28 +69,30 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof(ArgumentNullException),
-                        typeof(NotEmptyAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentNullException),
+                            typeof(NotEmptyAttribute),
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
                 }
             }
             else
             {
                 if ( value == null || value!.Count <= 0 )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof(ArgumentNullException),
-                        typeof(NotEmptyAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentNullException),
+                            typeof(NotEmptyAttribute),
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
                 }
             }
         }
@@ -101,11 +104,10 @@ public sealed class NotEmptyAttribute : ContractAspect
 
     // TODO: #33294 Use simpler mechanism to throw a compile-time exception from a template if/when available.
     [CompileTime]
-    private static void ThrowValidateCalledOnIneligibleTarget() =>
-        throw new InvalidOperationException( "Validate called on an ineligible target." );
+    private static void ThrowValidateCalledOnIneligibleTarget() => throw new InvalidOperationException( "Validate called on an ineligible target." );
 
     [CompileTime]
-    private static bool TryGetCompatibleTargetInterface( 
+    private static bool TryGetCompatibleTargetInterface(
         INamedType targetType,
         [NotNullWhen( true )] out INamedType? interfaceType,
         out bool requiresCast )
@@ -134,10 +136,12 @@ public sealed class NotEmptyAttribute : ContractAspect
                 if ( t.IsGeneric )
                 {
                     var originalDefinition = t.GetOriginalDefinition();
+
                     if ( originalDefinition.Equals( typeOfIReadOnlyCollection1 ) ||
                          originalDefinition.Equals( typeOfICollection1 ) )
                     {
                         foundInterface = t;
+
                         break;
                     }
                 }
@@ -157,6 +161,7 @@ public sealed class NotEmptyAttribute : ContractAspect
 
         interfaceType = null;
         requiresCast = false;
+
         return false;
     }
 }

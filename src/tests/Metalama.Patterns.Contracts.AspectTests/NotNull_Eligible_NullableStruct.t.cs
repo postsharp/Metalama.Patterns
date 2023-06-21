@@ -1,3 +1,4 @@
+using System;
 namespace Metalama.Patterns.Contracts.AspectTests;
 public class NotNull_Eligible_NullableStruct
 {

@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.Contracts;
 
+[PublicAPI]
 public static class CreditCardAttributeHelper
 {
     public static bool IsValidCreditCardNumber( string? value )
@@ -14,7 +17,7 @@ public static class CreditCardAttributeHelper
 #if NET5_0_OR_GREATER
         var str2 =
             value.Replace( "-", "", StringComparison.OrdinalIgnoreCase )
-                 .Replace( " ", "", StringComparison.OrdinalIgnoreCase );
+                .Replace( " ", "", StringComparison.OrdinalIgnoreCase );
 #else
         var str2 = value.Replace( "-", "" ).Replace( " ", "" );
 #endif
@@ -30,6 +33,7 @@ public static class CreditCardAttributeHelper
 
             var digitChecksum = (digit - 48) * (toggle ? 2 : 1);
             toggle = !toggle;
+
             while ( digitChecksum > 0 )
             {
                 checksum += digitChecksum % 10;

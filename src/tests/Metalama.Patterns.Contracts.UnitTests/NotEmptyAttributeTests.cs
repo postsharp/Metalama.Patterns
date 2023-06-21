@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class NotEmptyAttributeTests
+public sealed class NotEmptyAttributeTests
 {
     [Fact]
     public void Given_StringMethodWithNotEmpty_When_CorrectValuePassed_Then_Success()
@@ -16,7 +15,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_StringMethodWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_StringMethodWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -35,7 +34,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_StringFieldWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_StringFieldWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -54,7 +53,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_ListMethodWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_ListMethodWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -73,7 +72,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_ListFieldWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_ListFieldWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -84,7 +83,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_ICollectionPropertyWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_ICollectionPropertyWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -145,8 +144,9 @@ public class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () =>
-            cut.IReadOnlyCollectionMethod( new List<int>().AsReadOnly() ) );
+        var e = TestHelpers.RecordException<ArgumentException>(
+            () =>
+                cut.IReadOnlyCollectionMethod( new List<int>().AsReadOnly() ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );

@@ -2,7 +2,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Metalama.Patterns.Tests.Helpers;
+namespace Metalama.Patterns.Contracts.UnitTests;
 
 /// <summary>
 /// Exception thrown upon internal assertion failures in PostSharp Pattern Libraries.
@@ -13,27 +13,19 @@ public sealed class AssertionFailedException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="AssertionFailedException"/> class with the default error message.
     /// </summary>
-    public AssertionFailedException()
-    {
-    }
+    public AssertionFailedException() { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AssertionFailedException"/> class and specifies the error message.
     /// </summary>
-    public AssertionFailedException( string message ) : base( message )
-    {
-    }
+    public AssertionFailedException( string message ) : base( message ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AssertionFailedException"/> class and specifies the error message and the inner <see cref="Exception"/>.
     /// </summary>
-    public AssertionFailedException( string message, Exception inner ) : base( message, inner )
-    {
-    }
+    public AssertionFailedException( string message, Exception inner ) : base( message, inner ) { }
 
-    private AssertionFailedException( 
+    private AssertionFailedException(
         SerializationInfo info,
-        StreamingContext context ) : base( info, context )
-    {
-    }
+        StreamingContext context ) : base( info, context ) { }
 }

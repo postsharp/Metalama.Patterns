@@ -4,7 +4,5 @@ namespace Metalama.Patterns.Contracts.AspectTests;
 
 public class Range_LongStrictlyGreaterThanDouble
 {
-    private void MethodWithLongStrictlyGreaterThanDouble( [StrictlyGreaterThan( (double) long.MaxValue + ((double) long.MaxValue * 1e-6) )] long? a )
-    {
-    }
+    private void MethodWithLongStrictlyGreaterThanDouble( [StrictlyGreaterThan( (double) long.MaxValue + ((double) long.MaxValue * 1e-6) )] long? a ) { }
 }

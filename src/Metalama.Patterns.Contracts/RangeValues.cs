@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>
@@ -7,12 +9,13 @@ namespace Metalama.Patterns.Contracts;
 /// </summary>
 /// <seealso cref="RangeAttribute"/>
 /// <seealso cref="RangeAttributeHelpers.Validate{T}"/>
+[PublicAPI]
 public readonly struct RangeValues
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="RangeValues"/> struct.
     /// </summary>
-    public RangeValues( 
+    public RangeValues(
         long minInt64,
         long maxInt64,
         ulong minUInt64,

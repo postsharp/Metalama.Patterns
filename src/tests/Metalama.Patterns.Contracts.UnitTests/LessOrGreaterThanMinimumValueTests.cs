@@ -6,11 +6,12 @@ using Xunit;
 // Keep the testing logic equal for all the copies!
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+
 // Resharper disable RedundantCast
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
+public sealed class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 {
     private const long _longLimit = long.MinValue;
     private const double _doubleLimit = double.MinValue;
@@ -109,69 +110,39 @@ public class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 
     #region Long
 
-    private static void MethodWithLongGreaterThanLong( [GreaterThan( _longLimit )] long? a )
-    {
-    }
+    private static void MethodWithLongGreaterThanLong( [GreaterThan( _longLimit )] long? a ) { }
 
-    private static void MethodWithUlongGreaterThanLong( [GreaterThan( _longLimit )] ulong? a )
-    {
-    }
+    private static void MethodWithUlongGreaterThanLong( [GreaterThan( _longLimit )] ulong? a ) { }
 
-    private static void MethodWithDoubleGreaterThanLong( [GreaterThan( _longLimit )] double? a )
-    {
-    }
+    private static void MethodWithDoubleGreaterThanLong( [GreaterThan( _longLimit )] double? a ) { }
 
-    private static void MethodWithDecimalGreaterThanLong( [GreaterThan( _longLimit )] decimal? a )
-    {
-    }
+    private static void MethodWithDecimalGreaterThanLong( [GreaterThan( _longLimit )] decimal? a ) { }
 
-    private static void MethodWithLongLessThanLong( [LessThan( _longLimit )] long? a )
-    {
-    }
+    private static void MethodWithLongLessThanLong( [LessThan( _longLimit )] long? a ) { }
 
-    private static void MethodWithUlongLessThanLong( [LessThan( _longLimit )] ulong? a )
-    {
-    }
+    private static void MethodWithUlongLessThanLong( [LessThan( _longLimit )] ulong? a ) { }
 
-    private static void MethodWithDoubleLessThanLong( [LessThan( _longLimit )] double? a )
-    {
-    }
+    private static void MethodWithDoubleLessThanLong( [LessThan( _longLimit )] double? a ) { }
 
-    private static void MethodWithDecimalLessThanLong( [LessThan( _longLimit )] decimal? a )
-    {
-    }
+    private static void MethodWithDecimalLessThanLong( [LessThan( _longLimit )] decimal? a ) { }
 
     #endregion Long
 
     #region Double
 
-    private static void MethodWithLongGreaterThanDouble( [GreaterThan( _doubleLimit )] long? a )
-    {
-    }
+    private static void MethodWithLongGreaterThanDouble( [GreaterThan( _doubleLimit )] long? a ) { }
 
-    private static void MethodWithUlongGreaterThanDouble( [GreaterThan( _doubleLimit )] ulong? a )
-    {
-    }
+    private static void MethodWithUlongGreaterThanDouble( [GreaterThan( _doubleLimit )] ulong? a ) { }
 
-    private static void MethodWithDoubleGreaterThanDouble( [GreaterThan( _doubleLimit )] double? a )
-    {
-    }
+    private static void MethodWithDoubleGreaterThanDouble( [GreaterThan( _doubleLimit )] double? a ) { }
 
-    private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( _doubleLimit )] decimal? a )
-    {
-    }
+    private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( _doubleLimit )] decimal? a ) { }
 
-    private static void MethodWithLongLessThanDouble( [LessThan( (double) _longLimit )] long? a )
-    {
-    }
+    private static void MethodWithLongLessThanDouble( [LessThan( (double) _longLimit )] long? a ) { }
 
-    private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleLimit )] double? a )
-    {
-    }
+    private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleLimit )] double? a ) { }
 
-    private static void MethodWithDecimalLessThanDouble( [LessThan( _decimalLimit )] decimal? a )
-    {
-    }
+    private static void MethodWithDecimalLessThanDouble( [LessThan( _decimalLimit )] decimal? a ) { }
 
     #endregion Double
 }

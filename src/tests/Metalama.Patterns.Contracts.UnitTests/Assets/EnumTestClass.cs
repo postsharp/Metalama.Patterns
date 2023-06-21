@@ -4,15 +4,15 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class EnumTestClass
 {
-    [EnumDataType( typeof( TestEnum ) )]
+    [EnumDataType( typeof(TestEnum) )]
     public string StringEnum;
 
-    [EnumDataType( typeof( TestEnum ) )]
+    [EnumDataType( typeof(TestEnum) )]
     public int IntEnum;
 
-    [EnumDataType( typeof( TestEnum ) )]
+    [EnumDataType( typeof(TestEnum) )]
     public object ObjectEnum;
 
-    [EnumDataType( typeof( TestFlagsEnum ) )]
+    [EnumDataType( typeof(TestFlagsEnum) )]
     public int IntFlag;
 }

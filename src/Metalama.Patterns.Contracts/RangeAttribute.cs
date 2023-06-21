@@ -1,8 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// TODO: #33303 The original PS impementation tried to avoid calling GetInvalidTypes at runtime, consider reinstating this behaviour.
+// TODO: #33303 The original PS implementation tried to avoid calling GetInvalidTypes at runtime, consider reinstating this behaviour.
 // Note that it's not clear exactly why this was done in PS.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -22,6 +23,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.RangeErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used and <value>{5}</value> to refer to the maximum value used.</para>
 /// </remarks>
+[PublicAPI]
 [Inheritable]
 public class RangeAttribute : ContractAspect
 {
@@ -45,12 +47,12 @@ public class RangeAttribute : ContractAspect
     /// <summary>
     /// Gets the minimal value to be used when generating the error message.
     /// </summary>
-    protected object DisplayMinValue { get; private set; }
+    protected object DisplayMinValue { get; }
 
     /// <summary>
     /// Gets the maximal value to be used when generating the error message.
     /// </summary>
-    protected object DisplayMaxValue { get; private set; }
+    protected object DisplayMaxValue { get; }
 
     private readonly long _minInt64;
     private readonly long _maxInt64;
@@ -66,7 +68,7 @@ public class RangeAttribute : ContractAspect
 
     private readonly TypeFlag _invalidTypes;
 
-    internal RangeAttribute( 
+    internal RangeAttribute(
         object displayMin,
         object displayMax,
         long minInt64,
@@ -411,8 +413,9 @@ public class RangeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( 
-            f => IsElibigleType( f.Type ),
+
+        builder.MustSatisfy(
+            f => IsEligibleType( f.Type ),
             f => $"the type of {f} must be a numeric type, a nullable numeric type, or object" );
     }
 
@@ -420,13 +423,14 @@ public class RangeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( 
-            p => IsElibigleType( p.Type ),
+
+        builder.MustSatisfy(
+            p => IsEligibleType( p.Type ),
             p => $"the type of {p} must be a numeric type, a nullable numeric type, or object" );
     }
 
     [CompileTime]
-    private static bool IsElibigleType( IType type )
+    private static bool IsEligibleType( IType type )
         => type.ToNonNullableType().SpecialType switch
         {
             SpecialType.UInt16 or
@@ -448,11 +452,11 @@ public class RangeAttribute : ContractAspect
     /// Creates a <see cref="DiagnosticDefinition"/> using the standard template for errors like "RangeAttribute cannot be
     /// applied to Foo/A because the value range cannot be satisfied by the type int", where the title and diagnostic ID must be
     /// specific to each derived aspect. Derived aspects should store the result in a <c>readonly static</c> field, the value of
-    /// which should be returned by an override of <see cref="GetCannotBeAppliedDiagosticDefinition"/>.
+    /// which should be returned by an override of <see cref="GetCannotBeAppliedDiagnosticDefinition"/>.
     /// </summary>
     /// <param name="id">The diagnostic ID, for example "LAMA5000".</param>
     /// <param name="attributeTypeName">The name of the attribute type (for example, "RangeAttribute").</param>
-    protected static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> CreateCannotBeAppliedDiagosticDefinition(
+    protected static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> CreateCannotBeAppliedDiagnosticDefinition(
         string id,
         string attributeTypeName )
         => new(
@@ -464,10 +468,9 @@ public class RangeAttribute : ContractAspect
 
     // Was COM010 in PostSharp
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5000", nameof( RangeAttribute ) );
+        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5000", nameof(RangeAttribute) );
 
-    protected virtual DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
-        => _rangeCannotBeApplied;
+    protected virtual DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition() => _rangeCannotBeApplied;
 
     private void BuildAspect( IAspectBuilder builder, IType targetType )
     {
@@ -477,9 +480,10 @@ public class RangeAttribute : ContractAspect
         if ( (typeFlag & this._invalidTypes) != 0 )
         {
             builder.Diagnostics.Report(
-                this.GetCannotBeAppliedDiagosticDefinition().WithArguments(
-                    (builder.Target,
-                     basicType.Name) ) );
+                this.GetCannotBeAppliedDiagnosticDefinition()
+                    .WithArguments(
+                        (builder.Target,
+                         basicType.Name) ) );
         }
     }
 
@@ -511,23 +515,31 @@ public class RangeAttribute : ContractAspect
             case SpecialType.UInt64:
                 minBuilder.AppendLiteral( this._minUInt64 );
                 maxBuilder.AppendLiteral( this._maxUInt64 );
+
                 break;
+
             case SpecialType.SByte:
             case SpecialType.Int16:
             case SpecialType.Int32:
             case SpecialType.Int64:
                 minBuilder.AppendLiteral( this._minInt64 );
                 maxBuilder.AppendLiteral( this._maxInt64 );
+
                 break;
+
             case SpecialType.Single:
             case SpecialType.Double:
                 minBuilder.AppendLiteral( this._minDouble );
                 maxBuilder.AppendLiteral( this._maxDouble );
+
                 break;
+
             case SpecialType.Decimal:
                 minBuilder.AppendLiteral( this._minDecimal );
                 maxBuilder.AppendLiteral( this._maxDecimal );
+
                 break;
+
             default:
                 throw new InvalidOperationException( $"SpecialType.{specialType} was not expected here." );
         }
@@ -550,7 +562,7 @@ public class RangeAttribute : ContractAspect
         {
             if ( value != null )
             {
-                var rangeValues = new RangeValues( 
+                var rangeValues = new RangeValues(
                     this._minInt64,
                     this._maxInt64,
                     this._minUInt64,
@@ -566,16 +578,19 @@ public class RangeAttribute : ContractAspect
 
                 if ( !validateResult.IsInRange )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentOutOfRangeException ),
-                        aspectType,
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        exceptionInfo.MessageIdExpression.Value,
-                        exceptionInfo.IncludeMinValue ? this.DisplayMinValue : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                        exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentOutOfRangeException),
+                            aspectType,
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            exceptionInfo.MessageIdExpression.Value,
+                            exceptionInfo.IncludeMinValue
+                                ? this.DisplayMinValue
+                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
+                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
                 }
             }
         }
@@ -587,32 +602,38 @@ public class RangeAttribute : ContractAspect
             {
                 if ( value!.HasValue && (value < min.Value || value > max.Value) )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentOutOfRangeException ),
-                        aspectType,
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        exceptionInfo.MessageIdExpression.Value,
-                        exceptionInfo.IncludeMinValue ? this.DisplayMinValue : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                        exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentOutOfRangeException),
+                            aspectType,
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            exceptionInfo.MessageIdExpression.Value,
+                            exceptionInfo.IncludeMinValue
+                                ? this.DisplayMinValue
+                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
+                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
                 }
             }
             else
             {
                 if ( value < min.Value || value > max.Value )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentOutOfRangeException ),
-                        aspectType,
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        exceptionInfo.MessageIdExpression.Value,
-                        exceptionInfo.IncludeMinValue ? this.DisplayMinValue : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                        exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentOutOfRangeException),
+                            aspectType,
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            exceptionInfo.MessageIdExpression.Value,
+                            exceptionInfo.IncludeMinValue
+                                ? this.DisplayMinValue
+                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
+                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
                 }
             }
         }
@@ -631,8 +652,9 @@ public class RangeAttribute : ContractAspect
     [CompileTime]
     protected virtual ExceptionInfo GetExceptionInfo()
         => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider
-                .RangeErrorMessage ) ),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .RangeErrorMessage) ),
             true,
             true );
 }

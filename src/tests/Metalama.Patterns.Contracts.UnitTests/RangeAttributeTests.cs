@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class RangeAttributeTests
+public sealed class RangeAttributeTests
 {
     [Fact]
     public void Given_MethodWithInRangeParameter_When_CorrectValuePassed_Then_Success()
@@ -179,8 +178,9 @@ public class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () =>
-            cut.ZeroToTenNullableDecimal( -10.0m ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>(
+            () =>
+                cut.ZeroToTenNullableDecimal( -10.0m ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
@@ -236,8 +236,7 @@ public class RangeAttributeTests
         var cut = new RangeTestClass();
 
         long? p = -1;
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>(
-            () => cut.ZeroToTenNullableIntRef( 1, ref p ) );
+        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableIntRef( 1, ref p ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
@@ -249,8 +248,10 @@ public class RangeAttributeTests
         var cut = new RangeTestClass();
 
         long? p = 1;
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () =>
-            cut.ZeroToTenNullableIntRef( -1, ref p ) );
+
+        var e = TestHelpers.RecordException<PostconditionFailedException>(
+            () =>
+                cut.ZeroToTenNullableIntRef( -1, ref p ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
@@ -261,8 +262,9 @@ public class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () =>
-            cut.ZeroToTenNullableIntOut( -1, out _ ) );
+        var e = TestHelpers.RecordException<PostconditionFailedException>(
+            () =>
+                cut.ZeroToTenNullableIntOut( -1, out _ ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );

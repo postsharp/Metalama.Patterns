@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+
 // Resharper disable RedundantCast
 
 namespace Metalama.Patterns.Contracts;
@@ -19,6 +21,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.GreaterThanErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
+[PublicAPI]
 public class GreaterThanAttribute : RangeAttribute
 {
     /// <summary>
@@ -26,7 +29,7 @@ public class GreaterThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public GreaterThanAttribute( long min )
-        : base( 
+        : base(
             min,
             long.MaxValue,
             min,
@@ -37,17 +40,14 @@ public class GreaterThanAttribute : RangeAttribute
             double.MaxValue,
             min,
             decimal.MaxValue,
-            GetInvalidTypes( min, long.MaxValue )
-        )
-    {
-    }
+            GetInvalidTypes( min, long.MaxValue ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying an unsigned integer bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public GreaterThanAttribute( ulong min )
-        : base( 
+        : base(
             min,
             ulong.MaxValue,
             min > (ulong) long.MaxValue ? long.MaxValue : (long) min,
@@ -58,17 +58,14 @@ public class GreaterThanAttribute : RangeAttribute
             double.MaxValue,
             min,
             decimal.MaxValue,
-            GetInvalidTypes( min )
-        )
-    {
-    }
+            GetInvalidTypes( min ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a floating-point bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public GreaterThanAttribute( double min )
-        : base( 
+        : base(
             min,
             double.MaxValue,
             DoubleMinimum.ToInt64( min ),
@@ -79,10 +76,7 @@ public class GreaterThanAttribute : RangeAttribute
             double.MaxValue,
             DoubleMinimum.ToDecimal( min ),
             decimal.MaxValue,
-            GetInvalidTypes( min, double.MaxValue )
-        )
-    {
-    }
+            GetInvalidTypes( min, double.MaxValue ) ) { }
 
     private static class DoubleMinimum
     {
@@ -135,15 +129,16 @@ public class GreaterThanAttribute : RangeAttribute
     /// <inheritdoc/>
     protected override ExceptionInfo GetExceptionInfo()
         => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .GreaterThanErrorMessage) ),
-            true, 
-            false);
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .GreaterThanErrorMessage) ),
+            true,
+            false );
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5001", nameof( GreaterThanAttribute) );
+        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5001", nameof(GreaterThanAttribute) );
 
     /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
         => _rangeCannotBeApplied;
 }

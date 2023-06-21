@@ -1,12 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
 // ReSharper disable InconsistentNaming
-public class RegularExpressionAttributeTests
+public sealed class RegularExpressionAttributeTests
 {
     [Fact]
     public void Given_MethodWithRegexMatch_When_CorrectValuePassed_Then_Success()
@@ -17,7 +16,7 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_MethodWithRegexMatch_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_MethodWithRegexMatch_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
@@ -36,7 +35,7 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_FieldWithRegexMatch_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldWithRegexMatch_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
@@ -55,7 +54,7 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_FieldEmail_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldEmail_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
@@ -74,7 +73,7 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_FieldPhone_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldPhone_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
@@ -93,10 +92,11 @@ public class RegularExpressionAttributeTests
     }
 
     [Fact]
-    public void Given_FieldUrl_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldUrl_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new RegexTestClass();
 
+        // ReSharper disable once StringLiteralTypo
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.UrlField = "dslkfusd" );
 
         Assert.NotNull( e );

@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+
 // Resharper disable RedundantCast
 
 namespace Metalama.Patterns.Contracts;
@@ -25,6 +27,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.StrictlyGreaterThanErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
+[PublicAPI]
 public partial class StrictlyGreaterThanAttribute : RangeAttribute
 {
     /// <summary>
@@ -32,7 +35,7 @@ public partial class StrictlyGreaterThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public StrictlyGreaterThanAttribute( long min )
-        : base( 
+        : base(
             min,
             long.MaxValue,
             Int64Minimum.ToInt64( min ),
@@ -43,17 +46,14 @@ public partial class StrictlyGreaterThanAttribute : RangeAttribute
             double.MaxValue,
             Int64Minimum.ToDecimal( min ),
             decimal.MaxValue,
-            GetInvalidTypes( Int64Minimum.ToInt64( min ), long.MaxValue )
-        )
-    {
-    }
+            GetInvalidTypes( Int64Minimum.ToInt64( min ), long.MaxValue ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying an unsigned integer bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public StrictlyGreaterThanAttribute( ulong min )
-        : base( 
+        : base(
             min,
             ulong.MaxValue,
             UInt64Minimum.ToInt64( min ),
@@ -64,17 +64,14 @@ public partial class StrictlyGreaterThanAttribute : RangeAttribute
             double.MaxValue,
             UInt64Minimum.ToDecimal( min ),
             decimal.MaxValue,
-            GetInvalidTypes( UInt64Minimum.ToUInt64( min ) )
-        )
-    {
-    }
+            GetInvalidTypes( UInt64Minimum.ToUInt64( min ) ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a floating-point bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public StrictlyGreaterThanAttribute( double min )
-        : base( 
+        : base(
             min,
             double.MaxValue,
             DoubleMinimum.ToInt64( min ),
@@ -85,22 +82,21 @@ public partial class StrictlyGreaterThanAttribute : RangeAttribute
             double.MaxValue,
             DoubleMinimum.ToDecimal( min ),
             decimal.MaxValue,
-            GetInvalidTypes( min < double.MaxValue - 1 ? min + 1 : double.MaxValue, double.MaxValue ) )
-    {
-    }
+            GetInvalidTypes( min < double.MaxValue - 1 ? min + 1 : double.MaxValue, double.MaxValue ) ) { }
 
     /// <inheritdoc/>
     protected override ExceptionInfo GetExceptionInfo()
         => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .StrictlyGreaterThanErrorMessage) ),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .StrictlyGreaterThanErrorMessage) ),
             true,
-            false);
+            false );
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5005", nameof( StrictlyGreaterThanAttribute ) );
+        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5005", nameof(StrictlyGreaterThanAttribute) );
 
     /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
         => _rangeCannotBeApplied;
 }

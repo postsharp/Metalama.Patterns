@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -15,19 +16,18 @@ namespace Metalama.Patterns.Contracts;
 /// </para>
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.GreaterThanErrorMessage"/>.</para>
 /// </remarks>
+[PublicAPI]
 public class PositiveAttribute : GreaterThanAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="PositiveAttribute"/> class.
     /// </summary>
-    public PositiveAttribute() : base( 0 )
-    {
-    }
+    public PositiveAttribute() : base( 0 ) { }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5004", nameof( PositiveAttribute ) );
+        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5004", nameof(PositiveAttribute) );
 
     /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
+    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
         => _rangeCannotBeApplied;
 }
