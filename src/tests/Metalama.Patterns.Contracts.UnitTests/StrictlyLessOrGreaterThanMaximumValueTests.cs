@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class StrictlyLessOrGreaterThanMaximumValueTests : RangeContractTestsBase
+public sealed class StrictlyLessOrGreaterThanMaximumValueTests : RangeContractTestsBase
 {
     private const long _longLimit = long.MaxValue - 1;
     private const ulong _ulongLimit = ulong.MaxValue - 1;

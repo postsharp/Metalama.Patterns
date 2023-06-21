@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class NegativeOrPositiveAttributeTests : RangeContractTestsBase
+public sealed class NegativeOrPositiveAttributeTests : RangeContractTestsBase
 {
     [Fact]
     public void TestMethodsWithPositiveAspect_Success()

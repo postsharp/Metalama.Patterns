@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class InterfaceTests
+public sealed class InterfaceTests
 {
     [Fact]
     public void TestInterfaceImpl()
@@ -14,6 +13,9 @@ public class InterfaceTests
         var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.Bar( null! ) );
         Assert.NotNull( e );
     }
+
+    // Resharper disable UnusedMemberInSuper.Global
+    // Resharper disable UnusedParameter.Global
 
     private interface IFoo
     {

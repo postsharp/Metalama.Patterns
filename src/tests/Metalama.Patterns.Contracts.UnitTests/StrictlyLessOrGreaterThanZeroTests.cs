@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
+public sealed class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
 {
     private const long _longLimit = 0;
     private const ulong _ulongLimit = 0;

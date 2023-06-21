@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class PrecisionTests : RangeContractTestsBase
+public sealed class PrecisionTests : RangeContractTestsBase
 {
     [Fact]
     public void CheckDoubleTolerance()

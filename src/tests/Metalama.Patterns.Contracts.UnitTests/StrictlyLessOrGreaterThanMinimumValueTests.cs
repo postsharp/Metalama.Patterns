@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTestsBase
+public sealed class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 {
     private const long _longLimit = long.MinValue + 1;
     private const double _doubleLimit = double.MinValue / (1 + DoubleTolerance);
