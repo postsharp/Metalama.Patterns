@@ -6,7 +6,6 @@ namespace Flashtrace.Formatters.UnitTests;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedParameter.Global
-
 internal static class AssertEx
 {
     // NOTE: Xunit doesn't support assert messages by design (except for True and False methods).

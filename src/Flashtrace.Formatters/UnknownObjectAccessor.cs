@@ -184,7 +184,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
             {
                 throw new ArgumentException( "State is not valid.", nameof(accessor) );
             }
-            
+
             this._instance = accessor._instance;
 
             this._enumerator = accessor._type == null || accessor._instance == null
@@ -195,7 +195,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
         /// <inheritdoc/>
         public KeyValuePair<string, object?> Current
             => this._instance != null
-                ? new( this._enumerator.Current.Key, this._enumerator.Current.Value( this._instance ) )
+                ? new KeyValuePair<string, object?>( this._enumerator.Current.Key, this._enumerator.Current.Value( this._instance ) )
                 : default;
 
         object IEnumerator.Current => this._instance != null ? this.Current : null!;
@@ -257,7 +257,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
             {
                 return Array.Empty<(string Name, object? Value)>();
             }
-            
+
             List<ValueTuple<string, object?>> properties = new( this._accessors.Count );
 
             foreach ( var accessor in this._accessors )

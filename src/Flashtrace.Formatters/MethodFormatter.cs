@@ -55,10 +55,10 @@ public sealed class MethodFormatter : Formatter<MethodBase>
 
         try
         {
-            var methodName = value is ConstructorInfo 
-                ? value.IsStatic ? "StaticConstructor" : "new" 
+            var methodName = value is ConstructorInfo
+                ? value.IsStatic ? "StaticConstructor" : "new"
                 : value.Name;
-            
+
             var c = methodName[0];
 
             if ( c is '<' or '_' )

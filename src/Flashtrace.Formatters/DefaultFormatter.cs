@@ -73,7 +73,7 @@ public sealed class DefaultFormatter<TValue> : Formatter<TValue>
         {
             // ReSharper disable HeapView.PossibleBoxingAllocation
             // ReSharper disable once CompareNonConstrainedGenericWithNull
-            
+
             if ( value == null )
             {
                 stringBuilder.Append( 'n', 'u', 'l', 'l' );

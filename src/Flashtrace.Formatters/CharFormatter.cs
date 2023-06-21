@@ -43,7 +43,7 @@ public sealed class CharFormatter : Formatter<char>
             return this;
         }
     }
-    
+
     private sealed class NonQuotingCharFormatter : Formatter<char>
     {
         private readonly CharFormatter _defaultCharFormatter;
@@ -76,5 +76,5 @@ public sealed class CharFormatter : Formatter<char>
                 return this._defaultCharFormatter;
             }
         }
-    }    
+    }
 }

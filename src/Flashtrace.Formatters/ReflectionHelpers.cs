@@ -8,7 +8,7 @@ namespace Flashtrace.Formatters;
 [PublicAPI]
 public static class ReflectionHelpers
 {
-    public static bool IsAnonymous( this Type type ) 
+    public static bool IsAnonymous( this Type type )
         => type.IsDefined( typeof(CompilerGeneratedAttribute), false )
            && type.Name.IndexOf( "AnonymousType", StringComparison.Ordinal ) != -1
            && (type.Name.StartsWith( "<>", StringComparison.OrdinalIgnoreCase ) || type.Name.StartsWith( "VB$", StringComparison.OrdinalIgnoreCase ));

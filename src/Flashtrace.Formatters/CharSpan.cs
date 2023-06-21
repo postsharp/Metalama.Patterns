@@ -71,7 +71,7 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     }
 
     // ReSharper disable once MergeConditionalExpression
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CharSpan"/> struct from a <see cref="string"/>, and takes the whole string.
     /// </summary>

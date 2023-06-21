@@ -39,7 +39,7 @@ internal static class EnumFormatterCache<T>
         {
             throw new ArgumentNullException( nameof(value) );
         }
-        
+
         if ( _simpleNames.TryGetValue( value, out var name ) )
         {
             return name;

@@ -11,9 +11,15 @@ namespace Flashtrace.Formatters;
 /// A class similar to <see cref="System.Text.StringBuilder"/>, but implemented using unsafe C#.
 /// </summary>
 [PublicAPI]
-[SuppressMessage( "Style", "IDE0047:Remove unnecessary parentheses", Justification = "If the parentheses are removed, these warnings are replaced with 'Arithmetic expressions should declare precedence' warnings instead." )]
+[SuppressMessage(
+    "Style",
+    "IDE0047:Remove unnecessary parentheses",
+    Justification = "If the parentheses are removed, these warnings are replaced with 'Arithmetic expressions should declare precedence' warnings instead." )]
 #pragma warning disable IDE0079 // Remove unnecessary suppression
-[SuppressMessage( "ReSharper", "ArrangeRedundantParentheses", Justification = "If the parentheses are removed, these warnings are replaced with 'Arithmetic expressions should declare precedence' warnings instead." )]
+[SuppressMessage(
+    "ReSharper",
+    "ArrangeRedundantParentheses",
+    Justification = "If the parentheses are removed, these warnings are replaced with 'Arithmetic expressions should declare precedence' warnings instead." )]
 #pragma warning restore IDE0079 // Remove unnecessary suppression
 public sealed unsafe class UnsafeStringBuilder : IDisposable
 {
@@ -958,7 +964,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     {
         // Exception condition added when porting code to satisfy nullable rules.
         var a = this.CharArray ?? throw new InvalidOperationException( "CharArray is unexpectedly null." );
-        
+
         return new string( a, startIndex, length );
     }
 

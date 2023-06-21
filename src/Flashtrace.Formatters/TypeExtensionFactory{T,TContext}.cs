@@ -23,7 +23,7 @@ internal class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
 
     [return: NotNullIfNotNull( nameof(o) )]
     public T? Convert( T? o, Type targetObjectType ) => this.Convert( o, targetObjectType, this._contextArray );
-    
+
     public void RegisterTypeExtension( Type targetType, Type typeExtensionType )
         => this.RegisterTypeExtension( targetType, typeExtensionType, this._contextArray );
 

@@ -135,8 +135,7 @@ public class FormatterRepository : IFormatterRepository
     /// <summary>
     /// Returns the formatter for the type <typeparamref name="T"/>. 
     /// </summary>
-    public IFormatter<T> Get<T>() 
-        => (IFormatter<T>) this._invariantFormatterCache.GetOrAdd( typeof(T), this._getInvariantFormatterFunc ).GetInstance();
+    public IFormatter<T> Get<T>() => (IFormatter<T>) this._invariantFormatterCache.GetOrAdd( typeof(T), this._getInvariantFormatterFunc ).GetInstance();
 
     /// <summary>
     /// Returns a formatter for a specific object. This overload should be used when the type of the object
@@ -179,9 +178,9 @@ public class FormatterRepository : IFormatterRepository
                 typeof(DefaultFormatter<>).MakeGenericType( type ),
                 this )!;
 
-    private IFormatter CreateDefaultFormatter<T>() 
-        => typeof(T).IsAnonymous() 
-            ? new AnonymousTypeFormatter( this, typeof(T) ) 
+    private IFormatter CreateDefaultFormatter<T>()
+        => typeof(T).IsAnonymous()
+            ? new AnonymousTypeFormatter( this, typeof(T) )
             : new DefaultFormatter<T>( this );
 
     private abstract class InvariantFormatterCacheEntry

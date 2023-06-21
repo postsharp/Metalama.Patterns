@@ -16,7 +16,7 @@ public class EnumFormatterTests
             Assert.Equal( value.ToString(), EnumFormatterCache<FlagsEnum>.GetString( value ) );
         }
     }
-    
+
     [Flags]
     public enum FlagsEnum
     {

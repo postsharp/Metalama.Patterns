@@ -285,7 +285,7 @@ internal class TypeExtensionFactoryBase<T>
         var targetType = this._genericInterfaceType.MakeGenericType( targetObjectType );
 
         // ReSharper disable once UseMethodIsInstanceOfType : Don't want to risk any subtle change of logic.
-        
+
         if ( targetType.IsAssignableFrom( o.GetType() ) )
         {
             return o;

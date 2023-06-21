@@ -53,7 +53,7 @@ public sealed class StringFormatter : Formatter<string>
     {
         private readonly StringFormatter _defaultStringFormatter;
 
-        public NonQuotingStringFormatter( IFormatterRepository repository, StringFormatter defaultStringFormatter ) : base( repository ) 
+        public NonQuotingStringFormatter( IFormatterRepository repository, StringFormatter defaultStringFormatter ) : base( repository )
         {
             this._defaultStringFormatter = defaultStringFormatter;
         }

@@ -18,6 +18,5 @@ internal class ThrowingFormatter<T> : Formatter<IEnumerable<T>>
 #pragma warning restore CA2201
     }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value ) 
-        => throw new NotSupportedException();
+    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value ) => throw new NotSupportedException();
 }

@@ -12,7 +12,10 @@ namespace Flashtrace.Formatters;
 
 // TODO: Review use of ExplicitCrossPackageInternal
 // [ExplicitCrossPackageInternal]
-[SuppressMessage( "StyleCop.CSharp.MaintainabilityRules", "SA1405:Debug.Assert should provide message text", Justification = "Ported from old code, original intent not known." )]
+[SuppressMessage(
+    "StyleCop.CSharp.MaintainabilityRules",
+    "SA1405:Debug.Assert should provide message text",
+    Justification = "Ported from old code, original intent not known." )]
 internal static unsafe class BufferHelper
 {
 #if WINDOWS_PINVOKE && UNSECURE_PINVOKE

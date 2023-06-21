@@ -18,7 +18,7 @@ internal readonly struct TypeExtensionInfo<T>
 
     public bool IsGeneric { get; }
 
-    public bool ShouldOverwrite( TypeExtensionInfo<T> typeExtension ) 
+    public bool ShouldOverwrite( TypeExtensionInfo<T> typeExtension )
         => CovariantTypeExtensionFactory<T>.ShouldOverwrite( this.ObjectType, this.IsGeneric, typeExtension.ObjectType, this.IsGeneric );
 }
 

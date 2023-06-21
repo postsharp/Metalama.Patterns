@@ -52,7 +52,7 @@ public sealed class TypeFormatter : Formatter<Type>
 
             return;
         }
-        
+
         try
         {
             if ( type.IsGenericParameter )
@@ -175,8 +175,8 @@ public sealed class TypeFormatter : Formatter<Type>
             return type.Name;
         }
 
-        return this.IsTrivialNamespace( type ) 
-            ? type.Name 
+        return this.IsTrivialNamespace( type )
+            ? type.Name
             : type.FullName ?? type.Name;
     }
 

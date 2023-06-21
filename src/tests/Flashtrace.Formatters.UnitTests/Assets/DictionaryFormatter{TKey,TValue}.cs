@@ -10,7 +10,8 @@ namespace Flashtrace.Formatters.UnitTests
 
         public override void Write( UnsafeStringBuilder stringBuilder, IDictionary<TKey, TValue>? value )
         {
-            stringBuilder.Append( "{" + string.Join( ",", value!.Select( kvp => string.Format( CultureInfo.InvariantCulture, "{0}:{1}", kvp.Key, kvp.Value ) ) ) + "}" );
+            stringBuilder.Append(
+                "{" + string.Join( ",", value!.Select( kvp => string.Format( CultureInfo.InvariantCulture, "{0}:{1}", kvp.Key, kvp.Value ) ) ) + "}" );
         }
     }
 }
