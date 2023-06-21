@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E12768A6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Contracts.UnitTests", "src\tests\Metalama.Patterns.Contracts.UnitTests\Metalama.Patterns.Contracts.UnitTests.csproj", "{C972CEEA-60FA-4DD4-BEEC-A5FDDF451D50}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedHelpers", "src\tests\SharedHelpers\SharedHelpers.shproj", "{31626078-D5D3-483E-9D0D-8591C060A155}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Contracts.AspectTests", "src\tests\Metalama.Patterns.Contracts.AspectTests\Metalama.Patterns.Contracts.AspectTests.csproj", "{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.Formatters", "src\Flashtrace.Formatters\Flashtrace.Formatters.csproj", "{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}"
@@ -60,16 +58,10 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C972CEEA-60FA-4DD4-BEEC-A5FDDF451D50} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
-		{31626078-D5D3-483E-9D0D-8591C060A155} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC2B6F6-5623-43F8-BBBB-ED8072670A80}
-	EndGlobalSection
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\tests\SharedHelpers\SharedHelpers.projitems*{31626078-d5d3-483e-9d0d-8591c060a155}*SharedItemsImports = 13
-		src\tests\SharedHelpers\SharedHelpers.projitems*{b4dedff6-9bbc-4c2b-90bb-7a1c8473cdc0}*SharedItemsImports = 5
-		src\tests\SharedHelpers\SharedHelpers.projitems*{c972ceea-60fa-4dd4-beec-a5fddf451d50}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
