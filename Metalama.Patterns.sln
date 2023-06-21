@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.Formatters", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.Formatters.UnitTests", "src\tests\Flashtrace.Formatters.UnitTests\Flashtrace.Formatters.UnitTests.csproj", "{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace", "src\Flashtrace\Flashtrace.csproj", "{2F65B1B4-6FD2-40A9-A293-437FF620157E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,12 @@ Global
 		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
 		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
