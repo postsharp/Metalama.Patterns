@@ -1,0 +1,189 @@
+﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
+// source-available license. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Aspects.Advices;
+using PostSharp.Patterns.Contracts;
+using PostSharp.Patterns.Utilities;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Reflection;
+using PostSharp.Reflection;
+
+namespace PostSharp.Patterns.Diagnostics.Custom
+{
+
+    /// <summary>
+    /// Defines how the raw CLR object stored in a <see cref="LogEventData"/> is translated into a set of visitable properties and an expression
+    /// that is accessible from the transaction policy expressions.
+    /// </summary>
+    public class LogEventMetadata
+    {
+        private static readonly LogEventMetadata anonymous = new LogEventMetadata();
+
+        private static readonly ConcurrentDictionary<Type, LogEventMetadata> defaultInstances = new ConcurrentDictionary<Type, LogEventMetadata>();
+
+        private static LogEventMetadata GetDefaultInstanceImpl<T>() => DefaultLogEventMetadata<T>.Instance;
+
+        internal static LogEventMetadata GetDefaultInstance( Type type )
+        {
+            return type.IsAnonymous() ? anonymous :  defaultInstances.GetOrAdd( type,
+                t => (LogEventMetadata) typeof( LogEventMetadata ).GetMethod( nameof( GetDefaultInstanceImpl ), 
+                BindingFlags.NonPublic | BindingFlags.Static ).MakeGenericMethod( t ).Invoke( null, null ) );
+        }
+        
+        /// <summary>
+        /// Gets the name of the current <see cref="LogEventMetadata"/>. This property may be undefined. It must be defined 
+        /// when the <see cref="LogEventData"/> must be available for evaluation from transaction policy expressions. In this case,
+        /// the type of expression model (i.e. the generic parameter of <see cref="LogEventMetadata{T}"/>) must be identical for identical
+        /// values of the <see cref="Name"/> property.
+        /// </summary>
+        public string Name { get; }
+
+
+        /// <summary>
+        /// Initializes a new <see cref="LogEventMetadata"/>.
+        /// </summary>
+        /// <param name="name">Optional. The name of the current <see cref="LogEventMetadata"/>. This property may be undefined. It must be defined 
+        /// when the <see cref="LogEventData"/> must be available for evaluation from transaction policy expressions. In this case,
+        /// the type of expression model (i.e. the generic parameter of <see cref="LogEventMetadata{T}"/>) must be identical for identical
+        /// values of the <see cref="Name"/> property.</param>
+        public LogEventMetadata( string name = null )
+        {
+            this.Name = name;
+        }
+
+
+        /// <summary>
+        /// Determines if the current <see cref="LogEventMetadata"/> contains any inherited property. The implementation of this method must not allocate heap memory.
+        /// </summary>
+        /// <param name="data">The raw CLR object, typically <see cref="LogEventData.Data" qualifyHint="true"/></param>
+        /// <returns></returns>
+        public virtual bool HasInheritedProperty( object data ) => false;
+
+        /// <summary>
+        /// Gets the options of a given property.
+        /// </summary>
+        /// <param name="name">The property name.</param>
+        /// <returns></returns>
+        internal protected virtual LoggingPropertyOptions GetPropertyOptions( string name ) => default;
+
+        internal virtual Type ExpressionModelType => typeof( object );
+
+        /// <summary>
+        /// Invokes an action for each property in the raw CLR object of a <see cref="LogEventData"/>.
+        /// </summary>
+        /// <typeparam name="TVisitorState">The type of the <paramref name="visitorState"/> parameter, an opaque value passed to <paramref name="visitor"/>.</typeparam>
+        /// <param name="data">The raw CLR object, typically <see cref="LogEventData.Data" qualifyHint="true"/>.</param>
+        /// <param name="visitor">The visitor.</param>
+        /// <param name="visitorState">An opaque value passed to <paramref name="visitor"/>.</param>
+        /// <param name="visitorOptions">Determines which properties need to be visited. By default, all properties are visited.</param>
+        public virtual void VisitProperties<TVisitorState>( object data, ILoggingPropertyVisitor<TVisitorState> visitor, ref TVisitorState visitorState, in LoggingPropertyVisitorOptions visitorOptions = default )
+        {
+            if ( data != null )
+            {
+                UnknownObjectAccessor accessor = UnknownObjectAccessor.GetInstance( data );
+
+                PropertyVisitor<TVisitorState>.State ourState = new PropertyVisitor<TVisitorState>.State( this, visitorState, visitor, visitorOptions );
+
+                accessor.VisitProperties( PropertyVisitor<TVisitorState>.Instance, ref ourState );
+
+                visitorState = ourState.ChildState;
+
+            }
+        }
+
+        internal T GetExpressionModel<T>( object data )
+        {
+            if ( this is LogEventMetadata<T> typedMetadat )
+            {
+                return typedMetadat.GetExpressionModel( data );
+            }
+            else
+            {
+                // This may throw an InvalidCastException, by design. That would be the fault of the caller.
+                return (T) data;
+            }
+        }
+
+        private class PropertyVisitor<TChildState> : IUnknownObjectPropertyVisitor<PropertyVisitor<TChildState>.State>
+        {
+            public static readonly PropertyVisitor<TChildState> Instance = new PropertyVisitor<TChildState>();
+
+            public bool MustVisit( string name, ref State state )
+            {
+                LoggingPropertyOptions options = state.Parent.GetPropertyOptions( name );
+
+                if ( options.IsIgnored ) return false;
+                if ( state.Options.OnlyInherited && !options.IsInherited ) return false;
+                if ( state.Options.OnlyRendered && !options.IsRendered ) return false;
+
+                return true;
+            }
+
+            public void Visit<TValue>( string name, TValue value, ref State state )
+            {
+                LoggingPropertyOptions options = state.Parent.GetPropertyOptions( name );
+
+                state.ChildVisitor.Visit( name, value, options, ref state.ChildState );
+                
+            }
+
+            public struct State
+            {
+                public readonly LogEventMetadata Parent;
+                public TChildState ChildState;
+                public readonly ILoggingPropertyVisitor<TChildState> ChildVisitor;
+                public readonly LoggingPropertyVisitorOptions Options;
+
+                public State( LogEventMetadata parent, TChildState childState, ILoggingPropertyVisitor<TChildState> childVisitor, LoggingPropertyVisitorOptions options )
+                {
+                    this.Parent = parent;
+                    this.ChildState = childState;
+                    this.ChildVisitor = childVisitor;
+                    this.Options = options;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// A specialization of <see cref="LogEventMetadata"/> that specifies the type of the 
+    /// expression model type, i.e. the type exposed to transaction policy expressions.
+    /// </summary>
+    /// <typeparam name="TExpressionModel">The type of the 
+    /// expression model type, i.e. the type exposed to transaction policy expressions</typeparam>
+
+    public abstract class LogEventMetadata<TExpressionModel> : LogEventMetadata
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="LogEventMetadata"/>.
+        /// </summary>
+        /// <param name="name">The name of the current <see cref="LogEventMetadata"/>. This property may be undefined. It must be defined 
+        /// when the <see cref="LogEventData"/> must be available for evaluation from transaction policy expressions. In this case,
+        /// the type of expression model (i.e. the generic parameter of <see cref="LogEventMetadata{T}"/>) must be identical for identical
+        /// values of the <see cref="LogEventMetadata.Name"/> property.</param>
+
+        protected LogEventMetadata( string name ) : base( name )
+        {
+
+        }
+
+        /// <summary>
+        /// Gets the object that must be exposed to the expressions in transaction policies.
+        /// </summary>
+        /// <param name="data">The raw CLR object, typically <see cref="LogEventData.Data" qualifyHint="true"/>.</param>
+        /// <returns></returns>
+        public virtual TExpressionModel GetExpressionModel( object data ) => (TExpressionModel) data;
+
+
+        internal sealed override Type ExpressionModelType => typeof( TExpressionModel );
+
+    }
+
+
+
+}
+
+
