@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Tests.Helpers;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public class NotNullAttributeTests
+public sealed class NotNullAttributeTests
 {
     [Fact]
     public void Given_MethodWithNotNullObjectParameter_When_NotNullPassed_Then_Success()
