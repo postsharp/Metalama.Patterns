@@ -6,276 +6,14 @@
 <#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
 
+// TODO: Split T4 template into separate files with common include.
 
-using System;
-using System.ComponentModel;
-using PostSharp.Patterns.Diagnostics.Contexts;
-using PostSharp.Patterns.Diagnostics.Custom;
-using PostSharp.Patterns.Diagnostics.Custom.Messages;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
+using Flashtrace.Custom.Messages;
 
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
-	public partial class Logger
-	{
-	<#
-    for (var i = 1; i <= 10; i++)
-    {
-#>
-
-		/// <summary>
-        /// Writes a custom log record with <#= i #> parameter<#= GetPlural( i ) #>.
-        /// </summary>
-        /// <param name="level">The severity of the record (e.g. <see cref="LogLevel.Info"/> or <see cref="LogLevel.Warning"/>).</param>
-        /// <param name="formattingString">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
-<#
-        GenerateXmlDoc( i );
-#>
-	    public void Write<<#= Repeat( "T{0}", i ) #>>(  LogLevel level, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
-        {
-			CallerInfo nullRecordInfo = default;
-            this.Write( level, formattingString, <#= Repeat( "arg{0}", i ) #>, ref nullRecordInfo );
-        }
-
-		 /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-		[SuppressMessage("Microsoft.Design", "CA1031")]
-        public void Write<<#= Repeat( "T{0}", i ) #>>( LogLevel level, string formattingString,<#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
-        {
-            if ( !this.ValidateLogger( level ) )
-                return;
-
-			try
-			{
-				this.logger.Write( null, level, LogRecordKind.CustomRecord, formattingString, <#= Repeat( "arg{0}", i ) #>, null, ref callerInfo );
-			}
-			catch ( Exception e )
-			{
-				this.ExceptionHandler?.OnInternalException( e );
-			}
-        }
-
-		/// <summary>
-        /// Writes a custom log record with <#= i #> parameter<#= GetPlural( i ) #> and associates it with an <see cref="Exception"/>.
-        /// </summary>
-        /// <param name="level">The severity of the record (e.g. <see cref="LogLevel.Warning"/> or <see cref="LogLevel.Error"/>).</param>
-        /// <param name="formattingString">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
-	    /// <param name="exception">The <see cref="Exception"/> associated with the record.</param>
-<#
-        GenerateXmlDoc( i );
-#>
-	    public void WriteException<<#= Repeat( "T{0}", i ) #>>( LogLevel level, Exception exception, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
-        {
-            this.WriteException( level, exception, formattingString, <#= Repeat( "arg{0}", i ) #>, ref nullRecordInfo );
-        }
-
-		 /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-		[SuppressMessage("Microsoft.Design", "CA1031")]
-        public void WriteException<<#= Repeat( "T{0}", i ) #>>( LogLevel level, Exception exception, string formattingString,<#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
-        {
-            if ( !this.ValidateLogger( level ) )
-                 return;
-
-			try
-			{
-				this.logger.Write( null, level, LogRecordKind.CustomRecord, formattingString, <#= Repeat( "arg{0}", i ) #>, exception, ref callerInfo );
-			}
-			catch ( Exception e )
-			{
-				this.ExceptionHandler?.OnInternalException( e );
-			}
-        }
-
-		/// <summary>
-        /// Opens a custom activity with <#= i #> parameter<#= GetPlural( i ) #>. 
-        /// </summary>
-		/// <param name="options">Options.</param>
-        /// <param name="formattingString">The formatting string of the activity description, including parameters (e.g. <c>Writing {LineCount} line(s) in file {Path}.</c>)</param>
-        /// <returns>A <see cref="Logger"/> representing the new activity.</returns>
-        /// <remarks>The activity must be closed using <see cref="LogActivity.SetSuccess(string)"/>, <see cref="LogActivity.SetFailure(String)"/> or <see cref="LogActivity.SetException(Exception)"/>. </remarks>
-		<#
-        GenerateXmlDoc( i );
-#>
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public LogActivity OpenActivity<<#= Repeat( "T{0}", i ) #>>( LogActivityOptions options, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
-        {
-           CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return OpenActivity( options, formattingString, <#= Repeat( "arg{0}", i ) #>, ref callerInfo );
-        }
-
-
-		 /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-		[SuppressMessage("Microsoft.Design", "CA1031")]
-		public LogActivity OpenActivity<<#= Repeat( "T{0}", i ) #>>( LogActivityOptions options, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
-        {
-			LogLevel level = this.DefaultLevel;
-      
-            if ( !this.IsEnabled( level ) )
-            {
-                return this.GetNullActivity();
-            }
-
-			ILoggingContext activity = null;
-			try
-			{
-				SetOptions( ref options, ref callerInfo );
-
-				activity = this.logger.OpenActivity( options, ref callerInfo);
-				this.logger.Write( activity, level, LogRecordKind.CustomActivityEntry, formattingString, <#= Repeat( "arg{0}", i ) #>, null, ref callerInfo);
-				return this.CreateActivity( activity );
-			}
-			catch ( Exception e )
-			{
-				this.DisposeSafe( activity );
-				this.ExceptionHandler?.OnInternalException( e );
-				
-				return this.GetNullActivity();
-			}
-        }
-
-		 /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-		[SuppressMessage("Microsoft.Design", "CA1031")]
-		public LogActivity OpenAsyncActivity<<#= Repeat( "T{0}", i ) #>>( LogActivityOptions options, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
-        {
-           LogLevel level = this.DefaultLevel;
-
-            if ( !this.IsEnabled( level ) )
-            {
-                return this.GetNullActivity();
-            }
-
-			ILoggingContext activity = null;
-
-			try
-			{
-				options.IsAsync = true;
-				activity = this.logger.OpenActivity(options, ref callerInfo);
-				this.logger.Write( activity, level, LogRecordKind.CustomActivityEntry, formattingString, <#= Repeat( "arg{0}", i ) #>, null, ref callerInfo);
-				return this.CreateActivity( activity );
-			}
-			catch ( Exception e )
-			{
-				this.ExceptionHandler?.OnInternalException( e );
-				this.DisposeSafe( activity );
-				return this.GetNullActivity();
-			}
-        }
-
-/////
-
-        /// <summary>
-        /// Opens a custom activity with a description containing <#= i #> parameter<#= GetPlural( i ) #>.
-        /// </summary>
-        /// <param name="formattingString">The description of the activity, including parameters (e.g. <c>Writing {LineCount} line(s) in file {Path}</c>).</param>
-<#
-        GenerateXmlDoc( i );
-#>
-        /// <returns>A <see cref="Logger"/> representing the new activity.</returns>
-        /// <remarks>The activity must be closed using <see cref="LogActivity.SetSuccess(string)"/>, <see cref="LogActivity.SetFailure(String)"/> or <see cref="LogActivity.SetException(Exception)"/>. </remarks>
-		[MethodImpl(MethodImplOptions.NoInlining)]
-        public LogActivity OpenActivity<<#= Repeat( "T{0}", i ) #>>( string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
-        {
-            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return OpenActivity( formattingString, <#= Repeat( "arg{0}", i ) #>, ref callerInfo );
-        }
-
-
-		 /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public LogActivity OpenActivity<<#= Repeat( "T{0}", i ) #>>( string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
-        {
-           return this.OpenActivity( LogActivityOptions.Default, formattingString, <#= Repeat( "arg{0}", i ) #>, ref callerInfo );
-        }
-	<#
-    }
-#>
-	
-	
-	}
-
-	partial class LogActivity
-	{
-	<#
-    for (var i = 1; i <= 10; i++)
-    {
-#>
-
-			/// <summary>
-        /// Ends an activity (opened with <see cref="Logger.OpenActivity(string)"/>)
-        /// with success and specifies a success message with <#= i #> parameter<#= GetPlural( i ) #>.
-        /// </summary>
-        /// <param name="formattingString">The success message with parameters, for instance <c>Written {Count} lines</c>.</param>
-<#
-        GenerateXmlDoc( i );
-#>
-  		public void SetSuccess<<#= Repeat( "T{0}", i ) #>>(string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>)
-        {
-			CallerInfo nullRecordInfo = default;
-            this.SetSuccess(formattingString, <#= Repeat( "arg{0}", i ) #>, ref nullRecordInfo );
-        }
-
-	  	 /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-		[SuppressMessage("Microsoft.Design", "CA1031")]
-        public void SetSuccess<<#= Repeat( "T{0}", i ) #>>(string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo)
-        {
-			if ( !this.RequiresCustomActivity( ref callerInfo ) )
-                return;
-
-			try
-			{
-				this.logger.Write( this.Context, this.ResolvedSuccessLevel, LogRecordKind.CustomActivitySuccess, formattingString, <#= Repeat( "arg{0}", i ) #>, null, ref callerInfo );
-				this.Close( ref callerInfo );
-			}
-			catch ( Exception e )
-			{
-				this.ExceptionHandler?.OnInternalException( e );
-			}
-        }
-
-		/// <summary>
-        /// Ends an activity (opened with <see cref="Logger.OpenActivity(string)"/>)
-        /// with failure and specifies a failure message with <#= i #> parameter<#= GetPlural( i ) #>.
-        /// </summary>
-        /// <param name="formattingString">The failure message with parameters, for instance <c>Written {Count} lines</c>.</param>
-<#
-        GenerateXmlDoc( i );
-#>
-  		public void SetFailure<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>)
-        {
-            CallerInfo nullRecordInfo = default;
-            this.SetFailure( formattingString, <#= Repeat( "arg{0}", i ) #>, ref nullRecordInfo );
-        }
-
-		 /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-		[SuppressMessage("Microsoft.Design", "CA1031")]
-        public void SetFailure<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo)
-        {
-			if ( !this.RequiresCustomActivity( ref callerInfo ) )
-                return;
-
-			try
-			{
-				this.logger?.Write( this.Context, this.ResolvedFailureLevel, LogRecordKind.CustomActivityFailure, formattingString, <#= Repeat( "arg{0}", i ) #>, null,  ref callerInfo );
-				this.Close( ref callerInfo );
-			}
-			catch ( Exception e )
-			{
-				this.ExceptionHandler?.OnInternalException( e );
-			}
-        }
-
-		<#
-    }
-#>
-	}
-	
-   
    <#
     for (var i = 1; i <= 10; i++)
     {
@@ -356,9 +94,7 @@ namespace PostSharp.Patterns.Diagnostics
 			<#= Repeat( "private readonly string name{0}; ", i, "" ) #>
 			<#= Repeat( "private readonly T{0} value{0}; ", i, "" ) #>
 
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal SemanticMessage( string messageName, <#= Repeat( "string name{0}, T{0} value{0}", i ) #> )
 			{
 				this.messageName = messageName;
@@ -405,9 +141,7 @@ namespace PostSharp.Patterns.Diagnostics
 <#
         GenerateXmlDoc( i );
 #>
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
 	    public static FormattedMessage<<#= Repeat( "T{0}", i ) #>> Formatted<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
         {
             return new FormattedMessage<<#= Repeat( "T{0}", i ) #>>( formattingString, <#= Repeat( "arg{0}", i ) #> );
@@ -430,17 +164,12 @@ namespace PostSharp.Patterns.Diagnostics
 	<#
         }
 #>
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
 	    public static  SemanticMessage<<#= Repeat( "T{0}", i ) #>> Semantic<<#= Repeat( "T{0}", i ) #>>(  string name, <#= Repeat( "string parameterName{0}, T{0} parameterValue{0}", i ) #> )
         {
             return new SemanticMessage<<#= Repeat( "T{0}", i ) #>>( name, <#= Repeat( "parameterName{0}, parameterValue{0}", i ) #> );
         }
 
-	#if VALUE_TUPLE
-		
-		
 		/// <summary>
         /// Create a semantic message with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
@@ -454,20 +183,12 @@ namespace PostSharp.Patterns.Diagnostics
 	<#
         }
 #>
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
 	    public static  SemanticMessage<<#= Repeat( "T{0}", i ) #>> Semantic<<#= Repeat( "T{0}", i ) #>>(  string name, <#= Repeat( "in (string Name,T{0} Value) parameter{0}", i ) #> )
         {
             return new SemanticMessage<<#= Repeat( "T{0}", i ) #>>( name, <#= Repeat( "parameter{0}.Name, parameter{0}.Value", i ) #> );
         }
-	
-
-	#endif
-
 	}
-
-
 	<#
     }
 #>
