@@ -16,7 +16,7 @@ public class StringLengthAttributeTests
     }
 
     [Fact]
-    public void Given_MethodWithMaxLength_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_MethodWithMaxLength_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new StringLengthTestClass();
 
@@ -35,7 +35,7 @@ public class StringLengthAttributeTests
     }
 
     [Fact]
-    public void Given_FieldWithMaxLength_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldWithMaxLength_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new StringLengthTestClass();
 
@@ -46,7 +46,7 @@ public class StringLengthAttributeTests
     }
 
     [Fact]
-    public void Given_FieldWithMinLength_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_FieldWithMinLength_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new StringLengthTestClass();
 

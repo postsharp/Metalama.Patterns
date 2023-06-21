@@ -16,7 +16,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_StringMethodWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_StringMethodWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -35,7 +35,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_StringFieldWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_StringFieldWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -54,7 +54,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_ListMethodWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_ListMethodWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -73,7 +73,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_ListFieldWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_ListFieldWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 
@@ -84,7 +84,7 @@ public class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_ICollectionPropertyWithNotEmpty_When_IncorrecValuePassed_Then_ExceptionIsThrown()
+    public void Given_ICollectionPropertyWithNotEmpty_When_IncorrectValuePassed_Then_ExceptionIsThrown()
     {
         var cut = new NotEmptyTestClass();
 

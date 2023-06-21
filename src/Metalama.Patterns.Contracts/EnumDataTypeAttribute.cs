@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -19,6 +20,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.EnumDataTypeErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to <see cref="EnumType"/> name.</para>
 /// </remarks>
+[PublicAPI]
 [Inheritable]
 public sealed class EnumDataTypeAttribute : ContractAspect
 {
@@ -42,7 +44,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
         base.BuildEligibility( builder );
 
         builder.MustSatisfy(
-            f => IsElibigleType( f.Type ),
+            f => IsEligibleType( f.Type ),
             f => $"the type of {f} must be string, an integer type or a nullable integer type" );
     }
 
@@ -52,12 +54,12 @@ public sealed class EnumDataTypeAttribute : ContractAspect
         base.BuildEligibility( builder );
 
         builder.MustSatisfy(
-            p => IsElibigleType( p.Type ),
+            p => IsEligibleType( p.Type ),
             p => $"the type of {p} must be string, an integer type or a nullable integer type" );
     }
 
     [CompileTime]
-    private static bool IsElibigleType( IType type )
+    private static bool IsEligibleType( IType type )
         => type.ToNonNullableType().SpecialType switch
         {
             SpecialType.String or
@@ -80,7 +82,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
         var targetName = meta.Target.GetTargetName();
         var targetType = meta.Target.GetTargetType();
 
-        if ( targetType.SpecialType == SpecialType.String || targetType.SpecialType == SpecialType.Object )
+        if ( targetType.SpecialType is SpecialType.String or SpecialType.Object )
         {
             if ( value != null! && !EnumDataTypeAttributeHelper.IsValidEnumValue( value, this.EnumType ) )
             {

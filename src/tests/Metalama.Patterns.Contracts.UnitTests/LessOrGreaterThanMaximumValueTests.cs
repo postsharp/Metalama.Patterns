@@ -16,13 +16,13 @@ public class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
     private const long _longLimit = long.MaxValue;
     private const ulong _ulongLimit = ulong.MaxValue;
     private const double _doubleLimit = double.MaxValue;
+    private const decimal _decimalStep = decimal.MaxValue * DecimalTolerance;
 
     // This has to be double because decimal is not allowed as attribute constructor value.
     // Loss of precision is a consequence.
     private const double _decimalLimit = (double) decimal.MaxValue / (1 + DoubleTolerance);
 
     private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
-    private static readonly decimal _decimalStep = decimal.MaxValue * DecimalTolerance;
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Success()

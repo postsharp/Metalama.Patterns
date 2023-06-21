@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Globalization;
 
 namespace Metalama.Patterns.Contracts;
 
+[PublicAPI]
 public static class ContractTargetKindExtensions
 {
     /// <summary>
@@ -20,7 +22,7 @@ public static class ContractTargetKindExtensions
         };
 
     /// <summary>
-    /// Gets the display name for the specified <see cref="ContractTargetKind"/> followed by the name of the target declartion when applicable.
+    /// Gets the display name for the specified <see cref="ContractTargetKind"/> followed by the name of the target declaration when applicable.
     /// </summary>
     public static string GetDisplayName( this ContractTargetKind targetKind, string? targetName )
         => targetKind switch

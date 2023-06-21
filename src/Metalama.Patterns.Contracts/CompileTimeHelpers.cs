@@ -4,6 +4,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
+// ReSharper disable UnusedMember.Global
+
 namespace Metalama.Patterns.Contracts;
 
 [CompileTime]
