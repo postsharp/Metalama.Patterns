@@ -1,8 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
 namespace Flashtrace.Custom.Messages
 {
-#if VALUE_TUPLE
     /// <summary>
     /// Encapsulates a semantic message with an arbitrary number of parameters. Use the <see cref="SemanticMessageBuilder"/> class to create an instance of this type.
     /// </summary>
@@ -12,9 +14,7 @@ namespace Flashtrace.Custom.Messages
         private readonly string messageName;
         private readonly IReadOnlyList<ValueTuple<string, object>> parameters;
 
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
         internal SemanticMessageArray( string messageName, IReadOnlyList<(string, object)> parameters )
         {
             this.messageName = messageName;
@@ -40,5 +40,4 @@ namespace Flashtrace.Custom.Messages
         public override string ToString() => DebugMessageFormatter.Format( this );
 
     }
-#endif
 }

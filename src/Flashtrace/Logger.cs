@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace Flashtrace
 {
+    // TODO: Remove class Logger.
     /// <summary>
     /// Allows to emit custom log records and define custom activities. This class is obsolete. Use <see cref="LogSource" /> for new developments.
     /// </summary>
@@ -66,44 +67,6 @@ namespace Flashtrace
 
         ///  <exclude/>
         public bool IsOpenActivityEnabled => this.logger?.IsEnabled( this.logger.ActivityOptions.ActivityLevel ) ?? false;
-
-        /// <summary>
-        /// Gets a <see cref="Logger"/> for a given role and <see cref="Type"/>.
-        /// </summary>
-        /// <param name="role">The role name (see <see cref="LoggingRoles"/> for a list of standard logging roles).</param>
-        /// <param name="type">The type that will emit the records.</param>
-        /// <returns>A <see cref="Logger"/> for <paramref name="role"/> and <paramref name="type"/>.</returns>
-        [Obsolete( "Use the LogSource class with new developments. Disable the warning with #pragma for existing code." )]
-        public static Logger GetLogger( string role, Type type )
-        {
-            return new Logger( ServiceLocator.GetService<ILoggerFactory>()?.GetLogger( role, type ) );
-        }
-
-        /// <summary>
-        /// Gets a <see cref="Logger"/> for a given role and for the calling type.
-        /// </summary>
-        /// <param name="role">The role name (see <see cref="LoggingRoles"/> for a list of standard logging roles). The default value is <c>Custom</c>.</param>
-        /// <returns>A <see cref="Logger"/> for <paramref name="role"/> and the calling type.</returns>
-        [SuppressMessage( "Microsoft.Performance", "CA1801" )]
-        [Obsolete( "Use the LogSource class with new developments. Disable the warning with #pragma for existing code." )]
-        public static Logger GetLogger( string role = "Custom" )
-        {
-            throw new InvalidOperationException(
-                "The current assembly has not been enhanced by PostSharp Diagnostics. Make sure the package PostSharp.Patterns.Diagnostics is referenced." );
-        }
-
-        /// <excludeOverload />
-        [EditorBrowsable( EditorBrowsableState.Never )]
-        [Obsolete( "Use the LogSource class." )]
-        public static Logger GetLogger( string role, ref CallerInfo callerInfo )
-        {
-            if ( callerInfo.SourceType == null )
-            {
-                throw new ArgumentNullException( nameof(callerInfo) );
-            }
-
-            return GetLogger( role, callerInfo.SourceType );
-        }
 
         internal ILoggerExceptionHandler ExceptionHandler => this.logger as ILoggerExceptionHandler;
 
@@ -485,7 +448,7 @@ namespace Flashtrace
         /// <returns></returns>
         public LogSource ToLogSource()
         {
-            return new LogSource( (ILogger3) this.logger, this.DefaultLevel, this.logger.ActivityOptions.ExceptionLevel );
+            return new LogSource( (ILogger) this.logger, this.DefaultLevel, this.logger.ActivityOptions.ExceptionLevel );
         }
     }
 }

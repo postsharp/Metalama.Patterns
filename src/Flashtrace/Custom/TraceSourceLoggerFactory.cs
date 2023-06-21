@@ -1,18 +1,22 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#pragma warning disable CS0618 // Type or member is obsolete
-
 namespace Flashtrace.Custom
 {
-    internal class TraceSourceLoggerFactory : ILoggerFactory, ILoggerFactoryProvider, ILoggerFactoryProvider3
+    internal class TraceSourceLoggerFactory : ILoggerFactory, ILoggerFactoryProvider
     {
-        ILogger ILoggerFactory.GetLogger( string role, Type type ) => new Factory( role ).GetLogger( type );
+        ILogger ILoggerFactory.GetLogger( Type type )
+        {
+            throw new NotImplementedException();
+        }
 
-        ILoggerFactory2 ILoggerFactoryProvider.GetLoggerFactory( string role ) => new Factory( role );
+        ILogger ILoggerFactory.GetLogger( string sourceName )
+        {
+            throw new NotImplementedException();
+        }
 
-        ILoggerFactory3 ILoggerFactoryProvider3.GetLoggerFactory3( string role ) => new Factory( role );
+        ILoggerFactory ILoggerFactoryProvider.GetLoggerFactory( string role ) => new Factory( role );
 
-        private class Factory : ILoggerFactory2, ILoggerFactory3
+        private class Factory : ILoggerFactory
         {
             private readonly string role;
 
@@ -21,12 +25,12 @@ namespace Flashtrace.Custom
                 this.role = role;
             }
 
-            public ILogger2 GetLogger( Type type ) => new TraceSourceLogger( this, this.role, type );
+            public ILogger GetLogger( Type type ) => new TraceSourceLogger( this, this.role, type );
 
             // Probably no-one is using the Type property anyway, so let's just put null in there:
-            ILogger3 ILoggerFactory3.GetLogger( Type type ) => new TraceSourceLogger( this, this.role, type );
+            ILogger ILoggerFactory.GetLogger( Type type ) => new TraceSourceLogger( this, this.role, type );
 
-            public ILogger3 GetLogger( string sourceName ) => new TraceSourceLogger( this, this.role, null );
+            public ILogger GetLogger( string sourceName ) => new TraceSourceLogger( this, this.role, null );
         }
     }
 }

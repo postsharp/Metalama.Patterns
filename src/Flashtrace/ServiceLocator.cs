@@ -39,23 +39,10 @@ namespace Flashtrace
             return Entry<T>.Value;
         }
 
-        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
-        [SuppressMessage( "Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline" )]
         static ServiceLocator()
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-
-#if true || SYSTEM_TRACE
             RegisterService<ILoggerFactory>( new TraceSourceLoggerFactory() );
             RegisterService<ILoggerFactoryProvider>( new TraceSourceLoggerFactory() );
-            RegisterService<ILoggerFactoryProvider3>( new TraceSourceLoggerFactory() );
-#else
-            RegisterService<ILoggerFactory>(new NullLogger());
-            RegisterService<ILoggerFactoryProvider>(new NullLogger());
-            RegisterService<ILoggerFactoryProvider3>(new NullLogger());
-#endif
-
-#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         private static class Entry<T> where T : class

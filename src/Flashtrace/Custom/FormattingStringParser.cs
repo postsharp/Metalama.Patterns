@@ -6,7 +6,7 @@ using System.Globalization;
 namespace Flashtrace.Custom
 {
     /// <summary>
-    /// Parses the formatting string for custom messages of the <see cref="Logger"/> and <see cref="LogActivity"/> classes.
+    /// Parses the formatting string for custom messages of the <see cref="LogLevelSource"/> and <see cref="LogActivity{TActivityDescription}"/> classes.
     /// </summary>
     [SuppressMessage( "Microsoft.Performance", "CA1815" )]
     public struct FormattingStringParser

@@ -18,12 +18,6 @@ namespace Flashtrace
         public const string Tracing = "Trace";
 
         /// <summary>
-        /// Audit.
-        /// </summary>
-        [Obsolete( "This feature has been moved to the sample PostSharp.Samples.Logging.Audit." )]
-        public const string Audit = "Audit";
-
-        /// <summary>
         /// Logging of the logging component itself.
         /// </summary>
         public const string Meta = "Meta";

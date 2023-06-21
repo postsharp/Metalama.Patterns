@@ -7,10 +7,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace
 {
+    // TODO: Remove class LogActivity
     /// <summary>
     /// Represents a logged custom activity, i.e. something that a beginning and an end with a specific outcome.
     /// This class is instantiated by the legacy API of the <see cref="Logger"/> class. For the modern API, see <see cref="LogActivity{TActivityDescription}"/>.
     /// </summary>
+    [Obsolete("To remove", true)]
     public partial class LogActivity : Logger, IDisposable
     {
         /// <summary>
@@ -23,13 +25,11 @@ namespace Flashtrace
             this.Context = context;
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
         private LogLevel ResolvedSuccessLevel => this.logger.ActivityOptions.ActivityLevel;
 
         private LogLevel ResolvedExceptionLevel => this.logger.ActivityOptions.ExceptionLevel;
 
         private LogLevel ResolvedFailureLevel => this.logger.ActivityOptions.FailureLevel;
-#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Determines whether the current <see cref="LogActivity"/> is valid, i.e. calls to methods 

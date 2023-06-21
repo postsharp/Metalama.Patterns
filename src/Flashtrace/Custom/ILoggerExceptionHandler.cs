@@ -5,14 +5,14 @@ using Flashtrace.Contexts;
 namespace Flashtrace.Custom
 {
     /// <summary>
-    /// Defines methods called in case of exception in the <see cref="Logger"/> class. This interface
+    /// Defines methods called in case of exception in logging infrastructure classes. This interface
     /// can be implemented by any class implementing the <see cref="ILogger"/> interface.
-    /// When an <see cref="ILogger"/> does not implement this interface, logging exceptions are simply silently ignored.
+    /// When an <see cref="ILogger"/> does not implement this interface, logging exceptions are silently ignored.
     /// </summary>
     public interface ILoggerExceptionHandler
     {
         /// <summary>
-        /// Method invoked when the user code calling <see cref="Logger"/> or <see cref="LogActivity"/> is invalid, e.g. when the formatting string
+        /// Method invoked when the user code calling a logging infrastucture method is invalid, e.g. when the formatting string
         /// is incorrect or does not match the arguments.
         /// </summary>
         /// <param name="callerInfo">Information about the line of code causing the error.</param>

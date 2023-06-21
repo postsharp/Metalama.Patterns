@@ -2,6 +2,7 @@
 
 using Flashtrace.Contexts;
 using Flashtrace.Formatters;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Flashtrace.Custom
     /// <summary>
     /// A base class for implementations of <see cref="ILogger"/> that cannot depend on the <c>PostSharp.Patterns.Diagnostics</c> package.
     /// </summary>
-    public abstract partial class LegacySourceLogger : ILogger3, IContextLocalLogger, ILogActivityOptions
+    public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger, ILogActivityOptions
     {
         /// <summary>
         /// Initializes a new <see cref="LegacySourceLogger"/>.
@@ -28,9 +29,7 @@ namespace Flashtrace.Custom
         public abstract bool IsEnabled( LogLevel level );
 
         /// <inheritdoc/>
-#pragma warning disable CS0618 // Type or member is obsolete
-        public abstract ILoggerFactory2 Factory { get; }
-#pragma warning restore CS0618 // Type or member is obsolete
+        public abstract ILoggerFactory Factory { get; }
 
         /// <inheritdoc/>
         [SuppressMessage( "Microsoft.Naming", "CA1721" )]
@@ -205,8 +204,6 @@ namespace Flashtrace.Custom
 
         LogLevel ILogActivityOptions.ExceptionLevel => LogLevel.Warning;
 
-        Type ILogger.Type => null;
-
         string ILogger.Role => null;
 
         [SuppressMessage( "Microsoft.Design", "CA1031" )]
@@ -216,9 +213,7 @@ namespace Flashtrace.Custom
             {
                 var message = "Error in user code calling the logging subsystem: " + string.Format( CultureInfo.InvariantCulture, format, args );
 
-#if STACK_FRAME
                 message += Environment.NewLine + new StackTrace().ToString();
-#endif
 
                 this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.CustomRecord, message, null, null );
             }
@@ -241,16 +236,16 @@ namespace Flashtrace.Custom
             return new RecordBuilder( this, recordInfo.Level, recordInfo.Kind, (Context) context );
         }
 
-        ILoggerFactory3 ILogger3.Factory => (ILoggerFactory3) this.Factory;
+        ILoggerFactory ILogger.Factory => (ILoggerFactory) this.Factory;
 
-        IContextLocalLogger ILogger2.GetContextLocalLogger() => this;
+        IContextLocalLogger ILogger.GetContextLocalLogger() => this;
 
-        (IContextLocalLogger logger, bool isEnabled) ILogger3.GetContextLocalLogger( LogLevel level )
+        (IContextLocalLogger logger, bool isEnabled) ILogger.GetContextLocalLogger( LogLevel level )
         {
             return (this, this.IsEnabled( level ));
         }
 
-        ILoggingContext ILogger2.CurrentContext => throw new NotImplementedException();
+        ILoggingContext ILogger.CurrentContext => throw new NotImplementedException();
 
         bool ILogger.IsEnabled( LogLevel level ) => this.IsEnabled( level );
 
@@ -409,10 +404,6 @@ namespace Flashtrace.Custom
             public bool IsAsync { get; }
 
             public string SyntheticId => null;
-
-            public void ForEachProperty( LoggingPropertyVisitor<object> visitor, bool includeAncestors = true ) { }
-
-            public void ForEachProperty<T>( LoggingPropertyVisitor<T> visitor, ref T state, bool includeAncestors = true ) { }
 
             public bool IsDisposed { get; private set; }
 

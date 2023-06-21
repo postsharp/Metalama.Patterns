@@ -21,7 +21,7 @@ namespace Flashtrace
         /// <param name="factory">An <see cref="ILoggerFactory"/>.</param>
         /// <param name="type">The type that will emit the records.</param>
         /// <returns>A <see cref="LogSource"/> for <paramref name="type"/>.</returns>
-        public static LogSource GetLogSource( [Required] this ILoggerFactory3 factory, [Required] Type type )
+        public static LogSource GetLogSource( [Required] this ILoggerFactory factory, [Required] Type type )
         {
             var cacheKey = new CacheKey( factory, type.FullName );
 
@@ -31,7 +31,7 @@ namespace Flashtrace
             }
             else
             {
-                var newSource = new LogSource( ((ILoggerFactory3) factory).GetLogger( type ) );
+                var newSource = new LogSource( ((ILoggerFactory) factory).GetLogger( type ) );
                 cache.TryAdd( cacheKey, newSource );
 
                 return newSource;
@@ -41,10 +41,10 @@ namespace Flashtrace
         /// <summary>
         /// Gets a <see cref="LogSource"/> for a given role and <paramref name="sourceName"/>.
         /// </summary>
-        /// <param name="factory">An <see cref="ILoggerFactory3"/>.</param>
+        /// <param name="factory">An <see cref="ILoggerFactory"/>.</param>
         /// <param name="sourceName">Log source name to be used by the backend. Not all backends support creating sources by name.</param>
         /// <returns>A <see cref="LogSource"/> for <paramref name="sourceName"/>.</returns>
-        public static LogSource GetLogSource( [Required] this ILoggerFactory3 factory, [Required] string sourceName )
+        public static LogSource GetLogSource( [Required] this ILoggerFactory factory, [Required] string sourceName )
         {
             var cacheKey = new CacheKey( factory, sourceName );
 
@@ -62,12 +62,12 @@ namespace Flashtrace
         }
 
         /// <summary>
-        /// Gets a <see cref="Logger"/> for a given role and for the calling type.
+        /// Gets a <see cref="LogSource"/> for a given role and for the calling type.
         /// </summary>
         /// <param name="factory">An <see cref="ILoggerFactory"/>.</param>
-        /// <returns>A <see cref="Logger"/> for the calling type.</returns>
+        /// <returns>A <see cref="LogSource"/> for the calling type.</returns>
         [SuppressMessage( "Microsoft.Performance", "CA1801" )]
-        public static LogSource GetLogSource( [Required] this ILoggerFactory3 factory )
+        public static LogSource GetLogSource( [Required] this ILoggerFactory factory )
         {
             var callerInfo = CallerInfo.GetDynamic( 1 );
 
@@ -76,7 +76,7 @@ namespace Flashtrace
 
         /// <excludeOverload />
         [EditorBrowsable( EditorBrowsableState.Never )]
-        public static LogSource GetLogSource( [Required] this ILoggerFactory3 factory, ref CallerInfo callerInfo )
+        public static LogSource GetLogSource( [Required] this ILoggerFactory factory, ref CallerInfo callerInfo )
         {
             // If we don't have a caller type, it's preferable to use System.Object as a safe fallback rather than throwing an exception.
             var callerType = callerInfo.SourceType ?? typeof(object);

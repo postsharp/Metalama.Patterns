@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Flashtrace.Custom.Messages
 {
@@ -14,9 +15,7 @@ namespace Flashtrace.Custom.Messages
         private readonly string formattingString;
         private readonly object[] args;
 
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
         internal FormattedMessageArray( string formattingString, object[] args )
         {
             this.formattingString = formattingString;

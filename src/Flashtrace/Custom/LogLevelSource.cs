@@ -105,7 +105,7 @@ namespace Flashtrace.Custom
         /// </summary>
         /// <param name="description">The activity description, typically created using the <see cref="SemanticMessageBuilder"/> or <see cref="FormattedMessageBuilder"/> class.</param>
         /// <param name="options">Options.</param>
-        /// <returns>A <see cref="Logger"/> representing the new activity.</returns>
+        /// <returns>A <see cref="T:LogActivity&lt;TActivityDescription&gt;"/> representing the new activity.</returns>
         /// <remarks>The activity must be closed using <see cref="LogActivity.SetSuccess(string)"/>, <see cref="LogActivity.SetFailure(string)"/> or <see cref="LogActivity.SetException(Exception)"/>. </remarks>
         [MethodImpl( MethodImplOptions.NoInlining )]
         public LogActivity<T> OpenActivity<T>( in T description, in OpenActivityOptions options = default ) where T : IMessage

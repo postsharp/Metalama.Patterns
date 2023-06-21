@@ -3,10 +3,12 @@
 namespace Flashtrace.Custom
 {
     /// <summary>
-    /// Exposes the default verbosity of the <see cref="Logger"/> and <see cref="LogActivity"/> classes when creating and closing activities.
+    /// Exposes the default verbosity of the <see cref="LogSource"/> and <see cref="LogActivity{TActivityDescription}"/> classes when creating and closing activities.
     /// </summary>
     public interface ILogActivityOptions
     {
+        // TODO: Review where these are used and update docs:
+
         /// <summary>
         /// Gets or sets the default severity for custom messages and for entry and success messages of activities.
         /// </summary>

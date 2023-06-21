@@ -64,10 +64,11 @@ namespace Flashtrace
         [EditorBrowsable( EditorBrowsableState.Never )]
         void SetException( Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo );
 
+        // TODO: Review documented claims re automatic instrumentation.
 #pragma warning disable CA1716 // Identifiers should not match keywords
         /// <summary>
         /// Resumes the current async activity after it has been suspended by a call to <see cref="LogActivity{TActivityDescription}.Suspend()"/>. There is typically no need
-        /// to invoke this method in user code because all async methods that use the <see cref="Logger"/> class are automatically instrumented.
+        /// to invoke this method in user code because all async methods that use the <see cref="Custom.LogLevelSource"/> class are automatically instrumented.
         /// </summary>
         void Resume();
 
@@ -76,10 +77,11 @@ namespace Flashtrace
         void Resume( ref CallerInfo callerInfo );
 #pragma warning restore CA1716 // Identifiers should not match keywords
 
+        // TODO: Review documented claims re automatic instrumentation.
         /// <summary>
         /// Suspends the current async activity.
         /// The activity must than be resumed by a call of the <see cref="LogActivity{TActivityDescription}.Resume()"/> method.
-        /// There is typically no need to invoke this method in user code because all async methods that use the <see cref="Logger"/> class are automatically instrumented.
+        /// There is typically no need to invoke this method in user code because all async methods that use the <see cref="Custom.LogLevelSource"/> class are automatically instrumented.
         /// </summary>
         void Suspend();
 

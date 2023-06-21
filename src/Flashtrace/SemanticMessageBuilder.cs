@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Custom.Messages;
+using System.Runtime.CompilerServices;
 
 namespace Flashtrace
 {
@@ -16,10 +17,7 @@ namespace Flashtrace
         /// <param name="messageName">Message name.</param>
         /// <param name="parameters">Array of parameters (name-value pairs).</param>
         /// <returns></returns>
-#if VALUE_TUPLE
-#if AGGRESSIVE_INLINING
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
         // Intentionally removing the params modifier because otherwise the C# compiler picks the wrong overload which causes a performance issue.
         public static SemanticMessageArray Semantic(string messageName, ValueTuple<string, object>[] parameters) => new SemanticMessageArray(messageName, parameters);
 
@@ -29,20 +27,15 @@ namespace Flashtrace
         /// <param name="messageName">Message name.</param>
         /// <param name="parameters">Array of parameters (name-value pairs).</param>
         /// <returns></returns>
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
         public static SemanticMessageArray Semantic(string messageName, IReadOnlyList<ValueTuple<string, object>> parameters) => new SemanticMessageArray(messageName, parameters);
-#endif
 
         /// <summary>
         /// Creates a semantic message without parameter.
         /// </summary>
         /// <param name="messageName">Message name.</param>
         /// <returns></returns>
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
         public static SemanticMessage Semantic( string messageName ) => new( messageName );
     }
 }

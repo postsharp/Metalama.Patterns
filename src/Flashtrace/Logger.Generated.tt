@@ -295,9 +295,7 @@ namespace PostSharp.Patterns.Diagnostics
 			<#= Repeat( "private readonly T{0} arg{0}; ", i, "" ) #>
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
 			{
 				this.formattingString = formattingString;

@@ -12,15 +12,13 @@ namespace Flashtrace.Custom
         private readonly TraceSource traceSource;
         private static readonly ConcurrentDictionary<string, TraceSource> traceSources = new( StringComparer.OrdinalIgnoreCase );
 
-        internal TraceSourceLogger( ILoggerFactory3 factory, string role, Type type ) : base( role, type )
+        internal TraceSourceLogger( ILoggerFactory factory, string role, Type type ) : base( role, type )
         {
             this.Factory = factory;
             this.traceSource = GetTraceSource( role );
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        public override ILoggerFactory2 Factory { get; }
-#pragma warning restore CS0618 // Type or member is obsolete
+        public override ILoggerFactory Factory { get; }
 
         private static string GetSourceName( string role )
         {

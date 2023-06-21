@@ -3,13 +3,17 @@
 // To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" Logger.Generated.tt
 // The transformation is not automatic because we are in a shared project.
 
-using Flashtrace.Contexts;
-using Flashtrace.Custom.Messages;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
-namespace Flashtrace
+
+using System;
+using System.ComponentModel;
+using PostSharp.Patterns.Diagnostics.Contexts;
+using PostSharp.Patterns.Diagnostics.Custom;
+using PostSharp.Patterns.Diagnostics.Custom.Messages;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
+
+namespace PostSharp.Patterns.Diagnostics
 {
 	public partial class Logger
 	{
@@ -89,7 +93,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1>( LogActivityOptions options, string formattingString, T1 arg1 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, ref callerInfo );
         }
 
 
@@ -166,7 +170,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1>( string formattingString, T1 arg1 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, ref callerInfo );
+			return OpenActivity( formattingString, arg1, ref callerInfo );
         }
 
 
@@ -258,7 +262,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, ref callerInfo );
         }
 
 
@@ -337,7 +341,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2>( string formattingString, T1 arg1, T2 arg2 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, ref callerInfo );
         }
 
 
@@ -435,7 +439,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2, T3>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2, T3 arg3 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, arg3, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, arg3, ref callerInfo );
         }
 
 
@@ -516,7 +520,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2, T3>( string formattingString, T1 arg1, T2 arg2, T3 arg3 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, arg3, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, arg3, ref callerInfo );
         }
 
 
@@ -620,7 +624,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2, T3, T4>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, ref callerInfo );
         }
 
 
@@ -703,7 +707,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2, T3, T4>( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, arg3, arg4, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, arg3, arg4, ref callerInfo );
         }
 
 
@@ -813,7 +817,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2, T3, T4, T5>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, ref callerInfo );
         }
 
 
@@ -898,7 +902,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2, T3, T4, T5>( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, ref callerInfo );
         }
 
 
@@ -1014,7 +1018,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, ref callerInfo );
         }
 
 
@@ -1101,7 +1105,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6>( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, ref callerInfo );
         }
 
 
@@ -1223,7 +1227,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6, T7>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ref callerInfo );
         }
 
 
@@ -1312,7 +1316,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6, T7>( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ref callerInfo );
         }
 
 
@@ -1440,7 +1444,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6, T7, T8>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ref callerInfo );
         }
 
 
@@ -1531,7 +1535,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6, T7, T8>( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ref callerInfo );
         }
 
 
@@ -1665,7 +1669,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6, T7, T8, T9>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ref callerInfo );
         }
 
 
@@ -1758,7 +1762,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6, T7, T8, T9>( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ref callerInfo );
         }
 
 
@@ -1898,7 +1902,7 @@ namespace Flashtrace
 		public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>( LogActivityOptions options, string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10 )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return this.OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ref callerInfo );
+		   return OpenActivity( options, formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ref callerInfo );
         }
 
 
@@ -1993,7 +1997,7 @@ namespace Flashtrace
         public LogActivity OpenActivity<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10 )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return this.OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ref callerInfo );
+			return OpenActivity( formattingString, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ref callerInfo );
         }
 
 
@@ -2857,9 +2861,7 @@ namespace Flashtrace
 			private readonly T1 arg1; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1 )
 			{
 				this.formattingString = formattingString;
@@ -2882,7 +2884,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 1 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3018,9 +3020,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2 )
 			{
 				this.formattingString = formattingString;
@@ -3043,7 +3043,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 2 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3054,7 +3054,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 2 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3200,9 +3200,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3 )
 			{
 				this.formattingString = formattingString;
@@ -3225,7 +3223,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3236,7 +3234,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3247,7 +3245,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 2, parameter, this.arg3, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3403,9 +3401,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4 )
 			{
 				this.formattingString = formattingString;
@@ -3428,7 +3424,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3439,7 +3435,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3450,7 +3446,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 2, parameter, this.arg3, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3461,7 +3457,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 3, parameter, this.arg4, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3627,9 +3623,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5 )
 			{
 				this.formattingString = formattingString;
@@ -3652,7 +3646,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3663,7 +3657,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3674,7 +3668,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 2, parameter, this.arg3, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3685,7 +3679,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 3, parameter, this.arg4, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3696,7 +3690,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 4, parameter, this.arg5, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3872,9 +3866,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6 )
 			{
 				this.formattingString = formattingString;
@@ -3897,7 +3889,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3908,7 +3900,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3919,7 +3911,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 2, parameter, this.arg3, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3930,7 +3922,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 3, parameter, this.arg4, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3941,7 +3933,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 4, parameter, this.arg5, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -3952,7 +3944,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 5, parameter, this.arg6, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4138,9 +4130,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; private readonly T7 arg7; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7 )
 			{
 				this.formattingString = formattingString;
@@ -4163,7 +4153,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4174,7 +4164,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4185,7 +4175,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 2, parameter, this.arg3, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4196,7 +4186,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 3, parameter, this.arg4, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4207,7 +4197,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 4, parameter, this.arg5, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4218,7 +4208,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 5, parameter, this.arg6, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4229,7 +4219,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 6, parameter, this.arg7, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4425,9 +4415,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; private readonly T7 arg7; private readonly T8 arg8; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8 )
 			{
 				this.formattingString = formattingString;
@@ -4450,7 +4438,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4461,7 +4449,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4472,7 +4460,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 2, parameter, this.arg3, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4483,7 +4471,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 3, parameter, this.arg4, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4494,7 +4482,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 4, parameter, this.arg5, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4505,7 +4493,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 5, parameter, this.arg6, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4516,7 +4504,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 6, parameter, this.arg7, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4527,7 +4515,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 7, parameter, this.arg8, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4733,9 +4721,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; private readonly T7 arg7; private readonly T8 arg8; private readonly T9 arg9; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9 )
 			{
 				this.formattingString = formattingString;
@@ -4758,7 +4744,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4769,7 +4755,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4780,7 +4766,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 2, parameter, this.arg3, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4791,7 +4777,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 3, parameter, this.arg4, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4802,7 +4788,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 4, parameter, this.arg5, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4813,7 +4799,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 5, parameter, this.arg6, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4824,7 +4810,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 6, parameter, this.arg7, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4835,7 +4821,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 7, parameter, this.arg8, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -4846,7 +4832,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 8, parameter, this.arg9, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 8, parameter, arg9, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5062,9 +5048,7 @@ namespace Flashtrace
 			private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; private readonly T7 arg7; private readonly T8 arg8; private readonly T9 arg9; private readonly T10 arg10; 
 
 			
-			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-			#endif
 			internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10 )
 			{
 				this.formattingString = formattingString;
@@ -5087,7 +5071,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 0, parameter, this.arg1, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5098,7 +5082,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 1, parameter, this.arg2, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5109,7 +5093,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 2, parameter, this.arg3, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5120,7 +5104,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 3, parameter, this.arg4, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5131,7 +5115,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 4, parameter, this.arg5, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5142,7 +5126,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 5, parameter, this.arg6, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5153,7 +5137,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 6, parameter, this.arg7, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5164,7 +5148,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 7, parameter, this.arg8, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5175,7 +5159,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 8, parameter, this.arg9, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 8, parameter, arg9, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -5186,7 +5170,7 @@ namespace Flashtrace
 					throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( 9, parameter, this.arg10, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( 9, parameter, arg10, CustomLogParameterOptions.FormattedStringParameter );
 
 				
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );

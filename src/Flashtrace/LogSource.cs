@@ -9,8 +9,7 @@ using System.Runtime.CompilerServices;
 namespace Flashtrace
 {
     /// <summary>
-    /// Allow to write log messages and trace the execution of activities. This class is optimized for use with C# 7.2 or later.
-    /// For previous compiler versions, consider using the legacy <see cref="Logger"/> class.
+    /// Allow to write log messages and trace the execution of activities.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -31,7 +30,7 @@ namespace Flashtrace
                                criticalLogLevelSource,
                                noneLogLevelSource;
 
-        internal LogSource( [Required] ILogger3 logger, LogLevel defaultLevel = LogLevel.Debug, LogLevel failureLevel = LogLevel.Error )
+        internal LogSource( [Required] ILogger logger, LogLevel defaultLevel = LogLevel.Debug, LogLevel failureLevel = LogLevel.Error )
         {
             this.Logger = logger;
             this.DefaultLevel = defaultLevel;
@@ -41,7 +40,7 @@ namespace Flashtrace
         /// <inheritdoc />
         public ILoggingContext CurrentContext => this.Logger.CurrentContext;
 
-        internal ILogger3 Logger { get; }
+        internal ILogger Logger { get; }
 
         /// <summary>
         /// Gets a new <see cref="LogSource"/> keeping all the configuration of the current instance, but for a different type.
@@ -70,7 +69,7 @@ namespace Flashtrace
                 throw new ArgumentNullException( nameof(sourceName) );
             }
 
-            return new LogSource( ((ILoggerFactory3) this.Logger.Factory).GetLogger( sourceName ), this.DefaultLevel, this.FailureLevel );
+            return new LogSource( ((ILoggerFactory) this.Logger.Factory).GetLogger( sourceName ), this.DefaultLevel, this.FailureLevel );
         }
 
         /// <summary>
@@ -107,13 +106,13 @@ namespace Flashtrace
 
         /// <excludeOverload />
         [EditorBrowsable( EditorBrowsableState.Never )]
-        public static LogSource Get( ref CallerInfo callerInfo ) => LogSourceFactory.Default3.GetLogSource( ref callerInfo );
+        public static LogSource Get( ref CallerInfo callerInfo ) => LogSourceFactory.Default.GetLogSource( ref callerInfo );
 
         /// <summary>
         /// Gets a log source associated with a specific source name.
         /// </summary>
         /// <param name="sourceName">Name that the logging backend associates with a log source.</param>
-        public static LogSource Get( string sourceName ) => LogSourceFactory.Default3.GetLogSource( sourceName );
+        public static LogSource Get( string sourceName ) => LogSourceFactory.Default.GetLogSource( sourceName );
 
         /// <summary>
         /// Gets a log source for a specified role and source name.
@@ -121,7 +120,7 @@ namespace Flashtrace
         /// <param name="role">A role name. See <see cref="LoggingRoles"/>.</param>
         /// <param name="sourceName">The source name. A dotted name.</param>
         /// <returns></returns>
-        public static LogSource Get( string sourceName, string role = null ) => LogSourceFactory.ForRole3( role ?? "Custom" ).GetLogSource( sourceName );
+        public static LogSource Get( string sourceName, string role = null ) => LogSourceFactory.ForRole( role ?? "Custom" ).GetLogSource( sourceName );
 
         /// <summary>
         /// Gets a log source for a specified role and <see cref="Type"/>.
@@ -129,7 +128,7 @@ namespace Flashtrace
         /// <param name="role">See <see cref="LoggingRoles"/>.</param>
         /// <param name="type">The type.</param>
         /// <returns></returns>
-        public static LogSource Get( Type type, string role = null ) => LogSourceFactory.ForRole3( role ?? "Custom" ).GetLogSource( type );
+        public static LogSource Get( Type type, string role = null ) => LogSourceFactory.ForRole( role ?? "Custom" ).GetLogSource( type );
 
         /// <summary>
         /// Determines whether logging is enabled in the current <see cref="LogSource"/> for a given <see cref="LogLevel"/>.

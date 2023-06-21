@@ -2,24 +2,19 @@
 
 using Flashtrace.Contexts;
 using Flashtrace.Formatters;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Custom
 {
-#pragma warning disable CS0618 // Type or member is obsolete
-    internal partial class NullLogger : ILogger3, IContextLocalLogger, ILoggerFactory, ILoggingContext, ICustomLogRecordBuilder, ILogActivityOptions,
-                                        ILoggerFactoryProvider, ILoggerFactory2, ILoggerFactoryProvider3, ILoggerFactory3
-#pragma warning restore CS0618 // Type or member is obsolete
+    internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory, ILoggingContext, ICustomLogRecordBuilder, ILogActivityOptions,
+                                        ILoggerFactoryProvider
     {
         private static bool warningEmitted;
 
         string ILogger.Role => null;
 
-        Type ILogger.Type => null;
-
         bool ILogger.RequiresSuspendResume => false;
-
-        ILogger ILoggerFactory.GetLogger( string role, Type type ) => this;
 
         bool ILogger.IsEnabled( LogLevel level ) => false;
 
@@ -65,6 +60,7 @@ namespace Flashtrace.Custom
 
         LogLevel ILogActivityOptions.ExceptionLevel => LogLevel.None;
 
+        // TODO: Implementation is [Obsolete], but base interface property is not.
         [Obsolete]
         ILogActivityOptions ILogger.ActivityOptions => this;
 
@@ -72,15 +68,9 @@ namespace Flashtrace.Custom
 
         string ILoggingContext.SyntheticId => null;
 
-        void ILoggingContext.ForEachProperty( LoggingPropertyVisitor<object> visitor, bool includeAncestors ) { }
+        ILoggerFactory ILogger.Factory => this;
 
-        void ILoggingContext.ForEachProperty<T>( LoggingPropertyVisitor<T> visitor, ref T state, bool includeAncestors ) { }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-        ILoggerFactory2 ILogger2.Factory => this;
-#pragma warning restore CS0618 // Type or member is obsolete
-
-        (IContextLocalLogger logger, bool isEnabled) ILogger3.GetContextLocalLogger( LogLevel level ) => (this, false);
+        (IContextLocalLogger logger, bool isEnabled) ILogger.GetContextLocalLogger( LogLevel level ) => (this, false);
 
         private static void EmitWarning( LogLevel level )
         {
@@ -91,9 +81,7 @@ namespace Flashtrace.Custom
 
             warningEmitted = true;
 
-#if SYSTEM_TRACE
             Trace.TraceWarning( "PostSharp.Diagnostics.LoggingServices has not been initialized, but warnings and errors are being emitted and lost." );
-#endif
         }
 
         void ILogger.SetWaitDependency( ILoggingContext context, object waited ) { }
@@ -121,20 +109,14 @@ namespace Flashtrace.Custom
 
         void ICustomLogRecordBuilder.EndWriteItem( CustomLogRecordItem item ) { }
 
-        ILoggerFactory3 ILogger3.Factory => this;
+        IContextLocalLogger ILogger.GetContextLocalLogger() => this;
 
-        IContextLocalLogger ILogger2.GetContextLocalLogger() => this;
+        ILoggerFactory ILoggerFactoryProvider.GetLoggerFactory( string role ) => this;
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        ILoggerFactory2 ILoggerFactoryProvider.GetLoggerFactory( string role ) => this;
-#pragma warning restore CS0618 // Type or member is obsolete
+        ILogger ILoggerFactory.GetLogger( Type type ) => this;
 
-        ILogger2 ILoggerFactory2.GetLogger( Type type ) => this;
+        public ILogger GetLogger( string sourceName ) => this;
 
-        ILogger3 ILoggerFactory3.GetLogger( Type type ) => this;
-
-        public ILogger3 GetLogger( string sourceName ) => this;
-
-        public ILoggerFactory3 GetLoggerFactory3( string role ) => this;
+        public ILoggerFactory GetLoggerFactory( string role ) => this;
     }
 }

@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if SERIALIZABLE
 using System.Runtime.Serialization;
-#endif
 
 namespace Flashtrace.Custom
 {
@@ -10,9 +8,7 @@ namespace Flashtrace.Custom
     /// Exception thrown by the <see cref="FormattingStringParser"/> and by the <c>Logger</c> class
     /// when user code provides an invalid formatting string.
     /// </summary>
-#if SERIALIZABLE
     [Serializable]
-#endif
     public class InvalidFormattingStringException : FormatException
     {
         /// <summary>
@@ -34,7 +30,6 @@ namespace Flashtrace.Custom
         /// <param name="inner"></param>
         public InvalidFormattingStringException( string message, Exception inner ) : base( message, inner ) { }
 
-#if SERIALIZABLE
         /// <summary>
         /// Deserialization constructor.
         /// </summary>
@@ -43,6 +38,5 @@ namespace Flashtrace.Custom
             StreamingContext context ) : base( info, context )
         {
         }
-#endif
     }
 }

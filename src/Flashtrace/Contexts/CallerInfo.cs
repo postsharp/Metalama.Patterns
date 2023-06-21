@@ -7,7 +7,7 @@ using System.Reflection;
 namespace Flashtrace.Contexts
 {
     /// <summary>
-    /// Represents information about the caller of the <see cref="Logger"/> class.
+    /// Describes the caller of a logging method.
     /// </summary>
     [SuppressMessage( "Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes" )]
     public struct CallerInfo

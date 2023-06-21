@@ -23,9 +23,7 @@ namespace Flashtrace
 
         private readonly LogLevels levels;
 
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
         internal LogActivity( IContextLocalLogger logger, LogLevels levels, ILoggingContext context, in TActivityDescription description )
         {
             this.description = description;

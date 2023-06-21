@@ -7,8 +7,8 @@ namespace Flashtrace
     [ExplicitCrossPackageInternal]
     internal static class LogSourceFactory
     {
-        public static ILoggerFactory3 Default3 => ServiceLocator.GetService<ILoggerFactoryProvider3>().GetLoggerFactory3( LoggingRoles.Custom );
+        public static ILoggerFactory Default => ServiceLocator.GetService<ILoggerFactoryProvider>().GetLoggerFactory( LoggingRoles.Custom );
 
-        public static ILoggerFactory3 ForRole3( string role ) => ServiceLocator.GetService<ILoggerFactoryProvider3>().GetLoggerFactory3( role );
+        public static ILoggerFactory ForRole( string role ) => ServiceLocator.GetService<ILoggerFactoryProvider>().GetLoggerFactory( role );
     }
 }

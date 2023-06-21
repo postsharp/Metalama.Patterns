@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Custom
 {
@@ -12,13 +13,13 @@ namespace Flashtrace.Custom
     /// <para>If you want to implement this interface, you should also implement the <see cref="ILoggerFactory"/> interface
     /// and register it to the <see cref="PostSharp.Patterns.Utilities.ServiceLocator"/>.</para>
     /// </remarks>
-    public partial interface ILogger
+    public partial interface ILogger : ILoggerExceptionHandler
     {
         /// <summary>
-        /// Gets the source <see cref="Type"/> for which this <see cref="ILogger"/> was created.
+        /// Gets the logger for the current context and returns a flag determining if the logger is enabled for a given level.
         /// </summary>
-        [Obsolete( "Don't use the Type property as some logger may have no type assigned depending on the initialization order." )]
-        Type Type { get; }
+        /// <returns></returns>
+        new ILoggerFactory Factory { get; }
 
         /// <summary>
         /// Gets the role of records created by this <see cref="ILogger"/>. A list of standard roles is available in the <see cref="LoggingRoles"/> class.
@@ -102,5 +103,25 @@ namespace Flashtrace.Custom
         /// <param name="context">The waiting context.</param>
         /// <param name="waited">The "thing" that is awaited for. Typically a <see cref="System.Threading.Tasks.Task"/>, or <c>TaskInfo</c>, or another context.</param>
         void SetWaitDependency( ILoggingContext context, object waited );
+
+        /// <summary>
+        /// Gets the current <see cref="ILoggingContext"/>.
+        /// </summary>
+        ILoggingContext CurrentContext { get; }
+
+        /// <summary>
+        /// Gets the logger for the current context.
+        /// </summary>
+        /// <returns></returns>
+        [SuppressMessage( "Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Expensive to evaluate." )]
+        IContextLocalLogger GetContextLocalLogger();
+
+        /// <summary>
+        /// Gets the <see cref="IContextLocalLogger"/> plus a flag indicating whether the source is enabled for a given <see cref="LogLevel"/>.
+        /// </summary>
+        /// <param name="level">Log level.</param>
+        /// <returns>The <see cref="IContextLocalLogger"/> for the current execution context and a flag indicating whether logging
+        /// is enabled for the given <paramref name="level"/>.</returns>
+        (IContextLocalLogger logger, bool isEnabled) GetContextLocalLogger( LogLevel level );
     }
 }

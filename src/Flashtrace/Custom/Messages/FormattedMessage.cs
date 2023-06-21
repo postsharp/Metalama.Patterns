@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Flashtrace.Custom.Messages
 {
@@ -12,9 +13,7 @@ namespace Flashtrace.Custom.Messages
     {
         private readonly string text;
 
-#if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-#endif
         internal FormattedMessage( string text )
         {
             this.text = text;

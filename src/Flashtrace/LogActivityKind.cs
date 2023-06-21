@@ -7,8 +7,9 @@ namespace Flashtrace
     /// </summary>
     public enum LogActivityKind
     {
+        // TODO: Check acutal uses of default, update "created by" below.
         /// <summary>
-        /// Default, created by <see cref="Logger.OpenActivity(PostSharp.Patterns.Diagnostics.LogActivityOptions,string)"/> or <see cref="Logger.OpenAsyncActivity(PostSharp.Patterns.Diagnostics.LogActivityOptions,string)"/>.
+        /// Default, created by <see cref="Custom.LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> or <see cref="Custom.LogLevelSource.LogActivityAsync{TDescription, TResult}(in TDescription, Func{Task{TResult}}, in OpenActivityOptions)"/>.
         /// </summary>
         Default,
 

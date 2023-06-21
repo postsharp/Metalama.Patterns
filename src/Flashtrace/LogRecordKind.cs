@@ -5,6 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace
 {
+    // TODO: LogRecordKind: From experience I know that some of these flags are disused and should be removed.
+    // TODO: Review docs.
+
     /// <summary>
     /// Kinds of log entry.
     /// </summary>
