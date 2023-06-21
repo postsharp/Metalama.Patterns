@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
 using Flashtrace.Formatters;
@@ -33,17 +32,15 @@ namespace Flashtrace.Custom
         public abstract ILoggerFactory2 Factory { get; }
 #pragma warning restore CS0618 // Type or member is obsolete
 
-
-
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Naming", "CA1721")]
+        [SuppressMessage( "Microsoft.Naming", "CA1721" )]
         public Type Type { get; }
 
         /// <inheritdoc/>
         public string Role { get; }
 
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Performance", "CA1822")]
+        [SuppressMessage( "Microsoft.Performance", "CA1822" )]
         public bool RequiresSuspendResume => false;
 
         private static string GetRecordKindText( LogRecordKind recordKind )
@@ -60,14 +57,10 @@ namespace Flashtrace.Custom
                 case LogRecordKind.CustomActivitySuccess:
                     return "Succeeded";
 
-
                 default:
                     return null;
-
             }
         }
-
-        
 
         /// <summary>
         /// Writes a text message.
@@ -76,17 +69,13 @@ namespace Flashtrace.Custom
         /// <param name="recordKind"></param>
         /// <param name="text">The fully-rendered message.</param>
         /// <param name="exception">An optional <see cref="Exception"/>.</param>
-        protected abstract void Write( LogLevel level, LogRecordKind recordKind, string text,  Exception exception );
-        
+        protected abstract void Write( LogLevel level, LogRecordKind recordKind, string text, Exception exception );
 
         private void WriteFormatted( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, object[] args, Exception exception )
         {
-            
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
 
-
-
-            string recordKindText = GetRecordKindText( recordKind );
+            var recordKindText = GetRecordKindText( recordKind );
 
             if ( recordKind == LogRecordKind.CustomActivityEntry )
             {
@@ -107,7 +96,6 @@ namespace Flashtrace.Custom
                         stringBuilder.Append( recordKindText );
                     }
                 }
-                
 
                 if ( !string.IsNullOrEmpty( text ) )
                 {
@@ -120,16 +108,13 @@ namespace Flashtrace.Custom
                 }
             }
 
-
             if ( exception != null )
             {
                 stringBuilder.AppendLine();
                 stringBuilder.Append( exception.ToString() );
             }
 
-
             this.Write( level, recordKind, stringBuilder.ToString(), exception );
-            
         }
 
         private static void WriteText( string text, object[] args, StringBuilder stringBuilder )
@@ -140,12 +125,14 @@ namespace Flashtrace.Custom
             }
             else
             {
-                FormattingStringParser parser = new FormattingStringParser( text );
+                var parser = new FormattingStringParser( text );
 
-                int parameterIndex = 0;
+                var parameterIndex = 0;
+
                 while ( true )
                 {
-                    ArraySegment<char> str = parser.GetNextSubstring();
+                    var str = parser.GetNextSubstring();
+
                     if ( str.Array == null )
                     {
                         break;
@@ -154,6 +141,7 @@ namespace Flashtrace.Custom
                     stringBuilder.Append( str.Array, str.Offset, str.Count );
 
                     str = parser.GetNextParameter();
+
                     if ( str.Array == null )
                     {
                         break;
@@ -165,7 +153,14 @@ namespace Flashtrace.Custom
             }
         }
 
-        void ILogger.Write( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, object[] args, Exception exception, ref CallerInfo recordInfo )
+        void ILogger.Write(
+            ILoggingContext context,
+            LogLevel level,
+            LogRecordKind recordKind,
+            string text,
+            object[] args,
+            Exception exception,
+            ref CallerInfo recordInfo )
         {
             if ( this.IsEnabled( level ) )
             {
@@ -175,34 +170,32 @@ namespace Flashtrace.Custom
 
         void ILogger.Write( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, Exception exception, ref CallerInfo recordInfo )
         {
-            if ( this.IsEnabled( level ))
+            if ( this.IsEnabled( level ) )
             {
                 this.WriteFormatted( context, level, recordKind, text, null, exception );
             }
         }
 
-
         ILoggingContext ILogger.OpenActivity( LogActivityOptions options, ref CallerInfo callerInfo )
         {
             return new Context( options.IsAsync );
         }
-        
-        ILoggingContext IContextLocalLogger.OpenActivity(in OpenActivityOptions options, ref CallerInfo callerInfo) => new Context(callerInfo.IsAsync);
 
+        ILoggingContext IContextLocalLogger.OpenActivity( in OpenActivityOptions options, ref CallerInfo callerInfo ) => new Context( callerInfo.IsAsync );
 
         void ILogger.ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
 
         void ILogger.SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
 
-        void ILogger.SetWaitDependency(ILoggingContext context, object waited) { }
+        void ILogger.SetWaitDependency( ILoggingContext context, object waited ) { }
 
         bool ILogger.RequiresSuspendResume => false;
 
-        void IContextLocalLogger.ResumeActivity(ILoggingContext context, ref CallerInfo callerInfo) { }
+        void IContextLocalLogger.ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
 
-        void IContextLocalLogger.SuspendActivity(ILoggingContext context, ref CallerInfo callerInfo) { }
+        void IContextLocalLogger.SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
 
-        void IContextLocalLogger.SetWaitDependency(ILoggingContext context, object waited) { }
+        void IContextLocalLogger.SetWaitDependency( ILoggingContext context, object waited ) { }
 
         ILogActivityOptions ILogger.ActivityOptions => this;
 
@@ -216,15 +209,12 @@ namespace Flashtrace.Custom
 
         string ILogger.Role => null;
 
-        
-        
-
         [SuppressMessage( "Microsoft.Design", "CA1031" )]
         void ILoggerExceptionHandler.OnInvalidUserCode( ref CallerInfo callerInfo, string format, params object[] args )
         {
             try
             {
-                string message = "Error in user code calling the logging subsystem: " + string.Format( CultureInfo.InvariantCulture, format, args );
+                var message = "Error in user code calling the logging subsystem: " + string.Format( CultureInfo.InvariantCulture, format, args );
 
 #if STACK_FRAME
                 message += Environment.NewLine + new StackTrace().ToString();
@@ -232,10 +222,7 @@ namespace Flashtrace.Custom
 
                 this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.CustomRecord, message, null, null );
             }
-            catch
-            {
-
-            }
+            catch { }
         }
 
         [SuppressMessage( "Microsoft.Design", "CA1031" )]
@@ -243,14 +230,10 @@ namespace Flashtrace.Custom
         {
             try
             {
-                string message = "Error in user code calling the logging subsystem: " + exception.ToString();
+                var message = "Error in user code calling the logging subsystem: " + exception.ToString();
                 this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.CustomRecord, message, null, null );
             }
-            catch
-            {
-
-            }
-
+            catch { }
         }
 
         ICustomLogRecordBuilder IContextLocalLogger.GetRecordBuilder( in CustomLogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext context )
@@ -269,19 +252,19 @@ namespace Flashtrace.Custom
 
         ILoggingContext ILogger2.CurrentContext => throw new NotImplementedException();
 
-        bool ILogger.IsEnabled(LogLevel level) => this.IsEnabled(level);
+        bool ILogger.IsEnabled( LogLevel level ) => this.IsEnabled( level );
 
         private class RecordBuilder : ICustomLogRecordBuilder
         {
             private LegacySourceLogger logger;
-            private readonly StringBuilder stringBuilder = new StringBuilder();
+            private readonly StringBuilder stringBuilder = new();
             private readonly LogLevel level;
             private readonly LogRecordKind recordKind;
             private Exception exception;
             private readonly Context context;
             private bool appendComma;
 
-            public RecordBuilder(LegacySourceLogger logger, LogLevel level, LogRecordKind recordKind, Context context)
+            public RecordBuilder( LegacySourceLogger logger, LogLevel level, LogRecordKind recordKind, Context context )
             {
                 this.logger = logger;
                 this.level = level;
@@ -289,130 +272,125 @@ namespace Flashtrace.Custom
                 this.context = context;
             }
 
-            void ICustomLogRecordBuilder.BeginWriteItem(CustomLogRecordItem item, in CustomLogRecordTextOptions options)
+            void ICustomLogRecordBuilder.BeginWriteItem( CustomLogRecordItem item, in CustomLogRecordTextOptions options )
             {
-                switch (item)
+                switch ( item )
                 {
                     case CustomLogRecordItem.Message:
                     case CustomLogRecordItem.ActivityDescription:
-                        if (options.Name != null)
+                        if ( options.Name != null )
                         {
-                            this.stringBuilder.Append(options.Name);
+                            this.stringBuilder.Append( options.Name );
                         }
+
                         break;
 
                     case CustomLogRecordItem.ActivityOutcome:
-                        if (this.stringBuilder.Length > 0)
+                        if ( this.stringBuilder.Length > 0 )
                         {
-                            this.stringBuilder.Append(": ");
+                            this.stringBuilder.Append( ": " );
                         }
-                        else if (this.context != null)
+                        else if ( this.context != null )
                         {
-                            this.stringBuilder.Append(this.context.Description);
-                            this.stringBuilder.Append(": ");
+                            this.stringBuilder.Append( this.context.Description );
+                            this.stringBuilder.Append( ": " );
                         }
 
+                        var text = options.Name ?? GetRecordKindText( this.recordKind );
 
-                        string text = options.Name ?? GetRecordKindText(this.recordKind);
-                        if (text != null)
+                        if ( text != null )
                         {
-                            this.stringBuilder.Append(text);
+                            this.stringBuilder.Append( text );
                             this.appendComma = true;
                         }
-                        break;
 
+                        break;
                 }
             }
 
-            void ICustomLogRecordBuilder.EndWriteItem(CustomLogRecordItem item)
-            {
-            }
-
-
-
+            void ICustomLogRecordBuilder.EndWriteItem( CustomLogRecordItem item ) { }
 
             public void Dispose()
             {
                 this.logger = null;
             }
 
-            void ICustomLogRecordBuilder.SetException(Exception e)
+            void ICustomLogRecordBuilder.SetException( Exception e )
             {
                 this.exception = e;
-                this.WriteParameter("exception", e, CustomLogParameterOptions.SemanticParameter);
+                this.WriteParameter( "exception", e, CustomLogParameterOptions.SemanticParameter );
             }
 
-            void ICustomLogRecordBuilder.SetExecutionTime(double executionTime, bool isOvertime)
+            void ICustomLogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
+
+            void ICustomLogRecordBuilder.WriteCustomParameter<T>( int index, in CharSpan parameterName, T value, in CustomLogParameterOptions options )
             {
+                this.WriteParameter( parameterName.ToString(), value, options );
             }
 
-            void ICustomLogRecordBuilder.WriteCustomParameter<T>(int index, in CharSpan parameterName, T value, in CustomLogParameterOptions options)
+            private void WriteParameter<T>( string parameterName, T value, in CustomLogParameterOptions options )
             {
-                this.WriteParameter(parameterName.ToString(), value, options);
-            }
-
-            private void WriteParameter<T>(string parameterName, T value, in CustomLogParameterOptions options)
-            {
-
-                switch (options.Mode)
+                switch ( options.Mode )
                 {
                     default:
-                        this.WriteValue(value);
+                        this.WriteValue( value );
+
                         break;
 
                     case CustomLogParameterMode.NameValuePair:
-                        this.stringBuilder.Append(", ");
-                        this.stringBuilder.Append(parameterName);
-                        this.stringBuilder.Append(" = ");
-                        this.WriteValue(value);
+                        this.stringBuilder.Append( ", " );
+                        this.stringBuilder.Append( parameterName );
+                        this.stringBuilder.Append( " = " );
+                        this.WriteValue( value );
+
                         break;
 
                     case CustomLogParameterMode.Hidden:
                         break;
-
                 }
             }
 
-            private void WriteValue<T>(T value)
+            private void WriteValue<T>( T value )
             {
-                if (value == null)
+                if ( value == null )
                 {
-                    this.stringBuilder.Append("null");
+                    this.stringBuilder.Append( "null" );
                 }
                 else
                 {
-                    this.stringBuilder.Append(value.ToString());
+                    this.stringBuilder.Append( value.ToString() );
                 }
             }
 
-            void ICustomLogRecordBuilder.WriteCustomString(in CharSpan str)
+            void ICustomLogRecordBuilder.WriteCustomString( in CharSpan str )
             {
-                if (this.appendComma)
+                if ( this.appendComma )
                 {
                     this.appendComma = false;
-                    this.stringBuilder.Append(", ");
+                    this.stringBuilder.Append( ", " );
                 }
-                this.stringBuilder.Append(str.ToString());
+
+                this.stringBuilder.Append( str.ToString() );
             }
 
             void ICustomLogRecordBuilder.Complete()
             {
-                if (this.logger != null)
+                if ( this.logger != null )
                 {
-                    if (this.recordKind == LogRecordKind.CustomActivityEntry)
+                    if ( this.recordKind == LogRecordKind.CustomActivityEntry )
                     {
                         this.context.Description = this.stringBuilder.ToString();
-                        this.stringBuilder.Append(": ");
-                        this.stringBuilder.Append(GetRecordKindText(LogRecordKind.CustomActivityEntry));
+                        this.stringBuilder.Append( ": " );
+                        this.stringBuilder.Append( GetRecordKindText( LogRecordKind.CustomActivityEntry ) );
                     }
-                    this.logger.Write(this.level, this.recordKind, this.stringBuilder.ToString(), this.exception);
 
+                    this.logger.Write( this.level, this.recordKind, this.stringBuilder.ToString(), this.exception );
                 }
 
                 this.Dispose();
             }
 
-            void IDisposable.Dispose() {}
+            void IDisposable.Dispose() { }
         }
 
         private class Context : ILoggingContext
@@ -432,30 +410,21 @@ namespace Flashtrace.Custom
 
             public string SyntheticId => null;
 
-            public void ForEachProperty( LoggingPropertyVisitor<object> visitor, bool includeAncestors = true )
-            {
-                
-            }
+            public void ForEachProperty( LoggingPropertyVisitor<object> visitor, bool includeAncestors = true ) { }
 
-            public void ForEachProperty<T>( LoggingPropertyVisitor<T> visitor, ref T state, bool includeAncestors = true )
-            {
-                
-            }
+            public void ForEachProperty<T>( LoggingPropertyVisitor<T> visitor, ref T state, bool includeAncestors = true ) { }
 
             public bool IsDisposed { get; private set; }
 
             int ILoggingContext.RecycleId => 0;
-
 
             void IDisposable.Dispose()
             {
                 this.IsDisposed = true;
             }
 
-            [SuppressMessage("Microsoft.Performance", "CA1822")]
+            [SuppressMessage( "Microsoft.Performance", "CA1822" )]
             public bool IsHidden => false;
-
-            
         }
     }
 }

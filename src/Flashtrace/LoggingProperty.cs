@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Custom;
 using System.Runtime.Serialization;
@@ -64,7 +63,7 @@ namespace Flashtrace
             get => this.options.IsInherited;
             set => this.options = this.options.WithIsInherited( value );
         }
-        
+
         /// <summary>
         /// Determines whether the property is cross-process. The default value is <c>false</c>. When this property is set to <c>true</c>, <see cref="IsInherited"/> is automatically
         /// set to <c>true</c>.
@@ -74,6 +73,7 @@ namespace Flashtrace
             get => this.options.IsBaggage;
             set => this.options = this.options.WithIsBaggage( value );
         }
+
         internal LoggingPropertyOptions Options => this.options;
 
         /// <summary>
@@ -107,8 +107,5 @@ namespace Flashtrace
 
         /// <inheritdoc/>
         public override string ToString() => $"{this.Name}={this.Value}";
-        
-
-     
     }
 }

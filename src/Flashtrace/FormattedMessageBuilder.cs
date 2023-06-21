@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Custom.Messages;
 
@@ -20,8 +19,9 @@ namespace Flashtrace
 #if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
 #endif
+
         // Intentionally removing the params modifier to prevent the C# compiler to pick this overload unintentionally.
-        public static FormattedMessageArray Formatted(string formattingString, object[] args) => new FormattedMessageArray(formattingString, args);
+        public static FormattedMessageArray Formatted( string formattingString, object[] args ) => new( formattingString, args );
 
         /// <summary>
         /// Creates a text message with no formatting string parameter.
@@ -31,6 +31,6 @@ namespace Flashtrace
 #if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
 #endif
-        public static FormattedMessage Formatted(string text) => new FormattedMessage(text);
+        public static FormattedMessage Formatted( string text ) => new( text );
     }
 }

@@ -1,14 +1,14 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Contexts
 {
     /// <summary>
     /// Represents a position in a file of source code.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes")]
+    [SuppressMessage( "Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes" )]
     public readonly struct SourceLineInfo
     {
         /// <summary>
@@ -44,6 +44,5 @@ namespace Flashtrace.Contexts
         /// Determines whether the current <see cref="SourceLineInfo"/> is null.
         /// </summary>
         public bool IsNull => this.File == null;
-
     }
 }

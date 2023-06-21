@@ -1,11 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
 
 namespace Flashtrace.Custom
 {
-
     /// <summary>
     /// Abstraction of the Logging facility, through which other components emit their log records. This
     /// interfaces abstracts other PostSharp components from the PostSharp.Patterns.Diagnostics component.
@@ -19,7 +17,7 @@ namespace Flashtrace.Custom
         /// <summary>
         /// Gets the source <see cref="Type"/> for which this <see cref="ILogger"/> was created.
         /// </summary>
-        [Obsolete("Don't use the Type property as some logger may have no type assigned depending on the initialization order.")]
+        [Obsolete( "Don't use the Type property as some logger may have no type assigned depending on the initialization order." )]
         Type Type { get; }
 
         /// <summary>
@@ -66,7 +64,14 @@ namespace Flashtrace.Custom
         /// <param name="exception">The <see cref="Exception"/> associated with the record, or <c>null</c>.</param>
         /// <param name="callerInfo">Information about the caller source code.</param>
         /// <param name="args">An array of parameters.</param>
-        void Write( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, object[] args, Exception exception, ref CallerInfo callerInfo );
+        void Write(
+            ILoggingContext context,
+            LogLevel level,
+            LogRecordKind recordKind,
+            string text,
+            object[] args,
+            Exception exception,
+            ref CallerInfo callerInfo );
 
         /// <summary>
         /// Opens an activity.
@@ -98,7 +103,4 @@ namespace Flashtrace.Custom
         /// <param name="waited">The "thing" that is awaited for. Typically a <see cref="System.Threading.Tasks.Task"/>, or <c>TaskInfo</c>, or another context.</param>
         void SetWaitDependency( ILoggingContext context, object waited );
     }
-
 }
-
-

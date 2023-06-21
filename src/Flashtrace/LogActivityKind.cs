@@ -1,6 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace
 {
@@ -28,21 +26,20 @@ namespace Flashtrace
         /// Activity of waiting for a <see cref="Task"/> or another dispatcher object.
         /// </summary>
         Wait,
-        
+
         /// <summary>
         /// An outgoing request. The property "RequestId" is expected to be defined.
         /// </summary>
         OutgoingRequest,
-        
+
         /// <summary>
         /// An incoming request of the service (typically a web request). A transaction boundary.
         /// </summary>
         IncomingRequest,
-        
+
         /// <summary>
         /// A custom transaction.
         /// </summary>
         Transaction
     }
-
 }

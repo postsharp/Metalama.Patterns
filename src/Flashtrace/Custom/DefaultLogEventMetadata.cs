@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
 using System.Reflection;
@@ -8,23 +7,24 @@ namespace Flashtrace.Custom
 {
     internal sealed class DefaultLogEventMetadata<T> : LogEventMetadata<T>
     {
-        private readonly Dictionary<string, LoggingPropertyOptions> propertyOptions 
-            = new Dictionary<string, LoggingPropertyOptions>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, LoggingPropertyOptions> propertyOptions = new( StringComparer.OrdinalIgnoreCase );
         private readonly bool hasInheritedProperty;
 
-        public static readonly DefaultLogEventMetadata<T> Instance = new DefaultLogEventMetadata<T>();
+        public static readonly DefaultLogEventMetadata<T> Instance = new();
 
-        private DefaultLogEventMetadata() : base(typeof(T).Name)
+        private DefaultLogEventMetadata() : base( typeof(T).Name )
         {
-            if ( !typeof( T ).IsAnonymous() )
+            if ( !typeof(T).IsAnonymous() )
             {
-                foreach ( PropertyInfo property in UnknownObjectAccessor.GetProperties( typeof( T ) ) )
+                foreach ( var property in UnknownObjectAccessor.GetProperties( typeof(T) ) )
                 {
-                    LoggingPropertyOptionsAttribute attribute = property.GetCustomAttribute<LoggingPropertyOptionsAttribute>();
+                    var attribute = property.GetCustomAttribute<LoggingPropertyOptionsAttribute>();
+
                     if ( attribute != null )
                     {
-                        LoggingPropertyOptions options = attribute.ToOptions();
+                        var options = attribute.ToOptions();
                         this.propertyOptions.Add( property.Name, options );
+
                         if ( options.IsInherited )
                         {
                             this.hasInheritedProperty = true;
@@ -43,17 +43,11 @@ namespace Flashtrace.Custom
             return this.hasInheritedProperty;
         }
 
-        internal protected override LoggingPropertyOptions GetPropertyOptions( string name )
+        protected internal override LoggingPropertyOptions GetPropertyOptions( string name )
         {
-            this.propertyOptions.TryGetValue( name, out LoggingPropertyOptions options );
+            this.propertyOptions.TryGetValue( name, out var options );
+
             return options;
         }
-
-
     }
-
-
-
 }
-
-

@@ -1,18 +1,17 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace
 {
     /// <summary>
     /// Kinds of log entry.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
+    [SuppressMessage( "Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames" )]
     [Flags]
     public enum LogRecordKind
     {
-
         /// <summary>
         /// The value was not set.
         /// </summary>
@@ -93,11 +92,9 @@ namespace Flashtrace
         /// </summary>
         MethodOvertime = 1 << 15,
 
- 
         /// <summary>
         /// Any exit of a custom activity, where it is not known whether the execution succeeded or failed.
         /// </summary>
         CustomActivityExit = 1 << 16
-
     }
 }

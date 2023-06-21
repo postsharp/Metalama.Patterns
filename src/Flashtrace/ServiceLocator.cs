@@ -1,7 +1,7 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Custom;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace
 {
@@ -10,7 +10,6 @@ namespace Flashtrace
     /// </summary>
     public static class ServiceLocator
     {
-
         /// <summary>
         /// Event raised when a new service is registered.
         /// </summary>
@@ -21,13 +20,13 @@ namespace Flashtrace
         /// </summary>
         /// <typeparam name="T">Type of the service interface.</typeparam>
         /// <param name="service">Service implementation.</param>
-        public static void RegisterService<T>(T service) where T : class
+        public static void RegisterService<T>( T service ) where T : class
         {
-            T oldService = Entry<T>.Value;
+            var oldService = Entry<T>.Value;
             (oldService as IDisposable)?.Dispose();
 
             Entry<T>.Value = service;
-            ServiceRegistered?.Invoke(null, new ServiceRegisteredEventArgs(typeof(T)));
+            ServiceRegistered?.Invoke( null, new ServiceRegisteredEventArgs( typeof(T) ) );
         }
 
         /// <summary>
@@ -38,19 +37,18 @@ namespace Flashtrace
         public static T GetService<T>() where T : class
         {
             return Entry<T>.Value;
-
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        [SuppressMessage( "Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline" )]
         static ServiceLocator()
         {
 #pragma warning disable CS0618 // Type or member is obsolete
 
 #if true || SYSTEM_TRACE
-            RegisterService<ILoggerFactory>(new TraceSourceLoggerFactory());
-            RegisterService<ILoggerFactoryProvider>(new TraceSourceLoggerFactory());
-            RegisterService<ILoggerFactoryProvider3>(new TraceSourceLoggerFactory());
+            RegisterService<ILoggerFactory>( new TraceSourceLoggerFactory() );
+            RegisterService<ILoggerFactoryProvider>( new TraceSourceLoggerFactory() );
+            RegisterService<ILoggerFactoryProvider3>( new TraceSourceLoggerFactory() );
 #else
             RegisterService<ILoggerFactory>(new NullLogger());
             RegisterService<ILoggerFactoryProvider>(new NullLogger());

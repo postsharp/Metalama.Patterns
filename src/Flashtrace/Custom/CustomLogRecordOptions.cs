@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Diagnostics.CodeAnalysis;
 
@@ -8,7 +7,7 @@ namespace Flashtrace.Custom
     /// <summary>
     /// Options of the <see cref="ICustomLogRecordBuilder.BeginWriteItem(CustomLogRecordItem, in CustomLogRecordTextOptions)"/> method.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
+    [SuppressMessage( "Microsoft.Performance", "CA1815", Justification = "Equal is not a use case" )]
     public readonly struct CustomLogRecordOptions
     {
         /// <summary>
@@ -30,7 +29,7 @@ namespace Flashtrace.Custom
         /// <summary>
         /// Gets the <see cref="LogEventData"/> for the current record.
         /// </summary>
-        public LogEventData Data { get;  }
+        public LogEventData Data { get; }
 
         /// <summary>
         /// Initializes a new <see cref="CustomLogRecordOptions"/>.
@@ -39,16 +38,12 @@ namespace Flashtrace.Custom
         /// <param name="kind"></param>
         /// <param name="attributes"></param>
         /// <param name="data"></param>
-        internal CustomLogRecordOptions(LogLevel level, LogRecordKind kind, CustomLogRecordAttributes attributes, in LogEventData data )
+        internal CustomLogRecordOptions( LogLevel level, LogRecordKind kind, CustomLogRecordAttributes attributes, in LogEventData data )
         {
             this.Level = level;
             this.Kind = kind;
             this.Attributes = attributes;
             this.Data = data;
         }
-
     }
-
 }
-
-

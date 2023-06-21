@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
 using System.Diagnostics.CodeAnalysis;
@@ -9,12 +8,13 @@ namespace Flashtrace.Custom
     /// <summary>
     /// Options of the <see cref="ICustomLogRecordBuilder.WriteCustomParameter{T}(int, in Formatters.CharSpan, T, in CustomLogParameterOptions)"/> method.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
+    [SuppressMessage( "Microsoft.Performance", "CA1815", Justification = "Equal is not a use case" )]
     public readonly struct CustomLogParameterOptions
     {
         [ExplicitCrossPackageInternal]
-        internal static readonly CustomLogParameterOptions FormattedStringParameter = new CustomLogParameterOptions(CustomLogParameterMode.Default);
-        internal static readonly CustomLogParameterOptions SemanticParameter = new CustomLogParameterOptions(CustomLogParameterMode.NameValuePair);
+        internal static readonly CustomLogParameterOptions FormattedStringParameter = new( CustomLogParameterMode.Default );
+
+        internal static readonly CustomLogParameterOptions SemanticParameter = new( CustomLogParameterMode.NameValuePair );
 
         /// <summary>
         /// Determines how the parameter should be rendered.
@@ -25,7 +25,7 @@ namespace Flashtrace.Custom
         /// Initializes a new <see cref="CustomLogParameterOptions"/>.
         /// </summary>
         /// <param name="mode">Determines how the parameter should be rendered.</param>
-        public CustomLogParameterOptions(CustomLogParameterMode mode)
+        public CustomLogParameterOptions( CustomLogParameterMode mode )
         {
             this.Mode = mode;
         }
@@ -44,7 +44,7 @@ namespace Flashtrace.Custom
         /// <summary>
         /// Only the parameter value is rendered.
         /// </summary>
-        Default, 
+        Default,
 
         /// <summary>
         /// The parameter is rendered in <c>name = value</c> form.

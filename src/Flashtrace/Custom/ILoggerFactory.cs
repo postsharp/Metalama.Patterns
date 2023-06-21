@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Custom
 {
@@ -58,7 +57,7 @@ namespace Flashtrace.Custom
         /// </summary>
         /// <param name="type">The type of the source code that will emit the records.</param>
         /// <returns>An instance of the <see cref="ILogger2"/> interface for <paramref name="type"/>.</returns>
-        [Obsolete("Use ILoggerFactory3.GetLogger")]
+        [Obsolete( "Use ILoggerFactory3.GetLogger" )]
         ILogger2 GetLogger( Type type );
     }
 
@@ -83,5 +82,4 @@ namespace Flashtrace.Custom
         /// <param name="sourceName">Name identifying the returned logger. The backend creates a logger based on this name.</param>
         ILogger3 GetLogger( string sourceName );
     }
-
 }

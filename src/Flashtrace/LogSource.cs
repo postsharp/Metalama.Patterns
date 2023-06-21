@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
 using Flashtrace.Custom;
@@ -9,8 +8,6 @@ using System.Runtime.CompilerServices;
 
 namespace Flashtrace
 {
-
-
     /// <summary>
     /// Allow to write log messages and trace the execution of activities. This class is optimized for use with C# 7.2 or later.
     /// For previous compiler versions, consider using the legacy <see cref="Logger"/> class.
@@ -26,8 +23,13 @@ namespace Flashtrace
     /// </remarks>
     public sealed class LogSource
     {
-
-        private LogLevelSource debugLogLevelSource, traceLogLevelSource, infoLogLevelSource, warningLogLevelSource, errorLogLevelSource, criticalLogLevelSource, noneLogLevelSource;
+        private LogLevelSource debugLogLevelSource,
+                               traceLogLevelSource,
+                               infoLogLevelSource,
+                               warningLogLevelSource,
+                               errorLogLevelSource,
+                               criticalLogLevelSource,
+                               noneLogLevelSource;
 
         internal LogSource( [Required] ILogger3 logger, LogLevel defaultLevel = LogLevel.Debug, LogLevel failureLevel = LogLevel.Error )
         {
@@ -38,7 +40,7 @@ namespace Flashtrace
 
         /// <inheritdoc />
         public ILoggingContext CurrentContext => this.Logger.CurrentContext;
-     
+
         internal ILogger3 Logger { get; }
 
         /// <summary>
@@ -46,13 +48,14 @@ namespace Flashtrace
         /// </summary>
         /// <param name="type">The <see cref="Type"/> for which the <see cref="LogSource"/> should be created.</param>
         /// <returns>A <see cref="LogSource"/> for <paramref name="type"/>.</returns>
-        public LogSource ForType(Type type)
+        public LogSource ForType( Type type )
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            if ( type == null )
+            {
+                throw new ArgumentNullException( nameof(type) );
+            }
 
-            return new LogSource( this.Logger.Factory.GetLogger(type), this.DefaultLevel, this.FailureLevel);
-
+            return new LogSource( this.Logger.Factory.GetLogger( type ), this.DefaultLevel, this.FailureLevel );
         }
 
         /// <summary>
@@ -63,41 +66,43 @@ namespace Flashtrace
         public LogSource ForSource( string sourceName )
         {
             if ( string.IsNullOrEmpty( sourceName ) )
-                throw new ArgumentNullException( nameof( sourceName ) );
+            {
+                throw new ArgumentNullException( nameof(sourceName) );
+            }
 
             return new LogSource( ((ILoggerFactory3) this.Logger.Factory).GetLogger( sourceName ), this.DefaultLevel, this.FailureLevel );
-
         }
 
         /// <summary>
         /// Gets a new <see cref="LogSource"/> keeping all the configuration of the current instance, but for the calling type.
         /// </summary>
         /// <returns>A <see cref="LogSource"/> for the calling type.</returns>
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl( MethodImplOptions.NoInlining )]
         public LogSource ForCurrentType()
         {
-            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-            return this.ForType(callerInfo.SourceType  ?? typeof(object));
+            var callerInfo = CallerInfo.GetDynamic( 1 );
+
+            return this.ForType( callerInfo.SourceType ?? typeof(object) );
         }
 
         /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable( EditorBrowsableState.Never )]
         public LogSource ForCurrentType( ref CallerInfo callerInfo )
         {
-            return this.ForType(callerInfo.SourceType);
+            return this.ForType( callerInfo.SourceType );
         }
-
 
         /// <summary>
         /// Gets a <see cref="LogSource"/> for the calling type.
         /// </summary>
         /// <returns>A <see cref="LogSource"/> for the calling type.</returns>
         [SuppressMessage( "Microsoft.Performance", "CA1801" )]
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl( MethodImplOptions.NoInlining )]
         public static LogSource Get()
         {
-            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-            return Get( ref callerInfo);
+            var callerInfo = CallerInfo.GetDynamic( 1 );
+
+            return Get( ref callerInfo );
         }
 
         /// <excludeOverload />
@@ -109,7 +114,6 @@ namespace Flashtrace
         /// </summary>
         /// <param name="sourceName">Name that the logging backend associates with a log source.</param>
         public static LogSource Get( string sourceName ) => LogSourceFactory.Default3.GetLogSource( sourceName );
-
 
         /// <summary>
         /// Gets a log source for a specified role and source name.
@@ -132,17 +136,18 @@ namespace Flashtrace
         /// </summary>
         /// <param name="level">A <see cref="LogLevel"/>.</param>
         /// <returns><c>true</c> if logging is enabled for <paramref name="level"/>, otherwise <c>false</c>.</returns>
-        [SuppressMessage("Microsoft.Performance", "CA1801")]
-        [SuppressMessage("Microsoft.Design", "CA1031")]
-        public bool IsEnabled(LogLevel level)
+        [SuppressMessage( "Microsoft.Performance", "CA1801" )]
+        [SuppressMessage( "Microsoft.Design", "CA1031" )]
+        public bool IsEnabled( LogLevel level )
         {
             try
             {
-                return this.Logger.IsEnabled(level);
+                return this.Logger.IsEnabled( level );
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
-                this.Logger.OnInternalException(e);
+                this.Logger.OnInternalException( e );
+
                 return false;
             }
         }
@@ -155,28 +160,32 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This method is properly optimized. Subsequent calls with the same parameter value will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource WithLevel(LogLevel level)
+        public LogLevelSource WithLevel( LogLevel level )
         {
-            switch (level)
+            switch ( level )
             {
                 case LogLevel.Trace:
                     return this.Trace;
+
                 case LogLevel.Debug:
                     return this.Debug;
+
                 case LogLevel.Info:
                     return this.Info;
+
                 case LogLevel.Warning:
                     return this.Warning;
+
                 case LogLevel.Error:
                     return this.Error;
+
                 case LogLevel.Critical:
                     return this.Critical;
+
                 default:
                     return this.None;
-
             }
         }
-
 
         internal LogLevel DefaultLevel
         {
@@ -194,9 +203,9 @@ namespace Flashtrace
         /// <param name="defaultLevel">The <see cref="LogLevel"/> for the <see cref="Default"/> severity (also used for the start and success messages of activities).</param>
         /// <param name="failureLevel">The <see cref="LogLevel"/> for the <see cref="Failure"/> severity (also used for the failure messages of activities).</param>
         /// <returns>A new <see cref="LogSource"/> with the specified log levels.</returns>
-        public LogSource WithLevels(LogLevel defaultLevel, LogLevel failureLevel) => new LogSource( this.Logger, defaultLevel, failureLevel);
+        public LogSource WithLevels( LogLevel defaultLevel, LogLevel failureLevel ) => new( this.Logger, defaultLevel, failureLevel );
 
-        private LogLevelSource GetWriteMessage(ref LogLevelSource field, LogLevel level) => field ?? (field = new LogLevelSource(this, level));
+        private LogLevelSource GetWriteMessage( ref LogLevelSource field, LogLevel level ) => field ?? (field = new LogLevelSource( this, level ));
 
         /// <summary>
         /// Exposes methods that allow to open activities with the <see cref="LogLevel.None"/> severity. Such activities are never displayed,
@@ -205,7 +214,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource None => (this.noneLogLevelSource ?? (this.noneLogLevelSource = new LogLevelSource(this, LogLevel.None)));
+        public LogLevelSource None => (this.noneLogLevelSource ?? (this.noneLogLevelSource = new LogLevelSource( this, LogLevel.None )));
 
         /// <summary>
         /// Exposes methods that allow to write messages and open activities with the default severity of the current <see cref="LogSource"/>. The default severity is <see cref="LogLevel.Debug"/>,
@@ -214,7 +223,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource Default => this.WithLevel(this.DefaultLevel);
+        public LogLevelSource Default => this.WithLevel( this.DefaultLevel );
 
         /// <summary>
         /// Exposes methods that allow to write messages and open activities with the default failure severity of the current <see cref="LogSource"/>. The default severity is <see cref="LogLevel.Error"/>,
@@ -223,7 +232,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource Failure => this.WithLevel(this.FailureLevel);
+        public LogLevelSource Failure => this.WithLevel( this.FailureLevel );
 
         /// <summary>
         /// Exposes methods that allow to write messages and open activities with the <see cref="LogLevel.Critical"/> severity.
@@ -231,7 +240,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource Critical => this.GetWriteMessage(ref this.criticalLogLevelSource, LogLevel.Critical);
+        public LogLevelSource Critical => this.GetWriteMessage( ref this.criticalLogLevelSource, LogLevel.Critical );
 
         /// <summary>
         /// Exposes methods that allow to write messages and open activities with the <see cref="LogLevel.Error"/> severity.
@@ -239,7 +248,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource Error => this.GetWriteMessage(ref this.errorLogLevelSource, LogLevel.Error);
+        public LogLevelSource Error => this.GetWriteMessage( ref this.errorLogLevelSource, LogLevel.Error );
 
         /// <summary>
         /// Exposes methods that allow to write messages and open activities with the <see cref="LogLevel.Warning"/> severity.
@@ -247,7 +256,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource Warning => this.GetWriteMessage(ref this.warningLogLevelSource, LogLevel.Warning);
+        public LogLevelSource Warning => this.GetWriteMessage( ref this.warningLogLevelSource, LogLevel.Warning );
 
         /// <summary>
         /// Exposes methods that allow to write messages and open activities with the <see cref="LogLevel.Info"/> severity.
@@ -255,7 +264,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource Info => this.GetWriteMessage(ref this.infoLogLevelSource, LogLevel.Info);
+        public LogLevelSource Info => this.GetWriteMessage( ref this.infoLogLevelSource, LogLevel.Info );
 
         /// <summary>
         /// Exposes methods that allow to write messages and open activities with the <see cref="LogLevel.Trace"/> severity.
@@ -263,7 +272,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource Trace => this.GetWriteMessage(ref this.traceLogLevelSource, LogLevel.Trace);
+        public LogLevelSource Trace => this.GetWriteMessage( ref this.traceLogLevelSource, LogLevel.Trace );
 
         /// <summary>
         /// Exposes methods that allow to write messages and open activities with the <see cref="LogLevel.Debug"/> severity.
@@ -271,7 +280,7 @@ namespace Flashtrace
         /// <remarks>
         ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
         /// </remarks>
-        public LogLevelSource Debug => this.GetWriteMessage(ref this.debugLogLevelSource, LogLevel.Debug);
+        public LogLevelSource Debug => this.GetWriteMessage( ref this.debugLogLevelSource, LogLevel.Debug );
 
         /// <summary>
         /// Emits a log record with the source file and line of the caller.
@@ -279,8 +288,8 @@ namespace Flashtrace
         [SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic" )]
         public void WriteExecutionPoint()
         {
-            CallerInfo callerInfo = CallerInfo.GetDynamic( 1 );
-            
+            var callerInfo = CallerInfo.GetDynamic( 1 );
+
             if ( !callerInfo.SourceLineInfo.IsNull )
             {
                 this.WriteExecutionPoint( ref callerInfo );
@@ -319,14 +328,5 @@ namespace Flashtrace
                 logger.ApplyTransactionRequirements( ref openActivityOptions );
             }
         }
-
-
     }
-
-
-
-
-
 }
-
-

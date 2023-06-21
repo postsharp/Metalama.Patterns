@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Diagnostics.CodeAnalysis;
 
@@ -10,11 +9,11 @@ namespace Flashtrace.Custom
     /// method.
     /// </summary>
     [SuppressMessage( "Microsoft.Performance", "CA1815", Justification = "Equal is not a use case" )]
-    public readonly struct LoggingPropertyVisitorOptions 
+    public readonly struct LoggingPropertyVisitorOptions
     {
         private readonly Flags flags;
 
-        private LoggingPropertyVisitorOptions( Flags flags ) 
+        private LoggingPropertyVisitorOptions( Flags flags )
         {
             this.flags = flags;
         }
@@ -45,7 +44,6 @@ namespace Flashtrace.Custom
             {
                 this.flags |= Flags.OnlyRendered;
             }
-
         }
 
         /// <summary>
@@ -54,13 +52,11 @@ namespace Flashtrace.Custom
         /// </summary>
         public bool OnlyInherited => (this.flags & Flags.OnlyInherited) != 0;
 
-
         /// <summary>
         /// Determines if inherited properties must be included. This flag is taken into account by the visitors implemented on the logging contexts
         /// only. It is ignored by other visiting methods.
         /// </summary>
         public bool IncludeInherited => (this.flags & Flags.IncludeInherited) != 0;
-
 
         /// <summary>
         /// Determines if only rendered properties must be visited.
@@ -72,9 +68,9 @@ namespace Flashtrace.Custom
         /// </summary>
         /// <param name="value">The new value of the <see cref="OnlyInherited"/> property.</param>
         /// <returns></returns>
-        public LoggingPropertyVisitorOptions WithOnlyInherited(bool value = true )
+        public LoggingPropertyVisitorOptions WithOnlyInherited( bool value = true )
         {
-            return this.WithFlag(Flags.OnlyInherited, value );
+            return this.WithFlag( Flags.OnlyInherited, value );
         }
 
         /// <summary>
@@ -97,8 +93,7 @@ namespace Flashtrace.Custom
             return this.WithFlag( Flags.IncludeInherited, value );
         }
 
-
-        private LoggingPropertyVisitorOptions WithFlag( Flags flag, bool value ) => new LoggingPropertyVisitorOptions(( this.flags & ~flag) | (value ? flag : Flags.Default));
+        private LoggingPropertyVisitorOptions WithFlag( Flags flag, bool value ) => new( (this.flags & ~flag) | (value ? flag : Flags.Default) );
 
         [Flags]
         private enum Flags
@@ -109,7 +104,4 @@ namespace Flashtrace.Custom
             IncludeInherited = 4
         }
     }
-
 }
-
-

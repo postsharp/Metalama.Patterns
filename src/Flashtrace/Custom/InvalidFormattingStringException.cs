@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if SERIALIZABLE
 using System.Runtime.Serialization;
@@ -19,17 +18,13 @@ namespace Flashtrace.Custom
         /// <summary>
         /// Initializes a new <see cref="InvalidFormattingStringException"/> with the default error message.
         /// </summary>
-        public InvalidFormattingStringException() : base("Invalid formatting string.")
-        {
-        }
+        public InvalidFormattingStringException() : base( "Invalid formatting string." ) { }
 
         /// <summary>
         /// Initializes a new <see cref="InvalidFormattingStringException"/> and specifies the error message.
         /// </summary>
         /// <param name="message">The error message.</param>
-        public InvalidFormattingStringException( string message ) : base( message )
-        {
-        }
+        public InvalidFormattingStringException( string message ) : base( message ) { }
 
         /// <summary>
         /// Initializes a new <see cref="InvalidFormattingStringException"/> and specifies the error message and
@@ -37,11 +32,9 @@ namespace Flashtrace.Custom
         /// </summary>
         /// <param name="message"></param>
         /// <param name="inner"></param>
-        public InvalidFormattingStringException( string message, Exception inner ) : base( message, inner )
-        {
-        }
+        public InvalidFormattingStringException( string message, Exception inner ) : base( message, inner ) { }
 
-        #if SERIALIZABLE
+#if SERIALIZABLE
         /// <summary>
         /// Deserialization constructor.
         /// </summary>
@@ -50,6 +43,6 @@ namespace Flashtrace.Custom
             StreamingContext context ) : base( info, context )
         {
         }
-        #endif
+#endif
     }
 }

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Diagnostics.CodeAnalysis;
 
@@ -8,7 +7,7 @@ namespace Flashtrace.Custom
     /// <summary>
     /// Options of the <see cref="ICustomLogRecordBuilder.BeginWriteItem(CustomLogRecordItem, in CustomLogRecordTextOptions)"/> method.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1815")]
+    [SuppressMessage( "Microsoft.Performance", "CA1815" )]
     public readonly struct CustomLogRecordTextOptions
     {
         /// <summary>
@@ -26,7 +25,7 @@ namespace Flashtrace.Custom
         /// </summary>
         /// <param name="parameterCount">Number of parameters in the message.</param>
         /// <param name="name">Semantic name of the message (<c>null</c> in case of a non-semantic message).</param>
-        public CustomLogRecordTextOptions(int parameterCount, string name = null ) 
+        public CustomLogRecordTextOptions( int parameterCount, string name = null )
         {
             this.Name = name;
             this.ParameterCount = parameterCount;

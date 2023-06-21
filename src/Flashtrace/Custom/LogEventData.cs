@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Custom
 {
@@ -21,11 +20,10 @@ namespace Flashtrace.Custom
         /// </summary>
         public object Data { get; }
 
-        
         private LogEventData( object data, LogEventMetadata metadata = null )
         {
             this.Data = data;
-            this.Metadata = metadata ?? (data == null ? null : LogEventMetadata.GetDefaultInstance(data.GetType()));
+            this.Metadata = metadata ?? (data == null ? null : LogEventMetadata.GetDefaultInstance( data.GetType() ));
         }
 
         /// <summary>
@@ -34,20 +32,20 @@ namespace Flashtrace.Custom
         /// <param name="data">The raw CLR object, typically an instance of anonymous type or any other type.</param>
         /// <param name="metadata">The <see cref="LogEventMetadata"/> used to interpret <paramref name="data"/>. When this parameter
         /// is <c>null</c>, the default <see cref="LogEventMetadata"/> implementation is used, which maps CLR properties into logging properties.</param>
-        public static LogEventData Create( object data, LogEventMetadata metadata ) => new LogEventData( data, metadata );
+        public static LogEventData Create( object data, LogEventMetadata metadata ) => new( data, metadata );
 
         /// <summary>
         /// Creates a new <see cref="LogEventData"/> and uses the default <see cref="LogEventMetadata"/> for the run-time type of the specified object.
         /// </summary>
         /// <param name="data">The raw CLR object, typically an instance of anonymous type or any other type.</param>
-        public static LogEventData Create( object data ) => new LogEventData( data );
+        public static LogEventData Create( object data ) => new( data );
 
         /// <summary>
         /// Creates a new <see cref="LogEventData"/> and uses the default <see cref="LogEventMetadata"/> for the build-time type of the specified object.
         /// This overload is faster than the non-generic one.
         /// </summary>
         /// <param name="data">The raw CLR object, typically an instance of anonymous type or any other type.</param>
-        public static LogEventData Create<T>( T data ) => new LogEventData( data, DefaultLogEventMetadata<T>.Instance );
+        public static LogEventData Create<T>( T data ) => new( data, DefaultLogEventMetadata<T>.Instance );
 
         internal LogEventData( IReadOnlyList<LoggingProperty> properties )
         {
@@ -62,7 +60,10 @@ namespace Flashtrace.Custom
         /// <param name="visitor">The visitor.</param>
         /// <param name="visitorState">An opaque value passed to <paramref name="visitor"/>.</param>
         /// <param name="visitorOptions">Determines which properties need to be visited. By default, all properties are visited.</param>
-        public void VisitProperties<TVisitorState>( ILoggingPropertyVisitor<TVisitorState> visitor, ref TVisitorState visitorState, in LoggingPropertyVisitorOptions visitorOptions = default )
+        public void VisitProperties<TVisitorState>(
+            ILoggingPropertyVisitor<TVisitorState> visitor,
+            ref TVisitorState visitorState,
+            in LoggingPropertyVisitorOptions visitorOptions = default )
         {
             if ( this.Data != null )
             {
@@ -74,19 +75,19 @@ namespace Flashtrace.Custom
         /// Returns a dictionary containing all properties contained in the current <see cref="LogEventData"/>.
         /// </summary>
         /// <returns></returns>
-        public IReadOnlyDictionary<string,object> ToDictionary()
+        public IReadOnlyDictionary<string, object> ToDictionary()
         {
-            Dictionary<string, object> dictionary = new Dictionary<string, object>();
+            Dictionary<string, object> dictionary = new();
             this.VisitProperties( DictionaryVisitor.Instance, ref dictionary );
+
             return dictionary;
         }
-
 
         [ExplicitCrossPackageInternal]
         internal bool HasInheritedProperty => this.Data != null && this.Metadata.HasInheritedProperty( this.Data );
 
         [ExplicitCrossPackageInternal]
-        internal T GetExpressionModel<T>() => this.Metadata == null ? default : this.Metadata.GetExpressionModel<T>( this.Data ) ;
+        internal T GetExpressionModel<T>() => this.Metadata == null ? default : this.Metadata.GetExpressionModel<T>( this.Data );
 
         /// <inheritdoc/>
         public override bool Equals( object obj )
@@ -142,22 +143,15 @@ namespace Flashtrace.Custom
 
         /// <inheritdoc/>
         public override string ToString() => $"{{LogEventData {this.Data?.ToString() ?? "null"}}}";
-        
-
 
         private class DictionaryVisitor : ILoggingPropertyVisitor<Dictionary<string, object>>
         {
-            public static DictionaryVisitor Instance = new DictionaryVisitor();
+            public static DictionaryVisitor Instance = new();
 
             public void Visit<TValue>( string name, TValue value, in LoggingPropertyOptions options, ref Dictionary<string, object> state )
             {
                 state[name] = value;
             }
         }
-
-
     }
-
 }
-
-

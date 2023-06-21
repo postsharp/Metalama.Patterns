@@ -1,9 +1,7 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Transactions
 {
-
 #pragma warning disable CA1815 // Override equals and operator equals on value types
 
     /// <summary>
@@ -14,13 +12,16 @@ namespace Flashtrace.Transactions
         private const short isSampledFlag = 1;
         private readonly short flags;
 
-        
-        internal short State { [ExplicitCrossPackageInternal] get; }
+        internal short State
+        {
+            [ExplicitCrossPackageInternal]
+            get;
+        }
 
         [ExplicitCrossPackageInternal]
-        internal TransactionRequirement(short state, bool isSampled)
+        internal TransactionRequirement( short state, bool isSampled )
         {
-            this.flags = (isSampled && state != 0 )? isSampledFlag : (short) 0;
+            this.flags = (isSampled && state != 0) ? isSampledFlag : (short) 0;
             this.State = state;
         }
 
@@ -37,17 +38,17 @@ namespace Flashtrace.Transactions
         /// <summary>
         /// Represents the request to open a transaction based on a sampling policy.
         /// </summary>
-        public static TransactionRequirement SampledTransaction => new TransactionRequirement(-1, true);
+        public static TransactionRequirement SampledTransaction => new( -1, true );
 
         /// <summary>
         /// Represents the request to open a transaction based on a deterministic policy (without sampling).
         /// </summary>
-        public static TransactionRequirement DeterministicTransaction => new TransactionRequirement(-1, false);
+        public static TransactionRequirement DeterministicTransaction => new( -1, false );
 
         /// <summary>
         /// Represents the absence of request to open a transaction.
         /// </summary>
-        public static TransactionRequirement NoTransaction => new TransactionRequirement(0, false);
+        public static TransactionRequirement NoTransaction => new( 0, false );
 
         /// <summary>
         /// Returns a copy of the current <see cref="TransactionRequirement"/> but with a different value of <see cref="RequiresTransaction"/>.
@@ -55,15 +56,12 @@ namespace Flashtrace.Transactions
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public TransactionRequirement WithRequiresTransaction( bool value ) => new TransactionRequirement( value ? this.State : (short) 0, this.IsSampled );
+        public TransactionRequirement WithRequiresTransaction( bool value ) => new( value ? this.State : (short) 0, this.IsSampled );
 
         /// <inheritdoc/>
         public override string ToString()
         {
             return $"RequiresTransaction={this.RequiresTransaction}, IsSampled={this.IsSampled}";
         }
-
     }
-
-
 }

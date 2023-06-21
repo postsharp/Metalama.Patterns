@@ -1,6 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace
 {
@@ -27,7 +25,6 @@ namespace Flashtrace
                 default:
                     return false;
             }
-
         }
 
         /// <summary>
@@ -35,9 +32,9 @@ namespace Flashtrace
         /// </summary>
         /// <param name="kind">A <see cref="LogRecordKind"/>.</param>
         /// <returns><c>true</c> if <paramref name="kind"/> represents the closing of a context, otherwise <c>false</c>.</returns>
-        public static bool IsClose(this LogRecordKind kind)
+        public static bool IsClose( this LogRecordKind kind )
         {
-            switch (kind)
+            switch ( kind )
             {
                 case LogRecordKind.MethodSuccess:
                 case LogRecordKind.MethodOvertime:
@@ -53,7 +50,6 @@ namespace Flashtrace
                 default:
                     return false;
             }
-
         }
 
         /// <summary>
@@ -61,9 +57,9 @@ namespace Flashtrace
         /// </summary>
         /// <param name="kind">A <see cref="LogRecordKind"/>.</param>
         /// <returns><c>true</c> if <paramref name="kind"/> represents the closing of a custom activity, otherwise <c>false</c>.</returns>
-        public static bool IsCloseCustomActivity(this LogRecordKind kind)
+        public static bool IsCloseCustomActivity( this LogRecordKind kind )
         {
-            switch (kind)
+            switch ( kind )
             {
                 case LogRecordKind.CustomActivityException:
                 case LogRecordKind.CustomActivitySuccess:
@@ -75,7 +71,6 @@ namespace Flashtrace
                     return false;
             }
         }
-
 
         /// <summary>
         /// Determines whether a given <see cref="LogRecordKind"/> represents a standalone record, i.e. a record that does
@@ -121,10 +116,8 @@ namespace Flashtrace
                 case LogRecordKind.ExecutionPoint:
                     return true;
 
-
                 default:
                     return false;
-
             }
         }
     }

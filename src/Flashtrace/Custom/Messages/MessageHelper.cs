@@ -1,10 +1,10 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
 namespace Flashtrace.Custom.Messages
 {
     internal static class MessageHelper
     {
-        public static void Write<T>( in T message, ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item ) 
+        public static void Write<T>( in T message, ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
             where T : IMessage
         {
             // TODO: Post.GetMutableRef

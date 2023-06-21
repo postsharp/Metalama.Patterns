@@ -19,32 +19,36 @@ namespace PostSharp.Patterns.Diagnostics
 {
 	public partial class Logger
 	{
-	<# for ( int i = 1; i <= 10; i++ )
-	{	#>
+	<#
+    for (var i = 1; i <= 10; i++)
+    {
+#>
 
 		/// <summary>
-        /// Writes a custom log record with <#=i#> parameter<#=GetPlural(i)#>.
+        /// Writes a custom log record with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
         /// <param name="level">The severity of the record (e.g. <see cref="LogLevel.Info"/> or <see cref="LogLevel.Warning"/>).</param>
         /// <param name="formattingString">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
-<#GenerateXmlDoc(i);#>
-	    public void Write<<#=Repeat( "T{0}", i )#>>(  LogLevel level, string formattingString, <#=Repeat( "T{0} arg{0}", i )#> )
+<#
+        GenerateXmlDoc( i );
+#>
+	    public void Write<<#= Repeat( "T{0}", i ) #>>(  LogLevel level, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
         {
 			CallerInfo nullRecordInfo = default;
-            this.Write( level, formattingString, <#=Repeat( "arg{0}", i )#>, ref nullRecordInfo );
+            this.Write( level, formattingString, <#= Repeat( "arg{0}", i ) #>, ref nullRecordInfo );
         }
 
 		 /// <excludeOverload />
         [EditorBrowsable(EditorBrowsableState.Never)]
 		[SuppressMessage("Microsoft.Design", "CA1031")]
-        public void Write<<#=Repeat( "T{0}", i )#>>( LogLevel level, string formattingString,<#=Repeat( "T{0} arg{0}", i )#>, ref CallerInfo callerInfo )
+        public void Write<<#= Repeat( "T{0}", i ) #>>( LogLevel level, string formattingString,<#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
         {
             if ( !this.ValidateLogger( level ) )
                 return;
 
 			try
 			{
-				this.logger.Write( null, level, LogRecordKind.CustomRecord, formattingString, <#=Repeat( "arg{0}", i )#>, null, ref callerInfo );
+				this.logger.Write( null, level, LogRecordKind.CustomRecord, formattingString, <#= Repeat( "arg{0}", i ) #>, null, ref callerInfo );
 			}
 			catch ( Exception e )
 			{
@@ -53,28 +57,30 @@ namespace PostSharp.Patterns.Diagnostics
         }
 
 		/// <summary>
-        /// Writes a custom log record with <#=i#> parameter<#=GetPlural(i)#> and associates it with an <see cref="Exception"/>.
+        /// Writes a custom log record with <#= i #> parameter<#= GetPlural( i ) #> and associates it with an <see cref="Exception"/>.
         /// </summary>
         /// <param name="level">The severity of the record (e.g. <see cref="LogLevel.Warning"/> or <see cref="LogLevel.Error"/>).</param>
         /// <param name="formattingString">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
 	    /// <param name="exception">The <see cref="Exception"/> associated with the record.</param>
-<#GenerateXmlDoc(i);#>
-	    public void WriteException<<#=Repeat( "T{0}", i )#>>( LogLevel level, Exception exception, string formattingString, <#=Repeat( "T{0} arg{0}", i )#> )
+<#
+        GenerateXmlDoc( i );
+#>
+	    public void WriteException<<#= Repeat( "T{0}", i ) #>>( LogLevel level, Exception exception, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
         {
-            this.WriteException( level, exception, formattingString, <#=Repeat( "arg{0}", i )#>, ref nullRecordInfo );
+            this.WriteException( level, exception, formattingString, <#= Repeat( "arg{0}", i ) #>, ref nullRecordInfo );
         }
 
 		 /// <excludeOverload />
         [EditorBrowsable(EditorBrowsableState.Never)]
 		[SuppressMessage("Microsoft.Design", "CA1031")]
-        public void WriteException<<#=Repeat( "T{0}", i )#>>( LogLevel level, Exception exception, string formattingString,<#=Repeat( "T{0} arg{0}", i )#>, ref CallerInfo callerInfo )
+        public void WriteException<<#= Repeat( "T{0}", i ) #>>( LogLevel level, Exception exception, string formattingString,<#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
         {
             if ( !this.ValidateLogger( level ) )
                  return;
 
 			try
 			{
-				this.logger.Write( null, level, LogRecordKind.CustomRecord, formattingString, <#=Repeat( "arg{0}", i )#>, exception, ref callerInfo );
+				this.logger.Write( null, level, LogRecordKind.CustomRecord, formattingString, <#= Repeat( "arg{0}", i ) #>, exception, ref callerInfo );
 			}
 			catch ( Exception e )
 			{
@@ -83,25 +89,27 @@ namespace PostSharp.Patterns.Diagnostics
         }
 
 		/// <summary>
-        /// Opens a custom activity with <#=i#> parameter<#=GetPlural(i)#>. 
+        /// Opens a custom activity with <#= i #> parameter<#= GetPlural( i ) #>. 
         /// </summary>
 		/// <param name="options">Options.</param>
         /// <param name="formattingString">The formatting string of the activity description, including parameters (e.g. <c>Writing {LineCount} line(s) in file {Path}.</c>)</param>
         /// <returns>A <see cref="Logger"/> representing the new activity.</returns>
         /// <remarks>The activity must be closed using <see cref="LogActivity.SetSuccess(string)"/>, <see cref="LogActivity.SetFailure(String)"/> or <see cref="LogActivity.SetException(Exception)"/>. </remarks>
-		<#GenerateXmlDoc(i);#>
+		<#
+        GenerateXmlDoc( i );
+#>
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		public LogActivity OpenActivity<<#=Repeat( "T{0}", i )#>>( LogActivityOptions options, string formattingString, <#=Repeat( "T{0} arg{0}", i )#> )
+		public LogActivity OpenActivity<<#= Repeat( "T{0}", i ) #>>( LogActivityOptions options, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
         {
            CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-		   return OpenActivity( options, formattingString, <#=Repeat( "arg{0}", i )#>, ref callerInfo );
+		   return OpenActivity( options, formattingString, <#= Repeat( "arg{0}", i ) #>, ref callerInfo );
         }
 
 
 		 /// <excludeOverload />
         [EditorBrowsable(EditorBrowsableState.Never)]
 		[SuppressMessage("Microsoft.Design", "CA1031")]
-		public LogActivity OpenActivity<<#=Repeat( "T{0}", i )#>>( LogActivityOptions options, string formattingString, <#=Repeat( "T{0} arg{0}", i )#>, ref CallerInfo callerInfo )
+		public LogActivity OpenActivity<<#= Repeat( "T{0}", i ) #>>( LogActivityOptions options, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
         {
 			LogLevel level = this.DefaultLevel;
       
@@ -116,7 +124,7 @@ namespace PostSharp.Patterns.Diagnostics
 				SetOptions( ref options, ref callerInfo );
 
 				activity = this.logger.OpenActivity( options, ref callerInfo);
-				this.logger.Write( activity, level, LogRecordKind.CustomActivityEntry, formattingString, <#=Repeat( "arg{0}", i )#>, null, ref callerInfo);
+				this.logger.Write( activity, level, LogRecordKind.CustomActivityEntry, formattingString, <#= Repeat( "arg{0}", i ) #>, null, ref callerInfo);
 				return this.CreateActivity( activity );
 			}
 			catch ( Exception e )
@@ -131,7 +139,7 @@ namespace PostSharp.Patterns.Diagnostics
 		 /// <excludeOverload />
         [EditorBrowsable(EditorBrowsableState.Never)]
 		[SuppressMessage("Microsoft.Design", "CA1031")]
-		public LogActivity OpenAsyncActivity<<#=Repeat( "T{0}", i )#>>( LogActivityOptions options, string formattingString, <#=Repeat( "T{0} arg{0}", i )#>, ref CallerInfo callerInfo )
+		public LogActivity OpenAsyncActivity<<#= Repeat( "T{0}", i ) #>>( LogActivityOptions options, string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
         {
            LogLevel level = this.DefaultLevel;
 
@@ -146,7 +154,7 @@ namespace PostSharp.Patterns.Diagnostics
 			{
 				options.IsAsync = true;
 				activity = this.logger.OpenActivity(options, ref callerInfo);
-				this.logger.Write( activity, level, LogRecordKind.CustomActivityEntry, formattingString, <#=Repeat( "arg{0}", i )#>, null, ref callerInfo);
+				this.logger.Write( activity, level, LogRecordKind.CustomActivityEntry, formattingString, <#= Repeat( "arg{0}", i ) #>, null, ref callerInfo);
 				return this.CreateActivity( activity );
 			}
 			catch ( Exception e )
@@ -160,61 +168,67 @@ namespace PostSharp.Patterns.Diagnostics
 /////
 
         /// <summary>
-        /// Opens a custom activity with a description containing <#=i#> parameter<#=GetPlural(i)#>.
+        /// Opens a custom activity with a description containing <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
         /// <param name="formattingString">The description of the activity, including parameters (e.g. <c>Writing {LineCount} line(s) in file {Path}</c>).</param>
-<#GenerateXmlDoc(i);#>
+<#
+        GenerateXmlDoc( i );
+#>
         /// <returns>A <see cref="Logger"/> representing the new activity.</returns>
         /// <remarks>The activity must be closed using <see cref="LogActivity.SetSuccess(string)"/>, <see cref="LogActivity.SetFailure(String)"/> or <see cref="LogActivity.SetException(Exception)"/>. </remarks>
 		[MethodImpl(MethodImplOptions.NoInlining)]
-        public LogActivity OpenActivity<<#=Repeat( "T{0}", i )#>>( string formattingString, <#=Repeat( "T{0} arg{0}", i )#> )
+        public LogActivity OpenActivity<<#= Repeat( "T{0}", i ) #>>( string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
         {
             CallerInfo callerInfo = CallerInfo.GetDynamic(1);
-			return OpenActivity( formattingString, <#=Repeat( "arg{0}", i )#>, ref callerInfo );
+			return OpenActivity( formattingString, <#= Repeat( "arg{0}", i ) #>, ref callerInfo );
         }
 
 
 		 /// <excludeOverload />
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public LogActivity OpenActivity<<#=Repeat( "T{0}", i )#>>( string formattingString, <#=Repeat( "T{0} arg{0}", i )#>, ref CallerInfo callerInfo )
+        public LogActivity OpenActivity<<#= Repeat( "T{0}", i ) #>>( string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo )
         {
-           return this.OpenActivity( LogActivityOptions.Default, formattingString, <#=Repeat( "arg{0}", i )#>, ref callerInfo );
+           return this.OpenActivity( LogActivityOptions.Default, formattingString, <#= Repeat( "arg{0}", i ) #>, ref callerInfo );
         }
 	<#
-	}
-	 #>
+    }
+#>
 	
 	
 	}
 
 	partial class LogActivity
 	{
-	<# for ( int i = 1; i <= 10; i++ )
-	{	#>
+	<#
+    for (var i = 1; i <= 10; i++)
+    {
+#>
 
 			/// <summary>
         /// Ends an activity (opened with <see cref="Logger.OpenActivity(string)"/>)
-        /// with success and specifies a success message with <#=i#> parameter<#=GetPlural(i)#>.
+        /// with success and specifies a success message with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
         /// <param name="formattingString">The success message with parameters, for instance <c>Written {Count} lines</c>.</param>
-<#GenerateXmlDoc(i);#>
-  		public void SetSuccess<<#=Repeat( "T{0}", i )#>>(string formattingString, <#=Repeat( "T{0} arg{0}", i )#>)
+<#
+        GenerateXmlDoc( i );
+#>
+  		public void SetSuccess<<#= Repeat( "T{0}", i ) #>>(string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>)
         {
 			CallerInfo nullRecordInfo = default;
-            this.SetSuccess(formattingString, <#=Repeat( "arg{0}", i )#>, ref nullRecordInfo );
+            this.SetSuccess(formattingString, <#= Repeat( "arg{0}", i ) #>, ref nullRecordInfo );
         }
 
 	  	 /// <excludeOverload />
         [EditorBrowsable(EditorBrowsableState.Never)]
 		[SuppressMessage("Microsoft.Design", "CA1031")]
-        public void SetSuccess<<#=Repeat( "T{0}", i )#>>(string formattingString, <#=Repeat( "T{0} arg{0}", i )#>, ref CallerInfo callerInfo)
+        public void SetSuccess<<#= Repeat( "T{0}", i ) #>>(string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo)
         {
 			if ( !this.RequiresCustomActivity( ref callerInfo ) )
                 return;
 
 			try
 			{
-				this.logger.Write( this.Context, this.ResolvedSuccessLevel, LogRecordKind.CustomActivitySuccess, formattingString, <#=Repeat( "arg{0}", i )#>, null, ref callerInfo );
+				this.logger.Write( this.Context, this.ResolvedSuccessLevel, LogRecordKind.CustomActivitySuccess, formattingString, <#= Repeat( "arg{0}", i ) #>, null, ref callerInfo );
 				this.Close( ref callerInfo );
 			}
 			catch ( Exception e )
@@ -225,27 +239,29 @@ namespace PostSharp.Patterns.Diagnostics
 
 		/// <summary>
         /// Ends an activity (opened with <see cref="Logger.OpenActivity(string)"/>)
-        /// with failure and specifies a failure message with <#=i#> parameter<#=GetPlural(i)#>.
+        /// with failure and specifies a failure message with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
         /// <param name="formattingString">The failure message with parameters, for instance <c>Written {Count} lines</c>.</param>
-<#GenerateXmlDoc(i);#>
-  		public void SetFailure<<#=Repeat( "T{0}", i )#>>(  string formattingString, <#=Repeat( "T{0} arg{0}", i )#>)
+<#
+        GenerateXmlDoc( i );
+#>
+  		public void SetFailure<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>)
         {
             CallerInfo nullRecordInfo = default;
-            this.SetFailure( formattingString, <#=Repeat( "arg{0}", i )#>, ref nullRecordInfo );
+            this.SetFailure( formattingString, <#= Repeat( "arg{0}", i ) #>, ref nullRecordInfo );
         }
 
 		 /// <excludeOverload />
         [EditorBrowsable(EditorBrowsableState.Never)]
 		[SuppressMessage("Microsoft.Design", "CA1031")]
-        public void SetFailure<<#=Repeat( "T{0}", i )#>>(  string formattingString, <#=Repeat( "T{0} arg{0}", i )#>, ref CallerInfo callerInfo)
+        public void SetFailure<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0} arg{0}", i ) #>, ref CallerInfo callerInfo)
         {
 			if ( !this.RequiresCustomActivity( ref callerInfo ) )
                 return;
 
 			try
 			{
-				this.logger?.Write( this.Context, this.ResolvedFailureLevel, LogRecordKind.CustomActivityFailure, formattingString, <#=Repeat( "arg{0}", i )#>, null,  ref callerInfo );
+				this.logger?.Write( this.Context, this.ResolvedFailureLevel, LogRecordKind.CustomActivityFailure, formattingString, <#= Repeat( "arg{0}", i ) #>, null,  ref callerInfo );
 				this.Close( ref callerInfo );
 			}
 			catch ( Exception e )
@@ -255,64 +271,70 @@ namespace PostSharp.Patterns.Diagnostics
         }
 
 		<#
-	}
-	 #>
+    }
+#>
 	}
 	
    
-   <# for ( int i = 1; i <= 10; i++ )
-	{
-	#>
+   <#
+    for (var i = 1; i <= 10; i++)
+    {
+#>
 
 	namespace Custom.Messages
 	{
 		/// <summary>
-		/// Encapsulates a text message with <#=i#> parameter<#=GetPlural(i)#>. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
+		/// Encapsulates a text message with <#= i #> parameter<#= GetPlural( i ) #>. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 		/// </summary>
 	    [SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
 	    [SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
-		public readonly struct FormattedMessage<<#=Repeat( "T{0}", i )#>> : IMessage
+		public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 		{
 			private readonly string formattingString;
 			
-			<#=Repeat( "private readonly T{0} arg{0}; ", i, "" )#>
+			<#= Repeat( "private readonly T{0} arg{0}; ", i, "" ) #>
 
 			
 			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
 			#endif
-			internal FormattedMessage( string formattingString, <#=Repeat( "T{0} arg{0}", i )#> )
+			internal FormattedMessage( string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
 			{
 				this.formattingString = formattingString;
-				<#=Repeat( "this.arg{0} = arg{0}; ", i, "" )#>
+				<#= Repeat( "this.arg{0} = arg{0}; ", i, "" ) #>
 			}
 
 			void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
 			{
-				recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#=i#>, null));
+				recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#= i #>, null));
     
 				FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 				ArraySegment<char> parameter;
 
-				   <# for ( int j = 1; j <= i; j++ ) { #>
+				   <#
+        for (var j = 1; j <= i; j++)
+        {
+#>
 
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 				parameter = parser.GetNextParameter();
 
 				if ( parameter.Array == null )
 				{
-					throw new InvalidFormattingStringException("The formatting string must have exactly <#=i#> parameters.");
+					throw new InvalidFormattingStringException("The formatting string must have exactly <#= i #> parameters.");
 				}
 
-				recordBuilder.WriteCustomParameter( <#=j-1#>, parameter, arg<#=j#>, CustomLogParameterOptions.FormattedStringParameter );
+				recordBuilder.WriteCustomParameter( <#= j - 1 #>, parameter, arg<#= j #>, CustomLogParameterOptions.FormattedStringParameter );
 
-				<# } #>
+				<#
+        }
+#>
 
 				recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 				if ( parser.GetNextParameter().Array != null )
 				{
-					throw new InvalidFormattingStringException("The formatting string must have exactly <#=i#> parameters.");
+					throw new InvalidFormattingStringException("The formatting string must have exactly <#= i #> parameters.");
 				}
 
 				recordBuilder.EndWriteItem(item);
@@ -325,36 +347,41 @@ namespace PostSharp.Patterns.Diagnostics
 		}
 
 		 /// <summary>
-		/// Encapsulates a semantic message with a <#=i#> number of parameter<#=GetPlural(i)#>. Use the <see cref="SemanticMessageBuilder"/> class to create an instance of this type.
+		/// Encapsulates a semantic message with a <#= i #> number of parameter<#= GetPlural( i ) #>. Use the <see cref="SemanticMessageBuilder"/> class to create an instance of this type.
 		/// </summary>
 		[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
 		[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
-		public readonly struct SemanticMessage<<#=Repeat( "T{0}", i )#>> : IMessage
+		public readonly struct SemanticMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 		{
 			private readonly string messageName;
 			
-			<#=Repeat( "private readonly string name{0}; ", i, "" )#>
-			<#=Repeat( "private readonly T{0} value{0}; ", i, "" )#>
+			<#= Repeat( "private readonly string name{0}; ", i, "" ) #>
+			<#= Repeat( "private readonly T{0} value{0}; ", i, "" ) #>
 
 			#if AGGRESSIVE_INLINING
 			[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
 			#endif
-			internal SemanticMessage( string messageName, <#=Repeat( "string name{0}, T{0} value{0}", i )#> )
+			internal SemanticMessage( string messageName, <#= Repeat( "string name{0}, T{0} value{0}", i ) #> )
 			{
 				this.messageName = messageName;
-				<#=Repeat( "this.name{0} = name{0}; ", i, "" )#>
-				<#=Repeat( "this.value{0} = value{0}; ", i, "" )#>
+				<#= Repeat( "this.name{0} = name{0}; ", i, "" ) #>
+				<#= Repeat( "this.value{0} = value{0}; ", i, "" ) #>
 			}
 
 			void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
 			{
-				recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#=i#>, this.messageName));
+				recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#= i #>, this.messageName));
 
-				   <# for ( int j = 1; j <= i; j++ ) { #>
+				   <#
+        for (var j = 1; j <= i; j++)
+        {
+#>
 
-				recordBuilder.WriteCustomParameter( <#=j-1#>, this.name<#=j#>, this.value<#=j#>, CustomLogParameterOptions.SemanticParameter );
+				recordBuilder.WriteCustomParameter( <#= j - 1 #>, this.name<#= j #>, this.value<#= j #>, CustomLogParameterOptions.SemanticParameter );
 
-				<# } #>
+				<#
+        }
+#>
 
 				recordBuilder.EndWriteItem(item);
 				
@@ -374,65 +401,67 @@ namespace PostSharp.Patterns.Diagnostics
 	{
 		
 		/// <summary>
-        /// Creates a formatted string with <#=i#> parameter<#=GetPlural(i)#>.
+        /// Creates a formatted string with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
         /// <param name="formattingString">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
-<#GenerateXmlDoc(i);#>
+<#
+        GenerateXmlDoc( i );
+#>
 #if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
 #endif
-	    public static FormattedMessage<<#=Repeat( "T{0}", i )#>> Formatted<<#=Repeat( "T{0}", i )#>>(  string formattingString, <#=Repeat( "T{0} arg{0}", i )#> )
+	    public static FormattedMessage<<#= Repeat( "T{0}", i ) #>> Formatted<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
         {
-            return new FormattedMessage<<#=Repeat( "T{0}", i )#>>( formattingString, <#=Repeat( "arg{0}", i )#> );
+            return new FormattedMessage<<#= Repeat( "T{0}", i ) #>>( formattingString, <#= Repeat( "arg{0}", i ) #> );
         }
 	}
 
 	partial class SemanticMessageBuilder
 	{
 		/// <summary>
-        /// Create a semantic message with <#=i#> parameter<#=GetPlural(i)#> (using tuples).
+        /// Create a semantic message with <#= i #> parameter<#= GetPlural( i ) #> (using tuples).
         /// </summary>
         /// <param name="name">Name of the message.</param>
 <#
-for ( int j = 1; j <= i; j++ )
-	{
-	#>
-		/// <typeparam name="T<#=j#>">Type of the <#=GetOrdinal(j)#> parameter value.</typeparam>
-		/// <param name="parameterName<#= j #>">Name of the <#=GetOrdinal(j)#> parameter.</param>
-		/// <param name="parameterValue<#= j #>">Name of the <#=GetOrdinal(j)#> parameter.</param>
+        for (var j = 1; j <= i; j++)
+        {
+#>
+		/// <typeparam name="T<#= j #>">Type of the <#= GetOrdinal( j ) #> parameter value.</typeparam>
+		/// <param name="parameterName<#= j #>">Name of the <#= GetOrdinal( j ) #> parameter.</param>
+		/// <param name="parameterValue<#= j #>">Name of the <#= GetOrdinal( j ) #> parameter.</param>
 	<#
-	}
+        }
 #>
 #if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
 #endif
-	    public static  SemanticMessage<<#=Repeat( "T{0}", i )#>> Semantic<<#=Repeat( "T{0}", i )#>>(  string name, <#=Repeat( "string parameterName{0}, T{0} parameterValue{0}", i )#> )
+	    public static  SemanticMessage<<#= Repeat( "T{0}", i ) #>> Semantic<<#= Repeat( "T{0}", i ) #>>(  string name, <#= Repeat( "string parameterName{0}, T{0} parameterValue{0}", i ) #> )
         {
-            return new SemanticMessage<<#=Repeat( "T{0}", i )#>>( name, <#=Repeat( "parameterName{0}, parameterValue{0}", i )#> );
+            return new SemanticMessage<<#= Repeat( "T{0}", i ) #>>( name, <#= Repeat( "parameterName{0}, parameterValue{0}", i ) #> );
         }
 
 	#if VALUE_TUPLE
 		
 		
 		/// <summary>
-        /// Create a semantic message with <#=i#> parameter<#=GetPlural(i)#>.
+        /// Create a semantic message with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
         /// <param name="name">Name of the message.</param>
 <#
-for ( int j = 1; j <= i; j++ )
-	{
-	#>
-		/// <typeparam name="T<#=j#>">Type of the <#=GetOrdinal(j)#> parameter value.</typeparam>
-		/// <param name="parameter<#= j #>">Name and value of the <#=GetOrdinal(j)#> parameter wrapped as a tuple.</param>
+        for (var j = 1; j <= i; j++)
+        {
+#>
+		/// <typeparam name="T<#= j #>">Type of the <#= GetOrdinal( j ) #> parameter value.</typeparam>
+		/// <param name="parameter<#= j #>">Name and value of the <#= GetOrdinal( j ) #> parameter wrapped as a tuple.</param>
 	<#
-	}
+        }
 #>
 #if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
 #endif
-	    public static  SemanticMessage<<#=Repeat( "T{0}", i )#>> Semantic<<#=Repeat( "T{0}", i )#>>(  string name, <#=Repeat( "in (string Name,T{0} Value) parameter{0}", i )#> )
+	    public static  SemanticMessage<<#= Repeat( "T{0}", i ) #>> Semantic<<#= Repeat( "T{0}", i ) #>>(  string name, <#= Repeat( "in (string Name,T{0} Value) parameter{0}", i ) #> )
         {
-            return new SemanticMessage<<#=Repeat( "T{0}", i )#>>( name, <#=Repeat( "parameter{0}.Name, parameter{0}.Value", i )#> );
+            return new SemanticMessage<<#= Repeat( "T{0}", i ) #>>( name, <#= Repeat( "parameter{0}.Name, parameter{0}.Value", i ) #> );
         }
 	
 
@@ -442,8 +471,8 @@ for ( int j = 1; j <= i; j++ )
 
 
 	<#
-	}
-	#>
+    }
+#>
 
 
 
@@ -454,55 +483,58 @@ for ( int j = 1; j <= i; j++ )
 
 
 <#+
-static string Repeat( string format, int count )
-{
-	string s = "";
-	for ( int i = 1; i <= count; i++ )
-	{
-		if ( i > 1 ) s += ", ";
-		s += string.Format( format, i );
-	}
+    private static string Repeat( string format, int count )
+    {
+        var s = "";
+        for (var i = 1; i <= count; i++)
+        {
+            if (i > 1) s += ", ";
+            s += string.Format( format, i );
+        }
 
-	return s;
-}
+        return s;
+    }
 
-static string Repeat( string format, int count, string separator )
-{
-	string s = "";
-	for ( int i = 1; i <= count; i++ )
-	{
-		if ( i > 1 ) s += separator;
-		s += string.Format( format, i );
-	}
+    private static string Repeat( string format, int count, string separator )
+    {
+        var s = "";
+        for (var i = 1; i <= count; i++)
+        {
+            if (i > 1) s += separator;
+            s += string.Format( format, i );
+        }
 
-	return s;
-}
+        return s;
+    }
 
-static string GetPlural( int count )
-{
-	return count > 1 ? "s" : "";
-}
+    private static string GetPlural( int count )
+    {
+        return count > 1 ? "s" : "";
+    }
 
-static string GetOrdinal(int count)
-{
-   switch ( count )
-   {
-	 case 1: return "first";
-	 case 2: return "second";
-	 case 3: return "third";
-	 default: return count + "-th";
-   }
-}
+    private static string GetOrdinal( int count )
+    {
+        switch (count)
+        {
+            case 1:
+                return "first";
+            case 2:
+                return "second";
+            case 3:
+                return "third";
+            default:
+                return count + "-th";
+        }
+    }
 
-void GenerateXmlDoc( int count )
-{
-	for ( int i = 1; i <= count; i++ )
-	{
-	#>
-		/// <typeparam name="T<#=i#>">Type of the <#=GetOrdinal(i)#> parameter.</typeparam>
-		/// <param name="arg<#= i #>">Value of the <#=GetOrdinal(i)#> parameter.</param>
+    private void GenerateXmlDoc( int count )
+    {
+        for (var i = 1; i <= count; i++)
+        {
+#>
+		/// <typeparam name="T<#= i #>">Type of the <#= GetOrdinal( i ) #> parameter.</typeparam>
+		/// <param name="arg<#= i #>">Value of the <#= GetOrdinal( i ) #> parameter.</param>
 	<#+
-	}
-}
-
+        }
+    }
 #>

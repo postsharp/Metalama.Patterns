@@ -7,10 +7,10 @@ namespace Flashtrace
     internal sealed class ExplicitCrossPackageInternalAttribute : Attribute { }
 
     // TODO: Resolve usages, remove.
-    [AttributeUsage( AttributeTargets.All )] 
+    [AttributeUsage( AttributeTargets.All )]
     internal sealed class InternalImplementAttribute : Attribute { }
 
     // TODO: Resolve usages, remove.
-    [AttributeUsage( AttributeTargets.All )] 
+    [AttributeUsage( AttributeTargets.All )]
     internal sealed class RequiredAttribute : Attribute { }
 }

@@ -11,11 +11,13 @@ namespace Flashtrace.Custom
 {
 	public partial interface ILogger
 	{
-	<# for ( int i = 1; i <= 10; i++ )
-	{	#>
+	<#
+    for (var i = 1; i <= 10; i++)
+    {
+#>
 
 		/// <summary>
-        /// Writes a custom log record with <#=i#> parameter<#=GetPlural(i)#>.
+        /// Writes a custom log record with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
 		/// <param name="context">The context for which the message has to be written.</param>
         /// <param name="level">The severity of the record (e.g. <see cref="LogLevel.Info"/> or <see cref="LogLevel.Warning"/>).</param>
@@ -23,13 +25,15 @@ namespace Flashtrace.Custom
         /// <param name="recordKind">Kind of record.</param>
         /// <param name="exception">The <see cref="Exception"/> associated with the record, or <c>null</c>.</param>
         /// <param name="recordInfo">Information about the caller source code.</param>
-		<#GenerateXmlDoc(i);#>
-	   void Write<<#=Repeat( "T{0}", i )#>>( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, <#=Repeat( "T{0} arg{0}", i )#>, Exception exception, ref CallerInfo recordInfo  );
+		<#
+        GenerateXmlDoc( i );
+#>
+	   void Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception, ref CallerInfo recordInfo  );
 
 
 	<#
-	}
-	 #>
+    }
+#>
 	
 	
 	}
@@ -37,32 +41,40 @@ namespace Flashtrace.Custom
 	
 	partial class NullLogger
 	{
-<# for ( int i = 1; i <= 10; i++ )
-	{	#>
+<#
+    for (var i = 1; i <= 10; i++)
+    {
+#>
 
-	    void ILogger.Write<<#=Repeat( "T{0}", i )#>>( ILoggingContext context, LogLevel level, LogRecordKind logRecordKind, string text, <#=Repeat( "T{0} arg{0}", i )#>, Exception exception, ref CallerInfo callerInfo )
+	    void ILogger.Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind logRecordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception, ref CallerInfo callerInfo )
         {
              EmitWarning( level );
         }
 
-		<# }	#>
+		<#
+    }
+#>
 	}
 
 
 	partial class LegacySourceLogger
 	{
-<# for ( int i = 1; i <= 10; i++ )
-	{	#>
+<#
+    for (var i = 1; i <= 10; i++)
+    {
+#>
 
-	    void ILogger.Write<<#=Repeat( "T{0}", i )#>>( ILoggingContext context, LogLevel level, LogRecordKind logRecordKind, string text, <#=Repeat( "T{0} arg{0}", i )#>, Exception exception,  ref CallerInfo callerInfo )
+	    void ILogger.Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind logRecordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception,  ref CallerInfo callerInfo )
         {
 			if ( this.IsEnabled( level ) )
 			{
-              this.WriteFormatted( context, level, logRecordKind, text, new object[] {  <#=Repeat( "arg{0}", i )#> }, exception );
+              this.WriteFormatted( context, level, logRecordKind, text, new object[] {  <#= Repeat( "arg{0}", i ) #> }, exception );
 			}
         }
 
-		<# }	#>
+		<#
+    }
+#>
 	}
 
     
@@ -70,32 +82,31 @@ namespace Flashtrace.Custom
 
 
 <#+
-string Repeat( string format, int count )
-{
-	string s = "";
-	for ( int i = 1; i <= count; i++ )
-	{
-		if ( i > 1 ) s += ", ";
-		s += string.Format( format, i );
-	}
+    private string Repeat( string format, int count )
+    {
+        var s = "";
+        for (var i = 1; i <= count; i++)
+        {
+            if (i > 1) s += ", ";
+            s += string.Format( format, i );
+        }
 
-	return s;
-}
+        return s;
+    }
 
-string GetPlural( int count )
-{
-	return count > 1 ? "s" : "";
-}
+    private string GetPlural( int count )
+    {
+        return count > 1 ? "s" : "";
+    }
 
-void GenerateXmlDoc( int count )
-{
-	for ( int i = 1; i <= count; i++ )
-	{
-	#>
-		/// <typeparam name="T<#=i#>">Type of the <#=i#>-th parameter.</typeparam>
-		/// <param name="arg<#= i #>">Value of the <#=i#>-th parameter.</param>
+    private void GenerateXmlDoc( int count )
+    {
+        for (var i = 1; i <= count; i++)
+        {
+#>
+		/// <typeparam name="T<#= i #>">Type of the <#= i #>-th parameter.</typeparam>
+		/// <param name="arg<#= i #>">Value of the <#= i #>-th parameter.</param>
 	<#+
-	}
-}
-
+        }
+    }
 #>

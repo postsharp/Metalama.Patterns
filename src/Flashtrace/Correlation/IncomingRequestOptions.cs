@@ -1,8 +1,8 @@
-﻿namespace Flashtrace.Correlation
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+namespace Flashtrace.Correlation
 {
-
 #pragma warning disable CA1815 // Override equals and operator equals on value types
-
 
     /// <summary>
     /// Logging options sent by the caller in a distributed logging transaction.
@@ -19,7 +19,6 @@
         /// to the <c>sampled</c> flag of the W3C Trace Context specification
         /// (https://www.w3.org/TR/trace-context/#sampled-flag). 
         /// </param>
-
         public IncomingRequestOptions( bool isParentSampled )
         {
             this.isParentSampled = isParentSampled ? (byte) 1 : (byte) 0;

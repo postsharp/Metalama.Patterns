@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace
 {
@@ -7,10 +6,9 @@ namespace Flashtrace
     /// Specifies the severity of a logged message.
     /// </summary>
 #pragma warning disable CA1028 // Enum Storage should be Int32
-    public enum LogLevel 
+    public enum LogLevel
 #pragma warning restore CA1028 // Enum Storage should be Int32
     {
-       
         /// <summary>
         /// No message should be logged.
         /// </summary>
@@ -52,9 +50,9 @@ namespace Flashtrace
     internal static class LogLevelExtensions
     {
         public const LogLevel Force = (LogLevel) 0x10;
-        
+
         [ExplicitCrossPackageInternal]
-        internal static LogLevel WithForce(this LogLevel level) => level | Force;
+        internal static LogLevel WithForce( this LogLevel level ) => level | Force;
 
         [ExplicitCrossPackageInternal]
         internal static LogLevel WithoutForce( this LogLevel level ) => level & ~Force;
@@ -65,6 +63,4 @@ namespace Flashtrace
         [ExplicitCrossPackageInternal]
         internal static LogLevel CopyForce( this LogLevel source, LogLevel other ) => source.HasForce() ? other.WithForce() : other.WithoutForce();
     }
-
-
 }

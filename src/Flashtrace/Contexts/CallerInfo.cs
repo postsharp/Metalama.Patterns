@@ -1,7 +1,7 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Flashtrace.Contexts
@@ -9,10 +9,9 @@ namespace Flashtrace.Contexts
     /// <summary>
     /// Represents information about the caller of the <see cref="Logger"/> class.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes")]
+    [SuppressMessage( "Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes" )]
     public struct CallerInfo
     {
-
         private Type sourceType;
 
         /// <summary>
@@ -27,9 +26,9 @@ namespace Flashtrace.Contexts
         [DebuggerStepThrough]
         public CallerInfo( RuntimeTypeHandle sourceTypeToken, string methodName, string file, int line, int column, CallerAttributes attributes )
         {
-            this.SourceTypeToken= sourceTypeToken;
+            this.SourceTypeToken = sourceTypeToken;
             this.MethodName = methodName;
-            this.SourceLineInfo = new SourceLineInfo(file, line, column);
+            this.SourceLineInfo = new SourceLineInfo( file, line, column );
             this.sourceType = null;
             this.Attributes = attributes;
         }
@@ -44,12 +43,12 @@ namespace Flashtrace.Contexts
         /// <param name="column">Column in <paramref name="file"/> of the caller.</param>
         /// <param name="attributes">Attributes.</param>
         [DebuggerStepThrough]
-        public CallerInfo(Type sourceType, string methodName, string file, int line, int column, CallerAttributes attributes )
+        public CallerInfo( Type sourceType, string methodName, string file, int line, int column, CallerAttributes attributes )
         {
             this.sourceType = sourceType;
             this.MethodName = methodName;
-            this.SourceTypeToken = default(RuntimeTypeHandle);
-            this.SourceLineInfo = new SourceLineInfo(file, line, column);
+            this.SourceTypeToken = default;
+            this.SourceLineInfo = new SourceLineInfo( file, line, column );
             this.Attributes = attributes;
         }
 
@@ -94,9 +93,6 @@ namespace Flashtrace.Contexts
         /// </summary>
         public SourceLineInfo SourceLineInfo { get; private set; }
 
-        
-
-
         /// <summary>
         /// Determines whether the current <see cref="CallerInfo"/> is null.
         /// </summary>
@@ -106,25 +102,25 @@ namespace Flashtrace.Contexts
         internal static CallerInfo Null;
 
         [ExplicitCrossPackageInternal]
-        internal static CallerInfo Async => new CallerInfo { Attributes = CallerAttributes.IsAsync };
-
-
+        internal static CallerInfo Async => new() { Attributes = CallerAttributes.IsAsync };
 
         /// <inheritdoc />
         public override string ToString()
         {
-            if ( this.IsNull ) return "null";
+            if ( this.IsNull )
+            {
+                return "null";
+            }
 
-            if (this.SourceLineInfo.IsNull)
+            if ( this.SourceLineInfo.IsNull )
+            {
                 return this.SourceType.FullName + "." + this.MethodName;
+            }
             else
+            {
                 return this.SourceType.FullName + "." + this.MethodName + " at " + this.SourceLineInfo.File + ", " + this.SourceLineInfo.Line;
-            
-
+            }
         }
-
-
-
 
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
@@ -134,14 +130,14 @@ namespace Flashtrace.Contexts
         /// <returns> A <see cref="CallerInfo"/> for the caller (skipping the specified number of stack frames), or <c>default</c> if the platform does not support the <see cref="StackFrame"/> class.</returns>
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 #pragma warning disable CA1801 // Unused parameter.
-        public static CallerInfo GetDynamic(int skipFrames)
+        public static CallerInfo GetDynamic( int skipFrames )
 #pragma warning restore CA1801
         {
-            for ( int i = skipFrames + 1;  ; i++ )
+            for ( var i = skipFrames + 1;; i++ )
             {
-                StackFrame frame = new StackFrame( i, true);
+                var frame = new StackFrame( i, true );
 
-                MethodBase method = frame.GetMethod();
+                var method = frame.GetMethod();
 
                 if ( method == null )
                 {
@@ -149,7 +145,7 @@ namespace Flashtrace.Contexts
                     return default;
                 }
 
-                if (method.DeclaringType == null)
+                if ( method.DeclaringType == null )
                 {
                     continue;
                 }
@@ -163,7 +159,13 @@ namespace Flashtrace.Contexts
                 }
 #endif
 
-                return new CallerInfo(method.DeclaringType, method.Name, frame.GetFileName(), frame.GetFileLineNumber(), frame.GetFileColumnNumber(), CallerAttributes.None);
+                return new CallerInfo(
+                    method.DeclaringType,
+                    method.Name,
+                    frame.GetFileName(),
+                    frame.GetFileLineNumber(),
+                    frame.GetFileColumnNumber(),
+                    CallerAttributes.None );
             }
         }
     }

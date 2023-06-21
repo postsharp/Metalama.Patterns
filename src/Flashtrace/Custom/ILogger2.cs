@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
 using System.Diagnostics.CodeAnalysis;
@@ -14,21 +13,20 @@ namespace Flashtrace.Custom
         /// <summary>
         /// Gets the <see cref="ILoggerFactory"/>, which allows to create new instances of the logger. This is used for instance by <see cref="LogSource.ForType(System.Type)"/>.
         /// </summary>
-        [Obsolete("Use ILogger3.Factory")]
+        [Obsolete( "Use ILogger3.Factory" )]
         ILoggerFactory2 Factory { get; }
 
         /// <summary>
         /// Gets the logger for the current context.
         /// </summary>
         /// <returns></returns>
-        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Expensive to evaluate.")]
+        [SuppressMessage( "Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Expensive to evaluate." )]
         IContextLocalLogger GetContextLocalLogger();
-        
+
         /// <summary>
         /// Gets the current <see cref="ILoggingContext"/>.
         /// </summary>
         ILoggingContext CurrentContext { get; }
-        
     }
 
     /// <summary>
@@ -50,7 +48,4 @@ namespace Flashtrace.Custom
         /// is enabled for the given <paramref name="level"/>.</returns>
         (IContextLocalLogger logger, bool isEnabled) GetContextLocalLogger( LogLevel level );
     }
-     
 }
-
-

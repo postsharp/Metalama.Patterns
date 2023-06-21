@@ -1,17 +1,15 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Custom.Messages;
 
 namespace Flashtrace
 {
-        /// <summary>
+    /// <summary>
     /// Creates semantic messages composed of a message name and a list of properties given as name-value pairs. These messages are ideal for machine analysis.
     /// For more succinct code, consider including the <c>using static PostSharp.Patterns.Diagnostics.MessageBuilder</c> statement.
     /// </summary>
     public static partial class SemanticMessageBuilder
-    { 
-
+    {
         /// <summary>
         /// Creates a semantic message with an arbitrary number of parameters.
         /// </summary>
@@ -45,8 +43,6 @@ namespace Flashtrace
 #if AGGRESSIVE_INLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
 #endif
-        public static SemanticMessage Semantic(string messageName) => new SemanticMessage(messageName);
-
+        public static SemanticMessage Semantic( string messageName ) => new( messageName );
     }
-
 }

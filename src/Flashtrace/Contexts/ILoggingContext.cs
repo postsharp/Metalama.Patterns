@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Flashtrace.Contexts
 {
@@ -9,7 +8,6 @@ namespace Flashtrace.Contexts
     [InternalImplement]
     public interface ILoggingContext : IDisposable
     {
-
         /// <summary>
         /// Determines whether the context is currently disposed (contexts can be recycled, therefore the
         /// disposed state is not the final state).
@@ -25,7 +23,7 @@ namespace Flashtrace.Contexts
         /// Determines whether the context represents an <c>async</c> method or a custom activity in an <c>async</c> method.
         /// </summary>
         bool IsAsync { get; }
-        
+
         /// <summary>
         /// Gets a cross-process globally unique identifier for the current context.
         /// </summary>
@@ -55,20 +53,13 @@ namespace Flashtrace.Contexts
         /// </remarks>
         [Obsolete( "Use LoggingContext.VisitProperties." )]
         void ForEachProperty<T>( LoggingPropertyVisitor<T> visitor, ref T state, bool includeAncestors = true );
-
     }
-    
+
     /// <summary>
     /// Delegate invoked by the <see cref="ILoggingContext.ForEachProperty{T}(LoggingPropertyVisitor{T}, ref T, bool)"/> method.
     /// </summary>
     /// <param name="property">The visited <see cref="LoggingProperty"/>.</param>
     /// <param name="value">The evaluated value of the property. Will not be <c>null</c> because null properties are ignored. </param>
     /// <param name="state">The value passed to the <see cref="ILoggingContext.ForEachProperty{T}(LoggingPropertyVisitor{T}, ref T, bool)"/> method.</param>
-    public delegate void LoggingPropertyVisitor<T>(LoggingProperty property, object value, ref T state);
-
-
-
-   
+    public delegate void LoggingPropertyVisitor<T>( LoggingProperty property, object value, ref T state );
 }
-
-

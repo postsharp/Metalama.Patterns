@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
 using Flashtrace.Custom.Messages;
@@ -7,7 +6,6 @@ using System.ComponentModel;
 
 namespace Flashtrace
 {
-    
     /// <summary>
     /// Exposes the public API of the generic value type <see cref="LogActivity{TActivityDescription}"/>.
     /// </summary>
@@ -22,22 +20,22 @@ namespace Flashtrace
         /// Closes the activity with success and sets no other outcome message than <c>Succeeded</c>.
         /// </summary>
         /// <param name="options">Options.</param>
-        void SetSuccess(in CloseActivityOptions options = default);
+        void SetSuccess( in CloseActivityOptions options = default );
 
         /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void SetSuccess(in CloseActivityOptions options, ref CallerInfo callerInfo);
+        [EditorBrowsable( EditorBrowsableState.Never )]
+        void SetSuccess( in CloseActivityOptions options, ref CallerInfo callerInfo );
 
         /// <summary>
         /// Closes the activity with success and sets includes a result in the outcome message.
         /// </summary>
         /// <param name="result">The result of the activity.</param>
         /// <param name="options">Options.</param>
-        void SetResult<TResult>(TResult result, in CloseActivityOptions options = default);
+        void SetResult<TResult>( TResult result, in CloseActivityOptions options = default );
 
         /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void SetResult<TResult>(TResult result, in CloseActivityOptions options, ref CallerInfo callerInfo);
+        [EditorBrowsable( EditorBrowsableState.Never )]
+        void SetResult<TResult>( TResult result, in CloseActivityOptions options, ref CallerInfo callerInfo );
 
         /// <summary>
         /// Closes the activity and sets its outcome.
@@ -51,8 +49,8 @@ namespace Flashtrace
             where TMessage : IMessage;
 
         /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo)
+        [EditorBrowsable( EditorBrowsableState.Never )]
+        void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo )
             where TMessage : IMessage;
 
         /// <summary>
@@ -60,10 +58,10 @@ namespace Flashtrace
         /// </summary>
         /// <param name="exception">An <see cref="System.Exception"/>.</param>
         /// <param name="options">Options.</param>
-        void SetException(Exception exception, in CloseActivityOptions options = default);
+        void SetException( Exception exception, in CloseActivityOptions options = default );
 
         /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable( EditorBrowsableState.Never )]
         void SetException( Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo );
 
 #pragma warning disable CA1716 // Identifiers should not match keywords
@@ -74,8 +72,8 @@ namespace Flashtrace
         void Resume();
 
         /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void Resume(ref CallerInfo callerInfo);
+        [EditorBrowsable( EditorBrowsableState.Never )]
+        void Resume( ref CallerInfo callerInfo );
 #pragma warning restore CA1716 // Identifiers should not match keywords
 
         /// <summary>
@@ -86,7 +84,7 @@ namespace Flashtrace
         void Suspend();
 
         /// <excludeOverload />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void Suspend(ref CallerInfo callerInfo);
+        [EditorBrowsable( EditorBrowsableState.Never )]
+        void Suspend( ref CallerInfo callerInfo );
     }
 }

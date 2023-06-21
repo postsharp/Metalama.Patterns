@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
@@ -7,38 +6,54 @@ using System.Reflection;
 
 namespace Flashtrace.Custom
 {
-    
     internal static class AugmentedLogEventData
     {
-        private static readonly ConcurrentDictionary<(Type, Type), object> delegateCache = new ConcurrentDictionary<(Type, Type), object>();
+        private static readonly ConcurrentDictionary<(Type, Type), object> delegateCache = new();
 
         public static LogEventData Augment<T>( in LogEventData augmented, string propertyName, T propertyValue, in LoggingPropertyOptions options )
         {
-            Type augmentedType = augmented.Metadata?.ExpressionModelType ?? typeof( object );
+            var augmentedType = augmented.Metadata?.ExpressionModelType ?? typeof(object);
 
-            CreateMetaDataDelegate<T> factory = (CreateMetaDataDelegate<T>) delegateCache.GetOrAdd( (typeof( T ), augmentedType), t => CreateFactory<T>( t.Item2 ) );
+            CreateMetaDataDelegate<T> factory = (CreateMetaDataDelegate<T>) delegateCache.GetOrAdd(
+                (typeof(T), augmentedType),
+                t => CreateFactory<T>( t.Item2 ) );
 
-            LogEventMetadata instance  = factory( augmented, propertyName, propertyValue, options );
+            var instance = factory( augmented, propertyName, propertyValue, options );
+
             return LogEventData.Create( instance, instance );
         }
 
         private static CreateMetaDataDelegate<TValue> CreateFactory<TValue>( Type augmentedType )
         {
-            ParameterExpression augmentedParameter = Expression.Parameter( typeof( LogEventData ).MakeByRefType() );
-            ParameterExpression propertyNameParameter = Expression.Parameter( typeof( string ) );
-            ParameterExpression propertyValueParameter = Expression.Parameter( typeof( TValue ) );
-            ParameterExpression optionsParameter = Expression.Parameter( typeof( LoggingPropertyOptions ).MakeByRefType() );
+            var augmentedParameter = Expression.Parameter( typeof(LogEventData).MakeByRefType() );
+            var propertyNameParameter = Expression.Parameter( typeof(string) );
+            var propertyValueParameter = Expression.Parameter( typeof(TValue) );
+            var optionsParameter = Expression.Parameter( typeof(LoggingPropertyOptions).MakeByRefType() );
 
-            Type genericType = typeof( MetaData<,> ).MakeGenericType( typeof( TValue ), augmentedType );
-            Expression newExpression = Expression.New( genericType.GetConstructors( BindingFlags.Instance | BindingFlags.Public)[0], augmentedParameter, propertyNameParameter, propertyValueParameter, optionsParameter );
-            Expression<CreateMetaDataDelegate<TValue>> lambda = Expression.Lambda<CreateMetaDataDelegate<TValue>>( newExpression, augmentedParameter, propertyNameParameter, propertyValueParameter, optionsParameter );
+            var genericType = typeof(MetaData<,>).MakeGenericType( typeof(TValue), augmentedType );
+
+            Expression newExpression = Expression.New(
+                genericType.GetConstructors( BindingFlags.Instance | BindingFlags.Public )[0],
+                augmentedParameter,
+                propertyNameParameter,
+                propertyValueParameter,
+                optionsParameter );
+
+            Expression<CreateMetaDataDelegate<TValue>> lambda = Expression.Lambda<CreateMetaDataDelegate<TValue>>(
+                newExpression,
+                augmentedParameter,
+                propertyNameParameter,
+                propertyValueParameter,
+                optionsParameter );
+
             return lambda.Compile();
         }
 
-
-        private delegate LogEventMetadata CreateMetaDataDelegate<TValue>( in LogEventData augmented, string propertyName, TValue propertyValue, in LoggingPropertyOptions propertyOptions );
-
-
+        private delegate LogEventMetadata CreateMetaDataDelegate<TValue>(
+            in LogEventData augmented,
+            string propertyName,
+            TValue propertyValue,
+            in LoggingPropertyOptions propertyOptions );
 
         // It's beneficial to have the data and metadata in the same object because we need an instance of both anyway.
         private class MetaData<TValue, TAugmented> : LogEventMetadata<TAugmented>
@@ -60,7 +75,11 @@ namespace Flashtrace.Custom
                 this.PropertyOptions = propertyOptions;
             }
 
-            public override void VisitProperties<TVisitorState>( object data, ILoggingPropertyVisitor<TVisitorState> visitor, ref TVisitorState visitorState, in LoggingPropertyVisitorOptions visitorOptions = default )
+            public override void VisitProperties<TVisitorState>(
+                object data,
+                ILoggingPropertyVisitor<TVisitorState> visitor,
+                ref TVisitorState visitorState,
+                in LoggingPropertyVisitorOptions visitorOptions = default )
             {
                 if ( !visitorOptions.OnlyInherited || this.PropertyOptions.IsInherited )
                 {
@@ -73,13 +92,19 @@ namespace Flashtrace.Custom
             public override bool HasInheritedProperty( object data )
             {
                 if ( !ReferenceEquals( data, this ) )
+                {
                     throw new FlashtraceAssertionFailedException();
+                }
 
                 if ( this.PropertyOptions.IsInherited )
+                {
                     return true;
+                }
 
                 if ( this.Augmented.Data != null )
+                {
                     return this.Augmented.Metadata.HasInheritedProperty( this.Augmented.Data );
+                }
 
                 return false;
             }
@@ -87,17 +112,12 @@ namespace Flashtrace.Custom
             public override TAugmented GetExpressionModel( object data )
             {
                 if ( !ReferenceEquals( data, this ) )
+                {
                     throw new FlashtraceAssertionFailedException();
+                }
 
                 return this.Augmented.GetExpressionModel<TAugmented>();
             }
         }
-
-
     }
-
-    
-
 }
-
-
