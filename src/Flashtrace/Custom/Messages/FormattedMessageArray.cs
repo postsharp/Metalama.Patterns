@@ -1,13 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using PostSharp.Patterns.Diagnostics.Custom;
 
-namespace PostSharp.Patterns.Diagnostics.Custom.Messages
+namespace Flashtrace.Custom.Messages
 {
     /// <summary>
     /// Encapsulates a formatted message with an arbitrary number of parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.

@@ -2,12 +2,7 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 #define TRACE // Because TraceEvent has [Conditional("TRACE")]
 
-
-using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
 #if SYSTEM_TRACE
 

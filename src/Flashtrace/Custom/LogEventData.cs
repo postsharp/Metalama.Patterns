@@ -1,12 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Aspects.Advices;
-using PostSharp.Patterns.Threading;
-using System;
-using System.Collections.Generic;
-
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
     /// <summary>
     /// Specifies the properties of a log event (such as a message, an activity opening or an activity closing).

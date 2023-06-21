@@ -1,15 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Diagnostics;
+using Flashtrace.Contexts;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
-using PostSharp.Patterns.Diagnostics.Contexts;
-using PostSharp.Patterns.Formatters;
 
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
     /// <summary>
     /// A base class for implementations of <see cref="ILogger"/> that cannot depend on the <c>PostSharp.Patterns.Diagnostics</c> package.

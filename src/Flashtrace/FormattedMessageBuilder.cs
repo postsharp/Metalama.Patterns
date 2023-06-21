@@ -1,10 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System.Runtime.CompilerServices;
-using PostSharp.Patterns.Diagnostics.Custom.Messages;
+using Flashtrace.Custom.Messages;
 
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
     /// <summary>
     /// Creates messages based on a human-readable formatted string. These messages are suitable for structured logging are not optimal for machine analysis.

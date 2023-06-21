@@ -1,23 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Extensibility;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Diagnostics.Contexts;
-using PostSharp.Patterns.Diagnostics.Custom.Messages;
-using System;
-using System.Collections.Generic;
+using Flashtrace.Contexts;
+using Flashtrace.Custom.Messages;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
     /// <summary>
-    /// A facade to a <see cref="PostSharp.Patterns.Diagnostics.LogSource"/> constrained to a specific <see cref="LogLevel"/>.
-    /// Instances of the <see cref="LogLevelSource"/> class are exposed as properties of the <see cref="PostSharp.Patterns.Diagnostics.LogSource"/>
-    /// class, e.g. <see cref="Diagnostics.LogSource.Debug"/> or <see cref="Diagnostics.LogSource.Error"/>.
+    /// A facade to a <see cref="Flashtrace.LogSource"/> constrained to a specific <see cref="LogLevel"/>.
+    /// Instances of the <see cref="LogLevelSource"/> class are exposed as properties of the <see cref="Flashtrace.LogSource"/>
+    /// class, e.g. <see cref="Flashtrace.LogSource.Debug"/> or <see cref="Flashtrace.LogSource.Error"/>.
     /// </summary>
     [RequirePostSharp("PostSharp.Patterns.Common.Weaver", "AddCallerInfoTask", AnyTypeReference = true)]
     [RequirePostSharp( typeof( AwaitInstrumentationAspectProvider ), AnyTypeReference = true )]

@@ -1,16 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Aspects;
-using PostSharp.Extensibility;
-using PostSharp.Patterns.Diagnostics.Custom;
-using PostSharp.Reflection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Flashtrace.Custom;
 using System.Reflection;
 
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
     internal class AwaitInstrumentationAspectProvider : IAspectProvider
     {

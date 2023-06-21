@@ -1,11 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
     /// <summary>
     /// Parses the formatting string for custom messages of the <see cref="Logger"/> and <see cref="LogActivity"/> classes.

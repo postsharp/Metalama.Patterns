@@ -3,12 +3,8 @@
 
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using PostSharp.Aspects;
-using PostSharp.Aspects.Advices;
-using PostSharp.Aspects.Dependencies;
-using PostSharp.Serialization;
 
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
     /// <exclude/>
     [EditorBrowsable(EditorBrowsableState.Never)]

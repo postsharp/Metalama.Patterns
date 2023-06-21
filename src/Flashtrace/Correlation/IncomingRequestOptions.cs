@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PostSharp.Patterns.Diagnostics.Correlation
+﻿namespace Flashtrace.Correlation
 {
 
 #pragma warning disable CA1815 // Override equals and operator equals on value types

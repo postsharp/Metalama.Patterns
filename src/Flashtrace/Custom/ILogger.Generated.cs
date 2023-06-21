@@ -5,15 +5,9 @@
 // To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" ILogger.Generated.tt
 // The transformation is not automatic because we are in a shared project.
 
+using Flashtrace.Contexts;
 
-
-using System;
-using System.ComponentModel;
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Patterns.Diagnostics.Contexts;
-
-
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
 	public partial interface ILogger
 	{

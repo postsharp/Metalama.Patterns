@@ -1,11 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
 #if SYSTEM_TRACE
     internal class TraceSourceLoggerFactory : ILoggerFactory, ILoggerFactoryProvider, ILoggerFactoryProvider3

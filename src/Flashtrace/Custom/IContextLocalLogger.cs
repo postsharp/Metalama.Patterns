@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Patterns.Diagnostics.Contexts;
+using Flashtrace.Contexts;
 
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
     /// <summary>
     /// Abstraction of custom logging methods where the contact has already been resolved.
@@ -11,7 +11,7 @@ namespace PostSharp.Patterns.Diagnostics.Custom
     public interface IContextLocalLogger : ILoggerExceptionHandler
     {  
         /// <summary>
-        /// Determines whether logging is enabled for a given <see cref="PostSharp.Patterns.Diagnostics.LogLevel"/>.
+        /// Determines whether logging is enabled for a given <see cref="LogLevel"/>.
         /// </summary>
         /// <param name="level">A record level (or severity).</param>
         /// <returns><c>true</c> if logging is enabled for <paramref name="level"/>, otherwise <c>false</c>.</returns>

@@ -1,10 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Diagnostics;
 
-namespace PostSharp.Patterns.Diagnostics.Contexts
+namespace Flashtrace.Contexts
 {
     /// <summary>
     /// Represents a position in a file of source code.

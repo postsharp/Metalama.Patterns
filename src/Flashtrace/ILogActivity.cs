@@ -1,12 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using Flashtrace.Contexts;
+using Flashtrace.Custom.Messages;
 using System.ComponentModel;
-using PostSharp.Patterns.Diagnostics.Contexts;
-using PostSharp.Patterns.Diagnostics.Custom.Messages;
 
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
     
     /// <summary>
@@ -45,7 +44,7 @@ namespace PostSharp.Patterns.Diagnostics
         /// </summary>
         /// <typeparam name="TMessage">Type of the <paramref name="message"/> parameter.</typeparam>
         /// <param name="level">Level of the outcome message.</param>
-        /// <param name="message">The description of the activity outcome, typically created using the <see cref="PostSharp.Patterns.Diagnostics.SemanticMessageBuilder"/> or <see cref="PostSharp.Patterns.Diagnostics.FormattedMessageBuilder"/> class.</param>
+        /// <param name="message">The description of the activity outcome, typically created using the <see cref="SemanticMessageBuilder"/> or <see cref="FormattedMessageBuilder"/> class.</param>
         /// <param name="exception">An optional <see cref="System.Exception"/>.</param>
         /// <param name="options">Options.</param>
         void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception exception = null, in CloseActivityOptions options = default )
@@ -69,8 +68,8 @@ namespace PostSharp.Patterns.Diagnostics
 
 #pragma warning disable CA1716 // Identifiers should not match keywords
         /// <summary>
-        /// Resumes the current async activity after it has been suspended by a call to <see cref="PostSharp.Patterns.Diagnostics.LogActivity{TActivityDescription}.Suspend()"/>. There is typically no need
-        /// to invoke this method in user code because all async methods that use the <see cref="PostSharp.Patterns.Diagnostics.Logger"/> class are automatically instrumented.
+        /// Resumes the current async activity after it has been suspended by a call to <see cref="LogActivity{TActivityDescription}.Suspend()"/>. There is typically no need
+        /// to invoke this method in user code because all async methods that use the <see cref="Logger"/> class are automatically instrumented.
         /// </summary>
         void Resume();
 
@@ -81,8 +80,8 @@ namespace PostSharp.Patterns.Diagnostics
 
         /// <summary>
         /// Suspends the current async activity.
-        /// The activity must than be resumed by a call of the <see cref="PostSharp.Patterns.Diagnostics.LogActivity{TActivityDescription}.Resume()"/> method.
-        /// There is typically no need to invoke this method in user code because all async methods that use the <see cref="PostSharp.Patterns.Diagnostics.Logger"/> class are automatically instrumented.
+        /// The activity must than be resumed by a call of the <see cref="LogActivity{TActivityDescription}.Resume()"/> method.
+        /// There is typically no need to invoke this method in user code because all async methods that use the <see cref="Logger"/> class are automatically instrumented.
         /// </summary>
         void Suspend();
 

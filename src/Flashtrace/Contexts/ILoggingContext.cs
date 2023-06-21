@@ -1,12 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using PostSharp.Constraints;
-using PostSharp.Patterns.Diagnostics.Custom;
-
-namespace PostSharp.Patterns.Diagnostics.Contexts
+namespace Flashtrace.Contexts
 {
     /// <summary>
     /// Defines the minimal semantics of a logging context required by the <see cref="Logger"/> class.

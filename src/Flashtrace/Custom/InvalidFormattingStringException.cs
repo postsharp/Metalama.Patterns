@@ -1,15 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 #if SERIALIZABLE
 using System.Runtime.Serialization;
 #endif
 
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
     /// <summary>
-    /// Exception thrown by the <see cref="PostSharp.Patterns.Diagnostics.Custom.FormattingStringParser"/> and by the <c>Logger</c> class
+    /// Exception thrown by the <see cref="FormattingStringParser"/> and by the <c>Logger</c> class
     /// when user code provides an invalid formatting string.
     /// </summary>
 #if SERIALIZABLE

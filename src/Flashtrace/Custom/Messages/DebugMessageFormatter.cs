@@ -1,9 +1,6 @@
-﻿using PostSharp.Patterns.Formatters;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
-namespace PostSharp.Patterns.Diagnostics.Custom.Messages
+namespace Flashtrace.Custom.Messages
 {
     internal static class DebugMessageFormatter
     {

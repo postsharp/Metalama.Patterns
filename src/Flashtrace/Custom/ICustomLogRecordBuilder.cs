@@ -1,10 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using PostSharp.Patterns.Formatters;
-
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
     /// <summary>
     /// Allows to build a custom log record (typically, but not necessarily, a string). A log record can be composed of one of several

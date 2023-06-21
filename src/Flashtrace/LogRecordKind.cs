@@ -1,10 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Collections;
 
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
     /// <summary>
     /// Kinds of log entry.
@@ -50,7 +49,7 @@ namespace PostSharp.Patterns.Diagnostics
         ValueChanged = 1 << 6,
 
         /// <summary>
-        /// Custom record (emitted by <see cref="Logger.Write(PostSharp.Patterns.Diagnostics.LogLevel,string)"/>.
+        /// Custom record (emitted by <see cref="Logger.Write(Flashtrace.LogLevel,string)"/>.
         /// </summary>
         CustomRecord = 1 << 7,
 

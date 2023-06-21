@@ -1,16 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using Flashtrace.Contexts;
+using Flashtrace.Custom;
+using Flashtrace.Custom.Messages;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using PostSharp.Extensibility;
-using PostSharp.Patterns.Diagnostics.Contexts;
-using PostSharp.Patterns.Diagnostics.Custom;
-using PostSharp.Patterns.Diagnostics.Custom.Messages;
 
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
     /// <summary>
     /// Represents a logged custom activity, i.e. something that has a beginning and an end with a specific outcome.

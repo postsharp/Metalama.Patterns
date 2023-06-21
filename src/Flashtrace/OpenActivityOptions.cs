@@ -1,17 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Patterns.Diagnostics.Contexts;
-using System;
-using System.Collections.Generic;
+using Flashtrace.Contexts;
+using Flashtrace.Correlation;
+using Flashtrace.Custom;
+using Flashtrace.Transactions;
 using System.Diagnostics.CodeAnalysis;
-using PostSharp.Patterns.Diagnostics.Custom;
-using System.Runtime.CompilerServices;
-using PostSharp.Patterns.Utilities;
-using PostSharp.Patterns.Diagnostics.Transactions;
-using PostSharp.Patterns.Diagnostics.Correlation;
 
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
 
 

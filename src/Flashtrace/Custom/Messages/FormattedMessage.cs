@@ -2,10 +2,8 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 using System.Diagnostics.CodeAnalysis;
-using PostSharp.Patterns.Diagnostics.Custom;
-using System.Runtime.CompilerServices;
 
-namespace PostSharp.Patterns.Diagnostics.Custom.Messages
+namespace Flashtrace.Custom.Messages
 {
     /// <summary>
     /// Encapsulates a formatted message without parameter. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.

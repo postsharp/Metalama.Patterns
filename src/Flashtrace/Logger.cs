@@ -1,17 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using Flashtrace.Contexts;
+using Flashtrace.Custom;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using PostSharp.Extensibility;
-using PostSharp.Patterns.Diagnostics.Contexts;
-using PostSharp.Patterns.Diagnostics.Custom;
-using PostSharp.Patterns.Utilities;
 
-
-namespace PostSharp.Patterns.Diagnostics
+namespace Flashtrace
 {
     /// <summary>
     /// Allows to emit custom log records and define custom activities. This class is obsolete. Use <see cref="LogSource" /> for new developments.

@@ -1,16 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Aspects.Advices;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Utilities;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Reflection;
-using PostSharp.Reflection;
 
-namespace PostSharp.Patterns.Diagnostics.Custom
+namespace Flashtrace.Custom
 {
 
     /// <summary>
