@@ -15,7 +15,6 @@ namespace Flashtrace
     /// This class is instantiated by the new API of the <see cref="LogSource"/> class.
     /// </summary>
 
-    [RequirePostSharp("PostSharp.Patterns.Common.Weaver", "AddCallerInfoTask", AnyTypeReference = true)]
     [SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
     public readonly struct LogActivity<TActivityDescription> : ILogActivity
         where TActivityDescription : IMessage

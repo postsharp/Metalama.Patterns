@@ -73,7 +73,7 @@ namespace Flashtrace.Custom
             public override bool HasInheritedProperty( object data )
             {
                 if ( !ReferenceEquals( data, this ) )
-                    throw new AssertionFailedException();
+                    throw new FlashtraceAssertionFailedException();
 
                 if ( this.PropertyOptions.IsInherited )
                     return true;
@@ -87,7 +87,7 @@ namespace Flashtrace.Custom
             public override TAugmented GetExpressionModel( object data )
             {
                 if ( !ReferenceEquals( data, this ) )
-                    throw new AssertionFailedException();
+                    throw new FlashtraceAssertionFailedException();
 
                 return this.Augmented.GetExpressionModel<TAugmented>();
             }

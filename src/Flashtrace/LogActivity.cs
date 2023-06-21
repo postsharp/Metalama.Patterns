@@ -12,7 +12,6 @@ namespace Flashtrace
     /// Represents a logged custom activity, i.e. something that a beginning and an end with a specific outcome.
     /// This class is instantiated by the legacy API of the <see cref="Logger"/> class. For the modern API, see <see cref="LogActivity{TActivityDescription}"/>.
     /// </summary>
-    [RequirePostSharp("PostSharp.Patterns.Common.Weaver", "AddCallerInfoTask", AnyTypeReference = true)]
     public partial class LogActivity : Logger, IDisposable
     {
         /// <summary>

@@ -216,7 +216,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
         public void Reset() => throw new NotSupportedException();
     }
 
-    internal static IEnumerable<PropertyInfo> GetProperties( Type type )
+    public static IEnumerable<PropertyInfo> GetProperties( Type type )
     {
         foreach ( var property in type.GetRuntimeProperties() )
         {

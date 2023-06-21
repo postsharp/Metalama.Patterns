@@ -5,7 +5,6 @@
 
 namespace Flashtrace.Custom
 {
-#if SYSTEM_TRACE
     internal class TraceSourceLoggerFactory : ILoggerFactory, ILoggerFactoryProvider, ILoggerFactoryProvider3
     {
         ILogger ILoggerFactory.GetLogger(string role, Type type) => new Factory(role ).GetLogger( type);
@@ -32,5 +31,4 @@ namespace Flashtrace.Custom
             
         }
     }
-#endif
 }

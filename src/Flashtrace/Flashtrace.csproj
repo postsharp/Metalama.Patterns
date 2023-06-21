@@ -16,6 +16,27 @@
     <Using Remove="System.Net.Http" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Flashtrace.Common\Flashtrace.Common.csproj" />
+    <ProjectReference Include="..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Custom\ILogger.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ILogger.Generated.cs</LastGenOutput>
+    </None>
+    <Compile Update="Custom\ILogger.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ILogger.Generated.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 	
 </Project>

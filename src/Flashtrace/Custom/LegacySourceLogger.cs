@@ -2,6 +2,7 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 using Flashtrace.Contexts;
+using Flashtrace.Formatters;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;

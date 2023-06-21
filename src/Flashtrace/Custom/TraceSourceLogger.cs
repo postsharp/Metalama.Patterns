@@ -2,11 +2,11 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 #define TRACE // Because TraceEvent has [Conditional("TRACE")]
 
+using System.Collections.Concurrent;
+using System.Diagnostics;
+
 namespace Flashtrace.Custom
 {
-#if SYSTEM_TRACE
-
-
     internal partial class TraceSourceLogger : LegacySourceLogger
     {
         private readonly TraceSource traceSource;
@@ -73,5 +73,4 @@ namespace Flashtrace.Custom
 
     
     }
-#endif
 }

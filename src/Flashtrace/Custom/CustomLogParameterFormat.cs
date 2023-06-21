@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace.Formatters;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Custom
@@ -31,7 +32,7 @@ namespace Flashtrace.Custom
 
         // This property could be public and settable in the future.
         [ExplicitCrossPackageInternal]
-        internal FormattingOptions FormattingOptions => this.Mode == CustomLogParameterMode.Default ? this.FormattingOptions.Unquoted : this.FormattingOptions.Default;
+        internal FormattingOptions FormattingOptions => this.Mode == CustomLogParameterMode.Default ? FormattingOptions.Unquoted : FormattingOptions.Default;
     }
 
     /// <summary>

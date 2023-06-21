@@ -7,8 +7,13 @@ namespace Flashtrace.Custom.Messages
         public static void Write<T>( in T message, ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item ) 
             where T : IMessage
         {
+            // TODO: Post.GetMutableRef
+#if false
             ref T mutableRef = ref Post.GetMutableRef(message);
             mutableRef.Write(recordBuilder, item);
+#else
+            message.Write( recordBuilder, item );
+#endif
         }
     }
 }

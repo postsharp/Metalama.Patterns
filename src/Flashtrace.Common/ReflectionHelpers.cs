@@ -3,7 +3,7 @@
 using JetBrains.Annotations;
 using System.Runtime.CompilerServices;
 
-namespace Flashtrace.Formatters;
+namespace Flashtrace;
 
 [PublicAPI]
 public static class ReflectionHelpers

@@ -24,7 +24,6 @@ namespace Flashtrace
     /// Use <see cref="LogSource.Get()"/> to get an instance of this class for the current type.
     /// </para>
     /// </remarks>
-    [RequirePostSharp( "PostSharp.Patterns.Common.Weaver", "AddCallerInfoTask", AnyTypeReference = true )]
     public sealed class LogSource
     {
 

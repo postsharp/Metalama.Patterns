@@ -2,6 +2,7 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 using Flashtrace.Custom;
+using System.Runtime.Serialization;
 
 namespace Flashtrace
 {

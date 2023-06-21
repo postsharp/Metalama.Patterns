@@ -1,9 +1,7 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-// THIS FILE IS T4-GENERATED.
+﻿// THIS FILE IS T4-GENERATED.
 // To edit, go to GenericLogger.tt.
 // To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" ILogger.Generated.tt
-// The transformation is not automatic because we are in a shared project.
+
 
 using Flashtrace.Contexts;
 
@@ -20,7 +18,7 @@ namespace Flashtrace.Custom
         /// <param name="text">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
         /// <param name="recordKind">Kind of record.</param>
         /// <param name="exception">The <see cref="Exception"/> associated with the record, or <c>null</c>.</param>
-        /// <param name="recordInfo">Information about the caller souICustomActivityLoggingContextrce code.</param>
+        /// <param name="recordInfo">Information about the caller source code.</param>
 				/// <typeparam name="T1">Type of the 1-th parameter.</typeparam>
 		/// <param name="arg1">Value of the 1-th parameter.</param>
 		   void Write<T1>( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, T1 arg1, Exception exception, ref CallerInfo recordInfo  );
@@ -318,8 +316,7 @@ namespace Flashtrace.Custom
              EmitWarning( level );
         }
 
-        
-    }
+			}
 
 
 	partial class LegacySourceLogger
