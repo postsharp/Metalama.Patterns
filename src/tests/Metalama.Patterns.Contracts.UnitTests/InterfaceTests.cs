@@ -22,8 +22,6 @@ public class InterfaceTests
 
     private class Foo : IFoo
     {
-        public void Bar( string a )
-        {
-        }
+        public void Bar( string a ) { }
     }
 }

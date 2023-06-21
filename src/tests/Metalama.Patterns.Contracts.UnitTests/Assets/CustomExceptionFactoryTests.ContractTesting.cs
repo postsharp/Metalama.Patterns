@@ -11,8 +11,6 @@ public partial class CustomExceptionFactoryTests
             return true;
         }
 
-        public void Method2( [StringLength(5)] string parameter)
-        {
-        }
+        public void Method2( [StringLength( 5 )] string parameter ) { }
     }
 }

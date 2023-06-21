@@ -35,6 +35,7 @@ public abstract class ContractExceptionFactory
         {
             const string template =
                 "The [{0}] contract failed with {1}, but the current ContractExceptionFactory is not configured to instantiate this exception type";
+
             var aspectName = exceptionInfo.AspectType.Name;
             const string attribute = "Attribute";
 
@@ -43,11 +44,12 @@ public abstract class ContractExceptionFactory
                 aspectName = aspectName.Substring( 0, aspectName.Length - attribute.Length );
             }
 
-            throw new InvalidOperationException( string.Format(
-                CultureInfo.InvariantCulture,
-                template,
-                aspectName,
-                exceptionInfo.ExceptionType.Name ) );
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    template,
+                    aspectName,
+                    exceptionInfo.ExceptionType.Name ) );
         }
     }
 }

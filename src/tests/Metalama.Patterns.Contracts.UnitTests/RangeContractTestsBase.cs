@@ -15,12 +15,10 @@ public abstract class RangeContractTestsBase
         try
         {
             method( longValue );
-            throw new AssertionFailedException(
-                $"{method.GetMethodInfo().Name}( long?:{NullableToString( longValue )} ) did not fail." );
+
+            throw new AssertionFailedException( $"{method.GetMethodInfo().Name}( long?:{NullableToString( longValue )} ) did not fail." );
         }
-        catch ( ArgumentOutOfRangeException )
-        {
-        }
+        catch ( ArgumentOutOfRangeException ) { }
     }
 
     protected static void AssertFails( Action<ulong?> method, ulong? ulongValue )
@@ -28,12 +26,10 @@ public abstract class RangeContractTestsBase
         try
         {
             method( ulongValue );
-            throw new AssertionFailedException(
-                $"{method.GetMethodInfo().Name}( ulong?:{NullableToString( ulongValue )} ) did not fail." );
+
+            throw new AssertionFailedException( $"{method.GetMethodInfo().Name}( ulong?:{NullableToString( ulongValue )} ) did not fail." );
         }
-        catch ( ArgumentOutOfRangeException )
-        {
-        }
+        catch ( ArgumentOutOfRangeException ) { }
     }
 
     protected static void AssertFails( Action<double?> method, double? doubleValue )
@@ -41,12 +37,10 @@ public abstract class RangeContractTestsBase
         try
         {
             method( doubleValue );
-            throw new AssertionFailedException(
-                $"{method.GetMethodInfo().Name}( double?:{NullableToString( doubleValue )} ) did not fail." );
+
+            throw new AssertionFailedException( $"{method.GetMethodInfo().Name}( double?:{NullableToString( doubleValue )} ) did not fail." );
         }
-        catch ( ArgumentOutOfRangeException )
-        {
-        }
+        catch ( ArgumentOutOfRangeException ) { }
     }
 
     protected static void AssertFails( Action<decimal?> method, decimal? decimalValue )
@@ -54,15 +48,13 @@ public abstract class RangeContractTestsBase
         try
         {
             method( decimalValue );
-            throw new AssertionFailedException(
-                $"{method.GetMethodInfo().Name}( decimal:{NullableToString( decimalValue )} ) did not fail." );
+
+            throw new AssertionFailedException( $"{method.GetMethodInfo().Name}( decimal:{NullableToString( decimalValue )} ) did not fail." );
         }
-        catch ( ArgumentOutOfRangeException )
-        {
-        }
+        catch ( ArgumentOutOfRangeException ) { }
     }
 
-    protected static void AssertFails( 
+    protected static void AssertFails(
         Action<long?, ulong?, double?, decimal?> method,
         long? longValue,
         ulong? ulongValue,
@@ -72,17 +64,15 @@ public abstract class RangeContractTestsBase
         try
         {
             method( longValue, ulongValue, doubleValue, decimalValue );
+
             throw new AssertionFailedException(
                 $"{method.GetMethodInfo().Name}( long?:{NullableToString( longValue )}, ulong?:{NullableToString( ulongValue )}, double?:{NullableToString( doubleValue )}, decimal?:{NullableToString( decimalValue )} ) did not fail." );
         }
-        catch ( ArgumentOutOfRangeException )
-        {
-        }
+        catch ( ArgumentOutOfRangeException ) { }
     }
 
     // Incorrect warning.
 #pragma warning disable CS8603 // Possible null reference return.
     private static string NullableToString( object? nullable ) => nullable == null ? "null" : nullable.ToString();
 #pragma warning restore CS8603 // Possible null reference return.
-
 }

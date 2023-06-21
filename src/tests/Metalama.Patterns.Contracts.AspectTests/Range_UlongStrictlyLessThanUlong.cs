@@ -4,7 +4,5 @@ namespace Metalama.Patterns.Contracts.AspectTests;
 
 public class Range_UlongStrictlyLessThanUlong
 {
-    private void MethodWithUlongStrictlyLessThanUlong( [StrictlyLessThan( ulong.MinValue )] ulong? a )
-    {
-    }
+    private void MethodWithUlongStrictlyLessThanUlong( [StrictlyLessThan( ulong.MinValue )] ulong? a ) { }
 }

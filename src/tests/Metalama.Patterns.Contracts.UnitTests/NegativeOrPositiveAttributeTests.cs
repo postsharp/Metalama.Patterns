@@ -38,7 +38,7 @@ public class NegativeOrPositiveAttributeTests : RangeContractTestsBase
         AssertFails( TestMethodsWithNegativeAspect, long.MinValue, ulong.MaxValue, double.MaxValue, decimal.MaxValue );
     }
 
-    private static void TestMethodsWithPositiveAspect( 
+    private static void TestMethodsWithPositiveAspect(
         long? longValue,
         ulong? ulongValue,
         double? doubleValue,
@@ -50,7 +50,7 @@ public class NegativeOrPositiveAttributeTests : RangeContractTestsBase
         MethodWithPositiveDecimal( decimalValue );
     }
 
-    private static void TestMethodsWithNegativeAspect( 
+    private static void TestMethodsWithNegativeAspect(
         long? longValue,
         ulong? ulongValue,
         double? doubleValue,
@@ -62,35 +62,19 @@ public class NegativeOrPositiveAttributeTests : RangeContractTestsBase
         MethodWithNegativeDecimal( decimalValue );
     }
 
-    private static void MethodWithPositiveLong( [Positive] long? a )
-    {
-    }
+    private static void MethodWithPositiveLong( [Positive] long? a ) { }
 
-    private static void MethodWithPositiveUlong( [Positive] ulong? a )
-    {
-    }
+    private static void MethodWithPositiveUlong( [Positive] ulong? a ) { }
 
-    private static void MethodWithPositiveDouble( [Positive] double? a )
-    {
-    }
+    private static void MethodWithPositiveDouble( [Positive] double? a ) { }
 
-    private static void MethodWithPositiveDecimal( [Positive] decimal? a )
-    {
-    }
+    private static void MethodWithPositiveDecimal( [Positive] decimal? a ) { }
 
-    private static void MethodWithNegativeLong( [Negative] long? a )
-    {
-    }
+    private static void MethodWithNegativeLong( [Negative] long? a ) { }
 
-    private static void MethodWithNegativeUlong( [Negative] ulong? a )
-    {
-    }
+    private static void MethodWithNegativeUlong( [Negative] ulong? a ) { }
 
-    private static void MethodWithNegativeDouble( [Negative] double? a )
-    {
-    }
+    private static void MethodWithNegativeDouble( [Negative] double? a ) { }
 
-    private static void MethodWithNegativeDecimal( [Negative] decimal? a )
-    {
-    }
+    private static void MethodWithNegativeDecimal( [Negative] decimal? a ) { }
 }

@@ -66,7 +66,7 @@ public class RangeAttribute : ContractAspect
 
     private readonly TypeFlag _invalidTypes;
 
-    internal RangeAttribute( 
+    internal RangeAttribute(
         object displayMin,
         object displayMax,
         long minInt64,
@@ -411,7 +411,8 @@ public class RangeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( 
+
+        builder.MustSatisfy(
             f => IsElibigleType( f.Type ),
             f => $"the type of {f} must be a numeric type, a nullable numeric type, or object" );
     }
@@ -420,7 +421,8 @@ public class RangeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( 
+
+        builder.MustSatisfy(
             p => IsElibigleType( p.Type ),
             p => $"the type of {p} must be a numeric type, a nullable numeric type, or object" );
     }
@@ -464,10 +466,9 @@ public class RangeAttribute : ContractAspect
 
     // Was COM010 in PostSharp
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5000", nameof( RangeAttribute ) );
+        CreateCannotBeAppliedDiagosticDefinition( "LAMA5000", nameof(RangeAttribute) );
 
-    protected virtual DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()
-        => _rangeCannotBeApplied;
+    protected virtual DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition() => _rangeCannotBeApplied;
 
     private void BuildAspect( IAspectBuilder builder, IType targetType )
     {
@@ -477,9 +478,10 @@ public class RangeAttribute : ContractAspect
         if ( (typeFlag & this._invalidTypes) != 0 )
         {
             builder.Diagnostics.Report(
-                this.GetCannotBeAppliedDiagosticDefinition().WithArguments(
-                    (builder.Target,
-                     basicType.Name) ) );
+                this.GetCannotBeAppliedDiagosticDefinition()
+                    .WithArguments(
+                        (builder.Target,
+                         basicType.Name) ) );
         }
     }
 
@@ -511,23 +513,31 @@ public class RangeAttribute : ContractAspect
             case SpecialType.UInt64:
                 minBuilder.AppendLiteral( this._minUInt64 );
                 maxBuilder.AppendLiteral( this._maxUInt64 );
+
                 break;
+
             case SpecialType.SByte:
             case SpecialType.Int16:
             case SpecialType.Int32:
             case SpecialType.Int64:
                 minBuilder.AppendLiteral( this._minInt64 );
                 maxBuilder.AppendLiteral( this._maxInt64 );
+
                 break;
+
             case SpecialType.Single:
             case SpecialType.Double:
                 minBuilder.AppendLiteral( this._minDouble );
                 maxBuilder.AppendLiteral( this._maxDouble );
+
                 break;
+
             case SpecialType.Decimal:
                 minBuilder.AppendLiteral( this._minDecimal );
                 maxBuilder.AppendLiteral( this._maxDecimal );
+
                 break;
+
             default:
                 throw new InvalidOperationException( $"SpecialType.{specialType} was not expected here." );
         }
@@ -550,7 +560,7 @@ public class RangeAttribute : ContractAspect
         {
             if ( value != null )
             {
-                var rangeValues = new RangeValues( 
+                var rangeValues = new RangeValues(
                     this._minInt64,
                     this._maxInt64,
                     this._minUInt64,
@@ -566,16 +576,19 @@ public class RangeAttribute : ContractAspect
 
                 if ( !validateResult.IsInRange )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentOutOfRangeException ),
-                        aspectType,
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        exceptionInfo.MessageIdExpression.Value,
-                        exceptionInfo.IncludeMinValue ? this.DisplayMinValue : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                        exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentOutOfRangeException),
+                            aspectType,
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            exceptionInfo.MessageIdExpression.Value,
+                            exceptionInfo.IncludeMinValue
+                                ? this.DisplayMinValue
+                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
+                            exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
                 }
             }
         }
@@ -587,32 +600,38 @@ public class RangeAttribute : ContractAspect
             {
                 if ( value!.HasValue && (value < min.Value || value > max.Value) )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentOutOfRangeException ),
-                        aspectType,
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        exceptionInfo.MessageIdExpression.Value,
-                        exceptionInfo.IncludeMinValue ? this.DisplayMinValue : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                        exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentOutOfRangeException),
+                            aspectType,
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            exceptionInfo.MessageIdExpression.Value,
+                            exceptionInfo.IncludeMinValue
+                                ? this.DisplayMinValue
+                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
+                            exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
                 }
             }
             else
             {
                 if ( value < min.Value || value > max.Value )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof( ArgumentOutOfRangeException ),
-                        aspectType,
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        exceptionInfo.MessageIdExpression.Value,
-                        exceptionInfo.IncludeMinValue ? this.DisplayMinValue : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                        exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentOutOfRangeException),
+                            aspectType,
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            exceptionInfo.MessageIdExpression.Value,
+                            exceptionInfo.IncludeMinValue
+                                ? this.DisplayMinValue
+                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
+                            exceptionInfo.IncludeMinValue && exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ) );
                 }
             }
         }
@@ -631,8 +650,9 @@ public class RangeAttribute : ContractAspect
     [CompileTime]
     protected virtual ExceptionInfo GetExceptionInfo()
         => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof( ContractLocalizedTextProvider
-                .RangeErrorMessage ) ),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .RangeErrorMessage) ),
             true,
             true );
 }

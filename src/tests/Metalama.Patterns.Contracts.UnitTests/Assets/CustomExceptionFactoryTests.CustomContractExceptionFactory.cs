@@ -16,7 +16,8 @@ public partial class CustomExceptionFactoryTests
         public override Exception CreateException( ContractExceptionInfo exceptionInfo )
         {
             this._callback?.Invoke( exceptionInfo.ExceptionType );
-            if ( exceptionInfo.ExceptionType == typeof( ArgumentNullException ) )
+
+            if ( exceptionInfo.ExceptionType == typeof(ArgumentNullException) )
             {
                 return new TestException( "test" );
             }

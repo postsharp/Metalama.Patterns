@@ -13,18 +13,14 @@ public class PostconditionFailedException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="PostconditionFailedException"/> class.
     /// </summary>
-    public PostconditionFailedException()
-    {
-    }
+    public PostconditionFailedException() { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PostconditionFailedException"/> class with a specified error message.
     /// </summary>
     /// <param name="message">Exception message.</param>
     public PostconditionFailedException( string message )
-        : base( message )
-    {
-    }
+        : base( message ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PostconditionFailedException"/> class with a specified error message
@@ -33,9 +29,7 @@ public class PostconditionFailedException : Exception
     /// <param name="message">Exception message.</param>
     /// <param name="innerException">Inner exception.</param>
     public PostconditionFailedException( string message, Exception innerException )
-        : base( message, innerException )
-    {
-    }
+        : base( message, innerException ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PostconditionFailedException"/> class with serialized data.
@@ -43,7 +37,5 @@ public class PostconditionFailedException : Exception
     /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
     /// <param name="context">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
     protected PostconditionFailedException( SerializationInfo info, StreamingContext context )
-        : base( info, context )
-    {
-    }
+        : base( info, context ) { }
 }

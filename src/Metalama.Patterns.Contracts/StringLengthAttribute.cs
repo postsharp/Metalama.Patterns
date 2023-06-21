@@ -90,30 +90,32 @@ public sealed class StringLengthAttribute : ContractAspect
         {
             if ( value != null && value!.Length > this.MaximumLength )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentException),
-                    typeof(StringLengthAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.StringLengthMaxErrorMessage,
-                    this.MaximumLength ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentException),
+                        typeof(StringLengthAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.StringLengthMaxErrorMessage,
+                        this.MaximumLength ) );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength == int.MaxValue )
         {
             if ( value != null && value!.Length < this.MinimumLength )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentException),
-                    typeof(StringLengthAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.StringLengthMinErrorMessage,
-                    this.MinimumLength ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentException),
+                        typeof(StringLengthAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.StringLengthMinErrorMessage,
+                        this.MinimumLength ) );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength != int.MaxValue )
@@ -122,16 +124,17 @@ public sealed class StringLengthAttribute : ContractAspect
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentException),
-                    typeof(StringLengthAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.StringLengthRangeErrorMessage,
-                    this.MinimumLength,
-                    this.MaximumLength ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentException),
+                        typeof(StringLengthAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.StringLengthRangeErrorMessage,
+                        this.MinimumLength,
+                        this.MaximumLength ) );
             }
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }

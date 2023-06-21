@@ -6,8 +6,6 @@ public partial class CustomExceptionFactoryTests
 {
     private sealed class EmptyContractExceptionFactory : ContractExceptionFactory
     {
-        public EmptyContractExceptionFactory( ContractExceptionFactory next ) : base( next )
-        {
-        }
+        public EmptyContractExceptionFactory( ContractExceptionFactory next ) : base( next ) { }
     }
 }

@@ -24,7 +24,5 @@ public class NotEmptyTestClass
     [return: NotEmpty]
     public string StringMethodWithRetVal( string retVal ) => retVal;
 
-    public void IReadOnlyCollectionMethod<T>( [NotEmpty] IReadOnlyCollection<T> parameter )
-    {
-    }
+    public void IReadOnlyCollectionMethod<T>( [NotEmpty] IReadOnlyCollection<T> parameter ) { }
 }

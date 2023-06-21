@@ -4,7 +4,5 @@ namespace Metalama.Patterns.Contracts.AspectTests;
 
 public class Range_UlongGreaterThanDouble
 {
-    private void MethodWithUlongGreaterThanDouble( [GreaterThan( (double) ulong.MaxValue + ((double) ulong.MaxValue * 1e-6) )] ulong? a )
-    {
-    }
+    private void MethodWithUlongGreaterThanDouble( [GreaterThan( (double) ulong.MaxValue + ((double) ulong.MaxValue * 1e-6) )] ulong? a ) { }
 }

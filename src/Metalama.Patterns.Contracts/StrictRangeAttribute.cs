@@ -30,7 +30,7 @@ public class StrictRangeAttribute : RangeAttribute
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
     public StrictRangeAttribute( long min, long max )
-        : base( 
+        : base(
             min,
             max,
             StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
@@ -41,12 +41,9 @@ public class StrictRangeAttribute : RangeAttribute
             StrictlyLessThanAttribute.Int64Maximum.ToDouble( max ),
             StrictlyGreaterThanAttribute.Int64Minimum.ToDecimal( min ),
             StrictlyLessThanAttribute.Int64Maximum.ToDecimal( max ),
-            GetInvalidTypes( 
+            GetInvalidTypes(
                 StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
-                StrictlyLessThanAttribute.Int64Maximum.ToInt64( max ) )
-        )
-    {
-    }
+                StrictlyLessThanAttribute.Int64Maximum.ToInt64( max ) ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying unsigned integer bounds.
@@ -54,7 +51,7 @@ public class StrictRangeAttribute : RangeAttribute
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
     public StrictRangeAttribute( ulong min, ulong max )
-        : base( 
+        : base(
             min,
             max,
             StrictlyGreaterThanAttribute.UInt64Minimum.ToInt64( min ),
@@ -65,10 +62,7 @@ public class StrictRangeAttribute : RangeAttribute
             StrictlyLessThanAttribute.UInt64Maximum.ToDouble( max ),
             StrictlyGreaterThanAttribute.UInt64Minimum.ToDecimal( min ),
             StrictlyLessThanAttribute.UInt64Maximum.ToDecimal( max ),
-            GetInvalidTypes( StrictlyGreaterThanAttribute.UInt64Minimum.ToUInt64( min ) )
-        )
-    {
-    }
+            GetInvalidTypes( StrictlyGreaterThanAttribute.UInt64Minimum.ToUInt64( min ) ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying floating-point bounds.
@@ -76,7 +70,7 @@ public class StrictRangeAttribute : RangeAttribute
     /// <param name="min">The lower bound.</param>
     /// <param name="max">The upper bound.</param>
     public StrictRangeAttribute( double min, double max )
-        : base( 
+        : base(
             min,
             max,
             StrictlyGreaterThanAttribute.DoubleMinimum.ToInt64( min ),
@@ -87,22 +81,21 @@ public class StrictRangeAttribute : RangeAttribute
             StrictlyLessThanAttribute.DoubleMaximum.ToDouble( max ),
             StrictlyGreaterThanAttribute.DoubleMinimum.ToDecimal( min ),
             StrictlyLessThanAttribute.DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes( 
+            GetInvalidTypes(
                 min < double.MaxValue - 1 ? min + 1 : double.MaxValue,
-                max > double.MinValue + 1 ? max - 1 : double.MinValue ) )
-    {
-    }
+                max > double.MinValue + 1 ? max - 1 : double.MinValue ) ) { }
 
     /// <inheritdoc/>
     protected override ExceptionInfo GetExceptionInfo()
         => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .StrictRangeErrorMessage) ),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .StrictRangeErrorMessage) ),
             true,
-            true);
+            true );
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5009", nameof( StrictRangeAttribute ) );
+        CreateCannotBeAppliedDiagosticDefinition( "LAMA5009", nameof(StrictRangeAttribute) );
 
     /// <inheritdoc/>
     protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()

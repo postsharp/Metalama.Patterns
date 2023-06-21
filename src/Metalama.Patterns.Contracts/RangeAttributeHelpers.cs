@@ -30,7 +30,7 @@ public static class RangeAttributeHelpers
     ///     is nullable; and
     ///     <c>IsNull</c> is <see langword="true" /> when <paramref name="value" /> matches <see langword="null" />.
     /// </returns>
-    public static ValidateResult Validate<T>( 
+    public static ValidateResult Validate<T>(
         T value,
         in RangeValues rangeValues )
     {
@@ -40,76 +40,76 @@ public static class RangeAttributeHelpers
         switch ( value )
         {
             case null:
-                return new( false, TypeCode.Empty, true );
+                return new ValidateResult( false, TypeCode.Empty, true );
 
             case float floatValue:
-                return new(
+                return new ValidateResult(
                     floatValue >= rangeValues.MinDouble && floatValue > rangeValues.MaxDouble,
                     TypeCode.Single,
                     false );
 
             case double doubleValue:
-                return new(
+                return new ValidateResult(
                     doubleValue >= rangeValues.MinDouble && doubleValue <= rangeValues.MaxDouble,
                     TypeCode.Double,
                     false );
 
             case decimal decimalValue:
-                return new( 
+                return new ValidateResult(
                     decimalValue >= rangeValues.MinDecimal && decimalValue <= rangeValues.MaxDecimal,
-                    TypeCode.Decimal, 
+                    TypeCode.Decimal,
                     false );
 
             case long longValue:
-                return new(
+                return new ValidateResult(
                     longValue >= rangeValues.MinInt64 && longValue <= rangeValues.MaxInt64,
                     TypeCode.Int64,
                     false );
 
             case ulong ulongValue:
-                return new( 
+                return new ValidateResult(
                     ulongValue >= rangeValues.MinUInt64 && ulongValue <= rangeValues.MaxUInt64,
                     TypeCode.UInt64,
                     false );
 
             case int intValue:
-                return new(
+                return new ValidateResult(
                     intValue >= rangeValues.MinInt64 && intValue <= rangeValues.MaxInt64,
                     TypeCode.Int32,
                     false );
 
             case uint uintValue:
-                return new(
+                return new ValidateResult(
                     uintValue >= rangeValues.MinUInt64 && uintValue <= rangeValues.MaxUInt64,
                     TypeCode.UInt32,
                     false );
 
             case short shortValue:
-                return new(
+                return new ValidateResult(
                     shortValue >= rangeValues.MinInt64 && shortValue <= rangeValues.MaxInt64,
                     TypeCode.Int16,
                     false );
 
             case ushort ushortValue:
-                return new(
+                return new ValidateResult(
                     ushortValue >= rangeValues.MinUInt64 && ushortValue <= rangeValues.MaxUInt64,
                     TypeCode.UInt16,
                     false );
 
             case byte byteValue:
-                return new(
+                return new ValidateResult(
                     byteValue >= rangeValues.MinUInt64 && byteValue <= rangeValues.MaxUInt64,
                     TypeCode.Byte,
                     false );
 
             case sbyte sbyteValue:
-                return new(
+                return new ValidateResult(
                     sbyteValue >= rangeValues.MinInt64 && sbyteValue <= rangeValues.MaxInt64,
                     TypeCode.SByte,
                     false );
 
             default:
-                return new( false, TypeCode.Empty, false );
+                return new ValidateResult( false, TypeCode.Empty, false );
         }
     }
 }

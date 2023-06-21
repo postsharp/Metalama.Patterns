@@ -10,16 +10,12 @@ public class DefaultContractExceptionFactory : ContractExceptionFactory
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultContractExceptionFactory"/> class.
     /// </summary>
-    public DefaultContractExceptionFactory() : this( ContractsServices.DefaultExceptionFactory )
-    {
-    }
+    public DefaultContractExceptionFactory() : this( ContractsServices.DefaultExceptionFactory ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultContractExceptionFactory"/> class.
     /// </summary>
-    public DefaultContractExceptionFactory( ContractExceptionFactory? next ) : base( next )
-    {
-    }
+    public DefaultContractExceptionFactory( ContractExceptionFactory? next ) : base( next ) { }
 
     /// <inheritdoc/>
     public override Exception CreateException( ContractExceptionInfo exceptionInfo )

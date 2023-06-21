@@ -4,7 +4,5 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class TestException : Exception
 {
-    public TestException(string message) : base(message)
-    {
-    }
+    public TestException( string message ) : base( message ) { }
 }

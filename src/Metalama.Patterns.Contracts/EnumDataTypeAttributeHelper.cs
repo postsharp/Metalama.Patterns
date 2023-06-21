@@ -14,6 +14,7 @@ public static class EnumDataTypeAttributeHelper
         }
 
         object enumValue;
+
         try
         {
             enumValue = Enum.Parse( enumType, value, false );
@@ -39,6 +40,7 @@ public static class EnumDataTypeAttributeHelper
         }
 
         var type = value.GetType();
+
         if ( !type.IsEnum || !enumType.Equals( type ) )
         {
             return false;
@@ -64,16 +66,14 @@ public static class EnumDataTypeAttributeHelper
         }
     }
 
-    private static bool IsEnumTypeInFlagsMode( Type enumType ) =>
-        enumType.GetCustomAttributes( typeof(FlagsAttribute), false ).Length != 0;
+    private static bool IsEnumTypeInFlagsMode( Type enumType ) => enumType.GetCustomAttributes( typeof(FlagsAttribute), false ).Length != 0;
 
     // VS gives incorrect warning at build time, but no squiggly, hence the double suppression.
 #pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable CS8603 // Possible null reference return.
-    private static string GetUnderlyingTypeValueString( Type enumType, object enumValue ) =>
-        Convert.ChangeType( enumValue, Enum.GetUnderlyingType( enumType ), CultureInfo.InvariantCulture )
-        .ToString();
-#pragma warning restore CS8603 // Possible null reference return.
+#pragma warning disable CS8603  // Possible null reference return.
+    private static string GetUnderlyingTypeValueString( Type enumType, object enumValue )
+        => Convert.ChangeType( enumValue, Enum.GetUnderlyingType( enumType ), CultureInfo.InvariantCulture )
+            .ToString();
+#pragma warning restore CS8603  // Possible null reference return.
 #pragma warning restore IDE0079 // Remove unnecessary suppression
-
 }

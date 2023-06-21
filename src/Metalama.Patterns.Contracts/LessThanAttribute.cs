@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+
 // Resharper disable RedundantCast
 
 namespace Metalama.Patterns.Contracts;
@@ -25,7 +26,7 @@ public class LessThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public LessThanAttribute( long max )
-        : base( 
+        : base(
             long.MinValue,
             max,
             long.MinValue,
@@ -36,17 +37,14 @@ public class LessThanAttribute : RangeAttribute
             max,
             decimal.MinValue,
             max,
-            GetInvalidTypes( long.MinValue, max )
-        )
-    {
-    }
+            GetInvalidTypes( long.MinValue, max ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying an unsigned integer bound.
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public LessThanAttribute( ulong max )
-        : base( 
+        : base(
             ulong.MinValue,
             max,
             long.MinValue,
@@ -57,17 +55,14 @@ public class LessThanAttribute : RangeAttribute
             max,
             decimal.MinValue,
             max,
-            GetInvalidTypes( ulong.MinValue )
-        )
-    {
-    }
+            GetInvalidTypes( ulong.MinValue ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a floating-point bound.
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public LessThanAttribute( double max )
-        : base( 
+        : base(
             double.MinValue,
             max,
             long.MinValue,
@@ -78,10 +73,7 @@ public class LessThanAttribute : RangeAttribute
             max,
             decimal.MinValue,
             DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes( double.MinValue, max )
-        )
-    {
-    }
+            GetInvalidTypes( double.MinValue, max ) ) { }
 
     private static class DoubleMaximum
     {
@@ -134,13 +126,14 @@ public class LessThanAttribute : RangeAttribute
     /// <inheritdoc/>
     protected override ExceptionInfo GetExceptionInfo()
         => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField( nameof(ContractLocalizedTextProvider
-                .LessThanErrorMessage) ),
+            CompileTimeHelpers.GetContractLocalizedTextProviderField(
+                nameof(ContractLocalizedTextProvider
+                           .LessThanErrorMessage) ),
             false,
-            true);
+            true );
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagosticDefinition( "LAMA5002", nameof( LessThanAttribute) );
+        CreateCannotBeAppliedDiagosticDefinition( "LAMA5002", nameof(LessThanAttribute) );
 
     /// <inheritdoc/>
     protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagosticDefinition()

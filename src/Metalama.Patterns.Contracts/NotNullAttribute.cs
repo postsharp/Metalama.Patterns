@@ -19,14 +19,13 @@ public sealed class NotNullAttribute : ContractAspect
     /// <summary>
     /// Initializes a new instance of the <see cref="NotNullAttribute"/> class.
     /// </summary>
-    public NotNullAttribute() 
-    {
-    }
+    public NotNullAttribute() { }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
+
         builder.MustSatisfy(
             f => f.Type.IsReferenceType != false || f.Type.IsNullable != false,
             f => $"the type of {f} must be a nullable type" );
@@ -36,6 +35,7 @@ public sealed class NotNullAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
+
         builder.MustSatisfy(
             p => p.Type.IsReferenceType != false || p.Type.IsNullable != false,
             p => $"the type of {p} must be a nullable type" );
@@ -46,14 +46,15 @@ public sealed class NotNullAttribute : ContractAspect
     {
         if ( value == null! )
         {
-            throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                typeof( ArgumentNullException ),
-                typeof( NotNullAttribute ),
-                value,
-                meta.Target.GetTargetName(),
-                meta.Target.GetTargetKind(),
-                meta.Target.ContractDirection,
-                ContractLocalizedTextProvider.NotNullErrorMessage ) );
+            throw ContractsServices.Default.ExceptionFactory.CreateException(
+                ContractExceptionInfo.Create(
+                    typeof(ArgumentNullException),
+                    typeof(NotNullAttribute),
+                    value,
+                    meta.Target.GetTargetName(),
+                    meta.Target.GetTargetKind(),
+                    meta.Target.ContractDirection,
+                    ContractLocalizedTextProvider.NotNullErrorMessage ) );
         }
     }
 }

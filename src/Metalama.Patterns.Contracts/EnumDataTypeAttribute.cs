@@ -40,7 +40,8 @@ public sealed class EnumDataTypeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( 
+
+        builder.MustSatisfy(
             f => IsElibigleType( f.Type ),
             f => $"the type of {f} must be string, an integer type or a nullable integer type" );
     }
@@ -49,7 +50,8 @@ public sealed class EnumDataTypeAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustSatisfy( 
+
+        builder.MustSatisfy(
             p => IsElibigleType( p.Type ),
             p => $"the type of {p} must be string, an integer type or a nullable integer type" );
     }
@@ -82,15 +84,16 @@ public sealed class EnumDataTypeAttribute : ContractAspect
         {
             if ( value != null! && !EnumDataTypeAttributeHelper.IsValidEnumValue( value, this.EnumType ) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentException),
-                    typeof(EnumDataTypeAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
-                    this.EnumType.Name ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentException),
+                        typeof(EnumDataTypeAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
+                        this.EnumType.Name ) );
             }
         }
         else if ( targetType.IsNullable == true )
@@ -102,15 +105,16 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
                 if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof(ArgumentException),
-                        typeof(EnumDataTypeAttribute),
-                        enumValue,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
-                        this.EnumType.Name ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentException),
+                            typeof(EnumDataTypeAttribute),
+                            enumValue,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
+                            this.EnumType.Name ) );
                 }
             }
         }
@@ -121,15 +125,16 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
             if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentException),
-                    typeof(EnumDataTypeAttribute),
-                    enumValue,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
-                    this.EnumType.Name ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentException),
+                        typeof(EnumDataTypeAttribute),
+                        enumValue,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
+                        this.EnumType.Name ) );
             }
         }
     }

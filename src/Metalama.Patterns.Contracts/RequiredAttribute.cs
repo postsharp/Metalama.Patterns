@@ -26,14 +26,13 @@ public sealed class RequiredAttribute : ContractAspect
     /// <summary>
     /// Initializes a new instance of the <see cref="RequiredAttribute"/> class.
     /// </summary>
-    public RequiredAttribute()
-    {
-    }
+    public RequiredAttribute() { }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
+
         builder.MustSatisfy(
             f => f.Type.IsReferenceType != false || f.Type.IsNullable != false,
             f => $"the type of {f} must be a nullable" );
@@ -43,6 +42,7 @@ public sealed class RequiredAttribute : ContractAspect
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
         base.BuildEligibility( builder );
+
         builder.MustSatisfy(
             p => p.Type.IsReferenceType != false || p.Type.IsNullable != false,
             p => $"the type of {p} must be a nullable" );
@@ -61,25 +61,27 @@ public sealed class RequiredAttribute : ContractAspect
             {
                 if ( value == null! )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof(ArgumentNullException),
-                        typeof(RequiredAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.RequiredErrorMessage ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentNullException),
+                            typeof(RequiredAttribute),
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            ContractLocalizedTextProvider.RequiredErrorMessage ) );
                 }
                 else
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                        typeof(ArgumentOutOfRangeException),
-                        typeof(RequiredAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.RequiredErrorMessage ) );
+                    throw ContractsServices.Default.ExceptionFactory.CreateException(
+                        ContractExceptionInfo.Create(
+                            typeof(ArgumentOutOfRangeException),
+                            typeof(RequiredAttribute),
+                            value,
+                            targetName,
+                            targetKind,
+                            meta.Target.ContractDirection,
+                            ContractLocalizedTextProvider.RequiredErrorMessage ) );
                 }
             }
         }
@@ -87,14 +89,15 @@ public sealed class RequiredAttribute : ContractAspect
         {
             if ( value == null! )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException( ContractExceptionInfo.Create(
-                    typeof(ArgumentNullException),
-                    typeof(RequiredAttribute),
-                    value,
-                    targetName,
-                    targetKind,
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.RequiredErrorMessage ) );
+                throw ContractsServices.Default.ExceptionFactory.CreateException(
+                    ContractExceptionInfo.Create(
+                        typeof(ArgumentNullException),
+                        typeof(RequiredAttribute),
+                        value,
+                        targetName,
+                        targetKind,
+                        meta.Target.ContractDirection,
+                        ContractLocalizedTextProvider.RequiredErrorMessage ) );
             }
         }
     }
