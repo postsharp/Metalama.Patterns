@@ -1,10 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace.Formatters;
 
 /// <summary>
 /// A <see cref="Formatter{T}"/> for <see cref="Type"/> values.
 /// </summary>
+[PublicAPI]
 public sealed class TypeFormatter : Formatter<Type>
 {
     private readonly bool _includeNamespace;

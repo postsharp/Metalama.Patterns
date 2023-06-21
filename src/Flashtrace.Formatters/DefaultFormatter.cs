@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace.Formatters;
 
 // Must be a separate class because we want to share among different generic types.
@@ -7,6 +9,7 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// The default formatter that formats objects by calling <see cref="object.ToString"/>.
 /// </summary>
+[PublicAPI]
 public sealed class DefaultFormatter<TValue> : Formatter<TValue>
 {
     private static readonly bool _isValueType = typeof(TValue).IsValueType;

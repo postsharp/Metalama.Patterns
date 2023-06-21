@@ -10,7 +10,7 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// The base class for type extension factories for types deriving or implementing <typeparamref name="T"/>.
 /// </summary>
-internal class TypeExtensionFactoryBase<T>
+internal abstract class TypeExtensionFactoryBase<T>
     where T : class
 {
     private readonly Type _genericInterfaceType;
@@ -20,7 +20,7 @@ internal class TypeExtensionFactoryBase<T>
 
     private readonly Dictionary<Type, TypeExtensionCacheUpdateCallback<T>> _cacheInvalidationCallbacks = new();
 
-    public TypeExtensionFactoryBase( Type genericInterfaceType, Type converterType )
+    protected TypeExtensionFactoryBase( Type genericInterfaceType, Type converterType )
     {
         this._genericInterfaceType = genericInterfaceType;
         this._converterType = converterType;
@@ -233,6 +233,7 @@ internal class TypeExtensionFactoryBase<T>
         return bestExtension;
     }
 
+    // ReSharper disable once UnusedMember.Global
     public void Clear()
     {
         lock ( this._instances )

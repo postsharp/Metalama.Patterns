@@ -2,9 +2,6 @@
 
 namespace Flashtrace.Formatters;
 
-/// <summary>
-/// Efficient formatter for enums.
-/// </summary>
 internal static class EnumFormatterCache<T>
     where T : Enum
 {

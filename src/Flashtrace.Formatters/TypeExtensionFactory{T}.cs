@@ -10,12 +10,16 @@ namespace Flashtrace.Formatters;
 internal class TypeExtensionFactory<T> : TypeExtensionFactoryBase<T>
     where T : class
 {
+    // ReSharper disable once MemberCanBeProtected.Global
     public TypeExtensionFactory( Type genericInterfaceType, Type converterType ) : base( genericInterfaceType, converterType ) { }
 
+    // ReSharper disable once UnusedMember.Global
     public T? Convert( T? o, Type targetObjectType ) => this.Convert( o, targetObjectType, null );
 
+    // ReSharper disable once UnusedMember.Global
     public void RegisterTypeExtension( Type targetType, Type typeExtensionType ) => this.RegisterTypeExtension( targetType, typeExtensionType, null );
 
+    // ReSharper disable once UnusedMember.Global
     public TypeExtensionInfo<T> GetTypeExtension(
         Type objectType,
         TypeExtensionCacheUpdateCallback<T> cacheUpdateCallback,

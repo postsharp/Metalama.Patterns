@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Globalization;
 
 namespace Flashtrace.Formatters;
@@ -17,6 +18,7 @@ namespace Flashtrace.Formatters;
 /// moment, call the <see cref="MakeImmutable"/> method, which unbinds the <see cref="UnsafeString"/> from
 /// its parent <see cref="UnsafeStringBuilder"/>.</para>
 /// </remarks>
+[PublicAPI]
 public sealed class UnsafeString
 {
     private int _version;

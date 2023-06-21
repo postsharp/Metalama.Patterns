@@ -14,8 +14,10 @@ internal readonly struct TypeExtensionInfo<T>
 
     public T Extension { get; }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public Type ObjectType { get; }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public bool IsGeneric { get; }
 
     public bool ShouldOverwrite( TypeExtensionInfo<T> typeExtension )

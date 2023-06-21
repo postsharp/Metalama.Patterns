@@ -3,6 +3,8 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable CommentTypo
 

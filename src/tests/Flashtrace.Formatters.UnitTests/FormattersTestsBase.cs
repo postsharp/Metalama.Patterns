@@ -17,6 +17,7 @@ public abstract class FormattersTestsBase
         this._logger = logger;
     }
 
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     protected bool EnableLogging { get; set; }
 
     /// <summary>

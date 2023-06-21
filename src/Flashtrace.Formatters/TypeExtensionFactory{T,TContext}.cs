@@ -15,6 +15,7 @@ internal class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
 {
     private readonly object?[] _contextArray;
 
+    // ReSharper disable once MemberCanBeProtected.Global
     public TypeExtensionFactory( Type genericInterfaceType, Type converterType, TContext? context )
         : base( genericInterfaceType, converterType )
     {

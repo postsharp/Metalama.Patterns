@@ -9,12 +9,14 @@ internal class FormatterConverter<TTarget> : Formatter<TTarget>
     private readonly IFormatter _wrapped;
     private readonly ConcurrentDictionary<IFormatter, FormatterConverter<TTarget>> _cache = new();
 
+    // ReSharper disable once MemberCanBeProtected.Global
     public FormatterConverter( IFormatter wrapped, IFormatterRepository repository )
         : base( repository )
     {
         this._wrapped = wrapped;
     }
 
+    // ReSharper disable once UnusedMember.Global
     public IFormatter<TTarget>? Convert( IFormatter? formatter )
         => formatter == null
             ? null

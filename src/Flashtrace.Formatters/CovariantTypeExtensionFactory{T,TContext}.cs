@@ -2,7 +2,7 @@
 
 namespace Flashtrace.Formatters;
 
-internal class CovariantTypeExtensionFactory<T, TContext> : TypeExtensionFactory<T, TContext>
+internal sealed class CovariantTypeExtensionFactory<T, TContext> : TypeExtensionFactory<T, TContext>
     where T : class
 {
     public CovariantTypeExtensionFactory( Type genericInterfaceType, Type converterType, TContext? context )

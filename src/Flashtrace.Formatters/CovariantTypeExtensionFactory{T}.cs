@@ -2,6 +2,7 @@
 
 namespace Flashtrace.Formatters;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 internal class CovariantTypeExtensionFactory<T> : TypeExtensionFactory<T>
     where T : class
 {

@@ -1,11 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace.Formatters;
 
 /// <summary>
 /// Defines a <see cref="Visit{TValue}(string, TValue, ref TState)"/> method invoked by <see cref="UnknownObjectAccessor.VisitProperties{TState}(IUnknownObjectPropertyVisitor{TState}, ref TState)"/>.
 /// </summary>
 /// <typeparam name="TState"></typeparam>
+[PublicAPI]
 public interface IUnknownObjectPropertyVisitor<TState>
 {
     /// <summary>
