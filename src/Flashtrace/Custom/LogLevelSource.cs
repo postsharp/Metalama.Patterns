@@ -14,8 +14,6 @@ namespace Flashtrace.Custom
     /// Instances of the <see cref="LogLevelSource"/> class are exposed as properties of the <see cref="Flashtrace.LogSource"/>
     /// class, e.g. <see cref="Flashtrace.LogSource.Debug"/> or <see cref="Flashtrace.LogSource.Error"/>.
     /// </summary>
-    [RequirePostSharp("PostSharp.Patterns.Common.Weaver", "AddCallerInfoTask", AnyTypeReference = true)]
-    [RequirePostSharp( typeof( AwaitInstrumentationAspectProvider ), AnyTypeReference = true )]
     public sealed class LogLevelSource 
     {
 

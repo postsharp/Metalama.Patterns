@@ -2,6 +2,7 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Flashtrace.Contexts
 {
@@ -136,7 +137,6 @@ namespace Flashtrace.Contexts
         public static CallerInfo GetDynamic(int skipFrames)
 #pragma warning restore CA1801
         {
-#if STACK_FRAME
             for ( int i = skipFrames + 1;  ; i++ )
             {
                 StackFrame frame = new StackFrame( i, true);
@@ -154,19 +154,17 @@ namespace Flashtrace.Contexts
                     continue;
                 }
 
+                // TODO: Are there any applicable Flashtrace types to use instead? Otherwise, remove this section.
+#if false
                 if ( (method.DeclaringType.Namespace != null && method.DeclaringType.Namespace.StartsWith( "PostSharp.Aspects", StringComparison.Ordinal )) ||
                      string.Equals( method.DeclaringType.Namespace, "PostSharp.Patterns.Diagnostics.ThreadingInstrumentation", StringComparison.Ordinal ) )
                 {
                     continue;
                 }
+#endif
 
                 return new CallerInfo(method.DeclaringType, method.Name, frame.GetFileName(), frame.GetFileLineNumber(), frame.GetFileColumnNumber(), CallerAttributes.None);
             }
-#else
-            return default;
-#endif
-      
-
         }
     }
 }

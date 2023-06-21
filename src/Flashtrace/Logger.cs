@@ -15,8 +15,6 @@ namespace Flashtrace
     [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes")]
     [SuppressMessage("Microsoft.Design", "CA1001")] // Loggers are meant to be forever - not disposable.
     [SuppressMessage("Microsoft.Design", "CA1031")]
-    [RequirePostSharp(typeof(AwaitInstrumentationAspectProvider), AnyTypeReference = true)]
-    [RequirePostSharp("PostSharp.Patterns.Common.Weaver", "AddCallerInfoTask", AnyTypeReference = true)]
     public partial class Logger
     {
         internal ILogger logger;
