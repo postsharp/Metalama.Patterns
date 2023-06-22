@@ -14,7 +14,7 @@ partial class SemanticMessageBuilder
 {
 
 	/// <summary>
-    /// Create a semantic message with 1 parameter (using tuples).
+    /// Create a semantic message with 1 parameter.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -27,7 +27,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 1 parameter.
+    /// Create a semantic message with 1 parameter (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -39,7 +39,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 2 parameters (using tuples).
+    /// Create a semantic message with 2 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -55,7 +55,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 2 parameters.
+    /// Create a semantic message with 2 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -69,7 +69,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 3 parameters (using tuples).
+    /// Create a semantic message with 3 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -88,7 +88,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 3 parameters.
+    /// Create a semantic message with 3 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -104,7 +104,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 4 parameters (using tuples).
+    /// Create a semantic message with 4 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -126,7 +126,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 4 parameters.
+    /// Create a semantic message with 4 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -144,7 +144,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 5 parameters (using tuples).
+    /// Create a semantic message with 5 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -169,7 +169,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 5 parameters.
+    /// Create a semantic message with 5 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -189,7 +189,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 6 parameters (using tuples).
+    /// Create a semantic message with 6 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -217,7 +217,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 6 parameters.
+    /// Create a semantic message with 6 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -239,7 +239,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 7 parameters (using tuples).
+    /// Create a semantic message with 7 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -270,7 +270,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 7 parameters.
+    /// Create a semantic message with 7 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -294,7 +294,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 8 parameters (using tuples).
+    /// Create a semantic message with 8 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -328,7 +328,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 8 parameters.
+    /// Create a semantic message with 8 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -354,7 +354,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 9 parameters (using tuples).
+    /// Create a semantic message with 9 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -391,7 +391,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 9 parameters.
+    /// Create a semantic message with 9 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -419,7 +419,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 10 parameters (using tuples).
+    /// Create a semantic message with 10 parameters.
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
@@ -459,7 +459,7 @@ partial class SemanticMessageBuilder
     }
 
 	/// <summary>
-    /// Create a semantic message with 10 parameters.
+    /// Create a semantic message with 10 parameters (using tuples).
     /// </summary>
     /// <param name="name">Name of the message.</param>
 	/// <typeparam name="T1">Type of the first parameter value.</typeparam>
