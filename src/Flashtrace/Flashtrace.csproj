@@ -31,14 +31,59 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ILogger.Generated.tt</DependentUpon>
     </Compile>
-    <None Update="Logger.Generated.tt">
+    <None Update="NullLogger.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Logger.Generated.cs</LastGenOutput>
+      <LastGenOutput>NullLogger.Generated.cs</LastGenOutput>
     </None>
-    <Compile Update="Logger.Generated.cs">
+    <Compile Update="NullLogger.Generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Logger.Generated.tt</DependentUpon>
+      <DependentUpon>NullLogger.Generated.tt</DependentUpon>
+    </Compile>
+    <None Update="LegacySourceLogger.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>LegacySourceLogger.Generated.cs</LastGenOutput>
+    </None>
+    <Compile Update="LegacySourceLogger.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LegacySourceLogger.Generated.tt</DependentUpon>
+    </Compile>
+    <None Update="SemanticMessageBuilder.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SemanticMessageBuilder.Generated.cs</LastGenOutput>
+    </None>
+    <Compile Update="SemanticMessageBuilder.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SemanticMessageBuilder.Generated.tt</DependentUpon>
+    </Compile>
+    <None Update="Messages\FormattedMessage.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>FormattedMessage.Generated.cs</LastGenOutput>
+    </None>
+    <Compile Update="Messages\FormattedMessage.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FormattedMessage.Generated.tt</DependentUpon>
+    </Compile>
+    <None Update="Messages\SemanticMessage.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SemanticMessage.Generated.cs</LastGenOutput>
+    </None>
+    <Compile Update="Messages\SemanticMessage.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SemanticMessage.Generated.tt</DependentUpon>
+    </Compile>
+    <None Update="FormattedMessageBuilder.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>FormattedMessageBuilder.Generated.cs</LastGenOutput>
+    </None>
+    <Compile Update="FormattedMessageBuilder.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FormattedMessageBuilder.Generated.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 	

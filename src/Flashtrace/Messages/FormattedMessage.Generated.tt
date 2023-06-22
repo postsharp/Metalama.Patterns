@@ -1,0 +1,80 @@
+﻿// THIS FILE IS T4-GENERATED.
+// To edit, go to FormattedMessage.Generated.tt.
+// To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" FormattedMessage.Generated.tt
+
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ include file="..\Common.ttinclude" #>
+
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Flashtrace.Messages;
+<#
+for (var i = 1; i <= 10; i++)
+{
+#>
+
+/// <summary>
+/// Encapsulates a text message with <#= i #> parameter<#= GetPlural( i ) #>. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
+/// </summary>
+[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
+[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
+public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
+{
+	private readonly string formattingString;
+	
+	<#= Repeat( "private readonly T{0} arg{0}; ", i, "" ) #>
+
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
+	internal FormattedMessage( string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
+	{
+		this.formattingString = formattingString;
+		<#= Repeat( "this.arg{0} = arg{0}; ", i, "" ) #>
+	}
+
+	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	{
+		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#= i #>, null));
+
+		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
+		ArraySegment<char> parameter;
+
+		   <#
+for (var j = 1; j <= i; j++)
+{
+#>
+
+		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		parameter = parser.GetNextParameter();
+
+		if ( parameter.Array == null )
+		{
+			throw new InvalidFormattingStringException("The formatting string must have exactly <#= i #> parameters.");
+		}
+
+		recordBuilder.WriteCustomParameter( <#= j - 1 #>, parameter, arg<#= j #>, CustomLogParameterOptions.FormattedStringParameter );
+
+		<#
+}
+#>
+
+		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+
+		if ( parser.GetNextParameter().Array != null )
+		{
+			throw new InvalidFormattingStringException("The formatting string must have exactly <#= i #> parameters.");
+		}
+
+		recordBuilder.EndWriteItem(item);
+
+
+	}
+
+	/// <inheritdoc />
+	public override string ToString() => DebugMessageFormatter.Format( this );
+}
+<#
+}
+#>
