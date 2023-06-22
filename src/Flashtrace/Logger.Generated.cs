@@ -8,12 +8,12 @@
 
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
-using Flashtrace.Custom.Messages;
+using Flashtrace.Messages;
 
 namespace Flashtrace
 {
    
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 1 parameter. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -155,7 +155,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 2 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -318,7 +318,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 3 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -502,7 +502,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 4 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -707,7 +707,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 5 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -933,7 +933,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 6 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -1180,7 +1180,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 7 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -1448,7 +1448,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 8 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -1737,7 +1737,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 9 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
@@ -2047,7 +2047,7 @@ namespace Flashtrace
         }
 	}
 	
-	namespace Custom.Messages
+	namespace Messages
 	{
 		/// <summary>
 		/// Encapsulates a text message with 10 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.

@@ -3,7 +3,7 @@
 using Flashtrace.Contexts;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Abstraction of the Logging facility, through which other components emit their log records. This

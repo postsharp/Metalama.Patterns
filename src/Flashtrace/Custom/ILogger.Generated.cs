@@ -3,9 +3,11 @@
 // To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" ILogger.Generated.tt
 
 
+// TODO: Split T4 template per generated type.
+
 using Flashtrace.Contexts;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
 	public partial interface ILogger
 	{

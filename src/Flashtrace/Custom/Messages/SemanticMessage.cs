@@ -3,7 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Flashtrace.Custom.Messages
+namespace Flashtrace.Messages
 {
     /// <summary>
     /// Encapsulates a semantic message without parameter. Use the <see cref="SemanticMessageBuilder"/> class to create an instance of this type.

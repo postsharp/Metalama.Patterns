@@ -2,7 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Determines the behavior of the <see cref="LogEventData.VisitProperties{TVisitorState}(ILoggingPropertyVisitor{TVisitorState}, ref TVisitorState, in LoggingPropertyVisitorOptions)"/>

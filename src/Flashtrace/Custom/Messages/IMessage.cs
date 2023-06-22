@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace.Custom.Messages
+namespace Flashtrace.Messages
 {
     /// <summary>
     /// Represents a message that can be used with the <see cref="LogSource"/> class. To create a message 

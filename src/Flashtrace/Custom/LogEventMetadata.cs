@@ -1,10 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+
 using Flashtrace.Formatters;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Defines how the raw CLR object stored in a <see cref="LogEventData"/> is translated into a set of visitable properties and an expression

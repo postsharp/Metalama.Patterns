@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace.Custom
+
+
+namespace Flashtrace
 {
     /// <summary>
     /// Defines a <see cref="Visit{TValue}(string, TValue, in LoggingPropertyOptions, ref TState)"/> method invoked for each property of

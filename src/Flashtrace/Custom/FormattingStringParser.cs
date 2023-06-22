@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Parses the formatting string for custom messages of the <see cref="LogLevelSource"/> and <see cref="LogActivity{TActivityDescription}"/> classes.

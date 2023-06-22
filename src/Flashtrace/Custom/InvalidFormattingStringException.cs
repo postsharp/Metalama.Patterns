@@ -2,7 +2,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Exception thrown by the <see cref="FormattingStringParser"/> and by the <c>Logger</c> class

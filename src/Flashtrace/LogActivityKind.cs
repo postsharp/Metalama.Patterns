@@ -9,7 +9,7 @@ namespace Flashtrace
     {
         // TODO: Check acutal uses of default, update "created by" below.
         /// <summary>
-        /// Default, created by <see cref="Custom.LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> or <see cref="Custom.LogLevelSource.LogActivityAsync{TDescription, TResult}(in TDescription, Func{Task{TResult}}, in OpenActivityOptions)"/>.
+        /// Default, created by <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> or <see cref="LogLevelSource.LogActivityAsync{TDescription, TResult}(in TDescription, Func{Task{TResult}}, in OpenActivityOptions)"/>.
         /// </summary>
         Default,
 

@@ -3,7 +3,7 @@
 using Flashtrace.Formatters;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Specifies the behavior of logging properties (exposed by <see cref="LogEventData"/>), such as

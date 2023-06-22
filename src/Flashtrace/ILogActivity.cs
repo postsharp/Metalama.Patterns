@@ -1,7 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
-using Flashtrace.Custom.Messages;
+using Flashtrace.Messages;
+using Flashtrace.Messages;
 using System.ComponentModel;
 
 namespace Flashtrace
@@ -68,7 +69,7 @@ namespace Flashtrace
 #pragma warning disable CA1716 // Identifiers should not match keywords
         /// <summary>
         /// Resumes the current async activity after it has been suspended by a call to <see cref="LogActivity{TActivityDescription}.Suspend()"/>. There is typically no need
-        /// to invoke this method in user code because all async methods that use the <see cref="Custom.LogLevelSource"/> class are automatically instrumented.
+        /// to invoke this method in user code because all async methods that use the <see cref="LogLevelSource"/> class are automatically instrumented.
         /// </summary>
         void Resume();
 
@@ -81,7 +82,7 @@ namespace Flashtrace
         /// <summary>
         /// Suspends the current async activity.
         /// The activity must than be resumed by a call of the <see cref="LogActivity{TActivityDescription}.Resume()"/> method.
-        /// There is typically no need to invoke this method in user code because all async methods that use the <see cref="Custom.LogLevelSource"/> class are automatically instrumented.
+        /// There is typically no need to invoke this method in user code because all async methods that use the <see cref="LogLevelSource"/> class are automatically instrumented.
         /// </summary>
         void Suspend();
 

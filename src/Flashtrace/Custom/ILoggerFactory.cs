@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace.Custom
+
+
+namespace Flashtrace
 {
     /// <summary>
     /// Creates instances of the <see cref="ILogger"/> interface. An instance of this interface must be registered into the <see cref="ServiceLocator"/>.

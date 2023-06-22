@@ -2,7 +2,8 @@
 
 using Flashtrace.Contexts;
 
-namespace Flashtrace.Custom
+
+namespace Flashtrace
 {
     /// <summary>
     /// Abstraction of custom logging methods where the contact has already been resolved.
@@ -55,18 +56,7 @@ namespace Flashtrace.Custom
         /// <param name="waited">The "thing" that is awaited for. Typically a <see cref="System.Threading.Tasks.Task"/>, or <c>TaskInfo</c>, or another context.</param>
         void SetWaitDependency( ILoggingContext context, object waited );
     }
-
-    /// <summary>
-    /// This means a <c>LoggingTypeSource</c> starting in 6.8.
-    /// </summary>
-    internal interface ITransactionAwareContextLocalLogger
-    {
-        /// <summary>
-        /// Evaluates whether a transaction needs to be open for a specified <see cref="OpenActivityOptions"/> and updates
-        /// its <see cref="OpenActivityOptions.TransactionRequirement"/> property.
-        /// This method must be invoked before calling <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/>.
-        /// </summary>
-        /// <param name="options">Options of the custom activity that creates the transaction.</param>
-        void ApplyTransactionRequirements( ref OpenActivityOptions options );
-    }
 }
+
+namespace Flashtrace.Custom
+{ }

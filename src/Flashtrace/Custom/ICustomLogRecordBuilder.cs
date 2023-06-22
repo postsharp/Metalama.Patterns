@@ -2,7 +2,7 @@
 
 using Flashtrace.Formatters;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Allows to build a custom log record (typically, but not necessarily, a string). A log record can be composed of one of several

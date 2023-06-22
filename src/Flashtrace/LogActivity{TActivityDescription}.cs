@@ -1,8 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
-using Flashtrace.Custom;
-using Flashtrace.Custom.Messages;
+
+using Flashtrace.Messages;
+using Flashtrace.Messages;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;

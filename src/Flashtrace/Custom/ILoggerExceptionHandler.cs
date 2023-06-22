@@ -2,7 +2,8 @@
 
 using Flashtrace.Contexts;
 
-namespace Flashtrace.Custom
+
+namespace Flashtrace
 {
     /// <summary>
     /// Defines methods called in case of exception in logging infrastructure classes. This interface

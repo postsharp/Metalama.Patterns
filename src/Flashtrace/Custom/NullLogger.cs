@@ -5,7 +5,7 @@ using Flashtrace.Formatters;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory, ILoggingContext, ICustomLogRecordBuilder, ILogActivityOptions,
                                         ILoggerFactoryProvider

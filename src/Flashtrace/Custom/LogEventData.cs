@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace.Custom
+
+
+namespace Flashtrace
 {
     /// <summary>
     /// Specifies the properties of a log event (such as a message, an activity opening or an activity closing).

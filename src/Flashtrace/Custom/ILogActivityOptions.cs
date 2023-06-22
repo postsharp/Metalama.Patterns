@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Exposes the default verbosity of the <see cref="LogSource"/> and <see cref="LogActivity{TActivityDescription}"/> classes when creating and closing activities.

@@ -98,10 +98,10 @@ namespace Flashtrace
         }
 
         /// <summary>
-        /// Determines whether a give <see cref="LogRecordKind"/> represents a custom record, emitted by the <see cref="Custom.LogLevelSource"/> class.
+        /// Determines whether a give <see cref="LogRecordKind"/> represents a custom record, emitted by the <see cref="LogLevelSource"/> class.
         /// </summary>
         /// <param name="kind">A <see cref="LogRecordKind"/>.</param>
-        /// <returns><c>true</c> if <paramref name="kind"/> is a custom kind of record emitted by the <see cref="Custom.LogLevelSource"/> class,
+        /// <returns><c>true</c> if <paramref name="kind"/> is a custom kind of record emitted by the <see cref="LogLevelSource"/> class,
         /// otherwise <c>false</c>.</returns>
         public static bool IsCustom( this LogRecordKind kind )
         {

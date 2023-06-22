@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
     /// <summary>
     /// Specifies the options (<see cref="LoggingPropertyOptions"/>) of a logging property that is

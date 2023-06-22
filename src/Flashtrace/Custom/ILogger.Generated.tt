@@ -5,9 +5,11 @@
 <#@ Template debug="false" hostspecific="false" language="C#" #>
 <#@ Output extension=".cs" #>
 
+// TODO: Split T4 template per generated type.
+
 using Flashtrace.Contexts;
 
-namespace Flashtrace.Custom
+namespace Flashtrace
 {
 	public partial interface ILogger
 	{
