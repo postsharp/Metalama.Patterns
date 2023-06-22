@@ -2,7 +2,6 @@
 
 using Flashtrace.Contexts;
 
-
 namespace Flashtrace
 {
     /// <summary>
@@ -58,5 +57,4 @@ namespace Flashtrace
     }
 }
 
-namespace Flashtrace.Custom
-{ }
+namespace Flashtrace.Custom { }

@@ -18,11 +18,12 @@ namespace Flashtrace
         /// <param name="formattingString">The formatting string.</param>
         /// <param name="args"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-        public static FormattedMessageArray Formatted( 
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
+        public static FormattedMessageArray Formatted(
             string formattingString,
+
             // Intentionally removing the params modifier to prevent the C# compiler to pick this overload unintentionally:
-            object[] args ) 
+            object[] args )
             => new( formattingString, args );
 
         /// <summary>
@@ -30,7 +31,7 @@ namespace Flashtrace
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
         public static FormattedMessage Formatted( string text ) => new( text );
     }
 }

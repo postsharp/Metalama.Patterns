@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
-
 using Flashtrace.Messages;
 using Flashtrace.Messages;
 using System.ComponentModel;
@@ -69,7 +68,7 @@ namespace Flashtrace
         public void Write<T>( in T message, Exception exception, in WriteMessageOptions options, ref CallerInfo callerInfo )
             where T : IMessage
         {
-            (var logger, var isEnabled) = this.LogSource.Logger.GetContextLocalLogger( this.Level );
+            var (logger, isEnabled) = this.LogSource.Logger.GetContextLocalLogger( this.Level );
 
             if ( !isEnabled )
             {

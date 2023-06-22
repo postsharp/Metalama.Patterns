@@ -11,8 +11,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Messages;
 <#
-for (var i = 1; i <= 10; i++)
-{
+    for (var i = 1; i <= 10; i++)
+    {
 #>
 
  /// <summary>
@@ -40,14 +40,14 @@ public readonly struct SemanticMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#= i #>, this.messageName));
 
 		   <#
-for (var j = 1; j <= i; j++)
-{
+        for (var j = 1; j <= i; j++)
+        {
 #>
 
 		recordBuilder.WriteCustomParameter( <#= j - 1 #>, this.name<#= j #>, this.value<#= j #>, CustomLogParameterOptions.SemanticParameter );
 
 		<#
-}
+        }
 #>
 
 		recordBuilder.EndWriteItem(item);
@@ -58,5 +58,5 @@ for (var j = 1; j <= i; j++)
 	public override string ToString() => DebugMessageFormatter.Format( this );
 }
 <#
-}
+    }
 #>

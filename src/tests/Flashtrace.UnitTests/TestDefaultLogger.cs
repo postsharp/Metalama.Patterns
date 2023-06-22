@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System.Diagnostics;
 using Xunit;
 
 namespace Flashtrace.UnitTests;
@@ -8,7 +10,7 @@ public class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixt
     public class TraceSourceFixture
     {
         public readonly TraceSource TraceSource = TraceSourceLogger.GetTraceSource();
-        public readonly MyListener Listener = new MyListener();
+        public readonly MyListener Listener = new();
 
         public LogSource LogSource = LogSource.Get();
 
@@ -31,10 +33,10 @@ public class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixt
     public void Test_TextLogger_Write()
     {
         this.fixture.LogSource.WithLevel( LogLevel.Error ).Write( FormattedMessageBuilder.Formatted( "Error" ) );
-        this.fixture.LogSource.WithLevel( LogLevel.Warning ).Write(FormattedMessageBuilder.Formatted("Warning"));
-        this.fixture.LogSource.WithLevel( LogLevel.Critical ).Write(FormattedMessageBuilder.Formatted("Critical"));
-        this.fixture.LogSource.WithLevel( LogLevel.Debug ).Write(FormattedMessageBuilder.Formatted("Debug"));
-        this.fixture.LogSource.WithLevel( LogLevel.Trace ).Write(FormattedMessageBuilder.Formatted("Trace"));
+        this.fixture.LogSource.WithLevel( LogLevel.Warning ).Write( FormattedMessageBuilder.Formatted( "Warning" ) );
+        this.fixture.LogSource.WithLevel( LogLevel.Critical ).Write( FormattedMessageBuilder.Formatted( "Critical" ) );
+        this.fixture.LogSource.WithLevel( LogLevel.Debug ).Write( FormattedMessageBuilder.Formatted( "Debug" ) );
+        this.fixture.LogSource.WithLevel( LogLevel.Trace ).Write( FormattedMessageBuilder.Formatted( "Trace" ) );
         Assert.Equal( 5, this.fixture.Listener.Messages.Count );
         Assert.Equal( "Error", this.fixture.Listener.Messages[0] );
     }
@@ -42,7 +44,7 @@ public class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixt
     [Fact]
     public void Test_TextLogger_ActivitySuccess()
     {
-        using (var activity = this.fixture.LogSource.Default.OpenActivity(FormattedMessageBuilder.Formatted("Activity")))
+        using ( var activity = this.fixture.LogSource.Default.OpenActivity( FormattedMessageBuilder.Formatted( "Activity" ) ) )
         {
             activity.SetSuccess();
         }
@@ -55,9 +57,9 @@ public class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixt
     [Fact]
     public void Test_TextLogger_ActivityFailure()
     {
-        using (var activity = this.fixture.LogSource.Default.OpenActivity(FormattedMessageBuilder.Formatted("Activity")))
+        using ( var activity = this.fixture.LogSource.Default.OpenActivity( FormattedMessageBuilder.Formatted( "Activity" ) ) )
         {
-            activity.SetOutcome( LogLevel.Error, FormattedMessageBuilder.Formatted("Oops: {Hello}", "Hello"));
+            activity.SetOutcome( LogLevel.Error, FormattedMessageBuilder.Formatted( "Oops: {Hello}", "Hello" ) );
         }
 
         Assert.Equal( 2, this.fixture.Listener.Messages.Count );
@@ -68,10 +70,10 @@ public class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixt
     [Fact]
     public void Test_SemanticLogger_Write()
     {
-        this.fixture.LogSource.WithLevel( LogLevel.Error ).Write( SemanticMessageBuilder.Semantic("Error", ("a", "b"), ("b", "c") ));
-        this.fixture.LogSource.WithLevel( LogLevel.Warning ).Write( SemanticMessageBuilder.Semantic("Warning", ("a", "b") ));
-        this.fixture.LogSource.WithLevel( LogLevel.Critical ).Write( SemanticMessageBuilder.Semantic("Critical", ("a", "b") ));
-        this.fixture.LogSource.WithLevel( LogLevel.Debug ).Write( SemanticMessageBuilder.Semantic("Debug", ("a", "b") ));
+        this.fixture.LogSource.WithLevel( LogLevel.Error ).Write( SemanticMessageBuilder.Semantic( "Error", ("a", "b"), ("b", "c") ) );
+        this.fixture.LogSource.WithLevel( LogLevel.Warning ).Write( SemanticMessageBuilder.Semantic( "Warning", ("a", "b") ) );
+        this.fixture.LogSource.WithLevel( LogLevel.Critical ).Write( SemanticMessageBuilder.Semantic( "Critical", ("a", "b") ) );
+        this.fixture.LogSource.WithLevel( LogLevel.Debug ).Write( SemanticMessageBuilder.Semantic( "Debug", ("a", "b") ) );
 
         // TODO: Review - tell gael about this likely C# compiler bug.
 
@@ -86,7 +88,7 @@ public class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixt
     [Fact]
     public void Test_SemanticLogger_ActivitySuccess()
     {
-        using (var activity = this.fixture.LogSource.Default.OpenActivity(SemanticMessageBuilder.Semantic("Activity")))
+        using ( var activity = this.fixture.LogSource.Default.OpenActivity( SemanticMessageBuilder.Semantic( "Activity" ) ) )
         {
             activity.SetSuccess();
         }
@@ -101,7 +103,7 @@ public class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixt
     {
         using ( var activity = this.fixture.LogSource.Default.OpenActivity( SemanticMessageBuilder.Semantic( "Activity", ("a", "b") ) ) )
         {
-            activity.SetOutcome( LogLevel.Error, SemanticMessageBuilder.Semantic( "Failed", ("c", "d") ));
+            activity.SetOutcome( LogLevel.Error, SemanticMessageBuilder.Semantic( "Failed", ("c", "d") ) );
         }
 
         Assert.Equal( 2, this.fixture.Listener.Messages.Count );
@@ -111,33 +113,33 @@ public class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixt
 
     public class MyListener : TraceListener
     {
-        string buffer = "";
-        public readonly List<string> Messages = new List<string>();
-    
-        public override void Write(string message)
+        private string buffer = "";
+        public readonly List<string> Messages = new();
+
+        public override void Write( string message )
         {
-            buffer += message;
+            this.buffer += message;
         }
 
-        public override void WriteLine(string message)
+        public override void WriteLine( string message )
         {
-            this.Messages.Add(buffer + message );
-            buffer = "";
-        }
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
-        {
-            this.Messages.Add(message );
+            this.Messages.Add( this.buffer + message );
+            this.buffer = "";
         }
 
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id)
+        public override void TraceEvent( TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message )
         {
-            base.TraceEvent(eventCache, source, eventType, id);
+            this.Messages.Add( message );
         }
 
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args)
+        public override void TraceEvent( TraceEventCache eventCache, string source, TraceEventType eventType, int id )
         {
-            this.Messages.Add(string.Format(format, args));
+            base.TraceEvent( eventCache, source, eventType, id );
         }
 
+        public override void TraceEvent( TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args )
+        {
+            this.Messages.Add( string.Format( format, args ) );
+        }
     }
 }

@@ -35,8 +35,6 @@ namespace Flashtrace
         /// </summary>
         protected InvalidFormattingStringException(
             SerializationInfo info,
-            StreamingContext context ) : base( info, context )
-        {
-        }
+            StreamingContext context ) : base( info, context ) { }
     }
 }

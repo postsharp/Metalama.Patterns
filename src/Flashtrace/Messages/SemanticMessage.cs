@@ -13,7 +13,7 @@ namespace Flashtrace.Messages
     {
         private readonly string messageName;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
         internal SemanticMessage( string messageName )
         {
             this.messageName = messageName;

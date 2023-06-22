@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
-
 using Flashtrace.Messages;
 using Flashtrace.Messages;
 using System.ComponentModel;
@@ -24,7 +23,7 @@ namespace Flashtrace
 
         private readonly LogLevels levels;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
         internal LogActivity( IContextLocalLogger logger, LogLevels levels, ILoggingContext context, in TActivityDescription description )
         {
             this.description = description;

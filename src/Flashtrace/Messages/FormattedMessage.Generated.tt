@@ -11,8 +11,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Messages;
 <#
-for (var i = 1; i <= 10; i++)
-{
+    for (var i = 1; i <= 10; i++)
+    {
 #>
 
 /// <summary>
@@ -42,8 +42,8 @@ public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 		ArraySegment<char> parameter;
 
 		   <#
-for (var j = 1; j <= i; j++)
-{
+        for (var j = 1; j <= i; j++)
+        {
 #>
 
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -57,7 +57,7 @@ for (var j = 1; j <= i; j++)
 		recordBuilder.WriteCustomParameter( <#= j - 1 #>, parameter, arg<#= j #>, CustomLogParameterOptions.FormattedStringParameter );
 
 		<#
-}
+        }
 #>
 
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
@@ -76,5 +76,5 @@ for (var j = 1; j <= i; j++)
 	public override string ToString() => DebugMessageFormatter.Format( this );
 }
 <#
-}
+    }
 #>

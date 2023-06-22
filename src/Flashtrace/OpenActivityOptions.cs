@@ -2,7 +2,6 @@
 
 using Flashtrace.Contexts;
 using Flashtrace.Correlation;
-
 using Flashtrace.Transactions;
 using System.Diagnostics.CodeAnalysis;
 

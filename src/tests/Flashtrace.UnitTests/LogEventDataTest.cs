@@ -16,7 +16,6 @@ public class LogEventDataTests
         Assert.Equal( 2, properties.Count );
         Assert.Equal( "Value", properties["Name1"] );
         Assert.Equal( 2, properties["Name2"] );
-
     }
 
     [Fact]
@@ -56,7 +55,7 @@ public class LogEventDataTests
     [Fact]
     public void TestAugmentedEmpty()
     {
-        var data = default( LogEventData ).WithAdditionalProperty( "Name3", 1.2 );
+        var data = default(LogEventData).WithAdditionalProperty( "Name3", 1.2 );
 
         var properties = data.ToDictionary();
 
@@ -75,7 +74,6 @@ public class LogEventDataTests
         Assert.Same( rawData, expressionModel.Data );
     }
 
-
     [Fact]
     public void TestAnnotatedProperties()
     {
@@ -91,10 +89,9 @@ public class LogEventDataTests
         var properties = eventData.ToDictionary();
 
         Assert.Equal( 1, properties.Count );
-
     }
 
-    class TestExpressionModel
+    private class TestExpressionModel
     {
         public readonly object Data;
 
@@ -106,15 +103,12 @@ public class LogEventDataTests
 
     private class TestMetadata : LogEventMetadata<TestExpressionModel>
     {
-        public TestMetadata() : base( "Test" )
-        {
-        }
+        public TestMetadata() : base( "Test" ) { }
 
         public override TestExpressionModel GetExpressionModel( object data )
         {
             return new TestExpressionModel( data );
         }
-
     }
 
     private class PropertiesWithAttributes
@@ -122,9 +116,7 @@ public class LogEventDataTests
         [LoggingPropertyOptions( IsIgnored = true )]
         public string Ignored { get; set; }
 
-
         [LoggingPropertyOptions( IsInherited = true )]
         public string Inherited { get; set; }
-
     }
 }

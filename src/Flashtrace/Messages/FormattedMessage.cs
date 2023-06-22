@@ -14,7 +14,7 @@ namespace Flashtrace.Messages
     {
         private readonly string text;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
         internal FormattedMessage( string text )
         {
             this.text = text;
