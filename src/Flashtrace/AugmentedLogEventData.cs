@@ -4,120 +4,120 @@ using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Flashtrace
+namespace Flashtrace;
+
+internal static class AugmentedLogEventData
 {
-    internal static class AugmentedLogEventData
+    private static readonly ConcurrentDictionary<(Type, Type), object> _delegateCache = new();
+
+    public static LogEventData Augment<T>( in LogEventData augmented, string propertyName, T propertyValue, in LoggingPropertyOptions options )
     {
-        private static readonly ConcurrentDictionary<(Type, Type), object> delegateCache = new();
+        var augmentedType = augmented.Metadata?.ExpressionModelType ?? typeof(object);
 
-        public static LogEventData Augment<T>( in LogEventData augmented, string propertyName, T propertyValue, in LoggingPropertyOptions options )
+        var factory = (CreateMetaDataDelegate<T>) _delegateCache.GetOrAdd(
+            (typeof(T), augmentedType),
+            t => CreateFactory<T>( t.Item2 ) );
+
+        var instance = factory( augmented, propertyName, propertyValue, options );
+
+        return LogEventData.Create( instance, instance );
+    }
+
+    private static CreateMetaDataDelegate<TValue> CreateFactory<TValue>( Type augmentedType )
+    {
+        var augmentedParameter = Expression.Parameter( typeof(LogEventData).MakeByRefType() );
+        var propertyNameParameter = Expression.Parameter( typeof(string) );
+        var propertyValueParameter = Expression.Parameter( typeof(TValue) );
+        var optionsParameter = Expression.Parameter( typeof(LoggingPropertyOptions).MakeByRefType() );
+
+        var genericType = typeof(MetaData<,>).MakeGenericType( typeof(TValue), augmentedType );
+
+        Expression newExpression = Expression.New(
+            genericType.GetConstructors( BindingFlags.Instance | BindingFlags.Public )[0],
+            augmentedParameter,
+            propertyNameParameter,
+            propertyValueParameter,
+            optionsParameter );
+
+        var lambda = Expression.Lambda<CreateMetaDataDelegate<TValue>>(
+            newExpression,
+            augmentedParameter,
+            propertyNameParameter,
+            propertyValueParameter,
+            optionsParameter );
+
+        return lambda.Compile();
+    }
+
+    private delegate LogEventMetadata CreateMetaDataDelegate<TValue>(
+        in LogEventData augmented,
+        string propertyName,
+        TValue propertyValue,
+        in LoggingPropertyOptions propertyOptions );
+
+    // It's beneficial to have the data and metadata in the same object because we need an instance of both anyway.
+    private sealed class MetaData<TValue, TAugmented> : LogEventMetadata<TAugmented>
+    {
+        private readonly LogEventData _augmented;
+
+        private readonly string _propertyName;
+
+        private readonly TValue _propertyValue;
+
+        private readonly LoggingPropertyOptions _propertyOptions;
+
+        public MetaData( in LogEventData augmented, string propertyName, TValue propertyValue, in LoggingPropertyOptions propertyOptions ) :
+            base( augmented.Metadata?.Name )
         {
-            var augmentedType = augmented.Metadata?.ExpressionModelType ?? typeof(object);
-
-            CreateMetaDataDelegate<T> factory = (CreateMetaDataDelegate<T>) delegateCache.GetOrAdd(
-                (typeof(T), augmentedType),
-                t => CreateFactory<T>( t.Item2 ) );
-
-            var instance = factory( augmented, propertyName, propertyValue, options );
-
-            return LogEventData.Create( instance, instance );
+            this._augmented = augmented;
+            this._propertyName = propertyName;
+            this._propertyValue = propertyValue;
+            this._propertyOptions = propertyOptions;
         }
 
-        private static CreateMetaDataDelegate<TValue> CreateFactory<TValue>( Type augmentedType )
+        public override void VisitProperties<TVisitorState>(
+            object? data,
+            ILoggingPropertyVisitor<TVisitorState> visitor,
+            ref TVisitorState visitorState,
+            in LoggingPropertyVisitorOptions visitorOptions = default )
         {
-            var augmentedParameter = Expression.Parameter( typeof(LogEventData).MakeByRefType() );
-            var propertyNameParameter = Expression.Parameter( typeof(string) );
-            var propertyValueParameter = Expression.Parameter( typeof(TValue) );
-            var optionsParameter = Expression.Parameter( typeof(LoggingPropertyOptions).MakeByRefType() );
+            if ( !visitorOptions.OnlyInherited || this._propertyOptions.IsInherited )
+            {
+                visitor.Visit( this._propertyName, this._propertyValue, this._propertyOptions, ref visitorState );
+            }
 
-            var genericType = typeof(MetaData<,>).MakeGenericType( typeof(TValue), augmentedType );
-
-            Expression newExpression = Expression.New(
-                genericType.GetConstructors( BindingFlags.Instance | BindingFlags.Public )[0],
-                augmentedParameter,
-                propertyNameParameter,
-                propertyValueParameter,
-                optionsParameter );
-
-            Expression<CreateMetaDataDelegate<TValue>> lambda = Expression.Lambda<CreateMetaDataDelegate<TValue>>(
-                newExpression,
-                augmentedParameter,
-                propertyNameParameter,
-                propertyValueParameter,
-                optionsParameter );
-
-            return lambda.Compile();
+            this._augmented.VisitProperties( visitor, ref visitorState, visitorOptions );
         }
 
-        private delegate LogEventMetadata CreateMetaDataDelegate<TValue>(
-            in LogEventData augmented,
-            string propertyName,
-            TValue propertyValue,
-            in LoggingPropertyOptions propertyOptions );
-
-        // It's beneficial to have the data and metadata in the same object because we need an instance of both anyway.
-        private class MetaData<TValue, TAugmented> : LogEventMetadata<TAugmented>
+        public override bool HasInheritedProperty( object? data )
         {
-            public LogEventData Augmented;
-
-            public string PropertyName { get; }
-
-            public TValue PropertyValue { get; }
-
-            public LoggingPropertyOptions PropertyOptions { get; }
-
-            public MetaData( in LogEventData augmented, string propertyName, TValue propertyValue, in LoggingPropertyOptions propertyOptions ) :
-                base( augmented.Metadata?.Name )
+            if ( !ReferenceEquals( data, this ) )
             {
-                this.Augmented = augmented;
-                this.PropertyName = propertyName;
-                this.PropertyValue = propertyValue;
-                this.PropertyOptions = propertyOptions;
+                throw new FlashtraceAssertionFailedException();
             }
 
-            public override void VisitProperties<TVisitorState>(
-                object data,
-                ILoggingPropertyVisitor<TVisitorState> visitor,
-                ref TVisitorState visitorState,
-                in LoggingPropertyVisitorOptions visitorOptions = default )
+            if ( this._propertyOptions.IsInherited )
             {
-                if ( !visitorOptions.OnlyInherited || this.PropertyOptions.IsInherited )
-                {
-                    visitor.Visit( this.PropertyName, this.PropertyValue, this.PropertyOptions, ref visitorState );
-                }
-
-                this.Augmented.VisitProperties( visitor, ref visitorState, visitorOptions );
+                return true;
             }
 
-            public override bool HasInheritedProperty( object data )
+            if ( this._augmented.Data != null )
             {
-                if ( !ReferenceEquals( data, this ) )
-                {
-                    throw new FlashtraceAssertionFailedException();
-                }
-
-                if ( this.PropertyOptions.IsInherited )
-                {
-                    return true;
-                }
-
-                if ( this.Augmented.Data != null )
-                {
-                    return this.Augmented.Metadata.HasInheritedProperty( this.Augmented.Data );
-                }
-
-                return false;
+                // If this._augmented.Data is non-null, then this._augmented.Metadata must also be non-null. 
+                return this._augmented.Metadata!.HasInheritedProperty( this._augmented.Data );
             }
 
-            public override TAugmented GetExpressionModel( object data )
-            {
-                if ( !ReferenceEquals( data, this ) )
-                {
-                    throw new FlashtraceAssertionFailedException();
-                }
+            return false;
+        }
 
-                return this.Augmented.GetExpressionModel<TAugmented>();
+        public override TAugmented? GetExpressionModel( object? data )
+        {
+            if ( !ReferenceEquals( data, this ) )
+            {
+                throw new FlashtraceAssertionFailedException();
             }
+
+            return this._augmented.GetExpressionModel<TAugmented>();
         }
     }
 }

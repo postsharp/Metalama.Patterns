@@ -1,12 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace
-{
-    [ExplicitCrossPackageInternal]
-    internal static class LogSourceFactory
-    {
-        public static ILoggerFactory Default => ServiceLocator.GetService<ILoggerFactoryProvider>().GetLoggerFactory( LoggingRoles.Custom );
+using JetBrains.Annotations;
 
-        public static ILoggerFactory ForRole( string role ) => ServiceLocator.GetService<ILoggerFactoryProvider>().GetLoggerFactory( role );
-    }
+namespace Flashtrace;
+
+[PublicAPI]
+public static class LogSourceFactory
+{
+    private static ILoggerFactoryProvider GetLoggerFactoryProvider()
+        => ServiceLocator.GetService<ILoggerFactoryProvider>()
+           ?? throw new InvalidOperationException( "The " + nameof(ILoggerFactoryProvider) + " service has not been registered." );
+
+    public static ILoggerFactory Default => GetLoggerFactoryProvider().GetLoggerFactory( LoggingRoles.Custom );
+
+    public static ILoggerFactory ForRole( string role ) => GetLoggerFactoryProvider().GetLoggerFactory( role );
 }

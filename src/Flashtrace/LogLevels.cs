@@ -1,20 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace
+namespace Flashtrace;
+
+internal readonly struct LogLevels
 {
-    internal readonly struct LogLevels
+    private readonly sbyte _defaultLevel;
+    private readonly sbyte _failureLevel;
+
+    public LogLevels( LogLevel defaultLevel, LogLevel failureLevel )
     {
-        private readonly sbyte defaultLevel;
-        private readonly sbyte failureLevel;
-
-        public LogLevels( LogLevel defaultLevel, LogLevel failureLevel )
-        {
-            this.defaultLevel = (sbyte) defaultLevel;
-            this.failureLevel = (sbyte) failureLevel;
-        }
-
-        public LogLevel DefaultLevel => (LogLevel) this.defaultLevel;
-
-        public LogLevel FailureLevel => (LogLevel) this.failureLevel;
+        this._defaultLevel = (sbyte) defaultLevel;
+        this._failureLevel = (sbyte) failureLevel;
     }
+
+    public LogLevel DefaultLevel => (LogLevel) this._defaultLevel;
+
+    public LogLevel FailureLevel => (LogLevel) this._failureLevel;
 }

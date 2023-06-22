@@ -1,53 +1,54 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 
-namespace Flashtrace
+namespace Flashtrace;
+
+// TODO: LogActivityOptions should be passed by reference everywhere.
+
+/// <summary>
+/// Options of a new <see cref="LogActivity{TActivityDescription}"/>.
+/// </summary>
+[PublicAPI]
+public struct LogActivityOptions
 {
-    // TODO: LogActivityOptions should be passed by reference everywhere.
+    private byte _kind;
+    private Flags _flags;
 
     /// <summary>
-    /// Options of a new <see cref="LogActivity"/>.
+    /// Gets the default value of the <see cref="LogActivityOptions"/> type.
     /// </summary>
-    [SuppressMessage( "Microsoft.Performance", "CA1815" )]
-    public struct LogActivityOptions
+    public static LogActivityOptions Default => default;
+
+    /// <summary>
+    /// Gets or sets the kind of <see cref="LogActivity{TActivityDescription}"/>.
+    /// </summary>
+    public LogActivityKind Kind
     {
-        private byte kind;
-        private Flags flags;
+        get => (LogActivityKind) this._kind;
+        set => this._kind = (byte) value;
+    }
 
-        /// <summary>
-        /// Gets the default value of the <see cref="LogActivityOptions"/> type.
-        /// </summary>
-        public static LogActivityOptions Default => default;
-
-        /// <summary>
-        /// Gets or sets the kind of <see cref="LogActivity"/>.
-        /// </summary>
-        public LogActivityKind Kind
+    // TODO: LogActivityOptions.IsAsync is never set true. It was previous set by removed legacy class LogActivity.
+    
+    /// <summary>
+    /// Gets a value indicating whether the <see cref="LogActivityOptions"/> is async.
+    /// </summary>
+    public bool IsAsync
+    {
+        get => (this._flags & Flags.IsAsync) != 0;
+        internal set
         {
-            get => (LogActivityKind) this.kind;
-            set => this.kind = (byte) value;
+            var otherFlags = this._flags & ~Flags.IsAsync;
+            var thisFlag = value ? Flags.IsAsync : Flags.Default;
+            this._flags = otherFlags | thisFlag;
         }
+    }
 
-        /// <summary>
-        /// Determines whether the new <see cref="LogActivityOptions"/> is async.
-        /// </summary>
-        public bool IsAsync
-        {
-            get => (this.flags & Flags.IsAsync) != 0;
-            internal set
-            {
-                var otherFlags = this.flags & ~Flags.IsAsync;
-                var thisFlag = value ? Flags.IsAsync : Flags.Default;
-                this.flags = otherFlags | thisFlag;
-            }
-        }
-
-        [Flags]
-        private enum Flags : byte
-        {
-            Default,
-            IsAsync = 1
-        }
+    [Flags]
+    private enum Flags : byte
+    {
+        Default,
+        IsAsync = 1
     }
 }

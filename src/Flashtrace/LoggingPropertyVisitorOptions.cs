@@ -1,107 +1,106 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 
-namespace Flashtrace
+namespace Flashtrace;
+
+/// <summary>
+/// Determines the behavior of the <see cref="LogEventData.VisitProperties{TVisitorState}"/>
+/// method.
+/// </summary>
+[PublicAPI]
+public readonly struct LoggingPropertyVisitorOptions
 {
-    /// <summary>
-    /// Determines the behavior of the <see cref="LogEventData.VisitProperties{TVisitorState}(ILoggingPropertyVisitor{TVisitorState}, ref TVisitorState, in LoggingPropertyVisitorOptions)"/>
-    /// method.
-    /// </summary>
-    [SuppressMessage( "Microsoft.Performance", "CA1815", Justification = "Equal is not a use case" )]
-    public readonly struct LoggingPropertyVisitorOptions
+    private readonly Flags _flags;
+
+    private LoggingPropertyVisitorOptions( Flags flags )
     {
-        private readonly Flags flags;
+        this._flags = flags;
+    }
 
-        private LoggingPropertyVisitorOptions( Flags flags )
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LoggingPropertyVisitorOptions"/> struct.
+    /// </summary>
+    /// <param name="onlyInherited">Determines if only inherited properties (those with the
+    /// <see cref="LoggingPropertyOptions.IsInherited" qualifyHint="true"/> flag set to <c>true</c>) must be visited.</param>
+    /// <param name="includeInherited">Determines if inherited properties must be included. This flag is taken into account by the visitors implemented on the logging contexts
+    /// only. It is ignored by other visiting methods.</param>
+    /// <param name="onlyRendered">Determines if only rendered properties must be visited.</param>
+    public LoggingPropertyVisitorOptions( bool onlyInherited = false, bool includeInherited = false, bool onlyRendered = false )
+    {
+        this._flags = Flags.Default;
+
+        if ( onlyInherited )
         {
-            this.flags = flags;
+            this._flags |= Flags.OnlyInherited;
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="LoggingPropertyVisitorOptions"/>.
-        /// </summary>
-        /// <param name="onlyInherited">Determines if only inherited properties (those with the
-        /// <see cref="LoggingPropertyOptions.IsInherited" qualifyHint="true"/> flag set to <c>true</c>) must be visited.</param>
-        /// <param name="includeInherited">Determines if inherited properties must be included. This flag is taken into account by the visitors implemented on the logging contexts
-        /// only. It is ignored by other visiting methods.</param>
-        /// <param name="onlyRendered">Determines if only rendered properties must be visited.</param>
-        public LoggingPropertyVisitorOptions( bool onlyInherited = false, bool includeInherited = false, bool onlyRendered = false )
+        if ( includeInherited )
         {
-            this.flags = Flags.Default;
-
-            if ( onlyInherited )
-            {
-                this.flags |= Flags.OnlyInherited;
-            }
-
-            if ( includeInherited )
-            {
-                this.flags |= Flags.IncludeInherited;
-            }
-
-            if ( onlyRendered )
-            {
-                this.flags |= Flags.OnlyRendered;
-            }
+            this._flags |= Flags.IncludeInherited;
         }
 
-        /// <summary>
-        /// Determines if only inherited properties (those with the <see cref="LoggingPropertyOptions.IsInherited" qualifyHint="true"/> flag set to <c>true</c>)
-        /// must be visited.
-        /// </summary>
-        public bool OnlyInherited => (this.flags & Flags.OnlyInherited) != 0;
-
-        /// <summary>
-        /// Determines if inherited properties must be included. This flag is taken into account by the visitors implemented on the logging contexts
-        /// only. It is ignored by other visiting methods.
-        /// </summary>
-        public bool IncludeInherited => (this.flags & Flags.IncludeInherited) != 0;
-
-        /// <summary>
-        /// Determines if only rendered properties must be visited.
-        /// </summary>
-        public bool OnlyRendered => (this.flags & Flags.OnlyRendered) != 0;
-
-        /// <summary>
-        /// Returns a copy of the current <see cref="LoggingPropertyVisitorOptions"/> but with a specific value of the <see cref="OnlyInherited"/> property.
-        /// </summary>
-        /// <param name="value">The new value of the <see cref="OnlyInherited"/> property.</param>
-        /// <returns></returns>
-        public LoggingPropertyVisitorOptions WithOnlyInherited( bool value = true )
+        if ( onlyRendered )
         {
-            return this.WithFlag( Flags.OnlyInherited, value );
+            this._flags |= Flags.OnlyRendered;
         }
+    }
 
-        /// <summary>
-        /// Returns a copy of the current <see cref="LoggingPropertyVisitorOptions"/> but with a specific value of the <see cref="OnlyRendered"/> property.
-        /// </summary>
-        /// <param name="value">The new value of the <see cref="OnlyRendered"/> property.</param>
-        /// <returns></returns>
-        public LoggingPropertyVisitorOptions WithOnlyRendered( bool value = true )
-        {
-            return this.WithFlag( Flags.OnlyRendered, value );
-        }
+    /// <summary>
+    /// Gets a value indicating whether only inherited properties (those with the <see cref="LoggingPropertyOptions.IsInherited" qualifyHint="true"/> flag set to <c>true</c>)
+    /// must be visited.
+    /// </summary>
+    public bool OnlyInherited => (this._flags & Flags.OnlyInherited) != 0;
 
-        /// <summary>
-        /// Returns a copy of the current <see cref="LoggingPropertyVisitorOptions"/> but with a specific value of the <see cref="IncludeInherited"/> property.
-        /// </summary>
-        /// <param name="value">The new value of the <see cref="IncludeInherited"/> property.</param>
-        /// <returns></returns>
-        public LoggingPropertyVisitorOptions WithIncludeInherited( bool value = true )
-        {
-            return this.WithFlag( Flags.IncludeInherited, value );
-        }
+    /// <summary>
+    /// Gets a value indicating whether inherited properties must be included. This flag is taken into account by the visitors implemented on the logging contexts
+    /// only. It is ignored by other visiting methods.
+    /// </summary>
+    public bool IncludeInherited => (this._flags & Flags.IncludeInherited) != 0;
 
-        private LoggingPropertyVisitorOptions WithFlag( Flags flag, bool value ) => new( (this.flags & ~flag) | (value ? flag : Flags.Default) );
+    /// <summary>
+    /// Gets a value indicating whether only rendered properties must be visited.
+    /// </summary>
+    public bool OnlyRendered => (this._flags & Flags.OnlyRendered) != 0;
 
-        [Flags]
-        private enum Flags
-        {
-            Default,
-            OnlyInherited = 1,
-            OnlyRendered = 2,
-            IncludeInherited = 4
-        }
+    /// <summary>
+    /// Returns a copy of the current <see cref="LoggingPropertyVisitorOptions"/> but with a specific value of the <see cref="OnlyInherited"/> property.
+    /// </summary>
+    /// <param name="value">The new value of the <see cref="OnlyInherited"/> property.</param>
+    /// <returns></returns>
+    public LoggingPropertyVisitorOptions WithOnlyInherited( bool value = true )
+    {
+        return this.WithFlag( Flags.OnlyInherited, value );
+    }
+
+    /// <summary>
+    /// Returns a copy of the current <see cref="LoggingPropertyVisitorOptions"/> but with a specific value of the <see cref="OnlyRendered"/> property.
+    /// </summary>
+    /// <param name="value">The new value of the <see cref="OnlyRendered"/> property.</param>
+    /// <returns></returns>
+    public LoggingPropertyVisitorOptions WithOnlyRendered( bool value = true )
+    {
+        return this.WithFlag( Flags.OnlyRendered, value );
+    }
+
+    /// <summary>
+    /// Returns a copy of the current <see cref="LoggingPropertyVisitorOptions"/> but with a specific value of the <see cref="IncludeInherited"/> property.
+    /// </summary>
+    /// <param name="value">The new value of the <see cref="IncludeInherited"/> property.</param>
+    /// <returns></returns>
+    public LoggingPropertyVisitorOptions WithIncludeInherited( bool value = true )
+    {
+        return this.WithFlag( Flags.IncludeInherited, value );
+    }
+
+    private LoggingPropertyVisitorOptions WithFlag( Flags flag, bool value ) => new( (this._flags & ~flag) | (value ? flag : Flags.Default) );
+
+    [Flags]
+    private enum Flags
+    {
+        Default,
+        OnlyInherited = 1,
+        OnlyRendered = 2,
+        IncludeInherited = 4
     }
 }

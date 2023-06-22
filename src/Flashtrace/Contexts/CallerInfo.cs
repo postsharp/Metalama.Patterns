@@ -1,156 +1,152 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
-namespace Flashtrace.Contexts
+namespace Flashtrace.Contexts;
+
+/// <summary>
+/// Describes the caller of a logging method.
+/// </summary>
+[PublicAPI]
+public struct CallerInfo
 {
+    private Type? _sourceType;
+
     /// <summary>
-    /// Describes the caller of a logging method.
+    /// Initializes a new instance of the <see cref="CallerInfo"/> struct specifying the source type as a <see cref="RuntimeTypeHandle"/>.
     /// </summary>
-    [SuppressMessage( "Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes" )]
-    public struct CallerInfo
+    /// <param name="sourceTypeToken"><see cref="RuntimeTypeHandle"/> of the calling type.</param>
+    /// <param name="methodName">Name of the calling method.</param>
+    /// <param name="file">Path of the source code of the calling code.</param>
+    /// <param name="line">Line in <paramref name="file"/> of the caller.</param>
+    /// <param name="column">Column in <paramref name="file"/> of the caller.</param>
+    /// <param name="attributes">Attributes.</param>
+    [DebuggerStepThrough]
+    public CallerInfo( RuntimeTypeHandle sourceTypeToken, string methodName, string file, int line, int column, CallerAttributes attributes )
     {
-        private Type sourceType;
+        this.SourceTypeToken = sourceTypeToken;
+        this.MethodName = methodName;
+        this.SourceLineInfo = new SourceLineInfo( file, line, column );
+        this._sourceType = null;
+        this.Attributes = attributes;
+    }
 
-        /// <summary>
-        /// Initializes a new <see cref="CallerInfo"/>, and uses as a <see cref="RuntimeTypeHandle"/> to specify the source type.
-        /// </summary>
-        /// <param name="sourceTypeToken"><see cref="RuntimeTypeHandle"/> of the calling type.</param>
-        /// <param name="methodName">Name of the calling method.</param>
-        /// <param name="file">Path of the source code of the calling code.</param>
-        /// <param name="line">Line in <paramref name="file"/> of the caller.</param>
-        /// <param name="column">Column in <paramref name="file"/> of the caller.</param>
-        /// <param name="attributes">Attributes.</param>
-        [DebuggerStepThrough]
-        public CallerInfo( RuntimeTypeHandle sourceTypeToken, string methodName, string file, int line, int column, CallerAttributes attributes )
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CallerInfo"/> struct specifying the source type as a <see cref="Type"/>.
+    /// </summary>
+    /// <param name="sourceType"><see cref="Type"/> of the calling type.</param>
+    /// <param name="methodName">Name of the calling method.</param>
+    /// <param name="file">Path of the source code of the calling code.</param>
+    /// <param name="line">Line in <paramref name="file"/> of the caller.</param>
+    /// <param name="column">Column in <paramref name="file"/> of the caller.</param>
+    /// <param name="attributes">Attributes.</param>
+    [DebuggerStepThrough]
+    public CallerInfo( Type sourceType, string methodName, string? file, int line, int column, CallerAttributes attributes )
+    {
+        this._sourceType = sourceType;
+        this.MethodName = methodName;
+        this.SourceTypeToken = default;
+        this.SourceLineInfo = new SourceLineInfo( file, line, column );
+        this.Attributes = attributes;
+    }
+
+    /// <summary>
+    /// Gets the caller attributes.
+    /// </summary>
+    public CallerAttributes Attributes { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the caller is an <c>async</c> method.
+    /// </summary>
+    public bool IsAsync => (this.Attributes & CallerAttributes.IsAsync) != 0;
+
+    /// <summary>
+    /// Gets the source <see cref="Type"/>.
+    /// </summary>
+    public Type? SourceType
+    {
+        get
         {
-            this.SourceTypeToken = sourceTypeToken;
-            this.MethodName = methodName;
-            this.SourceLineInfo = new SourceLineInfo( file, line, column );
-            this.sourceType = null;
-            this.Attributes = attributes;
-        }
-
-        /// <summary>
-        /// Initializes a new <see cref="CallerInfo"/>, and uses as a <see cref="Type"/> to specify the source type.
-        /// </summary>
-        /// <param name="sourceType"><see cref="Type"/> of the calling type.</param>
-        /// <param name="methodName">Name of the calling method.</param>
-        /// <param name="file">Path of the source code of the calling code.</param>
-        /// <param name="line">Line in <paramref name="file"/> of the caller.</param>
-        /// <param name="column">Column in <paramref name="file"/> of the caller.</param>
-        /// <param name="attributes">Attributes.</param>
-        [DebuggerStepThrough]
-        public CallerInfo( Type sourceType, string methodName, string file, int line, int column, CallerAttributes attributes )
-        {
-            this.sourceType = sourceType;
-            this.MethodName = methodName;
-            this.SourceTypeToken = default;
-            this.SourceLineInfo = new SourceLineInfo( file, line, column );
-            this.Attributes = attributes;
-        }
-
-        /// <summary>
-        /// Gets the caller attributes.
-        /// </summary>
-        public CallerAttributes Attributes { get; private set; }
-
-        /// <summary>
-        /// Determines whether the caller is an <c>async</c> method.
-        /// </summary>
-        public bool IsAsync => (this.Attributes & CallerAttributes.IsAsync) != 0;
-
-        /// <summary>
-        /// Gets the source <see cref="Type"/>.
-        /// </summary>
-        public Type SourceType
-        {
-            get
+            // As per MS documentation, Type.GetTypeFromHandle will return null if the argument "is null", despite the return type not being marked as Type?.
+            if ( this._sourceType == null && this.SourceTypeToken.Value != IntPtr.Zero )
             {
-                if ( this.sourceType == null )
-                {
-                    this.sourceType = Type.GetTypeFromHandle( this.SourceTypeToken );
-                }
-
-                return this.sourceType;
-            }
-        }
-
-        /// <summary>
-        /// Gets the <see cref="RuntimeTypeHandle"/> of the caller <see cref="Type"/>.
-        /// </summary>
-        public RuntimeTypeHandle SourceTypeToken { get; }
-
-        /// <summary>
-        /// Gets the name of the caller method.
-        /// </summary>
-        public string MethodName { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="SourceLineInfo"/> of the caller.
-        /// </summary>
-        public SourceLineInfo SourceLineInfo { get; private set; }
-
-        /// <summary>
-        /// Determines whether the current <see cref="CallerInfo"/> is null.
-        /// </summary>
-        public bool IsNull => this.MethodName == null && this.SourceLineInfo.IsNull;
-
-        [ExplicitCrossPackageInternal]
-        internal static CallerInfo Null;
-
-        [ExplicitCrossPackageInternal]
-        internal static CallerInfo Async => new() { Attributes = CallerAttributes.IsAsync };
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            if ( this.IsNull )
-            {
-                return "null";
+                this._sourceType = Type.GetTypeFromHandle( this.SourceTypeToken );
             }
 
-            if ( this.SourceLineInfo.IsNull )
-            {
-                return this.SourceType.FullName + "." + this.MethodName;
-            }
-            else
-            {
-                return this.SourceType.FullName + "." + this.MethodName + " at " + this.SourceLineInfo.File + ", " + this.SourceLineInfo.Line;
-            }
+            return this._sourceType;
+        }
+    }
+
+    /// <summary>
+    /// Gets the <see cref="RuntimeTypeHandle"/> of the caller <see cref="Type"/>.
+    /// </summary>
+    public RuntimeTypeHandle SourceTypeToken { get; }
+
+    /// <summary>
+    /// Gets the name of the caller method.
+    /// </summary>
+    public string? MethodName { get; private set; }
+
+    /// <summary>
+    /// Gets the <see cref="SourceLineInfo"/> of the caller.
+    /// </summary>
+    public SourceLineInfo SourceLineInfo { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the current <see cref="CallerInfo"/> is null.
+    /// </summary>
+    public bool IsNull => this.MethodName == null && this.SourceLineInfo.IsNull;
+
+    internal static CallerInfo Null;
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        if ( this.IsNull )
+        {
+            return "null";
         }
 
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-        /// <summary>
-        /// Gets a <see cref="CallerInfo"/> of the caller by performing a stack walk (using <see cref="StackFrame"/>).
-        /// </summary>
-        /// <param name="skipFrames">The number of stack frames to skip.</param>
-        /// <returns> A <see cref="CallerInfo"/> for the caller (skipping the specified number of stack frames), or <c>default</c> if the platform does not support the <see cref="StackFrame"/> class.</returns>
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
-#pragma warning disable CA1801 // Unused parameter.
-        public static CallerInfo GetDynamic( int skipFrames )
-#pragma warning restore CA1801
+        var useTypeName = this.SourceType?.FullName ?? this.SourceType?.Name ?? "<unknown>";
+        var useMethodName = this.MethodName ?? "<unknown>";
+
+        if ( this.SourceLineInfo.IsNull )
         {
-            for ( var i = skipFrames + 1;; i++ )
+            return useTypeName + "." + useMethodName;
+        }
+        else
+        {
+            return useTypeName + "." + useMethodName + " at " + this.SourceLineInfo.File + ", " + this.SourceLineInfo.Line;
+        }
+    }
+
+    /// <summary>
+    /// Gets a <see cref="CallerInfo"/> of the caller by performing a stack walk (using <see cref="StackFrame"/>).
+    /// </summary>
+    /// <param name="skipFrames">The number of stack frames to skip.</param>
+    /// <returns> A <see cref="CallerInfo"/> for the caller (skipping the specified number of stack frames), or <c>default</c> if the platform does not support the <see cref="StackFrame"/> class.</returns>
+    public static CallerInfo GetDynamic( int skipFrames )
+    {
+        // ReSharper disable once BadSemicolonSpaces
+        for ( var i = skipFrames + 1; ; i++ )
+        {
+            var frame = new StackFrame( i, true );
+
+            var method = frame.GetMethod();
+
+            if ( method == null )
             {
-                var frame = new StackFrame( i, true );
+                // We reach the bottom of the stack.
+                return default;
+            }
 
-                var method = frame.GetMethod();
+            if ( method.DeclaringType == null )
+            {
+                continue;
+            }
 
-                if ( method == null )
-                {
-                    // We reach the bottom of the stack.
-                    return default;
-                }
-
-                if ( method.DeclaringType == null )
-                {
-                    continue;
-                }
-
-                // TODO: Are there any applicable Flashtrace types to use instead? Otherwise, remove this section.
+            // TODO: Are there any applicable Flashtrace types to use instead? Otherwise, remove this section.
 #if false
                 if ( (method.DeclaringType.Namespace != null && method.DeclaringType.Namespace.StartsWith( "PostSharp.Aspects", StringComparison.Ordinal )) ||
                      string.Equals( method.DeclaringType.Namespace, "PostSharp.Patterns.Diagnostics.ThreadingInstrumentation", StringComparison.Ordinal ) )
@@ -159,14 +155,13 @@ namespace Flashtrace.Contexts
                 }
 #endif
 
-                return new CallerInfo(
-                    method.DeclaringType,
-                    method.Name,
-                    frame.GetFileName(),
-                    frame.GetFileLineNumber(),
-                    frame.GetFileColumnNumber(),
-                    CallerAttributes.None );
-            }
+            return new CallerInfo(
+                method.DeclaringType,
+                method.Name,
+                frame.GetFileName(),
+                frame.GetFileLineNumber(),
+                frame.GetFileColumnNumber(),
+                CallerAttributes.None );
         }
     }
 }
