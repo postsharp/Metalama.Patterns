@@ -22,11 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Custom\ILogger.Generated.tt">
+    <None Update="ILogger.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ILogger.Generated.cs</LastGenOutput>
     </None>
-    <Compile Update="Custom\ILogger.Generated.cs">
+    <Compile Update="ILogger.Generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ILogger.Generated.tt</DependentUpon>
