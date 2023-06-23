@@ -11,7 +11,7 @@ public static class LogSourceFactory
         => ServiceLocator.GetService<ILoggerFactoryProvider>()
            ?? throw new InvalidOperationException( "The " + nameof(ILoggerFactoryProvider) + " service has not been registered." );
 
-    public static ILoggerFactory Default => GetLoggerFactoryProvider().GetLoggerFactory( LoggingRoles.Custom );
+    public static ILoggerFactory Default => GetLoggerFactoryProvider().GetLoggerFactory( LoggingRoles.Default );
 
     public static ILoggerFactory ForRole( string role ) => GetLoggerFactoryProvider().GetLoggerFactory( role );
 }

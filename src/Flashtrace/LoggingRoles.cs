@@ -26,9 +26,9 @@ public static class LoggingRoles
     public const string Meta = "Meta";
 
     /// <summary>
-    /// Default role for custom logging using the <see cref="LogSource"/> class.
+    /// Default role for logging using the <see cref="LogSource"/> class.
     /// </summary>
-    public const string Custom = "Custom";
+    public const string Default = "Default";
 
     [ExplicitCrossPackageInternal]
     internal static bool IsSystemRole( string role )

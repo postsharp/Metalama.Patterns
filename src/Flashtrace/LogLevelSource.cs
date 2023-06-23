@@ -81,10 +81,10 @@ public sealed class LogLevelSource
         try
         {
             using ( var recordBuilder = logger.GetRecordBuilder(
-                       new CustomLogRecordOptions( this.Level, LogRecordKind.CustomRecord, CustomLogRecordAttributes.WriteMessage, options.Data ),
+                       new LogRecordOptions( this.Level, LogRecordKind.Message, LogRecordAttributes.WriteMessage, options.Data ),
                        ref callerInfo ) )
             {
-                MessageHelper.Write( message, recordBuilder, CustomLogRecordItem.Message );
+                MessageHelper.Write( message, recordBuilder, LogRecordItem.Message );
 
                 if ( exception != null )
                 {
@@ -196,15 +196,15 @@ public sealed class LogLevelSource
             if ( isEnabled )
             {
                 using ( var recordBuilder = logger.GetRecordBuilder(
-                           new CustomLogRecordOptions(
+                           new LogRecordOptions(
                                level,
-                               LogRecordKind.CustomActivityEntry,
-                               CustomLogRecordAttributes.WriteActivityDescription,
+                               LogRecordKind.ActivityEntry,
+                               LogRecordAttributes.WriteActivityDescription,
                                default ),
                            ref callerInfo,
                            context ) )
                 {
-                    MessageHelper.Write( description, recordBuilder, CustomLogRecordItem.ActivityDescription );
+                    MessageHelper.Write( description, recordBuilder, LogRecordItem.ActivityDescription );
                     recordBuilder.Complete();
                 }
             }

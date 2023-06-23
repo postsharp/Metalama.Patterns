@@ -9,8 +9,7 @@ using System.Runtime.CompilerServices;
 namespace Flashtrace;
 
 /// <summary>
-/// Represents a logged custom activity, i.e. something that has a beginning and an end with a specific outcome.
-/// This class is instantiated by the new API of the <see cref="LogSource"/> class.
+/// Represents a logged activity, i.e. something that has a beginning and an end with a specific outcome.
 /// </summary>
 [PublicAPI]
 public readonly struct LogActivity<TActivityDescription> : ILogActivity
@@ -65,17 +64,17 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
                     }
 
                     using ( var builder = contextLocalLogger.GetRecordBuilder(
-                               new CustomLogRecordOptions(
+                               new LogRecordOptions(
                                    level,
-                                   LogRecordKind.CustomRecord,
-                                   CustomLogRecordAttributes.WriteActivityDescriptionAndOutcome,
+                                   LogRecordKind.Message,
+                                   LogRecordAttributes.WriteActivityDescriptionAndOutcome,
                                    options.Data ),
                                ref callerInfo ) )
                     {
                         // The context was not opened because default verbosity was lower than the minimal one.
 
-                        MessageHelper.Write( this._description, builder, CustomLogRecordItem.ActivityDescription );
-                        MessageHelper.Write( message, builder, CustomLogRecordItem.ActivityOutcome );
+                        MessageHelper.Write( this._description, builder, LogRecordItem.ActivityDescription );
+                        MessageHelper.Write( message, builder, LogRecordItem.ActivityOutcome );
 
                         if ( exception != null )
                         {
@@ -98,15 +97,15 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
                         }
 
                         using ( var builder = contextLocalLogger.GetRecordBuilder(
-                                   new CustomLogRecordOptions(
+                                   new LogRecordOptions(
                                        level,
-                                       LogRecordKind.CustomActivityExit,
-                                       CustomLogRecordAttributes.WriteActivityOutcome,
+                                       LogRecordKind.ActivityExit,
+                                       LogRecordAttributes.WriteActivityOutcome,
                                        options.Data ),
                                    ref callerInfo,
                                    this.Context ) )
                         {
-                            message.Write( builder, CustomLogRecordItem.ActivityOutcome );
+                            message.Write( builder, LogRecordItem.ActivityOutcome );
 
                             if ( exception != null )
                             {

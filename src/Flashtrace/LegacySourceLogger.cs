@@ -85,7 +85,7 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 #else // Quick fix when removing LogRecordKind.CustomActivityFailure et al, retains effective behaviour of the original so tests still pass:
         return recordKind switch
         {
-            LogRecordKind.CustomActivityEntry => "Starting",
+            LogRecordKind.ActivityEntry => "Starting",
             _ => null
         };
 #endif
@@ -106,7 +106,7 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 
         var recordKindText = GetRecordKindText( recordKind );
 
-        if ( recordKind == LogRecordKind.CustomActivityEntry )
+        if ( recordKind == LogRecordKind.ActivityEntry )
         {
             WriteText( text, args, stringBuilder );
             ((Context) context).Description = stringBuilder.ToString();
@@ -237,7 +237,7 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 
             message += Environment.NewLine + new StackTrace().ToString();
 
-            this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.CustomRecord, message, null, null );
+            this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.Message, message, null, null );
         }
         catch { }
     }
@@ -248,12 +248,12 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
         try
         {
             var message = "Error in user code calling the logging subsystem: " + exception.ToString();
-            this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.CustomRecord, message, null, null );
+            this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.Message, message, null, null );
         }
         catch { }
     }
 
-    ICustomLogRecordBuilder IContextLocalLogger.GetRecordBuilder( in CustomLogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext context )
+    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext context )
     {
         return new RecordBuilder( this, recordInfo.Level, recordInfo.Kind, (Context) context );
     }
@@ -271,7 +271,7 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 
     bool ILogger.IsEnabled( LogLevel level ) => this.IsEnabled( level );
 
-    private class RecordBuilder : ICustomLogRecordBuilder
+    private class RecordBuilder : ILogRecordBuilder
     {
         private LegacySourceLogger _logger;
         private readonly StringBuilder _stringBuilder = new();
@@ -289,12 +289,12 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
             this._context = context;
         }
 
-        void ICustomLogRecordBuilder.BeginWriteItem( CustomLogRecordItem item, in CustomLogRecordTextOptions options )
+        void ILogRecordBuilder.BeginWriteItem( LogRecordItem item, in LogRecordTextOptions options )
         {
             switch ( item )
             {
-                case CustomLogRecordItem.Message:
-                case CustomLogRecordItem.ActivityDescription:
+                case LogRecordItem.Message:
+                case LogRecordItem.ActivityDescription:
                     if ( options.Name != null )
                     {
                         this._stringBuilder.Append( options.Name );
@@ -302,7 +302,7 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 
                     break;
 
-                case CustomLogRecordItem.ActivityOutcome:
+                case LogRecordItem.ActivityOutcome:
                     if ( this._stringBuilder.Length > 0 )
                     {
                         this._stringBuilder.Append( ": " );
@@ -325,27 +325,27 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
             }
         }
 
-        void ICustomLogRecordBuilder.EndWriteItem( CustomLogRecordItem item ) { }
+        void ILogRecordBuilder.EndWriteItem( LogRecordItem item ) { }
 
         public void Dispose()
         {
             this._logger = null;
         }
 
-        void ICustomLogRecordBuilder.SetException( Exception e )
+        void ILogRecordBuilder.SetException( Exception e )
         {
             this._exception = e;
-            this.WriteParameter( "exception", e, CustomLogParameterOptions.SemanticParameter );
+            this.WriteParameter( "exception", e, LogParameterOptions.SemanticParameter );
         }
 
-        void ICustomLogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
+        void ILogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-        void ICustomLogRecordBuilder.WriteCustomParameter<T>( int index, in CharSpan parameterName, T value, in CustomLogParameterOptions options )
+        void ILogRecordBuilder.WriteParameter<T>( int index, in CharSpan parameterName, T value, in LogParameterOptions options )
         {
             this.WriteParameter( parameterName.ToString(), value, options );
         }
 
-        private void WriteParameter<T>( string parameterName, T value, in CustomLogParameterOptions options )
+        private void WriteParameter<T>( string parameterName, T value, in LogParameterOptions options )
         {
             switch ( options.Mode )
             {
@@ -354,7 +354,7 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 
                     break;
 
-                case CustomLogParameterMode.NameValuePair:
+                case LogParameterMode.NameValuePair:
                     this._stringBuilder.Append( ", " );
                     this._stringBuilder.Append( parameterName );
                     this._stringBuilder.Append( " = " );
@@ -362,7 +362,7 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 
                     break;
 
-                case CustomLogParameterMode.Hidden:
+                case LogParameterMode.Hidden:
                     break;
             }
         }
@@ -379,7 +379,7 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
             }
         }
 
-        void ICustomLogRecordBuilder.WriteCustomString( in CharSpan str )
+        void ILogRecordBuilder.WriteString( in CharSpan str )
         {
             if ( this._appendComma )
             {
@@ -390,15 +390,15 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
             this._stringBuilder.Append( str.ToString() );
         }
 
-        void ICustomLogRecordBuilder.Complete()
+        void ILogRecordBuilder.Complete()
         {
             if ( this._logger != null )
             {
-                if ( this._recordKind == LogRecordKind.CustomActivityEntry )
+                if ( this._recordKind == LogRecordKind.ActivityEntry )
                 {
                     this._context.Description = this._stringBuilder.ToString();
                     this._stringBuilder.Append( ": " );
-                    this._stringBuilder.Append( GetRecordKindText( LogRecordKind.CustomActivityEntry ) );
+                    this._stringBuilder.Append( GetRecordKindText( LogRecordKind.ActivityEntry ) );
                 }
 
                 this._logger.Write( this._level, this._recordKind, this._stringBuilder.ToString(), this._exception );

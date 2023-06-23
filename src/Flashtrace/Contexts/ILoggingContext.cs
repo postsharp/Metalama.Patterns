@@ -23,7 +23,7 @@ public interface ILoggingContext : IDisposable
     int RecycleId { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the context represents an <c>async</c> method or a custom activity in an <c>async</c> method.
+    /// Gets a value indicating whether the context represents an <c>async</c> method or an activity in an <c>async</c> method.
     /// </summary>
     bool IsAsync { get; }
 

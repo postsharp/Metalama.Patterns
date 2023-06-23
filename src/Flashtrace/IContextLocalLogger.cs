@@ -7,7 +7,7 @@ namespace Flashtrace;
 
 // TODO: [FT-Review] Is 'contact' intended in the comment below? Maybe 'context' or 'local context' instead? What does 'context-local' actually mean?
 /// <summary>
-/// Abstraction of custom logging methods where the contact has already been resolved.
+/// Abstraction of logging methods where the contact has already been resolved.
 /// </summary>
 [PublicAPI]
 public interface IContextLocalLogger : ILoggerExceptionHandler
@@ -20,11 +20,11 @@ public interface IContextLocalLogger : ILoggerExceptionHandler
     bool IsEnabled( LogLevel level );
 
     /// <summary>
-    /// Opens a new context for a custom activity.
+    /// Opens a new context for an activity.
     /// </summary>
     /// <param name="options">Options.</param>
     /// <param name="callerInfo">Information about the caller code.</param>
-    /// <returns>A new context for the custom activity.</returns>
+    /// <returns>A new context for the activity.</returns>
     ILoggingContext OpenActivity( in OpenActivityOptions options, ref CallerInfo callerInfo );
 
     /// <summary>
@@ -34,12 +34,12 @@ public interface IContextLocalLogger : ILoggerExceptionHandler
     /// <param name="callerInfo">Information about the caller code.</param>
     /// <param name="context">The context for which the record will be built, or <c>null</c> for standalone records.</param>
     /// <returns>A record builder.</returns>
-    ICustomLogRecordBuilder GetRecordBuilder( in CustomLogRecordOptions options, ref CallerInfo callerInfo, ILoggingContext? context = null );
+    ILogRecordBuilder GetRecordBuilder( in LogRecordOptions options, ref CallerInfo callerInfo, ILoggingContext? context = null );
 
     /// <summary>
     /// Resumes an asynchronous activity suspended by the <see cref="SuspendActivity(ILoggingContext,ref CallerInfo)"/> method.
     /// </summary>
-    /// <param name="context">A context representing an asynchronous custom activity, created by <see cref="OpenActivity"/>
+    /// <param name="context">A context representing an asynchronous activity, created by <see cref="OpenActivity"/>
     /// and suspended by <see cref="SuspendActivity(ILoggingContext,ref CallerInfo)"/>.</param>
     /// <param name="callerInfo">Information about the caller code.</param>
     void ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo );
@@ -47,7 +47,7 @@ public interface IContextLocalLogger : ILoggerExceptionHandler
     /// <summary>
     /// Suspends an asynchronous activity, which can then be resumed by the <see cref="ResumeActivity(ILoggingContext,ref CallerInfo)"/> method.
     /// </summary>
-    /// <param name="context">A context representing an asynchronous custom activity, created by <see cref="OpenActivity"/>.</param>
+    /// <param name="context">A context representing an asynchronous activity, created by <see cref="OpenActivity"/>.</param>
     /// <param name="callerInfo">Information about the caller code.</param>
     void SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo );
 

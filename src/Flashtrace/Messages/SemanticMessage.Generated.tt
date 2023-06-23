@@ -34,14 +34,14 @@ public readonly struct SemanticMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 		<#= Repeat( "this.value{0} = value{0}; ", i, "" ) #>
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#= i #>, this.messageName));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(<#= i #>, this.messageName));
 <#
         for (var j = 1; j <= i; j++)
         {
 #>
-		recordBuilder.WriteCustomParameter( <#= j - 1 #>, this.name<#= j #>, this.value<#= j #>, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( <#= j - 1 #>, this.name<#= j #>, this.value<#= j #>, LogParameterOptions.SemanticParameter );
 <#
         }
 #>

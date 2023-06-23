@@ -11,22 +11,22 @@ internal static class DebugMessageFormatter
         where T : IMessage
     {
         using var writer = new Writer();
-        message.Write( writer, CustomLogRecordItem.Message );
+        message.Write( writer, LogRecordItem.Message );
 
         return writer.ToString();
     }
 
-    private sealed class Writer : ICustomLogRecordBuilder
+    private sealed class Writer : ILogRecordBuilder
     {
         private readonly StringBuilder _stringBuilder = new();
 
-        public void BeginWriteItem( CustomLogRecordItem item, in CustomLogRecordTextOptions options ) { }
+        public void BeginWriteItem( LogRecordItem item, in LogRecordTextOptions options ) { }
 
         public void Complete() { }
 
         public void Dispose() { }
 
-        public void EndWriteItem( CustomLogRecordItem item ) { }
+        public void EndWriteItem( LogRecordItem item ) { }
 
         public void SetException( Exception exception )
         {
@@ -35,12 +35,12 @@ internal static class DebugMessageFormatter
 
         public void SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-        public void WriteCustomParameter<T>( int index, in CharSpan parameterName, T? value, in CustomLogParameterOptions options )
+        public void WriteParameter<T>( int index, in CharSpan parameterName, T? value, in LogParameterOptions options )
         {
             this._stringBuilder.Append( value?.ToString() );
         }
 
-        public void WriteCustomString( in CharSpan str )
+        public void WriteString( in CharSpan str )
         {
             this._stringBuilder.Append( str.ToString() );
         }

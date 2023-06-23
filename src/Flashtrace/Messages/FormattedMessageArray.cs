@@ -22,15 +22,15 @@ public readonly struct FormattedMessageArray : IMessage
         this._args = args;
     }
 
-    void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+    void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
     {
-        recordBuilder.BeginWriteItem( item, new CustomLogRecordTextOptions( this._args.Length ) );
+        recordBuilder.BeginWriteItem( item, new LogRecordTextOptions( this._args.Length ) );
 
         var parser = new FormattingStringParser( this._formattingString );
 
         for ( var i = 0; i < this._args.Length; i++ )
         {
-            recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+            recordBuilder.WriteString( parser.GetNextSubstring() );
             var parameter = parser.GetNextParameter();
 
             if ( parameter.Array == null )
@@ -39,10 +39,10 @@ public readonly struct FormattedMessageArray : IMessage
                     string.Format( CultureInfo.InvariantCulture, "The formatting string must have exactly {0} parameters.", this._args.Length ) );
             }
 
-            recordBuilder.WriteCustomParameter( i, parameter, this._args[i], CustomLogParameterOptions.FormattedStringParameter );
+            recordBuilder.WriteParameter( i, parameter, this._args[i], LogParameterOptions.FormattedStringParameter );
         }
 
-        recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+        recordBuilder.WriteString( parser.GetNextSubstring() );
 
         if ( parser.GetNextParameter().Array != null )
         {

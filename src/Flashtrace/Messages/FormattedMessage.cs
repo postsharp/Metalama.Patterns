@@ -19,13 +19,13 @@ public readonly struct FormattedMessage : IMessage
         this._text = text;
     }
 
-    void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+    void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
     {
-        recordBuilder.BeginWriteItem( item, new CustomLogRecordTextOptions( 0 ) );
+        recordBuilder.BeginWriteItem( item, new LogRecordTextOptions( 0 ) );
 
         if ( !string.IsNullOrEmpty( this._text ) )
         {
-            recordBuilder.WriteCustomString( this._text );
+            recordBuilder.WriteString( this._text );
         }
 
         recordBuilder.EndWriteItem( item );

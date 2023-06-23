@@ -28,10 +28,10 @@ public readonly struct SemanticMessage<T1> : IMessage
 		this.value1 = value1; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(1, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(1, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -58,11 +58,11 @@ public readonly struct SemanticMessage<T1, T2> : IMessage
 		this.value1 = value1; this.value2 = value2; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(2, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(2, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -89,12 +89,12 @@ public readonly struct SemanticMessage<T1, T2, T3> : IMessage
 		this.value1 = value1; this.value2 = value2; this.value3 = value3; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(3, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 2, this.name3, this.value3, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(3, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 2, this.name3, this.value3, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -121,13 +121,13 @@ public readonly struct SemanticMessage<T1, T2, T3, T4> : IMessage
 		this.value1 = value1; this.value2 = value2; this.value3 = value3; this.value4 = value4; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(4, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 2, this.name3, this.value3, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 3, this.name4, this.value4, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(4, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 2, this.name3, this.value3, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 3, this.name4, this.value4, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -154,14 +154,14 @@ public readonly struct SemanticMessage<T1, T2, T3, T4, T5> : IMessage
 		this.value1 = value1; this.value2 = value2; this.value3 = value3; this.value4 = value4; this.value5 = value5; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(5, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 2, this.name3, this.value3, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 3, this.name4, this.value4, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 4, this.name5, this.value5, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(5, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 2, this.name3, this.value3, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 3, this.name4, this.value4, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 4, this.name5, this.value5, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -188,15 +188,15 @@ public readonly struct SemanticMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		this.value1 = value1; this.value2 = value2; this.value3 = value3; this.value4 = value4; this.value5 = value5; this.value6 = value6; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(6, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 2, this.name3, this.value3, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 3, this.name4, this.value4, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 4, this.name5, this.value5, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 5, this.name6, this.value6, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(6, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 2, this.name3, this.value3, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 3, this.name4, this.value4, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 4, this.name5, this.value5, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 5, this.name6, this.value6, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -223,16 +223,16 @@ public readonly struct SemanticMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		this.value1 = value1; this.value2 = value2; this.value3 = value3; this.value4 = value4; this.value5 = value5; this.value6 = value6; this.value7 = value7; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(7, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 2, this.name3, this.value3, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 3, this.name4, this.value4, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 4, this.name5, this.value5, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 5, this.name6, this.value6, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 6, this.name7, this.value7, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(7, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 2, this.name3, this.value3, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 3, this.name4, this.value4, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 4, this.name5, this.value5, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 5, this.name6, this.value6, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 6, this.name7, this.value7, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -259,17 +259,17 @@ public readonly struct SemanticMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessag
 		this.value1 = value1; this.value2 = value2; this.value3 = value3; this.value4 = value4; this.value5 = value5; this.value6 = value6; this.value7 = value7; this.value8 = value8; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(8, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 2, this.name3, this.value3, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 3, this.name4, this.value4, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 4, this.name5, this.value5, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 5, this.name6, this.value6, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 6, this.name7, this.value7, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 7, this.name8, this.value8, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(8, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 2, this.name3, this.value3, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 3, this.name4, this.value4, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 4, this.name5, this.value5, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 5, this.name6, this.value6, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 6, this.name7, this.value7, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 7, this.name8, this.value8, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -296,18 +296,18 @@ public readonly struct SemanticMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IMe
 		this.value1 = value1; this.value2 = value2; this.value3 = value3; this.value4 = value4; this.value5 = value5; this.value6 = value6; this.value7 = value7; this.value8 = value8; this.value9 = value9; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(9, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 2, this.name3, this.value3, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 3, this.name4, this.value4, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 4, this.name5, this.value5, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 5, this.name6, this.value6, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 6, this.name7, this.value7, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 7, this.name8, this.value8, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 8, this.name9, this.value9, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(9, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 2, this.name3, this.value3, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 3, this.name4, this.value4, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 4, this.name5, this.value5, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 5, this.name6, this.value6, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 6, this.name7, this.value7, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 7, this.name8, this.value8, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 8, this.name9, this.value9, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}
@@ -334,19 +334,19 @@ public readonly struct SemanticMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> 
 		this.value1 = value1; this.value2 = value2; this.value3 = value3; this.value4 = value4; this.value5 = value5; this.value6 = value6; this.value7 = value7; this.value8 = value8; this.value9 = value9; this.value10 = value10; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(10, this.messageName));
-		recordBuilder.WriteCustomParameter( 0, this.name1, this.value1, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 1, this.name2, this.value2, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 2, this.name3, this.value3, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 3, this.name4, this.value4, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 4, this.name5, this.value5, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 5, this.name6, this.value6, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 6, this.name7, this.value7, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 7, this.name8, this.value8, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 8, this.name9, this.value9, CustomLogParameterOptions.SemanticParameter );
-		recordBuilder.WriteCustomParameter( 9, this.name10, this.value10, CustomLogParameterOptions.SemanticParameter );
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(10, this.messageName));
+		recordBuilder.WriteParameter( 0, this.name1, this.value1, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 1, this.name2, this.value2, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 2, this.name3, this.value3, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 3, this.name4, this.value4, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 4, this.name5, this.value5, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 5, this.name6, this.value6, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 6, this.name7, this.value7, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 7, this.name8, this.value8, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 8, this.name9, this.value9, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( 9, this.name10, this.value10, LogParameterOptions.SemanticParameter );
 		recordBuilder.EndWriteItem(item);
 		
 	}

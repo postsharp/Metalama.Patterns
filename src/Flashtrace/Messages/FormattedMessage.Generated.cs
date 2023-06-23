@@ -27,14 +27,14 @@ public readonly struct FormattedMessage<T1> : IMessage
 		this.arg1 = arg1; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(1, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(1, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -42,8 +42,8 @@ public readonly struct FormattedMessage<T1> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 1 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -76,14 +76,14 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 		this.arg1 = arg1; this.arg2 = arg2; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(2, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(2, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -91,8 +91,8 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 2 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -100,8 +100,8 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 2 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -134,14 +134,14 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(3, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(3, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -149,8 +149,8 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -158,8 +158,8 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -167,8 +167,8 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -201,14 +201,14 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(4, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(4, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -216,8 +216,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -225,8 +225,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -234,8 +234,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -243,8 +243,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -277,14 +277,14 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(5, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(5, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -292,8 +292,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -301,8 +301,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -310,8 +310,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -319,8 +319,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -328,8 +328,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -362,14 +362,14 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(6, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(6, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -377,8 +377,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -386,8 +386,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -395,8 +395,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -404,8 +404,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -413,8 +413,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -422,8 +422,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -456,14 +456,14 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; this.arg7 = arg7; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(7, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(7, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -471,8 +471,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -480,8 +480,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -489,8 +489,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -498,8 +498,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -507,8 +507,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -516,8 +516,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -525,8 +525,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 6, parameter, arg7, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -559,14 +559,14 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; this.arg7 = arg7; this.arg8 = arg8; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(8, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(8, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -574,8 +574,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -583,8 +583,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -592,8 +592,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -601,8 +601,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -610,8 +610,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -619,8 +619,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -628,8 +628,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 6, parameter, arg7, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -637,8 +637,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 7, parameter, arg8, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -671,14 +671,14 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; this.arg7 = arg7; this.arg8 = arg8; this.arg9 = arg9; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(9, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(9, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -686,8 +686,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -695,8 +695,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -704,8 +704,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -713,8 +713,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -722,8 +722,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -731,8 +731,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -740,8 +740,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 6, parameter, arg7, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -749,8 +749,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 7, parameter, arg8, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -758,8 +758,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 8, parameter, arg9, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 8, parameter, arg9, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{
@@ -792,14 +792,14 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; this.arg7 = arg7; this.arg8 = arg8; this.arg9 = arg9; this.arg10 = arg10; 
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(10, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(10, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -807,8 +807,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -816,8 +816,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -825,8 +825,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -834,8 +834,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -843,8 +843,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -852,8 +852,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -861,8 +861,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 6, parameter, arg7, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -870,8 +870,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 7, parameter, arg8, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -879,8 +879,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 8, parameter, arg9, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 8, parameter, arg9, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -888,8 +888,8 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( 9, parameter, arg10, CustomLogParameterOptions.FormattedStringParameter );
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteParameter( 9, parameter, arg10, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{

@@ -6,40 +6,40 @@ using JetBrains.Annotations;
 namespace Flashtrace;
 
 /// <summary>
-/// Allows to build a custom log record (typically, but not necessarily, a string). A log record can be composed of one of several
+/// Allows to build a log record (typically, but not necessarily, a string). A log record can be composed of one of several
 /// items.
 /// </summary>
 [PublicAPI]
-public interface ICustomLogRecordBuilder : IDisposable
+public interface ILogRecordBuilder : IDisposable
 {
     /// <summary>
     /// Begins to build a specified item.
     /// </summary>
     /// <param name="item">The item being built.</param>
     /// <param name="options">Options.</param>
-    void BeginWriteItem( CustomLogRecordItem item, in CustomLogRecordTextOptions options );
+    void BeginWriteItem( LogRecordItem item, in LogRecordTextOptions options );
 
     /// <summary>
     /// Ends building a specified item.
     /// </summary>
     /// <param name="item"></param>
-    void EndWriteItem( CustomLogRecordItem item );
+    void EndWriteItem( LogRecordItem item );
 
     /// <summary>
-    /// Writes a custom parameter.
+    /// Writes a parameter.
     /// </summary>
     /// <typeparam name="T">Type of the parameter value.</typeparam>
     /// <param name="index">Index of the parameter (zero-based).</param>
     /// <param name="parameterName">Name of the parameter.</param>
     /// <param name="value">Value of the parameter.</param>
     /// <param name="options">Options.</param>
-    void WriteCustomParameter<T>( int index, in CharSpan parameterName, T? value, in CustomLogParameterOptions options );
+    void WriteParameter<T>( int index, in CharSpan parameterName, T? value, in LogParameterOptions options );
 
     /// <summary>
     /// Writes a string.
     /// </summary>
     /// <param name="str">A string.</param>
-    void WriteCustomString( in CharSpan str );
+    void WriteString( in CharSpan str );
 
     /// <summary>
     /// Assigns an <see cref="Exception"/> to the record.

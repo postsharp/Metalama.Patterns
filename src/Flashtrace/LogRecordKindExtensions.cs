@@ -21,7 +21,7 @@ public static class LogRecordKindExtensions
         {
             case LogRecordKind.MethodEntry:
             case LogRecordKind.AsyncMethodResume:
-            case LogRecordKind.CustomActivityEntry:
+            case LogRecordKind.ActivityEntry:
             case LogRecordKind.IteratorMoveNext:
                 return true;
 
@@ -44,7 +44,7 @@ public static class LogRecordKindExtensions
             case LogRecordKind.MethodException:
             case LogRecordKind.AsyncMethodAwait:
             case LogRecordKind.IteratorYield:
-            case LogRecordKind.CustomActivityExit:
+            case LogRecordKind.ActivityExit:
                 return true;
 
             default:
@@ -53,15 +53,15 @@ public static class LogRecordKindExtensions
     }
 
     /// <summary>
-    /// Determines whether a given <see cref="LogRecordKind"/> represents the closing of a custom activity.
+    /// Determines whether a given <see cref="LogRecordKind"/> represents the closing of an activity.
     /// </summary>
     /// <param name="kind">A <see cref="LogRecordKind"/>.</param>
-    /// <returns><c>true</c> if <paramref name="kind"/> represents the closing of a custom activity, otherwise <c>false</c>.</returns>
-    public static bool IsCloseCustomActivity( this LogRecordKind kind )
+    /// <returns><c>true</c> if <paramref name="kind"/> represents the closing of an activity, otherwise <c>false</c>.</returns>
+    public static bool IsCloseActivity( this LogRecordKind kind )
     {
         switch ( kind )
         {
-            case LogRecordKind.CustomActivityExit:
+            case LogRecordKind.ActivityExit:
                 return true;
 
             default:
@@ -71,7 +71,7 @@ public static class LogRecordKindExtensions
 
     /// <summary>
     /// Determines whether a given <see cref="LogRecordKind"/> represents a standalone record, i.e. a record that does
-    /// not have a corresponding opening or closing. For instance, a <see cref="LogRecordKind.CustomRecord"/>
+    /// not have a corresponding opening or closing. For instance, a <see cref="LogRecordKind.Message"/>
     /// is a standalone record.
     /// </summary>
     /// <param name="kind">A <see cref="LogRecordKind"/>.</param>
@@ -84,7 +84,7 @@ public static class LogRecordKindExtensions
     {
         switch ( kind )
         {
-            case LogRecordKind.CustomRecord:
+            case LogRecordKind.Message:
             case LogRecordKind.ExecutionPoint:
             case LogRecordKind.ValueChanged:
                 return true;
@@ -94,19 +94,22 @@ public static class LogRecordKindExtensions
         }
     }
 
+    // TODO: [FT-Review] Review use of method name 'IsUser' here. The method was previously named 'IsCustom'.
+
     /// <summary>
-    /// Determines whether a give <see cref="LogRecordKind"/> represents a custom record, emitted by the <see cref="LogLevelSource"/> class.
+    /// Determines whether the current <see cref="LogRecordKind"/> represents a record emitted by the
+    /// <see cref="LogLevelSource"/> class, which is typically invoked by user code.
     /// </summary>
     /// <param name="kind">A <see cref="LogRecordKind"/>.</param>
-    /// <returns><c>true</c> if <paramref name="kind"/> is a custom kind of record emitted by the <see cref="LogLevelSource"/> class,
+    /// <returns><c>true</c> if <paramref name="kind"/> is a record emitted by the <see cref="LogLevelSource"/> class,
     /// otherwise <c>false</c>.</returns>
-    public static bool IsCustom( this LogRecordKind kind )
+    public static bool IsUser( this LogRecordKind kind )
     {
         switch ( kind )
         {
-            case LogRecordKind.CustomRecord:
-            case LogRecordKind.CustomActivityEntry:
-            case LogRecordKind.CustomActivityExit:
+            case LogRecordKind.Message:
+            case LogRecordKind.ActivityEntry:
+            case LogRecordKind.ActivityExit:
             case LogRecordKind.ExecutionPoint:
                 return true;
 

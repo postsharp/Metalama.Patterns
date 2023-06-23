@@ -25,7 +25,7 @@ internal sealed class TraceSourceLogger : LegacySourceLogger
         return "Flashtrace." + role;
     }
 
-    public static TraceSource GetTraceSource( string role = "Custom" )
+    public static TraceSource GetTraceSource( string role = LoggingRoles.Default )
     {
         var sourceName = GetSourceName( role );
 

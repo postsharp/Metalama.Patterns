@@ -35,12 +35,12 @@ public partial interface ILogger : ILoggerExceptionHandler
 
     /// <summary>
     /// Gets a value indicating whether calls of <see cref="SuspendActivity"/> and <see cref="ResumeActivity"/> 
-    /// are required for asynchronous custom activities in the current context.
+    /// are required for asynchronous activities in the current context.
     /// </summary>
     bool RequiresSuspendResume { get; }
 
     /// <summary>
-    /// Writes a custom log record with a description without parameters.
+    /// Writes a log record with a description without parameters.
     /// </summary>
     /// <param name="context"></param>
     /// <param name="level"><see cref="LogLevel"/> of the record.</param>
@@ -51,7 +51,7 @@ public partial interface ILogger : ILoggerExceptionHandler
     void Write( ILoggingContext? context, LogLevel level, LogRecordKind recordKind, string text, Exception? exception, ref CallerInfo callerInfo );
 
     /// <summary>
-    /// Writes a custom log record with a description with an array of parameters.
+    /// Writes a log record with a description with an array of parameters.
     /// </summary>
     /// <param name="context"></param>
     /// <param name="level"><see cref="LogLevel"/> of the record.</param>
@@ -80,7 +80,7 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// <summary>
     /// Resumes an asynchronous activity suspended by the <see cref="SuspendActivity"/> method.
     /// </summary>
-    /// <param name="context">A context representing an asynchronous custom activity, created by <see cref="OpenActivity"/>
+    /// <param name="context">A context representing an asynchronous activity, created by <see cref="OpenActivity"/>
     /// and suspended by <see cref="SuspendActivity"/>.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
     void ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo );
@@ -88,7 +88,7 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// <summary>
     /// Suspends an asynchronous activity, which can then be resumed by the <see cref="ResumeActivity"/> method.
     /// </summary>
-    /// <param name="context">A context representing an asynchronous custom activity, created by <see cref="OpenActivity"/>.</param>
+    /// <param name="context">A context representing an asynchronous activity, created by <see cref="OpenActivity"/>.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
     void SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo );
 

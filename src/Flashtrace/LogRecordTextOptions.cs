@@ -5,10 +5,10 @@ using JetBrains.Annotations;
 namespace Flashtrace;
 
 /// <summary>
-/// Options of the <see cref="ICustomLogRecordBuilder.BeginWriteItem"/> method.
+/// Options of the <see cref="ILogRecordBuilder.BeginWriteItem"/> method.
 /// </summary>
 [PublicAPI]
-public readonly struct CustomLogRecordTextOptions
+public readonly struct LogRecordTextOptions
 {
     /// <summary>
     /// Gets the semantic name of the message, or <c>null</c> for a non-semantic message.
@@ -21,11 +21,11 @@ public readonly struct CustomLogRecordTextOptions
     public int ParameterCount { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CustomLogRecordTextOptions"/> struct.
+    /// Initializes a new instance of the <see cref="LogRecordTextOptions"/> struct.
     /// </summary>
     /// <param name="parameterCount">Number of parameters in the message.</param>
     /// <param name="name">Semantic name of the message, or <c>null</c> for a non-semantic message.</param>
-    public CustomLogRecordTextOptions( int parameterCount, string? name = null )
+    public LogRecordTextOptions( int parameterCount, string? name = null )
     {
         this.Name = name;
         this.ParameterCount = parameterCount;

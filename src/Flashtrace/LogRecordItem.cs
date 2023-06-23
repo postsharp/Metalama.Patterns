@@ -1,28 +1,28 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Messages;
 using JetBrains.Annotations;
 
 namespace Flashtrace;
 
 /// <summary>
-/// Determines how a parameter of a custom record should be rendered.
-/// method.
+/// Enumerates the scenarios in which an <see cref="IMessage"/> can be rendered.
 /// </summary>
 [PublicAPI]
-public enum CustomLogParameterMode
+public enum LogRecordItem
 {
     /// <summary>
-    /// Only the parameter value is rendered.
+    /// Message.
     /// </summary>
-    Default,
+    Message,
 
     /// <summary>
-    /// The parameter is rendered in <c>name = value</c> form.
+    /// Description of an activity.
     /// </summary>
-    NameValuePair,
+    ActivityDescription,
 
     /// <summary>
-    /// The parameter is not rendered.
+    /// Outcome of an activity.
     /// </summary>
-    Hidden
+    ActivityOutcome
 }

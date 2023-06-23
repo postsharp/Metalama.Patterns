@@ -4,7 +4,7 @@ namespace Flashtrace.Messages;
 
 internal static class MessageHelper
 {
-    public static void Write<T>( in T message, ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+    public static void Write<T>( in T message, ILogRecordBuilder recordBuilder, LogRecordItem item )
         where T : IMessage
     {
         // TODO: [FT-Review] Use of Post.GetMutableRef.

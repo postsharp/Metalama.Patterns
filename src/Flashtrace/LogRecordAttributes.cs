@@ -5,11 +5,11 @@ using JetBrains.Annotations;
 namespace Flashtrace;
 
 /// <summary>
-/// Attributes of the <see cref="CustomLogParameterOptions"/> class. Describes how the <see cref="ICustomLogRecordBuilder"/> will be used.
+/// Attributes of the <see cref="LogParameterOptions"/> class. Describes how the <see cref="ILogRecordBuilder"/> will be used.
 /// </summary>
 [PublicAPI]
 [Flags]
-public enum CustomLogRecordAttributes
+public enum LogRecordAttributes
 {
     /// <summary>
     /// Legacy value set by <see cref="ILogger"/> implementations. No information is provided by the caller.
@@ -17,22 +17,22 @@ public enum CustomLogRecordAttributes
     None = 0,
 
     /// <summary>
-    /// The <see cref="ICustomLogRecordBuilder"/> will be used to write the context description.
+    /// The <see cref="ILogRecordBuilder"/> will be used to write the context description.
     /// </summary>
     WriteActivityDescription = 1,
 
     /// <summary>
-    /// The <see cref="ICustomLogRecordBuilder"/> will be used to write the context outcome.
+    /// The <see cref="ILogRecordBuilder"/> will be used to write the context outcome.
     /// </summary>
     WriteActivityOutcome = 2,
 
     /// <summary>
-    /// The <see cref="ICustomLogRecordBuilder"/> will be used to write the context description and outcome.
+    /// The <see cref="ILogRecordBuilder"/> will be used to write the context description and outcome.
     /// </summary>
     WriteActivityDescriptionAndOutcome = WriteActivityDescription | WriteActivityOutcome,
 
     /// <summary>
-    /// The <see cref="ICustomLogRecordBuilder"/> will be used to write a standalone message.
+    /// The <see cref="ILogRecordBuilder"/> will be used to write a standalone message.
     /// </summary>
     WriteMessage = 4
 }

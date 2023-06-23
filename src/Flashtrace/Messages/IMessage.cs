@@ -12,14 +12,14 @@ namespace Flashtrace.Messages;
 public interface IMessage
 {
     /// <summary>
-    /// Renders the current message into a given <see cref="ICustomLogRecordBuilder"/>.
+    /// Renders the current message into a given <see cref="ILogRecordBuilder"/>.
     /// </summary>
-    /// <param name="builder">A <see cref="ICustomLogRecordBuilder"/>.</param>
-    /// <param name="kind">The situation in which the message is rendered (to be passed to <see cref="ICustomLogRecordBuilder.BeginWriteItem"/>)..</param>
+    /// <param name="builder">A <see cref="ILogRecordBuilder"/>.</param>
+    /// <param name="kind">The situation in which the message is rendered (to be passed to <see cref="ILogRecordBuilder.BeginWriteItem"/>)..</param>
     /// <remarks>
-    /// <para>The <see cref="IMessage"/> implementation is responsible for invoking <see cref="ICustomLogRecordBuilder.BeginWriteItem"/>
-    /// and <see cref="ICustomLogRecordBuilder.EndWriteItem(CustomLogRecordItem)"/>.
+    /// <para>The <see cref="IMessage"/> implementation is responsible for invoking <see cref="ILogRecordBuilder.BeginWriteItem"/>
+    /// and <see cref="ILogRecordBuilder.EndWriteItem(LogRecordItem)"/>.
     /// </para>
     /// </remarks>
-    void Write( ICustomLogRecordBuilder builder, CustomLogRecordItem kind );
+    void Write( ILogRecordBuilder builder, LogRecordItem kind );
 }

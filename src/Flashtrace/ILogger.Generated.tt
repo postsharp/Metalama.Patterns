@@ -18,7 +18,7 @@ namespace Flashtrace
 #>
 
 		/// <summary>
-        /// Writes a custom log record with <#= i #> parameter<#= GetPlural( i ) #>.
+        /// Writes a log record with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
 		/// <param name="context">The context for which the message has to be written.</param>
         /// <param name="level">The severity of the record (e.g. <see cref="LogLevel.Info"/> or <see cref="LogLevel.Warning"/>).</param>

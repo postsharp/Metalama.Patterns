@@ -49,23 +49,23 @@ public enum LogRecordKind
     ValueChanged = 1 << 6,
 
     /// <summary>
-    /// Custom record.
+    /// A general-purpose log message.
     /// </summary>
     /// <remarks>
     /// Emitted by:
     ///     <see cref="LogLevelSource.Write{T}(in T, in WriteMessageOptions)"/> and related overloads.
     /// </remarks>
-    CustomRecord = 1 << 7,
+    Message = 1 << 7,
 
     /// <summary>
-    /// Before a custom activity.
+    /// Before an activity.
     /// </summary>
     /// <remarks>
     /// Emitted by:
     ///     <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> and
     ///     <see cref="LogLevelSource.LogActivity{TDescription}(in TDescription, Action, in OpenActivityOptions)"/> and related overloads.
     /// </remarks>
-    CustomActivityEntry = 1 << 8,
+    ActivityEntry = 1 << 8,
 
     // TODO: [FT-Review] Pre-port, LogRecordKind.IteratorYield was set only in PS weaver MethodLoggingAspectTransformation.
     /// <summary>
@@ -95,7 +95,7 @@ public enum LogRecordKind
     MethodOvertime = 1 << 12,
 
     /// <summary>
-    /// When a custom activity exits, regardless of success or failure.
+    /// When a activity exits, regardless of success or failure.
     /// </summary>
     /// <remarks>
     /// Emitted by:
@@ -104,5 +104,5 @@ public enum LogRecordKind
     ///     <see cref="LogActivity{TActivityDescription}.SetResult{TResult}(TResult, in CloseActivityOptions)"/> and
     ///     <see cref="LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>.
     /// </remarks>
-    CustomActivityExit = 1 << 13
+    ActivityExit = 1 << 13
 }

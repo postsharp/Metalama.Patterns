@@ -21,15 +21,15 @@ public readonly struct SemanticMessageArray : IMessage
         this._parameters = parameters;
     }
 
-    void IMessage.Write( ICustomLogRecordBuilder builder, CustomLogRecordItem item )
+    void IMessage.Write( ILogRecordBuilder builder, LogRecordItem item )
     {
-        builder.BeginWriteItem( item, new CustomLogRecordTextOptions( this._parameters.Count, this._messageName ) );
+        builder.BeginWriteItem( item, new LogRecordTextOptions( this._parameters.Count, this._messageName ) );
 
         for ( var i = 0; i < this._parameters.Count; i++ )
         {
             var (name, value) = this._parameters[i];
 
-            builder.WriteCustomParameter( i, name, value, CustomLogParameterOptions.SemanticParameter );
+            builder.WriteParameter( i, name, value, LogParameterOptions.SemanticParameter );
         }
 
         builder.EndWriteItem( item );

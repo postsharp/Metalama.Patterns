@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Flashtrace;
 
 // ReSharper disable once UnusedType.Global : Usage is conditional.
-internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory, ILoggingContext, ICustomLogRecordBuilder,
+internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory, ILoggingContext, ILogRecordBuilder,
                                     ILoggerFactoryProvider
 {
     private static bool _warningEmitted;
@@ -78,26 +78,26 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
 
     void IDisposable.Dispose() { }
 
-    void ICustomLogRecordBuilder.WriteCustomParameter<T>( int index, in CharSpan parameterName, [AllowNull] T value, in CustomLogParameterOptions options ) { }
+    void ILogRecordBuilder.WriteParameter<T>( int index, in CharSpan parameterName, [AllowNull] T value, in LogParameterOptions options ) { }
     
-    void ICustomLogRecordBuilder.WriteCustomString( in CharSpan str ) { }
+    void ILogRecordBuilder.WriteString( in CharSpan str ) { }
 
-    void ICustomLogRecordBuilder.SetException( Exception e ) { }
+    void ILogRecordBuilder.SetException( Exception e ) { }
 
-    void ICustomLogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
+    void ILogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-    ICustomLogRecordBuilder IContextLocalLogger.GetRecordBuilder( in CustomLogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext? context )
+    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext? context )
         => this;
 
     void ILoggerExceptionHandler.OnInvalidUserCode( ref CallerInfo callerInfo, string format, params object[] args ) { }
 
     void ILoggerExceptionHandler.OnInternalException( Exception exception ) { }
 
-    void ICustomLogRecordBuilder.Complete() { }
+    void ILogRecordBuilder.Complete() { }
 
-    void ICustomLogRecordBuilder.BeginWriteItem( CustomLogRecordItem item, in CustomLogRecordTextOptions options ) { }
+    void ILogRecordBuilder.BeginWriteItem( LogRecordItem item, in LogRecordTextOptions options ) { }
 
-    void ICustomLogRecordBuilder.EndWriteItem( CustomLogRecordItem item ) { }
+    void ILogRecordBuilder.EndWriteItem( LogRecordItem item ) { }
 
     IContextLocalLogger ILogger.GetContextLocalLogger() => this;
 

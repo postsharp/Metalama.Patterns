@@ -33,9 +33,9 @@ public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 		<#= Repeat( "this.arg{0} = arg{0}; ", i, "" ) #>
 	}
 
-	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
+	void IMessage.Write( ILogRecordBuilder recordBuilder, LogRecordItem item )
 	{
-		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#= i #>, null));
+		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(<#= i #>, null));
 
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
@@ -44,7 +44,7 @@ public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
         for (var j = 1; j <= i; j++)
         {
 #>
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
 		if ( parameter.Array == null )
@@ -52,11 +52,11 @@ public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly <#= i #> parameters.");
 		}
 
-		recordBuilder.WriteCustomParameter( <#= j - 1 #>, parameter, arg<#= j #>, CustomLogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( <#= j - 1 #>, parameter, arg<#= j #>, LogParameterOptions.FormattedStringParameter );
 <#
         }
 #>
-		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
 		{

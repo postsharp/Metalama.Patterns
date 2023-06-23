@@ -19,9 +19,9 @@ public readonly struct SemanticMessage : IMessage
         this._messageName = messageName;
     }
 
-    void IMessage.Write( ICustomLogRecordBuilder builder, CustomLogRecordItem item )
+    void IMessage.Write( ILogRecordBuilder builder, LogRecordItem item )
     {
-        builder.BeginWriteItem( item, new CustomLogRecordTextOptions( 0, this._messageName ) );
+        builder.BeginWriteItem( item, new LogRecordTextOptions( 0, this._messageName ) );
         builder.EndWriteItem( item );
     }
 
