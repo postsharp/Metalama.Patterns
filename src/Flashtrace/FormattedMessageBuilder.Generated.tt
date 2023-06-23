@@ -25,7 +25,7 @@ partial class FormattedMessageBuilder
     /// </summary>
     /// <param name="formattingString">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
 <#
-    GenerateXmlDoc( i );
+        GenerateXmlDoc( i );
 #>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
     public static FormattedMessage<<#= Repeat( "T{0}", i ) #>> Formatted<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0}? arg{0}", i ) #> )

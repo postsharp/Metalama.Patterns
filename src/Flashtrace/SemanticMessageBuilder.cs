@@ -32,7 +32,7 @@ public static partial class SemanticMessageBuilder
     public static SemanticMessage<object> Semantic( string name, in (string Name, object? Value) parameter )
     {
         // NB: Without this overload, the C# compiler tries to use the (string Name, object Value)[] overload for some reason and then raises an error that the type is wrong (it's not an array).
-        
+
         return new SemanticMessage<object>( name, parameter.Name, parameter.Value );
     }
 
@@ -43,8 +43,7 @@ public static partial class SemanticMessageBuilder
     /// <param name="parameters">Array of parameters (name-value pairs).</param>
     /// <returns></returns>
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
-    public static SemanticMessageArray Semantic( string messageName, IReadOnlyList<(string Name, object? Value)> parameters )
-        => new( messageName, parameters );
+    public static SemanticMessageArray Semantic( string messageName, IReadOnlyList<(string Name, object? Value)> parameters ) => new( messageName, parameters );
 
     /// <summary>
     /// Creates a semantic message without parameter.

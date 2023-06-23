@@ -15,7 +15,7 @@ namespace Flashtrace;
 public struct OpenActivityOptions
 {
     // ReSharper restore InvalidXmlDocComment
-    
+
     private short _kind;
     private Flags _flags;
 

@@ -17,7 +17,7 @@ internal sealed class LogEventPropertiesMetadata
         }
 
         var properties = (IReadOnlyList<LoggingProperty>) data;
-        
+
         foreach ( var property in properties )
         {
             if ( property.IsInherited )

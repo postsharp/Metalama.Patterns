@@ -20,12 +20,12 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// Gets a factory that can provide instances of <see cref="ILogger"/>.
     /// </summary>
     ILoggerFactory Factory { get; }
-    
+
     /// <summary>
     /// Gets the role of records created by this <see cref="ILogger"/>. A list of standard roles is available in the <see cref="LoggingRoles"/> class.
     /// </summary>
     string Role { get; }
-    
+
     /// <summary>
     /// Determines whether logging is enabled for a given <see cref="LogLevel"/>.
     /// </summary>

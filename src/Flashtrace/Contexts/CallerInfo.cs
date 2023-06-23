@@ -128,8 +128,10 @@ public struct CallerInfo
     /// <returns> A <see cref="CallerInfo"/> for the caller (skipping the specified number of stack frames), or <c>default</c> if the platform does not support the <see cref="StackFrame"/> class.</returns>
     public static CallerInfo GetDynamic( int skipFrames )
     {
-        // ReSharper disable once BadSemicolonSpaces
-        for ( var i = skipFrames + 1; ; i++ )
+        // ReSharper code cleanup wants ';;', but this leads to a missing space warning which must be disabled.
+#pragma warning disable SA1002
+        for ( var i = skipFrames + 1;; i++ )
+#pragma warning restore SA1002
         {
             var frame = new StackFrame( i, true );
 

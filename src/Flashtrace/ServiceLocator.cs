@@ -20,7 +20,7 @@ public static class ServiceLocator
     /// </summary>
     /// <typeparam name="T">Type of the service interface.</typeparam>
     /// <param name="service">Service implementation.</param>
-    public static void RegisterService<T>( T service ) 
+    public static void RegisterService<T>( T service )
         where T : class
     {
         var oldService = Entry<T>.Value;
@@ -35,7 +35,7 @@ public static class ServiceLocator
     /// </summary>
     /// <typeparam name="T">Type of the requested service interface.</typeparam>
     /// <returns>An implementation of <typeparamref name="T"/>, or <c>null</c> if no such service has been registered.</returns>
-    public static T? GetService<T>() 
+    public static T? GetService<T>()
         where T : class
         => Entry<T>.Value;
 
@@ -45,13 +45,13 @@ public static class ServiceLocator
 #if true
         RegisterService<ILoggerFactory>( new TraceSourceLoggerFactory() );
         RegisterService<ILoggerFactoryProvider>( new TraceSourceLoggerFactory() );
-#else        
+#else
         RegisterService<ILoggerFactory>(new NullLogger());
         RegisterService<ILoggerFactoryProvider>(new NullLogger());
 #endif
     }
 
-    private static class Entry<T> 
+    private static class Entry<T>
         where T : class
     {
 #pragma warning disable SA1401

@@ -92,11 +92,11 @@ public sealed class LoggingProperty
         {
             const string message = "The parameter '" + nameof(name) + "' is required.";
 
-            throw name == null! 
-                ? new ArgumentNullException( nameof(name), message ) 
+            throw name == null!
+                ? new ArgumentNullException( nameof(name), message )
                 : new ArgumentOutOfRangeException( nameof(name), message );
         }
-        
+
         this.Name = name;
         this._value = value;
     }

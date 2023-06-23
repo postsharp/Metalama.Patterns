@@ -7,7 +7,7 @@ namespace Flashtrace.Messages;
 
 internal static class DebugMessageFormatter
 {
-    public static string Format<T>( T message ) 
+    public static string Format<T>( T message )
         where T : IMessage
     {
         using var writer = new Writer();

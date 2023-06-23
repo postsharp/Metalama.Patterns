@@ -79,15 +79,14 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
     void IDisposable.Dispose() { }
 
     void ILogRecordBuilder.WriteParameter<T>( int index, in CharSpan parameterName, [AllowNull] T value, in LogParameterOptions options ) { }
-    
+
     void ILogRecordBuilder.WriteString( in CharSpan str ) { }
 
     void ILogRecordBuilder.SetException( Exception e ) { }
 
     void ILogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext? context )
-        => this;
+    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext? context ) => this;
 
     void ILoggerExceptionHandler.OnInvalidUserCode( ref CallerInfo callerInfo, string format, params object[] args ) { }
 

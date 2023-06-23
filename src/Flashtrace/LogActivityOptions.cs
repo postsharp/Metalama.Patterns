@@ -30,7 +30,7 @@ public struct LogActivityOptions
     }
 
     // TODO: [FT] LogActivityOptions.IsAsync is never set true. It was previously set by deleted legacy class LogActivity. Action is pending wider use-case assessment (eg, after further porting).
-    
+
     /// <summary>
     /// Gets a value indicating whether the <see cref="LogActivityOptions"/> is async.
     /// </summary>

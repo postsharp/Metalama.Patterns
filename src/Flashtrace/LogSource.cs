@@ -80,7 +80,7 @@ public sealed class LogSource
     public LogSource ForCurrentType()
     {
         var callerInfo = CallerInfo.GetDynamic( 1 );
-        
+
         return this.ForType( callerInfo.SourceType! );
     }
 
@@ -119,9 +119,9 @@ public sealed class LogSource
     /// <param name="sourceName">The source name. A dotted name.</param>
     /// <param name="role">A role name. See <see cref="LoggingRoles"/>.</param>
     /// <returns></returns>
-    public static LogSource Get( string sourceName, string? role ) 
-        => role == null 
-            ? LogSourceFactory.Default.GetLogSource( sourceName ) 
+    public static LogSource Get( string sourceName, string? role )
+        => role == null
+            ? LogSourceFactory.Default.GetLogSource( sourceName )
             : LogSourceFactory.ForRole( role ).GetLogSource( sourceName );
 
     /// <summary>
@@ -131,8 +131,8 @@ public sealed class LogSource
     /// <param name="role">See <see cref="LoggingRoles"/>.</param>
     /// <returns></returns>
     public static LogSource Get( Type type, string? role = null )
-        => role == null 
-            ? LogSourceFactory.Default.GetLogSource( type ) 
+        => role == null
+            ? LogSourceFactory.Default.GetLogSource( type )
             : LogSourceFactory.ForRole( role ).GetLogSource( type );
 
     /// <summary>
@@ -308,7 +308,7 @@ public sealed class LogSource
     }
 
     // ReSharper disable InvalidXmlDocComment
-    
+
     /// <summary>
     /// Evaluates whether a transaction needs to be open for a specified <see cref="OpenActivityOptions"/> and updates
     /// its <see cref="OpenActivityOptions.TransactionRequirement"/> property.
@@ -331,6 +331,6 @@ public sealed class LogSource
             logger.ApplyTransactionRequirements( ref openActivityOptions );
         }
     }
-    
+
     // ReSharper restore InvalidXmlDocComment
 }

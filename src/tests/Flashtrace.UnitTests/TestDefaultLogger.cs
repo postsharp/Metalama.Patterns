@@ -151,7 +151,7 @@ public sealed class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSou
             base.TraceEvent( eventCache, source, eventType, id );
 #endif
         }
-    
+
         public override void TraceEvent( TraceEventCache? eventCache, string source, TraceEventType eventType, int id, string? format, params object?[]? args )
         {
             this.Messages.Add( string.Format( CultureInfo.InvariantCulture, format!, args! ) );
