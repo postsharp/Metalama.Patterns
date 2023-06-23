@@ -41,7 +41,7 @@ public static class ServiceLocator
 
     static ServiceLocator()
     {
-        // TODO: Decide default startup behaviour - TraceSourceLogger vs NullLogger.
+        // TODO: [FT-Review] Decide default startup behaviour - TraceSourceLogger vs NullLogger.
 #if true
         RegisterService<ILoggerFactory>( new TraceSourceLoggerFactory() );
         RegisterService<ILoggerFactoryProvider>( new TraceSourceLoggerFactory() );

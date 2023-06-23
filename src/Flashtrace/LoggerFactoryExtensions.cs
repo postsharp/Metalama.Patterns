@@ -37,10 +37,11 @@ public static class LoggerFactoryExtensions
 
         if ( fullName == null )
         {
-            // TODO: Review terminology 'normal'
+            // TODO: [FT-Review] Review terminology 'normal'.
 
             throw new ArgumentException(
-                $"Must be a 'normal' type. For example, array types, generic type parameters and open generic types are not supported. {nameof(type)}.FullName must not return null." );
+                $"Must be a 'normal' type. For example, array types, generic type parameters and open generic types are not supported. {nameof(type)}.FullName must not return null.",
+                nameof(type) );
         }
 
         var cacheKey = new CacheKey( factory, fullName );

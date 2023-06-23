@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace Flashtrace;
 
-// TODO: Is 'contact' intended in the comment below? Maybe 'context' instead? 
+// TODO: [FT-Review] Is 'contact' intended in the comment below? Maybe 'context' or 'local context' instead? What does 'context-local' actually mean?
 /// <summary>
 /// Abstraction of custom logging methods where the contact has already been resolved.
 /// </summary>

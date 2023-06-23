@@ -10,29 +10,23 @@ namespace Flashtrace;
 [PublicAPI]
 public enum LogActivityKind
 {
-    // TODO: Check actual uses of default, update "created by" below.
-    
-    // ReSharper disable InvalidXmlDocComment
-    
     /// <summary>
-    /// Default, created by <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> or <see cref="LogLevelSource.LogActivityAsync{TDescription, TResult}(in TDescription, Func{Task{TResult}}, in OpenActivityOptions)"/>.
+    /// A general-purpose activity, as typically created by user code.
     /// </summary>
     Default,
-    
-    // ReSharper restore InvalidXmlDocComment
-    
+
     /// <summary>
-    /// Activity of creating a <see cref="Task"/>.
+    /// Activity of creating a <see cref="System.Threading.Tasks.Task"/>.
     /// </summary>
     TaskLauncher,
 
     /// <summary>
-    /// Code running in a <see cref="Task"/>.
+    /// Code running in a <see cref="System.Threading.Tasks.Task"/>.
     /// </summary>
     Task,
 
     /// <summary>
-    /// Activity of waiting for a <see cref="Task"/> or another dispatcher object.
+    /// Activity of waiting for a <see cref="System.Threading.Tasks.Task"/> or another dispatcher object.
     /// </summary>
     Wait,
 

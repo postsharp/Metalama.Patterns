@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace Flashtrace;
 
-// TODO: LogActivityOptions should be passed by reference everywhere.
+// TODO: [Pre-FT] LogActivityOptions should be passed by reference everywhere.
 
 /// <summary>
 /// Options of a new <see cref="LogActivity{TActivityDescription}"/>.
@@ -29,7 +29,7 @@ public struct LogActivityOptions
         set => this._kind = (byte) value;
     }
 
-    // TODO: LogActivityOptions.IsAsync is never set true. It was previous set by removed legacy class LogActivity.
+    // TODO: [FT] LogActivityOptions.IsAsync is never set true. It was previously set by deleted legacy class LogActivity. Action is pending wider use-case assessment (eg, after further porting).
     
     /// <summary>
     /// Gets a value indicating whether the <see cref="LogActivityOptions"/> is async.

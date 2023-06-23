@@ -7,7 +7,7 @@ internal static class MessageHelper
     public static void Write<T>( in T message, ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
         where T : IMessage
     {
-        // TODO: Post.GetMutableRef
+        // TODO: [FT-Review] Use of Post.GetMutableRef.
 #if false
             ref T mutableRef = ref Post.GetMutableRef(message);
             mutableRef.Write(recordBuilder, item);
