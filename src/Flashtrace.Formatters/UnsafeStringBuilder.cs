@@ -400,7 +400,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
                 return true;
 
             default:
-                throw new FlashtraceAssertionFailedException();
+                throw new FlashtraceFormattersAssertionFailedException();
         }
     }
 
@@ -805,7 +805,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     {
         if ( ((value / 1000000000) % 10) != 0 )
         {
-            throw new FlashtraceAssertionFailedException();
+            throw new FlashtraceFormattersAssertionFailedException();
         }
 
         unchecked

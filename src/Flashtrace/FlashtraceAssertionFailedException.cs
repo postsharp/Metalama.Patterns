@@ -5,10 +5,14 @@ using System.Runtime.Serialization;
 namespace Flashtrace;
 
 /// <summary>
-/// Exception thrown upon internal assertion failures in PostSharp Pattern Libraries.
+/// Exception thrown upon internal assertion failures in the Flashtrace library.
 /// </summary>
+/// <remarks>
+/// Throw <see cref="FlashtraceAssertionFailedException"/> instead of using <see cref="System.Diagnostics.Debug"/>
+/// assert methods so that the compiler can track execution flow.
+/// </remarks>
 [Serializable]
-public sealed class FlashtraceAssertionFailedException : Exception
+internal sealed class FlashtraceAssertionFailedException : ApplicationException
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FlashtraceAssertionFailedException"/> class with the default error message.

@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Flashtrace.Common\Flashtrace.Common.csproj" />
     <ProjectReference Include="..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
   </ItemGroup>
 

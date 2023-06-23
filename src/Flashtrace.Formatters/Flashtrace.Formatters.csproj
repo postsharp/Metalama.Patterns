@@ -15,10 +15,6 @@
 	<ItemGroup>
 		<Using Remove="System.Net.Http" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\Flashtrace.Common\Flashtrace.Common.csproj" />
-	</ItemGroup>
 	
 	<Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 	

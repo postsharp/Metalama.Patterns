@@ -52,13 +52,13 @@ public sealed class DynamicFormatter<TValue> : Formatter<TValue>
 
             if ( formatter == null )
             {
-                throw new FlashtraceAssertionFailedException(
+                throw new FlashtraceFormattersAssertionFailedException(
                     string.Format( CultureInfo.InvariantCulture, "Cannot get a formatter for type {0}.", value.GetType() ) );
             }
 
             if ( (formatter.Attributes & FormatterAttributes.Dynamic) != 0 )
             {
-                throw new FlashtraceAssertionFailedException(
+                throw new FlashtraceFormattersAssertionFailedException(
                     string.Format( CultureInfo.InvariantCulture, "Infinite loop in resolving formatters for type {0}.", value.GetType() ) );
             }
 
