@@ -22,7 +22,7 @@ internal sealed class TraceSourceLogger : LegacySourceLogger
 
     private static string GetSourceName( string role )
     {
-        return "PostSharp." + role;
+        return "Flashtrace." + role;
     }
 
     public static TraceSource GetTraceSource( string role = "Custom" )

@@ -8,7 +8,7 @@ namespace Flashtrace;
 
 /// <summary>
 /// Creates messages based on a human-readable formatted string. These messages are suitable for structured logging are not optimal for machine analysis.
-/// For more succinct code, consider including the <c>using static PostSharp.Patterns.Diagnostics.FormattedMessageBuilder</c> statement.
+/// For more succinct code, consider including the <c>using static Flashtrace.FormattedMessageBuilder</c> statement.
 /// </summary>
 [PublicAPI]
 public static partial class FormattedMessageBuilder

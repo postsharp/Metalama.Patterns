@@ -7,8 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Flashtrace;
 
 /// <summary>
-/// Abstraction of the Logging facility, through which other components emit their log records. This
-/// interfaces abstracts other PostSharp components from the PostSharp.Patterns.Diagnostics component.
+/// Abstraction of the Logging facility, through which other components emit their log records.
 /// </summary>
 /// <remarks>
 /// <para>If you want to implement this interface, you should also implement the <see cref="ILoggerFactory"/> interface

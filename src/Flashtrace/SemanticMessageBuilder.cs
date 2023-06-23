@@ -8,7 +8,7 @@ namespace Flashtrace;
 
 /// <summary>
 /// Creates semantic messages composed of a message name and a list of properties given as name-value pairs. These messages are ideal for machine analysis.
-/// For more succinct code, consider including the <c>using static PostSharp.Patterns.Diagnostics.MessageBuilder</c> statement.
+/// For more succinct code, consider including the <c>using static Flashtrace.SemanticMessageBuilder</c> statement.
 /// </summary>
 [PublicAPI]
 public static partial class SemanticMessageBuilder

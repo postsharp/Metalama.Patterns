@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Flashtrace;
 
 /// <summary>
-/// A basic service locator used by PostSharp Patterns to find global services.
+/// A basic service locator used to find global services.
 /// </summary>
 [PublicAPI]
 public static class ServiceLocator
