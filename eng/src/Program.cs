@@ -22,7 +22,11 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
             // TODO: We don't have any packages to publish yet.
             // To start publishing the packages, set the public artifacts above and remove
             // this assignment to Configurations property.
-            ExportsToTeamCityDeploy = false
+            ExportsToTeamCityDeploy = false,
+            
+            // This is the first version of Patters.
+            // This line should be removed in the next version.
+            RequiresUpstreamCheck = false
         } )
 };
 

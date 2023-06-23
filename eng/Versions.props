@@ -17,7 +17,7 @@
     
     <!-- Set the default versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>2023.2.11</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>2023.2.17</PostSharpEngineeringVersion>
         <MetalamaVersion></MetalamaVersion>
     </PropertyGroup>
 
