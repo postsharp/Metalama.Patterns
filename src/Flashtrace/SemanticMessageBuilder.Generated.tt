@@ -6,8 +6,9 @@
 <#@ output extension=".cs" #>
 <#@ include file="Common.ttinclude" #>
 
+#nullable enable
+
 using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
 using Flashtrace.Messages;
 
 namespace Flashtrace;
@@ -34,7 +35,7 @@ partial class SemanticMessageBuilder
     }
 #>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-    public static  SemanticMessage<<#= Repeat( "T{0}", i ) #>> Semantic<<#= Repeat( "T{0}", i ) #>>(  string name, <#= Repeat( "string parameterName{0}, T{0} parameterValue{0}", i ) #> )
+    public static  SemanticMessage<<#= Repeat( "T{0}", i ) #>> Semantic<<#= Repeat( "T{0}", i ) #>>(  string name, <#= Repeat( "string parameterName{0}, T{0}? parameterValue{0}", i ) #> )
     {
         return new SemanticMessage<<#= Repeat( "T{0}", i ) #>>( name, <#= Repeat( "parameterName{0}, parameterValue{0}", i ) #> );
     }
@@ -53,7 +54,7 @@ partial class SemanticMessageBuilder
     }
 #>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-    public static  SemanticMessage<<#= Repeat( "T{0}", i ) #>> Semantic<<#= Repeat( "T{0}", i ) #>>(  string name, <#= Repeat( "in (string Name,T{0} Value) parameter{0}", i ) #> )
+    public static  SemanticMessage<<#= Repeat( "T{0}", i ) #>> Semantic<<#= Repeat( "T{0}", i ) #>>(  string name, <#= Repeat( "in (string Name,T{0}? Value) parameter{0}", i ) #> )
     {
         return new SemanticMessage<<#= Repeat( "T{0}", i ) #>>( name, <#= Repeat( "parameter{0}.Name, parameter{0}.Value", i ) #> );
     }

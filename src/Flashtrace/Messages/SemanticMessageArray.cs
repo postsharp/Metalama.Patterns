@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 using System.Runtime.CompilerServices;
 
 namespace Flashtrace.Messages;
@@ -8,14 +8,14 @@ namespace Flashtrace.Messages;
 /// <summary>
 /// Encapsulates a semantic message with an arbitrary number of parameters. Use the <see cref="SemanticMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage( "Microsoft.Performance", "CA1815", Justification = "Equal is not a use case" )]
+[PublicAPI]
 public readonly struct SemanticMessageArray : IMessage
 {
     private readonly string _messageName;
-    private readonly IReadOnlyList<(string Name, object Value)> _parameters;
+    private readonly IReadOnlyList<(string Name, object? Value)> _parameters;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
-    internal SemanticMessageArray( string messageName, IReadOnlyList<(string Name, object Value)> parameters )
+    internal SemanticMessageArray( string messageName, IReadOnlyList<(string Name, object? Value)> parameters )
     {
         this._messageName = messageName;
         this._parameters = parameters;

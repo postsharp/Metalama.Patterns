@@ -38,7 +38,7 @@ public readonly struct LogEventData : IEquatable<LogEventData>
     /// <param name="data">The raw CLR object, typically an instance of anonymous type or any other type.</param>
     /// <param name="metadata">The <see cref="LogEventMetadata"/> used to interpret <paramref name="data"/>. When this parameter
     /// is <c>null</c>, the default <see cref="LogEventMetadata"/> implementation is used, which maps CLR properties into logging properties.</param>
-    public static LogEventData Create( object data, LogEventMetadata metadata ) => new( data, metadata );
+    public static LogEventData Create( object? data, LogEventMetadata? metadata ) => new( data, metadata );
 
     /// <summary>
     /// Creates a new <see cref="LogEventData"/> and uses the default <see cref="LogEventMetadata"/> for the run-time type of the specified object.
@@ -51,7 +51,7 @@ public readonly struct LogEventData : IEquatable<LogEventData>
     /// This overload is faster than the non-generic one.
     /// </summary>
     /// <param name="data">The raw CLR object, typically an instance of anonymous type or any other type.</param>
-    public static LogEventData Create<T>( T data ) => new( data, DefaultLogEventMetadata<T>.Instance );
+    public static LogEventData Create<T>( T? data ) => new( data, DefaultLogEventMetadata<T>.Instance );
 
     internal LogEventData( IReadOnlyList<LoggingProperty> properties )
     {

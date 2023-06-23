@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace;
 
 /// <summary>
 /// List of standard logging roles.
 /// </summary>
+[PublicAPI]
 public static class LoggingRoles
 {
     /// <summary>

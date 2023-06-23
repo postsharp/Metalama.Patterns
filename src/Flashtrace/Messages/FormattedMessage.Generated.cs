@@ -4,25 +4,24 @@
 
 
 
+#nullable enable
+
 using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Messages;
 
 /// <summary>
 /// Encapsulates a text message with 1 parameter. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; 
+	private readonly T1? arg1; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1 )
+	internal FormattedMessage( string formattingString, T1? arg1 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; 
@@ -35,7 +34,6 @@ public readonly struct FormattedMessage<T1> : IMessage
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -45,8 +43,6 @@ public readonly struct FormattedMessage<T1> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -66,17 +62,15 @@ public readonly struct FormattedMessage<T1> : IMessage
 /// <summary>
 /// Encapsulates a text message with 2 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; 
+	private readonly T1? arg1; private readonly T2? arg2; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; 
@@ -89,7 +83,6 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -99,8 +92,6 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -110,8 +101,6 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -131,17 +120,15 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 /// <summary>
 /// Encapsulates a text message with 3 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; 
+	private readonly T1? arg1; private readonly T2? arg2; private readonly T3? arg3; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2, T3? arg3 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; 
@@ -154,7 +141,6 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -164,8 +150,6 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -175,8 +159,6 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -186,8 +168,6 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -207,17 +187,15 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 /// <summary>
 /// Encapsulates a text message with 4 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; 
+	private readonly T1? arg1; private readonly T2? arg2; private readonly T3? arg3; private readonly T4? arg4; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2, T3? arg3, T4? arg4 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; 
@@ -230,7 +208,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -240,8 +217,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -251,8 +226,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -262,8 +235,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -273,8 +244,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -294,17 +263,15 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 /// <summary>
 /// Encapsulates a text message with 5 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; 
+	private readonly T1? arg1; private readonly T2? arg2; private readonly T3? arg3; private readonly T4? arg4; private readonly T5? arg5; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2, T3? arg3, T4? arg4, T5? arg5 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; 
@@ -317,7 +284,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -327,8 +293,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -338,8 +302,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -349,8 +311,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -360,8 +320,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -371,8 +329,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -392,17 +348,15 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 /// <summary>
 /// Encapsulates a text message with 6 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; 
+	private readonly T1? arg1; private readonly T2? arg2; private readonly T3? arg3; private readonly T4? arg4; private readonly T5? arg5; private readonly T6? arg6; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2, T3? arg3, T4? arg4, T5? arg5, T6? arg6 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; 
@@ -415,7 +369,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -425,8 +378,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -436,8 +387,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -447,8 +396,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -458,8 +405,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -469,8 +414,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -480,8 +423,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -501,17 +442,15 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 /// <summary>
 /// Encapsulates a text message with 7 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; private readonly T7 arg7; 
+	private readonly T1? arg1; private readonly T2? arg2; private readonly T3? arg3; private readonly T4? arg4; private readonly T5? arg5; private readonly T6? arg6; private readonly T7? arg7; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2, T3? arg3, T4? arg4, T5? arg5, T6? arg6, T7? arg7 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; this.arg7 = arg7; 
@@ -524,7 +463,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -534,8 +472,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -545,8 +481,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -556,8 +490,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -567,8 +499,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -578,8 +508,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -589,8 +517,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -600,8 +526,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -621,17 +545,15 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 /// <summary>
 /// Encapsulates a text message with 8 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; private readonly T7 arg7; private readonly T8 arg8; 
+	private readonly T1? arg1; private readonly T2? arg2; private readonly T3? arg3; private readonly T4? arg4; private readonly T5? arg5; private readonly T6? arg6; private readonly T7? arg7; private readonly T8? arg8; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2, T3? arg3, T4? arg4, T5? arg5, T6? arg6, T7? arg7, T8? arg8 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; this.arg7 = arg7; this.arg8 = arg8; 
@@ -644,7 +566,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -654,8 +575,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -665,8 +584,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -676,8 +593,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		}
 
 		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -687,8 +602,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		}
 
 		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -698,8 +611,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		}
 
 		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -709,8 +620,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		}
 
 		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -720,8 +629,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		}
 
 		recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -731,8 +638,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 		}
 
 		recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -752,17 +657,15 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 /// <summary>
 /// Encapsulates a text message with 9 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; private readonly T7 arg7; private readonly T8 arg8; private readonly T9 arg9; 
+	private readonly T1? arg1; private readonly T2? arg2; private readonly T3? arg3; private readonly T4? arg4; private readonly T5? arg5; private readonly T6? arg6; private readonly T7? arg7; private readonly T8? arg8; private readonly T9? arg9; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2, T3? arg3, T4? arg4, T5? arg5, T6? arg6, T7? arg7, T8? arg8, T9? arg9 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; this.arg7 = arg7; this.arg8 = arg8; this.arg9 = arg9; 
@@ -775,7 +678,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -785,8 +687,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -796,8 +696,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -807,8 +705,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -818,8 +714,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -829,8 +723,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -840,8 +732,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -851,8 +741,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -862,8 +750,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -873,8 +759,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 		}
 
 		recordBuilder.WriteCustomParameter( 8, parameter, arg9, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )
@@ -894,17 +778,15 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 /// <summary>
 /// Encapsulates a text message with 10 parameters. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IMessage
 {
 	private readonly string formattingString;
 	
-	private readonly T1 arg1; private readonly T2 arg2; private readonly T3 arg3; private readonly T4 arg4; private readonly T5 arg5; private readonly T6 arg6; private readonly T7 arg7; private readonly T8 arg8; private readonly T9 arg9; private readonly T10 arg10; 
+	private readonly T1? arg1; private readonly T2? arg2; private readonly T3? arg3; private readonly T4? arg4; private readonly T5? arg5; private readonly T6? arg6; private readonly T7? arg7; private readonly T8? arg8; private readonly T9? arg9; private readonly T10? arg10; 
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10 )
+	internal FormattedMessage( string formattingString, T1? arg1, T2? arg2, T3? arg3, T4? arg4, T5? arg5, T6? arg6, T7? arg7, T8? arg8, T9? arg9, T10? arg10 )
 	{
 		this.formattingString = formattingString;
 		this.arg1 = arg1; this.arg2 = arg2; this.arg3 = arg3; this.arg4 = arg4; this.arg5 = arg5; this.arg6 = arg6; this.arg7 = arg7; this.arg8 = arg8; this.arg9 = arg9; this.arg10 = arg10; 
@@ -917,7 +799,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -927,8 +808,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 0, parameter, arg1, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -938,8 +817,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 1, parameter, arg2, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -949,8 +826,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 2, parameter, arg3, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -960,8 +835,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 3, parameter, arg4, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -971,8 +844,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 4, parameter, arg5, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -982,8 +853,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 5, parameter, arg6, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -993,8 +862,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 6, parameter, arg7, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -1004,8 +871,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 7, parameter, arg8, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -1015,8 +880,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 8, parameter, arg9, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -1026,8 +889,6 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 		}
 
 		recordBuilder.WriteCustomParameter( 9, parameter, arg10, CustomLogParameterOptions.FormattedStringParameter );
-
-		
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )

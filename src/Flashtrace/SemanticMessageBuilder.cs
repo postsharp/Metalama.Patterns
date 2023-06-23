@@ -21,7 +21,7 @@ public static partial class SemanticMessageBuilder
     /// <returns></returns>
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
     // Intentionally removing the params modifier because otherwise the C# compiler picks the wrong overload which causes a performance issue.
-    public static SemanticMessageArray Semantic( string messageName, (string Name, object Value)[] parameters ) => new( messageName, parameters );
+    public static SemanticMessageArray Semantic( string messageName, (string Name, object? Value)[] parameters ) => new( messageName, parameters );
 
     /// <summary>
     /// Create a semantic message with 1 parameter, using tuples, where the value is of type <see cref="object"/>.
@@ -29,7 +29,7 @@ public static partial class SemanticMessageBuilder
     /// <param name="name">Name of the message.</param>
     /// <param name="parameter">Name and value of the first parameter wrapped as a tuple.</param>
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
-    public static SemanticMessage<object> Semantic( string name, in (string Name, object Value) parameter )
+    public static SemanticMessage<object> Semantic( string name, in (string Name, object? Value) parameter )
     {
         // NB: Without this overload, the C# compiler tries to use the (string Name, object Value)[] overload for some reason and then raises an error that the type is wrong (it's not an array).
         
@@ -43,7 +43,7 @@ public static partial class SemanticMessageBuilder
     /// <param name="parameters">Array of parameters (name-value pairs).</param>
     /// <returns></returns>
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
-    public static SemanticMessageArray Semantic( string messageName, IReadOnlyList<(string Name, object Value)> parameters )
+    public static SemanticMessageArray Semantic( string messageName, IReadOnlyList<(string Name, object? Value)> parameters )
         => new( messageName, parameters );
 
     /// <summary>

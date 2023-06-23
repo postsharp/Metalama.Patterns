@@ -6,8 +6,9 @@
 <#@ output extension=".cs" #>
 <#@ include file="..\Common.ttinclude" #>
 
+#nullable enable
+
 using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Messages;
 <#
@@ -18,17 +19,15 @@ namespace Flashtrace.Messages;
 /// <summary>
 /// Encapsulates a text message with <#= i #> parameter<#= GetPlural( i ) #>. Use the <see cref="FormattedMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 {
 	private readonly string formattingString;
 	
-	<#= Repeat( "private readonly T{0} arg{0}; ", i, "" ) #>
+	<#= Repeat( "private readonly T{0}? arg{0}; ", i, "" ) #>
 
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal FormattedMessage( string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
+	internal FormattedMessage( string formattingString, <#= Repeat( "T{0}? arg{0}", i ) #> )
 	{
 		this.formattingString = formattingString;
 		<#= Repeat( "this.arg{0} = arg{0}; ", i, "" ) #>
@@ -41,11 +40,10 @@ public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
 		ArraySegment<char> parameter;
 
-		   <#
+<#
         for (var j = 1; j <= i; j++)
         {
 #>
-
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 		parameter = parser.GetNextParameter();
 
@@ -55,11 +53,9 @@ public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 		}
 
 		recordBuilder.WriteCustomParameter( <#= j - 1 #>, parameter, arg<#= j #>, CustomLogParameterOptions.FormattedStringParameter );
-
-		<#
+<#
         }
 #>
-
 		recordBuilder.WriteCustomString( parser.GetNextSubstring() );
 
 		if ( parser.GetNextParameter().Array != null )

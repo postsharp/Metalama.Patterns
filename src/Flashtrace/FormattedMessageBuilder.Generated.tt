@@ -6,10 +6,9 @@
 <#@ output extension=".cs" #>
 <#@ include file="Common.ttinclude" #>
 
-// TODO: Split T4 template into separate files with common include.
+#nullable enable
 
 using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
 using Flashtrace.Messages;
 
 namespace Flashtrace;
@@ -26,10 +25,10 @@ partial class FormattedMessageBuilder
     /// </summary>
     /// <param name="formattingString">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
 <#
-        GenerateXmlDoc( i );
+    GenerateXmlDoc( i );
 #>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-    public static FormattedMessage<<#= Repeat( "T{0}", i ) #>> Formatted<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0} arg{0}", i ) #> )
+    public static FormattedMessage<<#= Repeat( "T{0}", i ) #>> Formatted<<#= Repeat( "T{0}", i ) #>>(  string formattingString, <#= Repeat( "T{0}? arg{0}", i ) #> )
     {
         return new FormattedMessage<<#= Repeat( "T{0}", i ) #>>( formattingString, <#= Repeat( "arg{0}", i ) #> );
     }

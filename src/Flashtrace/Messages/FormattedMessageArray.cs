@@ -13,10 +13,10 @@ namespace Flashtrace.Messages;
 public readonly struct FormattedMessageArray : IMessage
 {
     private readonly string _formattingString;
-    private readonly object[] _args;
+    private readonly object?[] _args;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
-    internal FormattedMessageArray( string formattingString, object[] args )
+    internal FormattedMessageArray( string formattingString, object?[] args )
     {
         this._formattingString = formattingString;
         this._args = args;

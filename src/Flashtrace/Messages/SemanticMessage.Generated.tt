@@ -6,8 +6,9 @@
 <#@ output extension=".cs" #>
 <#@ include file="..\Common.ttinclude" #>
 
+#nullable enable
+
 using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Messages;
 <#
@@ -18,17 +19,15 @@ namespace Flashtrace.Messages;
  /// <summary>
 /// Encapsulates a semantic message with a <#= i #> number of parameter<#= GetPlural( i ) #>. Use the <see cref="SemanticMessageBuilder"/> class to create an instance of this type.
 /// </summary>
-[SuppressMessage("Microsoft.Performance","CA1815", Justification = "Equal is not a use case")]
-[SuppressMessage("Microsoft.Design","CA1005:AvoidExcessiveParametersOnGenericTypes", Justification = "Recommended to use 'var' keyword.")]
 public readonly struct SemanticMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 {
 	private readonly string messageName;
 	
 	<#= Repeat( "private readonly string name{0}; ", i, "" ) #>
-	<#= Repeat( "private readonly T{0} value{0}; ", i, "" ) #>
+	<#= Repeat( "private readonly T{0}? value{0}; ", i, "" ) #>
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)] // To avoid copying the struct.
-	internal SemanticMessage( string messageName, <#= Repeat( "string name{0}, T{0} value{0}", i ) #> )
+	internal SemanticMessage( string messageName, <#= Repeat( "string name{0}, T{0}? value{0}", i ) #> )
 	{
 		this.messageName = messageName;
 		<#= Repeat( "this.name{0} = name{0}; ", i, "" ) #>
@@ -38,18 +37,14 @@ public readonly struct SemanticMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 	void IMessage.Write( ICustomLogRecordBuilder recordBuilder, CustomLogRecordItem item )
 	{
 		recordBuilder.BeginWriteItem(item, new CustomLogRecordTextOptions(<#= i #>, this.messageName));
-
-		   <#
+<#
         for (var j = 1; j <= i; j++)
         {
 #>
-
 		recordBuilder.WriteCustomParameter( <#= j - 1 #>, this.name<#= j #>, this.value<#= j #>, CustomLogParameterOptions.SemanticParameter );
-
-		<#
+<#
         }
 #>
-
 		recordBuilder.EndWriteItem(item);
 		
 	}

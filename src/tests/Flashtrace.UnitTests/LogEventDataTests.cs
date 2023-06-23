@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Flashtrace.UnitTests;
 
-public class LogEventDataTests
+public sealed partial class LogEventDataTests
 {
     [Fact]
     public void TestAnonymous()
@@ -71,7 +71,7 @@ public class LogEventDataTests
 
         var expressionModel = data.GetExpressionModel<TestExpressionModel>();
         Assert.NotNull( expressionModel );
-        Assert.Same( rawData, expressionModel.Data );
+        Assert.Same( rawData, expressionModel!.Data );
     }
 
     [Fact]
@@ -83,40 +83,11 @@ public class LogEventDataTests
         // Test the dynamic factory.
         Assert.Same( eventData.Metadata, LogEventData.Create( o, null ).Metadata );
 
-        Assert.True( eventData.Metadata.GetPropertyOptions( "Inherited" ).IsInherited );
-        Assert.True( eventData.Metadata.GetPropertyOptions( "Ignored" ).IsIgnored );
+        Assert.True( eventData.Metadata!.GetPropertyOptions( "Inherited" ).IsInherited );
+        Assert.True( eventData.Metadata!.GetPropertyOptions( "Ignored" ).IsIgnored );
 
         var properties = eventData.ToDictionary();
 
         Assert.Equal( 1, properties.Count );
-    }
-
-    private class TestExpressionModel
-    {
-        public readonly object Data;
-
-        public TestExpressionModel( object data )
-        {
-            this.Data = data;
-        }
-    }
-
-    private class TestMetadata : LogEventMetadata<TestExpressionModel>
-    {
-        public TestMetadata() : base( "Test" ) { }
-
-        public override TestExpressionModel GetExpressionModel( object data )
-        {
-            return new TestExpressionModel( data );
-        }
-    }
-
-    private class PropertiesWithAttributes
-    {
-        [LoggingPropertyOptions( IsIgnored = true )]
-        public string Ignored { get; set; }
-
-        [LoggingPropertyOptions( IsInherited = true )]
-        public string Inherited { get; set; }
     }
 }

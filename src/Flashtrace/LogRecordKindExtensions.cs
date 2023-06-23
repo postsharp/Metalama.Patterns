@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace;
 
 /// <summary>
 /// Extensions to the <see cref="LogRecordKind"/> enum.
 /// </summary>
+[PublicAPI]
 public static class LogRecordKindExtensions
 {
     /// <summary>
