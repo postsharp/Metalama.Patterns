@@ -242,7 +242,7 @@ public sealed class LogLevelSource
     [EditorBrowsable( EditorBrowsableState.Never )]
     public void LogActivity<TDescription>(
         in TDescription description,
-        [Required] Action action,
+        Action action,
         in OpenActivityOptions options,
         ref CallerInfo callerInfo )
         where TDescription : IMessage
@@ -291,7 +291,7 @@ public sealed class LogLevelSource
     [EditorBrowsable( EditorBrowsableState.Never )]
     public TResult LogActivity<TDescription, TResult>(
         in TDescription description,
-        [Required] Func<TResult> action,
+        Func<TResult> action,
         in OpenActivityOptions options,
         ref CallerInfo callerInfo )
         where TDescription : IMessage

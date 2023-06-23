@@ -65,8 +65,22 @@ public static class LoggerFactoryExtensions
     /// <param name="factory">An <see cref="ILoggerFactory"/>.</param>
     /// <param name="sourceName">Log source name to be used by the backend. Not all backends support creating sources by name.</param>
     /// <returns>A <see cref="LogSource"/> for <paramref name="sourceName"/>.</returns>
-    public static LogSource GetLogSource( [Required] this ILoggerFactory factory, [Required] string sourceName )
+    public static LogSource GetLogSource( this ILoggerFactory factory, string sourceName )
     {
+        if ( factory == null )
+        {
+            throw new ArgumentNullException( nameof(factory) );
+        }
+
+        if ( string.IsNullOrWhiteSpace( sourceName ) )
+        {
+            const string message = "The parameter '" + nameof(sourceName) + "' is required.";
+
+            throw sourceName == null!
+                ? new ArgumentNullException( nameof(sourceName), message )
+                : new ArgumentOutOfRangeException( nameof(sourceName), message );
+        }
+
         var cacheKey = new CacheKey( factory, sourceName );
 
         if ( _cache.TryGetValue( cacheKey, out var result ) )
@@ -87,8 +101,13 @@ public static class LoggerFactoryExtensions
     /// </summary>
     /// <param name="factory">An <see cref="ILoggerFactory"/>.</param>
     /// <returns>A <see cref="LogSource"/> for the calling type.</returns>
-    public static LogSource GetLogSource( [Required] this ILoggerFactory factory )
+    public static LogSource GetLogSource( this ILoggerFactory factory )
     {
+        if ( factory == null )
+        {
+            throw new ArgumentNullException( nameof(factory) );
+        }
+
         var callerInfo = CallerInfo.GetDynamic( 1 );
 
         return factory.GetLogSource( ref callerInfo );
@@ -96,8 +115,13 @@ public static class LoggerFactoryExtensions
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static LogSource GetLogSource( [Required] this ILoggerFactory factory, ref CallerInfo callerInfo )
+    public static LogSource GetLogSource( this ILoggerFactory factory, ref CallerInfo callerInfo )
     {
+        if ( factory == null )
+        {
+            throw new ArgumentNullException( nameof(factory) );
+        }
+
         // If we don't have a caller type, it's preferable to use System.Object as a safe fallback rather than throwing an exception.
         var callerType = callerInfo.SourceType ?? typeof(object);
 

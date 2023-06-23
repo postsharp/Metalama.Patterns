@@ -30,7 +30,7 @@ public sealed class LogSource
     private LogLevelSource? _criticalLogLevelSource;
     private LogLevelSource? _noneLogLevelSource;
 
-    internal LogSource( [Required] ILogger logger, LogLevel defaultLevel = LogLevel.Debug, LogLevel failureLevel = LogLevel.Error )
+    internal LogSource( ILogger logger, LogLevel defaultLevel = LogLevel.Debug, LogLevel failureLevel = LogLevel.Error )
     {
         this.Logger = logger ?? throw new ArgumentNullException( nameof(logger) );
         this.DefaultLevel = defaultLevel;

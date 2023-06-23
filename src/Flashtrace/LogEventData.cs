@@ -90,11 +90,11 @@ public readonly struct LogEventData : IEquatable<LogEventData>
         return dictionary;
     }
 
-    [ExplicitCrossPackageInternal]
-    internal bool HasInheritedProperty => this.Data != null && this.Metadata!.HasInheritedProperty( this.Data );
+    // Was [ExplicitCrossPackageInternal]
+    public bool HasInheritedProperty => this.Data != null && this.Metadata!.HasInheritedProperty( this.Data );
 
-    [ExplicitCrossPackageInternal]
-    internal T? GetExpressionModel<T>() => this.Metadata == null ? default : this.Metadata.GetExpressionModel<T>( this.Data );
+    // Was [ExplicitCrossPackageInternal]
+    public T? GetExpressionModel<T>() => this.Metadata == null ? default : this.Metadata.GetExpressionModel<T>( this.Data );
 
     /// <inheritdoc/>
     public override bool Equals( object? obj )

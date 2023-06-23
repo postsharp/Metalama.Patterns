@@ -11,10 +11,11 @@ namespace Flashtrace;
 [PublicAPI]
 public readonly struct LogParameterOptions
 {
-    [ExplicitCrossPackageInternal]
-    internal static readonly LogParameterOptions FormattedStringParameter = new( LogParameterMode.Default );
+    // Was [ExplicitCrossPackageInternal]
+    public static readonly LogParameterOptions FormattedStringParameter = new( LogParameterMode.Default );
 
-    internal static readonly LogParameterOptions SemanticParameter = new( LogParameterMode.NameValuePair );
+    // Was internal.
+    public static readonly LogParameterOptions SemanticParameter = new( LogParameterMode.NameValuePair );
 
     /// <summary>
     /// Gets rendering mode of the parameter.
@@ -30,7 +31,7 @@ public readonly struct LogParameterOptions
         this.Mode = mode;
     }
 
-    // This property could be public and settable in the future.
-    [ExplicitCrossPackageInternal]
-    internal FormattingOptions FormattingOptions => this.Mode == LogParameterMode.Default ? FormattingOptions.Unquoted : FormattingOptions.Default;
+    // [Pre-FT] This property could be public and settable in the future.
+    // Was [ExplicitCrossPackageInternal]
+    public FormattingOptions FormattingOptions => this.Mode == LogParameterMode.Default ? FormattingOptions.Unquoted : FormattingOptions.Default;
 }

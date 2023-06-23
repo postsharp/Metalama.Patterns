@@ -30,8 +30,8 @@ public static class LoggingRoles
     /// </summary>
     public const string Default = "Default";
 
-    [ExplicitCrossPackageInternal]
-    internal static bool IsSystemRole( string role )
+    // Was [ExplicitCrossPackageInternal]
+    public static bool IsSystemRole( string role )
     {
         switch ( role )
         {

@@ -101,8 +101,17 @@ public sealed class LoggingProperty
         this._value = value;
     }
 
-    internal LoggingProperty( [Required] string name, object value, LoggingPropertyOptions options )
+    internal LoggingProperty( string name, object value, LoggingPropertyOptions options )
     {
+        if ( string.IsNullOrWhiteSpace( name ) )
+        {
+            const string message = "The parameter '" + nameof(name) + "' is required.";
+
+            throw name == null!
+                ? new ArgumentNullException( nameof(name), message )
+                : new ArgumentOutOfRangeException( nameof(name), message );
+        }
+
         this.Name = name;
         this._value = value;
         this._options = options;
@@ -113,8 +122,17 @@ public sealed class LoggingProperty
     /// </summary>
     /// <param name="name">Property name.</param>
     /// <param name="func">A function returning the property value. This function will be evaluated every time the <see cref="Value"/> getter is invoked.</param>
-    public LoggingProperty( [Required] string name, Func<object> func )
+    public LoggingProperty( string name, Func<object> func )
     {
+        if ( string.IsNullOrWhiteSpace( name ) )
+        {
+            const string message = "The parameter '" + nameof(name) + "' is required.";
+
+            throw name == null!
+                ? new ArgumentNullException( nameof(name), message )
+                : new ArgumentOutOfRangeException( nameof(name), message );
+        }
+
         this.Name = name;
         this._func = func;
     }
