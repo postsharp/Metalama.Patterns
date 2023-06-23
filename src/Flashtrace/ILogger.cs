@@ -34,11 +34,6 @@ public partial interface ILogger : ILoggerExceptionHandler
     bool IsEnabled( LogLevel level );
 
     /// <summary>
-    /// Gets the default verbosity when opening and closing activities.
-    /// </summary>
-    ILogActivityOptions ActivityOptions { get; }
-
-    /// <summary>
     /// Gets a value indicating whether calls of <see cref="SuspendActivity"/> and <see cref="ResumeActivity"/> 
     /// are required for asynchronous custom activities in the current context.
     /// </summary>

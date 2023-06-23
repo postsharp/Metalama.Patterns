@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Flashtrace;
 
 // ReSharper disable once UnusedType.Global : Usage is conditional.
-internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory, ILoggingContext, ICustomLogRecordBuilder, ILogActivityOptions,
+internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory, ILoggingContext, ICustomLogRecordBuilder,
                                     ILoggerFactoryProvider
 {
     private static bool _warningEmitted;
@@ -53,16 +53,6 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
     bool ILoggingContext.IsDisposed => false;
 
     int ILoggingContext.RecycleId => 0;
-
-    LogLevel ILogActivityOptions.ActivityLevel => LogLevel.None;
-
-    LogLevel ILogActivityOptions.FailureLevel => LogLevel.None;
-
-    LogLevel ILogActivityOptions.ExceptionLevel => LogLevel.None;
-
-    // TODO: Implementation is [Obsolete], but base interface property is not.
-    [Obsolete]
-    ILogActivityOptions ILogger.ActivityOptions => this;
 
     bool ILoggingContext.IsAsync => false;
 

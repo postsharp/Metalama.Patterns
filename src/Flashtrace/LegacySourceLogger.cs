@@ -34,7 +34,7 @@ namespace Flashtrace;
 /// A base class for implementations of <see cref="ILogger"/> that cannot depend on the <c>PostSharp.Patterns.Diagnostics</c> package.
 /// </summary>
 [PublicAPI]
-public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger, ILogActivityOptions
+public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="LegacySourceLogger"/> class.
