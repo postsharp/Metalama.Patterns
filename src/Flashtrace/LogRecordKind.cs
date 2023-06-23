@@ -5,9 +5,6 @@ using System.Collections;
 
 namespace Flashtrace;
 
-// TODO: LogRecordKind: From experience I know that some of these flags are disused and should be removed.
-// TODO: Review docs and re-enable InvalidXmlDocComment 
-
 // ReSharper disable InvalidXmlDocComment
 /// <summary>
 /// Kinds of log entry.
@@ -52,52 +49,60 @@ public enum LogRecordKind
     ValueChanged = 1 << 6,
 
     /// <summary>
-    /// Custom record (emitted by <see cref="Logger.Write(Flashtrace.LogLevel,string)"/>.
+    /// Custom record.
     /// </summary>
+    /// <remarks>
+    /// Emitted by:
+    ///     <see cref="LogLevelSource.Write{T}(in T, in WriteMessageOptions)"/> and related overloads.
+    /// </remarks>
     CustomRecord = 1 << 7,
 
     /// <summary>
-    /// Before a custom activity (emitted by <see cref="Logger.OpenActivity(string)"/>).
+    /// Before a custom activity.
     /// </summary>
+    /// <remarks>
+    /// Emitted by:
+    ///     <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> and
+    ///     <see cref="LogLevelSource.LogActivity{TDescription}(in TDescription, Action, in OpenActivityOptions)"/> and related overloads.
+    /// </remarks>
     CustomActivityEntry = 1 << 8,
 
-    /// <summary>
-    /// When a custom activity fails with an exception (emitted by <see cref="LogActivity.SetException(System.Exception)"/>).
-    /// </summary>
-    CustomActivityException = 1 << 9,
-
-    /// <summary>
-    /// When a custom activity succeeds (emitted by <see cref="LogActivity.SetSuccess(string)"/>).
-    /// </summary>
-    CustomActivitySuccess = 1 << 10,
-
-    /// <summary>
-    /// When a custom activity fails with a custom message (emitted by <see cref="LogActivity.SetFailure(string)"/>.
-    /// </summary>
-    CustomActivityFailure = 1 << 11,
-
+    // TODO: [FT-Review] Pre-port, LogRecordKind.IteratorYield was set only in PS weaver MethodLoggingAspectTransformation.
     /// <summary>
     /// When an iterator yields a result.
     /// </summary>
-    IteratorYield = 1 << 12,
+    IteratorYield = 1 << 9,
 
+    // TODO: [FT-Review] Pre-port, LogRecordKind.IteratorMoveNext was set only in PS weaver MethodLoggingAspectTransformation.
     /// <summary>
     /// Before the <see cref="IEnumerator.MoveNext"/> method of an iterator executes.
     /// </summary>
-    IteratorMoveNext = 1 << 13,
+    IteratorMoveNext = 1 << 10,
 
     /// <summary>
     /// Emitted by <see cref="Logger.WriteExecutionPoint()"/>.
     /// </summary>
-    ExecutionPoint = 1 << 14,
+    /// <remarks>
+    /// Emitted by:
+    ///     <see cref="LogSource.WriteExecutionPoint()"/>.
+    /// </remarks>
+    ExecutionPoint = 1 << 11,
 
+    // TODO: [FT-Review] Pre-port, LogRecordKind.MethodOvertime was set only in PS weaver MethodLoggingAspectTransformation.
     /// <summary>
     /// After a method execution is successful but lasted more time than the threshold.
     /// </summary>
-    MethodOvertime = 1 << 15,
+    MethodOvertime = 1 << 12,
 
     /// <summary>
-    /// Any exit of a custom activity, where it is not known whether the execution succeeded or failed.
+    /// When a custom activity exits, regardless of success or failure.
     /// </summary>
-    CustomActivityExit = 1 << 16
+    /// <remarks>
+    /// Emitted by:
+    ///     <see cref="LogActivity{TActivityDescription}.SetException(Exception, in CloseActivityOptions)"/>,
+    ///     <see cref="LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel, in TMessage, Exception?, in CloseActivityOptions)"/>,
+    ///     <see cref="LogActivity{TActivityDescription}.SetResult{TResult}(TResult, in CloseActivityOptions)"/> and
+    ///     <see cref="LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>.
+    /// </remarks>
+    CustomActivityExit = 1 << 13
 }

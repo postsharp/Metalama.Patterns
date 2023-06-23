@@ -23,7 +23,7 @@ namespace Flashtrace;
 #pragma warning disable CS8618
 #pragma warning disable IDE0004
 
-// TODO: !!! Is LegacySourceLogger still relevant/required? (see note)
+// TODO: [FT-Review] Is LegacySourceLogger still relevant/required? (see note)
 /* LegacySourceLogger appears to intend both implicit and explicit interface implementation for some
  * members - for example, Role has inheritdoc which implies implicit of ILogger.Role, but also
  * has an explicit impl of ILogger.Role. Maybe there's a good reason for this. But I'm not going to
@@ -65,6 +65,8 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 
     private static string GetRecordKindText( LogRecordKind recordKind )
     {
+        // TODO: [FT-Review] If LegacySourceLogger is retained (see TODO at top of this file), decide how to rework this properly.
+#if false // Orginal code:
         switch ( recordKind )
         {
             case LogRecordKind.CustomActivityEntry:
@@ -80,6 +82,13 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
             default:
                 return null;
         }
+#else // Quick fix when removing LogRecordKind.CustomActivityFailure et al, retains effective behaviour of the original so tests still pass:
+        return recordKind switch
+        {
+            LogRecordKind.CustomActivityEntry => "Starting",
+            _ => null
+        };
+#endif
     }
 
     /// <summary>
@@ -216,14 +225,6 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
     void IContextLocalLogger.SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
 
     void IContextLocalLogger.SetWaitDependency( ILoggingContext context, object waited ) { }
-
-    ILogActivityOptions ILogger.ActivityOptions => this;
-
-    LogLevel ILogActivityOptions.ActivityLevel => LogLevel.Trace;
-
-    LogLevel ILogActivityOptions.FailureLevel => LogLevel.Warning;
-
-    LogLevel ILogActivityOptions.ExceptionLevel => LogLevel.Warning;
 
     string ILogger.Role => null;
 

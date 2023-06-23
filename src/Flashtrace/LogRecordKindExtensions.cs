@@ -43,9 +43,6 @@ public static class LogRecordKindExtensions
             case LogRecordKind.MethodOvertime:
             case LogRecordKind.MethodException:
             case LogRecordKind.AsyncMethodAwait:
-            case LogRecordKind.CustomActivityException:
-            case LogRecordKind.CustomActivitySuccess:
-            case LogRecordKind.CustomActivityFailure:
             case LogRecordKind.IteratorYield:
             case LogRecordKind.CustomActivityExit:
                 return true;
@@ -64,9 +61,6 @@ public static class LogRecordKindExtensions
     {
         switch ( kind )
         {
-            case LogRecordKind.CustomActivityException:
-            case LogRecordKind.CustomActivitySuccess:
-            case LogRecordKind.CustomActivityFailure:
             case LogRecordKind.CustomActivityExit:
                 return true;
 
@@ -112,9 +106,6 @@ public static class LogRecordKindExtensions
         {
             case LogRecordKind.CustomRecord:
             case LogRecordKind.CustomActivityEntry:
-            case LogRecordKind.CustomActivityException:
-            case LogRecordKind.CustomActivitySuccess:
-            case LogRecordKind.CustomActivityFailure:
             case LogRecordKind.CustomActivityExit:
             case LogRecordKind.ExecutionPoint:
                 return true;
