@@ -10,6 +10,7 @@ namespace Flashtrace.Formatters;
 [PublicAPI]
 public interface IFormatterRepository
 {
+    // TODO: Do we still want this generic API? Is it properly implemented for non-sealed types?
     /// <summary>
     /// Gets the <see cref="IFormatter{T}"/> for type <typeparamref name="T"/>.
     /// </summary>

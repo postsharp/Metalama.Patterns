@@ -23,7 +23,7 @@ namespace Flashtrace;
 #pragma warning disable CS8618
 #pragma warning disable IDE0004
 
-// TODO: [FT-Review] Is LegacySourceLogger still relevant/required? (see note)
+// TODO: For now, making this internal pending encountering a necessary use case.
 /* LegacySourceLogger appears to intend both implicit and explicit interface implementation for some
  * members - for example, Role has inheritdoc which implies implicit of ILogger.Role, but also
  * has an explicit impl of ILogger.Role. Maybe there's a good reason for this. But I'm not going to
@@ -34,7 +34,7 @@ namespace Flashtrace;
 /// A base class for implementations of <see cref="ILogger"/> that cannot depend on the <c>PostSharp.Patterns.Diagnostics</c> package.
 /// </summary>
 [PublicAPI]
-public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
+internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="LegacySourceLogger"/> class.

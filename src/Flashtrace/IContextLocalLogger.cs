@@ -5,9 +5,8 @@ using JetBrains.Annotations;
 
 namespace Flashtrace;
 
-// TODO: [FT-Review] Is 'contact' intended in the comment below? Maybe 'context' or 'local context' instead? What does 'context-local' actually mean?
 /// <summary>
-/// Abstraction of logging methods where the contact has already been resolved.
+/// Abstraction of logging methods where the context has already been resolved.
 /// </summary>
 [PublicAPI]
 public interface IContextLocalLogger : ILoggerExceptionHandler

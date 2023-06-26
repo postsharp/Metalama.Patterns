@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Flashtrace;
 
 /// <summary>
-/// Arguments of the <see cref="ServiceLocator.ServiceRegistered"/> event.
+/// Arguments of the <see cref="LoggingServiceLocator.ServiceRegistered"/> event.
 /// </summary>
 [PublicAPI]
 public sealed class ServiceRegisteredEventArgs : EventArgs

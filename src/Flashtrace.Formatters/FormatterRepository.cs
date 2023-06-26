@@ -71,7 +71,7 @@ public class FormatterRepository : IFormatterRepository
         this.Register( typeof(IFormattable), new FormattableFormatter<IFormattable>( this ) );
         this.Register( typeof(Nullable<>), typeof(NullableFormatter<>) );
         this.Register( typeof(Type), new TypeFormatter( this ) );
-        this.Register( typeof(MethodBase), new MethodFormatter( this ) );
+        this.Register( typeof(MethodBase), new MethodInfoFormatter( this ) );
     }
 
     /// <inheritdoc />

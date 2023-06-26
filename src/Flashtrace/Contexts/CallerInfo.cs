@@ -148,14 +148,7 @@ public struct CallerInfo
                 continue;
             }
 
-            // TODO: [FT-Review] Do we want to automagically skip any Flashtrace or Metalama stack frames here?
-#if false
-                if ( (method.DeclaringType.Namespace != null && method.DeclaringType.Namespace.StartsWith( "PostSharp.Aspects", StringComparison.Ordinal )) ||
-                     string.Equals( method.DeclaringType.Namespace, "PostSharp.Patterns.Diagnostics.ThreadingInstrumentation", StringComparison.Ordinal ) )
-                {
-                    continue;
-                }
-#endif
+            // TODO: Do we want to automagically skip any Flashtrace or Metalama stack frames here?
 
             return new CallerInfo(
                 method.DeclaringType,

@@ -8,7 +8,7 @@ namespace Flashtrace;
 public static class LogSourceFactory
 {
     private static ILoggerFactoryProvider GetLoggerFactoryProvider()
-        => ServiceLocator.GetService<ILoggerFactoryProvider>()
+        => LoggingServiceLocator.GetService<ILoggerFactoryProvider>()
            ?? throw new InvalidOperationException( "The " + nameof(ILoggerFactoryProvider) + " service has not been registered." );
 
     public static ILoggerFactory Default => GetLoggerFactoryProvider().GetLoggerFactory( LoggingRoles.Default );

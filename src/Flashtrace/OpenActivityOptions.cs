@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 
 namespace Flashtrace;
 
+// TODO: Modernize. Consider readonly (record) struct and 'with' pattern for non-destructive mutablility.
 // ReSharper disable InvalidXmlDocComment
 /// <summary>
 /// Argument of the  <see cref="LogLevelSource.OpenActivity{T}(in T,in OpenActivity)"/> method.

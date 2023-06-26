@@ -8,7 +8,7 @@ namespace Flashtrace;
 /// A basic service locator used to find global services.
 /// </summary>
 [PublicAPI]
-public static class ServiceLocator
+public static class LoggingServiceLocator
 {
     /// <summary>
     /// Event raised when a new service is registered.
@@ -39,7 +39,7 @@ public static class ServiceLocator
         where T : class
         => Entry<T>.Value;
 
-    static ServiceLocator()
+    static LoggingServiceLocator()
     {
         // TODO: [FT-Review] Decide default startup behaviour - TraceSourceLogger vs NullLogger.
 #if true

@@ -156,8 +156,6 @@ internal abstract class TypeExtensionFactoryBase<T>
         }
     }
 
-    // TODO: [FT-Review] Review onExceptionWhileCreatingTypeExtension - this replaces a log message. Remove commented-out logging call once decided.
-
     private T? GetExtensionCore(
         Type objectType,
         object?[]? constructorArgs,
@@ -214,9 +212,6 @@ internal abstract class TypeExtensionFactoryBase<T>
             catch ( Exception e )
             {
                 onExceptionWhileCreatingTypeExtension?.Invoke( e );
-
-                // TODO: [FT] Review, confirm replacement with onExceptionWhileCreatingTypeExtension, remove.
-                // this.logger.Error.Write( FormattedMessageBuilder.Formatted(  "Exception while creating a type extension for {ObjectType}.", objectType  ), e);
 
                 // Extension constructor threw, so remove it from the dictionary and try again
                 var targetGenericTypeDefinition = GetGenericTypeDefinition( targetType );

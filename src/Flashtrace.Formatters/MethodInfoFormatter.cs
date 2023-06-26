@@ -1,19 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Flashtrace.Formatters;
 
-// TODO: [FT-Review] Review current impact of #27182 here (especially wrt supported platforms), reinstate compiled regex if possible.
+// TODO: Review current impact of #27182 here (especially wrt supported platforms), reinstate compiled regex if possible.
 
 /// <summary>
 /// A formatter for <see cref="MethodBase"/> values.
 /// </summary>
-[PublicAPI]
-public sealed class MethodFormatter : Formatter<MethodBase>
+internal sealed class MethodInfoFormatter : Formatter<MethodBase>
 {
 #if COMPILED_REGEX
     private const RegexOptions _regexOptions = RegexOptions.Compiled | RegexOptions.CultureInvariant;
@@ -41,7 +39,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
         }
     }
 
-    public MethodFormatter( IFormatterRepository repository ) : base( repository ) { }
+    public MethodInfoFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
     public override void Write( UnsafeStringBuilder stringBuilder, MethodBase? value )

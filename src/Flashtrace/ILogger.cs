@@ -11,7 +11,7 @@ namespace Flashtrace;
 /// </summary>
 /// <remarks>
 /// <para>If you want to implement this interface, you should also implement the <see cref="ILoggerFactory"/> interface
-/// and register it to the <see cref="ServiceLocator"/>.</para>
+/// and register it to the <see cref="LoggingServiceLocator"/>.</para>
 /// </remarks>
 [PublicAPI]
 public partial interface ILogger : ILoggerExceptionHandler

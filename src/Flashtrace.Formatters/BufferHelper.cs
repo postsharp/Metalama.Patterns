@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace Flashtrace.Formatters;
 
-// TODO: [FT-Review] Review performance-related #if's, use of PInvoke etc. For now, leaving the apparently most-vanilla branches in place.
+// TODO: Review performance-related #if's, use of PInvoke etc. For now, leaving the apparently most-vanilla branches in place.
 
 // Was [ExplicitCrossPackageInternal]
 [SuppressMessage(

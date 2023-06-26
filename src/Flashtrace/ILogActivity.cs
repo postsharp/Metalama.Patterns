@@ -66,7 +66,6 @@ public interface ILogActivity : IDisposable
     [EditorBrowsable( EditorBrowsableState.Never )]
     void SetException( Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo );
 
-    // TODO: [FT-Review] Review documented claims re automatic instrumentation.
 #pragma warning disable CA1716 // Identifiers should not match keywords
     /// <summary>
     /// Resumes the current async activity after it has been suspended by a call to <see cref="LogActivity{TActivityDescription}.Suspend()"/>. There is typically no need
@@ -79,7 +78,6 @@ public interface ILogActivity : IDisposable
     void Resume( ref CallerInfo callerInfo );
 #pragma warning restore CA1716 // Identifiers should not match keywords
 
-    // TODO: [FT-Review] Review documented claims re automatic instrumentation.
     /// <summary>
     /// Suspends the current async activity.
     /// The activity must than be resumed by a call of the <see cref="LogActivity{TActivityDescription}.Resume()"/> method.

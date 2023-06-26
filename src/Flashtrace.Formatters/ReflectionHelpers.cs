@@ -1,12 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
 using System.Runtime.CompilerServices;
 
 namespace Flashtrace.Formatters;
 
-[PublicAPI]
-public static class ReflectionHelpers
+internal static class ReflectionHelpers
 {
     public static bool IsAnonymous( this Type type )
         => type.IsDefined( typeof(CompilerGeneratedAttribute), false )

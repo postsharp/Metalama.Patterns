@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
 using System.Globalization;
 
 namespace Flashtrace.Formatters;
 
+// TODO: It seems this whole class should be refactored. It does too many things, some of those are now redundant with Span.
 /// <summary>
 /// A generalized representation of a string that can be either backed by a system <see cref="string"/>,
 /// a <c>char[]</c>, or an <see cref="UnsafeStringBuilder"/>. Conversions between these types happen transparently
@@ -18,8 +18,7 @@ namespace Flashtrace.Formatters;
 /// moment, call the <see cref="MakeImmutable"/> method, which unbinds the <see cref="UnsafeString"/> from
 /// its parent <see cref="UnsafeStringBuilder"/>.</para>
 /// </remarks>
-[PublicAPI]
-public sealed class UnsafeString
+internal sealed class UnsafeString
 {
     private int _version;
 #pragma warning disable IDE0032 // Use auto property
@@ -52,8 +51,7 @@ public sealed class UnsafeString
         this._array = array ?? throw new ArgumentNullException( nameof(array) );
     }
 
-    // TODO: [FT] Review use of ExplicitCrossPackageInternal. Leaving as internal for now until necessary use case encountered.
-    // [ExplicitCrossPackageInternal]
+    // Was [ExplicitCrossPackageInternal]
     internal UnsafeStringBuilder? StringBuilder { get; private set; }
 
     private void ThrowIfImmutable()

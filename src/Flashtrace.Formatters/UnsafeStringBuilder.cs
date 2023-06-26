@@ -409,7 +409,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// </summary>
     /// <param name="s">An <see cref="UnsafeString"/>.</param>
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    public bool Append( UnsafeString? s )
+    internal bool Append( UnsafeString? s )
     {
         if ( s == null || s.Length == 0 )
         {
@@ -1021,7 +1021,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// Gets an <see cref="UnsafeString"/> that provides read-only access to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
     /// <returns>An <see cref="UnsafeString"/> that provides read-only access to the current <see cref="UnsafeStringBuilder"/>.</returns>
-    public UnsafeString ToUnsafeString()
+    internal UnsafeString ToUnsafeString()
     {
         if ( !this._unsafeString.Recycle() )
         {

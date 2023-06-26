@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 namespace Flashtrace;
 
+// TODO: Reconsider mutability.
 /// <summary>
 /// Options for the <see cref="Exception"/> method.
 /// </summary>

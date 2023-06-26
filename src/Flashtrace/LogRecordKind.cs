@@ -67,13 +67,11 @@ public enum LogRecordKind
     /// </remarks>
     ActivityEntry = 1 << 8,
 
-    // TODO: [FT-Review] Pre-port, LogRecordKind.IteratorYield was set only in PS weaver MethodLoggingAspectTransformation.
     /// <summary>
     /// When an iterator yields a result.
     /// </summary>
     IteratorYield = 1 << 9,
 
-    // TODO: [FT-Review] Pre-port, LogRecordKind.IteratorMoveNext was set only in PS weaver MethodLoggingAspectTransformation.
     /// <summary>
     /// Before the <see cref="IEnumerator.MoveNext"/> method of an iterator executes.
     /// </summary>
@@ -88,7 +86,6 @@ public enum LogRecordKind
     /// </remarks>
     ExecutionPoint = 1 << 11,
 
-    // TODO: [FT-Review] Pre-port, LogRecordKind.MethodOvertime was set only in PS weaver MethodLoggingAspectTransformation.
     /// <summary>
     /// After a method execution is successful but lasted more time than the threshold.
     /// </summary>

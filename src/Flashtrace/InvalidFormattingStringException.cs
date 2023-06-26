@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using System.Runtime.Serialization;
 
 namespace Flashtrace;
 
@@ -11,7 +10,7 @@ namespace Flashtrace;
 /// </summary>
 [PublicAPI]
 [Serializable]
-public class InvalidFormattingStringException : FormatException
+public sealed class InvalidFormattingStringException : FormatException
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="InvalidFormattingStringException"/> class with the default error message.
@@ -31,11 +30,4 @@ public class InvalidFormattingStringException : FormatException
     /// <param name="message"></param>
     /// <param name="inner"></param>
     public InvalidFormattingStringException( string message, Exception inner ) : base( message, inner ) { }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="InvalidFormattingStringException"/> class.
-    /// </summary>
-    protected InvalidFormattingStringException(
-        SerializationInfo info,
-        StreamingContext context ) : base( info, context ) { }
 }

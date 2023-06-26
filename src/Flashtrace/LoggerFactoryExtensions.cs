@@ -33,16 +33,9 @@ public static class LoggerFactoryExtensions
             throw new ArgumentNullException( nameof(type) );
         }
 
-        var fullName = type.FullName;
-
-        if ( fullName == null )
-        {
-            // TODO: [FT-Review] Review terminology 'normal'.
-
-            throw new ArgumentException(
-                $"Must be a 'normal' type. For example, array types, generic type parameters and open generic types are not supported. {nameof(type)}.FullName must not return null.",
+        var fullName = type.FullName ?? throw new ArgumentException(
+                $"Must be a named type. For example, array types, generic type parameters and open generic types are not supported. {nameof(type)}.FullName must not return null.",
                 nameof(type) );
-        }
 
         var cacheKey = new CacheKey( factory, fullName );
 
