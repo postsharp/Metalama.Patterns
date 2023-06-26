@@ -34,7 +34,7 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
         ref CallerInfo callerInfo )
         => EmitWarning( level );
 
-    ILoggingContext ILogger.OpenActivity( LogActivityOptions options, ref CallerInfo callerInfo ) => this;
+    ILoggingContext ILogger.OpenActivity( in LogActivityOptions options, ref CallerInfo callerInfo ) => this;
 
     ILoggingContext IContextLocalLogger.OpenActivity( in OpenActivityOptions options, ref CallerInfo callerInfo ) => this;
 

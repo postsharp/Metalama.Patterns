@@ -205,8 +205,8 @@ public abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
         }
     }
 
-    ILoggingContext ILogger.OpenActivity( LogActivityOptions options, ref CallerInfo callerInfo )
-    {
+    ILoggingContext ILogger.OpenActivity( in LogActivityOptions options, ref CallerInfo callerInfo )
+    {        
         return new Context( options.IsAsync );
     }
 

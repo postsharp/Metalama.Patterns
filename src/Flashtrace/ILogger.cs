@@ -75,7 +75,7 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// <param name="options">Options.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
     /// <returns>An <see cref="ILoggingContext"/> representing the new activity.</returns>
-    ILoggingContext OpenActivity( LogActivityOptions options, ref CallerInfo callerInfo );
+    ILoggingContext OpenActivity( in LogActivityOptions options, ref CallerInfo callerInfo );
 
     /// <summary>
     /// Resumes an asynchronous activity suspended by the <see cref="SuspendActivity"/> method.
