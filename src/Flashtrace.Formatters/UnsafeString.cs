@@ -33,6 +33,8 @@ internal sealed class UnsafeString
         this.Length = stringBuilder.Length;
     }
 
+    // TODO: Remove if proven unused after further porting.
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// Initializes a new instance of the <see cref="UnsafeString"/> class backed by a <see cref="string"/>.
     /// </summary>
@@ -42,6 +44,8 @@ internal sealed class UnsafeString
         this._str = str ?? throw new ArgumentNullException( nameof(str) );
     }
 
+    // TODO: Remove if proven unused after further porting.
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// Initializes a new instance of the <see cref="UnsafeString"/> class backed by an array of <see cref="char"/>.
     /// </summary>
@@ -62,6 +66,8 @@ internal sealed class UnsafeString
         }
     }
 
+    // TODO: Remove if proven unused after further porting.
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// Gets an unmanaged pointer to the string.
     /// </summary>
@@ -81,6 +87,8 @@ internal sealed class UnsafeString
     internal char[]? CharArray => this._array;
 #pragma warning restore IDE0032 // Use auto property
 
+    // TODO: Make private if proven unused after further porting.
+    // ReSharper disable once MemberCanBePrivate.Global
     /// <summary>
     /// Gets a value indicating whether the current <see cref="UnsafeString"/> is immutable.
     /// Call the <see cref="MakeImmutable"/> method to make the <see cref="UnsafeString"/> immutable.
@@ -112,6 +120,8 @@ internal sealed class UnsafeString
         return true;
     }
 
+    // TODO: Remove if proven unused after further porting.
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// If the current <see cref="UnsafeString"/> is bound to its origin <see cref="UnsafeStringBuilder"/>,
     /// evaluates the <see cref="UnsafeStringBuilder"/> and breaks the binding, so that later changes in the 
@@ -140,6 +150,8 @@ internal sealed class UnsafeString
         this.StringBuilder = null;
     }
 
+    // TODO: Remove if proven unused after further porting.
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// Gets an <see cref="ArraySegment{Char}"/> representing the current <see cref="UnsafeString"/>.
     /// </summary>
