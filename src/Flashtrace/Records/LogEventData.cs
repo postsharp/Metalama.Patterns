@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Specifies the properties of a log event (such as a message, an activity opening or an activity closing).

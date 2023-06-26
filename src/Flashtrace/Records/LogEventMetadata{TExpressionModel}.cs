@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// A specialization of <see cref="LogEventMetadata"/> that specifies the type of the 

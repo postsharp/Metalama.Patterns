@@ -2,10 +2,11 @@
 
 using Flashtrace.Contexts;
 using Flashtrace.Messages;
+using Flashtrace.Options;
 using JetBrains.Annotations;
 using System.ComponentModel;
 
-namespace Flashtrace;
+namespace Flashtrace.Activities;
 
 /// <summary>
 /// Exposes the public API of the generic value type <see cref="LogActivity{TActivityDescription}"/>.

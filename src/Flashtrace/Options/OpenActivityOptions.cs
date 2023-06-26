@@ -1,13 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Activities;
 using Flashtrace.Contexts;
 using Flashtrace.Correlation;
+using Flashtrace.Internal;
+using Flashtrace.Records;
 using Flashtrace.Transactions;
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Options;
 
-// TODO: Modernize. Consider readonly (record) struct and 'with' pattern for non-destructive mutablility.
+// TODO: Modernize. Consider readonly (record) struct and 'with' pattern for non-destructive mutability.
 // ReSharper disable InvalidXmlDocComment
 /// <summary>
 /// Argument of the  <see cref="LogLevelSource.OpenActivity{T}(in T,in OpenActivity)"/> method.

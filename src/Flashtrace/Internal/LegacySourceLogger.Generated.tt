@@ -4,11 +4,12 @@
 
 <#@ Template debug="false" hostspecific="false" language="C#" #>
 <#@ Output extension=".cs" #>
-<#@ include file="Common.ttinclude" #>
+<#@ include file="..\Common.ttinclude" #>
 
 using Flashtrace.Contexts;
+using Flashtrace.Records;
 
-namespace Flashtrace
+namespace Flashtrace.Internal
 {
 	partial class LegacySourceLogger
 	{

@@ -3,7 +3,7 @@
 using Flashtrace.Formatters;
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Options of the <see cref="ILogRecordBuilder.WriteParameter{T}"/> method.

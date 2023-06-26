@@ -2,11 +2,13 @@
 
 using Flashtrace.Contexts;
 using Flashtrace.Messages;
+using Flashtrace.Options;
+using Flashtrace.Records;
 using JetBrains.Annotations;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Flashtrace;
+namespace Flashtrace.Activities;
 
 /// <summary>
 /// Represents a logged activity, i.e. something that has a beginning and an end with a specific outcome.
@@ -19,10 +21,10 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
 
     internal IContextLocalLogger Logger { get; }
 
-    private readonly LogLevels _levels;
+    private readonly ActivityLogLevels _levels;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
-    internal LogActivity( IContextLocalLogger logger, LogLevels levels, ILoggingContext? context, in TActivityDescription description )
+    internal LogActivity( IContextLocalLogger logger, in ActivityLogLevels levels, ILoggingContext? context, in TActivityDescription description )
     {
         this._description = description;
         this.Logger = logger;

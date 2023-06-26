@@ -3,7 +3,7 @@
 using Flashtrace.Formatters;
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Specifies the behavior of logging properties (exposed by <see cref="LogEventData"/>), such as

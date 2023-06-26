@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Defines a visit method invoked for each property of a <see cref="LogEventData"/>.

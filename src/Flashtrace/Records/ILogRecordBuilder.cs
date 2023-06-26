@@ -3,7 +3,7 @@
 using Flashtrace.Formatters;
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Allows to build a log record (typically, but not necessarily, a string). A log record can be composed of one of several

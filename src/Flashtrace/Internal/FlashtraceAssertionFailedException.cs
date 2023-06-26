@@ -2,7 +2,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Flashtrace;
+namespace Flashtrace.Internal;
 
 /// <summary>
 /// Exception thrown upon internal assertion failures in the Flashtrace library.

@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Determines the behavior of the <see cref="LogEventData.VisitProperties{TVisitorState}"/>

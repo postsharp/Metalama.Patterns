@@ -3,7 +3,7 @@
 using JetBrains.Annotations;
 using System.Globalization;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 #pragma warning disable CA1815 // Override equals and operator equals on value types
 
 /// <summary>

@@ -6,6 +6,7 @@
 
 #nullable enable
 
+using Flashtrace.Records;
 using System.Runtime.CompilerServices;
 
 namespace Flashtrace.Messages;

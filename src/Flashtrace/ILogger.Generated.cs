@@ -5,6 +5,7 @@
 
 
 using Flashtrace.Contexts;
+using Flashtrace.Records;
 
 namespace Flashtrace
 {

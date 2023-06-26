@@ -1,8 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Records;
 using Xunit;
 
-namespace Flashtrace.UnitTests;
+namespace Flashtrace.UnitTests.Records;
 
 public sealed partial class LogEventDataTests
 {

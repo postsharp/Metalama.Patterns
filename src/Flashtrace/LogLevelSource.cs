@@ -1,7 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Activities;
 using Flashtrace.Contexts;
 using Flashtrace.Messages;
+using Flashtrace.Options;
+using Flashtrace.Records;
 using JetBrains.Annotations;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -111,12 +114,12 @@ public sealed class LogLevelSource
     /// </summary>
     /// <param name="description">The activity description, typically created using the <see cref="SemanticMessageBuilder"/> or <see cref="FormattedMessageBuilder"/> class.</param>
     /// <param name="options">Options.</param>
-    /// <returns>A <see cref="Flashtrace.LogActivity{TActivityDescription}"/> representing the new activity.</returns>
+    /// <returns>A <see cref="Activities.LogActivity{TActivityDescription}"/> representing the new activity.</returns>
     /// <remarks>The activity must be closed using
-    /// <see cref="Flashtrace.LogActivity{TActivityDescription}.SetSuccess(in SetSuccess)"/>,
-    /// <see cref="Flashtrace.LogActivity{TActivityDescription}.SetResult{TResult}(TResult,in CloseActivityOptions)"/>,
-    /// <see cref="Flashtrace.LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
-    /// or <see cref="Flashtrace.LogActivity{TActivityDescription}.SetException(Exception,in CloseActivityOptions)"/>.
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in SetSuccess)"/>,
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetResult{TResult}(TResult,in CloseActivityOptions)"/>,
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
+    /// or <see cref="Activities.LogActivity{TActivityDescription}.SetException(Exception,in CloseActivityOptions)"/>.
     /// </remarks>
     [MethodImpl( MethodImplOptions.NoInlining )]
     public LogActivity<T> OpenActivity<T>( in T description, in OpenActivityOptions options = default )
@@ -209,7 +212,7 @@ public sealed class LogLevelSource
                 }
             }
 
-            return new LogActivity<T>( logger, new LogLevels( level, level.CopyForce( this.LogSource.FailureLevel ) ), context, description );
+            return new LogActivity<T>( logger, new ActivityLogLevels( level, level.CopyForce( this.LogSource.FailureLevel ) ), context, description );
         }
         catch ( Exception e )
         {

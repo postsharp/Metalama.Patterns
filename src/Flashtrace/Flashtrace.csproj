@@ -31,20 +31,20 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ILogger.Generated.tt</DependentUpon>
     </Compile>
-    <None Update="NullLogger.Generated.tt">
+    <None Update="Internal\NullLogger.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>NullLogger.Generated.cs</LastGenOutput>
     </None>
-    <Compile Update="NullLogger.Generated.cs">
+    <Compile Update="Internal\NullLogger.Generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>NullLogger.Generated.tt</DependentUpon>
     </Compile>
-    <None Update="LegacySourceLogger.Generated.tt">
+    <None Update="Internal\LegacySourceLogger.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>LegacySourceLogger.Generated.cs</LastGenOutput>
     </None>
-    <Compile Update="LegacySourceLogger.Generated.cs">
+    <Compile Update="Internal\LegacySourceLogger.Generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>LegacySourceLogger.Generated.tt</DependentUpon>

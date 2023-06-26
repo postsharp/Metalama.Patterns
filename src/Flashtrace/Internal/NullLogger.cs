@@ -2,10 +2,12 @@
 
 using Flashtrace.Contexts;
 using Flashtrace.Formatters;
+using Flashtrace.Options;
+using Flashtrace.Records;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Flashtrace;
+namespace Flashtrace.Internal;
 
 // ReSharper disable once UnusedType.Global : Usage is conditional.
 internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory, ILoggingContext, ILogRecordBuilder,

@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Flashtrace;
+using Flashtrace.Options;
+
+namespace Flashtrace.Internal;
 
 /// <summary>
 /// This means a <c>LoggingTypeSource</c> starting in 6.8.

@@ -2,13 +2,16 @@
 
 using Flashtrace.Contexts;
 using Flashtrace.Formatters;
+using Flashtrace.Messages;
+using Flashtrace.Options;
+using Flashtrace.Records;
 using JetBrains.Annotations;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
-namespace Flashtrace;
+namespace Flashtrace.Internal;
 
 // Disable all warnings until to do below is decided.
 // ReSharper disable all

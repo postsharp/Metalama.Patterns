@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Attributes of the <see cref="LogParameterOptions"/> class. Describes how the <see cref="ILogRecordBuilder"/> will be used.

@@ -3,7 +3,7 @@
 using Flashtrace.Messages;
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Enumerates the scenarios in which an <see cref="IMessage"/> can be rendered.

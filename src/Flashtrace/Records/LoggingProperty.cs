@@ -3,7 +3,7 @@
 using JetBrains.Annotations;
 using System.Runtime.Serialization;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Represents a property (a name, a value and a few options).

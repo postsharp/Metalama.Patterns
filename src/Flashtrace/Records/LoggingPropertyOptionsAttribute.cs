@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Records;
 
 /// <summary>
 /// Specifies the options (<see cref="LoggingPropertyOptions"/>) of a logging property that is

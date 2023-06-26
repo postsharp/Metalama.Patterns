@@ -34,8 +34,8 @@ public static class LoggerFactoryExtensions
         }
 
         var fullName = type.FullName ?? throw new ArgumentException(
-                $"Must be a named type. For example, array types, generic type parameters and open generic types are not supported. {nameof(type)}.FullName must not return null.",
-                nameof(type) );
+            $"Must be a named type. For example, array types, generic type parameters and open generic types are not supported. {nameof(type)}.FullName must not return null.",
+            nameof(type) );
 
         var cacheKey = new CacheKey( factory, fullName );
 

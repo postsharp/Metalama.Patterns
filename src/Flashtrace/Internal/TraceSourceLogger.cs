@@ -2,10 +2,11 @@
 
 #define TRACE // Because TraceEvent has [Conditional("TRACE")]
 
+using Flashtrace.Records;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
-namespace Flashtrace;
+namespace Flashtrace.Internal;
 
 internal sealed class TraceSourceLogger : LegacySourceLogger
 {

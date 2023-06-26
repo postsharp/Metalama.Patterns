@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Flashtrace;
+namespace Flashtrace.Messages;
 
 /// <summary>
 /// Exception thrown by the <see cref="FormattingStringParser"/> and by the <c>Logger</c> class
