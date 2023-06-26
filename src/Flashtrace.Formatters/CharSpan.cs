@@ -10,7 +10,7 @@ namespace Flashtrace.Formatters;
 [PublicAPI]
 public readonly struct CharSpan : CharSpan.IArrayAccessor
 {
-    /* TODO: Review TG - discuss replacement pattern. I considered exposing Array publicly to be too unsafe.
+    /* TODO: [FT-Review] Review explicit interface-based replacement pattern. I considered exposing Array publicly to be too unsafe. Cleanup when confirmed.
     [ExplicitCrossPackageInternal]
     internal object _array { get;  }
     */

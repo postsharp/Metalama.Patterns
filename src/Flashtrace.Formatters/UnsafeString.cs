@@ -52,7 +52,7 @@ public sealed class UnsafeString
         this._array = array ?? throw new ArgumentNullException( nameof(array) );
     }
 
-    // TODO: Review use of ExplicitCrossPackageInternal
+    // TODO: [FT] Review use of ExplicitCrossPackageInternal. Leaving as internal for now until necessary use case encountered.
     // [ExplicitCrossPackageInternal]
     internal UnsafeStringBuilder? StringBuilder { get; private set; }
 

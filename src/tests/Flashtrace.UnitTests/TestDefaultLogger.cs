@@ -83,11 +83,11 @@ public sealed class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSou
         this._fixture.LogSource.WithLevel( LogLevel.Critical ).Write( SemanticMessageBuilder.Semantic( "Critical", ("a", "b") ) );
         this._fixture.LogSource.WithLevel( LogLevel.Debug ).Write( SemanticMessageBuilder.Semantic( "Debug", ("a", "b") ) );
 
-        // TODO: Review - tell gael about this likely C# compiler bug.
-
         // NB: Had to add the Semantic( string name, in (string Name, object Value) parameter1 ) overload to get this to
         //     resolve correctly, otherwise the compiler was trying (incorrectly) to use the
-        //     Semantic(string messageName, (string Name, object Value)[] parameters) overload (note there's no 'params').
+        //     Semantic(string messageName, (string Name, object Value)[] parameters) overload (note there's no 'params')
+        //     instead of the expected overload Semantic<T>( string name, in (string Name, T Value) parameter1 ) where T
+        //     is object.
         this._fixture.LogSource.WithLevel( LogLevel.Trace ).Write( SemanticMessageBuilder.Semantic( "Trace", ("a", null) ) );
         Assert.Equal( 5, this._fixture.Listener.Messages.Count );
         Assert.Equal( "Error, a = b, b = c", this._fixture.Listener.Messages[0] );

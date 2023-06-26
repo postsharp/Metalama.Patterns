@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Flashtrace.Formatters;
 
-// TODO: Review modern-day impact of #27182 here (especially wrt supported platforms), reinstate compiled regex if possible.
+// TODO: [FT-Review] Review current impact of #27182 here (especially wrt supported platforms), reinstate compiled regex if possible.
 
 /// <summary>
 /// A formatter for <see cref="MethodBase"/> values.
@@ -22,7 +22,7 @@ public sealed class MethodFormatter : Formatter<MethodBase>
 #endif
 
     // (See #26919) We do not create a static Regex instance because it may result in the incorrect AppContext switch values when invoked via module initializer.
-    // TODO: revert back to the static Regex instance when #27182 is fixed.
+    // TODO: [Pre-FT] revert back to the static Regex instance when #27182 is fixed.
     private const string _anonymousMethodRegexPattern = "^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)";
 
     // private static readonly Regex anonymousMethodRegex = new Regex("^(<(?<parent>[^>]+)>b__[0-9A-Fa-f]+|_Lambda)", regexOptions);
