@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -10,15 +12,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Formatters;
 
-// TODO: Review performance-related #if's, use of PInvoke etc.
+// TODO: [FT-Review] Review performance-related #if's, use of PInvoke etc. For now, leaving the apparently most-vanilla branches in place.
 
-// TODO: Review use of ExplicitCrossPackageInternal
-// [ExplicitCrossPackageInternal]
+// Was [ExplicitCrossPackageInternal]
 [SuppressMessage(
     "StyleCop.CSharp.MaintainabilityRules",
     "SA1405:Debug.Assert should provide message text",
     Justification = "Ported from old code, original intent not known." )]
-internal static unsafe class BufferHelper
+[PublicAPI]
+public static unsafe class BufferHelper
 {
 #if WINDOWS_PINVOKE && UNSECURE_PINVOKE
     private static bool? runningOnWindows;
@@ -32,9 +34,7 @@ internal static unsafe class BufferHelper
 #endif
 #endif
 
-#if AGGRESSIVE_INLINING
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void CopyMemory( void* destination, void* source, int length )
     {
 #if MEMORY_COPY
