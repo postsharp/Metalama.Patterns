@@ -3,6 +3,8 @@
 using Flashtrace.Formatters;
 using JetBrains.Annotations;
 
+// TODO: Consider normalizing the terms "Log Record", "Log Event" and "Log Entry" in type names etc, likely to "Log Record" et al. 
+
 namespace Flashtrace.Records;
 
 /// <summary>
