@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
-    <RootNamespace>PostSharp.Patterns.Caching.Backends.Azure</RootNamespace>
-    <AssemblyName>PostSharp.Patterns.Caching.Backends.Azure</AssemblyName>    
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>Metalama.Patterns.Caching.Backends</RootNamespace>    
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;LamaDebug</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" />
-	<PackageReference Include="System.ValueTuple" Version="$(SystemValueTupleVersion)" />
+    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTupleVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -24,8 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Common\PostSharp.Patterns.Common\PostSharp.Patterns.Common.csproj" Private="False" />
-    <ProjectReference Include="..\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" Private="False" />
+    <ProjectReference Include="..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
   </ItemGroup>
 
 </Project>
