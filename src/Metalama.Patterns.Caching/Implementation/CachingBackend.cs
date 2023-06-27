@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
 using Metalama.Patterns.Caching.ValueAdapters;
@@ -13,7 +12,6 @@ using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation
 {
-
     /// <summary>
     /// An abstraction of the physical implementation of the cache, where the <see cref="CacheAttribute"/> ends up writing to and reading from.
     /// </summary>
@@ -24,7 +22,7 @@ namespace Metalama.Patterns.Caching.Implementation
         private CachingBackendFeatures features;
         private int status;
         private const int disposeTimeout = 30000;
-        private readonly TaskCompletionSource<bool> disposeTask = new TaskCompletionSource<bool>();
+        private readonly TaskCompletionSource<bool> disposeTask = new();
         private EventHandler<CacheItemRemovedEventArgs> itemRemoved;
         private EventHandler<CacheDependencyInvalidatedEventArgs> dependencyInvalidated;
         private BackgroundTaskScheduler backgroundTaskScheduler;
@@ -33,8 +31,6 @@ namespace Metalama.Patterns.Caching.Implementation
         {
             return LazyInitializer.EnsureInitialized( ref this.backgroundTaskScheduler );
         }
-
-        
 
         /// <summary>
         /// Gets the <see cref="Flashtrace.LogSource"/> that implementations can use to emit
@@ -51,14 +47,14 @@ namespace Metalama.Patterns.Caching.Implementation
         /// Gets the factory of value adapters (<see cref="IValueAdapter"/>), which allow for instance to cache things like <see cref="System.IO.Stream"/> or <see cref="System.Collections.IEnumerable"/>,
         /// which could not be otherwise cached.
         /// </summary>
-        public ValueAdapterFactory ValueAdapters { get; } = new ValueAdapterFactory();
+        public ValueAdapterFactory ValueAdapters { get; } = new();
 
         /// <summary>
         /// Creates a <see cref="CachingBackendFeatures"/> object, which describes set of features implemented by the back-end.
         /// This method is invoked the first time the <see cref="SupportedFeatures"/> property is evaluated. The result is then cached.
         /// </summary>
         /// <returns>A new instance of the <see cref="CachingBackendEnhancerFeatures"/> class.</returns>
-        protected virtual CachingBackendFeatures CreateFeatures() => new CachingBackendFeatures();
+        protected virtual CachingBackendFeatures CreateFeatures() => new();
 
         /// <summary>
         /// Gets the set of features supported by the current <see cref="CachingBackend"/>.
@@ -69,11 +65,13 @@ namespace Metalama.Patterns.Caching.Implementation
         {
             if ( !feature )
             {
-                throw new NotSupportedException( string.Format(CultureInfo.InvariantCulture, "Feature \"{0}\" is not supported by {1}.", featureName, this.GetType().Name ) );
+                throw new NotSupportedException(
+                    string.Format( CultureInfo.InvariantCulture, "Feature \"{0}\" is not supported by {1}.", featureName, this.GetType().Name ) );
             }
         }
 
         #region SetItem
+
         /// <summary>
         /// Sets a cache item. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
         /// </summary>
@@ -89,11 +87,12 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="item">The cache item.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        protected virtual Task SetItemAsyncCore(string key, CacheItem item, CancellationToken cancellationToken)
+        protected virtual Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            this.SetItemCore(key, item);
+            this.SetItemCore( key, item );
+
             return trueTaskResult;
         }
 
@@ -117,6 +116,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -129,7 +129,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="item">The cache item.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public async Task SetItemAsync( [Required] string key, [Required] CacheItem item, CancellationToken cancellationToken = default(CancellationToken) )
+        public async Task SetItemAsync( [Required] string key, [Required] CacheItem item, CancellationToken cancellationToken = default )
         {
             using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "SetItemAsync( \"{Key}\")", key ) ) )
             {
@@ -146,6 +146,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -168,11 +169,11 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The key of the cache item.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/> that evaluates to <c>true</c> if the cache contains an item whose key is <paramref name="key"/>, otherwise <c>false</c>.</returns>
-        protected virtual Task<bool> ContainsItemAsyncCore(string key, CancellationToken cancellationToken)
+        protected virtual Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            return this.ContainsItemCore(key) ? trueTaskResult : falseTaskResult;
+            return this.ContainsItemCore( key ) ? trueTaskResult : falseTaskResult;
         }
 
         /// <summary>
@@ -186,7 +187,7 @@ namespace Metalama.Patterns.Caching.Implementation
             {
                 try
                 {
-                    bool present = this.ContainsItemCore( key );
+                    var present = this.ContainsItemCore( key );
 
                     activity.SetResult( present ? "Cache hit." : "Cache miss." );
 
@@ -195,6 +196,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -206,7 +208,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The key of the cache item.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/> that evaluates to <c>true</c> if the cache contains an item whose key is <paramref name="key"/>, otherwise <c>false</c>.</returns>
-        public async Task<bool> ContainsItemAsync([Required] string key, CancellationToken cancellationToken = default(CancellationToken) )
+        public async Task<bool> ContainsItemAsync( [Required] string key, CancellationToken cancellationToken = default )
         {
             using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsItemAsync( \"{Key}\" )", key ) ) )
             {
@@ -214,7 +216,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    bool present = await this.ContainsItemAsyncCore( key, cancellationToken );
+                    var present = await this.ContainsItemAsyncCore( key, cancellationToken );
 
                     activity.SetResult( present ? "Cache hit." : "Cache miss." );
 
@@ -223,6 +225,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -249,11 +252,11 @@ namespace Metalama.Patterns.Caching.Implementation
         /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/> evaluating to a <see cref="CacheValue"/>, or evaluating to <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-        protected virtual Task<CacheValue> GetItemAsyncCore(string key, bool includeDependencies, CancellationToken cancellationToken)
+        protected virtual Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.FromResult(this.GetItemCore(key, includeDependencies));
+            return Task.FromResult( this.GetItemCore( key, includeDependencies ) );
         }
 
         /// <summary>
@@ -277,11 +280,13 @@ namespace Metalama.Patterns.Caching.Implementation
                     }
                     catch ( Exception e ) when ( e is InvalidCacheItemException || e is InvalidCastException )
                     {
-                        this.LogSource.Warning.Write( 
-                            Formatted( 
-                                "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item. " +
+                        this.LogSource.Warning.Write(
+                            Formatted(
+                                "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item. "
+                                +
                                 "To avoid this warning, change the cache key prefix when you do breaking changes to the source code." ),
                             e );
+
                         this.RemoveItemCore( key );
                     }
 
@@ -292,6 +297,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -305,8 +311,10 @@ namespace Metalama.Patterns.Caching.Implementation
         /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/> evaluating to a <see cref="CacheValue"/>, or evaluating to <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-        public async Task<CacheValue> GetItemAsync( [Required] string key, bool includeDependencies = true,
-                                                    CancellationToken cancellationToken = default(CancellationToken) )
+        public async Task<CacheValue> GetItemAsync(
+            [Required] string key,
+            bool includeDependencies = true,
+            CancellationToken cancellationToken = default )
         {
             using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "GetItemAsync( \"{Key}\" )", key ) ) )
             {
@@ -322,7 +330,11 @@ namespace Metalama.Patterns.Caching.Implementation
                     }
                     catch ( Exception e ) when ( e is InvalidCacheItemException || e is InvalidCastException )
                     {
-                        LogSource.Info.Write( Formatted( "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item." ), e );
+                        this.LogSource.Info.Write(
+                            Formatted(
+                                "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item." ),
+                            e );
+
                         await this.RemoveItemAsyncCore( key, cancellationToken );
                     }
 
@@ -333,6 +345,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -354,15 +367,14 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The key of the cache item.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        protected virtual Task RemoveItemAsyncCore(string key, CancellationToken cancellationToken)
+        protected virtual Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            this.RemoveItemCore(key);
+            this.RemoveItemCore( key );
+
             return trueTaskResult;
         }
-
-
 
         /// <summary>
         /// Removes a cache item from the cache given its key.
@@ -381,6 +393,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -392,7 +405,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The key of the cache item.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public async Task RemoveItemAsync( [Required] string key, CancellationToken cancellationToken = default(CancellationToken) )
+        public async Task RemoveItemAsync( [Required] string key, CancellationToken cancellationToken = default )
         {
             using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "RemoveItemAsync( \"{Key}\" )", key ) ) )
             {
@@ -407,6 +420,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -414,8 +428,8 @@ namespace Metalama.Patterns.Caching.Implementation
 
         #endregion
 
-
         #region InvalidateDependency
+
         /// <summary>
         /// Removes from the cache all items that have a specific dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
         /// </summary>
@@ -428,11 +442,12 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The dependency key.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        protected virtual Task InvalidateDependencyAsyncCore(string key, CancellationToken cancellationToken)
+        protected virtual Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            this.InvalidateDependencyCore(key);
+            this.InvalidateDependencyCore( key );
+
             return trueTaskResult;
         }
 
@@ -446,7 +461,7 @@ namespace Metalama.Patterns.Caching.Implementation
             {
                 try
                 {
-                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
+                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
 
                     this.InvalidateDependencyCore( key );
 
@@ -455,6 +470,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -466,13 +482,13 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The dependency key.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public async Task InvalidateDependencyAsync( [Required] string key, CancellationToken cancellationToken = default(CancellationToken) )
+        public async Task InvalidateDependencyAsync( [Required] string key, CancellationToken cancellationToken = default )
         {
             using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "InvalidateDependencyAsync( \"{Key}\" )", key ) ) )
             {
                 try
                 {
-                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
+                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
 
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -483,6 +499,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -491,6 +508,7 @@ namespace Metalama.Patterns.Caching.Implementation
         #endregion
 
         #region ContainsDependency
+
         /// <summary>
         /// Determines whether the cache contains a given dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
         /// </summary>
@@ -504,11 +522,11 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The dependency key.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/> evaluating to <c>true</c> if the cache contains the dependency <paramref name="key"/>, otherwise <c>false</c>.</returns>
-        protected virtual Task<bool> ContainsDependencyAsyncCore(string key, CancellationToken cancellationToken)
+        protected virtual Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            return this.ContainsDependencyCore(key) ? trueTaskResult : falseTaskResult;
+            return this.ContainsDependencyCore( key ) ? trueTaskResult : falseTaskResult;
         }
 
         /// <summary>
@@ -516,17 +534,16 @@ namespace Metalama.Patterns.Caching.Implementation
         /// </summary>
         /// <param name="key">The dependency key.</param>
         /// <returns><c>true</c> if the cache contains the dependency <paramref name="key"/>, otherwise <c>false</c>.</returns>
-
         public bool ContainsDependency( [Required] string key )
         {
             using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsDependency( \"{Key}\" )", key ) ) )
             {
                 try
                 {
-                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
-                    this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof( this.SupportedFeatures.ContainsDependency ) );
+                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
+                    this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof(this.SupportedFeatures.ContainsDependency) );
 
-                    bool present = this.ContainsDependencyCore( key );
+                    var present = this.ContainsDependencyCore( key );
 
                     activity.SetResult( present ? "Cache hit." : "Cache miss." );
 
@@ -535,6 +552,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -546,20 +564,20 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The dependency key.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/> evaluating to <c>true</c> if the cache contains the dependency <paramref name="key"/>, otherwise <c>false</c>.</returns>
-        public async Task<bool> ContainsDependencyAsync( [Required] string key, CancellationToken cancellationToken = default(CancellationToken) )
+        public async Task<bool> ContainsDependencyAsync( [Required] string key, CancellationToken cancellationToken = default )
         {
             using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsDependencyAsync( \"{Key}\" )", key ) ) )
             {
                 try
                 {
-                    LogSource.Debug.Write( Formatted( "The dependency key is \"{Key}\".", key ) );
+                    this.LogSource.Debug.Write( Formatted( "The dependency key is \"{Key}\".", key ) );
 
-                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
-                    this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof( this.SupportedFeatures.ContainsDependency ) );
+                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
+                    this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof(this.SupportedFeatures.ContainsDependency) );
 
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    bool present = await this.ContainsDependencyAsyncCore( key, cancellationToken );
+                    var present = await this.ContainsDependencyAsyncCore( key, cancellationToken );
 
                     activity.SetResult( present ? "Cache hit." : "Cache miss." );
 
@@ -568,6 +586,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -575,8 +594,8 @@ namespace Metalama.Patterns.Caching.Implementation
 
         #endregion
 
-
         #region Clear
+
         /// <summary>
         /// Clears the cache. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. 
         /// </summary>
@@ -587,9 +606,10 @@ namespace Metalama.Patterns.Caching.Implementation
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        protected virtual Task ClearAsyncCore(CancellationToken cancellationToken)
+        protected virtual Task ClearAsyncCore( CancellationToken cancellationToken )
         {
             this.ClearCore();
+
             return trueTaskResult;
         }
 
@@ -609,6 +629,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -619,7 +640,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public async Task ClearAsync( CancellationToken cancellationToken = default(CancellationToken) )
+        public async Task ClearAsync( CancellationToken cancellationToken = default )
         {
             using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ClearAsync()" ) ) )
             {
@@ -632,6 +653,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 catch ( Exception e )
                 {
                     activity.SetException( e );
+
                     throw;
                 }
             }
@@ -639,16 +661,15 @@ namespace Metalama.Patterns.Caching.Implementation
 
         #endregion
 
-
         /// <summary>
         /// Gets the status of the current <see cref="CachingBackend"/> (<see cref="CachingBackendStatus.Default"/>,
         /// <see cref="CachingBackendStatus.Disposing"/> or <see cref="CachingBackendStatus.Disposed"/>).
         /// </summary>
-        public CachingBackendStatus Status => (CachingBackendStatus)this.status;
+        public CachingBackendStatus Status => (CachingBackendStatus) this.status;
 
         private bool TryChangeStatus( CachingBackendStatus expectedStatus, CachingBackendStatus newStatus )
         {
-            return Interlocked.CompareExchange(ref this.status, (int)newStatus, (int)expectedStatus) == (int)expectedStatus;
+            return Interlocked.CompareExchange( ref this.status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
         }
 
         /// <summary>
@@ -657,7 +678,7 @@ namespace Metalama.Patterns.Caching.Implementation
         protected CachingBackend()
         {
             this.Id = Guid.NewGuid();
-            this.AutoReloadManager = new AutoReloadManager( this);
+            this.AutoReloadManager = new AutoReloadManager( this );
 
             // TODO: We may need an instance-scoped logger instead of a type-scoped logger.
 #pragma warning disable 618
@@ -668,7 +689,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <inheritdoc />
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{{{0} {1}}}", this.GetType().Name, this.Id );
+            return string.Format( CultureInfo.InvariantCulture, "{{{0} {1}}}", this.GetType().Name, this.Id );
         }
 
         /// <summary>
@@ -688,11 +709,14 @@ namespace Metalama.Patterns.Caching.Implementation
         public virtual Task WhenBackgroundTasksCompleted( CancellationToken cancellationToken )
         {
             if ( this.backgroundTaskScheduler == null )
+            {
                 return Task.CompletedTask;
+            }
             else
-                return  this.backgroundTaskScheduler.WhenBackgroundTasksCompleted( cancellationToken );
+            {
+                return this.backgroundTaskScheduler.WhenBackgroundTasksCompleted( cancellationToken );
+            }
         }
-
 
         /// <summary>
         /// Event raised when a cache item is removed from the cache. Check the <see cref="CachingBackendFeatures.Events"/>
@@ -703,7 +727,9 @@ namespace Metalama.Patterns.Caching.Implementation
             add
             {
                 if ( !this.SupportedFeatures.Events )
+                {
                     throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, "{0} does not support events.", this.GetType().Name ) );
+                }
 
                 this.itemRemoved += value;
             }
@@ -722,10 +748,15 @@ namespace Metalama.Patterns.Caching.Implementation
             add
             {
                 if ( !this.SupportedFeatures.Events )
-                    throw new InvalidOperationException( string.Format(CultureInfo.InvariantCulture, "{0} does not support events.", this.GetType().Name ) );
+                {
+                    throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, "{0} does not support events.", this.GetType().Name ) );
+                }
 
-                if (!this.SupportedFeatures.Dependencies)
-                    throw new InvalidOperationException( string.Format(CultureInfo.InvariantCulture, "{0} does not support dependencies.", this.GetType().Name ) );
+                if ( !this.SupportedFeatures.Dependencies )
+                {
+                    throw new InvalidOperationException(
+                        string.Format( CultureInfo.InvariantCulture, "{0} does not support dependencies.", this.GetType().Name ) );
+                }
 
                 this.dependencyInvalidated += value;
             }
@@ -739,23 +770,24 @@ namespace Metalama.Patterns.Caching.Implementation
                 if ( cacheItem.Configuration.AbsoluteExpiration.HasValue && cacheItem.Configuration.SlidingExpiration.HasValue )
                 {
                     throw new ArgumentException(
-                              "The absolute and sliding expiration values are mutually exclusive. They cannot be set both at the same time." );
+                        "The absolute and sliding expiration values are mutually exclusive. They cannot be set both at the same time." );
                 }
 
                 if ( (cacheItem.Configuration.AbsoluteExpiration.HasValue || cacheItem.Configuration.SlidingExpiration.HasValue)
                      && cacheItem.Configuration.Priority == CacheItemPriority.NotRemovable )
                 {
                     throw new ArgumentException(
-                              string.Format(CultureInfo.InvariantCulture, "The priority cannot be set to '{0}' when either the absolute expiration or sliding expiration is set as well.",
-                                             CacheItemPriority.NotRemovable ) );
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "The priority cannot be set to '{0}' when either the absolute expiration or sliding expiration is set as well.",
+                            CacheItemPriority.NotRemovable ) );
                 }
             }
 
             if ( !this.SupportedFeatures.Dependencies && cacheItem.Dependencies?.Count > 0 )
             {
-                this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
+                this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
             }
-
         }
 
         /// <summary>
@@ -805,12 +837,11 @@ namespace Metalama.Patterns.Caching.Implementation
             this.dependencyInvalidated?.Invoke( this, args );
         }
 
-
         /// <summary>
         /// Synchronously disposes the current <see cref="CachingBackend"/>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Design", "CA1063:ImplementIDisposableCorrectly" )]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations" )]
+        [SuppressMessage( "Microsoft.Design", "CA1063:ImplementIDisposableCorrectly" )]
+        [SuppressMessage( "Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations" )]
         public void Dispose()
         {
             this.Dispose( true );
@@ -821,7 +852,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// of a call to the <see cref="Dispose()"/> method or because of object finalizing.
         /// </summary>
         /// <param name="disposing"><c>true</c> if this method is called because the <see cref="Dispose()"/> method has been called, or <c>false</c> if the object is being finalized.</param>
-        [SuppressMessage("Microsoft.Design", "CA1063")] // The Dispose pattern is implemented differently.
+        [SuppressMessage( "Microsoft.Design", "CA1063" )] // The Dispose pattern is implemented differently.
         protected void Dispose( bool disposing )
         {
             if ( this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) )
@@ -859,10 +890,10 @@ namespace Metalama.Patterns.Caching.Implementation
 
                         this.disposeTask.SetException( e );
                         activity.SetException( e );
+
                         throw;
                     }
                 }
-                
             }
             else
             {
@@ -873,13 +904,13 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <summary>
         /// Synchronously disposes the current <see cref="CachingBackend"/>. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked.
         /// </summary>
-        protected virtual void DisposeCore(bool disposing)
+        protected virtual void DisposeCore( bool disposing )
         {
 #pragma warning disable 612
             if ( !this.WhenBackgroundTasksCompleted( CancellationToken.None ).Wait( disposeTimeout ) )
 #pragma warning restore 612
             {
-                throw new TimeoutException("Timeout when waiting for background tasks to complete.");
+                throw new TimeoutException( "Timeout when waiting for background tasks to complete." );
             }
         }
 
@@ -888,9 +919,9 @@ namespace Metalama.Patterns.Caching.Implementation
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public async Task DisposeAsync( CancellationToken cancellationToken = default(CancellationToken))
+        public async Task DisposeAsync( CancellationToken cancellationToken = default )
         {
-            if (this.TryChangeStatus(CachingBackendStatus.Default, CachingBackendStatus.Disposing))
+            if ( this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) )
             {
                 using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "Disposing" ) ) )
                 {
@@ -899,7 +930,9 @@ namespace Metalama.Patterns.Caching.Implementation
                         await this.DisposeAsyncCore( cancellationToken );
 
                         if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
+                        {
                             throw new MetalamaPatternsCachingAssertionFailedException();
+                        }
 
                         this.disposeTask.SetResult( true );
                         activity.SetSuccess();
@@ -907,10 +940,13 @@ namespace Metalama.Patterns.Caching.Implementation
                     catch ( Exception e )
                     {
                         if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
+                        {
                             throw new MetalamaPatternsCachingAssertionFailedException();
+                        }
 
                         this.disposeTask.SetException( e );
                         activity.SetException( e );
+
                         throw;
                     }
                 }
@@ -928,16 +964,15 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns>A <see cref="Task"/>.</returns>
         protected virtual async Task DisposeAsyncCore( CancellationToken cancellationToken )
         {
-            Task delay = Task.Delay( disposeTimeout, cancellationToken );
+            var delay = Task.Delay( disposeTimeout, cancellationToken );
 #pragma warning disable 612
-            Task task = await Task.WhenAny( this.WhenBackgroundTasksCompleted( cancellationToken ), delay );
+            var task = await Task.WhenAny( this.WhenBackgroundTasksCompleted( cancellationToken ), delay );
 #pragma warning restore 612
             if ( task == delay )
             {
-                throw new TimeoutException("Timeout when waiting for background tasks to complete.");
+                throw new TimeoutException( "Timeout when waiting for background tasks to complete." );
             }
         }
-
 
         // TODO: [Porting] Used by Redis backend. Making protected for now.
         [ExplicitCrossPackageInternal]
@@ -946,16 +981,18 @@ namespace Metalama.Patterns.Caching.Implementation
             get
             {
                 if ( this.backgroundTaskScheduler == null )
+                {
                     return 0;
+                }
                 else
+                {
                     return this.backgroundTaskScheduler.BackgroundTaskExceptions;
+                }
             }
         }
 
         int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
 
         internal AutoReloadManager AutoReloadManager { get; }
-
-     
     }
 }

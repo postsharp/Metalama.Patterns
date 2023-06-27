@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
@@ -19,17 +18,17 @@ namespace Metalama.Patterns.Caching.Backends.Redis
     public class RedisCachingBackend : CachingBackend
     {
         private readonly Func<ISerializer> createSerializerFunc;
-        private readonly ConcurrentStack<ISerializer> serializerPool = new ConcurrentStack<ISerializer>();
+        private readonly ConcurrentStack<ISerializer> serializerPool = new();
         private readonly bool ownsConnection;
-        private readonly BackgroundTaskScheduler backgroundTaskScheduler = new BackgroundTaskScheduler();
+        private readonly BackgroundTaskScheduler backgroundTaskScheduler = new();
 
         #region Events
 
         private const string itemRemovedEvent = "item-removed";
 
-        #pragma warning disable CA2213 // We're doing DisposeAsync.
+#pragma warning disable CA2213 // We're doing DisposeAsync.
         private RedisNotificationQueue notificationQueue;
-        #pragma warning restore CA2213
+#pragma warning restore CA2213
 
         #endregion
 
@@ -61,7 +60,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             this.Connection = connection;
             this.ownsConnection = configuration.OwnsConnection;
             this.Configuration = configuration;
-            this.Database = this.Connection.GetDatabase( configuration.Database  );
+            this.Database = this.Connection.GetDatabase( configuration.Database );
 
             this.KeyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
@@ -73,9 +72,12 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// </summary>
         internal void Init()
         {
-            this.notificationQueue = RedisNotificationQueue.Create( this.ToString(), this.Connection,
-                                                                    ImmutableArray.Create( this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel ),
-                                                                    this.ProcessNotification, this.Configuration.ConnectionTimeout );
+            this.notificationQueue = RedisNotificationQueue.Create(
+                this.ToString(),
+                this.Connection,
+                ImmutableArray.Create( this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel ),
+                this.ProcessNotification,
+                this.Configuration.ConnectionTimeout );
         }
 
         /// <summary>
@@ -83,12 +85,17 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        internal async Task InitAsync(CancellationToken cancellationToken)
+        internal async Task InitAsync( CancellationToken cancellationToken )
         {
-            this.notificationQueue = await RedisNotificationQueue.CreateAsync( this.ToString(), this.Connection,
-                                                                               ImmutableArray.Create( this.KeyBuilder.EventsChannel,
-                                                                                                      this.KeyBuilder.NotificationChannel ),
-                                                                               this.ProcessNotification, this.Configuration.ConnectionTimeout, cancellationToken );
+            this.notificationQueue = await RedisNotificationQueue.CreateAsync(
+                this.ToString(),
+                this.Connection,
+                ImmutableArray.Create(
+                    this.KeyBuilder.EventsChannel,
+                    this.KeyBuilder.NotificationChannel ),
+                this.ProcessNotification,
+                this.Configuration.ConnectionTimeout,
+                cancellationToken );
         }
 
         /// <summary>
@@ -98,8 +105,8 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="configuration">Configuration of the new back-end.</param>
         /// <returns>A <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
         /// according to the properties of the <paramref name="configuration"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static CachingBackend Create( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration)
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        public static CachingBackend Create( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration )
         {
             // #20775 Caching: two-layered cache should modify the key to avoid conflicts when toggling the option
             if ( configuration.IsLocallyCached )
@@ -122,6 +129,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             configuration.Freeze();
 
             RedisCachingBackend backend;
+
             if ( configuration.SupportsDependencies )
             {
                 backend = new DependenciesRedisCachingBackend( connection, configuration );
@@ -134,9 +142,10 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             backend.Init();
 
             CachingBackend enhancer;
-            if (configuration.IsLocallyCached)
+
+            if ( configuration.IsLocallyCached )
             {
-                enhancer = new TwoLayerCachingBackendEnhancer(new NonBlockingCachingBackendEnhancer(  backend) );
+                enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
             }
             else
             {
@@ -154,27 +163,32 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A task returning a <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
         /// according to the properties of the <paramref name="configuration"/>.</returns>
-        public static async Task<CachingBackend> CreateAsync(IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<CachingBackend> CreateAsync(
+            IConnectionMultiplexer connection,
+            [Required] RedisCachingBackendConfiguration configuration,
+            CancellationToken cancellationToken = default )
         {
             configuration.Freeze();
 
             RedisCachingBackend backend;
-            if (configuration.SupportsDependencies)
+
+            if ( configuration.SupportsDependencies )
             {
-                backend = new DependenciesRedisCachingBackend(connection, configuration);
+                backend = new DependenciesRedisCachingBackend( connection, configuration );
             }
             else
             {
-                backend = new RedisCachingBackend(connection, configuration);
+                backend = new RedisCachingBackend( connection, configuration );
             }
 
-            await backend.InitAsync(cancellationToken);
+            await backend.InitAsync( cancellationToken );
 
             CachingBackend enhancer;
-            if (configuration.IsLocallyCached)
+
+            if ( configuration.IsLocallyCached )
             {
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                enhancer = new TwoLayerCachingBackendEnhancer(new NonBlockingCachingBackendEnhancer( backend) );
+                enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
 #pragma warning restore CA2000 // Dispose objects before losing scope
             }
             else
@@ -185,9 +199,11 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             return enhancer;
         }
 
-
-        internal RedisCachingBackend( IConnectionMultiplexer connection, IDatabase database, RedisKeyBuilder keyBuilder,
-                                            RedisCachingBackendConfiguration configuration )
+        internal RedisCachingBackend(
+            IConnectionMultiplexer connection,
+            IDatabase database,
+            RedisKeyBuilder keyBuilder,
+            RedisCachingBackendConfiguration configuration )
         {
             this.Connection = connection;
             this.Database = database;
@@ -219,23 +235,29 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
             string keyKind;
             string itemKey;
+
             if ( !this.KeyBuilder.TryParseKeyspaceNotification( channelName, out keyKind, out itemKey ) )
             {
                 return;
             }
 
             if ( keyKind != RedisKeyBuilder.ValueKindPrefix )
+            {
                 return;
+            }
 
             CacheItemRemovedReason reason;
+
             switch ( notification.Value )
             {
                 case "expired":
                     reason = CacheItemRemovedReason.Expired;
+
                     break;
 
                 case "evicted":
                     reason = CacheItemRemovedReason.Evicted;
+
                     break;
 
                 default:
@@ -247,21 +269,24 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
         private void ProcessEvent( RedisNotification notification )
         {
-            StringTokenizer tokenizer = new StringTokenizer( notification.Value );
-            string kind = tokenizer.GetNext();
-            string sourceIdStr = tokenizer.GetNext();
-            string key = tokenizer.GetRest();
+            var tokenizer = new StringTokenizer( notification.Value );
+            var kind = tokenizer.GetNext();
+            var sourceIdStr = tokenizer.GetNext();
+            var key = tokenizer.GetRest();
 
             if ( kind == null || sourceIdStr == null || key == null )
             {
                 this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
+
                 return;
             }
 
             Guid sourceId;
+
             if ( !Guid.TryParse( sourceIdStr, out sourceId ) )
             {
                 this.LogSource.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr ) );
+
                 return;
             }
 
@@ -284,10 +309,12 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             {
                 case itemRemovedEvent:
                     this.OnItemRemoved( key, CacheItemRemovedReason.Removed, sourceId );
+
                     return true;
 
                 default:
                     this.LogSource.Debug.Write( Formatted( "Event {Kind} ignored.", kind ) );
+
                     break;
             }
 
@@ -302,9 +329,9 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <returns>A <see cref="Task"/>.</returns>
         protected Task SendEventAsync( string kind, string key )
         {
-            string value = kind + ":" + this.Id + ":" + key;
-            this.LogSource.Debug.Write( Formatted(  "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ));
-            
+            var value = kind + ":" + this.Id + ":" + key;
+            this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
+
             return this.notificationQueue.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
         }
 
@@ -315,8 +342,8 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="key">Key of the item (value key or dependency key, typically).</param>
         protected void SendEvent( string kind, string key )
         {
-            string value = kind + ":" + this.Id + ":" + key;
-            this.LogSource.Debug.Write( Formatted(  "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ));
+            var value = kind + ":" + this.Id + ":" + key;
+            this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
 
             this.notificationQueue.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
         }
@@ -334,7 +361,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         {
             this.Database.KeyDelete( this.KeyBuilder.GetValueKey( key ) );
         }
-        
+
         private TimeSpan? CreateExpiry( CacheItem policy )
         {
             TimeSpan? ttl = this.Configuration.DefaultExpiration;
@@ -367,7 +394,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                 serializer = this.createSerializerFunc();
             }
 
-            byte[] bytes = serializer.Serialize( item );
+            var bytes = serializer.Serialize( item );
 
             // No try/finally. We don't want to reuse the serializer if there is an exception.
 
@@ -424,7 +451,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
         internal RedisValue CreateRedisValue( CacheItem item )
         {
-            object value = CreateCacheValue( item );
+            var value = CreateCacheValue( item );
 
             return this.Serialize( value );
         }
@@ -433,28 +460,26 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         protected override void SetItemCore( string key, CacheItem item )
         {
             // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
-            RedisValue value = this.CreateRedisValue( item );
-            RedisKey valueKey = this.KeyBuilder.GetValueKey( key );
+            var value = this.CreateRedisValue( item );
+            var valueKey = this.KeyBuilder.GetValueKey( key );
 
-            TimeSpan? expiry = this.CreateExpiry( item );
+            var expiry = this.CreateExpiry( item );
 
             this.Database.StringSet( valueKey, value, expiry );
         }
-
 
         /// <inheritdoc />
         protected override async Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
         {
             // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
-            RedisValue value = this.CreateRedisValue( item );
-            
-            RedisKey valueKey = this.KeyBuilder.GetValueKey( key );
+            var value = this.CreateRedisValue( item );
 
-            TimeSpan? expiry = this.CreateExpiry( item );
+            var valueKey = this.KeyBuilder.GetValueKey( key );
+
+            var expiry = this.CreateExpiry( item );
 
             await this.Database.StringSetAsync( valueKey, value, expiry );
         }
-
 
         /// <inheritdoc />
         protected override bool ContainsItemCore( string key )
@@ -471,12 +496,11 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <exclude />
         protected object GetCacheValue( RedisKey valueKey, RedisValue value )
         {
-            object cacheValue = this.Deserialize( value );
+            var cacheValue = this.Deserialize( value );
 
-
-            if (cacheValue is RedisCacheValue withSlidingExpiration)
+            if ( cacheValue is RedisCacheValue withSlidingExpiration )
             {
-                this.ExecuteNonBlockingTask(() => this.Database.KeyExpireAsync(valueKey, withSlidingExpiration.SlidingExpiration));
+                this.ExecuteNonBlockingTask( () => this.Database.KeyExpireAsync( valueKey, withSlidingExpiration.SlidingExpiration ) );
                 cacheValue = withSlidingExpiration.Value;
             }
 
@@ -486,15 +510,15 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <exclude />
         protected override CacheValue GetItemCore( string key, bool includeDependencies )
         {
-            RedisKey valueKey = this.KeyBuilder.GetValueKey( key );
-            RedisValue serializedValue = this.Database.StringGet( valueKey );
+            var valueKey = this.KeyBuilder.GetValueKey( key );
+            var serializedValue = this.Database.StringGet( valueKey );
 
             if ( !serializedValue.HasValue )
             {
                 return null;
             }
 
-            object cacheValue = this.GetCacheValue( valueKey, serializedValue );
+            var cacheValue = this.GetCacheValue( valueKey, serializedValue );
 
             return new CacheValue( cacheValue );
         }
@@ -502,15 +526,15 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <exclude />
         protected override async Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
         {
-            RedisKey valueKey = this.KeyBuilder.GetValueKey( key );
-            RedisValue serializedValue = await this.Database.StringGetAsync( valueKey );
+            var valueKey = this.KeyBuilder.GetValueKey( key );
+            var serializedValue = await this.Database.StringGetAsync( valueKey );
 
             if ( !serializedValue.HasValue )
             {
                 return null;
             }
 
-            object cacheValue = this.GetCacheValue( valueKey, serializedValue );
+            var cacheValue = this.GetCacheValue( valueKey, serializedValue );
 
             return new CacheValue( cacheValue );
         }
@@ -520,7 +544,6 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         {
             throw new NotSupportedException();
         }
-
 
         /// <inheritdoc />
         protected override void InvalidateDependencyCore( string key )
@@ -543,7 +566,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         }
 
         /// <inheritdoc />
-        protected override void DisposeCore(bool disposing)
+        protected override void DisposeCore( bool disposing )
         {
             // Do not dispose Redis-related resources during finalization: it blocks the finalizer thread and
             // causes timeouts, and things are probably being disposed in the wrong order anyway.
@@ -555,7 +578,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
             this.backgroundTaskScheduler.Dispose();
 
-            base.DisposeCore(disposing);
+            base.DisposeCore( disposing );
 
             if ( disposing )
             {
@@ -572,7 +595,6 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <inheritdoc />
         protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
         {
-
             if ( this.notificationQueue != null )
             {
                 await this.notificationQueue.DisposeAsync( cancellationToken );
@@ -581,7 +603,6 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             await this.backgroundTaskScheduler.DisposeAsync( cancellationToken );
 
             await base.DisposeAsyncCore( cancellationToken );
-
 
             if ( this.ownsConnection )
             {
@@ -593,8 +614,8 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <summary>
         /// Destructor.
         /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1031")]
-        #pragma warning disable CA1063 // Implement IDisposable Correctly
+        [SuppressMessage( "Microsoft.Design", "CA1031" )]
+#pragma warning disable CA1063 // Implement IDisposable Correctly
         ~RedisCachingBackend()
         {
             try
@@ -605,7 +626,6 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             {
                 this.LogSource.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
             }
-            
         }
 
         /// <inheritdoc />
@@ -620,7 +640,6 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             throw new NotSupportedException();
         }
 
-      
         // Change the visibility of the method.
         internal void ExecuteNonBlockingTask( Func<Task> task )
         {
@@ -631,6 +650,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         public override async Task WhenBackgroundTasksCompleted( CancellationToken cancellationToken )
         {
             await base.WhenBackgroundTasksCompleted( cancellationToken );
+
             if ( this.notificationQueue != null )
             {
                 await this.notificationQueue.WhenQueueEmpty();

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
@@ -36,10 +35,12 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 #if NETFRAMEWORK || NETSTANDARD
                     && value.IndexOf( ":", StringComparison.Ordinal ) != -1
 #else
-                    && value.Contains( ":", StringComparison.Ordinal )
+                     && value.Contains( ":", StringComparison.Ordinal )
 #endif
-                    )
+                   )
+                {
                     throw new ArgumentOutOfRangeException( nameof(value), "The KeyPrefix property value cannot contain the ':' character." );
+                }
 
                 this.keyPrefix = value;
             }
@@ -162,7 +163,6 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         }
 
         object ICloneable.Clone() => this.Clone();
-       
 
         /// <summary>
         /// Returns a non-frozen clone of the current instance.
@@ -170,8 +170,9 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <returns></returns>
         public RedisCachingBackendConfiguration Clone()
         {
-            RedisCachingBackendConfiguration clone = (RedisCachingBackendConfiguration) this.MemberwiseClone();
+            var clone = (RedisCachingBackendConfiguration) this.MemberwiseClone();
             clone.IsFrozen = false;
+
             return clone;
         }
 
@@ -179,7 +180,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// Determines whether the current instance is frozen (i.e. read-only).
         /// </summary>
         public bool IsFrozen { get; private set; }
-        
+
         /// <summary>
         /// Gets or sets the time that the Redis backend will wait for a Redis connection.
         /// (When you create a new Redis backend, if it doesn't connect to a Redis server in this timeout, a <see cref="TimeoutException"/> is thrown.)

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Contracts;
 using System.Runtime.Serialization;
@@ -16,26 +15,20 @@ namespace Metalama.Patterns.Caching
         /// <summary>
         /// Initializes a new <see cref="InvalidCacheItemException"/> with the default error message.
         /// </summary>
-        public InvalidCacheItemException()
-        {
-        }
+        public InvalidCacheItemException() { }
 
         /// <summary>
         /// Initializes a new <see cref="InvalidCacheItemException"/> with a given error message.
         /// </summary>
         /// <param name="message">The error message.</param>
-        public InvalidCacheItemException( [Required] string message ) : base( message )
-        {
-        }
+        public InvalidCacheItemException( [Required] string message ) : base( message ) { }
 
         /// <summary>
         /// Initializes a new <see cref="InvalidCacheItemException"/> with a given error message and inner <see cref="Exception"/>.
         /// </summary>
         /// <param name="message">The error message.</param>
         /// <param name="inner">The inner exception.</param>
-        public InvalidCacheItemException( [Required] string message, Exception inner ) : base( message, inner )
-        {
-        }
+        public InvalidCacheItemException( [Required] string message, Exception inner ) : base( message, inner ) { }
 
         /// <summary>
         /// Deserialization constructor.
@@ -44,8 +37,6 @@ namespace Metalama.Patterns.Caching
         /// <param name="context"></param>
         protected InvalidCacheItemException(
             SerializationInfo info,
-            StreamingContext context ) : base( info, context )
-        {
-        }
+            StreamingContext context ) : base( info, context ) { }
     }
 }

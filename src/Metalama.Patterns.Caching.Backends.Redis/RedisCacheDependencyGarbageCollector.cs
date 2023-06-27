@@ -1,11 +1,11 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis
@@ -22,6 +22,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
     {
         private RedisKeyBuilder keyBuilder;
         private readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(RedisCacheDependencyGarbageCollector) );
+
         internal RedisNotificationQueue NotificationQueue { get; private set; }
 
         private readonly bool ownsBackend;
@@ -34,17 +35,15 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             this.keyBuilder = new RedisKeyBuilder( this.Database, configuration );
             this.backend = new DependenciesRedisCachingBackend( connection, this.Database, this.keyBuilder, configuration );
             this.ownsBackend = true;
-
         }
 
-        private RedisCacheDependencyGarbageCollector(DependenciesRedisCachingBackend backend) 
+        private RedisCacheDependencyGarbageCollector( DependenciesRedisCachingBackend backend )
         {
             this.Connection = backend.Connection;
             this.Database = backend.Database;
             this.backend = backend;
             this.ownsBackend = false;
         }
-        
 
         /// <summary>
         /// Creates a new <see cref="RedisCacheDependencyGarbageCollector"/> given a Redis connection and a configuration object.
@@ -52,11 +51,14 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="connection">A Redis connection.</param>
         /// <param name="configuration">A configuration object.</param>
         /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static RedisCacheDependencyGarbageCollector Create([Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration)
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        public static RedisCacheDependencyGarbageCollector Create(
+            [Required] IConnectionMultiplexer connection,
+            [Required] RedisCachingBackendConfiguration configuration )
         {
-            RedisCacheDependencyGarbageCollector collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
+            var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
             collector.Init( configuration );
+
             return collector;
         }
 
@@ -66,10 +68,12 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             {
                 case RedisCachingBackend redisCachingBackend:
                     return redisCachingBackend;
+
                 case CachingBackendEnhancer enhancer:
                     return FindRedisCachingBackend( enhancer.UnderlyingBackend );
+
                 default:
-                    throw new ArgumentException("The backend is not a Redis backend.", nameof( backend ));
+                    throw new ArgumentException( "The backend is not a Redis backend.", nameof(backend) );
             }
         }
 
@@ -78,19 +82,19 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// </summary>
         /// <param name="backend">An existing Redis <see cref="CachingBackend"/>, as returned by <see cref="RedisCachingBackend.Create"/>.</param>
         /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="backend"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static RedisCacheDependencyGarbageCollector Create([Required] CachingBackend backend)
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        public static RedisCacheDependencyGarbageCollector Create( [Required] CachingBackend backend )
         {
-            RedisCachingBackend redisCachingBackend = FindRedisCachingBackend( backend );
-
+            var redisCachingBackend = FindRedisCachingBackend( backend );
 
             if ( !redisCachingBackend.SupportedFeatures.Dependencies )
             {
-                throw new ArgumentException("This backend does not support dependencies.", nameof(backend));
+                throw new ArgumentException( "This backend does not support dependencies.", nameof(backend) );
             }
 
-            RedisCacheDependencyGarbageCollector collector = new RedisCacheDependencyGarbageCollector( (DependenciesRedisCachingBackend)redisCachingBackend);
-            collector.Init(redisCachingBackend.Configuration );
+            var collector = new RedisCacheDependencyGarbageCollector( (DependenciesRedisCachingBackend) redisCachingBackend );
+            collector.Init( redisCachingBackend.Configuration );
+
             return collector;
         }
 
@@ -101,10 +105,14 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="configuration">A configuration object.</param>
         /// <param name="cancellationToken"></param>
         /// <returns>A <see cref="Task"/> returning a <see cref="RedisCacheDependencyGarbageCollector"/> that uses <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static Task<RedisCacheDependencyGarbageCollector> CreateAsync([Required] IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration, CancellationToken cancellationToken = default)
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        public static Task<RedisCacheDependencyGarbageCollector> CreateAsync(
+            [Required] IConnectionMultiplexer connection,
+            RedisCachingBackendConfiguration configuration,
+            CancellationToken cancellationToken = default )
         {
-            RedisCacheDependencyGarbageCollector collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
+            var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
+
             return collector.InitAsync( configuration, cancellationToken );
         }
 
@@ -114,38 +122,46 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="backend">An existing <see cref="CachingBackend"/>, as returned by <see cref="RedisCachingBackend.Create"/>, that supports dependencies.</param>
         /// <param name="cancellationToken"></param>
         /// <returns>A <see cref="Task"/> returning a <see cref="RedisCacheDependencyGarbageCollector"/> that uses <paramref name="backend"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static Task<RedisCacheDependencyGarbageCollector> CreateAsync([Required] CachingBackend backend, CancellationToken cancellationToken = default)
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        public static Task<RedisCacheDependencyGarbageCollector> CreateAsync( [Required] CachingBackend backend, CancellationToken cancellationToken = default )
         {
-            RedisCachingBackend redisCachingBackend = FindRedisCachingBackend(backend);
+            var redisCachingBackend = FindRedisCachingBackend( backend );
 
-
-            if (!redisCachingBackend.SupportedFeatures.Dependencies)
+            if ( !redisCachingBackend.SupportedFeatures.Dependencies )
             {
-                throw new ArgumentException("This backend does not support dependencies.", nameof(backend));
+                throw new ArgumentException( "This backend does not support dependencies.", nameof(backend) );
             }
 
-            RedisCacheDependencyGarbageCollector collector = new RedisCacheDependencyGarbageCollector( (DependenciesRedisCachingBackend) backend );
-            return collector.InitAsync(redisCachingBackend.Configuration, cancellationToken );
-        }
+            var collector = new RedisCacheDependencyGarbageCollector( (DependenciesRedisCachingBackend) backend );
 
+            return collector.InitAsync( redisCachingBackend.Configuration, cancellationToken );
+        }
 
         private void Init( RedisCachingBackendConfiguration configuration )
         {
             this.InitCommon( configuration );
 
-            this.NotificationQueue = RedisNotificationQueue.Create( this.ToString(), this.Connection,
-                                                                    ImmutableArray.Create( this.keyBuilder.NotificationChannel ),
-                                                                    this.ProcessKeyspaceNotification, configuration.ConnectionTimeout );
-
+            this.NotificationQueue = RedisNotificationQueue.Create(
+                this.ToString(),
+                this.Connection,
+                ImmutableArray.Create( this.keyBuilder.NotificationChannel ),
+                this.ProcessKeyspaceNotification,
+                configuration.ConnectionTimeout );
         }
 
-        private async Task<RedisCacheDependencyGarbageCollector> InitAsync(RedisCachingBackendConfiguration configuration, CancellationToken cancellationToken)
+        private async Task<RedisCacheDependencyGarbageCollector> InitAsync(
+            RedisCachingBackendConfiguration configuration,
+            CancellationToken cancellationToken )
         {
             this.InitCommon( configuration );
 
-            this.NotificationQueue = await RedisNotificationQueue.CreateAsync(this.ToString(), this.Connection, ImmutableArray.Create(this.keyBuilder.NotificationChannel), this.ProcessKeyspaceNotification, configuration.ConnectionTimeout, cancellationToken);
-
+            this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
+                this.ToString(),
+                this.Connection,
+                ImmutableArray.Create( this.keyBuilder.NotificationChannel ),
+                this.ProcessKeyspaceNotification,
+                configuration.ConnectionTimeout,
+                cancellationToken );
 
             return this;
         }
@@ -165,65 +181,80 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// </summary>
         public IConnectionMultiplexer Connection { get; }
 
-
-        private void ProcessKeyspaceNotification(RedisNotification notification)
+        private void ProcessKeyspaceNotification( RedisNotification notification )
         {
             string channelName = notification.Channel;
 
-            StringTokenizer tokenizer = new StringTokenizer(channelName);
+            var tokenizer = new StringTokenizer( channelName );
 
-            if (tokenizer.GetNext() == null)
+            if ( tokenizer.GetNext() == null )
+            {
                 return;
+            }
 
-            string prefix = tokenizer.GetNext();
-            if (prefix != this.keyBuilder.KeyPrefix)
+            var prefix = tokenizer.GetNext();
+
+            if ( prefix != this.keyBuilder.KeyPrefix )
+            {
                 return;
+            }
 
-            string keyKind = tokenizer.GetNext();
+            var keyKind = tokenizer.GetNext();
 
-            string itemKey = tokenizer.GetRest();
+            var itemKey = tokenizer.GetRest();
 
-            switch (keyKind)
+            switch ( keyKind )
             {
                 case RedisKeyBuilder.DependenciesKindPrefix:
                     // When a dependencies key is removed by Redis (for whatever reason not under our control),
                     // we need to remove the main key as well.
-                    switch (notification.Value)
+                    switch ( notification.Value )
                     {
                         case "expired":
                         case "evicted":
-                            if (this.Database.KeyDelete(this.keyBuilder.GetValueKey(itemKey)))
+                            if ( this.Database.KeyDelete( this.keyBuilder.GetValueKey( itemKey ) ) )
                             {
-                                this.logger.Warning.Write( 
-                                                   Formatted("The dependencies key for item {Item} has been {State} but should not. The Redis server is probably misconfigured. " +
-                                                   "Only use volatile-* maxmemory policies.", itemKey, notification.Value ));
-
+                                this.logger.Warning.Write(
+                                    Formatted(
+                                        "The dependencies key for item {Item} has been {State} but should not. The Redis server is probably misconfigured. " +
+                                        "Only use volatile-* maxmemory policies.",
+                                        itemKey,
+                                        notification.Value ) );
                             }
+
                             // TODO: remove the main key from other dependencies.
                             break;
                     }
+
                     break;
 
                 case RedisKeyBuilder.DependencyKindPrefix:
                     // No idea of what to do with this situation.
-                    switch (notification.Value)
+                    switch ( notification.Value )
                     {
                         case "expired":
                         case "evicted":
-                            this.logger.Warning.Write( Formatted(  
-                                               "The dependency key {Key} has been {State} but should not. The Redis server is probably misconfigured. " +
-                                               "Only use volatile-* maxmemory policies.", itemKey, notification.Value ) );
+                            this.logger.Warning.Write(
+                                Formatted(
+                                    "The dependency key {Key} has been {State} but should not. The Redis server is probably misconfigured. " +
+                                    "Only use volatile-* maxmemory policies.",
+                                    itemKey,
+                                    notification.Value ) );
+
                             break;
                     }
+
                     break;
 
                 case RedisKeyBuilder.ValueKindPrefix:
-                    this.logger.Debug.EnabledOrNull?.Write( Formatted(  "Enqueue processing of cache eviction." ) );
-                    this.backend.ExecuteNonBlockingTask(() => this.OnValueEvictedAsync(itemKey));
+                    this.logger.Debug.EnabledOrNull?.Write( Formatted( "Enqueue processing of cache eviction." ) );
+                    this.backend.ExecuteNonBlockingTask( () => this.OnValueEvictedAsync( itemKey ) );
+
                     break;
 
                 default:
                     this.logger.Debug.EnabledOrNull?.Write( Formatted( "Notification ignored." ) );
+
                     break;
             }
         }
@@ -233,10 +264,10 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             string valueKey = this.keyBuilder.GetValueKey( key );
             string dependenciesKey = this.keyBuilder.GetDependenciesKey( key );
 
-            for ( int attempt = 0; attempt < this.backend.Configuration.TransactionMaxRetries + 1; attempt++ )
+            for ( var attempt = 0; attempt < this.backend.Configuration.TransactionMaxRetries + 1; attempt++ )
             {
-                Task<bool> valueKeyExistsTask = this.Database.KeyExistsAsync( valueKey );
-                Task<bool> dependenciesKeyExistsTask = this.Database.KeyExistsAsync( dependenciesKey );
+                var valueKeyExistsTask = this.Database.KeyExistsAsync( valueKey );
+                var dependenciesKeyExistsTask = this.Database.KeyExistsAsync( dependenciesKey );
 
                 await Task.WhenAll( valueKeyExistsTask, dependenciesKeyExistsTask );
 
@@ -244,15 +275,17 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                 // It is more expensive to set up the transaction and we know that just one client out of all clients
                 // connected will be able to execute the transaction, so we stop all the other clients here.
                 if (
+
                     // The value has been set again in the meanwhile
                     valueKeyExistsTask.Result
+
                     // The garabage collection has been performed by another client already
                     || !dependenciesKeyExistsTask.Result )
                 {
                     return;
                 }
 
-                ITransaction transaction = this.Database.CreateTransaction();
+                var transaction = this.Database.CreateTransaction();
                 transaction.AddCondition( Condition.KeyNotExists( valueKey ) );
                 transaction.AddCondition( Condition.KeyExists( dependenciesKey ) );
                 string[] dependencies = await this.backend.GetDependenciesAsync( key, transaction );
@@ -280,7 +313,6 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             {
                 this.backend.Dispose();
             }
-
         }
 
         /// <summary>
@@ -292,16 +324,14 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            await this.NotificationQueue.DisposeAsync(cancellationToken);
+            await this.NotificationQueue.DisposeAsync( cancellationToken );
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if ( this.ownsBackend )
             {
-                await this.backend.DisposeAsync(cancellationToken);
+                await this.backend.DisposeAsync( cancellationToken );
             }
-
-
         }
 
         /// <summary>
@@ -324,8 +354,10 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="server">The Redis server whose keys will be enumerated and validated.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-
-        public static Task PerformFullCollectionAsync( [Required] RedisCachingBackend backend, [Required] IServer server, CancellationToken cancellationToken = default )
+        public static Task PerformFullCollectionAsync(
+            [Required] RedisCachingBackend backend,
+            [Required] IServer server,
+            CancellationToken cancellationToken = default )
         {
             return ((DependenciesRedisCachingBackend) backend).CleanUpAsync( server, cancellationToken );
         }
@@ -333,7 +365,5 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         internal int BackgroundTaskExceptions => this.NotificationQueue.BackgroundTaskExceptions;
 
         int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
-
-   
     }
 }

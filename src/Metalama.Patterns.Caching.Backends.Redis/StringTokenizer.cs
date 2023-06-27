@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Patterns.Caching.Backends.Redis
 {
@@ -24,8 +23,9 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
         public string GetNext()
         {
-            int oldPosition = this.position;
-            int p = this.s.IndexOf( this.separator, oldPosition );
+            var oldPosition = this.position;
+            var p = this.s.IndexOf( this.separator, oldPosition );
+
             if ( p < 0 )
             {
                 return this.GetRest();
@@ -33,9 +33,9 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             else
             {
                 this.position = p + 1;
+
                 return this.s.Substring( oldPosition, p - oldPosition );
             }
-
         }
 
         public string GetRest()

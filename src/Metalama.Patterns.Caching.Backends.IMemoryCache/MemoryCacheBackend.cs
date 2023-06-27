@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
@@ -30,7 +29,7 @@ namespace Metalama.Patterns.Caching.Backends
     {
         private readonly IMemoryCache cache;
         private readonly Func<PSCacheItem, long> sizeCalculator;
-        
+
         /// <inheritdoc />
         protected override void DisposeCore( bool disposing )
         {
@@ -41,25 +40,21 @@ namespace Metalama.Patterns.Caching.Backends
         /// <inheritdoc />
         protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
         {
-            await base.DisposeAsyncCore( cancellationToken ).ConfigureAwait(false);
+            await base.DisposeAsyncCore( cancellationToken ).ConfigureAwait( false );
             this.cache.Dispose();
         }
 
         /// <summary>
         /// Initializes a new <see cref="MemoryCacheBackend"/> based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
         /// </summary>
-        public MemoryCacheBackend() : this (new MemoryCache( new MemoryCacheOptions() ))
-        {
-        }
-        
+        public MemoryCacheBackend() : this( new MemoryCache( new MemoryCacheOptions() ) ) { }
+
         /// <summary>
         /// Initializes a new <see cref="MemoryCacheBackend"/> based on the given <see cref="IMemoryCache"/>.
         /// </summary>
         /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
-        public MemoryCacheBackend( [Required] IMemoryCache cache ) : this (cache, null)
-        {
-        }
-        
+        public MemoryCacheBackend( [Required] IMemoryCache cache ) : this( cache, null ) { }
+
         /// <summary>
         /// Initializes a new <see cref="MemoryCacheBackend"/> based on the given <see cref="IMemoryCache"/>. The backend creates cache entries
         /// with size calculated by the given function.
@@ -71,15 +66,15 @@ namespace Metalama.Patterns.Caching.Backends
             this.cache = cache;
             this.sizeCalculator = sizeCalculator;
         }
-        
+
         private static string GetItemKey( string key )
         {
-            return nameof( MemoryCacheBackend ) + ":item:" + key;
+            return nameof(MemoryCacheBackend) + ":item:" + key;
         }
 
         private static string GetDependencyKey( string key )
         {
-            return nameof( MemoryCacheBackend ) + ":dependency:" + key;
+            return nameof(MemoryCacheBackend) + ":dependency:" + key;
         }
 
         private static CacheItemRemovedReason CreateRemovalReason( EvictionReason sourceReason )
@@ -89,22 +84,27 @@ namespace Metalama.Patterns.Caching.Backends
                 case EvictionReason.None:
                 case EvictionReason.Replaced:
                     return CacheItemRemovedReason.Other;
+
                 case EvictionReason.TokenExpired:
                     return CacheItemRemovedReason.Invalidated;
+
                 case EvictionReason.Capacity:
                     return CacheItemRemovedReason.Evicted;
+
                 case EvictionReason.Expired:
                     return CacheItemRemovedReason.Expired;
+
                 case EvictionReason.Removed:
                     return CacheItemRemovedReason.Removed;
+
                 default:
-                    throw new ArgumentException( string.Format(CultureInfo.InvariantCulture, "The CacheEntryRemovedReason '{0}' is unknown.", sourceReason ) );
+                    throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, "The CacheEntryRemovedReason '{0}' is unknown.", sourceReason ) );
             }
         }
 
         private MemoryCacheEntryOptions CreatePolicy( PSCacheItem item )
         {
-            MemoryCacheEntryOptions targetPolicy = new MemoryCacheEntryOptions();
+            var targetPolicy = new MemoryCacheEntryOptions();
             targetPolicy.RegisterPostEvictionCallback( this.OnCacheItemRemoved );
 
             if ( item.Configuration != null )
@@ -123,19 +123,30 @@ namespace Metalama.Patterns.Caching.Backends
                 {
                     case PSCacheItemPriority.Default:
                         targetPolicy.Priority = CacheItemPriority.Normal;
+
                         break;
+
                     case PSCacheItemPriority.Low:
                         targetPolicy.Priority = CacheItemPriority.Low;
+
                         break;
+
                     case PSCacheItemPriority.High:
                         targetPolicy.Priority = CacheItemPriority.High;
+
                         break;
+
                     case PSCacheItemPriority.NotRemovable:
                         targetPolicy.Priority = CacheItemPriority.NeverRemove;
+
                         break;
+
                     default:
-                        throw new NotSupportedException( string.Format(CultureInfo.InvariantCulture, "The priority '{0}' is not supported by the MemoryCache back-end.",
-                                                                        item.Configuration.Priority ) );
+                        throw new NotSupportedException(
+                            string.Format(
+                                CultureInfo.InvariantCulture,
+                                "The priority '{0}' is not supported by the MemoryCache back-end.",
+                                item.Configuration.Priority ) );
                 }
             }
 
@@ -143,6 +154,7 @@ namespace Metalama.Patterns.Caching.Backends
             {
                 targetPolicy.Size = this.sizeCalculator( item );
             }
+
             return targetPolicy;
         }
 
@@ -153,13 +165,15 @@ namespace Metalama.Patterns.Caching.Backends
                 // In this case, all actions are taken by the method that removes the item.
                 return;
             }
-            string prefix = GetItemKey( "" );
-            string fullKey = (string) keyAsObject;
+
+            var prefix = GetItemKey( "" );
+            var fullKey = (string) keyAsObject;
+
             if ( fullKey.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
             {
-                string key = fullKey.Substring( prefix.Length );
+                var key = fullKey.Substring( prefix.Length );
 
-                CacheValue item = (CacheValue) value;
+                var item = (CacheValue) value;
                 this.CleanDependencies( key, item );
                 this.OnItemRemoved( key, CreateRemovalReason( reason ), this.Id );
             }
@@ -168,22 +182,29 @@ namespace Metalama.Patterns.Caching.Backends
         private void AddDependencies( string key, IImmutableList<string> dependencies )
         {
             if ( dependencies == null || dependencies.Count <= 0 )
-                return;
-
-            foreach ( string dependency in dependencies )
             {
-                string dependencyKey = GetDependencyKey( dependency );
+                return;
+            }
+
+            foreach ( var dependency in dependencies )
+            {
+                var dependencyKey = GetDependencyKey( dependency );
 
                 HashSet<string> backwardDependencies = (HashSet<string>) this.cache.Get( dependencyKey );
+
                 if ( backwardDependencies == null )
                 {
-                    HashSet<string> newHashSet = new HashSet<string>();
-                    backwardDependencies = this.cache.GetOrCreate( dependencyKey, ( createdEntry ) =>
-                                                                                                   {
-                                                                                                       createdEntry.Priority = CacheItemPriority.NeverRemove;
-                                                                                                       createdEntry.Size = 0;
-                                                                                                       return newHashSet;
-                                                                                                   } );
+                    HashSet<string> newHashSet = new();
+
+                    backwardDependencies = this.cache.GetOrCreate(
+                        dependencyKey,
+                        ( createdEntry ) =>
+                        {
+                            createdEntry.Priority = CacheItemPriority.NeverRemove;
+                            createdEntry.Size = 0;
+
+                            return newHashSet;
+                        } );
                 }
 
                 lock ( backwardDependencies )
@@ -191,12 +212,15 @@ namespace Metalama.Patterns.Caching.Backends
                     backwardDependencies.Add( key );
 
                     // The invalidation callback may have removed the key.
-                    this.cache.GetOrCreate( dependencyKey, ( createdEntry ) =>
-                                                           {
-                                                               createdEntry.Priority = CacheItemPriority.NeverRemove;
-                                                               createdEntry.Size = 0;
-                                                               return backwardDependencies;
-                                                           } );
+                    this.cache.GetOrCreate(
+                        dependencyKey,
+                        ( createdEntry ) =>
+                        {
+                            createdEntry.Priority = CacheItemPriority.NeverRemove;
+                            createdEntry.Size = 0;
+
+                            return backwardDependencies;
+                        } );
                 }
             }
         }
@@ -204,9 +228,9 @@ namespace Metalama.Patterns.Caching.Backends
         /// <inheritdoc />
         protected override void SetItemCore( string key, PSCacheItem item )
         {
-            string itemKey = GetItemKey( key );
-            bool lockTaken = false;
-            MemoryCacheValue previousValue = (MemoryCacheValue) this.cache.Get( itemKey );
+            var itemKey = GetItemKey( key );
+            var lockTaken = false;
+            var previousValue = (MemoryCacheValue) this.cache.Get( itemKey );
 
             try
             {
@@ -221,9 +245,10 @@ namespace Metalama.Patterns.Caching.Backends
                     this.AddDependencies( key, item.Dependencies );
                 }
 
-                this.cache.Set( itemKey, new MemoryCacheValue( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ),
-                                this.CreatePolicy( item ) );
-
+                this.cache.Set(
+                    itemKey,
+                    new MemoryCacheValue( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ),
+                    this.CreatePolicy( item ) );
             }
             finally
             {
@@ -237,7 +262,7 @@ namespace Metalama.Patterns.Caching.Backends
         /// <inheritdoc />
         protected override bool ContainsItemCore( string key )
         {
-            return this.cache.Get( GetItemKey( key )) != null;
+            return this.cache.Get( GetItemKey( key ) ) != null;
         }
 
         /// <inheritdoc />  
@@ -246,18 +271,16 @@ namespace Metalama.Patterns.Caching.Backends
             return (CacheValue) this.cache.Get( GetItemKey( key ) );
         }
 
-
-
         /// <inheritdoc />
         protected override void InvalidateDependencyCore( string key )
         {
-            HashSet<string> items = (HashSet<string>) this.cache.Get(  GetDependencyKey( key ) );
+            HashSet<string> items = (HashSet<string>) this.cache.Get( GetDependencyKey( key ) );
 
             if ( items != null )
             {
                 lock ( items )
                 {
-                    foreach ( string item in items.ToList() )
+                    foreach ( var item in items.ToList() )
                     {
                         if ( this.RemoveItemImpl( item ) )
                         {
@@ -267,9 +290,7 @@ namespace Metalama.Patterns.Caching.Backends
 
                     // A side effect of calling RemoveItems is to remove the dependency entry so
                     // we don't have to do it a second time.
-
                 }
-
             }
 
             this.OnDependencyInvalidated( key, this.Id );
@@ -277,12 +298,14 @@ namespace Metalama.Patterns.Caching.Backends
 
         internal bool RemoveItemImpl( string key )
         {
-            string itemKey = GetItemKey( key );
+            var itemKey = GetItemKey( key );
 
-            MemoryCacheValue cacheValue = (MemoryCacheValue) this.cache.Get( itemKey );
+            var cacheValue = (MemoryCacheValue) this.cache.Get( itemKey );
 
             if ( cacheValue == null )
+            {
                 return false;
+            }
 
             lock ( cacheValue.Sync )
             {
@@ -291,28 +314,32 @@ namespace Metalama.Patterns.Caching.Backends
             }
 
             return true;
-
         }
 
         private void CleanDependencies( string key, CacheValue cacheValue )
         {
             if ( cacheValue.Dependencies == null )
-                return;
-
-            foreach ( string dependency in cacheValue.Dependencies )
             {
-                string dependencyKey = GetDependencyKey( dependency );
+                return;
+            }
+
+            foreach ( var dependency in cacheValue.Dependencies )
+            {
+                var dependencyKey = GetDependencyKey( dependency );
                 HashSet<string> backwardDependencies = (HashSet<string>) this.cache.Get( dependencyKey );
 
                 if ( backwardDependencies == null )
+                {
                     continue;
+                }
 
                 lock ( backwardDependencies )
                 {
                     backwardDependencies.Remove( key );
+
                     if ( backwardDependencies.Count == 0 )
                     {
-                        this.cache.Remove( dependencyKey);
+                        this.cache.Remove( dependencyKey );
                     }
                 }
             }
@@ -324,7 +351,6 @@ namespace Metalama.Patterns.Caching.Backends
             return this.cache.Get( GetDependencyKey( key ) ) != null;
         }
 
-
         /// <inheritdoc />
         protected override void ClearCore()
         {
@@ -334,7 +360,7 @@ namespace Metalama.Patterns.Caching.Backends
             }
             else
             {
-                throw new NotSupportedException("IMemoryCache implementations other than MemoryCache don't support clearing.");
+                throw new NotSupportedException( "IMemoryCache implementations other than MemoryCache don't support clearing." );
             }
         }
 
@@ -350,7 +376,7 @@ namespace Metalama.Patterns.Caching.Backends
         /// <inheritdoc />
         protected override CachingBackendFeatures CreateFeatures()
         {
-            return new Features(this.cache is MemoryCache);
+            return new Features( this.cache is MemoryCache );
         }
 
         private class Features : CachingBackendFeatures
@@ -359,6 +385,7 @@ namespace Metalama.Patterns.Caching.Backends
             {
                 this.Clear = supportsClear;
             }
+
             public override bool Clear { get; }
         }
     }

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Patterns.Caching.Serializers
 {
@@ -7,7 +6,7 @@ namespace Metalama.Patterns.Caching.Serializers
     /// An implementation of <see cref="ISerializer"/> that uses the <see cref="PortableFormatter"/>
     /// (for classes annotated with <see cref="PSerializableAttribute"/>).
     /// </summary>
-    [Obsolete("Porting TODO", true)]
+    [Obsolete( "Porting TODO", true )]
     public sealed class PortableSerializer : ISerializer
     {
 #if TODO

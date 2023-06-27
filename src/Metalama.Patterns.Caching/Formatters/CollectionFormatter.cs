@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
 
@@ -12,9 +11,7 @@ namespace Metalama.Patterns.Caching.Formatters
         /// to access formatters for other types.
         /// </summary>
         /// <param name="repository"></param>
-        public CollectionFormatter( IFormatterRepository repository ) : base( repository )
-        {
-        }
+        public CollectionFormatter( IFormatterRepository repository ) : base( repository ) { }
 
         /// <inheritdoc />
         public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
@@ -22,14 +19,15 @@ namespace Metalama.Patterns.Caching.Formatters
             if ( value == null )
             {
                 stringBuilder.Append( 'n', 'u', 'l', 'l' );
+
                 return;
             }
 
             IFormatter<T> formatter = this.Repository.Get<T>();
 
-            bool first = true;
+            var first = true;
 
-            foreach ( T item in value )
+            foreach ( var item in value )
             {
                 if ( first )
                 {

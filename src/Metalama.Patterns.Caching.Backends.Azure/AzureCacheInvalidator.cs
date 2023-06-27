@@ -1,8 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if NETFRAMEWORK
-
 using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
@@ -94,7 +92,8 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         private void InitCommon()
         {
-            this.subscription = SubscriptionClient.CreateFromConnectionString( this.options.ConnectionString, this.topic.Path, this.subscriptionName, ReceiveMode.ReceiveAndDelete );
+            this.subscription =
+ SubscriptionClient.CreateFromConnectionString( this.options.ConnectionString, this.topic.Path, this.subscriptionName, ReceiveMode.ReceiveAndDelete );
 
             this.processMessageTask = Task.Run(this.ProcessMessages);
         }

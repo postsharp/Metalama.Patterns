@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Collections.Concurrent;
 
@@ -12,23 +11,24 @@ namespace Metalama.Patterns.Caching.Locking
     /// </summary>
     public sealed class LocalLockManager : ILockManager
     {
-        private readonly ConcurrentDictionary<string, Lock> locks = new ConcurrentDictionary<string, Lock>(StringComparer.OrdinalIgnoreCase);
-     
+        private readonly ConcurrentDictionary<string, Lock> locks = new( StringComparer.OrdinalIgnoreCase );
+
         /// <inheritdoc />
-        public ILockHandle GetLock(string key)
+        public ILockHandle GetLock( string key )
         {
-            Lock @lock = this.locks.AddOrUpdate( key, k => new Lock(this, k), ( k, l ) =>  l.AddReference());
+            var @lock = this.locks.AddOrUpdate( key, k => new Lock( this, k ), ( k, l ) => l.AddReference() );
 #if DEBUG
             if ( @lock.References <= 0 )
+            {
                 throw new MetalamaPatternsCachingAssertionFailedException();
+            }
 #endif
             return new LockHandle( @lock );
         }
 
-
-        class LockHandle : ILockHandle
+        private class LockHandle : ILockHandle
         {
-            private static readonly Task doneTask = Task.FromResult(true);
+            private static readonly Task doneTask = Task.FromResult( true );
 
             private readonly Lock @lock;
             private bool disposed;
@@ -41,15 +41,25 @@ namespace Metalama.Patterns.Caching.Locking
 
             public bool Acquire( TimeSpan timeout, CancellationToken cancellationToken )
             {
-                if ( this.acquired ) throw new InvalidOperationException();
+                if ( this.acquired )
+                {
+                    throw new InvalidOperationException();
+                }
+
                 this.acquired = this.@lock.Wait( timeout, cancellationToken );
+
                 return this.acquired;
             }
 
             public async Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken )
             {
-                if (this.acquired) throw new InvalidOperationException();
+                if ( this.acquired )
+                {
+                    throw new InvalidOperationException();
+                }
+
                 this.acquired = await this.@lock.WaitAsync( timeout, cancellationToken );
+
                 return this.acquired;
             }
 
@@ -65,13 +75,16 @@ namespace Metalama.Patterns.Caching.Locking
             public Task ReleaseAsync()
             {
                 this.Release();
+
                 return doneTask;
             }
 
             public void Dispose()
             {
                 if ( this.acquired )
-                    throw new InvalidOperationException("The lock is still acquired.");
+                {
+                    throw new InvalidOperationException( "The lock is still acquired." );
+                }
 
                 if ( !this.disposed )
                 {
@@ -90,19 +103,15 @@ namespace Metalama.Patterns.Caching.Locking
             ~LockHandle()
 
             {
-
-                throw new MetalamaPatternsCachingAssertionFailedException("The Dispose method has not been invoked.");
-
+                throw new MetalamaPatternsCachingAssertionFailedException( "The Dispose method has not been invoked." );
             }
 #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
 #pragma warning restore CA1821 // Remove empty Finalizers
 #endif
         }
-  
-        
-        class Lock : SemaphoreSlim
+
+        private class Lock : SemaphoreSlim
         {
-          
             private readonly LocalLockManager parent;
             private readonly string key;
 
@@ -113,8 +122,8 @@ namespace Metalama.Patterns.Caching.Locking
 #pragma warning disable IDE0044 // Add readonly modifier (this is a mutable struct type)
             private SpinLock spinLock;
 #pragma warning restore IDE0044 // Add readonly modifier
-            
-            public Lock( LocalLockManager parent, string key ) : base(1)
+
+            public Lock( LocalLockManager parent, string key ) : base( 1 )
             {
                 this.parent = parent;
                 this.key = key;
@@ -122,7 +131,7 @@ namespace Metalama.Patterns.Caching.Locking
 
             public Lock AddReference()
             {
-                bool lockTaken = false;
+                var lockTaken = false;
 
                 try
                 {
@@ -133,7 +142,7 @@ namespace Metalama.Patterns.Caching.Locking
                 {
                     if ( lockTaken )
                     {
-                        this.spinLock.Exit(true);
+                        this.spinLock.Exit( true );
                     }
                 }
 
@@ -142,20 +151,23 @@ namespace Metalama.Patterns.Caching.Locking
 
             public void RemoveReference()
             {
-                bool lockTaken = false;
+                var lockTaken = false;
 
                 try
                 {
                     this.spinLock.Enter( ref lockTaken );
 
                     this.References--;
+
                     if ( this.References == 0 )
                     {
                         Lock removedLock;
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                        if ( !this.parent.locks.TryRemove( this.key, out removedLock ) || removedLock != this)
+                        if ( !this.parent.locks.TryRemove( this.key, out removedLock ) || removedLock != this )
 #pragma warning restore CA2000 // Dispose objects before losing scope
+                        {
                             throw new MetalamaPatternsCachingAssertionFailedException( "Data race." );
+                        }
                     }
                 }
                 finally
@@ -167,7 +179,5 @@ namespace Metalama.Patterns.Caching.Locking
                 }
             }
         }
-
-      
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if NETSTANDARD || NETCOREAPP
 using Metalama.Patterns.Caching.Implementation;
@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// Gets or sets the connection string for the Azure Service Bus topic. The connection string must include the topic name.
         /// </summary>
         public string ConnectionString { get; }
-        
+
         /// <summary>
         /// Gets the client ID. See the constructor for details.
         /// </summary>
@@ -74,8 +74,15 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <param name="namespaceName">Namespace of your Azure Service Bus instance.</param>
         /// <param name="topicName">Topic of an Azure Service Bus instance; invalidation messages will be passed via this topic.</param>
         /// <param name="azureSubscriptionId">Unique GUID for your Azure subscription. This is account-wide.</param>
-        public AzureCacheInvalidatorOptions2( string connectionString, string clientId, string clientSecret, string tenantId,
-                                              string resourceGroupName, string namespaceName, string topicName, string azureSubscriptionId )
+        public AzureCacheInvalidatorOptions2(
+            string connectionString,
+            string clientId,
+            string clientSecret,
+            string tenantId,
+            string resourceGroupName,
+            string namespaceName,
+            string topicName,
+            string azureSubscriptionId )
         {
             this.ClientId = clientId;
             this.ClientSecret = clientSecret;

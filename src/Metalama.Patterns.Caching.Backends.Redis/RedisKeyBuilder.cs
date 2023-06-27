@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using StackExchange.Redis;
 using System.Globalization;
@@ -19,42 +18,47 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
         public string KeyPrefix { get; private set; }
 
-        public RedisKeyBuilder(IDatabase database, RedisCachingBackendConfiguration configuration)
+        public RedisKeyBuilder( IDatabase database, RedisCachingBackendConfiguration configuration )
         {
             this.KeyPrefix = configuration?.KeyPrefix ?? "_";
             this.HearbeatKey = this.KeyPrefix + ":" + GarbageCollectionPrefix + ":heartbeat";
             this.EventsChannel = this.KeyPrefix + ":events";
-            this.NotificationChannel = string.Format(CultureInfo.InvariantCulture, "__keyspace@{0}__:{1}*", database.Database, this.KeyPrefix );
+            this.NotificationChannel = string.Format( CultureInfo.InvariantCulture, "__keyspace@{0}__:{1}*", database.Database, this.KeyPrefix );
         }
 
-        public RedisKey GetDependencyKey(string dependency)
+        public RedisKey GetDependencyKey( string dependency )
         {
             return this.KeyPrefix + ":" + DependencyKindPrefix + ":" + dependency;
         }
 
-        public RedisKey GetValueKey(string item)
+        public RedisKey GetValueKey( string item )
         {
             return this.KeyPrefix + ":" + ValueKindPrefix + ":" + item;
         }
 
-        public RedisKey GetDependenciesKey(string item)
+        public RedisKey GetDependenciesKey( string item )
         {
             return this.KeyPrefix + ":" + DependenciesKindPrefix + ":" + item;
         }
 
-        public bool TryParseKeyspaceNotification(string channelName, out string keyKind, out string itemKey)
+        public bool TryParseKeyspaceNotification( string channelName, out string keyKind, out string itemKey )
         {
             keyKind = null;
             itemKey = null;
 
-            StringTokenizer tokenizer = new StringTokenizer(channelName);
+            var tokenizer = new StringTokenizer( channelName );
 
-            if (tokenizer.GetNext() == null)
+            if ( tokenizer.GetNext() == null )
+            {
                 return false;
+            }
 
-            string prefix = tokenizer.GetNext();
-            if (prefix != this.KeyPrefix)
+            var prefix = tokenizer.GetNext();
+
+            if ( prefix != this.KeyPrefix )
+            {
                 return false;
+            }
 
             keyKind = tokenizer.GetNext();
             itemKey = tokenizer.GetRest();

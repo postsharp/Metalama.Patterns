@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
 
@@ -13,13 +12,13 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <summary>
         /// Name of the Redis channel to use to exchange invalidation messages. The default value is <c>RedisCacheInvalidator</c>.
         /// </summary>
-        public string ChannelName { get; set; } = nameof( RedisCacheInvalidator );
+        public string ChannelName { get; set; } = nameof(RedisCacheInvalidator);
 
         /// <summary>
         /// Determines whether disposing the <see cref="RedisCacheInvalidator"/> also disposes the Redis connection. The default value is <c>false</c>.
         /// </summary>
         public bool OwnsConnection { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the time that the Redis invalidator will wait for a Redis connection.
         /// (When you create a new Redis invalidator, if it doesn't connect to a Redis server in this timeout, a <see cref="TimeoutException"/> is thrown.)

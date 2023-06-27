@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Patterns.Caching.Implementation
 {
@@ -11,7 +10,9 @@ namespace Metalama.Patterns.Caching.Implementation
         internal CacheItemRemovedEventArgs( string key, CacheItemRemovedReason removedReason, Guid sourceId )
         {
             if ( key == null )
-                throw new ArgumentNullException( nameof( key ) );
+            {
+                throw new ArgumentNullException( nameof(key) );
+            }
 
             this.Key = key;
             this.RemovedReason = removedReason;
@@ -21,19 +22,17 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <summary>
         /// Gets the key of the removed cached item.
         /// </summary>
-        public string Key { get;  }
+        public string Key { get; }
 
         /// <summary>
         /// Gets the reason of the removal.
         /// </summary>
-        public CacheItemRemovedReason RemovedReason { get;  }
+        public CacheItemRemovedReason RemovedReason { get; }
 
         /// <summary>
         /// Gets the <see cref="Guid"/> of the <see cref="CachingBackend"/> that caused the removal,
         /// or <see cref="Guid.Empty"/> if it cannot be determined or does not apply.
         /// </summary>
-        public Guid SourceId { get;  }
+        public Guid SourceId { get; }
     }
-
-
 }

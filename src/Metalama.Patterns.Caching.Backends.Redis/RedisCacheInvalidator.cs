@@ -1,10 +1,10 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis
 {
@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
     /// </summary>
     public class RedisCacheInvalidator : CacheInvalidator
     {
-        readonly bool ownsConnection;
+        private readonly bool ownsConnection;
         private readonly RedisChannel channel;
         private readonly TimeSpan connectionTimeout;
 
@@ -25,8 +25,10 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// </summary>
         public IConnectionMultiplexer Connection { get; }
 
-        private RedisCacheInvalidator( CachingBackend underlyingBackend, IConnectionMultiplexer connection,
-                                       RedisCacheInvalidatorOptions options ) : base( underlyingBackend, options )
+        private RedisCacheInvalidator(
+            CachingBackend underlyingBackend,
+            IConnectionMultiplexer connection,
+            RedisCacheInvalidatorOptions options ) : base( underlyingBackend, options )
         {
             this.Connection = connection;
             this.ownsConnection = options.OwnsConnection;
@@ -36,17 +38,26 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
         private void Init()
         {
-            this.NotificationQueue = RedisNotificationQueue.Create( this.ToString(), this.Connection, ImmutableArray.Create( this.channel ), this.HandleMessage,
-                this.connectionTimeout);
+            this.NotificationQueue = RedisNotificationQueue.Create(
+                this.ToString(),
+                this.Connection,
+                ImmutableArray.Create( this.channel ),
+                this.HandleMessage,
+                this.connectionTimeout );
         }
 
-        private async Task<RedisCacheInvalidator> InitAsync(CancellationToken cancellationToken)
+        private async Task<RedisCacheInvalidator> InitAsync( CancellationToken cancellationToken )
         {
-            this.NotificationQueue = await RedisNotificationQueue.CreateAsync( this.ToString(), this.Connection, ImmutableArray.Create( this.channel ), this.HandleMessage, 
-                                                                               this.connectionTimeout, cancellationToken  );
+            this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
+                this.ToString(),
+                this.Connection,
+                ImmutableArray.Create( this.channel ),
+                this.HandleMessage,
+                this.connectionTimeout,
+                cancellationToken );
+
             return this;
         }
-
 
         /// <summary>
         /// Creates a new <see cref="RedisCacheInvalidator"/>.
@@ -55,11 +66,15 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="connection">A Redis connection.</param>
         /// <param name="options">Options.</param>
         /// <returns>A new <see cref="RedisCacheInvalidator"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static RedisCacheInvalidator Create( [Required] CachingBackend backend, [Required] IConnectionMultiplexer connection, [Required] RedisCacheInvalidatorOptions options )
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        public static RedisCacheInvalidator Create(
+            [Required] CachingBackend backend,
+            [Required] IConnectionMultiplexer connection,
+            [Required] RedisCacheInvalidatorOptions options )
         {
-            RedisCacheInvalidator invalidator = new RedisCacheInvalidator( backend, connection, options );
+            var invalidator = new RedisCacheInvalidator( backend, connection, options );
             invalidator.Init();
+
             return invalidator;
         }
 
@@ -71,11 +86,16 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         /// <param name="options">Options.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/> returning a new <see cref="RedisCacheInvalidator"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static Task<RedisCacheInvalidator> CreateAsync([Required] CachingBackend backend, [Required] IConnectionMultiplexer connection, [Required] RedisCacheInvalidatorOptions options, CancellationToken cancellationToken = default(CancellationToken) )
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        public static Task<RedisCacheInvalidator> CreateAsync(
+            [Required] CachingBackend backend,
+            [Required] IConnectionMultiplexer connection,
+            [Required] RedisCacheInvalidatorOptions options,
+            CancellationToken cancellationToken = default )
         {
-            RedisCacheInvalidator invalidator = new RedisCacheInvalidator( backend, connection, options );
-            return invalidator.InitAsync(cancellationToken);
+            var invalidator = new RedisCacheInvalidator( backend, connection, options );
+
+            return invalidator.InitAsync( cancellationToken );
         }
 
         private void HandleMessage( RedisNotification notification )
@@ -90,9 +110,9 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         }
 
         /// <inheritdoc />
-        protected override void DisposeCore(bool disposing)
+        protected override void DisposeCore( bool disposing )
         {
-            base.DisposeCore(disposing);
+            base.DisposeCore( disposing );
 
             this.NotificationQueue.Dispose();
 
@@ -103,11 +123,10 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             }
         }
 
-
         /// <inheritdoc />
-        protected override async Task DisposeAsyncCore(CancellationToken cancellationToken)
+        protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
         {
-            await base.DisposeAsyncCore(cancellationToken);
+            await base.DisposeAsyncCore( cancellationToken );
 
             await this.NotificationQueue.DisposeAsync( cancellationToken );
 
@@ -117,6 +136,5 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                 this.Connection.Dispose();
             }
         }
-
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if NETSTANDARD || NETCOREAPP
 
@@ -23,19 +23,18 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     public class AzureCacheInvalidator2 : CacheInvalidator
     {
         private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching )
-                                                                   .GetLogSource( typeof(AzureCacheInvalidator2) );
+            .GetLogSource( typeof(AzureCacheInvalidator2) );
 
         private string subscriptionName;
         private readonly TopicClient topic;
         private SubscriptionClient subscription;
         private readonly ServiceBusConnectionStringBuilder connectionStringBuilder;
 
-        private AzureCacheInvalidator2( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions2 options ) : base(underlyingBackend, options)
+        private AzureCacheInvalidator2( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions2 options ) : base( underlyingBackend, options )
         {
-            this.connectionStringBuilder = new ServiceBusConnectionStringBuilder(options.ConnectionString);
+            this.connectionStringBuilder = new ServiceBusConnectionStringBuilder( options.ConnectionString );
             this.topic = new TopicClient( this.connectionStringBuilder );
         }
-
 
         /// <summary>
         /// Asynchronously creates a new <see cref="AzureCacheInvalidator2"/>.
@@ -43,24 +42,27 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator2"/>.</param>
         /// <param name="options">Options.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator2"/>.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static async Task<AzureCacheInvalidator2> CreateAsync([Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions2 options )
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
+        public static async Task<AzureCacheInvalidator2> CreateAsync( [Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions2 options )
         {
-            AzureCacheInvalidator2 invalidator = new AzureCacheInvalidator2( backend, options );
+            var invalidator = new AzureCacheInvalidator2( backend, options );
             await invalidator.Init( options );
+
             return invalidator;
         }
+
         /// <summary>
         /// Creates a new <see cref="AzureCacheInvalidator2"/> and blocks until a subscription is established.
         /// </summary>
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator2"/>.</param>
         /// <param name="options">Options.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator2"/>.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
         public static AzureCacheInvalidator2 Create( [Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions2 options )
         {
-            AzureCacheInvalidator2 invalidator = new AzureCacheInvalidator2( backend, options );
-            invalidator.Init(options).Wait();
+            var invalidator = new AzureCacheInvalidator2( backend, options );
+            invalidator.Init( options ).Wait();
+
             return invalidator;
         }
 
@@ -74,13 +76,15 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             {
                 this.subscriptionName = options.SubscriptionName;
             }
+
             this.subscription = new SubscriptionClient( this.connectionStringBuilder, this.subscriptionName, ReceiveMode.ReceiveAndDelete );
             this.subscription.RegisterMessageHandler( this.ProcessSingleMessage, this.ProcessSingleException );
         }
 
         private Task ProcessSingleException( ExceptionReceivedEventArgs arg )
         {
-            logger.Error.Write( FormattedMessageBuilder.Formatted(  "Exception coming from Azure Service bus." ), arg.Exception );
+            logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception coming from Azure Service bus." ), arg.Exception );
+
             return Task.CompletedTask;
         }
 
@@ -88,38 +92,34 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         {
             try
             {
-                string value = Encoding.UTF8.GetString( arg1.Body );
+                var value = Encoding.UTF8.GetString( arg1.Body );
                 this.OnMessageReceived( value );
             }
-            catch ( OperationCanceledException )
-            {
-            }
+            catch ( OperationCanceledException ) { }
 #pragma warning disable CA1031 // Do not catch general exception types
-            catch ( Exception e)
+            catch ( Exception e )
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                logger.Error.Write( FormattedMessageBuilder.Formatted(  "Exception while processing Azure Service Bus message." ), e );
+                logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
             }
+
             return Task.CompletedTask;
         }
 
-     
         /// <inheritdoc />
-        [SuppressMessage("Microsoft.Reliability", "CA2000")] // BrokeredMessage should not be disposed in this method.
+        [SuppressMessage( "Microsoft.Reliability", "CA2000" )] // BrokeredMessage should not be disposed in this method.
         protected override Task SendMessageAsync( string message, CancellationToken cancellationToken )
         {
-            Message azureMessage = new Message(Encoding.UTF8.GetBytes(message))
-                                   {
-                                       ContentType = "text/plain",
-                                       Label = "InvalidationMessage",
-                                       TimeToLive = TimeSpan.FromMinutes(5)
-                                   };
+            var azureMessage = new Message( Encoding.UTF8.GetBytes( message ) )
+            {
+                ContentType = "text/plain", Label = "InvalidationMessage", TimeToLive = TimeSpan.FromMinutes( 5 )
+            };
+
             return this.topic.SendAsync( azureMessage );
         }
 
-
         /// <inheritdoc />
-        protected override void DisposeCore(bool disposing)
+        protected override void DisposeCore( bool disposing )
         {
             this.subscription.CloseAsync();
             this.topic.CloseAsync();
@@ -135,75 +135,82 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         {
             await this.subscription.CloseAsync();
             await this.topic.CloseAsync();
-            GC.SuppressFinalize(this);
+            GC.SuppressFinalize( this );
         }
 
         /// <summary>
         /// Destructor.
         /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1063")]
+        [SuppressMessage( "Microsoft.Design", "CA1063" )]
         ~AzureCacheInvalidator2()
         {
-           this.DisposeCore( false );
+            this.DisposeCore( false );
         }
 
-		private static async Task<string> CreateSubscription( AzureCacheInvalidatorOptions2 options )
-		{
-			try
+        private static async Task<string> CreateSubscription( AzureCacheInvalidatorOptions2 options )
+        {
+            try
             {
-                string subscriptionId = Guid.NewGuid().ToString();
+                var subscriptionId = Guid.NewGuid().ToString();
 
-				string token = await GetToken(options.TenantId, options.ClientId, options.ClientSecret, options.AzureLoginAuthority);
+                var token = await GetToken( options.TenantId, options.ClientId, options.ClientSecret, options.AzureLoginAuthority );
 
-				TokenCredentials credentials = new TokenCredentials(token);
-                using ( ServiceBusManagementClient sbClient = new ServiceBusManagementClient( credentials ) { SubscriptionId = options.AzureSubscriptionId } )
+                var credentials = new TokenCredentials( token );
+
+                using ( var sbClient = new ServiceBusManagementClient( credentials ) { SubscriptionId = options.AzureSubscriptionId } )
                 {
-                    SBSubscription subscriptionParams = new SBSubscription
-                                                        {
-                                                            MaxDeliveryCount = 10,
-                                                            AutoDeleteOnIdle = TimeSpan.FromMinutes( 6 )
-                                                        };
+                    var subscriptionParams = new SBSubscription { MaxDeliveryCount = 10, AutoDeleteOnIdle = TimeSpan.FromMinutes( 6 ) };
 
-                    await sbClient.Subscriptions.CreateOrUpdateAsync(options.ResourceGroupName, options.NamespaceName, options.TopicName, subscriptionId, subscriptionParams);
+                    await sbClient.Subscriptions.CreateOrUpdateAsync(
+                        options.ResourceGroupName,
+                        options.NamespaceName,
+                        options.TopicName,
+                        subscriptionId,
+                        subscriptionParams );
+
                     return subscriptionId;
                 }
             }
-			catch (Exception e)
-			{
-                logger.Error.Write( FormattedMessageBuilder.Formatted(  "Exception while processing Azure Service Bus subscription." ), e );
+            catch ( Exception e )
+            {
+                logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
+
                 throw;
             }
-		}
-        private static async Task<string> GetToken([Required] string tenantId, [Required] string clientId, [Required] string clientSecret,
-                                                   [Required] string loginAuthority)
+        }
+
+        private static async Task<string> GetToken(
+            [Required] string tenantId,
+            [Required] string clientId,
+            [Required] string clientSecret,
+            [Required] string loginAuthority )
         {
             try
             {
                 // Check to see if the token has expired before requesting one.
                 // We will go ahead and request a new one if we are within 2 minutes of the token expiring.
-               
-                AuthenticationContext context = new AuthenticationContext($"{loginAuthority}{tenantId}");
 
-                AuthenticationResult result = await context.AcquireTokenAsync(
+                var context = new AuthenticationContext( $"{loginAuthority}{tenantId}" );
+
+                var result = await context.AcquireTokenAsync(
                     "https://management.core.windows.net/",
-                    new ClientCredential(clientId, clientSecret)
-                );
+                    new ClientCredential( clientId, clientSecret ) );
 
                 // If the token isn't a valid string, throw an error.
-                if (string.IsNullOrEmpty(result.AccessToken))
+                if ( string.IsNullOrEmpty( result.AccessToken ) )
                 {
-                    throw new Exception("Token result is empty!");
+                    throw new Exception( "Token result is empty!" );
                 }
 
                 return result.AccessToken;
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
-                logger.Error.Write( FormattedMessageBuilder.Formatted(  "Could not create an Azure Service Bus token." ), e );
+                logger.Error.Write( FormattedMessageBuilder.Formatted( "Could not create an Azure Service Bus token." ), e );
+
                 throw;
             }
         }
-
     }
 }
 #endif

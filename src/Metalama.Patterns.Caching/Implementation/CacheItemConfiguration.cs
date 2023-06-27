@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Patterns.Caching.Implementation
 {
@@ -30,8 +29,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <inheritdoc />
         public bool? IgnoreThisParameter { get; set; }
 
-
-        internal void ApplyFallback(ICacheItemConfiguration fallback )
+        internal void ApplyFallback( ICacheItemConfiguration fallback )
         {
             if ( this.AutoReload == null )
             {
@@ -71,9 +69,7 @@ namespace Metalama.Patterns.Caching.Implementation
 
         internal CacheItemConfiguration Clone()
         {
-            return (CacheItemConfiguration)this.MemberwiseClone();
+            return (CacheItemConfiguration) this.MemberwiseClone();
         }
-
-       
     }
 }

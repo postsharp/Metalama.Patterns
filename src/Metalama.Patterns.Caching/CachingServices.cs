@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
@@ -12,7 +11,7 @@ namespace Metalama.Patterns.Caching
     /// </summary>
     public static partial class CachingServices
     {
-        private static volatile CacheKeyBuilder keyBuilder = new CacheKeyBuilder();
+        private static volatile CacheKeyBuilder keyBuilder = new();
         private static volatile CachingBackend backend = new UninitializedCachingBackend();
         private static readonly LogSource defaultLogger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
 
@@ -39,24 +38,23 @@ namespace Metalama.Patterns.Caching
             set
             {
                 if ( backend == value )
+                {
                     return;
+                }
 
                 backend = value ?? new NullCachingBackend();
-
             }
         }
 
-      
         /// <summary>
         /// Gets the repository of caching profiles (<see cref="CachingProfile"/>).
         /// </summary>
-        public static CachingProfileRegistry Profiles { get; } = new CachingProfileRegistry();
+        public static CachingProfileRegistry Profiles { get; } = new();
 
         /// <summary>
         /// Gets the current caching context, so dependencies can be added.
         /// </summary>
         public static ICachingContext CurrentContext => CachingContext.Current;
-
 
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
@@ -80,7 +78,4 @@ namespace Metalama.Patterns.Caching
             return CachingContext.OpenSuspendedCacheContext();
         }
     }
-
-  
-
 }

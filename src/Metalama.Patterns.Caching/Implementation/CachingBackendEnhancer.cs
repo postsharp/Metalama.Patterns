@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Contracts;
 
@@ -23,9 +22,11 @@ namespace Metalama.Patterns.Caching.Implementation
         protected CachingBackendEnhancer( [Required] CachingBackend underlyingBackend )
         {
             this.UnderlyingBackend = underlyingBackend;
+
             if ( underlyingBackend.SupportedFeatures.Events )
             {
                 this.UnderlyingBackend.ItemRemoved += this.OnBackendItemRemoved;
+
                 if ( underlyingBackend.SupportedFeatures.Dependencies )
                 {
                     this.UnderlyingBackend.DependencyInvalidated += this.OnBackendDependencyInvalidated;
@@ -151,12 +152,12 @@ namespace Metalama.Patterns.Caching.Implementation
         }
 
         /// <inheritdoc />
-        protected override void DisposeCore(bool disposing)
+        protected override void DisposeCore( bool disposing )
         {
             // It is important to dispose 'this' before local and remote caches because we need to empty the current queue before disposing
             // the remote cache.
 
-            base.DisposeCore(disposing);
+            base.DisposeCore( disposing );
 
             this.UnderlyingBackend.ItemRemoved -= this.OnBackendItemRemoved;
             this.UnderlyingBackend.DependencyInvalidated -= this.OnBackendDependencyInvalidated;
@@ -177,6 +178,5 @@ namespace Metalama.Patterns.Caching.Implementation
 
             await this.UnderlyingBackend.DisposeAsync( cancellationToken );
         }
-
     }
 }

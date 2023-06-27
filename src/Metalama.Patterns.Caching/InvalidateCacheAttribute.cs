@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
@@ -25,7 +24,6 @@ namespace Metalama.Patterns.Caching
 #endif
     public sealed class InvalidateCacheAttribute // : MethodInterceptionAspect
     {
-       
         [PNonSerialized]
         private Type invalidatedMethodsDeclaringType;
 
@@ -57,9 +55,7 @@ namespace Metalama.Patterns.Caching
         /// <param name="methodNames">A list of names of methods to invalidate. All parameters of these methods (except those marked 
         /// with <see cref="NotCacheKeyAttribute"/>) must have a parameter of the same name and compatible type in the target
         /// method of the current <see cref="InvalidateCacheAttribute"/> aspect.</param>
-        public InvalidateCacheAttribute( params string[] methodNames ) : this( null, methodNames )
-        {
-        }
+        public InvalidateCacheAttribute( params string[] methodNames ) : this( null, methodNames ) { }
 
         /// <summary>
         /// Initializes a new <see cref="InvalidateCacheAttribute"/> that invalidates method of a different type than the
@@ -69,7 +65,6 @@ namespace Metalama.Patterns.Caching
         /// <param name="methodNames">A list of names of methods to invalidate. All parameters of these methods (except those marked 
         /// with <see cref="NotCacheKeyAttribute"/>) must have a parameter of the same name and compatible type in the target
         /// method of the current <see cref="InvalidateCacheAttribute"/> aspect.</param>
-
         public InvalidateCacheAttribute( Type declaringType, params string[] methodNames )
         {
             this.invalidatedMethodsDeclaringType = declaringType;
@@ -286,7 +281,8 @@ namespace Metalama.Patterns.Caching
         /// <exclude/>
         public override void OnInvoke( MethodInterceptionArgs args )
         {
-            using ( var activity = this.GetLogger().Default.OpenActivity( FormattedMessageBuilder.Formatted( "Processing invalidation by method {Method}", this.targetMethod ) ) )
+            using ( var activity =
+ this.GetLogger().Default.OpenActivity( FormattedMessageBuilder.Formatted( "Processing invalidation by method {Method}", this.targetMethod ) ) )
             {
                 try
                 {
@@ -313,7 +309,8 @@ namespace Metalama.Patterns.Caching
         /// <exclude/>
         public override async Task OnInvokeAsync( MethodInterceptionArgs args )
         {
-            using ( var activity = this.GetLogger().Default.OpenActivity(  FormattedMessageBuilder.Formatted( "Processing invalidation by async method {Method}", this.targetMethod ) ) )
+            using ( var activity =
+ this.GetLogger().Default.OpenActivity(  FormattedMessageBuilder.Formatted( "Processing invalidation by async method {Method}", this.targetMethod ) ) )
             {
                 try
                 {

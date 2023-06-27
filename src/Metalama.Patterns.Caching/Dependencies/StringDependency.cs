@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Contracts;
 
@@ -13,7 +12,7 @@ namespace Metalama.Patterns.Caching.Dependencies
         private readonly string key;
 
 #pragma warning disable CA1024 // Use properties where appropriate
-                              /// <inheritdoc />
+        /// <inheritdoc />
         public string GetCacheKey()
         {
             return this.key;
@@ -24,7 +23,7 @@ namespace Metalama.Patterns.Caching.Dependencies
         /// Initializes a new <see cref="StringDependency"/>.
         /// </summary>
         /// <param name="key">The cache dependency.</param>
-        public StringDependency([Required] string key)
+        public StringDependency( [Required] string key )
         {
             this.key = key;
         }
@@ -33,27 +32,28 @@ namespace Metalama.Patterns.Caching.Dependencies
         /// <param name="other">The object to compare with the current object.</param>
         /// <returns>
         /// <see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
-        public bool Equals(ICacheDependency other)
+        public bool Equals( ICacheDependency other )
         {
-            StringDependency otherObjectDependency = other as StringDependency;
-            if (otherObjectDependency == null)
+            var otherObjectDependency = other as StringDependency;
+
+            if ( otherObjectDependency == null )
             {
                 return false;
             }
 
-            return string.Equals(this.GetCacheKey(), otherObjectDependency.GetCacheKey(), StringComparison.Ordinal);
+            return string.Equals( this.GetCacheKey(), otherObjectDependency.GetCacheKey(), StringComparison.Ordinal );
         }
 
         /// <inheritdoc />
         public override bool Equals( object obj )
         {
-            return this.Equals( obj as StringDependency);
+            return this.Equals( obj as StringDependency );
         }
 
         /// <inheritdoc />  
         public override int GetHashCode()
         {
-            return StringComparer.Ordinal.GetHashCode(this.GetCacheKey());
+            return StringComparer.Ordinal.GetHashCode( this.GetCacheKey() );
         }
     }
 }

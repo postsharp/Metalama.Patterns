@@ -1,5 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching.Dependencies
 {
@@ -9,7 +10,7 @@ namespace Metalama.Patterns.Caching.Dependencies
     /// Alternatively, custom classes may implement the <see cref="Patterns.Formatters.IFormattable"/> interface or simply
     /// the <see cref="object.ToString"/> method.
     /// </summary>
-    public interface ICacheDependency 
+    public interface ICacheDependency
     {
         /// <summary>
         /// Gets a string that uniquely represents the current object.
@@ -18,7 +19,7 @@ namespace Metalama.Patterns.Caching.Dependencies
         /// <remarks>
         /// <para>The returned key should be globally unique, not just unique within the class implementing the method.</para>
         /// </remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        [SuppressMessage( "Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate" )]
         string GetCacheKey();
     }
 }

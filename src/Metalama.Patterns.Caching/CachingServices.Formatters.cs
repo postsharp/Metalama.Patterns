@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Formatters;
 using Flashtrace.Formatters;
@@ -13,13 +12,13 @@ namespace Metalama.Patterns.Caching
         /// </summary>        
         public sealed class Formatters : FormatterRepository
         {
-            public static Formatters Instance { get; } = new Formatters( CachingFormattingRole.Instance );
+            public static Formatters Instance { get; } = new( CachingFormattingRole.Instance );
 
-            private Formatters( FormattingRole role ) 
+            private Formatters( FormattingRole role )
                 : base( role )
             {
-                this.Register( typeof( IEnumerable<> ), typeof( CollectionFormatter<> ) );
+                this.Register( typeof(IEnumerable<>), typeof(CollectionFormatter<>) );
             }
-        }       
+        }
     }
 }

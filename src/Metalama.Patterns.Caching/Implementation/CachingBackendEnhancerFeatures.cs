@@ -1,11 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Contracts;
 
 namespace Metalama.Patterns.Caching.Implementation
 {
-
     /// <summary>
     /// An abstract implementation of <see cref="CachingBackendEnhancerFeatures"/> for use in implementations of <see cref="CachingBackendEnhancer"/>,
     /// where the default behavior is to return the features of the underlying <see cref="CachingBackend"/>.
@@ -41,5 +39,4 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <inheritdoc />
         public override bool ContainsDependency => this.UnderlyingBackendFeatures.ContainsDependency;
     }
-
 }

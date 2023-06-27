@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Contracts;
@@ -7,9 +6,8 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using static Flashtrace.FormattedMessageBuilder;
 
-#pragma warning disable CA1034 // Nested types should not be visible
+#pragma warning disable CA1034  // Nested types should not be visible
 #pragma warning disable IDE0008 // Use explicit type (we use var for logging)
-
 
 namespace Metalama.Patterns.Caching
 {
@@ -20,15 +18,12 @@ namespace Metalama.Patterns.Caching
         /// </summary>
         public static partial class Invalidation
         {
-            private static readonly ConcurrentDictionary<MethodInfo, int> nestedCachedMethods = new ConcurrentDictionary<MethodInfo, int>();
-
-
+            private static readonly ConcurrentDictionary<MethodInfo, int> nestedCachedMethods = new();
 
             internal static void AddedNestedCachedMethod( MethodInfo method )
             {
                 nestedCachedMethods.TryAdd( method, 0 );
             }
-
 
             /// <summary>
             /// Invalidates a cache dependency given an <see cref="object"/>, i.e. removes all cached items that are dependent on that object.
@@ -37,22 +32,26 @@ namespace Metalama.Patterns.Caching
             /// is passed, the proper overload of the method is invoked. Otherwise, <paramref name="dependency"/> is wrapped into an <see cref="ObjectDependency"/> object.</param>
             public static void Invalidate( [Required] object dependency )
             {
-                switch (dependency)
+                switch ( dependency )
                 {
                     case Delegate method:
-                        InvalidateDelegate(method);
+                        InvalidateDelegate( method );
+
                         break;
 
                     case string key:
-                        Invalidate(key);
+                        Invalidate( key );
+
                         break;
 
                     case ICacheDependency cacheDependency:
-                        Invalidate(cacheDependency);
+                        Invalidate( cacheDependency );
+
                         break;
 
                     default:
-                        Invalidate(new ObjectDependency(dependency), dependency.GetType());
+                        Invalidate( new ObjectDependency( dependency ), dependency.GetType() );
+
                         break;
                 }
             }
@@ -65,19 +64,19 @@ namespace Metalama.Patterns.Caching
             /// <returns>A <see cref="Task"/>.</returns>
             public static Task InvalidateAsync( [Required] object dependency )
             {
-                switch (dependency)
+                switch ( dependency )
                 {
                     case Delegate method:
-                        return InvalidateDelegateAsync(method);
+                        return InvalidateDelegateAsync( method );
 
                     case string key:
-                        return InvalidateAsync(key);
+                        return InvalidateAsync( key );
 
                     case ICacheDependency cacheDependency:
-                        return InvalidateAsync(cacheDependency);
+                        return InvalidateAsync( cacheDependency );
 
                     default:
-                        return InvalidateAsync(new ObjectDependency(dependency), dependency.GetType());
+                        return InvalidateAsync( new ObjectDependency( dependency ), dependency.GetType() );
                 }
             }
 
@@ -92,7 +91,8 @@ namespace Metalama.Patterns.Caching
 
             private static void Invalidate( [Required] ICacheDependency dependency, Type dependencyType )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity( Formatted("Invalidating object dependency of type {DependencyType}", dependencyType )) )
+                using ( var activity =
+                       defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
                 {
                     try
                     {
@@ -100,9 +100,10 @@ namespace Metalama.Patterns.Caching
 
                         activity.SetSuccess();
                     }
-                    catch ( Exception e)
+                    catch ( Exception e )
                     {
                         activity.SetException( e );
+
                         throw;
                     }
                 }
@@ -120,7 +121,8 @@ namespace Metalama.Patterns.Caching
 
             private static async Task InvalidateAsync( [Required] ICacheDependency dependency, Type dependencyType )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity( Formatted("Invalidating object dependency of type {DependencyType}", dependencyType )) )
+                using ( var activity =
+                       defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
                 {
                     try
                     {
@@ -128,9 +130,10 @@ namespace Metalama.Patterns.Caching
 
                         activity.SetSuccess();
                     }
-                    catch ( Exception e)
+                    catch ( Exception e )
                     {
                         activity.SetException( e );
+
                         throw;
                     }
                 }
@@ -142,7 +145,7 @@ namespace Metalama.Patterns.Caching
             /// <param name="dependencyKey"></param>
             public static void Invalidate( [Required] string dependencyKey )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity( Formatted("Invalidating string dependency" )))
+                using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "Invalidating string dependency" ) ) )
                 {
                     try
                     {
@@ -150,9 +153,10 @@ namespace Metalama.Patterns.Caching
 
                         activity.SetSuccess();
                     }
-                    catch ( Exception e)
+                    catch ( Exception e )
                     {
                         activity.SetException( e );
+
                         throw;
                     }
                 }
@@ -160,7 +164,7 @@ namespace Metalama.Patterns.Caching
 
             private static void InvalidateImpl( [Required] string dependencyKey )
             {
-                defaultLogger.Debug.EnabledOrNull?.Write( Formatted("The dependency key is {Key}.", dependencyKey ) );
+                defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
 
                 DefaultBackend.InvalidateDependency( dependencyKey );
             }
@@ -171,25 +175,25 @@ namespace Metalama.Patterns.Caching
             /// <param name="dependencyKey"></param>
             public static async Task InvalidateAsync( [Required] string dependencyKey )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity( Formatted(  "InvalidateAsync( key = {Key} )", dependencyKey ) ) )
+                using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( key = {Key} )", dependencyKey ) ) )
                 {
                     try
                     {
-                        defaultLogger.Debug.EnabledOrNull?.Write( Formatted(  "The dependency key is {Key}.", dependencyKey ));
+                        defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
 
                         await DefaultBackend.InvalidateDependencyAsync( dependencyKey );
 
                         activity.SetSuccess();
                     }
-                    catch ( Exception e)
+                    catch ( Exception e )
                     {
                         activity.SetException( e );
+
                         throw;
                     }
                 }
             }
 
-           
             /// <summary>
             /// Removes a method call result from the cache giving the <see cref="MethodInfo"/> representing the method, the instance and the arguments of the method call.
             /// </summary>
@@ -198,14 +202,13 @@ namespace Metalama.Patterns.Caching
             /// <param name="args">The method arguments.</param>
             public static void Invalidate( [Required] MethodInfo method, object instance, params object[] args )
             {
-           
-                using ( var activity = defaultLogger.Default.OpenActivity( Formatted("Invalidate( method = {Method} )", method )) )
+                using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "Invalidate( method = {Method} )", method ) ) )
                 {
                     try
                     {
-                        string key = DefaultKeyBuilder.BuildMethodKey( method, args, instance );
+                        var key = DefaultKeyBuilder.BuildMethodKey( method, args, instance );
 
-                        defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key  ));
+                        defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
                         DefaultBackend.RemoveItem( key );
 
@@ -215,16 +218,19 @@ namespace Metalama.Patterns.Caching
                         }
                         else if ( nestedCachedMethods.ContainsKey( method ) )
                         {
-                            defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
-                                                            "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
-                                          method ));
+                            defaultLogger.Debug.EnabledOrNull?.Write(
+                                Formatted(
+                                    "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
+                                    "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
+                                    method ) );
                         }
 
                         activity.SetSuccess();
                     }
-                    catch ( Exception e)
+                    catch ( Exception e )
                     {
                         activity.SetException( e );
+
                         throw;
                     }
                 }
@@ -238,13 +244,13 @@ namespace Metalama.Patterns.Caching
             /// <param name="args">The method arguments.</param>
             public static async Task InvalidateAsync( [Required] MethodInfo method, object instance, params object[] args )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity(Formatted("InvalidateAsync( method = {Method} )", method )) )
+                using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
                 {
                     try
                     {
-                        string key = DefaultKeyBuilder.BuildMethodKey( method, args, instance );
+                        var key = DefaultKeyBuilder.BuildMethodKey( method, args, instance );
 
-                        defaultLogger.Debug.EnabledOrNull?.Write( Formatted("Key=\"{Key}\".", key) );
+                        defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
                         await DefaultBackend.RemoveItemAsync( key );
 
@@ -254,16 +260,19 @@ namespace Metalama.Patterns.Caching
                         }
                         else if ( nestedCachedMethods.ContainsKey( method ) )
                         {
-                            defaultLogger.Warning.Write( Formatted(  "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
-                                                            "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
-                                          method ));
+                            defaultLogger.Warning.Write(
+                                Formatted(
+                                    "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
+                                    "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
+                                    method ) );
                         }
 
                         activity.SetSuccess();
                     }
-                    catch ( Exception e)
+                    catch ( Exception e )
                     {
                         activity.SetException( e );
+
                         throw;
                     }
                 }
@@ -279,7 +288,6 @@ namespace Metalama.Patterns.Caching
                 return InvalidateAsync( method.Method, method.Target, args );
             }
 
-
             /// <summary>
             /// Removes a method call result from the cache giving the delegate of the method. This overload is for methods with 0 parameter.
             /// </summary>
@@ -289,7 +297,6 @@ namespace Metalama.Patterns.Caching
             {
                 InvalidateDelegate( method );
             }
-
 
             /// <summary>
             /// Asynchronously removes a method call result from the cache giving the delegate of the method. This overload is for methods with 0 parameter.
@@ -302,12 +309,11 @@ namespace Metalama.Patterns.Caching
                 return InvalidateDelegateAsync( method );
             }
 
-
-
             private static CachingContext OpenRecacheContext( Delegate method, params object[] args )
             {
-                string key = DefaultKeyBuilder.BuildMethodKey( method.Method, args, method.Target );
-                return CachingContext.OpenRecacheContext(key);
+                var key = DefaultKeyBuilder.BuildMethodKey( method.Method, args, method.Target );
+
+                return CachingContext.OpenRecacheContext( key );
             }
 
             /// <summary>
@@ -318,7 +324,7 @@ namespace Metalama.Patterns.Caching
             /// <returns>The return value of <paramref name="method"/>.</returns>
             public static TReturn Recache<TReturn>( [Required] Func<TReturn> method )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity(Formatted("Recache( method = {Method} )", method.Method )) )
+                using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "Recache( method = {Method} )", method.Method ) ) )
                 {
                     try
                     {
@@ -333,9 +339,10 @@ namespace Metalama.Patterns.Caching
 
                         return result;
                     }
-                    catch ( Exception e)
+                    catch ( Exception e )
                     {
                         activity.SetException( e );
+
                         throw;
                     }
                 }
@@ -349,7 +356,7 @@ namespace Metalama.Patterns.Caching
             /// <returns>A <see cref="Task{TResult}"/> that evaluates to the return value of <paramref name="method"/>.</returns>
             public static async Task<TReturn> RecacheAsync<TReturn>( [Required] Func<Task<TReturn>> method )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity(Formatted("RecacheAsync( method = {Method} )", method.Method )) )
+                using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "RecacheAsync( method = {Method} )", method.Method ) ) )
                 {
                     try
                     {
@@ -364,15 +371,14 @@ namespace Metalama.Patterns.Caching
 
                         return result;
                     }
-                    catch ( Exception e)
+                    catch ( Exception e )
                     {
                         activity.SetException( e );
+
                         throw;
                     }
                 }
             }
-
         }
     }
-
 }

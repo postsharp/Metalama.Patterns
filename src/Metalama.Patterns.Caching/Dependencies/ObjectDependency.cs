@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Contracts;
 
@@ -19,9 +18,8 @@ namespace Metalama.Patterns.Caching.Dependencies
         /// <inheritdoc />
         public string GetCacheKey()
         {
-            return CachingServices.DefaultKeyBuilder.BuildDependencyKey(this.Object);
+            return CachingServices.DefaultKeyBuilder.BuildDependencyKey( this.Object );
         }
-
 
         /// <summary>
         /// Initializes a new <see cref="ObjectDependency"/>.
@@ -36,15 +34,15 @@ namespace Metalama.Patterns.Caching.Dependencies
         /// <param name="other">The object to compare with the current object.</param>
         /// <returns>
         /// <see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
-        public bool Equals([Required] ICacheDependency other)
+        public bool Equals( [Required] ICacheDependency other )
         {
-            if (!(other is ObjectDependency otherObjectDependency))
+            if ( !(other is ObjectDependency otherObjectDependency) )
             {
                 return false;
             }
             else
             {
-                return Equals(this.Object, otherObjectDependency.Object);
+                return Equals( this.Object, otherObjectDependency.Object );
             }
         }
 

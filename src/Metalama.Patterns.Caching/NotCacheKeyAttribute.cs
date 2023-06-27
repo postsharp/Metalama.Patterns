@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Patterns.Caching
 {
@@ -7,9 +6,6 @@ namespace Metalama.Patterns.Caching
     /// Custom attribute that, when applied to a parameter of a cached method (i.e. a method enhanced by the <see cref="CacheAttribute"/> aspect),
     /// excludes this parameter from being a part of the cache key.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class NotCacheKeyAttribute : Attribute
-    {
-        
-    }
+    [AttributeUsage( AttributeTargets.Parameter )]
+    public sealed class NotCacheKeyAttribute : Attribute { }
 }

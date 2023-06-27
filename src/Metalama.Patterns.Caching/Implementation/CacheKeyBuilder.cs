@@ -1,10 +1,10 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
 using Metalama.Patterns.Contracts;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -16,13 +16,14 @@ namespace Metalama.Patterns.Caching.Implementation
     /// </summary>
     public class CacheKeyBuilder : IDisposable
     {
-        private readonly ConcurrentDictionary<MethodInfo, CachedMethodInfo> methodInfoCache = new ConcurrentDictionary<MethodInfo, CachedMethodInfo>();
+        private readonly ConcurrentDictionary<MethodInfo, CachedMethodInfo> methodInfoCache = new();
         private readonly UnsafeStringBuilderPool stringBuilderPool;
         private readonly IFormatterRepository _formatterRepository;
+
         /// <summary>
         /// A sentinel object that means that the parameter is not a part of the cache key, and should be ignored.
         /// </summary>
-        protected object IgnoredParameterSentinel { get; } = new object();
+        protected object IgnoredParameterSentinel { get; } = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheKeyBuilder"/> class optionally specifying a
@@ -32,7 +33,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// The <see cref="IFormatterRepository"/> from which to obtain formatters, or <see langword="null"/> to
         /// use <see cref="CachingServices.Formatters.Instance"/>.
         /// </param>
-        public CacheKeyBuilder( IFormatterRepository? formatterRepository = null ) : this(2048)
+        public CacheKeyBuilder( IFormatterRepository? formatterRepository = null ) : this( 2048 )
         {
             this._formatterRepository = formatterRepository ?? CachingServices.Formatters.Instance;
         }
@@ -46,7 +47,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// The <see cref="IFormatterRepository"/> from which to obtain formatters, or <see langword="null"/> to
         /// use <see cref="CachingServices.Formatters.Instance"/>.
         /// </param>
-        public CacheKeyBuilder(int maxKeySize, IFormatterRepository? formatterRepository = null )
+        public CacheKeyBuilder( int maxKeySize, IFormatterRepository? formatterRepository = null )
         {
             this._formatterRepository = formatterRepository ?? CachingServices.Formatters.Instance;
             this.stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
@@ -56,7 +57,6 @@ namespace Metalama.Patterns.Caching.Implementation
         /// Gets the maximal number of characters in cache keys.
         /// </summary>
         public int MaxKeySize => this.stringBuilderPool.StringBuilderCapacity;
-
 
         /// <summary>
         /// Gets the <see cref="CachedMethodInfo"/> for a given <see cref="MethodInfo"/>.
@@ -75,7 +75,6 @@ namespace Metalama.Patterns.Caching.Implementation
             }
 
             return cachedMethodInfo;
-
         }
 
         private static CachedMethodInfo GetCachedMethodInfoCore( [Required] MethodInfo method )
@@ -83,15 +82,15 @@ namespace Metalama.Patterns.Caching.Implementation
             ParameterInfo[] parameterInfos = method.GetParameters();
             CachedParameterInfo[] cachedParameterInfos = new CachedParameterInfo[parameterInfos.Length];
 
-            for ( int i = 0; i < parameterInfos.Length; i++ )
+            for ( var i = 0; i < parameterInfos.Length; i++ )
             {
-                bool isIgnored = parameterInfos[i].IsDefined( typeof(NotCacheKeyAttribute) );
+                var isIgnored = parameterInfos[i].IsDefined( typeof(NotCacheKeyAttribute) );
 
                 cachedParameterInfos[i] = new CachedParameterInfo( parameterInfos[0], isIgnored );
             }
 
             // It's okay to take the build-time configuration here because IgnoreThisParameter cannot be changed at run time.
-            ICacheAspect cacheAspect = CacheAspectRepository.Get( method );
+            var cacheAspect = CacheAspectRepository.Get( method );
 
             if ( cacheAspect == null )
             {
@@ -102,10 +101,11 @@ namespace Metalama.Patterns.Caching.Implementation
 
             if ( cacheAspect == null )
             {
-                throw new MetalamaPatternsCachingAssertionFailedException( string.Format( CultureInfo.InvariantCulture, "Declaring type of '{0}' method has not been initialized.", method ) );
+                throw new MetalamaPatternsCachingAssertionFailedException(
+                    string.Format( CultureInfo.InvariantCulture, "Declaring type of '{0}' method has not been initialized.", method ) );
             }
 
-            bool isThisParameterIgnored = cacheAspect.BuildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault();
+            var isThisParameterIgnored = cacheAspect.BuildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault();
 
             return new CachedMethodInfo( method, isThisParameterIgnored, cachedParameterInfos.ToImmutableArray() );
         }
@@ -122,53 +122,64 @@ namespace Metalama.Patterns.Caching.Implementation
             ParameterInfo[] parameters = method.GetParameters();
 
             if ( parameters.Length != arguments.Count )
-                throw new ArgumentOutOfRangeException( nameof( arguments ),
-                                                       "The list must have the same number of items as the number of parameters of the method." );
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(arguments),
+                    "The list must have the same number of items as the number of parameters of the method." );
+            }
 
             if ( !method.IsStatic && instance == null )
-                throw new ArgumentNullException( nameof( instance ) );
+            {
+                throw new ArgumentNullException( nameof(instance) );
+            }
 
             if ( method.IsStatic && instance != null )
-                throw new ArgumentException( string.Format(CultureInfo.InvariantCulture, "The {0} parameter must be null when {1} is a static method.", nameof( instance ), nameof( method ) ) );
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "The {0} parameter must be null when {1} is a static method.",
+                        nameof(instance),
+                        nameof(method) ) );
+            }
 
-            CachedMethodInfo cachedMethodInfo = this.GetCachedMethodInfo( method );
+            var cachedMethodInfo = this.GetCachedMethodInfo( method );
 
             // Compute the caching key.
-            UnsafeStringBuilder stringBuilder = this.stringBuilderPool.GetInstance();
-            
+            var stringBuilder = this.stringBuilderPool.GetInstance();
 
-                this.AppendMethod( stringBuilder, method );
-                stringBuilder.Append( '(' );
+            this.AppendMethod( stringBuilder, method );
+            stringBuilder.Append( '(' );
 
-                bool addComma = false;
+            var addComma = false;
 
+            if ( !method.IsStatic && !cachedMethodInfo.IsThisParameterIgnored )
+            {
+                // We need a 'this' specifier to differentiate an instance method
+                // from a static method whose first parameter is of the declaring type.
+                stringBuilder.Append( "this=" );
+                this.AppendObject( stringBuilder, instance );
+                addComma = true;
+            }
 
-                if ( !method.IsStatic && !cachedMethodInfo.IsThisParameterIgnored )
+            for ( var i = 0; i < arguments.Count; i++ )
+            {
+                var argument = arguments[i];
+
+                if ( cachedMethodInfo.Parameters[i].IsIgnored )
                 {
-                    // We need a 'this' specifier to differentiate an instance method
-                    // from a static method whose first parameter is of the declaring type.
-                    stringBuilder.Append( "this=" );
-                    this.AppendObject( stringBuilder, instance );
-                    addComma = true;
+                    this.AppendArgument( stringBuilder, parameters[i].ParameterType, this.IgnoredParameterSentinel, ref addComma );
                 }
-
-                for ( int i = 0; i < arguments.Count; i++ )
+                else
                 {
-                    object argument = arguments[i];
-                    if ( cachedMethodInfo.Parameters[i].IsIgnored )
-                    {
-                        this.AppendArgument( stringBuilder, parameters[i].ParameterType, this.IgnoredParameterSentinel, ref addComma );
-                    }
-                    else
-                    {
-                        this.AppendArgument( stringBuilder, parameters[i].ParameterType, argument, ref addComma );
-                    }
+                    this.AppendArgument( stringBuilder, parameters[i].ParameterType, argument, ref addComma );
                 }
+            }
 
             stringBuilder.Append( ')' );
-            string cacheKey = stringBuilder.ToString();
+            var cacheKey = stringBuilder.ToString();
             this.stringBuilderPool.ReturnInstance( stringBuilder );
-            
+
             return cacheKey;
         }
 
@@ -177,15 +188,16 @@ namespace Metalama.Patterns.Caching.Implementation
         /// </summary>
         /// <param name="o">An object.</param>
         /// <returns>A dependency key that uniquely represents <paramref name="o"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o" )]
+        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
         public virtual string BuildDependencyKey( [Required] object o )
         {
-            UnsafeStringBuilder stringBuilder = this.stringBuilderPool.GetInstance();
+            var stringBuilder = this.stringBuilderPool.GetInstance();
             this.AppendObject( stringBuilder, o );
 
-            string key = stringBuilder.ToString();
+            var key = stringBuilder.ToString();
             this.stringBuilderPool.ReturnInstance( stringBuilder );
+
             return key;
         }
 
@@ -194,22 +206,28 @@ namespace Metalama.Patterns.Caching.Implementation
         /// </summary>
         /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/></param>
         /// <param name="method">A <see cref="MethodInfo"/>.</param>
-        protected virtual void AppendMethod([Required] UnsafeStringBuilder stringBuilder, [Required] MethodInfo method )
+        protected virtual void AppendMethod( [Required] UnsafeStringBuilder stringBuilder, [Required] MethodInfo method )
         {
             this.AppendType( stringBuilder, method.DeclaringType );
             stringBuilder.Append( '.' );
             stringBuilder.Append( method.Name );
 
             if ( method.IsGenericMethod )
+            {
                 this.AppendGenericArguments( stringBuilder, method.GetGenericArguments() );
+            }
         }
 
         private void AppendArgument( UnsafeStringBuilder stringBuilder, Type parameterType, object parameterValue, ref bool addComma )
         {
             if ( addComma )
+            {
                 stringBuilder.Append( ", " );
+            }
             else
+            {
                 addComma = true;
+            }
 
             this.AppendArgument( stringBuilder, parameterType, parameterValue );
         }
@@ -221,7 +239,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
         /// <param name="parameterType">The type of the parameter.</param>
         /// <param name="parameterValue">The value assigned to the parameter (can be <c>null</c>).</param>
-        protected virtual void AppendArgument([Required] UnsafeStringBuilder stringBuilder, [Required] Type parameterType, object parameterValue )
+        protected virtual void AppendArgument( [Required] UnsafeStringBuilder stringBuilder, [Required] Type parameterType, object parameterValue )
         {
             // We need to include the parameter type to avoid ambiguities between overloads of the same method.
             stringBuilder.Append( '(' );
@@ -230,9 +248,13 @@ namespace Metalama.Patterns.Caching.Implementation
             stringBuilder.Append( ' ' );
 
             if ( parameterValue == null )
+            {
                 stringBuilder.Append( "null" );
+            }
             else
+            {
                 this.AppendObject( stringBuilder, parameterValue );
+            }
         }
 
         /// <summary>
@@ -250,8 +272,8 @@ namespace Metalama.Patterns.Caching.Implementation
         /// </summary>
         /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
         /// <param name="o">An <see cref="object"/>.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o")]
-        protected virtual void AppendObject([Required] UnsafeStringBuilder stringBuilder, [Required] object o )
+        [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o" )]
+        protected virtual void AppendObject( [Required] UnsafeStringBuilder stringBuilder, [Required] object o )
         {
             if ( o == this.IgnoredParameterSentinel )
             {
@@ -259,24 +281,26 @@ namespace Metalama.Patterns.Caching.Implementation
             }
             else
             {
-                IFormatter formatter = this._formatterRepository.Get( o.GetType() );
+                var formatter = this._formatterRepository.Get( o.GetType() );
                 formatter.Write( stringBuilder, o );
             }
         }
 
-        private void AppendGenericArguments(UnsafeStringBuilder stringBuilder, Type[] genericArguments)
+        private void AppendGenericArguments( UnsafeStringBuilder stringBuilder, Type[] genericArguments )
         {
-            stringBuilder.Append('<');
+            stringBuilder.Append( '<' );
 
-            for (int i = 0; i < genericArguments.Length; i++)
+            for ( var i = 0; i < genericArguments.Length; i++ )
             {
-                if (i > 0)
-                    stringBuilder.Append(',');
+                if ( i > 0 )
+                {
+                    stringBuilder.Append( ',' );
+                }
 
-                this.AppendType(stringBuilder, genericArguments[i]);
+                this.AppendType( stringBuilder, genericArguments[i] );
             }
 
-            stringBuilder.Append('>');
+            stringBuilder.Append( '>' );
         }
 
         /// <summary>
@@ -291,7 +315,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <inheritdoc />
         public void Dispose()
         {
-            this.Dispose(true);
+            this.Dispose( true );
         }
     }
 }

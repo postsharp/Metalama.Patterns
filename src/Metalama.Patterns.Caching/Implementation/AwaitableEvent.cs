@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Collections.Concurrent;
 using System.ComponentModel;
@@ -10,9 +9,9 @@ namespace Metalama.Patterns.Caching.Implementation
 {
     // Ported from PostSharp.Patterns.Common/Threading/Primitives
     [ExplicitCrossPackageInternal]
-    internal sealed class AwaitableEvent 
+    internal sealed class AwaitableEvent
     {
-        private static readonly TimeSpan infiniteTimeSpan = TimeSpan.FromMilliseconds(-1);
+        private static readonly TimeSpan infiniteTimeSpan = TimeSpan.FromMilliseconds( -1 );
 
         // ReSharper disable InconsistentNaming
         // states of the wait handle
@@ -23,7 +22,9 @@ namespace Metalama.Patterns.Caching.Implementation
         internal const int CREATED = 0;
         internal const int WAITING = 1;
         internal const int SUCCESS = 2;
+
         internal const int TIMEOUT = 3;
+
         // ReSharper restore InconsistentNaming
 
         private readonly int resetMode;
@@ -35,9 +36,7 @@ namespace Metalama.Patterns.Caching.Implementation
         private static volatile ManualResetEventSlim threadLocalEvent;
 
         public AwaitableEvent( EventResetMode resetMode )
-            : this( resetMode, false )
-        {
-        }
+            : this( resetMode, false ) { }
 
         public AwaitableEvent( EventResetMode resetMode, bool signaled )
         {
@@ -48,13 +47,12 @@ namespace Metalama.Patterns.Caching.Implementation
             this.signalState = signaled ? SIGNALED : NOT_SIGNALED;
         }
 
-
         public bool Wait()
         {
             return this.WaitInternal( infiniteTimeSpan );
         }
 
-        public bool Wait(TimeSpan timeout)
+        public bool Wait( TimeSpan timeout )
         {
             return this.WaitInternal( timeout );
         }
@@ -64,39 +62,39 @@ namespace Metalama.Patterns.Caching.Implementation
             return this.WaitOneAsyncInternal( infiniteTimeSpan, CancellationToken.None );
         }
 
-        public Awaiter WaitAsync(TimeSpan timeout)
+        public Awaiter WaitAsync( TimeSpan timeout )
         {
             return this.WaitOneAsyncInternal( timeout, CancellationToken.None );
         }
 
-        public Awaiter WaitAsync(CancellationToken cancellationToken)
+        public Awaiter WaitAsync( CancellationToken cancellationToken )
         {
             return this.WaitOneAsyncInternal( infiniteTimeSpan, cancellationToken );
         }
 
-        public Awaiter WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
+        public Awaiter WaitAsync( TimeSpan timeout, CancellationToken cancellationToken )
         {
             return this.WaitOneAsyncInternal( timeout, cancellationToken );
         }
 
         public Awaiter<TData> WaitAsync<TData>()
         {
-            return this.WaitOneAsyncInternal<TData>(infiniteTimeSpan, CancellationToken.None);
+            return this.WaitOneAsyncInternal<TData>( infiniteTimeSpan, CancellationToken.None );
         }
 
-        public Awaiter<TData> WaitAsync<TData>(TimeSpan timeout)
+        public Awaiter<TData> WaitAsync<TData>( TimeSpan timeout )
         {
-            return this.WaitOneAsyncInternal<TData>(timeout, CancellationToken.None);
+            return this.WaitOneAsyncInternal<TData>( timeout, CancellationToken.None );
         }
 
-        public Awaiter<TData> WaitAsync<TData>(CancellationToken cancellationToken)
+        public Awaiter<TData> WaitAsync<TData>( CancellationToken cancellationToken )
         {
-            return this.WaitOneAsyncInternal<TData>(infiniteTimeSpan, cancellationToken);
+            return this.WaitOneAsyncInternal<TData>( infiniteTimeSpan, cancellationToken );
         }
 
-        public Awaiter<TData> WaitAsync<TData>(TimeSpan timeout, CancellationToken cancellationToken)
+        public Awaiter<TData> WaitAsync<TData>( TimeSpan timeout, CancellationToken cancellationToken )
         {
-            return this.WaitOneAsyncInternal<TData>(timeout, cancellationToken);
+            return this.WaitOneAsyncInternal<TData>( timeout, cancellationToken );
         }
 
         public void Set()
@@ -107,7 +105,7 @@ namespace Metalama.Patterns.Caching.Implementation
 
             ConcurrencyTestingApi.TraceEvent( "Begin Set operation." );
 
-            if (this.resetMode == (int) EventResetMode.AutoReset)
+            if ( this.resetMode == (int) EventResetMode.AutoReset )
             {
                 this.SetAutoReset();
             }
@@ -115,8 +113,8 @@ namespace Metalama.Patterns.Caching.Implementation
             {
                 this.SetManualReset();
             }
-            
-            ConcurrencyTestingApi.TraceEvent("End Set operation.");
+
+            ConcurrencyTestingApi.TraceEvent( "End Set operation." );
         }
 
         private void SetAutoReset()
@@ -129,15 +127,16 @@ namespace Metalama.Patterns.Caching.Implementation
 
                 if ( this.operations.TryDequeue( out op ) )
                 {
-                    HandleDequeuedOperation:
+                HandleDequeuedOperation:
                     ConcurrencyTestingApi.TraceEvent( "Operation dequeued." );
 
                     // note that this is not an infinite cycle - it will run at most three times (we have at most two state transitions possible)            
-                    int opState = op.State;
+                    var opState = op.State;
 
                     if ( opState == SUCCESS || opState == TIMEOUT )
                     {
                         ConcurrencyTestingApi.TraceEvent( "Current operation was already finished or timed out, restarting." );
+
                         continue;
                     }
                     else
@@ -145,11 +144,13 @@ namespace Metalama.Patterns.Caching.Implementation
                         if ( op.Activate() )
                         {
                             ConcurrencyTestingApi.TraceEvent( "Operation activated, we can exit." );
+
                             break;
                         }
                         else
                         {
                             ConcurrencyTestingApi.TraceEvent( "Other thread changed the operation state - try again." );
+
                             goto HandleDequeuedOperation;
                         }
                     }
@@ -170,7 +171,7 @@ namespace Metalama.Patterns.Caching.Implementation
                             ConcurrencyTestingApi.TraceEvent( "Peeked an operation in queue, make sure that it is not waiting." );
 
                             // someone announced the waiting operation - now we need to determine their state
-                            int opState = op.State;
+                            var opState = op.State;
 
                             if ( opState == WAITING )
                             {
@@ -179,12 +180,14 @@ namespace Metalama.Patterns.Caching.Implementation
                                 {
                                     // we have our signal back, now we need to restart
                                     ConcurrencyTestingApi.TraceEvent( "Signal taken back, restart." );
+
                                     continue;
                                 }
                                 else
                                 {
                                     // someone else took our signal, we can safely exit
                                     ConcurrencyTestingApi.TraceEvent( "Other thread took signal, exit." );
+
                                     break;
                                 }
                             }
@@ -192,6 +195,7 @@ namespace Metalama.Patterns.Caching.Implementation
                             {
                                 // if the operation is CREATED, it will notice our signal
                                 ConcurrencyTestingApi.TraceEvent( "Observed operation is CREATED, exit." );
+
                                 break;
                             }
                             else
@@ -199,6 +203,7 @@ namespace Metalama.Patterns.Caching.Implementation
                                 // if it is SUCCESS or TIMEOUT, it was finished by an other thread
                                 // TODO: prove that at this point the following is not true: SIGNAL + operation in a waiting state
                                 ConcurrencyTestingApi.TraceEvent( "Observed operation is SUCCESS or TIMEOUT, exit." );
+
                                 break;
                             }
                         }
@@ -206,6 +211,7 @@ namespace Metalama.Patterns.Caching.Implementation
                         {
                             // nothing in the queue, we can just safely exit
                             ConcurrencyTestingApi.TraceEvent( "Observed empty queue, exit." );
+
                             break;
                         }
                     }
@@ -213,6 +219,7 @@ namespace Metalama.Patterns.Caching.Implementation
                     {
                         // someone else signaled - we can safely exit
                         ConcurrencyTestingApi.TraceEvent( "There is already a signal, exit." );
+
                         break;
                     }
                 }
@@ -224,15 +231,15 @@ namespace Metalama.Patterns.Caching.Implementation
             // set the signal
             this.signalState = SIGNALED;
 
-            ConcurrencyTestingApi.TraceEvent("Signal set.");
+            ConcurrencyTestingApi.TraceEvent( "Signal set." );
 
             // now we need to go through the operation queue and activate until signal is reset
             // we don't care if there are multiple threads competing
-            while (true)
+            while ( true )
             {
-                int mySignalState = this.signalState;
+                var mySignalState = this.signalState;
 
-                if (mySignalState == NOT_SIGNALED)
+                if ( mySignalState == NOT_SIGNALED )
                 {
                     break;
                 }
@@ -240,23 +247,24 @@ namespace Metalama.Patterns.Caching.Implementation
                 // activate one
                 WaitOperationBase op;
 
-                if (this.operations.TryDequeue(out op))
+                if ( this.operations.TryDequeue( out op ) )
                 {
                 HandleDequeuedOperation:
-                    ConcurrencyTestingApi.TraceEvent("Operation dequeued.");
+                    ConcurrencyTestingApi.TraceEvent( "Operation dequeued." );
 
                     // note that this is not an infinite cycle - it will run at most three times (we have at most two state transitions possible)            
-                    int opState = op.State;
+                    var opState = op.State;
 
-                    if (opState == SUCCESS || opState == TIMEOUT)
+                    if ( opState == SUCCESS || opState == TIMEOUT )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Current operation was already finished or timed out, move to the next one.");
+                        ConcurrencyTestingApi.TraceEvent( "Current operation was already finished or timed out, move to the next one." );
                     }
                     else
                     {
                         if ( !op.Activate() )
                         {
                             ConcurrencyTestingApi.TraceEvent( "Other thread changed the operation state - try again." );
+
                             goto HandleDequeuedOperation;
                         }
                         else
@@ -284,6 +292,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 this.signalState = NOT_SIGNALED;
             }
         }
+
         private static ManualResetEventSlim GetThreadLocalEvent()
         {
             if ( threadLocalEvent == null )
@@ -298,18 +307,18 @@ namespace Metalama.Patterns.Caching.Implementation
             return threadLocalEvent;
         }
 
-        private bool WaitInternal(TimeSpan timeout)
+        private bool WaitInternal( TimeSpan timeout )
         {
-            ConcurrencyTestingApi.TraceEvent("Begin Wait operation.");
+            ConcurrencyTestingApi.TraceEvent( "Begin Wait operation." );
 
             try
             {
                 // differentiate between zero timeout (sort of a peek) and some timeout (finite or infinite)
-                if (timeout == TimeSpan.Zero)
+                if ( timeout == TimeSpan.Zero )
                 {
                     // we need to just peek if the handle is signaled (and consume the signal in case of auto reset event)
                     // this does not race with Set/Reset as we do not work with the queue
-                    if (this.resetMode == (int) EventResetMode.AutoReset)
+                    if ( this.resetMode == (int) EventResetMode.AutoReset )
                     {
                         return this.NoWaitAutoReset();
                     }
@@ -320,7 +329,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 }
                 else
                 {
-                    if (this.resetMode == (int) EventResetMode.AutoReset)
+                    if ( this.resetMode == (int) EventResetMode.AutoReset )
                     {
                         return this.WaitAutoReset( timeout );
                     }
@@ -332,20 +341,22 @@ namespace Metalama.Patterns.Caching.Implementation
             }
             finally
             {
-                ConcurrencyTestingApi.TraceEvent("End Wait operation.");
+                ConcurrencyTestingApi.TraceEvent( "End Wait operation." );
             }
         }
 
         private bool NoWaitAutoReset()
         {
-            if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
+            if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
             {
-                ConcurrencyTestingApi.TraceEvent("Signal consumed, return true.");
+                ConcurrencyTestingApi.TraceEvent( "Signal consumed, return true." );
+
                 return true;
             }
             else
             {
-                ConcurrencyTestingApi.TraceEvent("Signal not consumed, return false.");
+                ConcurrencyTestingApi.TraceEvent( "Signal not consumed, return false." );
+
                 return false;
             }
         }
@@ -355,90 +366,94 @@ namespace Metalama.Patterns.Caching.Implementation
             return this.signalState == SIGNALED;
         }
 
-        private bool WaitAutoReset(TimeSpan timeout)
+        private bool WaitAutoReset( TimeSpan timeout )
         {
             // AUTO RESET:
             // if the event is signaled, consume the signal and go through if successful
-            if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
+            if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
             {
-                ConcurrencyTestingApi.TraceEvent("Signal consumed, return true.");
+                ConcurrencyTestingApi.TraceEvent( "Signal consumed, return true." );
+
                 return true;
             }
 
             // in case we did not obtain the signal, we need to enqueue an operation to let other threads help us
-            WaitOperationSync op =
+            var op =
                 new WaitOperationSync()
                 {
-                    State = CREATED,
-                    Event = GetThreadLocalEvent() // optimize this using one thread-static event
+                    State = CREATED, Event = GetThreadLocalEvent() // optimize this using one thread-static event
                 };
 
             // enqueue the operation (other threads will now see it)
-            this.operations.Enqueue(op);
+            this.operations.Enqueue( op );
 
-            ConcurrencyTestingApi.TraceEvent("Enqueued operation.");
+            ConcurrencyTestingApi.TraceEvent( "Enqueued operation." );
 
-            if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
+            if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
             {
-                ConcurrencyTestingApi.TraceEvent("Signal taken, try to finish current operation.");
+                ConcurrencyTestingApi.TraceEvent( "Signal taken, try to finish current operation." );
 
-                if (CREATED != Interlocked.CompareExchange(ref op.State, SUCCESS, CREATED))
+                if ( CREATED != Interlocked.CompareExchange( ref op.State, SUCCESS, CREATED ) )
                 {
-                    ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, use Set() to put signal back correctly.");
+                    ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, use Set() to put signal back correctly." );
                     this.Set();
                 }
 
-                ConcurrencyTestingApi.TraceEvent("Operation succeeded, return true.");
+                ConcurrencyTestingApi.TraceEvent( "Operation succeeded, return true." );
+
                 return true;
             }
             else
             {
-                ConcurrencyTestingApi.TraceEvent("Event is not signaled, begin to wait.");
+                ConcurrencyTestingApi.TraceEvent( "Event is not signaled, begin to wait." );
 
                 // try to announce that we are going to wait (other threads need to signal the event to get us going)
-                if (CREATED == Interlocked.CompareExchange(ref op.State, WAITING, CREATED))
+                if ( CREATED == Interlocked.CompareExchange( ref op.State, WAITING, CREATED ) )
                 {
-                    ConcurrencyTestingApi.TraceEvent("Operation moved to waiting state, try to consume the signal again.");
+                    ConcurrencyTestingApi.TraceEvent( "Operation moved to waiting state, try to consume the signal again." );
 
-                    if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
+                    if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Signal taken, try to finish current operation.");
+                        ConcurrencyTestingApi.TraceEvent( "Signal taken, try to finish current operation." );
 
-                        if (WAITING != Interlocked.CompareExchange(ref op.State, SUCCESS, WAITING))
+                        if ( WAITING != Interlocked.CompareExchange( ref op.State, SUCCESS, WAITING ) )
                         {
-                            ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, use Set() to put signal back correctly.");
+                            ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, use Set() to put signal back correctly." );
                             this.Set();
                         }
 
-                        ConcurrencyTestingApi.TraceEvent("Operation succeeded, return true.");
+                        ConcurrencyTestingApi.TraceEvent( "Operation succeeded, return true." );
+
                         return true;
                     }
                     else
                     {
-                        ConcurrencyTestingApi.TraceEvent("Signal not taken, wait.");
+                        ConcurrencyTestingApi.TraceEvent( "Signal not taken, wait." );
 
-                        if (op.Event.Wait(timeout))
+                        if ( op.Event.Wait( timeout ) )
                         {
                             Debug.Assert( op.State == WAITING );
                             op.State = SUCCESS;
-                            ConcurrencyTestingApi.TraceEvent("Wait successful, return true.");
+                            ConcurrencyTestingApi.TraceEvent( "Wait successful, return true." );
 
                             return true;
                         }
                         else
                         {
-                            ConcurrencyTestingApi.TraceEvent("Wait timed out, going to timeout operation.");
+                            ConcurrencyTestingApi.TraceEvent( "Wait timed out, going to timeout operation." );
 
-                            if (WAITING == Interlocked.CompareExchange(ref op.State, TIMEOUT, WAITING))
+                            if ( WAITING == Interlocked.CompareExchange( ref op.State, TIMEOUT, WAITING ) )
                             {
-                                ConcurrencyTestingApi.TraceEvent("Operation timed out, return false.");
+                                ConcurrencyTestingApi.TraceEvent( "Operation timed out, return false." );
+
                                 return false;
                             }
                             else
                             {
-                                Debug.Assert(op.State == SUCCESS);
+                                Debug.Assert( op.State == SUCCESS );
+
                                 // we can presume that the operation was dequeued and end
-                                ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, return true.");
+                                ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, return true." );
 
                                 return true;
                             }
@@ -447,9 +462,10 @@ namespace Metalama.Patterns.Caching.Implementation
                 }
                 else
                 {
-                    Debug.Assert(op.State == SUCCESS);
+                    Debug.Assert( op.State == SUCCESS );
+
                     // we can presume that the operation was dequeued and end
-                    ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, return true.");
+                    ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, return true." );
 
                     return true;
                 }
@@ -463,15 +479,15 @@ namespace Metalama.Patterns.Caching.Implementation
             if ( this.signalState == SIGNALED )
             {
                 ConcurrencyTestingApi.TraceEvent( "Event is signaled, return true." );
+
                 return true;
             }
 
             // event is not signaled
-            WaitOperationSync op =
+            var op =
                 new WaitOperationSync()
                 {
-                    State = CREATED,
-                    Event = GetThreadLocalEvent() // optimize this using one thread-static event
+                    State = CREATED, Event = GetThreadLocalEvent() // optimize this using one thread-static event
                 };
 
             // enqueue the operation (other threads will now see it)
@@ -485,6 +501,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 op.State = SUCCESS;
 
                 ConcurrencyTestingApi.TraceEvent( "Event is signaled, moved operation to SUCCESS state, return true." );
+
                 return true;
             }
             else
@@ -501,6 +518,7 @@ namespace Metalama.Patterns.Caching.Implementation
                         op.State = SUCCESS;
 
                         ConcurrencyTestingApi.TraceEvent( "Event is signaled, moved operation to SUCCESS state, return true." );
+
                         return true;
                     }
                     else
@@ -509,7 +527,7 @@ namespace Metalama.Patterns.Caching.Implementation
 
                         if ( op.Event.Wait( timeout ) )
                         {
-                            Debug.Assert(op.State == WAITING);
+                            Debug.Assert( op.State == WAITING );
                             op.State = SUCCESS;
                             ConcurrencyTestingApi.TraceEvent( "Wait successful, return true." );
 
@@ -522,11 +540,13 @@ namespace Metalama.Patterns.Caching.Implementation
                             if ( WAITING == Interlocked.CompareExchange( ref op.State, TIMEOUT, WAITING ) )
                             {
                                 ConcurrencyTestingApi.TraceEvent( "Operation timed out, return false." );
+
                                 return false;
                             }
                             else
                             {
                                 Debug.Assert( op.State == SUCCESS );
+
                                 // we can presume that the operation was dequeued and end
                                 ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, return true." );
 
@@ -538,104 +558,16 @@ namespace Metalama.Patterns.Caching.Implementation
                 else
                 {
                     Debug.Assert( op.State == SUCCESS );
+
                     // we can presume that the operation was dequeued and end
                     ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, return true." );
 
                     return true;
                 }
             }
-
         }
 
-        private Awaiter WaitOneAsyncInternal(TimeSpan timeout, CancellationToken cancellationToken)
-        {
-            if (timeout != TimeSpan.Zero && timeout != infiniteTimeSpan)
-            {
-                throw new InvalidOperationException("Support for non-zero finite timeout is not currently implemented.");
-            }
-
-            if (cancellationToken != CancellationToken.None)
-            {
-                throw new InvalidOperationException("Support for cancellation tokens is not currently implemented.");
-            }
-
-            if (timeout == TimeSpan.Zero)
-            {
-                // this is a peek operation - we should finish immediately ( state machine will check IsCompleted before calling *OnCompleted )
-
-                // we need to just peek if the handle is signaled (and consume the signal in case of auto reset event)
-                // this does not race with Set/Reset as we do not work with the queue
-                if (this.resetMode == (int) EventResetMode.AutoReset)
-                {
-                    if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
-                    {
-                        ConcurrencyTestingApi.TraceEvent("Signal consumed, return awaiter with ImmediateResult=true.");
-
-                        return new Awaiter(this, true);
-                    }
-                    else
-                    {
-                        ConcurrencyTestingApi.TraceEvent("Signal not consumed, return awaiter with ImmediateResult=false.");
-
-                        return new Awaiter(this, false);
-                    }
-                }
-                else
-                {
-                    if (this.signalState == SIGNALED)
-                    {
-                        ConcurrencyTestingApi.TraceEvent("Signal observed, return awaiter with ImmediateResult=true.");
-
-                        return new Awaiter(this, true);
-                    }
-                    else
-                    {
-                        ConcurrencyTestingApi.TraceEvent("Signal observed, return awaiter with ImmediateResult=false.");
-
-                        return new Awaiter(this, false);
-                    }
-                }
-            }
-            else
-            {
-                if (this.resetMode == (int) EventResetMode.AutoReset)
-                {
-                    // AUTO RESET:
-                    // if the event is signaled, consume the signal and go through if successful
-                    if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
-                    {
-                        ConcurrencyTestingApi.TraceEvent("Signal consumed, return awaiter with ImmediateResult=true.");
-
-                        return new Awaiter(this, true);
-                    }
-                }
-                else
-                {
-                    // MANUAL RESET:
-                    if (this.signalState == SIGNALED)
-                    {
-                        ConcurrencyTestingApi.TraceEvent("Signal observed, return true.");
-
-                        return new Awaiter(this, true);
-                    }
-                }
-
-                // in case of both modes, if we could not end immediately, we need to return an awaiter and force the consumer to schedule a continuation
-                // this awaiter will tell the state machine that the operation is not completed, forcing it to schedule a continuation
-                WaitOperationAsync op =
-                    new WaitOperationAsync
-                    {
-                        State = CREATED,
-                        Timeout = timeout,
-                        CancellationToken = cancellationToken
-                    };
-
-                // we cannot do more now because we don't have the continuation, we need to wait until it is set
-                return new Awaiter(this, op);
-            }
-        }
-
-        private Awaiter<TData> WaitOneAsyncInternal<TData>(TimeSpan timeout, CancellationToken cancellationToken)
+        private Awaiter WaitOneAsyncInternal( TimeSpan timeout, CancellationToken cancellationToken )
         {
             if ( timeout != TimeSpan.Zero && timeout != infiniteTimeSpan )
             {
@@ -650,41 +582,41 @@ namespace Metalama.Patterns.Caching.Implementation
             if ( timeout == TimeSpan.Zero )
             {
                 // this is a peek operation - we should finish immediately ( state machine will check IsCompleted before calling *OnCompleted )
-        
+
                 // we need to just peek if the handle is signaled (and consume the signal in case of auto reset event)
                 // this does not race with Set/Reset as we do not work with the queue
-                if (this.resetMode == (int) EventResetMode.AutoReset)
+                if ( this.resetMode == (int) EventResetMode.AutoReset )
                 {
-                    if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
+                    if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Signal consumed, return awaiter with ImmediateResult=true.");
+                        ConcurrencyTestingApi.TraceEvent( "Signal consumed, return awaiter with ImmediateResult=true." );
 
-                        return new Awaiter<TData>(this, true);
+                        return new Awaiter( this, true );
                     }
                     else
                     {
-                        ConcurrencyTestingApi.TraceEvent("Signal not consumed, return awaiter with ImmediateResult=false.");
+                        ConcurrencyTestingApi.TraceEvent( "Signal not consumed, return awaiter with ImmediateResult=false." );
 
-                        return new Awaiter<TData>(this, false);
+                        return new Awaiter( this, false );
                     }
                 }
                 else
                 {
                     if ( this.signalState == SIGNALED )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Signal observed, return awaiter with ImmediateResult=true.");
+                        ConcurrencyTestingApi.TraceEvent( "Signal observed, return awaiter with ImmediateResult=true." );
 
-                        return new Awaiter<TData>(this, true);
+                        return new Awaiter( this, true );
                     }
                     else
                     {
-                        ConcurrencyTestingApi.TraceEvent("Signal observed, return awaiter with ImmediateResult=false.");
+                        ConcurrencyTestingApi.TraceEvent( "Signal observed, return awaiter with ImmediateResult=false." );
 
-                        return new Awaiter<TData>(this, false);
+                        return new Awaiter( this, false );
                     }
                 }
             }
-            else 
+            else
             {
                 if ( this.resetMode == (int) EventResetMode.AutoReset )
                 {
@@ -692,9 +624,9 @@ namespace Metalama.Patterns.Caching.Implementation
                     // if the event is signaled, consume the signal and go through if successful
                     if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Signal consumed, return awaiter with ImmediateResult=true.");
+                        ConcurrencyTestingApi.TraceEvent( "Signal consumed, return awaiter with ImmediateResult=true." );
 
-                        return new Awaiter<TData>(this, true);
+                        return new Awaiter( this, true );
                     }
                 }
                 else
@@ -704,22 +636,100 @@ namespace Metalama.Patterns.Caching.Implementation
                     {
                         ConcurrencyTestingApi.TraceEvent( "Signal observed, return true." );
 
-                        return new Awaiter<TData>(this, true);
+                        return new Awaiter( this, true );
+                    }
+                }
+
+                // in case of both modes, if we could not end immediately, we need to return an awaiter and force the consumer to schedule a continuation
+                // this awaiter will tell the state machine that the operation is not completed, forcing it to schedule a continuation
+                var op =
+                    new WaitOperationAsync { State = CREATED, Timeout = timeout, CancellationToken = cancellationToken };
+
+                // we cannot do more now because we don't have the continuation, we need to wait until it is set
+                return new Awaiter( this, op );
+            }
+        }
+
+        private Awaiter<TData> WaitOneAsyncInternal<TData>( TimeSpan timeout, CancellationToken cancellationToken )
+        {
+            if ( timeout != TimeSpan.Zero && timeout != infiniteTimeSpan )
+            {
+                throw new InvalidOperationException( "Support for non-zero finite timeout is not currently implemented." );
+            }
+
+            if ( cancellationToken != CancellationToken.None )
+            {
+                throw new InvalidOperationException( "Support for cancellation tokens is not currently implemented." );
+            }
+
+            if ( timeout == TimeSpan.Zero )
+            {
+                // this is a peek operation - we should finish immediately ( state machine will check IsCompleted before calling *OnCompleted )
+
+                // we need to just peek if the handle is signaled (and consume the signal in case of auto reset event)
+                // this does not race with Set/Reset as we do not work with the queue
+                if ( this.resetMode == (int) EventResetMode.AutoReset )
+                {
+                    if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                    {
+                        ConcurrencyTestingApi.TraceEvent( "Signal consumed, return awaiter with ImmediateResult=true." );
+
+                        return new Awaiter<TData>( this, true );
+                    }
+                    else
+                    {
+                        ConcurrencyTestingApi.TraceEvent( "Signal not consumed, return awaiter with ImmediateResult=false." );
+
+                        return new Awaiter<TData>( this, false );
+                    }
+                }
+                else
+                {
+                    if ( this.signalState == SIGNALED )
+                    {
+                        ConcurrencyTestingApi.TraceEvent( "Signal observed, return awaiter with ImmediateResult=true." );
+
+                        return new Awaiter<TData>( this, true );
+                    }
+                    else
+                    {
+                        ConcurrencyTestingApi.TraceEvent( "Signal observed, return awaiter with ImmediateResult=false." );
+
+                        return new Awaiter<TData>( this, false );
+                    }
+                }
+            }
+            else
+            {
+                if ( this.resetMode == (int) EventResetMode.AutoReset )
+                {
+                    // AUTO RESET:
+                    // if the event is signaled, consume the signal and go through if successful
+                    if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                    {
+                        ConcurrencyTestingApi.TraceEvent( "Signal consumed, return awaiter with ImmediateResult=true." );
+
+                        return new Awaiter<TData>( this, true );
+                    }
+                }
+                else
+                {
+                    // MANUAL RESET:
+                    if ( this.signalState == SIGNALED )
+                    {
+                        ConcurrencyTestingApi.TraceEvent( "Signal observed, return true." );
+
+                        return new Awaiter<TData>( this, true );
                     }
                 }
 
                 // in case of both modes, if we could not end immediately, we need to return an awaiter and force the consumer to schedule a continuation
                 // this awaiter will tell the state machine that the operation is not completed, forcing it to schedule a continuation
                 WaitOperationAsync<TData> op =
-                    new WaitOperationAsync<TData>
-                    {
-                        State = CREATED,
-                        Timeout = timeout,
-                        CancellationToken = cancellationToken
-                    };
+                    new() { State = CREATED, Timeout = timeout, CancellationToken = cancellationToken };
 
                 // we cannot do more now because we don't have the continuation, we need to wait until it is set
-                return new Awaiter<TData>(this, op);
+                return new Awaiter<TData>( this, op );
             }
         }
 
@@ -733,7 +743,7 @@ namespace Metalama.Patterns.Caching.Implementation
             this.ScheduleContinuationInner( op );
         }
 
-        internal void ScheduleContinuation<TData>(WaitOperationAsync<TData> op, Action<WaitOperationAsync<TData>> continuation, bool flowContext)
+        internal void ScheduleContinuation<TData>( WaitOperationAsync<TData> op, Action<WaitOperationAsync<TData>> continuation, bool flowContext )
         {
             // set the continuation (we need to call this after the wait is over)
             op.Continuation = continuation;
@@ -743,157 +753,157 @@ namespace Metalama.Patterns.Caching.Implementation
             this.ScheduleContinuationInner( op );
         }
 
-        private void ScheduleContinuationInner( WaitOperationAsyncBase op)
+        private void ScheduleContinuationInner( WaitOperationAsyncBase op )
         {
             // NOTE: at this point we cannot finish the operation synchronously
             //       we need to run Activate in order to continue the workflow
 
             // enqueue the operation (other threads will now see it)
-            this.operations.Enqueue(op);
+            this.operations.Enqueue( op );
 
-            ConcurrencyTestingApi.TraceEvent("Enqueued operation.");
+            ConcurrencyTestingApi.TraceEvent( "Enqueued operation." );
 
-            if (this.resetMode == (int) EventResetMode.AutoReset)
+            if ( this.resetMode == (int) EventResetMode.AutoReset )
             {
-                if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
+                if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
                 {
-                    ConcurrencyTestingApi.TraceEvent("Signal taken, try to finish current operation.");
+                    ConcurrencyTestingApi.TraceEvent( "Signal taken, try to finish current operation." );
 
-                    if (CREATED != Interlocked.CompareExchange(ref op.State, SUCCESS, CREATED))
+                    if ( CREATED != Interlocked.CompareExchange( ref op.State, SUCCESS, CREATED ) )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, use Set() to put signal back correctly.");
+                        ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, use Set() to put signal back correctly." );
                         this.Set();
                     }
 
-                    ConcurrencyTestingApi.TraceEvent("Operation succeeded, activate and exit.");
+                    ConcurrencyTestingApi.TraceEvent( "Operation succeeded, activate and exit." );
                     op.Activate();
                 }
                 else
                 {
-                    ConcurrencyTestingApi.TraceEvent("Event is not signaled, begin to wait.");
+                    ConcurrencyTestingApi.TraceEvent( "Event is not signaled, begin to wait." );
 
                     // try to announce that we are going to wait (other threads need to signal the event to get us going)
-                    if (CREATED == Interlocked.CompareExchange(ref op.State, WAITING, CREATED))
+                    if ( CREATED == Interlocked.CompareExchange( ref op.State, WAITING, CREATED ) )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Operation moved to waiting state, try to consume the signal again.");
+                        ConcurrencyTestingApi.TraceEvent( "Operation moved to waiting state, try to consume the signal again." );
 
-                        if (SIGNALED == Interlocked.CompareExchange(ref this.signalState, NOT_SIGNALED, SIGNALED))
+                        if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
                         {
-                            ConcurrencyTestingApi.TraceEvent("Signal taken, try to finish current operation.");
+                            ConcurrencyTestingApi.TraceEvent( "Signal taken, try to finish current operation." );
 
-                            if (WAITING == Interlocked.CompareExchange(ref op.State, SUCCESS, WAITING))
+                            if ( WAITING == Interlocked.CompareExchange( ref op.State, SUCCESS, WAITING ) )
                             {
-                                ConcurrencyTestingApi.TraceEvent("Operation succeeded, activate and exit.");
+                                ConcurrencyTestingApi.TraceEvent( "Operation succeeded, activate and exit." );
                                 op.Activate();
                             }
                             else
                             {
-                                ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, use Set() to put signal back correctly.");
+                                ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, use Set() to put signal back correctly." );
                                 this.Set();
                             }
                         }
                         else
                         {
-                            ConcurrencyTestingApi.TraceEvent("Signal not taken, wait.");
+                            ConcurrencyTestingApi.TraceEvent( "Signal not taken, wait." );
 
-                            if (op.Timeout == infiniteTimeSpan)
+                            if ( op.Timeout == infiniteTimeSpan )
                             {
                                 // if there is no cancellation token, we simply exit
 
-                                if (op.CancellationToken != CancellationToken.None)
+                                if ( op.CancellationToken != CancellationToken.None )
                                 {
-                                    throw new NotImplementedException("Cancellation tokens are currently is not implemented.");
+                                    throw new NotImplementedException( "Cancellation tokens are currently is not implemented." );
                                 }
                             }
                             else
                             {
-                                if (op.CancellationToken != CancellationToken.None)
+                                if ( op.CancellationToken != CancellationToken.None )
                                 {
-                                    throw new NotImplementedException("Finite waiting with cancellation token is not implemented.");
+                                    throw new NotImplementedException( "Finite waiting with cancellation token is not implemented." );
                                 }
                                 else
                                 {
-                                    throw new NotImplementedException("Finite waiting is not implemented.");
+                                    throw new NotImplementedException( "Finite waiting is not implemented." );
                                 }
                             }
                         }
                     }
                     else
                     {
-                        Debug.Assert(op.State == SUCCESS);
-                        ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, activate operation and exit.");
+                        Debug.Assert( op.State == SUCCESS );
+                        ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, activate operation and exit." );
                         op.Activate();
                     }
                 }
             }
             else
             {
-                if (this.signalState == SIGNALED)
+                if ( this.signalState == SIGNALED )
                 {
-                    ConcurrencyTestingApi.TraceEvent("Event is signaled, try to finish the operation.");
+                    ConcurrencyTestingApi.TraceEvent( "Event is signaled, try to finish the operation." );
 
-                    if (CREATED == Interlocked.CompareExchange(ref op.State, SUCCESS, CREATED))
+                    if ( CREATED == Interlocked.CompareExchange( ref op.State, SUCCESS, CREATED ) )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Finished the operation, activate and exit.");
+                        ConcurrencyTestingApi.TraceEvent( "Finished the operation, activate and exit." );
                         op.Activate();
                     }
                     else
                     {
-                        ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, exit.");
+                        ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, exit." );
                     }
                 }
                 else
                 {
-                    ConcurrencyTestingApi.TraceEvent("Event is not signaled, begin to wait.");
+                    ConcurrencyTestingApi.TraceEvent( "Event is not signaled, begin to wait." );
 
-                    if (CREATED == Interlocked.CompareExchange(ref op.State, WAITING, CREATED))
+                    if ( CREATED == Interlocked.CompareExchange( ref op.State, WAITING, CREATED ) )
                     {
-                        ConcurrencyTestingApi.TraceEvent("Operation moved to waiting state, check the signal again.");
+                        ConcurrencyTestingApi.TraceEvent( "Operation moved to waiting state, check the signal again." );
 
-                        if (this.signalState == SIGNALED)
+                        if ( this.signalState == SIGNALED )
                         {
-                            ConcurrencyTestingApi.TraceEvent("Event is signaled, try to finish the operation.");
+                            ConcurrencyTestingApi.TraceEvent( "Event is signaled, try to finish the operation." );
 
-                            if (CREATED == Interlocked.CompareExchange(ref op.State, SUCCESS, CREATED))
+                            if ( CREATED == Interlocked.CompareExchange( ref op.State, SUCCESS, CREATED ) )
                             {
-                                ConcurrencyTestingApi.TraceEvent("Finished the operation, activate and exit.");
+                                ConcurrencyTestingApi.TraceEvent( "Finished the operation, activate and exit." );
                                 op.Activate();
                             }
                             else
                             {
-                                ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, exit.");
+                                ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, exit." );
                             }
                         }
                         else
                         {
-                            ConcurrencyTestingApi.TraceEvent("Signal not taken, wait.");
+                            ConcurrencyTestingApi.TraceEvent( "Signal not taken, wait." );
 
-                            if (op.Timeout == infiniteTimeSpan)
+                            if ( op.Timeout == infiniteTimeSpan )
                             {
                                 // if there is no cancellation token, we simply exit
 
-                                if (op.CancellationToken != CancellationToken.None)
+                                if ( op.CancellationToken != CancellationToken.None )
                                 {
-                                    throw new NotImplementedException("Cancellation tokens are currently not implemented.");
+                                    throw new NotImplementedException( "Cancellation tokens are currently not implemented." );
                                 }
                             }
                             else
                             {
-                                if (op.CancellationToken != CancellationToken.None)
+                                if ( op.CancellationToken != CancellationToken.None )
                                 {
-                                    throw new NotImplementedException("Finite waiting with cancellation token is not implemented.");
+                                    throw new NotImplementedException( "Finite waiting with cancellation token is not implemented." );
                                 }
                                 else
                                 {
-                                    throw new NotImplementedException("Finite waiting is not implemented.");
+                                    throw new NotImplementedException( "Finite waiting is not implemented." );
                                 }
                             }
                         }
                     }
                     else
                     {
-                        Debug.Assert(op.State == SUCCESS);
-                        ConcurrencyTestingApi.TraceEvent("Other thread finished the operation, activate operation and exit.");
+                        Debug.Assert( op.State == SUCCESS );
+                        ConcurrencyTestingApi.TraceEvent( "Other thread finished the operation, activate operation and exit." );
                         op.Activate();
                     }
                 }
@@ -920,6 +930,7 @@ namespace Metalama.Patterns.Caching.Implementation
             public override bool Activate()
             {
                 this.Event.Set();
+
                 return true;
             }
         }
@@ -928,10 +939,13 @@ namespace Metalama.Patterns.Caching.Implementation
         {
             // needed only in case of awaitable wait, for blocking wait it is just informational
             public TimeSpan Timeout;
+
             // task scheduler that was current when continuation was scheduled
             public volatile TaskScheduler TaskScheduler;
+
             // flow context information
             public volatile bool FlowContext;
+
             // token received for wait cancellation
             public CancellationToken CancellationToken;
         }
@@ -946,46 +960,51 @@ namespace Metalama.Patterns.Caching.Implementation
 
             public override bool Activate()
             {
-                int state = this.State;
+                var state = this.State;
                 Debug.Assert( state != TIMEOUT );
-
 
                 if ( state == SUCCESS )
                 {
-                    ConcurrencyTestingApi.TraceEvent("Operation already in SUCCESS state.");
+                    ConcurrencyTestingApi.TraceEvent( "Operation already in SUCCESS state." );
                 }
                 else if ( state == Interlocked.CompareExchange( ref this.State, SUCCESS, state ) )
                 {
                     if ( state == CREATED )
+                    {
                         ConcurrencyTestingApi.TraceEvent( "Operation moved to SUCCESS state, it was CREATED." );
+                    }
                     else
+                    {
                         ConcurrencyTestingApi.TraceEvent( "Operation moved to SUCCESS state, it was WAITING, schedule continuation." );
+                    }
                 }
                 else
+                {
                     return false;
+                }
 
                 // NOTE: this is how YieldAwaiter handles reactivation, but we omit SynchronizationContext.CurrentNoFlow which is internal
                 // TODO: make sure that this reactivation algorithm is correct
 
-                if (this.TaskScheduler != TaskScheduler.Default)
+                if ( this.TaskScheduler != TaskScheduler.Default )
                 {
-                    Task.Factory.StartNew(this.Continuation, default(CancellationToken), TaskCreationOptions.PreferFairness, this.TaskScheduler);
+                    Task.Factory.StartNew( this.Continuation, default, TaskCreationOptions.PreferFairness, this.TaskScheduler );
                 }
-                else if (this.FlowContext)
+                else if ( this.FlowContext )
                 {
-                    ThreadPool.QueueUserWorkItem(runContinuationWaitCallback, this.Continuation);
+                    ThreadPool.QueueUserWorkItem( runContinuationWaitCallback, this.Continuation );
                 }
                 else
                 {
-                    ThreadPool.UnsafeQueueUserWorkItem(runContinuationWaitCallback, this.Continuation);
+                    ThreadPool.UnsafeQueueUserWorkItem( runContinuationWaitCallback, this.Continuation );
                 }
 
                 return true;
             }
 
-            public static void RunContinuation(object state)
+            public static void RunContinuation( object state )
             {
-                Action action = (Action)state;
+                var action = (Action) state;
                 action();
             }
         }
@@ -995,7 +1014,9 @@ namespace Metalama.Patterns.Caching.Implementation
             // caching delegates
             // ReSharper disable StaticMemberInGenericType
             private static readonly Action<object> runContinuationAction = RunContinuation;
+
             private static readonly WaitCallback runContinuationWaitCallback = RunContinuation;
+
             // ReSharper restore StaticMemberInGenericType
 
             // continuation
@@ -1011,40 +1032,48 @@ namespace Metalama.Patterns.Caching.Implementation
 
             public override bool Activate()
             {
-                int state = this.State;
-                Debug.Assert(state != TIMEOUT);
+                var state = this.State;
+                Debug.Assert( state != TIMEOUT );
 
-
-                if (state == SUCCESS)
+                if ( state == SUCCESS )
                 {
-                    ConcurrencyTestingApi.TraceEvent("Operation already in SUCCESS state.");
+                    ConcurrencyTestingApi.TraceEvent( "Operation already in SUCCESS state." );
                 }
                 else if ( state == Interlocked.CompareExchange( ref this.State, SUCCESS, state ) )
                 {
                     if ( state == CREATED )
+                    {
                         ConcurrencyTestingApi.TraceEvent( "Operation moved to SUCCESS state, it was CREATED." );
+                    }
                     else
+                    {
                         ConcurrencyTestingApi.TraceEvent( "Operation moved to SUCCESS state, it was WAITING, schedule continuation." );
+                    }
                 }
                 else
+                {
                     return false;
-
+                }
 
                 // NOTE: this is how YieldAwaiter handles reactivation, but we omit SynchronizationContext.CurrentNoFlow which is internal
                 // TODO: make sure that this reactivation algorithm is correct
 
-                if (this.TaskScheduler != TaskScheduler.Default)
+                if ( this.TaskScheduler != TaskScheduler.Default )
                 {
-                    Task.Factory.StartNew(runContinuationAction, this, default(CancellationToken), TaskCreationOptions.PreferFairness,
-                                           this.TaskScheduler);
+                    Task.Factory.StartNew(
+                        runContinuationAction,
+                        this,
+                        default,
+                        TaskCreationOptions.PreferFairness,
+                        this.TaskScheduler );
                 }
-                else if (this.FlowContext)
+                else if ( this.FlowContext )
                 {
-                    ThreadPool.QueueUserWorkItem(runContinuationWaitCallback, this);
+                    ThreadPool.QueueUserWorkItem( runContinuationWaitCallback, this );
                 }
                 else
                 {
-                    ThreadPool.UnsafeQueueUserWorkItem(runContinuationWaitCallback, this);
+                    ThreadPool.UnsafeQueueUserWorkItem( runContinuationWaitCallback, this );
                 }
 
                 return true;
@@ -1073,7 +1102,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 this.immediateResult = immediateResult;
             }
 
-            public Awaiter(AwaitableEvent owner, WaitOperationAsync operation)
+            public Awaiter( AwaitableEvent owner, WaitOperationAsync operation )
             {
                 this.operation = operation;
                 this.owner = owner;
@@ -1108,7 +1137,7 @@ namespace Metalama.Patterns.Caching.Implementation
 
         // NOTE: while this looks like awaitable it cannot be awaited from state machine as state machine does not support continuation with argument
         //       we keep the name and pattern to make the code that uses it familar for users
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable( EditorBrowsableState.Never )]
         public readonly struct Awaiter<TData>
         {
             private readonly AwaitableEvent owner;
@@ -1117,14 +1146,14 @@ namespace Metalama.Patterns.Caching.Implementation
 
             private readonly bool? immediateResult;
 
-            public Awaiter(AwaitableEvent owner, bool immediateResult)
+            public Awaiter( AwaitableEvent owner, bool immediateResult )
             {
                 this.owner = owner;
                 this.Operation = null;
                 this.immediateResult = immediateResult;
             }
 
-            public Awaiter(AwaitableEvent owner, WaitOperationAsync<TData> operation)
+            public Awaiter( AwaitableEvent owner, WaitOperationAsync<TData> operation )
             {
                 this.Operation = operation;
                 this.owner = owner;
@@ -1136,14 +1165,14 @@ namespace Metalama.Patterns.Caching.Implementation
                 get { return this.immediateResult != null; }
             }
 
-            public void OnCompleted(Action<WaitOperationAsync<TData>> continuation)
+            public void OnCompleted( Action<WaitOperationAsync<TData>> continuation )
             {
-                this.owner.ScheduleContinuation(this.Operation, continuation, true);
+                this.owner.ScheduleContinuation( this.Operation, continuation, true );
             }
 
-            public void UnsafeOnCompleted(Action<WaitOperationAsync<TData>> continuation)
+            public void UnsafeOnCompleted( Action<WaitOperationAsync<TData>> continuation )
             {
-                this.owner.ScheduleContinuation(this.Operation, continuation, false);
+                this.owner.ScheduleContinuation( this.Operation, continuation, false );
             }
 
             public bool GetResult()

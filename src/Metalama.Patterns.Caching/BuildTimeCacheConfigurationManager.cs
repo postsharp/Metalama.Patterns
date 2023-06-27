@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
 using System.Reflection;
@@ -8,22 +7,22 @@ namespace Metalama.Patterns.Caching
 {
     internal static class BuildTimeCacheConfigurationManager
     {
-
         public static ICacheItemConfiguration GetConfigurationFromAttributes( MemberInfo method )
         {
-            List<ICacheItemConfiguration> configurations = new List<ICacheItemConfiguration>();
+            List<ICacheItemConfiguration> configurations = new();
 
             PopulateConfigurations( method.DeclaringType, configurations );
 
-            ICacheItemConfiguration assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType.Assembly );
+            var assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType.Assembly );
+
             if ( assemblyConfiguration != null )
             {
                 configurations.Add( assemblyConfiguration );
             }
 
-            CacheItemConfiguration mergedConfiguration = new CacheItemConfiguration();
+            var mergedConfiguration = new CacheItemConfiguration();
 
-            foreach ( ICacheItemConfiguration configuration in configurations )
+            foreach ( var configuration in configurations )
             {
                 mergedConfiguration.ApplyFallback( configuration );
             }
@@ -47,14 +46,14 @@ namespace Metalama.Patterns.Caching
 
         private static void PopulateConfigurations( Type type, List<ICacheItemConfiguration> configurations )
         {
-            ICacheItemConfiguration configuration = GetConfigurationOnDeclaration( type );
+            var configuration = GetConfigurationOnDeclaration( type );
 
             if ( configuration != null )
             {
                 configurations.Add( configuration );
             }
 
-            Type baseType = type.BaseType;
+            var baseType = type.BaseType;
 
             if ( baseType != null )
             {
@@ -89,7 +88,7 @@ namespace Metalama.Patterns.Caching
 
         private sealed class CacheConfigurationAttributeCache
         {
-            public readonly Dictionary<object, CacheConfigurationAttribute> Attributes = new Dictionary<object, CacheConfigurationAttribute>();
+            public readonly Dictionary<object, CacheConfigurationAttribute> Attributes = new();
         }
     }
 }

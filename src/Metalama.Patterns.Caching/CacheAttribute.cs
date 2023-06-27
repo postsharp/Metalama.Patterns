@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
@@ -32,12 +31,12 @@ namespace Metalama.Patterns.Caching
 #endif
     public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     {
-        private CacheItemConfiguration configuration = new CacheItemConfiguration();
+        private CacheItemConfiguration configuration = new();
 
         [PNonSerialized]
         private SpinLock initializeLock;
 
-        private static readonly CachingProfile disabledProfile = new CachingProfile("Disabled") { IsEnabled = false };
+        private static readonly CachingProfile disabledProfile = new( "Disabled" ) { IsEnabled = false };
 
         [PNonSerialized]
         private CachingProfile profile;
@@ -79,7 +78,7 @@ namespace Metalama.Patterns.Caching
         /// </summary>
         public double AbsoluteExpiration
         {
-            get { return this.configuration.AbsoluteExpiration.GetValueOrDefault(TimeSpan.Zero).TotalMinutes; }
+            get { return this.configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
             set { this.configuration.AbsoluteExpiration = TimeSpan.FromMinutes( value ); }
         }
 
@@ -89,8 +88,8 @@ namespace Metalama.Patterns.Caching
         /// </summary>
         public double SlidingExpiration
         {
-            get { return this.configuration.SlidingExpiration.GetValueOrDefault(TimeSpan.Zero).TotalMinutes; }
-            set { this.configuration.SlidingExpiration = TimeSpan.FromMinutes(value); }
+            get { return this.configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
+            set { this.configuration.SlidingExpiration = TimeSpan.FromMinutes( value ); }
         }
 
         /// <summary>
@@ -98,7 +97,7 @@ namespace Metalama.Patterns.Caching
         /// </summary>
         public CacheItemPriority Priority
         {
-            get { return this.configuration.Priority.GetValueOrDefault(CacheItemPriority.Default); }
+            get { return this.configuration.Priority.GetValueOrDefault( CacheItemPriority.Default ); }
             set { this.configuration.Priority = value; }
         }
 
@@ -152,28 +151,32 @@ namespace Metalama.Patterns.Caching
             {
                 if ( this.profile == null || this.profileRevision < CachingServices.Profiles.RevisionNumber )
                 {
-                    bool initializeLockTaken = false;
+                    var initializeLockTaken = false;
+
                     try
                     {
-                        this.initializeLock.Enter(ref initializeLockTaken);
+                        this.initializeLock.Enter( ref initializeLockTaken );
 
                         if ( this.profile == null || this.profileRevision < CachingServices.Profiles.RevisionNumber )
                         {
+                            var profileName = this.configuration.ProfileName ?? CachingProfile.DefaultName;
 
-                            string profileName = this.configuration.ProfileName ?? CachingProfile.DefaultName;
+                            var localProfile = CachingServices.Profiles[profileName];
 
-                            CachingProfile localProfile = CachingServices.Profiles[profileName];
-                            
-                            if (localProfile == null )
+                            if ( localProfile == null )
                             {
                                 this.profile = disabledProfile;
-                                this.GetLogger().Warning.Write( Formatted(
-                                                        "The cache is incorrectly configured for method {Method}: there is no profile named {Profile}.",
-                                                        this.targetMethod, profileName) );
+
+                                this.GetLogger()
+                                    .Warning.Write(
+                                        Formatted(
+                                            "The cache is incorrectly configured for method {Method}: there is no profile named {Profile}.",
+                                            this.targetMethod,
+                                            profileName ) );
                             }
 
                             this.mergedConfiguration = this.configuration.Clone();
-                            this.mergedConfiguration.ApplyFallback(localProfile);
+                            this.mergedConfiguration.ApplyFallback( localProfile );
 
                             Thread.MemoryBarrier();
 
@@ -185,7 +188,9 @@ namespace Metalama.Patterns.Caching
                     finally
                     {
                         if ( initializeLockTaken )
+                        {
                             this.initializeLock.Exit();
+                        }
                     }
                 }
 
@@ -195,9 +200,9 @@ namespace Metalama.Patterns.Caching
 
         private LogSource GetLogger()
         {
-            if (this.logger == null )
+            if ( this.logger == null )
             {
-                this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource(this.targetMethod.DeclaringType);
+                this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.targetMethod.DeclaringType );
             }
 
             return this.logger;
@@ -263,7 +268,8 @@ namespace Metalama.Patterns.Caching
             CallerInfo callerInfo = CallerInfo.Async;
 
             LogSource logSource = this.GetLogger();
-            using ( var activity = logSource.Default.OpenActivity( Formatted("Processing invocation of async method {Method}", this.targetMethod ), default, ref callerInfo ) )
+            using ( var activity =
+ logSource.Default.OpenActivity( Formatted("Processing invocation of async method {Method}", this.targetMethod ), default, ref callerInfo ) )
             {
                 try
                 {

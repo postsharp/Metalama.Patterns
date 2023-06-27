@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
 #if NETFRAMEWORK
 #define NET_DATA_CONTRACT_SERIALIZER
 #endif
@@ -9,14 +9,13 @@ using System.Runtime.Serialization;
 
 namespace Metalama.Patterns.Caching.Serializers
 {
-
     /// <summary>
     /// An implementation of <see cref="ISerializer"/> that uses <see cref="NetDataContractSerializer"/>.
     /// You can derive this class to use a different <see cref="XmlObjectSerializer"/>.
     /// </summary>
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 #if !NET_DATA_CONTRACT_SERIALIZER
-    [EditorBrowsable(EditorBrowsableState.Never)]
+    [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
     public class DataContractSerializer : ISerializer
     {
@@ -30,7 +29,6 @@ namespace Metalama.Patterns.Caching.Serializers
 #endif
         }
 
-
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
         /// Creates a new <see cref="XmlObjectSerializer"/>. The default implementation creates a <see cref="NetDataContractSerializer"/>.
@@ -38,7 +36,7 @@ namespace Metalama.Patterns.Caching.Serializers
         /// <returns>A new <see cref="XmlObjectSerializer"/>.</returns>
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 #if !NET_DATA_CONTRACT_SERIALIZER
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
         protected virtual XmlObjectSerializer CreateSerializer()
         {
@@ -51,7 +49,7 @@ namespace Metalama.Patterns.Caching.Serializers
 
         /// <inheritdoc />
 #if !NET_DATA_CONTRACT_SERIALIZER
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
         public byte[] Serialize( object value )
         {
@@ -67,13 +65,13 @@ namespace Metalama.Patterns.Caching.Serializers
                 return stream.ToArray();
             }
 #else
-                throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException();
 #endif
         }
 
         /// <inheritdoc />
 #if !NET_DATA_CONTRACT_SERIALIZER
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
         public object Deserialize( byte[] array )
         {

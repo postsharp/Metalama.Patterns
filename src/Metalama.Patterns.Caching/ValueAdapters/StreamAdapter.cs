@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Patterns.Caching.ValueAdapters
 {
@@ -14,12 +13,12 @@ namespace Metalama.Patterns.Caching.ValueAdapters
                 return null;
             }
 
-            byte[] buffer = new byte[8192];
+            var buffer = new byte[8192];
 
-            using ( MemoryStream memoryStream = new MemoryStream() )
+            using ( var memoryStream = new MemoryStream() )
             {
-
                 int bytes;
+
                 while ( (bytes = value.Read( buffer, 0, buffer.Length )) > 0 )
                 {
                     memoryStream.Write( buffer, 0, bytes );
@@ -31,39 +30,37 @@ namespace Metalama.Patterns.Caching.ValueAdapters
 
         public override async Task<object> GetStoredValueAsync( Stream value, CancellationToken cancellationToken )
         {
-            if (value == null)
+            if ( value == null )
             {
                 return null;
             }
 
-            byte[] buffer = new byte[8192];
+            var buffer = new byte[8192];
 
-            using ( MemoryStream memoryStream = new MemoryStream() )
+            using ( var memoryStream = new MemoryStream() )
             {
                 int bytes;
 #pragma warning disable CA1835 // Use Memory<T> instead of T[]
                 while ( (bytes = await value.ReadAsync( buffer, 0, buffer.Length, cancellationToken )) > 0 )
 #pragma warning disable CA1835 // Use Memory<T> instead of T[]
                 {
-                    memoryStream.Write(buffer, 0, bytes);
+                    memoryStream.Write( buffer, 0, bytes );
                 }
 
                 return memoryStream.ToArray();
             }
         }
 
-        public override Stream GetExposedValue(object storedValue)
+        public override Stream GetExposedValue( object storedValue )
         {
-            if (storedValue == null)
+            if ( storedValue == null )
             {
                 return null;
             }
 
-            byte[] buffer = (byte[])storedValue;
+            var buffer = (byte[]) storedValue;
 
-            return new MemoryStream(buffer, false);
+            return new MemoryStream( buffer, false );
         }
-
-       
     }
 }

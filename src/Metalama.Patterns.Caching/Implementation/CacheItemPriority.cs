@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Backends;
 
@@ -19,7 +18,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// Never removed, unless explicitly required through invalidation methods.
         /// </summary>
         NotRemovable,
-        
+
         /// <summary>
         /// This cache item is removed earlier if the cache needs to be compacted. For <see cref="MemoryCachingBackend"/>, this is the same as <see cref="Default"/>.
         /// </summary>

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
@@ -10,16 +9,16 @@ namespace Metalama.Patterns.Caching
 {
     partial class CachingServices
     {
-
         /// <summary>
         /// Allows to configure caching profiles (<see cref="CachingProfile"/>), and therefore influence the behavior
         /// of the <see cref="CacheAttribute"/> aspect at run-time. Exposed on the <see cref="CachingServices.Profiles"/> property.
         /// </summary>
         public sealed class CachingProfileRegistry
         {
-            private volatile ImmutableDictionary<string, CachingProfile> profiles = ImmutableDictionary.Create<string, CachingProfile>(StringComparer.OrdinalIgnoreCase);
-            private int revisionNumber;
+            private volatile ImmutableDictionary<string, CachingProfile> profiles =
+                ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
 
+            private int revisionNumber;
 
             internal CachingProfileRegistry()
             {
@@ -31,7 +30,6 @@ namespace Metalama.Patterns.Caching
             /// a profile is registered or modified.
             /// </summary>
             public int RevisionNumber => this.revisionNumber;
-
 
             internal void OnProfileChanged() => Interlocked.Increment( ref this.revisionNumber );
 
@@ -65,7 +63,6 @@ namespace Metalama.Patterns.Caching
 
                         profile = new CachingProfile( profileName );
                         newDictionary = oldDictionary.SetItem( profile.Name, profile );
-
                     }
 #pragma warning disable 420
                     while ( Interlocked.CompareExchange( ref this.profiles, newDictionary, oldDictionary ) != oldDictionary );
@@ -75,7 +72,6 @@ namespace Metalama.Patterns.Caching
 
                     return profile;
                 }
-
             }
 
             /// <summary>
@@ -91,14 +87,12 @@ namespace Metalama.Patterns.Caching
                 {
                     oldDictionary = this.profiles;
                     newDictionary = oldDictionary.SetItem( profile.Name, profile );
-
                 }
 #pragma warning disable 420
                 while ( Interlocked.CompareExchange( ref this.profiles, newDictionary, oldDictionary ) != oldDictionary );
 #pragma warning restore 420
 
                 this.OnProfileChanged();
-
             }
 
             /// <summary>
@@ -106,12 +100,10 @@ namespace Metalama.Patterns.Caching
             /// </summary>
             public void Reset()
             {
-                this.profiles =  ImmutableDictionary.Create<string, CachingProfile>(StringComparer.OrdinalIgnoreCase);
+                this.profiles = ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
                 this.Register( new CachingProfile( CachingProfile.DefaultName ) );
                 this.OnProfileChanged();
             }
-
-
         }
     }
 }

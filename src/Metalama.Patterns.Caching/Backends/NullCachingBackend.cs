@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
 
@@ -11,9 +10,7 @@ namespace Metalama.Patterns.Caching.Backends
     public class NullCachingBackend : CachingBackend
     {
         /// <inheritdoc />
-        protected override void SetItemCore( string key, CacheItem item )
-        {
-        }
+        protected override void SetItemCore( string key, CacheItem item ) { }
 
         /// <inheritdoc />
         protected override bool ContainsItemCore( string key )
@@ -28,9 +25,7 @@ namespace Metalama.Patterns.Caching.Backends
         }
 
         /// <inheritdoc />
-        protected override void InvalidateDependencyCore( string key )
-        {
-        }
+        protected override void InvalidateDependencyCore( string key ) { }
 
         /// <inheritdoc />
         protected override bool ContainsDependencyCore( string key )
@@ -39,14 +34,9 @@ namespace Metalama.Patterns.Caching.Backends
         }
 
         /// <inheritdoc />
-        protected override void ClearCore()
-        {
-
-        }
+        protected override void ClearCore() { }
 
         /// <inheritdoc />
-        protected override void RemoveItemCore( string key )
-        {
-        }
+        protected override void RemoveItemCore( string key ) { }
     }
 }
