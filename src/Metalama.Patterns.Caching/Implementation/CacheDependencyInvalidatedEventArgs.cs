@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Contracts;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -7,6 +8,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <summary>
 /// Arguments of the <see cref="CachingBackend.DependencyInvalidated"/> event.
 /// </summary>
+[PublicAPI]
 public sealed class CacheDependencyInvalidatedEventArgs : EventArgs
 {
     /// <summary>
@@ -22,7 +24,7 @@ public sealed class CacheDependencyInvalidatedEventArgs : EventArgs
     public Guid SourceId { get; }
 
     /// <summary>
-    /// Initializes a new <see cref="CacheDependencyInvalidatedEventArgs"/>.
+    /// Initializes a new instance of the <see cref="CacheDependencyInvalidatedEventArgs"/> class.
     /// </summary>
     /// <param name="key">The key of the invalidated dependency.</param>
     /// <param name="sourceId">The <see cref="Guid"/> of the <see cref="CachingBackend"/>

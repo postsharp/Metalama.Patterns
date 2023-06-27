@@ -2,11 +2,11 @@
 
 #if NETFRAMEWORK
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching.Backends.Azure
 {
@@ -14,6 +14,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     /// An implementation of <see cref="CacheInvalidator"/> based on Microsoft Azure Service Bus, using the older API, <c>WindowsAzure.ServiceBus</c>,
     /// meant for .NET Framework.
     /// </summary>
+    [PublicAPI]
     public class AzureCacheInvalidator : CacheInvalidator
     {
         private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(AzureCacheInvalidator) );
@@ -22,17 +23,17 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         private readonly TopicClient _topic;
         private readonly AzureCacheInvalidatorOptions _options;
 
-        private SubscriptionClient _subscription;
+        // According to Create method logic, consumers can't obtain instances where _subscription and _processMessageTask are null. 
+        private SubscriptionClient _subscription = null!;
+        private Task _processMessageTask = null!;
         private volatile bool _isStopped;
-        private Task _processMessageTask;
 
         private AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions options ) : base( underlyingBackend, options )
         {
             this._options = options;
             this._topic = TopicClient.CreateFromConnectionString( options.ConnectionString );
 
-            var connectionStringBuilder = new ServiceBusConnectionStringBuilder( options.ConnectionString );
-            connectionStringBuilder.EntityPath = null;
+            var connectionStringBuilder = new ServiceBusConnectionStringBuilder( options.ConnectionString ) { EntityPath = null };
 
             this._serviceBusNamespaceManager = NamespaceManager.CreateFromConnectionString( connectionStringBuilder.ToString() );
         }
@@ -43,7 +44,6 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator"/>.</param>
         /// <param name="options">Options.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
-        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
         public static AzureCacheInvalidator Create( [Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions options )
         {
             var invalidator = new AzureCacheInvalidator( backend, options );
@@ -65,7 +65,6 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator"/>.</param>
         /// <param name="options">Options.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
-        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
         public static Task<AzureCacheInvalidator> CreateAsync( [Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions options )
         {
             var invalidator = new AzureCacheInvalidator( backend, options );
@@ -129,7 +128,6 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         }
 
         /// <inheritdoc />
-        [SuppressMessage( "Microsoft.Reliability", "CA2000" )] // BrokeredMessage should not be disposed in this method.
         protected override Task SendMessageAsync( string message, CancellationToken cancellationToken )
         {
             var brokeredMessage = new BrokeredMessage( message );
@@ -164,9 +162,8 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         }
 
         /// <summary>
-        /// Destructor.
+        /// Finalizes an instance of the <see cref="AzureCacheInvalidator"/> class.
         /// </summary>
-        [SuppressMessage( "Microsoft.Design", "CA1063" )]
         ~AzureCacheInvalidator()
         {
             this.DisposeCore( false );

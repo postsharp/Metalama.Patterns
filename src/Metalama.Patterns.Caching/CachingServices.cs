@@ -1,19 +1,22 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
 /// The entry point to configure <c>PostSharp.Patterns.Caching</c> at run-time.
 /// </summary>
+[PublicAPI]
 public static partial class CachingServices
 {
+    private static readonly LogSource _defaultLogger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
     private static volatile CacheKeyBuilder _keyBuilder = new();
     private static volatile CachingBackend _backend = new UninitializedCachingBackend();
-    private static readonly LogSource _defaultLogger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
 
     static CachingServices()
     {
@@ -23,18 +26,20 @@ public static partial class CachingServices
     /// <summary>
     /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
     /// </summary>
+    [AllowNull]
     public static CacheKeyBuilder DefaultKeyBuilder
     {
-        get { return _keyBuilder; }
-        set { _keyBuilder = value ?? new CacheKeyBuilder(); }
+        get => _keyBuilder;
+        set => _keyBuilder = value ?? new CacheKeyBuilder();
     }
 
     /// <summary>
     /// Gets or sets the default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
     /// </summary>
+    [AllowNull]
     public static CachingBackend DefaultBackend
     {
-        get { return _backend; }
+        get => _backend;
         set
         {
             if ( _backend == value )
@@ -56,7 +61,6 @@ public static partial class CachingServices
     /// </summary>
     public static ICachingContext CurrentContext => CachingContext.Current;
 
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
     /// <summary>
     /// Temporarily suspends propagation of dependencies from subsequently called methods to the caller method.
     /// </summary>
@@ -72,7 +76,6 @@ public static partial class CachingServices
     /// in the context of cached methods and not being dependent on its result.
     /// </para>
     /// </remarks>
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     public static IDisposable SuspendDependencyPropagation()
     {
         return CachingContext.OpenSuspendedCacheContext();

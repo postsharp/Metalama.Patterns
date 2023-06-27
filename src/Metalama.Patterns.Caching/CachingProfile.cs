@@ -1,14 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Locking;
 using Metalama.Patterns.Contracts;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
 /// Allows for centralized and run-time configuration of several instances of the <see cref="CacheAttribute"/> aspect.
 /// </summary>
+[PublicAPI]
 public sealed class CachingProfile : ICacheItemConfiguration
 {
     /// <summary>
@@ -25,7 +28,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     private IAcquireLockTimeoutStrategy _acquireLockTimeoutStrategy = new DefaultAcquireLockTimeoutStrategy();
 
     /// <summary>
-    /// Initializes a new <see cref="CachingProfile"/>.
+    /// Initializes a new instance of the <see cref="CachingProfile"/> class.
     /// </summary>
     /// <param name="name">Profile name (a case-insensitive string).</param>
     public CachingProfile( [Required] string name )
@@ -39,25 +42,25 @@ public sealed class CachingProfile : ICacheItemConfiguration
     public string Name { get; }
 
     /// <summary>
-    /// Determines whether caching is enabled for the current profile.
+    /// Gets or sets a value indicating whether caching is enabled for the current profile.
     /// </summary>
     public bool IsEnabled
     {
-        get { return this._isEnabled; }
+        get => this._isEnabled;
         set
         {
             CachingServices.Profiles.OnProfileChanged();
             this._isEnabled = value;
         }
     }
-
+    
     /// <summary>
-    /// Determines whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
+    /// Gets or sets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
     /// when the cache item is removed from the cache.
     /// </summary>
     public bool? AutoReload
     {
-        get { return this._autoReload; }
+        get => this._autoReload;
         set
         {
             CachingServices.Profiles.OnProfileChanged();
@@ -71,7 +74,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public TimeSpan? AbsoluteExpiration
     {
-        get { return this._absoluteExpiration; }
+        get => this._absoluteExpiration;
         set
         {
             CachingServices.Profiles.OnProfileChanged();
@@ -85,7 +88,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public TimeSpan? SlidingExpiration
     {
-        get { return this._slidingExpiration; }
+        get => this._slidingExpiration;
         set
         {
             CachingServices.Profiles.OnProfileChanged();
@@ -98,7 +101,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public CacheItemPriority? Priority
     {
-        get { return this._priority; }
+        get => this._priority;
         set
         {
             CachingServices.Profiles.OnProfileChanged();
@@ -106,9 +109,8 @@ public sealed class CachingProfile : ICacheItemConfiguration
         }
     }
 
-    /// <inheritdoc />
-
     // We can't modify specify IgnoreThisParameter in a profile because this setting is used at build time.
+    /// <inheritdoc />
     bool? ICacheItemConfiguration.IgnoreThisParameter => null;
 
     /// <inheritdoc />
@@ -132,10 +134,11 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// which allows for concurrent execution of all methods. An alternative implementation is <see cref="LocalLockManager"/>,
     /// which prevents concurrent execution of the same method with the same parameters, in the current process (or AppDomain).
     /// </summary>
+    [AllowNull]
     public ILockManager LockManager
     {
-        get { return this._lockManager; }
-        set { this._lockManager = value ?? new NullLockManager(); }
+        get => this._lockManager;
+        set => this._lockManager = value ?? new NullLockManager();
     }
 
     /// <summary>
@@ -151,9 +154,10 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// the <see cref="IAcquireLockTimeoutStrategy"/> interface. If the <see cref="IAcquireLockTimeoutStrategy.OnTimeout"/> does not return
     /// any exception, the cached method will be evaluated (even without a lock).
     /// </summary>
+    [AllowNull]
     public IAcquireLockTimeoutStrategy AcquireLockTimeoutStrategy
     {
-        get { return this._acquireLockTimeoutStrategy; }
-        set { this._acquireLockTimeoutStrategy = value ?? new DefaultAcquireLockTimeoutStrategy(); }
+        get => this._acquireLockTimeoutStrategy;
+        set => this._acquireLockTimeoutStrategy = value ?? new DefaultAcquireLockTimeoutStrategy();
     }
 }

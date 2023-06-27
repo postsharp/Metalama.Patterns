@@ -1,34 +1,41 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using JetBrains.Annotations;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-// TODO: [Porting] Used by Redis backend. Making public for now.
+// TODO: [Porting] Used by Redis backend. Making public for now. Consider removing [PublicApi].
+[PublicAPI]
 [ExplicitCrossPackageInternal]
 public sealed class BackgroundTaskScheduler
 {
+    private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource();
+
+    private readonly AwaitableEvent _backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
+    private readonly bool _sequential;
+    private readonly object _sync = new();
+
+#if DEBUG
+    private readonly ConcurrentDictionary<int, PendingTask> _pendingBackgroundTasks = new();
+#endif
+
     private volatile int _backgroundTaskExceptions;
     private static volatile int _allBackgroundTaskExceptions;
     private volatile int _backgroundTaskCount;
-    private readonly AwaitableEvent _backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
     private bool _backgroundTasksForbidden;
-    private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource();
-    private readonly bool _sequential;
 
 #if DEBUG
     private volatile int _nextTaskId;
-    private readonly ConcurrentDictionary<int, PendingTask> _pendingBackgroundTasks = new();
 #endif
 
     public int BackgroundTaskExceptions => this._backgroundTaskExceptions;
 
     private volatile Task _lastTask = Task.CompletedTask;
-
-    private readonly object _sync = new();
 
     public BackgroundTaskScheduler() : this( false ) { }
 
@@ -40,10 +47,7 @@ public sealed class BackgroundTaskScheduler
     /// <summary>
     /// Forbids the use of the <see cref="EnqueueBackgroundTask(Func{Task})"/> method. This method is used for debugging purposes only.
     /// </summary>
-    public void StopAcceptingBackgroundTasks()
-    {
-        this._backgroundTasksForbidden = true;
-    }
+    public void StopAcceptingBackgroundTasks() => this._backgroundTasksForbidden = true;
 
     /// <summary>
     /// Enqueues a background task.
@@ -59,6 +63,7 @@ public sealed class BackgroundTaskScheduler
 
         lock ( this._backgroundTasksFinishedEvent )
         {
+            // ReSharper disable once NonAtomicCompoundOperator : [Porting] Won't fix, too risky.
             this._backgroundTaskCount++;
 
             if ( this._backgroundTaskCount == 1 )
@@ -80,6 +85,11 @@ public sealed class BackgroundTaskScheduler
             {
                 var previousTask = this._lastTask;
 
+// Suppress warnings to allow adding extra parameter if DEBUG
+#pragma warning disable SA1113
+#pragma warning disable SA1115 
+#pragma warning disable SA1111
+
                 var createdTask = Task.Run(
                     () => this.RunTask(
                         task,
@@ -89,11 +99,10 @@ public sealed class BackgroundTaskScheduler
                         pendingTask
 #endif
                     ) );
-
+                
                 this._lastTask = createdTask;
             }
         }
-
         else
         {
             Task.Run(
@@ -110,12 +119,15 @@ public sealed class BackgroundTaskScheduler
 
     private async Task RunTask(
         Func<Task> task,
-        Task lastTask
+        Task? lastTask
 #if DEBUG
        ,
         PendingTask pendingTask
 #endif
     )
+#pragma warning restore SA1115
+#pragma warning restore SA1113
+#pragma warning restore SA1111
     {
         if ( lastTask != null )
         {
@@ -148,6 +160,7 @@ public sealed class BackgroundTaskScheduler
         {
             lock ( this._backgroundTasksFinishedEvent )
             {
+                // ReSharper disable once NonAtomicCompoundOperator : [Porting] Won't fix, too risky.
                 this._backgroundTaskCount--;
 
                 if ( this._backgroundTaskCount == 0 )
@@ -157,8 +170,7 @@ public sealed class BackgroundTaskScheduler
             }
 
 #if DEBUG
-            PendingTask removedTask;
-            this._pendingBackgroundTasks.TryRemove( pendingTask.Id, out removedTask );
+            this._pendingBackgroundTasks.TryRemove( pendingTask.Id, out _ );
 #endif
         }
     }
@@ -176,10 +188,7 @@ public sealed class BackgroundTaskScheduler
         await this._backgroundTasksFinishedEvent.WaitAsync( CancellationToken.None );
     }
 
-    internal static int AllBackgroundTaskExceptions
-    {
-        get { return _allBackgroundTaskExceptions; }
-    }
+    internal static int AllBackgroundTaskExceptions => _allBackgroundTaskExceptions;
 
     public void Dispose()
     {
@@ -195,10 +204,13 @@ public sealed class BackgroundTaskScheduler
     }
 
 #if DEBUG
+    [SuppressMessage( "StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Class is for diagnostic purposes." )]
     private class PendingTask
     {
-        public StackTrace StackTrace;
-        public Task Task;
+        public StackTrace? StackTrace;
+
+        // ReSharper disable once NotAccessedField.Local
+        public Task? Task;
         public int Id;
     }
 #endif

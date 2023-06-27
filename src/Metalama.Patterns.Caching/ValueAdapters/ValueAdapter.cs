@@ -12,16 +12,10 @@ public abstract class ValueAdapter<T> : IValueAdapter<T>
     public virtual bool IsAsyncSupported => false;
 
     /// <inheritdoc />
-    object IValueAdapter.GetStoredValue( object value )
-    {
-        return this.GetStoredValue( (T) value );
-    }
+    object IValueAdapter.GetStoredValue( object value ) => this.GetStoredValue( (T) value );
 
     /// <inheritdoc />
-    Task<object> IValueAdapter.GetStoredValueAsync( object value, CancellationToken cancellationToken )
-    {
-        return this.GetStoredValueAsync( (T) value, cancellationToken );
-    }
+    Task<object> IValueAdapter.GetStoredValueAsync( object value, CancellationToken cancellationToken ) => this.GetStoredValueAsync( (T) value, cancellationToken );
 
     /// <inheritdoc />
     public abstract T GetExposedValue( object storedValue );
@@ -30,14 +24,8 @@ public abstract class ValueAdapter<T> : IValueAdapter<T>
     public abstract object GetStoredValue( T value );
 
     /// <inheritdoc />
-    public virtual Task<object> GetStoredValueAsync( T value, CancellationToken cancellationToken )
-    {
-        return Task.FromResult( this.GetStoredValue( value ) );
-    }
+    public virtual Task<object> GetStoredValueAsync( T value, CancellationToken cancellationToken ) => Task.FromResult( this.GetStoredValue( value ) );
 
     /// <inheritdoc />
-    object IValueAdapter.GetExposedValue( object storedValue )
-    {
-        return this.GetExposedValue( storedValue );
-    }
+    object IValueAdapter.GetExposedValue( object storedValue ) => this.GetExposedValue( storedValue );
 }

@@ -57,9 +57,9 @@ public class DataContractSerializer : ISerializer
         if ( value == null )
             return Array.Empty<byte>();
 
-        XmlObjectSerializer serializer = this.CreateSerializer();
+        var serializer = this.CreateSerializer();
 
-        using ( MemoryStream stream = new MemoryStream() )
+        using ( var stream = new MemoryStream() )
         {
             serializer.WriteObject( stream, value );
             return stream.ToArray();
@@ -79,9 +79,9 @@ public class DataContractSerializer : ISerializer
         if ( array == null || array.Length == 0 )
             return null;
 
-        XmlObjectSerializer serializer = this.CreateSerializer();
+        var serializer = this.CreateSerializer();
 
-        using ( MemoryStream stream = new MemoryStream( array ) )
+        using ( var stream = new MemoryStream( array ) )
         {
             return serializer.ReadObject( stream );
         }

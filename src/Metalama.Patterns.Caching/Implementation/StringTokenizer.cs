@@ -38,8 +38,5 @@ internal struct StringTokenizer
         }
     }
 
-    public string GetRest()
-    {
-        return this._s.Substring( this._position );
-    }
+    public string GetRest() => this._s.Substring( this._position );
 }

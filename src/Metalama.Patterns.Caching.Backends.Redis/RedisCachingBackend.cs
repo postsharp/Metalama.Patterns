@@ -105,7 +105,6 @@ public class RedisCachingBackend : CachingBackend
     /// <param name="configuration">Configuration of the new back-end.</param>
     /// <returns>A <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
     /// according to the properties of the <paramref name="configuration"/>.</returns>
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static CachingBackend Create( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration )
     {
         // #20775 Caching: two-layered cache should modify the key to avoid conflicts when toggling the option
@@ -164,7 +163,7 @@ public class RedisCachingBackend : CachingBackend
     /// <returns>A task returning a <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
     /// according to the properties of the <paramref name="configuration"/>.</returns>
     public static async Task<CachingBackend> CreateAsync(
-        IConnectionMultiplexer connection,
+        [Required] IConnectionMultiplexer connection,
         [Required] RedisCachingBackendConfiguration configuration,
         CancellationToken cancellationToken = default )
     {
@@ -508,7 +507,7 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <exclude />
-    protected override CacheValue GetItemCore( string key, bool includeDependencies )
+    protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
         var valueKey = this.KeyBuilder.GetValueKey( key );
         var serializedValue = this.Database.StringGet( valueKey );
@@ -524,7 +523,7 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <exclude />
-    protected override async Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override async Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         var valueKey = this.KeyBuilder.GetValueKey( key );
         var serializedValue = await this.Database.StringGetAsync( valueKey );

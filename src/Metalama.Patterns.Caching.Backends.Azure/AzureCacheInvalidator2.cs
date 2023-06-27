@@ -2,6 +2,7 @@
 
 #if NETSTANDARD || NETCOREAPP
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using Microsoft.Azure.Management.ServiceBus;
@@ -9,8 +10,6 @@ using Microsoft.Azure.Management.ServiceBus.Models;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Rest;
-using Newtonsoft.Json;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Metalama.Patterns.Caching.Backends.Azure
@@ -19,15 +18,16 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     /// An implementation of <see cref="CacheInvalidator"/> based on Microsoft Azure Service Bus, using the <c>Microsoft.Azure.ServiceBus</c> API
     /// meant for .NET Standard.
     /// </summary>
+    [PublicAPI]
     public class AzureCacheInvalidator2 : CacheInvalidator
     {
         private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching )
             .GetLogSource( typeof(AzureCacheInvalidator2) );
 
-        private string _subscriptionName;
         private readonly TopicClient _topic;
-        private SubscriptionClient _subscription;
         private readonly ServiceBusConnectionStringBuilder _connectionStringBuilder;
+        private string _subscriptionName = null!;
+        private SubscriptionClient _subscription = null!;
 
         private AzureCacheInvalidator2( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions2 options ) : base( underlyingBackend, options )
         {
@@ -41,7 +41,6 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator2"/>.</param>
         /// <param name="options">Options.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator2"/>.</returns>
-        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
         public static async Task<AzureCacheInvalidator2> CreateAsync( [Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions2 options )
         {
             var invalidator = new AzureCacheInvalidator2( backend, options );
@@ -56,7 +55,6 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator2"/>.</param>
         /// <param name="options">Options.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator2"/>.</returns>
-        [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
         public static AzureCacheInvalidator2 Create( [Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions2 options )
         {
             var invalidator = new AzureCacheInvalidator2( backend, options );
@@ -67,13 +65,13 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         private async Task Init( AzureCacheInvalidatorOptions2 options )
         {
-            if ( options.SubscriptionName == null )
+            if ( options is AzureCacheInvalidatorOptions2.NewSubscription newSubscriptionOptions )
             {
-                this._subscriptionName = await CreateSubscription( options );
+                this._subscriptionName = await CreateSubscription( newSubscriptionOptions );
             }
             else
             {
-                this._subscriptionName = options.SubscriptionName;
+                this._subscriptionName = ((AzureCacheInvalidatorOptions2.ExistingSubscription) options).SubscriptionName;
             }
 
             this._subscription = new SubscriptionClient( this._connectionStringBuilder, this._subscriptionName, ReceiveMode.ReceiveAndDelete );
@@ -95,9 +93,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                 this.OnMessageReceived( value );
             }
             catch ( OperationCanceledException ) { }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch ( Exception e )
-#pragma warning restore CA1031 // Do not catch general exception types
             {
                 _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
             }
@@ -106,7 +102,6 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         }
 
         /// <inheritdoc />
-        [SuppressMessage( "Microsoft.Reliability", "CA2000" )] // BrokeredMessage should not be disposed in this method.
         protected override Task SendMessageAsync( string message, CancellationToken cancellationToken )
         {
             var azureMessage = new Message( Encoding.UTF8.GetBytes( message ) )
@@ -138,15 +133,14 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         }
 
         /// <summary>
-        /// Destructor.
+        /// Finalizes an instance of the <see cref="AzureCacheInvalidator2"/> class.
         /// </summary>
-        [SuppressMessage( "Microsoft.Design", "CA1063" )]
         ~AzureCacheInvalidator2()
         {
             this.DisposeCore( false );
         }
 
-        private static async Task<string> CreateSubscription( AzureCacheInvalidatorOptions2 options )
+        private static async Task<string> CreateSubscription( AzureCacheInvalidatorOptions2.NewSubscription options )
         {
             try
             {
@@ -198,7 +192,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                 // If the token isn't a valid string, throw an error.
                 if ( string.IsNullOrEmpty( result.AccessToken ) )
                 {
-                    throw new Exception( "Token result is empty!" );
+                    throw new AzureCachingBackendAssertionFailedException( "Token result is empty!" );
                 }
 
                 return result.AccessToken;

@@ -13,25 +13,16 @@ public class NullCachingBackend : CachingBackend
     protected override void SetItemCore( string key, CacheItem item ) { }
 
     /// <inheritdoc />
-    protected override bool ContainsItemCore( string key )
-    {
-        return false;
-    }
+    protected override bool ContainsItemCore( string key ) => false;
 
     /// <inheritdoc />
-    protected override CacheValue GetItemCore( string key, bool includeDependencies )
-    {
-        return null;
-    }
+    protected override CacheValue GetItemCore( string key, bool includeDependencies ) => null;
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key ) { }
 
     /// <inheritdoc />
-    protected override bool ContainsDependencyCore( string key )
-    {
-        return false;
-    }
+    protected override bool ContainsDependencyCore( string key ) => false;
 
     /// <inheritdoc />
     protected override void ClearCore() { }

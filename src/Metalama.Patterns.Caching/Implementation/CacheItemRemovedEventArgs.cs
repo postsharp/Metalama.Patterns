@@ -1,20 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
 /// Arguments of the <see cref="CachingBackend.ItemRemoved"/> event.
 /// </summary>
+[PublicAPI] // TODO: Does CacheItemRemovedEventArgs need to be public? 
 public sealed class CacheItemRemovedEventArgs : EventArgs
 {
     internal CacheItemRemovedEventArgs( string key, CacheItemRemovedReason removedReason, Guid sourceId )
     {
-        if ( key == null )
-        {
-            throw new ArgumentNullException( nameof(key) );
-        }
-
-        this.Key = key;
+        this.Key = key ?? throw new ArgumentNullException( nameof(key) );
         this.RemovedReason = removedReason;
         this.SourceId = sourceId;
     }

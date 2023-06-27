@@ -3,7 +3,6 @@
 using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching;
@@ -11,21 +10,21 @@ namespace Metalama.Patterns.Caching;
 internal sealed class AutoReloadManager
 {
     private readonly CachingBackend _backend;
-    private int _autoRefreshSubscriptions;
     private readonly ConcurrentDictionary<string, AutoRefreshInfo> _autoRefreshInfos = new();
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
+
+    private int _autoRefreshSubscriptions;
 
     public AutoReloadManager( CachingBackend backend )
     {
         this._backend = backend;
     }
 
-    private void BeginAutoRefreshValue( object sender, CacheItemRemovedEventArgs args )
+    private void BeginAutoRefreshValue( object? sender, CacheItemRemovedEventArgs args )
     {
         var key = args.Key;
-        AutoRefreshInfo autoRefreshInfo;
 
-        if ( this._autoRefreshInfos.TryGetValue( key, out autoRefreshInfo ) )
+        if ( this._autoRefreshInfos.TryGetValue( key, out var autoRefreshInfo ) )
         {
             if ( autoRefreshInfo.IsAsync )
             {
@@ -57,7 +56,7 @@ internal sealed class AutoReloadManager
 
         this._autoRefreshInfos.GetOrAdd(
             key,
-            k =>
+            _ =>
             {
                 if ( Interlocked.Increment( ref this._autoRefreshSubscriptions ) == 1 )
                 {
@@ -70,7 +69,6 @@ internal sealed class AutoReloadManager
         // NOTE: We never remove things from autoRefreshInfos. AutoRefresh keys are there forever, they are never evicted.
     }
 
-    [SuppressMessage( "Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes" )]
     private static void AutoRefreshCore( string key, AutoRefreshInfo info )
     {
         using ( var activity = info.Logger.Default.OpenActivity( Formatted( "Auto-refreshing: {Key}", key ) ) )
@@ -101,7 +99,7 @@ internal sealed class AutoReloadManager
             {
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    Task<object> invokeValueProviderTask = (Task<object>) info.ValueProvider.Invoke();
+                    var invokeValueProviderTask = (Task<object>) info.ValueProvider.Invoke();
                     var value = await invokeValueProviderTask;
 
                     await CachingFrontend.SetItemAsync( key, value, info.ReturnType, info.Configuration, context, cancellationToken );

@@ -20,10 +20,10 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// </summary>
 public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingComponent
 {
-    private RedisKeyBuilder _keyBuilder;
     private readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(RedisCacheDependencyGarbageCollector) );
+    private RedisKeyBuilder _keyBuilder;
 
-    internal RedisNotificationQueue NotificationQueue { get; private set; }
+    private RedisNotificationQueue NotificationQueue { get; set; }
 
     private readonly bool _ownsBackend;
     private readonly DependenciesRedisCachingBackend _backend;

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Dependencies;
 
 namespace Metalama.Patterns.Caching;
@@ -7,12 +8,13 @@ namespace Metalama.Patterns.Caching;
 /// <summary>
 /// Represents the context in which a method being cached is executing. 
 /// </summary>
+[PublicAPI]
 public interface ICachingContext
 {
     /// <summary>
     /// Gets the parent context.
     /// </summary>
-    ICachingContext Parent { get; }
+    ICachingContext? Parent { get; }
 
     /// <summary>
     /// Gets the kind of <see cref="ICachingContext"/>.
@@ -23,13 +25,13 @@ public interface ICachingContext
     /// Adds a set of dependencies represented as keys to the current context.
     /// </summary>
     /// <param name="dependencies">A set of dependency keys.</param>
-    void AddDependencies( IEnumerable<string> dependencies );
+    void AddDependencies( IEnumerable<string>? dependencies );
 
     /// <summary>
     /// Adds a set of dependencies represented as <see cref="ICacheDependency"/> to the current context.
     /// </summary>
     /// <param name="dependencies">A set of <see cref="ICacheDependency"/>.</param>
-    void AddDependencies( IEnumerable<ICacheDependency> dependencies );
+    void AddDependencies( IEnumerable<ICacheDependency>? dependencies );
 
     /// <summary>
     /// Adds a dependency represented as a key to the current context.

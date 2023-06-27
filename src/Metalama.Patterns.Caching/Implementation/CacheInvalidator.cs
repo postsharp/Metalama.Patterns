@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Contracts;
-using System.Diagnostics.CodeAnalysis;
 using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -10,6 +10,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// Base class for a kind of <see cref="CachingBackendEnhancer"/> that allows several instances of the same application to use
 /// a local cache, and synchronize themselves by sending invalidation messages over a publish/subscribe channel.
 /// </summary>
+[PublicAPI]
 public abstract class CacheInvalidator : CachingBackendEnhancer
 {
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
@@ -20,7 +21,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     public CacheInvalidatorOptions Options { get; }
 
     /// <summary>
-    /// Initializes a new <see cref="CachingBackend"/>/
+    /// Initializes a new instance of the <see cref="CacheInvalidator"/> class.
     /// </summary>
     /// <param name="underlyingBackend">The underlying <see cref="CachingBackend"/> (typically an in-memory cache).</param>
     /// <param name="options">Options of the new <see cref="CacheInvalidator"/>.</param>
@@ -65,7 +66,6 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     /// Implementations of <see cref="CacheInvalidator"/> must call this method when an invalidation message is received.
     /// </summary>
     /// <param name="message">The serialized invalidation message.</param>
-    [SuppressMessage( "Microsoft.Design", "CA1031" )]
     protected void OnMessageReceived( [Required] string message )
     {
         var tokenizer = new StringTokenizer( message );
@@ -83,10 +83,8 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
             var kind = tokenizer.GetNext();
             var backendIdStr = tokenizer.GetNext();
             var key = tokenizer.GetRest();
-
-            Guid sourceId;
-
-            if ( !Guid.TryParse( backendIdStr, out sourceId ) )
+            
+            if ( !Guid.TryParse( backendIdStr, out var sourceId ) )
             {
                 activity.SetOutcome(
                     this.LogSource.Failure.Level,
@@ -133,11 +131,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
         }
     }
 
-    [SuppressMessage( "Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase" )]
-    private string GetMessage( string kind, string key )
-    {
-        return this.Options.Prefix + ":" + kind.ToLowerInvariant() + ":" + this.UnderlyingBackend.Id + ":" + key;
-    }
+    private string GetMessage( string kind, string key ) => this.Options.Prefix + ":" + kind.ToLowerInvariant() + ":" + this.UnderlyingBackend.Id + ":" + key;
 
     private Task PublishInvalidationAsync( string key, CacheKeyKind cacheKeyKind, CancellationToken cancellationToken )
     {

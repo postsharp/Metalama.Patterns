@@ -20,10 +20,7 @@ public static partial class CachingServices
     {
         private static readonly ConcurrentDictionary<MethodInfo, int> _nestedCachedMethods = new();
 
-        internal static void AddedNestedCachedMethod( MethodInfo method )
-        {
-            _nestedCachedMethods.TryAdd( method, 0 );
-        }
+        internal static void AddedNestedCachedMethod( MethodInfo method ) => _nestedCachedMethods.TryAdd( method, 0 );
 
         /// <summary>
         /// Invalidates a cache dependency given an <see cref="object"/>, i.e. removes all cached items that are dependent on that object.
@@ -84,10 +81,7 @@ public static partial class CachingServices
         /// Invalidates a cache dependency given as an <see cref="ICacheDependency"/>, i.e. removes all cache items that are dependent on this dependency.
         /// </summary>
         /// <param name="dependency">A dependency.</param>
-        public static void Invalidate( [Required] ICacheDependency dependency )
-        {
-            Invalidate( dependency, dependency.GetType() );
-        }
+        public static void Invalidate( [Required] ICacheDependency dependency ) => Invalidate( dependency, dependency.GetType() );
 
         private static void Invalidate( [Required] ICacheDependency dependency, Type dependencyType )
         {
@@ -114,10 +108,7 @@ public static partial class CachingServices
         /// </summary>
         /// <param name="dependency">A dependency.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public static Task InvalidateAsync( [Required] ICacheDependency dependency )
-        {
-            return InvalidateAsync( dependency, dependency.GetType() );
-        }
+        public static Task InvalidateAsync( [Required] ICacheDependency dependency ) => InvalidateAsync( dependency, dependency.GetType() );
 
         private static async Task InvalidateAsync( [Required] ICacheDependency dependency, Type dependencyType )
         {
@@ -278,25 +269,16 @@ public static partial class CachingServices
             }
         }
 
-        private static void InvalidateDelegate( Delegate method, params object[] args )
-        {
-            Invalidate( method.Method, method.Target, args );
-        }
+        private static void InvalidateDelegate( Delegate method, params object[] args ) => Invalidate( method.Method, method.Target, args );
 
-        private static Task InvalidateDelegateAsync( Delegate method, params object[] args )
-        {
-            return InvalidateAsync( method.Method, method.Target, args );
-        }
+        private static Task InvalidateDelegateAsync( Delegate method, params object[] args ) => InvalidateAsync( method.Method, method.Target, args );
 
         /// <summary>
         /// Removes a method call result from the cache giving the delegate of the method. This overload is for methods with 0 parameter.
         /// </summary>
         /// <typeparam name="TReturn">The return type of the method.</typeparam>
         /// <param name="method">A delegate of the method to invalidate.</param>
-        public static void Invalidate<TReturn>( [Required] Func<TReturn> method )
-        {
-            InvalidateDelegate( method );
-        }
+        public static void Invalidate<TReturn>( [Required] Func<TReturn> method ) => InvalidateDelegate( method );
 
         /// <summary>
         /// Asynchronously removes a method call result from the cache giving the delegate of the method. This overload is for methods with 0 parameter.
@@ -304,10 +286,7 @@ public static partial class CachingServices
         /// <typeparam name="TReturn">The return type of the method.</typeparam>
         /// <param name="method">A delegate of the method to invalidate.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public static Task InvalidateAsync<TReturn>( [Required] Func<TReturn> method )
-        {
-            return InvalidateDelegateAsync( method );
-        }
+        public static Task InvalidateAsync<TReturn>( [Required] Func<TReturn> method ) => InvalidateDelegateAsync( method );
 
         private static CachingContext OpenRecacheContext( Delegate method, params object[] args )
         {

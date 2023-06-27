@@ -4,21 +4,20 @@ using Metalama.Patterns.Caching.Dependencies;
 
 namespace Metalama.Patterns.Caching;
 
-[Serializable]
-internal sealed class SuspendedCachingContext : MarshalByRefObject, IDisposable, ICachingContext
+internal sealed class SuspendedCachingContext : IDisposable, ICachingContext
 {
-    private ICachingContext _suspendedContext;
+    private readonly ICachingContext? _suspendedContext;
 
-    internal SuspendedCachingContext( ICachingContext suspendedContext )
+    internal SuspendedCachingContext( ICachingContext? suspendedContext )
     {
         this._suspendedContext = suspendedContext;
     }
 
-    public ICachingContext Parent => null;
+    public ICachingContext? Parent => null;
 
-    public void AddDependencies( IEnumerable<string> dependencies ) { }
+    public void AddDependencies( IEnumerable<string>? dependencies ) { }
 
-    public void AddDependencies( IEnumerable<ICacheDependency> dependencies ) { }
+    public void AddDependencies( IEnumerable<ICacheDependency>? dependencies ) { }
 
     public void AddDependency( string dependency ) { }
 

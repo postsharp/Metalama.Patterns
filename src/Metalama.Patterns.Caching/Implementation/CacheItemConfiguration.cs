@@ -67,8 +67,5 @@ public sealed class CacheItemConfiguration : ICacheItemConfiguration
         }
     }
 
-    internal CacheItemConfiguration Clone()
-    {
-        return (CacheItemConfiguration) this.MemberwiseClone();
-    }
+    internal CacheItemConfiguration Clone() => (CacheItemConfiguration) this.MemberwiseClone();
 }

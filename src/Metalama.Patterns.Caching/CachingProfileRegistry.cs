@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 
@@ -7,12 +8,13 @@ using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching;
 
-partial class CachingServices
+public partial class CachingServices
 {
     /// <summary>
     /// Allows to configure caching profiles (<see cref="CachingProfile"/>), and therefore influence the behavior
     /// of the <see cref="CacheAttribute"/> aspect at run-time. Exposed on the <see cref="CachingServices.Profiles"/> property.
     /// </summary>
+    [PublicAPI]
     public sealed class CachingProfileRegistry
     {
         private volatile ImmutableDictionary<string, CachingProfile> _profiles =
@@ -47,7 +49,7 @@ partial class CachingServices
         {
             get
             {
-                CachingProfile profile;
+                CachingProfile? profile;
 
                 ImmutableDictionary<string, CachingProfile> oldDictionary;
                 ImmutableDictionary<string, CachingProfile> newDictionary;
@@ -56,7 +58,7 @@ partial class CachingServices
                 {
                     oldDictionary = this._profiles;
 
-                    if ( oldDictionary.TryGetValue( profileName ?? CachingProfile.DefaultName, out profile ) )
+                    if ( oldDictionary.TryGetValue( profileName, out profile ) )
                     {
                         return profile;
                     }

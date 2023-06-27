@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using Microsoft.Extensions.Caching.Memory;
@@ -25,10 +26,11 @@ namespace Metalama.Patterns.Caching.Backends;
 /// of the cache.</item>
 /// </list>
 /// </remarks>
-public class MemoryCacheBackend : CachingBackend
+[PublicAPI]
+public sealed class MemoryCacheBackend : CachingBackend
 {
     private readonly IMemoryCache _cache;
-    private readonly Func<PSCacheItem, long> _sizeCalculator;
+    private readonly Func<PSCacheItem, long>? _sizeCalculator;
 
     /// <inheritdoc />
     protected override void DisposeCore( bool disposing )
@@ -45,23 +47,23 @@ public class MemoryCacheBackend : CachingBackend
     }
 
     /// <summary>
-    /// Initializes a new <see cref="MemoryCacheBackend"/> based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
+    /// Initializes a new instance of the <see cref="MemoryCacheBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
     /// </summary>
     public MemoryCacheBackend() : this( new MemoryCache( new MemoryCacheOptions() ) ) { }
 
     /// <summary>
-    /// Initializes a new <see cref="MemoryCacheBackend"/> based on the given <see cref="IMemoryCache"/>.
+    /// Initializes a new instance of the <see cref="MemoryCacheBackend"/> class based on the given <see cref="IMemoryCache"/>.
     /// </summary>
     /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
     public MemoryCacheBackend( [Required] IMemoryCache cache ) : this( cache, null ) { }
 
     /// <summary>
-    /// Initializes a new <see cref="MemoryCacheBackend"/> based on the given <see cref="IMemoryCache"/>. The backend creates cache entries
+    /// Initializes a new instance of the <see cref="MemoryCacheBackend"/> class based on the given <see cref="IMemoryCache"/>. The backend creates cache entries
     /// with size calculated by the given function.
     /// </summary>
     /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
     /// <param name="sizeCalculator">A function that calculates the size of a new cache item, which some backends may use to evict.</param>
-    public MemoryCacheBackend( [Required] IMemoryCache cache, Func<PSCacheItem, long> sizeCalculator )
+    public MemoryCacheBackend( [Required] IMemoryCache cache, Func<PSCacheItem, long>? sizeCalculator )
     {
         this._cache = cache;
         this._sizeCalculator = sizeCalculator;
@@ -160,7 +162,7 @@ public class MemoryCacheBackend : CachingBackend
 
     private void OnCacheItemRemoved( object keyAsObject, object value, EvictionReason reason, object state )
     {
-        if ( reason == EvictionReason.Removed || reason == EvictionReason.Replaced )
+        if ( reason is EvictionReason.Removed or EvictionReason.Replaced )
         {
             // In this case, all actions are taken by the method that removes the item.
             return;
@@ -179,9 +181,9 @@ public class MemoryCacheBackend : CachingBackend
         }
     }
 
-    private void AddDependencies( string key, IImmutableList<string> dependencies )
+    private void AddDependencies( string key, IImmutableList<string>? dependencies )
     {
-        if ( dependencies == null || dependencies.Count <= 0 )
+        if ( dependencies is not { Count: > 0 } )
         {
             return;
         }
@@ -190,7 +192,7 @@ public class MemoryCacheBackend : CachingBackend
         {
             var dependencyKey = GetDependencyKey( dependency );
 
-            HashSet<string> backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
+            var backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
 
             if ( backwardDependencies == null )
             {
@@ -231,7 +233,7 @@ public class MemoryCacheBackend : CachingBackend
         var itemKey = GetItemKey( key );
         var lockTaken = false;
         var previousValue = (MemoryCacheValue) this._cache.Get( itemKey );
-
+        
         try
         {
             if ( previousValue != null )
@@ -240,7 +242,7 @@ public class MemoryCacheBackend : CachingBackend
                 this.CleanDependencies( key, previousValue );
             }
 
-            if ( item.Dependencies != null && item.Dependencies.Count > 0 )
+            if ( item.Dependencies is { Count: > 0 } )
             {
                 this.AddDependencies( key, item.Dependencies );
             }
@@ -254,7 +256,7 @@ public class MemoryCacheBackend : CachingBackend
         {
             if ( lockTaken )
             {
-                Monitor.Exit( previousValue.Sync );
+                Monitor.Exit( previousValue!.Sync );
             }
         }
     }
@@ -274,7 +276,7 @@ public class MemoryCacheBackend : CachingBackend
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key )
     {
-        HashSet<string> items = (HashSet<string>) this._cache.Get( GetDependencyKey( key ) );
+        var items = (HashSet<string>) this._cache.Get( GetDependencyKey( key ) );
 
         if ( items != null )
         {
@@ -326,7 +328,7 @@ public class MemoryCacheBackend : CachingBackend
         foreach ( var dependency in cacheValue.Dependencies )
         {
             var dependencyKey = GetDependencyKey( dependency );
-            HashSet<string> backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
+            var backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
 
             if ( backwardDependencies == null )
             {

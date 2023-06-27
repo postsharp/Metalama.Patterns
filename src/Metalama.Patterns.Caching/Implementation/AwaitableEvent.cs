@@ -7,6 +7,15 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
+// TODO: [Porting] Consider properly fixing all the warnings in AwaitableEvent.
+
+// This file has many warnings. It is an internal utility class ported from PostSharp.Patterns.Common/Threading/Primitives.
+// It's risky to modify code like this, and it's difficult to actually fix the warnings without changing the code, so
+// for now, just suppress all the warnings.
+
+// Resharper disable All
+#pragma  warning disable
+
 // Ported from PostSharp.Patterns.Common/Threading/Primitives
 [ExplicitCrossPackageInternal]
 internal sealed class AwaitableEvent

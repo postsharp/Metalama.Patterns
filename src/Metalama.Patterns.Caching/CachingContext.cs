@@ -8,30 +8,25 @@ using System.Reflection;
 
 namespace Metalama.Patterns.Caching;
 
-// Needs to be [Serializable] and derived from MarshalByRefObject because we are using CallContext in .NET 4.5.
-// No serialization actually occurs, but CallContext requires this.
-[Serializable]
-internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICachingContext
+internal sealed class CachingContext : IDisposable, ICachingContext
 {
-    private static readonly AsyncLocal<ICachingContext> _currentContext = new();
+    private static readonly AsyncLocal<ICachingContext?> _currentContext = new();
 
+    [AllowNull]
     public static ICachingContext Current
     {
-        get { return _currentContext.Value ?? (_currentContext.Value = new NullCachingContext()); }
-        internal set { _currentContext.Value = value; }
+        get => _currentContext.Value ??= new NullCachingContext();
+        internal set => _currentContext.Value = value;
     }
 
     private readonly string _key;
-    private bool _disposed;
     private readonly object _dependenciesSync = new();
-    private HashSet<string> _dependencies;
 
-    [SuppressMessage( "Microsoft.Usage", "CA2235:MarkAllNonSerializableFields", Justification = "Not really serialized." )]
-    private ImmutableHashSet<string> _immutableDependencies;
+    private bool _disposed;
+    private HashSet<string>? _dependencies;
+    private ImmutableHashSet<string>? _immutableDependencies;
 
-    private CachingContext() { }
-
-    private CachingContext( string key, CachingContextKind options, ICachingContext parent )
+    private CachingContext( string key, CachingContextKind options, ICachingContext? parent )
     {
         this._key = key;
         this.Kind = options;
@@ -63,7 +58,7 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
         }
     }
 
-    public ICachingContext Parent { get; }
+    public ICachingContext? Parent { get; }
 
     public static CachingContext OpenRecacheContext( string key )
     {
@@ -109,14 +104,11 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
             this._dependencies.Add( dependency.GetCacheKey() );
         }
     }
-
+    
+    [MemberNotNull( nameof(_dependencies) )]
     private void PrepareAddDependency()
     {
-        if ( this._dependencies == null )
-        {
-            this._dependencies = new HashSet<string>();
-        }
-
+        this._dependencies ??= new HashSet<string>();
         this._immutableDependencies = null;
     }
 
@@ -148,12 +140,10 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
         if ( this._disposed )
         {
             this.Parent?.AddDependency( dependency );
-
-            return;
         }
     }
 
-    public void AddDependencies( IEnumerable<ICacheDependency> dependencies )
+    public void AddDependencies( IEnumerable<ICacheDependency>? dependencies )
     {
         if ( string.IsNullOrEmpty( this._key ) )
         {
@@ -181,7 +171,7 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
         }
     }
 
-    public void AddDependencies( IEnumerable<string> dependencies )
+    public void AddDependencies( IEnumerable<string>? dependencies )
     {
         if ( this._disposed )
         {

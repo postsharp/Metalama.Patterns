@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Serializers;
 using System.Collections.Immutable;
 
@@ -10,15 +11,16 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// </summary>
 [PSerializable]
 [ImportSerializer( typeof(ImmutableList<>), typeof(ImmutableListPortableSerializer<>) )]
+[PublicAPI] // TODO: Does CacheItem need to be public? Might be a consequence of serialization?
 public sealed class CacheItem : IEquatable<CacheItem>
 {
     /// <summary>
-    /// Initializes a new <see cref="CacheItem"/>.
+    /// Initializes a new instance of the <see cref="CacheItem"/> class.
     /// </summary>
     /// <param name="value">The value to be cached (<c>null</c> is a valid value).</param>
     /// <param name="dependencies">A list of dependencies, or <c>null</c> if there is no dependency.</param>
     /// <param name="configuration">The configuration of the cache item, or <c>null</c> to use the default configuration.</param>
-    public CacheItem( object value, IImmutableList<string> dependencies = null, CacheItemConfiguration configuration = null )
+    public CacheItem( object? value, IImmutableList<string>? dependencies = null, CacheItemConfiguration? configuration = null )
     {
         this.Value = value;
         this.Dependencies = dependencies;
@@ -26,52 +28,46 @@ public sealed class CacheItem : IEquatable<CacheItem>
     }
 
     /// <summary>
-    /// Gets the value to be cached (<c>null</c> is a valid value).
+    /// Gets the value to be cached.
     /// </summary>
-    public object Value { get; private set; }
+    public object? Value { get; }
 
     /// <summary>
     /// Gets the list of dependencies of the current item, or <c>null</c>
     /// if there is no dependency.
     /// </summary>
-    public IImmutableList<string> Dependencies { get; private set; }
+    public IImmutableList<string>? Dependencies { get; }
 
     /// <summary>
     /// Gets the <see cref="CacheItemConfiguration"/> for the current item,
     /// or <c>null</c> to use the default configuration.
     /// </summary>
-    public CacheItemConfiguration Configuration { get; private set; }
+    public CacheItemConfiguration? Configuration { get; }
 
-    internal CacheItem WithValue( object value )
-    {
-        var clone = (CacheItem) this.MemberwiseClone();
-        clone.Value = value;
-
-        return clone;
-    }
+    internal CacheItem WithValue( object value ) => new( value, this.Dependencies, this.Configuration );
 
     /// <inheritdoc />
-    public override bool Equals( object obj )
+    public override bool Equals( object? obj )
     {
-        if ( obj is CacheItem )
+        if ( obj is CacheItem item )
         {
-            return this.Equals( (CacheItem) obj );
+            return this.Equals( item );
         }
 
-        return base.Equals( obj );
+        return ReferenceEquals( obj, this );
     }
 
     /// <summary>
     /// Determines whether two instances of the <see cref="CacheItem"/> class are structurally equal.
     /// </summary>
-    /// <param name="first">A <see cref="CacheItem"/>.</param>
-    /// <param name="second">A <see cref="CacheItem"/>.</param>
+    /// <param name="first">The first <see cref="CacheItem"/>.</param>
+    /// <param name="second">The second <see cref="CacheItem"/>.</param>
     /// <returns><c>true</c> if <paramref name="first"/> equals <paramref name="second"/>, otherwise <c>false</c>.</returns>
-    public static bool operator ==( CacheItem first, CacheItem second )
+    public static bool operator ==( CacheItem? first, CacheItem? second )
     {
-        if ( (object) first == null )
+        if ( ReferenceEquals( first, null ) )
         {
-            return (object) second == null;
+            return ReferenceEquals( second, null );
         }
 
         return first.Equals( second );
@@ -80,20 +76,17 @@ public sealed class CacheItem : IEquatable<CacheItem>
     /// <summary>
     /// Determines whether two instances of the <see cref="CacheItem"/> class are structurally different.
     /// </summary>
-    /// <param name="first">A <see cref="CacheItem"/>.</param>
-    /// <param name="second">A <see cref="CacheItem"/>.</param>
-    /// <returns><c>true</c> if <paramref name="first"/> is differnt to <paramref name="second"/>, otherwise <c>false</c>.</returns>
-    public static bool operator !=( CacheItem first, CacheItem second )
-    {
-        return !(first == second);
-    }
+    /// <param name="first">The first <see cref="CacheItem"/>.</param>
+    /// <param name="second">The second <see cref="CacheItem"/>.</param>
+    /// <returns><c>true</c> if <paramref name="first"/> is different to <paramref name="second"/>, otherwise <c>false</c>.</returns>
+    public static bool operator !=( CacheItem first, CacheItem second ) => !(first == second);
 
     /// <summary>
     /// Determines whether the current <see cref="CacheItem"/> is structurally equal to another <see cref="CacheItem"/>.
     /// </summary>
     /// <param name="other">A <see cref="CacheItem"/>.</param>
     /// <returns><c>true</c> both items are equal, otherwise <c>false</c>.</returns>
-    public bool Equals( CacheItem other )
+    public bool Equals( CacheItem? other )
     {
         if ( ReferenceEquals( null, other ) )
         {
@@ -148,7 +141,7 @@ public sealed class CacheItem : IEquatable<CacheItem>
         {
             var hashCode = 47;
 
-            hashCode = (hashCode * 53) ^ this.Value.GetHashCode();
+            hashCode = (hashCode * 53) ^ (this.Value == null ? 0 : this.Value.GetHashCode());
 
             if ( this.Dependencies != null )
             {

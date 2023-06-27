@@ -21,15 +21,9 @@ public sealed class MemoryCachingBackend : CachingBackend
 
     private readonly MemoryCache _cache;
 
-    private static string GetItemKey( string key )
-    {
-        return nameof(MemoryCachingBackend) + ":item:" + key;
-    }
+    private static string GetItemKey( string key ) => nameof(MemoryCachingBackend) + ":item:" + key;
 
-    private static string GetDependencyKey( string key )
-    {
-        return nameof(MemoryCachingBackend) + ":dependency:" + key;
-    }
+    private static string GetDependencyKey( string key ) => nameof(MemoryCachingBackend) + ":dependency:" + key;
 
     /// <summary>
     /// Initializes a new <see cref="MemoryCachingBackend"/> based on the <see cref="MemoryCache.Default"/> instance of the <see cref="MemoryCache"/> class.
@@ -196,22 +190,13 @@ public sealed class MemoryCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override bool ContainsItemCore( string key )
-    {
-        return this._cache.Contains( GetItemKey( key ) );
-    }
+    protected override bool ContainsItemCore( string key ) => this._cache.Contains( GetItemKey( key ) );
 
     /// <inheritdoc />  
-    protected override CacheValue GetItemCore( string key, bool includeDependencies )
-    {
-        return (CacheValue) this._cache.Get( GetItemKey( key ) );
-    }
+    protected override CacheValue GetItemCore( string key, bool includeDependencies ) => (CacheValue) this._cache.Get( GetItemKey( key ) );
 
     /// <inheritdoc />
-    protected override void InvalidateDependencyCore( string key )
-    {
-        this.InvalidateDependencyImpl( key );
-    }
+    protected override void InvalidateDependencyCore( string key ) => this.InvalidateDependencyImpl( key );
 
     internal void InvalidateDependencyImpl( string key, MemoryCacheValue replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
     {
@@ -302,16 +287,10 @@ public sealed class MemoryCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override bool ContainsDependencyCore( string key )
-    {
-        return this._cache.Contains( GetDependencyKey( key ) );
-    }
+    protected override bool ContainsDependencyCore( string key ) => this._cache.Contains( GetDependencyKey( key ) );
 
     /// <inheritdoc />
-    protected override void ClearCore()
-    {
-        this._cache.Trim( 100 );
-    }
+    protected override void ClearCore() => this._cache.Trim( 100 );
 
     /// <inheritdoc />
     protected override void RemoveItemCore( string key )

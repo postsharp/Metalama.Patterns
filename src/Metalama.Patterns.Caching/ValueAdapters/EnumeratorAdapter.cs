@@ -18,10 +18,7 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
         return list;
     }
 
-    public override IEnumerator<T> GetExposedValue( object storedValue )
-    {
-        return new Enumerator( (List<T>) storedValue );
-    }
+    public override IEnumerator<T> GetExposedValue( object storedValue ) => new Enumerator( (List<T>) storedValue );
 
     private class Enumerator : IEnumerator<T>
     {
@@ -57,9 +54,6 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
             return this._list.Count > this._index;
         }
 
-        public void Reset()
-        {
-            throw new NotSupportedException( "Cannot reset a cached enumerator." );
-        }
+        public void Reset() => throw new NotSupportedException( "Cannot reset a cached enumerator." );
     }
 }

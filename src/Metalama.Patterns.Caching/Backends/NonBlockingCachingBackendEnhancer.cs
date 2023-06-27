@@ -14,42 +14,24 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     private BackgroundTaskScheduler _taskScheduler = new( true );
 
     /// <inheritdoc />
-    protected override CachingBackendFeatures CreateFeatures()
-    {
-        return new Features( this.UnderlyingBackend.SupportedFeatures );
-    }
+    protected override CachingBackendFeatures CreateFeatures() => new Features( this.UnderlyingBackend.SupportedFeatures );
 
     /// <inheritdoc />
     public NonBlockingCachingBackendEnhancer( CachingBackend underlyingBackend ) : base( underlyingBackend ) { }
 
-    private void EnqueueBackgroundTask( Func<Task> task )
-    {
-        this._taskScheduler.EnqueueBackgroundTask( task );
-    }
+    private void EnqueueBackgroundTask( Func<Task> task ) => this._taskScheduler.EnqueueBackgroundTask( task );
 
     /// <inheritdoc />
-    protected override void ClearCore()
-    {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync() );
-    }
+    protected override void ClearCore() => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync() );
 
     /// <inheritdoc />
-    protected override void InvalidateDependencyCore( string key )
-    {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.InvalidateDependencyAsync( key ) );
-    }
+    protected override void InvalidateDependencyCore( string key ) => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.InvalidateDependencyAsync( key ) );
 
     /// <inheritdoc />
-    protected override void SetItemCore( string key, CacheItem item )
-    {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.SetItemAsync( key, item ) );
-    }
+    protected override void SetItemCore( string key, CacheItem item ) => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.SetItemAsync( key, item ) );
 
     /// <inheritdoc />
-    protected override void RemoveItemCore( string key )
-    {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.RemoveItemAsync( key ) );
-    }
+    protected override void RemoveItemCore( string key ) => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.RemoveItemAsync( key ) );
 
     /// <inheritdoc />
     protected override Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )

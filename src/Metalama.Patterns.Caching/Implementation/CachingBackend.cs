@@ -27,10 +27,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     private EventHandler<CacheDependencyInvalidatedEventArgs> _dependencyInvalidated;
     private BackgroundTaskScheduler _backgroundTaskScheduler;
 
-    private BackgroundTaskScheduler GetLegacyBackgroundTaskScheduler()
-    {
-        return LazyInitializer.EnsureInitialized( ref this._backgroundTaskScheduler );
-    }
+    private BackgroundTaskScheduler GetLegacyBackgroundTaskScheduler() => LazyInitializer.EnsureInitialized( ref this._backgroundTaskScheduler );
 
     /// <summary>
     /// Gets the <see cref="Flashtrace.LogSource"/> that implementations can use to emit
@@ -242,7 +239,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="includeDependencies"><c>true</c> if the <see cref="CacheValue.Dependencies"/> properties of the
     /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
     /// <returns>A <see cref="CacheValue"/>, or <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-    protected abstract CacheValue GetItemCore( string key, bool includeDependencies );
+    protected abstract CacheValue? GetItemCore( string key, bool includeDependencies );
 
     /// <summary>
     /// Asynchronously gets a cache item given its key. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
@@ -252,7 +249,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> evaluating to a <see cref="CacheValue"/>, or evaluating to <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-    protected virtual Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected virtual Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -667,10 +664,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     public CachingBackendStatus Status => (CachingBackendStatus) this._status;
 
-    private bool TryChangeStatus( CachingBackendStatus expectedStatus, CachingBackendStatus newStatus )
-    {
-        return Interlocked.CompareExchange( ref this._status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
-    }
+    private bool TryChangeStatus( CachingBackendStatus expectedStatus, CachingBackendStatus newStatus ) => Interlocked.CompareExchange( ref this._status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
 
     /// <summary>
     /// Initializes a new <see cref="CachingBackend"/>.
@@ -687,10 +681,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     }
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        return string.Format( CultureInfo.InvariantCulture, "{{{0} {1}}}", this.GetType().Name, this.Id );
-    }
+    public override string ToString() => string.Format( CultureInfo.InvariantCulture, "{{{0} {1}}}", this.GetType().Name, this.Id );
 
     /// <summary>
     /// Returns a <see cref="Task"/> that is signaled to the complete state when all background tasks
@@ -733,10 +724,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
             this._itemRemoved += value;
         }
-        remove
-        {
-            this._itemRemoved -= value;
-        }
+        remove => this._itemRemoved -= value;
     }
 
     /// <summary>
@@ -759,7 +747,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
             this._dependencyInvalidated += value;
         }
-        remove { this._dependencyInvalidated -= value; }
+        remove => this._dependencyInvalidated -= value;
     }
 
     private void Validate( CacheItem cacheItem )
@@ -840,10 +828,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     [SuppressMessage( "Microsoft.Design", "CA1063:ImplementIDisposableCorrectly" )]
     [SuppressMessage( "Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations" )]
-    public void Dispose()
-    {
-        this.Dispose( true );
-    }
+    public void Dispose() => this.Dispose( true );
 
     /// <summary>
     /// Synchronously disposes the current <see cref="CachingBackend"/>, with a parameter instructing whether this method is called because

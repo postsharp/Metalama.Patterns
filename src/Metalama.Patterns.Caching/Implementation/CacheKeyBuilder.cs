@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
+using JetBrains.Annotations;
 using Metalama.Patterns.Contracts;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -14,6 +14,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <summary>
 /// Builds cache item keys and dependency keys.
 /// </summary>
+[PublicAPI]
 public class CacheKeyBuilder : IDisposable
 {
     private readonly ConcurrentDictionary<MethodInfo, CachedMethodInfo> _methodInfoCache = new();
@@ -21,7 +22,7 @@ public class CacheKeyBuilder : IDisposable
     private readonly IFormatterRepository _formatterRepository;
 
     /// <summary>
-    /// A sentinel object that means that the parameter is not a part of the cache key, and should be ignored.
+    /// Gets a sentinel object that means that the parameter is not a part of the cache key, and should be ignored.
     /// </summary>
     protected object IgnoredParameterSentinel { get; } = new();
 
@@ -65,9 +66,7 @@ public class CacheKeyBuilder : IDisposable
     /// <returns>The <see cref="CachedMethodInfo"/> for <paramref name="method"/>, or <c>null</c> if no <see cref="CachedMethodInfo"/> was registered for <paramref name="method"/>.</returns>
     protected CachedMethodInfo GetCachedMethodInfo( [Required] MethodInfo method )
     {
-        CachedMethodInfo cachedMethodInfo;
-
-        if ( !this._methodInfoCache.TryGetValue( method, out cachedMethodInfo ) )
+        if ( !this._methodInfoCache.TryGetValue( method, out var cachedMethodInfo ) )
         {
             cachedMethodInfo = GetCachedMethodInfoCore( method );
 
@@ -79,8 +78,8 @@ public class CacheKeyBuilder : IDisposable
 
     private static CachedMethodInfo GetCachedMethodInfoCore( [Required] MethodInfo method )
     {
-        ParameterInfo[] parameterInfos = method.GetParameters();
-        CachedParameterInfo[] cachedParameterInfos = new CachedParameterInfo[parameterInfos.Length];
+        var parameterInfos = method.GetParameters();
+        var cachedParameterInfos = new CachedParameterInfo[parameterInfos.Length];
 
         for ( var i = 0; i < parameterInfos.Length; i++ )
         {
@@ -95,7 +94,7 @@ public class CacheKeyBuilder : IDisposable
         if ( cacheAspect == null )
         {
             // The declaring type has not been initialized. Try to initialize it ourselves.
-            RuntimeHelpers.RunClassConstructor( method.DeclaringType.TypeHandle );
+            RuntimeHelpers.RunClassConstructor( method.DeclaringType!.TypeHandle );
             cacheAspect = CacheAspectRepository.Get( method );
         }
 
@@ -117,9 +116,9 @@ public class CacheKeyBuilder : IDisposable
     /// <param name="arguments">The arguments passed to the <paramref name="method"/> call.</param>
     /// <param name="instance">The <c>this</c> instance of the <paramref name="method"/> call, or <c>null</c> if <paramref name="method"/> is static.</param>
     /// <returns>A string uniquely representing the method call.</returns>
-    public virtual string BuildMethodKey( [Required] MethodInfo method, [Required] IList<object> arguments, object instance = null )
+    public virtual string BuildMethodKey( [Required] MethodInfo method, [Required] IList<object> arguments, object? instance = null )
     {
-        ParameterInfo[] parameters = method.GetParameters();
+        var parameters = method.GetParameters();
 
         if ( parameters.Length != arguments.Count )
         {
@@ -158,7 +157,7 @@ public class CacheKeyBuilder : IDisposable
             // We need a 'this' specifier to differentiate an instance method
             // from a static method whose first parameter is of the declaring type.
             stringBuilder.Append( "this=" );
-            this.AppendObject( stringBuilder, instance );
+            this.AppendObject( stringBuilder, instance! );    
             addComma = true;
         }
 
@@ -177,7 +176,7 @@ public class CacheKeyBuilder : IDisposable
         }
 
         stringBuilder.Append( ')' );
-        var cacheKey = stringBuilder.ToString();
+        var cacheKey = stringBuilder.ToString()!;
         this._stringBuilderPool.ReturnInstance( stringBuilder );
 
         return cacheKey;
@@ -188,14 +187,12 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="o">An object.</param>
     /// <returns>A dependency key that uniquely represents <paramref name="o"/>.</returns>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o" )]
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public virtual string BuildDependencyKey( [Required] object o )
     {
         var stringBuilder = this._stringBuilderPool.GetInstance();
         this.AppendObject( stringBuilder, o );
 
-        var key = stringBuilder.ToString();
+        var key = stringBuilder.ToString()!;
         this._stringBuilderPool.ReturnInstance( stringBuilder );
 
         return key;
@@ -204,11 +201,11 @@ public class CacheKeyBuilder : IDisposable
     /// <summary>
     /// Appends the method name and generic arguments to an <see cref="UnsafeStringBuilder"/>.
     /// </summary>
-    /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/></param>
+    /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="method">A <see cref="MethodInfo"/>.</param>
     protected virtual void AppendMethod( [Required] UnsafeStringBuilder stringBuilder, [Required] MethodInfo method )
     {
-        this.AppendType( stringBuilder, method.DeclaringType );
+        this.AppendType( stringBuilder, method.DeclaringType! );
         stringBuilder.Append( '.' );
         stringBuilder.Append( method.Name );
 
@@ -239,7 +236,7 @@ public class CacheKeyBuilder : IDisposable
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="parameterType">The type of the parameter.</param>
     /// <param name="parameterValue">The value assigned to the parameter (can be <c>null</c>).</param>
-    protected virtual void AppendArgument( [Required] UnsafeStringBuilder stringBuilder, [Required] Type parameterType, object parameterValue )
+    protected virtual void AppendArgument( [Required] UnsafeStringBuilder stringBuilder, [Required] Type parameterType, object? parameterValue )
     {
         // We need to include the parameter type to avoid ambiguities between overloads of the same method.
         stringBuilder.Append( '(' );
@@ -262,17 +259,13 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="type">A <see cref="Type"/>.</param>
-    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, [Required] Type type )
-    {
-        this._formatterRepository.Get<Type>().Write( stringBuilder, type );
-    }
+    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, [Required] Type type ) => this._formatterRepository.Get<Type>().Write( stringBuilder, type );
 
     /// <summary>
     /// Appends a string representing an <see cref="object"/> to an <see cref="UnsafeStringBuilder"/>.
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="o">An <see cref="object"/>.</param>
-    [SuppressMessage( "Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o" )]
     protected virtual void AppendObject( [Required] UnsafeStringBuilder stringBuilder, [Required] object o )
     {
         if ( o == this.IgnoredParameterSentinel )
@@ -307,14 +300,8 @@ public class CacheKeyBuilder : IDisposable
     /// Disposes the current object.
     /// </summary>
     /// <param name="disposing"><c>true</c> if the <see cref="Dispose()"/> method has been called, <c>false</c> if the object is being finalized by the garbage collector.</param>
-    protected virtual void Dispose( bool disposing )
-    {
-        this._stringBuilderPool.Dispose();
-    }
+    protected virtual void Dispose( bool disposing ) => this._stringBuilderPool.Dispose();
 
     /// <inheritdoc />
-    public void Dispose()
-    {
-        this.Dispose( true );
-    }
+    public void Dispose() => this.Dispose( true );
 }

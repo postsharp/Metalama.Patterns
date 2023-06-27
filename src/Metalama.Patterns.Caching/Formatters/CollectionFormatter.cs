@@ -4,7 +4,7 @@ using Flashtrace.Formatters;
 
 namespace Metalama.Patterns.Caching.Formatters;
 
-internal class CollectionFormatter<T> : Formatter<IEnumerable<T>>
+internal sealed class CollectionFormatter<T> : Formatter<IEnumerable<T>>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CollectionFormatter{T}"/> class using the specified <see cref="IFormatterRepository"/>
@@ -14,7 +14,7 @@ internal class CollectionFormatter<T> : Formatter<IEnumerable<T>>
     public CollectionFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T> value )
+    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value )
     {
         if ( value == null )
         {
@@ -23,7 +23,7 @@ internal class CollectionFormatter<T> : Formatter<IEnumerable<T>>
             return;
         }
 
-        IFormatter<T> formatter = this.Repository.Get<T>();
+        var formatter = this.Repository.Get<T>();
 
         var first = true;
 

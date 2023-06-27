@@ -58,8 +58,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public string ProfileName
     {
-        get { return this._configuration.ProfileName; }
-        set { this._configuration.ProfileName = value; }
+        get => this._configuration.ProfileName;
+        set => this._configuration.ProfileName = value;
     }
 
     /// <summary>
@@ -68,8 +68,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public bool AutoReload
     {
-        get { return this._configuration.AutoReload.GetValueOrDefault(); }
-        set { this._configuration.AutoReload = value; }
+        get => this._configuration.AutoReload.GetValueOrDefault();
+        set => this._configuration.AutoReload = value;
     }
 
     /// <summary>
@@ -78,8 +78,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public double AbsoluteExpiration
     {
-        get { return this._configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
-        set { this._configuration.AbsoluteExpiration = TimeSpan.FromMinutes( value ); }
+        get => this._configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
+        set => this._configuration.AbsoluteExpiration = TimeSpan.FromMinutes( value );
     }
 
     /// <summary>
@@ -88,8 +88,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public double SlidingExpiration
     {
-        get { return this._configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
-        set { this._configuration.SlidingExpiration = TimeSpan.FromMinutes( value ); }
+        get => this._configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
+        set => this._configuration.SlidingExpiration = TimeSpan.FromMinutes( value );
     }
 
     /// <summary>
@@ -97,8 +97,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public CacheItemPriority Priority
     {
-        get { return this._configuration.Priority.GetValueOrDefault( CacheItemPriority.Default ); }
-        set { this._configuration.Priority = value; }
+        get => this._configuration.Priority.GetValueOrDefault( CacheItemPriority.Default );
+        set => this._configuration.Priority = value;
     }
 
     /// <summary>
@@ -107,8 +107,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public bool IgnoreThisParameter
     {
-        get { return this._configuration.IgnoreThisParameter.GetValueOrDefault(); }
-        set { this._configuration.IgnoreThisParameter = value; }
+        get => this._configuration.IgnoreThisParameter.GetValueOrDefault();
+        set => this._configuration.IgnoreThisParameter = value;
     }
 
 #if TODO

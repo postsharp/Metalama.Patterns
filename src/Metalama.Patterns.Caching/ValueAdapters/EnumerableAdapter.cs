@@ -14,8 +14,5 @@ internal sealed class EnumerableAdapter<T> : ValueAdapter<IEnumerable<T>>
         return new List<T>( value );
     }
 
-    public override IEnumerable<T> GetExposedValue( object storedValue )
-    {
-        return (IEnumerable<T>) storedValue;
-    }
+    public override IEnumerable<T> GetExposedValue( object storedValue ) => (IEnumerable<T>) storedValue;
 }

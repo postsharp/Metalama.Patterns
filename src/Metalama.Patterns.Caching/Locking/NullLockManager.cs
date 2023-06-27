@@ -8,30 +8,18 @@ namespace Metalama.Patterns.Caching.Locking;
 public class NullLockManager : ILockManager
 {
     /// <inheritdoc />
-    public ILockHandle GetLock( string key )
-    {
-        return LockHandle.Instance;
-    }
+    public ILockHandle GetLock( string key ) => LockHandle.Instance;
 
     private class LockHandle : ILockHandle
     {
         public static readonly LockHandle Instance = new();
         private static readonly Task<bool> _doneTask = Task.FromResult( true );
 
-        public Task ReleaseAsync()
-        {
-            return _doneTask;
-        }
+        public Task ReleaseAsync() => _doneTask;
 
-        public bool Acquire( TimeSpan timeout, CancellationToken cancellationToken )
-        {
-            return true;
-        }
+        public bool Acquire( TimeSpan timeout, CancellationToken cancellationToken ) => true;
 
-        public Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken )
-        {
-            return _doneTask;
-        }
+        public Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken ) => _doneTask;
 
         public void Release() { }
 

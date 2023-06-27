@@ -10,21 +10,15 @@ namespace Metalama.Patterns.Caching.Backends;
 /// </summary>
 public sealed class UninitializedCachingBackend : CachingBackend
 {
-    private static void Throw()
-    {
-        throw new CachingException(
-            string.Format(
-                CultureInfo.InvariantCulture,
-                "The caching back-end has not been initialized. Set the {0}.{1} property before accessing a cached method.",
-                nameof(CachingServices),
-                nameof(CachingServices.DefaultBackend) ) );
-    }
+    private static void Throw() => throw new CachingException(
+        string.Format(
+            CultureInfo.InvariantCulture,
+            "The caching back-end has not been initialized. Set the {0}.{1} property before accessing a cached method.",
+            nameof(CachingServices),
+            nameof(CachingServices.DefaultBackend) ) );
 
     /// <inheritdoc />
-    protected override void ClearCore()
-    {
-        Throw();
-    }
+    protected override void ClearCore() => Throw();
 
     /// <inheritdoc />
     protected override bool ContainsDependencyCore( string key )
@@ -51,20 +45,11 @@ public sealed class UninitializedCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override void InvalidateDependencyCore( string key )
-    {
-        Throw();
-    }
+    protected override void InvalidateDependencyCore( string key ) => Throw();
 
     /// <inheritdoc />
-    protected override void RemoveItemCore( string key )
-    {
-        Throw();
-    }
+    protected override void RemoveItemCore( string key ) => Throw();
 
     /// <inheritdoc />
-    protected override void SetItemCore( string key, CacheItem item )
-    {
-        Throw();
-    }
+    protected override void SetItemCore( string key, CacheItem item ) => Throw();
 }

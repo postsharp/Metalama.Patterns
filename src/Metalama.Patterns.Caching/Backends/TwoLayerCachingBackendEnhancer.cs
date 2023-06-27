@@ -388,15 +388,9 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override CachingBackendFeatures CreateFeatures()
-    {
-        return new Features( this.UnderlyingBackend.SupportedFeatures );
-    }
+    protected override CachingBackendFeatures CreateFeatures() => new Features( this.UnderlyingBackend.SupportedFeatures );
 
-    internal static long GetTimestamp()
-    {
-        return DateTimeOffset.UtcNow.UtcTicks;
-    }
+    internal static long GetTimestamp() => DateTimeOffset.UtcNow.UtcTicks;
 
     private sealed class Features : CachingBackendEnhancerFeatures
     {
