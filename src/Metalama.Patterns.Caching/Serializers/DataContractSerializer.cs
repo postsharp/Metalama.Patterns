@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Caching.Serializers;
 /// </summary>
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 #if !NET_DATA_CONTRACT_SERIALIZER
-    [EditorBrowsable( EditorBrowsableState.Never )]
+[EditorBrowsable( EditorBrowsableState.Never )]
 #endif
 public class DataContractSerializer : ISerializer
 {
@@ -25,7 +25,7 @@ public class DataContractSerializer : ISerializer
     public DataContractSerializer()
     {
 #if !NET_DATA_CONTRACT_SERIALIZER
-            throw new PlatformNotSupportedException();
+        throw new PlatformNotSupportedException();
 #endif
     }
 
@@ -36,20 +36,20 @@ public class DataContractSerializer : ISerializer
     /// <returns>A new <see cref="XmlObjectSerializer"/>.</returns>
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 #if !NET_DATA_CONTRACT_SERIALIZER
-        [EditorBrowsable( EditorBrowsableState.Never )]
+    [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
     protected virtual XmlObjectSerializer CreateSerializer()
     {
 #if NET_DATA_CONTRACT_SERIALIZER
         return new NetDataContractSerializer();
 #else
-            throw new PlatformNotSupportedException();
+        throw new PlatformNotSupportedException();
 #endif
     }
 
     /// <inheritdoc />
 #if !NET_DATA_CONTRACT_SERIALIZER
-        [EditorBrowsable( EditorBrowsableState.Never )]
+    [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
     public byte[] Serialize( object value )
     {
@@ -65,13 +65,13 @@ public class DataContractSerializer : ISerializer
             return stream.ToArray();
         }
 #else
-            throw new PlatformNotSupportedException();
+        throw new PlatformNotSupportedException();
 #endif
     }
 
     /// <inheritdoc />
 #if !NET_DATA_CONTRACT_SERIALIZER
-        [EditorBrowsable( EditorBrowsableState.Never )]
+    [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
     public object Deserialize( byte[] array )
     {
@@ -86,7 +86,7 @@ public class DataContractSerializer : ISerializer
             return serializer.ReadObject( stream );
         }
 #else
-            throw new PlatformNotSupportedException();
+        throw new PlatformNotSupportedException();
 #endif
     }
 }

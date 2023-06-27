@@ -90,8 +90,7 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
             while ( !this.Subscriber.IsConnected( channel ) )
             {
-                this._logger.Debug.EnabledOrNull?.Write(
-                    Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
+                this._logger.Debug.EnabledOrNull?.Write( Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
 
                 Thread.Sleep( _connectDelay );
 
@@ -121,8 +120,7 @@ internal class RedisNotificationQueue : ITestableCachingComponent
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                this._logger.Debug.EnabledOrNull?.Write(
-                    Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
+                this._logger.Debug.EnabledOrNull?.Write( Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
 
                 await Task.Delay( _connectDelay, cancellationToken );
             }

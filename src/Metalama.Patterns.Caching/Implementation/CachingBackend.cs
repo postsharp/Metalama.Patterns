@@ -754,8 +754,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
             if ( !this.SupportedFeatures.Dependencies )
             {
-                throw new InvalidOperationException(
-                    string.Format( CultureInfo.InvariantCulture, "{0} does not support dependencies.", this.GetType().Name ) );
+                throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, "{0} does not support dependencies.", this.GetType().Name ) );
             }
 
             this._dependencyInvalidated += value;
@@ -769,8 +768,7 @@ public abstract class CachingBackend : ITestableCachingComponent
         {
             if ( cacheItem.Configuration.AbsoluteExpiration.HasValue && cacheItem.Configuration.SlidingExpiration.HasValue )
             {
-                throw new ArgumentException(
-                    "The absolute and sliding expiration values are mutually exclusive. They cannot be set both at the same time." );
+                throw new ArgumentException( "The absolute and sliding expiration values are mutually exclusive. They cannot be set both at the same time." );
             }
 
             if ( (cacheItem.Configuration.AbsoluteExpiration.HasValue || cacheItem.Configuration.SlidingExpiration.HasValue)

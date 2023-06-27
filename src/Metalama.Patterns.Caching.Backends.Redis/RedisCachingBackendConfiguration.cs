@@ -35,7 +35,7 @@ public class RedisCachingBackendConfiguration : ICloneable
 #if NETFRAMEWORK || NETSTANDARD
                  && value.IndexOf( ":", StringComparison.Ordinal ) != -1
 #else
-                     && value.Contains( ":", StringComparison.Ordinal )
+                 && value.Contains( ":", StringComparison.Ordinal )
 #endif
                )
             {

@@ -567,8 +567,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             if ( keyPrefix != this.KeyBuilder.KeyPrefix )
             {
-                this.LogSource.Warning.Write(
-                    Formatted( "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix ) );
+                this.LogSource.Warning.Write( Formatted( "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix ) );
 
                 continue;
             }
