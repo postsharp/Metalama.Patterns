@@ -1,15 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-
-#pragma warning disable 420
 
 namespace Metalama.Patterns.Caching.Implementation
 {
@@ -944,9 +939,7 @@ namespace Metalama.Patterns.Caching.Implementation
         internal sealed class WaitOperationAsync : WaitOperationAsyncBase
         {
             // caching delegate
-#if THREADS
             private static readonly WaitCallback runContinuationWaitCallback = RunContinuation;
-#endif
 
             // continuation
             public volatile Action Continuation;
@@ -974,7 +967,6 @@ namespace Metalama.Patterns.Caching.Implementation
                 // NOTE: this is how YieldAwaiter handles reactivation, but we omit SynchronizationContext.CurrentNoFlow which is internal
                 // TODO: make sure that this reactivation algorithm is correct
 
-#if THREADS
                 if (this.TaskScheduler != TaskScheduler.Default)
                 {
                     Task.Factory.StartNew(this.Continuation, default(CancellationToken), TaskCreationOptions.PreferFairness, this.TaskScheduler);
@@ -985,19 +977,10 @@ namespace Metalama.Patterns.Caching.Implementation
                 }
                 else
                 {
-#if !THREADS_UNSAFE_QUEUE
-                    // There's not ThreadPool.UnsafeQueueUserWorkItem in .NET Standard 1.3
-                    Task.Factory.StartNew( this.Continuation, default(CancellationToken), TaskCreationOptions.PreferFairness, this.TaskScheduler );
-#else
                     ThreadPool.UnsafeQueueUserWorkItem(runContinuationWaitCallback, this.Continuation);
-#endif
                 }
-#else
-                // without thread support nor NoFlow sync context, there is not much we can do
-                Task.Factory.StartNew( this.Continuation, default(CancellationToken), TaskCreationOptions.PreferFairness, this.TaskScheduler );
-#endif
 
-                    return true;
+                return true;
             }
 
             public static void RunContinuation(object state)
@@ -1012,9 +995,7 @@ namespace Metalama.Patterns.Caching.Implementation
             // caching delegates
             // ReSharper disable StaticMemberInGenericType
             private static readonly Action<object> runContinuationAction = RunContinuation;
-#if THREADS
             private static readonly WaitCallback runContinuationWaitCallback = RunContinuation;
-#endif
             // ReSharper restore StaticMemberInGenericType
 
             // continuation
@@ -1052,7 +1033,6 @@ namespace Metalama.Patterns.Caching.Implementation
                 // NOTE: this is how YieldAwaiter handles reactivation, but we omit SynchronizationContext.CurrentNoFlow which is internal
                 // TODO: make sure that this reactivation algorithm is correct
 
-#if THREADS
                 if (this.TaskScheduler != TaskScheduler.Default)
                 {
                     Task.Factory.StartNew(runContinuationAction, this, default(CancellationToken), TaskCreationOptions.PreferFairness,
@@ -1064,18 +1044,8 @@ namespace Metalama.Patterns.Caching.Implementation
                 }
                 else
                 {
-#if !THREADS_UNSAFE_QUEUE
-                    // There's not ThreadPool.UnsafeQueueUserWorkItem in .NET Standard 1.3
-                    Task.Factory.StartNew(
-                                runContinuationAction, this, default(CancellationToken), TaskCreationOptions.PreferFairness, this.TaskScheduler );
-#else
                     ThreadPool.UnsafeQueueUserWorkItem(runContinuationWaitCallback, this);
-#endif
                 }
-#else
-                        // without thread support nor NoFlow sync context, there is not much we can do
-                        Task.Factory.StartNew( runContinuationAction, this, default(CancellationToken), TaskCreationOptions.PreferFairness, this.TaskScheduler );
-#endif
 
                 return true;
             }
