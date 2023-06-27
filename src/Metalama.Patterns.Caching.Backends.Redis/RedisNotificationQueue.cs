@@ -14,27 +14,27 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 
 internal class RedisNotificationQueue : ITestableCachingComponent
 {
-    private LogSource logger;
+    private LogSource _logger;
 
     public ISubscriber Subscriber { get; }
 
 #pragma warning disable CA2213 // This is properly disposed
-    private readonly BlockingCollection<RedisNotification> notificationQueue = new();
-    private readonly ManualResetEventSlim notificationProcessingLock = new( true );
+    private readonly BlockingCollection<RedisNotification> _notificationQueue = new();
+    private readonly ManualResetEventSlim _notificationProcessingLock = new( true );
 #pragma warning restore CA2213
 
-    private readonly Thread notificationProcessingThread;
-    private readonly TaskCompletionSource<bool> notificationProcessingThreadCompleted = new();
-    private readonly ImmutableArray<RedisChannel> channels;
-    private readonly Action<RedisNotification> handler;
-    private readonly TimeSpan connectionTimeout;
-    private volatile TaskCompletionSource<bool> queueEmptyTask = new();
-    private static volatile int notificationProcessingThreads;
-    private readonly string id;
-    private const int connectDelay = 10;
-    private volatile int status;
-    private readonly TaskCompletionSource<bool> disposeTask = new();
-    private readonly StackTrace allocationStackTrace = new();
+    private readonly Thread _notificationProcessingThread;
+    private readonly TaskCompletionSource<bool> _notificationProcessingThreadCompleted = new();
+    private readonly ImmutableArray<RedisChannel> _channels;
+    private readonly Action<RedisNotification> _handler;
+    private readonly TimeSpan _connectionTimeout;
+    private volatile TaskCompletionSource<bool> _queueEmptyTask = new();
+    private static volatile int _notificationProcessingThreads;
+    private readonly string _id;
+    private const int _connectDelay = 10;
+    private volatile int _status;
+    private readonly TaskCompletionSource<bool> _disposeTask = new();
+    private readonly StackTrace _allocationStackTrace = new();
 
     private RedisNotificationQueue(
         string id,
@@ -43,13 +43,13 @@ internal class RedisNotificationQueue : ITestableCachingComponent
         Action<RedisNotification> handler,
         TimeSpan connectionTimeout )
     {
-        this.id = id;
-        this.channels = channels;
-        this.handler = handler;
-        this.connectionTimeout = connectionTimeout;
+        this._id = id;
+        this._channels = channels;
+        this._handler = handler;
+        this._connectionTimeout = connectionTimeout;
         this.Subscriber = connection.GetSubscriber();
 
-        this.notificationProcessingThread = new Thread( ProcessNotificationQueue )
+        this._notificationProcessingThread = new Thread( ProcessNotificationQueue )
         {
             Name = nameof(DependenciesRedisCachingBackend) + ".ProcessNotificationQueue"
         };
@@ -60,11 +60,11 @@ internal class RedisNotificationQueue : ITestableCachingComponent
     {
         try
         {
-            this.logger.Error.Write(
+            this._logger.Error.Write(
                 Formatted(
                     "The resource {ObjectId} has not been properly disposed. Allocation stack trace:\n{AllocStackTrace}",
-                    this.id,
-                    this.allocationStackTrace.ToString() ) );
+                    this._id,
+                    this._allocationStackTrace.ToString() ) );
 
             try
             {
@@ -72,7 +72,7 @@ internal class RedisNotificationQueue : ITestableCachingComponent
             }
             catch ( Exception e )
             {
-                this.logger.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
+                this._logger.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
             }
         }
         catch { }
@@ -80,22 +80,22 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
     private void Init()
     {
-        this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.GetType() );
+        this._logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.GetType() );
 
         var startedAt = DateTime.Now;
 
-        foreach ( var channel in this.channels )
+        foreach ( var channel in this._channels )
         {
             this.Subscriber.Subscribe( channel, this.OnNotificationReceived );
 
             while ( !this.Subscriber.IsConnected( channel ) )
             {
-                this.logger.Debug.EnabledOrNull?.Write(
-                    Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, connectDelay ) );
+                this._logger.Debug.EnabledOrNull?.Write(
+                    Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
 
-                Thread.Sleep( connectDelay );
+                Thread.Sleep( _connectDelay );
 
-                if ( DateTime.Now > startedAt + this.connectionTimeout )
+                if ( DateTime.Now > startedAt + this._connectionTimeout )
                 {
                     throw new TimeoutException( "Could not connect to a Redis server in the connection timeout." );
                 }
@@ -104,14 +104,14 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
         this.Subscriber.Ping();
 
-        this.notificationProcessingThread.Start( new WeakReference<RedisNotificationQueue>( this ) );
+        this._notificationProcessingThread.Start( new WeakReference<RedisNotificationQueue>( this ) );
     }
 
     private async Task<RedisNotificationQueue> InitAsync( CancellationToken cancellationToken )
     {
-        this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.GetType() );
+        this._logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.GetType() );
 
-        foreach ( var channel in this.channels )
+        foreach ( var channel in this._channels )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -121,16 +121,16 @@ internal class RedisNotificationQueue : ITestableCachingComponent
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                this.logger.Debug.EnabledOrNull?.Write(
-                    Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, connectDelay ) );
+                this._logger.Debug.EnabledOrNull?.Write(
+                    Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
 
-                await Task.Delay( connectDelay, cancellationToken );
+                await Task.Delay( _connectDelay, cancellationToken );
             }
         }
 
         await this.Subscriber.PingAsync();
 
-        this.notificationProcessingThread.Start( new WeakReference<RedisNotificationQueue>( this ) );
+        this._notificationProcessingThread.Start( new WeakReference<RedisNotificationQueue>( this ) );
 
         return this;
     }
@@ -165,20 +165,20 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
     private void OnNotificationReceived( RedisChannel channel, RedisValue value )
     {
-        this.logger.Debug.EnabledOrNull?.Write( Formatted( "Received notification {Value} on channel {Channel}", value, channel ) );
+        this._logger.Debug.EnabledOrNull?.Write( Formatted( "Received notification {Value} on channel {Channel}", value, channel ) );
 
         try
         {
-            if ( !this.notificationQueue.IsAddingCompleted )
+            if ( !this._notificationQueue.IsAddingCompleted )
             {
-                this.notificationQueue.Add( new RedisNotification { Channel = channel, Value = value } );
+                this._notificationQueue.Add( new RedisNotification { Channel = channel, Value = value } );
 
                 return;
             }
         }
         catch ( ObjectDisposedException ) { }
 
-        this.logger.Debug.EnabledOrNull?.Write( Formatted( "The notification was not queued because the queue was already disposed." ) );
+        this._logger.Debug.EnabledOrNull?.Write( Formatted( "The notification was not queued because the queue was already disposed." ) );
     }
 
     [SuppressMessage( "Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes" )]
@@ -193,13 +193,13 @@ internal class RedisNotificationQueue : ITestableCachingComponent
             return;
         }
 
-        Interlocked.Increment( ref notificationProcessingThreads );
+        Interlocked.Increment( ref _notificationProcessingThreads );
 
         try
         {
-            var logger = queue.logger;
-            var id = queue.id;
-            var blockingCollection = queue.notificationQueue;
+            var logger = queue._logger;
+            var id = queue._id;
+            var blockingCollection = queue._notificationQueue;
 
             logger.Debug.EnabledOrNull?.Write(
                 Formatted( "The {ThreadName} thread for object {ObjectId} has started.", nameof(ProcessNotificationQueue), id ) );
@@ -215,14 +215,14 @@ internal class RedisNotificationQueue : ITestableCachingComponent
                     return;
                 }
 
-                if ( queue.notificationQueue.IsAddingCompleted )
+                if ( queue._notificationQueue.IsAddingCompleted )
                 {
                     break;
                 }
 
                 try
                 {
-                    queue.notificationProcessingLock.Wait();
+                    queue._notificationProcessingLock.Wait();
 
                     using ( var activity =
                            logger.Default.OpenActivity(
@@ -230,7 +230,7 @@ internal class RedisNotificationQueue : ITestableCachingComponent
                     {
                         try
                         {
-                            queue.handler( notification );
+                            queue._handler( notification );
 
                             activity.SetSuccess();
                         }
@@ -242,9 +242,9 @@ internal class RedisNotificationQueue : ITestableCachingComponent
                         }
                     }
 
-                    if ( queue.notificationQueue.Count == 0 )
+                    if ( queue._notificationQueue.Count == 0 )
                     {
-                        Interlocked.Exchange( ref queue.queueEmptyTask, new TaskCompletionSource<bool>() ).SetResult( true );
+                        Interlocked.Exchange( ref queue._queueEmptyTask, new TaskCompletionSource<bool>() ).SetResult( true );
                     }
                 }
                 catch ( Exception e )
@@ -266,23 +266,23 @@ internal class RedisNotificationQueue : ITestableCachingComponent
         {
             if ( queueRef.TryGetTarget( out queue ) )
             {
-                queue.notificationProcessingThreadCompleted.TrySetResult( true );
+                queue._notificationProcessingThreadCompleted.TrySetResult( true );
             }
 
-            Interlocked.Decrement( ref notificationProcessingThreads );
+            Interlocked.Decrement( ref _notificationProcessingThreads );
         }
     }
 
-    internal static int NotificationProcessingThreads => notificationProcessingThreads;
+    internal static int NotificationProcessingThreads => _notificationProcessingThreads;
 
     internal void SuspendProcessing()
     {
-        this.notificationProcessingLock.Reset();
+        this._notificationProcessingLock.Reset();
     }
 
     internal void ResumeProcessing()
     {
-        this.notificationProcessingLock.Set();
+        this._notificationProcessingLock.Set();
     }
 
     internal Task WhenQueueEmpty()
@@ -290,26 +290,26 @@ internal class RedisNotificationQueue : ITestableCachingComponent
         // This is probably not thread safe, but this should be good enough for unit testing.
         Thread.MemoryBarrier();
 
-        if ( this.status >= (int) Status.DisposingPhase2 || this.notificationQueue.Count == 0 )
+        if ( this._status >= (int) Status.DisposingPhase2 || this._notificationQueue.Count == 0 )
         {
             return Task.FromResult( true );
         }
         else
         {
-            return this.queueEmptyTask.Task;
+            return this._queueEmptyTask.Task;
         }
     }
 
     private bool TryChangeStatus( Status expectedStatus, Status newStatus )
     {
 #pragma warning disable 420
-        return Interlocked.CompareExchange( ref this.status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
+        return Interlocked.CompareExchange( ref this._status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
 #pragma warning restore 420
     }
 
     private void ChangeStatus( Status newStatus )
     {
-        this.status = (int) newStatus;
+        this._status = (int) newStatus;
         Thread.MemoryBarrier();
     }
 
@@ -320,14 +320,14 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
     private void Dispose( bool disposing )
     {
-        using ( var activity = this.logger.Default.OpenActivity( Formatted( "Disposing" ) ) )
+        using ( var activity = this._logger.Default.OpenActivity( Formatted( "Disposing" ) ) )
         {
             try
             {
                 if ( !this.TryChangeStatus( Status.Default, Status.DisposingPhase1 ) )
                 {
                     activity.SetOutcome( LogLevel.Debug, Formatted( "The method was already called." ) );
-                    this.disposeTask.Task.Wait();
+                    this._disposeTask.Task.Wait();
 
                     return;
                 }
@@ -346,26 +346,26 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
                     // Messages are not enqueued from this point.
 
-                    this.notificationProcessingLock.Set();
-                    this.notificationQueue.CompleteAdding();
+                    this._notificationProcessingLock.Set();
+                    this._notificationQueue.CompleteAdding();
 
                     // All messages are processed at this point.
 
-                    this.notificationProcessingThreadCompleted.Task.Wait();
+                    this._notificationProcessingThreadCompleted.Task.Wait();
 
                     this.ChangeStatus( Status.DisposingPhase2 );
 
-                    this.notificationQueue.Dispose();
-                    this.notificationProcessingLock.Dispose();
+                    this._notificationQueue.Dispose();
+                    this._notificationProcessingLock.Dispose();
 
                     this.ChangeStatus( Status.Disposed );
 
                     activity.SetSuccess();
-                    this.disposeTask.SetResult( true );
+                    this._disposeTask.SetResult( true );
                 }
                 catch ( Exception e )
                 {
-                    this.disposeTask.SetException( e );
+                    this._disposeTask.SetException( e );
 
                     throw;
                 }
@@ -386,14 +386,14 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
     public async Task DisposeAsync( CancellationToken cancellationToken = default )
     {
-        using ( var activity = this.logger.Default.OpenActivity( Formatted( "Disposing" ) ) )
+        using ( var activity = this._logger.Default.OpenActivity( Formatted( "Disposing" ) ) )
         {
             try
             {
                 if ( !this.TryChangeStatus( Status.Default, Status.DisposingPhase1 ) )
                 {
                     activity.SetOutcome( LogLevel.Debug, Formatted( "The method was already called." ) );
-                    await this.disposeTask.Task;
+                    await this._disposeTask.Task;
 
                     return;
                 }
@@ -408,28 +408,28 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
                     // Messages are not enqueued from this point.
 
-                    this.notificationProcessingLock.Set();
-                    this.notificationQueue.CompleteAdding();
+                    this._notificationProcessingLock.Set();
+                    this._notificationQueue.CompleteAdding();
 
-                    using ( cancellationToken.Register( () => this.notificationProcessingThreadCompleted.SetCanceled() ) )
+                    using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                     {
                         // All messages are processed at this point.
-                        await this.notificationProcessingThreadCompleted.Task;
+                        await this._notificationProcessingThreadCompleted.Task;
                     }
 
                     this.ChangeStatus( Status.DisposingPhase2 );
 
-                    this.notificationQueue.Dispose();
-                    this.notificationProcessingLock.Dispose();
+                    this._notificationQueue.Dispose();
+                    this._notificationProcessingLock.Dispose();
 
                     this.ChangeStatus( Status.Disposed );
 
                     activity.SetSuccess();
-                    this.disposeTask.SetResult( true );
+                    this._disposeTask.SetResult( true );
                 }
                 catch ( Exception e )
                 {
-                    this.disposeTask.SetException( e );
+                    this._disposeTask.SetException( e );
 
                     throw;
                 }
@@ -458,7 +458,7 @@ internal class RedisNotificationQueue : ITestableCachingComponent
 
     public override string ToString()
     {
-        return string.Format( CultureInfo.InvariantCulture, "{{RedisNotificationQueue {0}}}", this.id );
+        return string.Format( CultureInfo.InvariantCulture, "{{RedisNotificationQueue {0}}}", this._id );
     }
 
     private enum Status

@@ -31,35 +31,35 @@ namespace Metalama.Patterns.Caching;
 #endif
 public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
 {
-    private CacheItemConfiguration configuration = new();
+    private CacheItemConfiguration _configuration = new();
 
     [PNonSerialized]
-    private SpinLock initializeLock;
+    private SpinLock _initializeLock;
 
-    private static readonly CachingProfile disabledProfile = new( "Disabled" ) { IsEnabled = false };
-
-    [PNonSerialized]
-    private CachingProfile profile;
+    private static readonly CachingProfile _disabledProfile = new( "Disabled" ) { IsEnabled = false };
 
     [PNonSerialized]
-    private int profileRevision;
+    private CachingProfile _profile;
 
     [PNonSerialized]
-    private LogSource logger;
+    private int _profileRevision;
 
     [PNonSerialized]
-    private CacheItemConfiguration mergedConfiguration;
+    private LogSource _logger;
 
     [PNonSerialized]
-    private MethodInfo targetMethod;
+    private CacheItemConfiguration _mergedConfiguration;
+
+    [PNonSerialized]
+    private MethodInfo _targetMethod;
 
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the current <see cref="CacheAttribute"/>.
     /// </summary>
     public string ProfileName
     {
-        get { return this.configuration.ProfileName; }
-        set { this.configuration.ProfileName = value; }
+        get { return this._configuration.ProfileName; }
+        set { this._configuration.ProfileName = value; }
     }
 
     /// <summary>
@@ -68,8 +68,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public bool AutoReload
     {
-        get { return this.configuration.AutoReload.GetValueOrDefault(); }
-        set { this.configuration.AutoReload = value; }
+        get { return this._configuration.AutoReload.GetValueOrDefault(); }
+        set { this._configuration.AutoReload = value; }
     }
 
     /// <summary>
@@ -78,8 +78,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public double AbsoluteExpiration
     {
-        get { return this.configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
-        set { this.configuration.AbsoluteExpiration = TimeSpan.FromMinutes( value ); }
+        get { return this._configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
+        set { this._configuration.AbsoluteExpiration = TimeSpan.FromMinutes( value ); }
     }
 
     /// <summary>
@@ -88,8 +88,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public double SlidingExpiration
     {
-        get { return this.configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
-        set { this.configuration.SlidingExpiration = TimeSpan.FromMinutes( value ); }
+        get { return this._configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
+        set { this._configuration.SlidingExpiration = TimeSpan.FromMinutes( value ); }
     }
 
     /// <summary>
@@ -97,8 +97,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public CacheItemPriority Priority
     {
-        get { return this.configuration.Priority.GetValueOrDefault( CacheItemPriority.Default ); }
-        set { this.configuration.Priority = value; }
+        get { return this._configuration.Priority.GetValueOrDefault( CacheItemPriority.Default ); }
+        set { this._configuration.Priority = value; }
     }
 
     /// <summary>
@@ -107,8 +107,8 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     /// </summary>
     public bool IgnoreThisParameter
     {
-        get { return this.configuration.IgnoreThisParameter.GetValueOrDefault(); }
-        set { this.configuration.IgnoreThisParameter = value; }
+        get { return this._configuration.IgnoreThisParameter.GetValueOrDefault(); }
+        set { this._configuration.IgnoreThisParameter = value; }
     }
 
 #if TODO
@@ -149,63 +149,63 @@ public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     {
         get
         {
-            if ( this.profile == null || this.profileRevision < CachingServices.Profiles.RevisionNumber )
+            if ( this._profile == null || this._profileRevision < CachingServices.Profiles.RevisionNumber )
             {
                 var initializeLockTaken = false;
 
                 try
                 {
-                    this.initializeLock.Enter( ref initializeLockTaken );
+                    this._initializeLock.Enter( ref initializeLockTaken );
 
-                    if ( this.profile == null || this.profileRevision < CachingServices.Profiles.RevisionNumber )
+                    if ( this._profile == null || this._profileRevision < CachingServices.Profiles.RevisionNumber )
                     {
-                        var profileName = this.configuration.ProfileName ?? CachingProfile.DefaultName;
+                        var profileName = this._configuration.ProfileName ?? CachingProfile.DefaultName;
 
                         var localProfile = CachingServices.Profiles[profileName];
 
                         if ( localProfile == null )
                         {
-                            this.profile = disabledProfile;
+                            this._profile = _disabledProfile;
 
                             this.GetLogger()
                                 .Warning.Write(
                                     Formatted(
                                         "The cache is incorrectly configured for method {Method}: there is no profile named {Profile}.",
-                                        this.targetMethod,
+                                        this._targetMethod,
                                         profileName ) );
                         }
 
-                        this.mergedConfiguration = this.configuration.Clone();
-                        this.mergedConfiguration.ApplyFallback( localProfile );
+                        this._mergedConfiguration = this._configuration.Clone();
+                        this._mergedConfiguration.ApplyFallback( localProfile );
 
                         Thread.MemoryBarrier();
 
                         // Need to set this after setting mergedConfiguration to prevent data races.
-                        this.profile = localProfile;
-                        this.profileRevision = CachingServices.Profiles.RevisionNumber;
+                        this._profile = localProfile;
+                        this._profileRevision = CachingServices.Profiles.RevisionNumber;
                     }
                 }
                 finally
                 {
                     if ( initializeLockTaken )
                     {
-                        this.initializeLock.Exit();
+                        this._initializeLock.Exit();
                     }
                 }
             }
 
-            return this.mergedConfiguration;
+            return this._mergedConfiguration;
         }
     }
 
     private LogSource GetLogger()
     {
-        if ( this.logger == null )
+        if ( this._logger == null )
         {
-            this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.targetMethod.DeclaringType );
+            this._logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this._targetMethod.DeclaringType );
         }
 
-        return this.logger;
+        return this._logger;
     }
 
 #if TODO

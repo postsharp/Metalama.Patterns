@@ -9,13 +9,13 @@ namespace Metalama.Patterns.Caching.Dependencies;
 /// </summary>
 public sealed class StringDependency : ICacheDependency
 {
-    private readonly string key;
+    private readonly string _key;
 
 #pragma warning disable CA1024 // Use properties where appropriate
     /// <inheritdoc />
     public string GetCacheKey()
     {
-        return this.key;
+        return this._key;
     }
 #pragma warning restore CA1024 // Use properties where appropriate
 
@@ -25,7 +25,7 @@ public sealed class StringDependency : ICacheDependency
     /// <param name="key">The cache dependency.</param>
     public StringDependency( [Required] string key )
     {
-        this.key = key;
+        this._key = key;
     }
 
     /// <summary>Determines whether the specified object is equal to the current object.</summary>

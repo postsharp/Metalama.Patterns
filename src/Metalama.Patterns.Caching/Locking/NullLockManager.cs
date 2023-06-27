@@ -16,11 +16,11 @@ public class NullLockManager : ILockManager
     private class LockHandle : ILockHandle
     {
         public static readonly LockHandle Instance = new();
-        private static readonly Task<bool> doneTask = Task.FromResult( true );
+        private static readonly Task<bool> _doneTask = Task.FromResult( true );
 
         public Task ReleaseAsync()
         {
-            return doneTask;
+            return _doneTask;
         }
 
         public bool Acquire( TimeSpan timeout, CancellationToken cancellationToken )
@@ -30,7 +30,7 @@ public class NullLockManager : ILockManager
 
         public Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken )
         {
-            return doneTask;
+            return _doneTask;
         }
 
         public void Release() { }

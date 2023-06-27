@@ -18,11 +18,11 @@ public static partial class CachingServices
     /// </summary>
     public static partial class Invalidation
     {
-        private static readonly ConcurrentDictionary<MethodInfo, int> nestedCachedMethods = new();
+        private static readonly ConcurrentDictionary<MethodInfo, int> _nestedCachedMethods = new();
 
         internal static void AddedNestedCachedMethod( MethodInfo method )
         {
-            nestedCachedMethods.TryAdd( method, 0 );
+            _nestedCachedMethods.TryAdd( method, 0 );
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ public static partial class CachingServices
         private static void Invalidate( [Required] ICacheDependency dependency, Type dependencyType )
         {
             using ( var activity =
-                   defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
+                   _defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
             {
                 try
                 {
@@ -122,7 +122,7 @@ public static partial class CachingServices
         private static async Task InvalidateAsync( [Required] ICacheDependency dependency, Type dependencyType )
         {
             using ( var activity =
-                   defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
+                   _defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
             {
                 try
                 {
@@ -145,7 +145,7 @@ public static partial class CachingServices
         /// <param name="dependencyKey"></param>
         public static void Invalidate( [Required] string dependencyKey )
         {
-            using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "Invalidating string dependency" ) ) )
+            using ( var activity = _defaultLogger.Default.OpenActivity( Formatted( "Invalidating string dependency" ) ) )
             {
                 try
                 {
@@ -164,7 +164,7 @@ public static partial class CachingServices
 
         private static void InvalidateImpl( [Required] string dependencyKey )
         {
-            defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
+            _defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
 
             DefaultBackend.InvalidateDependency( dependencyKey );
         }
@@ -175,11 +175,11 @@ public static partial class CachingServices
         /// <param name="dependencyKey"></param>
         public static async Task InvalidateAsync( [Required] string dependencyKey )
         {
-            using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( key = {Key} )", dependencyKey ) ) )
+            using ( var activity = _defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( key = {Key} )", dependencyKey ) ) )
             {
                 try
                 {
-                    defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
+                    _defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
 
                     await DefaultBackend.InvalidateDependencyAsync( dependencyKey );
 
@@ -202,13 +202,13 @@ public static partial class CachingServices
         /// <param name="args">The method arguments.</param>
         public static void Invalidate( [Required] MethodInfo method, object instance, params object[] args )
         {
-            using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "Invalidate( method = {Method} )", method ) ) )
+            using ( var activity = _defaultLogger.Default.OpenActivity( Formatted( "Invalidate( method = {Method} )", method ) ) )
             {
                 try
                 {
                     var key = DefaultKeyBuilder.BuildMethodKey( method, args, instance );
 
-                    defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key ) );
+                    _defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
                     DefaultBackend.RemoveItem( key );
 
@@ -216,9 +216,9 @@ public static partial class CachingServices
                     {
                         DefaultBackend.InvalidateDependency( key );
                     }
-                    else if ( nestedCachedMethods.ContainsKey( method ) )
+                    else if ( _nestedCachedMethods.ContainsKey( method ) )
                     {
-                        defaultLogger.Debug.EnabledOrNull?.Write(
+                        _defaultLogger.Debug.EnabledOrNull?.Write(
                             Formatted(
                                 "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
                                 "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
@@ -244,13 +244,13 @@ public static partial class CachingServices
         /// <param name="args">The method arguments.</param>
         public static async Task InvalidateAsync( [Required] MethodInfo method, object instance, params object[] args )
         {
-            using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
+            using ( var activity = _defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
             {
                 try
                 {
                     var key = DefaultKeyBuilder.BuildMethodKey( method, args, instance );
 
-                    defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key ) );
+                    _defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
                     await DefaultBackend.RemoveItemAsync( key );
 
@@ -258,9 +258,9 @@ public static partial class CachingServices
                     {
                         await DefaultBackend.InvalidateDependencyAsync( key );
                     }
-                    else if ( nestedCachedMethods.ContainsKey( method ) )
+                    else if ( _nestedCachedMethods.ContainsKey( method ) )
                     {
-                        defaultLogger.Warning.Write(
+                        _defaultLogger.Warning.Write(
                             Formatted(
                                 "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
                                 "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
@@ -324,7 +324,7 @@ public static partial class CachingServices
         /// <returns>The return value of <paramref name="method"/>.</returns>
         public static TReturn Recache<TReturn>( [Required] Func<TReturn> method )
         {
-            using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "Recache( method = {Method} )", method.Method ) ) )
+            using ( var activity = _defaultLogger.Default.OpenActivity( Formatted( "Recache( method = {Method} )", method.Method ) ) )
             {
                 try
                 {
@@ -356,7 +356,7 @@ public static partial class CachingServices
         /// <returns>A <see cref="Task{TResult}"/> that evaluates to the return value of <paramref name="method"/>.</returns>
         public static async Task<TReturn> RecacheAsync<TReturn>( [Required] Func<Task<TReturn>> method )
         {
-            using ( var activity = defaultLogger.Default.OpenActivity( Formatted( "RecacheAsync( method = {Method} )", method.Method ) ) )
+            using ( var activity = _defaultLogger.Default.OpenActivity( Formatted( "RecacheAsync( method = {Method} )", method.Method ) ) )
             {
                 try
                 {

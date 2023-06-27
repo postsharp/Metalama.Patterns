@@ -27,21 +27,21 @@ namespace Metalama.Patterns.Caching.Backends;
 /// </remarks>
 public class MemoryCacheBackend : CachingBackend
 {
-    private readonly IMemoryCache cache;
-    private readonly Func<PSCacheItem, long> sizeCalculator;
+    private readonly IMemoryCache _cache;
+    private readonly Func<PSCacheItem, long> _sizeCalculator;
 
     /// <inheritdoc />
     protected override void DisposeCore( bool disposing )
     {
         base.DisposeCore( disposing );
-        this.cache.Dispose();
+        this._cache.Dispose();
     }
 
     /// <inheritdoc />
     protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
     {
         await base.DisposeAsyncCore( cancellationToken ).ConfigureAwait( false );
-        this.cache.Dispose();
+        this._cache.Dispose();
     }
 
     /// <summary>
@@ -63,8 +63,8 @@ public class MemoryCacheBackend : CachingBackend
     /// <param name="sizeCalculator">A function that calculates the size of a new cache item, which some backends may use to evict.</param>
     public MemoryCacheBackend( [Required] IMemoryCache cache, Func<PSCacheItem, long> sizeCalculator )
     {
-        this.cache = cache;
-        this.sizeCalculator = sizeCalculator;
+        this._cache = cache;
+        this._sizeCalculator = sizeCalculator;
     }
 
     private static string GetItemKey( string key )
@@ -150,9 +150,9 @@ public class MemoryCacheBackend : CachingBackend
             }
         }
 
-        if ( this.sizeCalculator != null )
+        if ( this._sizeCalculator != null )
         {
-            targetPolicy.Size = this.sizeCalculator( item );
+            targetPolicy.Size = this._sizeCalculator( item );
         }
 
         return targetPolicy;
@@ -190,13 +190,13 @@ public class MemoryCacheBackend : CachingBackend
         {
             var dependencyKey = GetDependencyKey( dependency );
 
-            HashSet<string> backwardDependencies = (HashSet<string>) this.cache.Get( dependencyKey );
+            HashSet<string> backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
 
             if ( backwardDependencies == null )
             {
                 HashSet<string> newHashSet = new();
 
-                backwardDependencies = this.cache.GetOrCreate(
+                backwardDependencies = this._cache.GetOrCreate(
                     dependencyKey,
                     ( createdEntry ) =>
                     {
@@ -212,7 +212,7 @@ public class MemoryCacheBackend : CachingBackend
                 backwardDependencies.Add( key );
 
                 // The invalidation callback may have removed the key.
-                this.cache.GetOrCreate(
+                this._cache.GetOrCreate(
                     dependencyKey,
                     ( createdEntry ) =>
                     {
@@ -230,7 +230,7 @@ public class MemoryCacheBackend : CachingBackend
     {
         var itemKey = GetItemKey( key );
         var lockTaken = false;
-        var previousValue = (MemoryCacheValue) this.cache.Get( itemKey );
+        var previousValue = (MemoryCacheValue) this._cache.Get( itemKey );
 
         try
         {
@@ -245,7 +245,7 @@ public class MemoryCacheBackend : CachingBackend
                 this.AddDependencies( key, item.Dependencies );
             }
 
-            this.cache.Set(
+            this._cache.Set(
                 itemKey,
                 new MemoryCacheValue( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ),
                 this.CreatePolicy( item ) );
@@ -262,19 +262,19 @@ public class MemoryCacheBackend : CachingBackend
     /// <inheritdoc />
     protected override bool ContainsItemCore( string key )
     {
-        return this.cache.Get( GetItemKey( key ) ) != null;
+        return this._cache.Get( GetItemKey( key ) ) != null;
     }
 
     /// <inheritdoc />  
     protected override CacheValue GetItemCore( string key, bool includeDependencies )
     {
-        return (CacheValue) this.cache.Get( GetItemKey( key ) );
+        return (CacheValue) this._cache.Get( GetItemKey( key ) );
     }
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key )
     {
-        HashSet<string> items = (HashSet<string>) this.cache.Get( GetDependencyKey( key ) );
+        HashSet<string> items = (HashSet<string>) this._cache.Get( GetDependencyKey( key ) );
 
         if ( items != null )
         {
@@ -300,7 +300,7 @@ public class MemoryCacheBackend : CachingBackend
     {
         var itemKey = GetItemKey( key );
 
-        var cacheValue = (MemoryCacheValue) this.cache.Get( itemKey );
+        var cacheValue = (MemoryCacheValue) this._cache.Get( itemKey );
 
         if ( cacheValue == null )
         {
@@ -309,7 +309,7 @@ public class MemoryCacheBackend : CachingBackend
 
         lock ( cacheValue.Sync )
         {
-            this.cache.Remove( itemKey );
+            this._cache.Remove( itemKey );
             this.CleanDependencies( key, cacheValue );
         }
 
@@ -326,7 +326,7 @@ public class MemoryCacheBackend : CachingBackend
         foreach ( var dependency in cacheValue.Dependencies )
         {
             var dependencyKey = GetDependencyKey( dependency );
-            HashSet<string> backwardDependencies = (HashSet<string>) this.cache.Get( dependencyKey );
+            HashSet<string> backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
 
             if ( backwardDependencies == null )
             {
@@ -339,7 +339,7 @@ public class MemoryCacheBackend : CachingBackend
 
                 if ( backwardDependencies.Count == 0 )
                 {
-                    this.cache.Remove( dependencyKey );
+                    this._cache.Remove( dependencyKey );
                 }
             }
         }
@@ -348,13 +348,13 @@ public class MemoryCacheBackend : CachingBackend
     /// <inheritdoc />
     protected override bool ContainsDependencyCore( string key )
     {
-        return this.cache.Get( GetDependencyKey( key ) ) != null;
+        return this._cache.Get( GetDependencyKey( key ) ) != null;
     }
 
     /// <inheritdoc />
     protected override void ClearCore()
     {
-        if ( this.cache is MemoryCache classicMemoryCache )
+        if ( this._cache is MemoryCache classicMemoryCache )
         {
             classicMemoryCache.Compact( 1 );
         }
@@ -376,7 +376,7 @@ public class MemoryCacheBackend : CachingBackend
     /// <inheritdoc />
     protected override CachingBackendFeatures CreateFeatures()
     {
-        return new Features( this.cache is MemoryCache );
+        return new Features( this._cache is MemoryCache );
     }
 
     private class Features : CachingBackendFeatures

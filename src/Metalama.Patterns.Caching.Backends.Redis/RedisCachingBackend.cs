@@ -17,17 +17,17 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// </summary>
 public class RedisCachingBackend : CachingBackend
 {
-    private readonly Func<ISerializer> createSerializerFunc;
-    private readonly ConcurrentStack<ISerializer> serializerPool = new();
-    private readonly bool ownsConnection;
-    private readonly BackgroundTaskScheduler backgroundTaskScheduler = new();
+    private readonly Func<ISerializer> _createSerializerFunc;
+    private readonly ConcurrentStack<ISerializer> _serializerPool = new();
+    private readonly bool _ownsConnection;
+    private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
 
     #region Events
 
-    private const string itemRemovedEvent = "item-removed";
+    private const string _itemRemovedEvent = "item-removed";
 
 #pragma warning disable CA2213 // We're doing DisposeAsync.
-    private RedisNotificationQueue notificationQueue;
+    private RedisNotificationQueue _notificationQueue;
 #pragma warning restore CA2213
 
     #endregion
@@ -58,13 +58,13 @@ public class RedisCachingBackend : CachingBackend
     internal RedisCachingBackend( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration )
     {
         this.Connection = connection;
-        this.ownsConnection = configuration.OwnsConnection;
+        this._ownsConnection = configuration.OwnsConnection;
         this.Configuration = configuration;
         this.Database = this.Connection.GetDatabase( configuration.Database );
 
         this.KeyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
-        this.createSerializerFunc = configuration.CreateSerializer ?? (() => new BinarySerializer());
+        this._createSerializerFunc = configuration.CreateSerializer ?? (() => new BinarySerializer());
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ public class RedisCachingBackend : CachingBackend
     /// </summary>
     internal void Init()
     {
-        this.notificationQueue = RedisNotificationQueue.Create(
+        this._notificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
             ImmutableArray.Create( this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel ),
@@ -87,7 +87,7 @@ public class RedisCachingBackend : CachingBackend
     /// <returns>A <see cref="Task"/>.</returns>
     internal async Task InitAsync( CancellationToken cancellationToken )
     {
-        this.notificationQueue = await RedisNotificationQueue.CreateAsync(
+        this._notificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
             this.Connection,
             ImmutableArray.Create(
@@ -209,7 +209,7 @@ public class RedisCachingBackend : CachingBackend
         this.Database = database;
         this.KeyBuilder = keyBuilder;
         this.Configuration = configuration ?? new RedisCachingBackendConfiguration();
-        this.ownsConnection = false;
+        this._ownsConnection = false;
     }
 
     /// <inheritdoc />
@@ -307,7 +307,7 @@ public class RedisCachingBackend : CachingBackend
     {
         switch ( kind )
         {
-            case itemRemovedEvent:
+            case _itemRemovedEvent:
                 this.OnItemRemoved( key, CacheItemRemovedReason.Removed, sourceId );
 
                 return true;
@@ -332,7 +332,7 @@ public class RedisCachingBackend : CachingBackend
         var value = kind + ":" + this.Id + ":" + key;
         this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
 
-        return this.notificationQueue.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
+        return this._notificationQueue.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
     }
 
     /// <summary>
@@ -345,7 +345,7 @@ public class RedisCachingBackend : CachingBackend
         var value = kind + ":" + this.Id + ":" + key;
         this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
 
-        this.notificationQueue.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
+        this._notificationQueue.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
     }
 
     #endregion
@@ -389,16 +389,16 @@ public class RedisCachingBackend : CachingBackend
     {
         ISerializer serializer;
 
-        if ( !this.serializerPool.TryPop( out serializer ) )
+        if ( !this._serializerPool.TryPop( out serializer ) )
         {
-            serializer = this.createSerializerFunc();
+            serializer = this._createSerializerFunc();
         }
 
         var bytes = serializer.Serialize( item );
 
         // No try/finally. We don't want to reuse the serializer if there is an exception.
 
-        this.serializerPool.Push( serializer );
+        this._serializerPool.Push( serializer );
 
         return bytes;
     }
@@ -407,9 +407,9 @@ public class RedisCachingBackend : CachingBackend
     {
         ISerializer serializer;
 
-        if ( !this.serializerPool.TryPop( out serializer ) )
+        if ( !this._serializerPool.TryPop( out serializer ) )
         {
-            serializer = this.createSerializerFunc();
+            serializer = this._createSerializerFunc();
         }
 
         object item;
@@ -425,7 +425,7 @@ public class RedisCachingBackend : CachingBackend
 
         // No try/finally. We don't want to reuse the serializer if there is an exception.
 
-        this.serializerPool.Push( serializer );
+        this._serializerPool.Push( serializer );
 
         return item;
     }
@@ -555,14 +555,14 @@ public class RedisCachingBackend : CachingBackend
     protected override async Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
     {
         await this.DeleteItemAsync( key );
-        await this.SendEventAsync( itemRemovedEvent, key );
+        await this.SendEventAsync( _itemRemovedEvent, key );
     }
 
     /// <inheritdoc />
     protected override void RemoveItemCore( string key )
     {
         this.DeleteItem( key );
-        this.SendEvent( itemRemovedEvent, key );
+        this.SendEvent( _itemRemovedEvent, key );
     }
 
     /// <inheritdoc />
@@ -573,16 +573,16 @@ public class RedisCachingBackend : CachingBackend
 
         if ( disposing )
         {
-            this.notificationQueue?.Dispose();
+            this._notificationQueue?.Dispose();
         }
 
-        this.backgroundTaskScheduler.Dispose();
+        this._backgroundTaskScheduler.Dispose();
 
         base.DisposeCore( disposing );
 
         if ( disposing )
         {
-            if ( this.ownsConnection )
+            if ( this._ownsConnection )
             {
                 this.Connection.Close();
                 this.Connection.Dispose();
@@ -595,16 +595,16 @@ public class RedisCachingBackend : CachingBackend
     /// <inheritdoc />
     protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
     {
-        if ( this.notificationQueue != null )
+        if ( this._notificationQueue != null )
         {
-            await this.notificationQueue.DisposeAsync( cancellationToken );
+            await this._notificationQueue.DisposeAsync( cancellationToken );
         }
 
-        await this.backgroundTaskScheduler.DisposeAsync( cancellationToken );
+        await this._backgroundTaskScheduler.DisposeAsync( cancellationToken );
 
         await base.DisposeAsyncCore( cancellationToken );
 
-        if ( this.ownsConnection )
+        if ( this._ownsConnection )
         {
             await this.Connection.CloseAsync();
             this.Connection.Dispose();
@@ -643,7 +643,7 @@ public class RedisCachingBackend : CachingBackend
     // Change the visibility of the method.
     internal void ExecuteNonBlockingTask( Func<Task> task )
     {
-        this.backgroundTaskScheduler.EnqueueBackgroundTask( task );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( task );
     }
 
     /// <inheritdoc />
@@ -651,20 +651,20 @@ public class RedisCachingBackend : CachingBackend
     {
         await base.WhenBackgroundTasksCompleted( cancellationToken );
 
-        if ( this.notificationQueue != null )
+        if ( this._notificationQueue != null )
         {
-            await this.notificationQueue.WhenQueueEmpty();
+            await this._notificationQueue.WhenQueueEmpty();
         }
     }
 
-    protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this.notificationQueue.BackgroundTaskExceptions;
+    protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._notificationQueue.BackgroundTaskExceptions;
 
     /// <summary>
     /// Features of <see cref="RedisCachingBackend"/>.
     /// </summary>
     internal class RedisCachingBackendFeatures : CachingBackendFeatures
     {
-        private readonly RedisCachingBackend parent;
+        private readonly RedisCachingBackend _parent;
 
         /// <summary>
         /// Initializes a new <see cref="RedisCachingBackendFeatures"/>.
@@ -672,11 +672,11 @@ public class RedisCachingBackend : CachingBackend
         /// <param name="parent">The parent <see cref="RedisCachingBackend"/>.</param>
         public RedisCachingBackendFeatures( [Required] RedisCachingBackend parent )
         {
-            this.parent = parent;
+            this._parent = parent;
         }
 
         /// <inheritdoc />
-        public override bool Events => this.parent.notificationQueue != null;
+        public override bool Events => this._parent._notificationQueue != null;
 
         /// <inheritdoc />
         public override bool Clear => false;

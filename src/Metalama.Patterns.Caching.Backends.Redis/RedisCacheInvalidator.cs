@@ -14,9 +14,9 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// </summary>
 public class RedisCacheInvalidator : CacheInvalidator
 {
-    private readonly bool ownsConnection;
-    private readonly RedisChannel channel;
-    private readonly TimeSpan connectionTimeout;
+    private readonly bool _ownsConnection;
+    private readonly RedisChannel _channel;
+    private readonly TimeSpan _connectionTimeout;
 
     internal RedisNotificationQueue NotificationQueue { get; private set; }
 
@@ -31,9 +31,9 @@ public class RedisCacheInvalidator : CacheInvalidator
         RedisCacheInvalidatorOptions options ) : base( underlyingBackend, options )
     {
         this.Connection = connection;
-        this.ownsConnection = options.OwnsConnection;
-        this.connectionTimeout = options.ConnectionTimeout;
-        this.channel = new RedisChannel( options.ChannelName, RedisChannel.PatternMode.Literal );
+        this._ownsConnection = options.OwnsConnection;
+        this._connectionTimeout = options.ConnectionTimeout;
+        this._channel = new RedisChannel( options.ChannelName, RedisChannel.PatternMode.Literal );
     }
 
     private void Init()
@@ -41,9 +41,9 @@ public class RedisCacheInvalidator : CacheInvalidator
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this.channel ),
+            ImmutableArray.Create( this._channel ),
             this.HandleMessage,
-            this.connectionTimeout );
+            this._connectionTimeout );
     }
 
     private async Task<RedisCacheInvalidator> InitAsync( CancellationToken cancellationToken )
@@ -51,9 +51,9 @@ public class RedisCacheInvalidator : CacheInvalidator
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this.channel ),
+            ImmutableArray.Create( this._channel ),
             this.HandleMessage,
-            this.connectionTimeout,
+            this._connectionTimeout,
             cancellationToken );
 
         return this;
@@ -106,7 +106,7 @@ public class RedisCacheInvalidator : CacheInvalidator
     /// <inheritdoc />
     protected override async Task SendMessageAsync( string message, CancellationToken cancellationToken )
     {
-        await this.NotificationQueue.Subscriber.PublishAsync( this.channel, message );
+        await this.NotificationQueue.Subscriber.PublishAsync( this._channel, message );
     }
 
     /// <inheritdoc />
@@ -116,7 +116,7 @@ public class RedisCacheInvalidator : CacheInvalidator
 
         this.NotificationQueue.Dispose();
 
-        if ( this.ownsConnection )
+        if ( this._ownsConnection )
         {
             this.Connection.Close();
             this.Connection.Dispose();
@@ -130,7 +130,7 @@ public class RedisCacheInvalidator : CacheInvalidator
 
         await this.NotificationQueue.DisposeAsync( cancellationToken );
 
-        if ( this.ownsConnection )
+        if ( this._ownsConnection )
         {
             await this.Connection.CloseAsync();
             this.Connection.Dispose();

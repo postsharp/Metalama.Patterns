@@ -10,8 +10,8 @@ namespace Metalama.Patterns.Caching.Backends;
 /// </summary>
 public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
 {
-    private static readonly Task<bool> finishedTask = Task.FromResult( true );
-    private BackgroundTaskScheduler taskScheduler = new( true );
+    private static readonly Task<bool> _finishedTask = Task.FromResult( true );
+    private BackgroundTaskScheduler _taskScheduler = new( true );
 
     /// <inheritdoc />
     protected override CachingBackendFeatures CreateFeatures()
@@ -24,7 +24,7 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
 
     private void EnqueueBackgroundTask( Func<Task> task )
     {
-        this.taskScheduler.EnqueueBackgroundTask( task );
+        this._taskScheduler.EnqueueBackgroundTask( task );
     }
 
     /// <inheritdoc />
@@ -56,7 +56,7 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     {
         this.EnqueueBackgroundTask( () => this.UnderlyingBackend.SetItemAsync( key, item, cancellationToken ) );
 
-        return finishedTask;
+        return _finishedTask;
     }
 
     /// <inheritdoc />
@@ -64,7 +64,7 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     {
         this.EnqueueBackgroundTask( () => this.UnderlyingBackend.InvalidateDependencyAsync( key, cancellationToken ) );
 
-        return finishedTask;
+        return _finishedTask;
     }
 
     /// <inheritdoc />
@@ -72,7 +72,7 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     {
         this.EnqueueBackgroundTask( () => this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken ) );
 
-        return finishedTask;
+        return _finishedTask;
     }
 
     /// <inheritdoc />
@@ -80,20 +80,20 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     {
         this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync( cancellationToken ) );
 
-        return finishedTask;
+        return _finishedTask;
     }
 
     /// <inheritdoc />
     protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
     {
-        await this.taskScheduler.DisposeAsync( cancellationToken );
+        await this._taskScheduler.DisposeAsync( cancellationToken );
         await base.DisposeAsyncCore( cancellationToken );
     }
 
     /// <inheritdoc />
     protected override void DisposeCore( bool disposing )
     {
-        this.taskScheduler.Dispose();
+        this._taskScheduler.Dispose();
         base.DisposeCore( disposing );
     }
 

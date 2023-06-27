@@ -17,19 +17,19 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// </summary>
 public abstract class CachingBackend : ITestableCachingComponent
 {
-    private static readonly Task<bool> falseTaskResult = Task.FromResult( false );
-    private static readonly Task<bool> trueTaskResult = Task.FromResult( true );
-    private CachingBackendFeatures features;
-    private int status;
-    private const int disposeTimeout = 30000;
-    private readonly TaskCompletionSource<bool> disposeTask = new();
-    private EventHandler<CacheItemRemovedEventArgs> itemRemoved;
-    private EventHandler<CacheDependencyInvalidatedEventArgs> dependencyInvalidated;
-    private BackgroundTaskScheduler backgroundTaskScheduler;
+    private static readonly Task<bool> _falseTaskResult = Task.FromResult( false );
+    private static readonly Task<bool> _trueTaskResult = Task.FromResult( true );
+    private CachingBackendFeatures _features;
+    private int _status;
+    private const int _disposeTimeout = 30000;
+    private readonly TaskCompletionSource<bool> _disposeTask = new();
+    private EventHandler<CacheItemRemovedEventArgs> _itemRemoved;
+    private EventHandler<CacheDependencyInvalidatedEventArgs> _dependencyInvalidated;
+    private BackgroundTaskScheduler _backgroundTaskScheduler;
 
     private BackgroundTaskScheduler GetLegacyBackgroundTaskScheduler()
     {
-        return LazyInitializer.EnsureInitialized( ref this.backgroundTaskScheduler );
+        return LazyInitializer.EnsureInitialized( ref this._backgroundTaskScheduler );
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <summary>
     /// Gets the set of features supported by the current <see cref="CachingBackend"/>.
     /// </summary>
-    public CachingBackendFeatures SupportedFeatures => this.features ?? (this.features = this.CreateFeatures());
+    public CachingBackendFeatures SupportedFeatures => this._features ?? (this._features = this.CreateFeatures());
 
     private void RequireFeature( bool feature, string featureName )
     {
@@ -93,7 +93,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
         this.SetItemCore( key, item );
 
-        return trueTaskResult;
+        return _trueTaskResult;
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        return this.ContainsItemCore( key ) ? trueTaskResult : falseTaskResult;
+        return this.ContainsItemCore( key ) ? _trueTaskResult : _falseTaskResult;
     }
 
     /// <summary>
@@ -373,7 +373,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
         this.RemoveItemCore( key );
 
-        return trueTaskResult;
+        return _trueTaskResult;
     }
 
     /// <summary>
@@ -448,7 +448,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
         this.InvalidateDependencyCore( key );
 
-        return trueTaskResult;
+        return _trueTaskResult;
     }
 
     /// <summary>
@@ -526,7 +526,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        return this.ContainsDependencyCore( key ) ? trueTaskResult : falseTaskResult;
+        return this.ContainsDependencyCore( key ) ? _trueTaskResult : _falseTaskResult;
     }
 
     /// <summary>
@@ -610,7 +610,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     {
         this.ClearCore();
 
-        return trueTaskResult;
+        return _trueTaskResult;
     }
 
     /// <summary>
@@ -665,11 +665,11 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// Gets the status of the current <see cref="CachingBackend"/> (<see cref="CachingBackendStatus.Default"/>,
     /// <see cref="CachingBackendStatus.Disposing"/> or <see cref="CachingBackendStatus.Disposed"/>).
     /// </summary>
-    public CachingBackendStatus Status => (CachingBackendStatus) this.status;
+    public CachingBackendStatus Status => (CachingBackendStatus) this._status;
 
     private bool TryChangeStatus( CachingBackendStatus expectedStatus, CachingBackendStatus newStatus )
     {
-        return Interlocked.CompareExchange( ref this.status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
+        return Interlocked.CompareExchange( ref this._status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
     }
 
     /// <summary>
@@ -708,13 +708,13 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </remarks>
     public virtual Task WhenBackgroundTasksCompleted( CancellationToken cancellationToken )
     {
-        if ( this.backgroundTaskScheduler == null )
+        if ( this._backgroundTaskScheduler == null )
         {
             return Task.CompletedTask;
         }
         else
         {
-            return this.backgroundTaskScheduler.WhenBackgroundTasksCompleted( cancellationToken );
+            return this._backgroundTaskScheduler.WhenBackgroundTasksCompleted( cancellationToken );
         }
     }
 
@@ -731,11 +731,11 @@ public abstract class CachingBackend : ITestableCachingComponent
                 throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, "{0} does not support events.", this.GetType().Name ) );
             }
 
-            this.itemRemoved += value;
+            this._itemRemoved += value;
         }
         remove
         {
-            this.itemRemoved -= value;
+            this._itemRemoved -= value;
         }
     }
 
@@ -758,9 +758,9 @@ public abstract class CachingBackend : ITestableCachingComponent
                     string.Format( CultureInfo.InvariantCulture, "{0} does not support dependencies.", this.GetType().Name ) );
             }
 
-            this.dependencyInvalidated += value;
+            this._dependencyInvalidated += value;
         }
-        remove { this.dependencyInvalidated -= value; }
+        remove { this._dependencyInvalidated -= value; }
     }
 
     private void Validate( CacheItem cacheItem )
@@ -797,7 +797,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected void OnItemRemoved( [Required] CacheItemRemovedEventArgs args )
     {
         this.LogSource.Debug.Write( Formatted( "Item removed. Reason={Reason}, Key=\"{Key}\"", args.RemovedReason, args.Key ) );
-        this.itemRemoved?.Invoke( this, args );
+        this._itemRemoved?.Invoke( this, args );
     }
 
     /// <summary>
@@ -811,7 +811,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected void OnItemRemoved( [Required] string key, CacheItemRemovedReason reason, Guid sourceId )
     {
         this.LogSource.Debug.Write( Formatted( "Item removed. Reason={Reason}, Key=\"{Key}\"", reason, key ) );
-        this.itemRemoved?.Invoke( this, new CacheItemRemovedEventArgs( key, reason, sourceId ) );
+        this._itemRemoved?.Invoke( this, new CacheItemRemovedEventArgs( key, reason, sourceId ) );
     }
 
     /// <summary>
@@ -824,7 +824,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected void OnDependencyInvalidated( [Required] string key, Guid sourceId )
     {
         this.LogSource.Debug.Write( Formatted( "Dependency invalidated. Key=\"{Key}\"", key ) );
-        this.dependencyInvalidated?.Invoke( this, new CacheDependencyInvalidatedEventArgs( key, sourceId ) );
+        this._dependencyInvalidated?.Invoke( this, new CacheDependencyInvalidatedEventArgs( key, sourceId ) );
     }
 
     /// <summary>
@@ -834,7 +834,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected void OnDependencyInvalidated( [Required] CacheDependencyInvalidatedEventArgs args )
     {
         this.LogSource.Debug.Write( Formatted( "Dependency invalidated. Key=\"{Key}\"", args.Key ) );
-        this.dependencyInvalidated?.Invoke( this, args );
+        this._dependencyInvalidated?.Invoke( this, args );
     }
 
     /// <summary>
@@ -873,7 +873,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 #endif
                     }
 
-                    this.disposeTask.SetResult( true );
+                    this._disposeTask.SetResult( true );
                     activity.SetSuccess();
                 }
                 catch ( Exception e )
@@ -888,7 +888,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 #endif
                     }
 
-                    this.disposeTask.SetException( e );
+                    this._disposeTask.SetException( e );
                     activity.SetException( e );
 
                     throw;
@@ -897,7 +897,7 @@ public abstract class CachingBackend : ITestableCachingComponent
         }
         else
         {
-            this.disposeTask.Task.Wait();
+            this._disposeTask.Task.Wait();
         }
     }
 
@@ -907,7 +907,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected virtual void DisposeCore( bool disposing )
     {
 #pragma warning disable 612
-        if ( !this.WhenBackgroundTasksCompleted( CancellationToken.None ).Wait( disposeTimeout ) )
+        if ( !this.WhenBackgroundTasksCompleted( CancellationToken.None ).Wait( _disposeTimeout ) )
 #pragma warning restore 612
         {
             throw new TimeoutException( "Timeout when waiting for background tasks to complete." );
@@ -934,7 +934,7 @@ public abstract class CachingBackend : ITestableCachingComponent
                         throw new MetalamaPatternsCachingAssertionFailedException();
                     }
 
-                    this.disposeTask.SetResult( true );
+                    this._disposeTask.SetResult( true );
                     activity.SetSuccess();
                 }
                 catch ( Exception e )
@@ -944,7 +944,7 @@ public abstract class CachingBackend : ITestableCachingComponent
                         throw new MetalamaPatternsCachingAssertionFailedException();
                     }
 
-                    this.disposeTask.SetException( e );
+                    this._disposeTask.SetException( e );
                     activity.SetException( e );
 
                     throw;
@@ -953,7 +953,7 @@ public abstract class CachingBackend : ITestableCachingComponent
         }
         else
         {
-            await this.disposeTask.Task;
+            await this._disposeTask.Task;
         }
     }
 
@@ -964,7 +964,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <returns>A <see cref="Task"/>.</returns>
     protected virtual async Task DisposeAsyncCore( CancellationToken cancellationToken )
     {
-        var delay = Task.Delay( disposeTimeout, cancellationToken );
+        var delay = Task.Delay( _disposeTimeout, cancellationToken );
 #pragma warning disable 612
         var task = await Task.WhenAny( this.WhenBackgroundTasksCompleted( cancellationToken ), delay );
 #pragma warning restore 612
@@ -980,13 +980,13 @@ public abstract class CachingBackend : ITestableCachingComponent
     {
         get
         {
-            if ( this.backgroundTaskScheduler == null )
+            if ( this._backgroundTaskScheduler == null )
             {
                 return 0;
             }
             else
             {
-                return this.backgroundTaskScheduler.BackgroundTaskExceptions;
+                return this._backgroundTaskScheduler.BackgroundTaskExceptions;
             }
         }
     }

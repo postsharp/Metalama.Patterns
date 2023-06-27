@@ -20,29 +20,29 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// </summary>
 public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingComponent
 {
-    private RedisKeyBuilder keyBuilder;
-    private readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(RedisCacheDependencyGarbageCollector) );
+    private RedisKeyBuilder _keyBuilder;
+    private readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(RedisCacheDependencyGarbageCollector) );
 
     internal RedisNotificationQueue NotificationQueue { get; private set; }
 
-    private readonly bool ownsBackend;
-    private readonly DependenciesRedisCachingBackend backend;
+    private readonly bool _ownsBackend;
+    private readonly DependenciesRedisCachingBackend _backend;
 
     private RedisCacheDependencyGarbageCollector( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration )
     {
         this.Connection = connection;
         this.Database = this.Connection.GetDatabase( configuration?.Database ?? -1 );
-        this.keyBuilder = new RedisKeyBuilder( this.Database, configuration );
-        this.backend = new DependenciesRedisCachingBackend( connection, this.Database, this.keyBuilder, configuration );
-        this.ownsBackend = true;
+        this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
+        this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration );
+        this._ownsBackend = true;
     }
 
     private RedisCacheDependencyGarbageCollector( DependenciesRedisCachingBackend backend )
     {
         this.Connection = backend.Connection;
         this.Database = backend.Database;
-        this.backend = backend;
-        this.ownsBackend = false;
+        this._backend = backend;
+        this._ownsBackend = false;
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this.keyBuilder.NotificationChannel ),
+            ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
             this.ProcessKeyspaceNotification,
             configuration.ConnectionTimeout );
     }
@@ -158,7 +158,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this.keyBuilder.NotificationChannel ),
+            ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
             this.ProcessKeyspaceNotification,
             configuration.ConnectionTimeout,
             cancellationToken );
@@ -168,7 +168,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
 
     private void InitCommon( RedisCachingBackendConfiguration configuration )
     {
-        this.keyBuilder = new RedisKeyBuilder( this.Database, configuration );
+        this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
     }
 
     /// <summary>
@@ -194,7 +194,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
 
         var prefix = tokenizer.GetNext();
 
-        if ( prefix != this.keyBuilder.KeyPrefix )
+        if ( prefix != this._keyBuilder.KeyPrefix )
         {
             return;
         }
@@ -212,9 +212,9 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
                 {
                     case "expired":
                     case "evicted":
-                        if ( this.Database.KeyDelete( this.keyBuilder.GetValueKey( itemKey ) ) )
+                        if ( this.Database.KeyDelete( this._keyBuilder.GetValueKey( itemKey ) ) )
                         {
-                            this.logger.Warning.Write(
+                            this._logger.Warning.Write(
                                 Formatted(
                                     "The dependencies key for item {Item} has been {State} but should not. The Redis server is probably misconfigured. " +
                                     "Only use volatile-* maxmemory policies.",
@@ -234,7 +234,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
                 {
                     case "expired":
                     case "evicted":
-                        this.logger.Warning.Write(
+                        this._logger.Warning.Write(
                             Formatted(
                                 "The dependency key {Key} has been {State} but should not. The Redis server is probably misconfigured. " +
                                 "Only use volatile-* maxmemory policies.",
@@ -247,13 +247,13 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
                 break;
 
             case RedisKeyBuilder.ValueKindPrefix:
-                this.logger.Debug.EnabledOrNull?.Write( Formatted( "Enqueue processing of cache eviction." ) );
-                this.backend.ExecuteNonBlockingTask( () => this.OnValueEvictedAsync( itemKey ) );
+                this._logger.Debug.EnabledOrNull?.Write( Formatted( "Enqueue processing of cache eviction." ) );
+                this._backend.ExecuteNonBlockingTask( () => this.OnValueEvictedAsync( itemKey ) );
 
                 break;
 
             default:
-                this.logger.Debug.EnabledOrNull?.Write( Formatted( "Notification ignored." ) );
+                this._logger.Debug.EnabledOrNull?.Write( Formatted( "Notification ignored." ) );
 
                 break;
         }
@@ -261,10 +261,10 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
 
     private async Task OnValueEvictedAsync( string key )
     {
-        string valueKey = this.keyBuilder.GetValueKey( key );
-        string dependenciesKey = this.keyBuilder.GetDependenciesKey( key );
+        string valueKey = this._keyBuilder.GetValueKey( key );
+        string dependenciesKey = this._keyBuilder.GetDependenciesKey( key );
 
-        for ( var attempt = 0; attempt < this.backend.Configuration.TransactionMaxRetries + 1; attempt++ )
+        for ( var attempt = 0; attempt < this._backend.Configuration.TransactionMaxRetries + 1; attempt++ )
         {
             var valueKeyExistsTask = this.Database.KeyExistsAsync( valueKey );
             var dependenciesKeyExistsTask = this.Database.KeyExistsAsync( dependenciesKey );
@@ -288,8 +288,8 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
             var transaction = this.Database.CreateTransaction();
             transaction.AddCondition( Condition.KeyNotExists( valueKey ) );
             transaction.AddCondition( Condition.KeyExists( dependenciesKey ) );
-            string[] dependencies = await this.backend.GetDependenciesAsync( key, transaction );
-            this.backend.RemoveDependenciesTransaction( key, dependencies, transaction );
+            string[] dependencies = await this._backend.GetDependenciesAsync( key, transaction );
+            this._backend.RemoveDependenciesTransaction( key, dependencies, transaction );
 #pragma warning disable 4014
             transaction.KeyDeleteAsync( dependenciesKey );
 #pragma warning restore 4014
@@ -309,9 +309,9 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     {
         this.NotificationQueue.Dispose();
 
-        if ( this.ownsBackend )
+        if ( this._ownsBackend )
         {
-            this.backend.Dispose();
+            this._backend.Dispose();
         }
     }
 
@@ -328,9 +328,9 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if ( this.ownsBackend )
+        if ( this._ownsBackend )
         {
-            await this.backend.DisposeAsync( cancellationToken );
+            await this._backend.DisposeAsync( cancellationToken );
         }
     }
 

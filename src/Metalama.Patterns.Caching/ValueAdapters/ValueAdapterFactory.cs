@@ -14,9 +14,9 @@ namespace Metalama.Patterns.Caching.ValueAdapters;
 /// </summary>
 public sealed class ValueAdapterFactory
 {
-    private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IValueAdapter>> valueAdaptersByValueType = new();
-    private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(ValueAdapterFactory) );
-    private readonly TypeExtensionFactory<IValueAdapter> factory = new( typeof(IValueAdapter<>), null );
+    private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IValueAdapter>> _valueAdaptersByValueType = new();
+    private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(ValueAdapterFactory) );
+    private readonly TypeExtensionFactory<IValueAdapter> _factory = new( typeof(IValueAdapter<>), null );
 
     internal ValueAdapterFactory()
     {
@@ -32,7 +32,7 @@ public sealed class ValueAdapterFactory
     /// <param name="valueAdapter">The adapter.</param>
     public void Register( Type valueType, IValueAdapter valueAdapter )
     {
-        this.factory.RegisterTypeExtension( valueType, valueAdapter );
+        this._factory.RegisterTypeExtension( valueType, valueAdapter );
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public sealed class ValueAdapterFactory
     /// </param>
     public void Register( Type valueType, Type valueAdapterType )
     {
-        this.factory.RegisterTypeExtension( valueType, valueAdapterType );
+        this._factory.RegisterTypeExtension( valueType, valueAdapterType );
     }
 
     /// <summary>
@@ -65,16 +65,16 @@ public sealed class ValueAdapterFactory
     /// <returns>A value adapter for <paramref name="valueType"/>, or <c>null</c> if no value adapter is available for <paramref name="valueType"/>.</returns>
     public IValueAdapter Get( Type valueType )
     {
-        return this.valueAdaptersByValueType.GetOrAdd( valueType, this.GetCore ).Extension;
+        return this._valueAdaptersByValueType.GetOrAdd( valueType, this.GetCore ).Extension;
     }
 
     private TypeExtensionInfo<IValueAdapter> GetCore( Type valueType )
     {
-        return this.factory.GetTypeExtension( valueType, this.CacheUpdateCallback, () => null );
+        return this._factory.GetTypeExtension( valueType, this.CacheUpdateCallback, () => null );
     }
 
     private void CacheUpdateCallback( TypeExtensionInfo<IValueAdapter> typeExtension )
     {
-        this.valueAdaptersByValueType[typeExtension.ObjectType] = typeExtension;
+        this._valueAdaptersByValueType[typeExtension.ObjectType] = typeExtension;
     }
 }

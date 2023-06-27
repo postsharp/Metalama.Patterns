@@ -25,16 +25,16 @@ namespace Metalama.Patterns.Caching;
 public sealed class InvalidateCacheAttribute // : MethodInterceptionAspect
 {
     [PNonSerialized]
-    private Type invalidatedMethodsDeclaringType;
+    private Type _invalidatedMethodsDeclaringType;
 
     [PNonSerialized]
-    private readonly string[] invalidatedMethodNames;
+    private readonly string[] _invalidatedMethodNames;
 
     [PNonSerialized]
-    private MethodInfo targetMethod;
+    private MethodInfo _targetMethod;
 
     [PNonSerialized]
-    private LogSource logger;
+    private LogSource _logger;
 
 #if TODO
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
@@ -67,8 +67,8 @@ public sealed class InvalidateCacheAttribute // : MethodInterceptionAspect
     /// method of the current <see cref="InvalidateCacheAttribute"/> aspect.</param>
     public InvalidateCacheAttribute( Type declaringType, params string[] methodNames )
     {
-        this.invalidatedMethodsDeclaringType = declaringType;
-        this.invalidatedMethodNames = methodNames;
+        this._invalidatedMethodsDeclaringType = declaringType;
+        this._invalidatedMethodNames = methodNames;
     }
 
 #if TODO

@@ -10,21 +10,21 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 [ExplicitCrossPackageInternal]
 internal struct StringTokenizer
 {
-    private readonly string s;
-    private int position;
-    private readonly char separator;
+    private readonly string _s;
+    private int _position;
+    private readonly char _separator;
 
     public StringTokenizer( string s, char separator = ':' )
     {
-        this.s = s;
-        this.position = 0;
-        this.separator = separator;
+        this._s = s;
+        this._position = 0;
+        this._separator = separator;
     }
 
     public string GetNext()
     {
-        var oldPosition = this.position;
-        var p = this.s.IndexOf( this.separator, oldPosition );
+        var oldPosition = this._position;
+        var p = this._s.IndexOf( this._separator, oldPosition );
 
         if ( p < 0 )
         {
@@ -32,14 +32,14 @@ internal struct StringTokenizer
         }
         else
         {
-            this.position = p + 1;
+            this._position = p + 1;
 
-            return this.s.Substring( oldPosition, p - oldPosition );
+            return this._s.Substring( oldPosition, p - oldPosition );
         }
     }
 
     public string GetRest()
     {
-        return this.s.Substring( this.position );
+        return this._s.Substring( this._position );
     }
 }

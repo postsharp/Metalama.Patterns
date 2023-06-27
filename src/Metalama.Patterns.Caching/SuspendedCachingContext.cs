@@ -7,11 +7,11 @@ namespace Metalama.Patterns.Caching;
 [Serializable]
 internal sealed class SuspendedCachingContext : MarshalByRefObject, IDisposable, ICachingContext
 {
-    private ICachingContext suspendedContext;
+    private ICachingContext _suspendedContext;
 
     internal SuspendedCachingContext( ICachingContext suspendedContext )
     {
-        this.suspendedContext = suspendedContext;
+        this._suspendedContext = suspendedContext;
     }
 
     public ICachingContext Parent => null;
@@ -35,6 +35,6 @@ internal sealed class SuspendedCachingContext : MarshalByRefObject, IDisposable,
             throw new InvalidOperationException( "Only the current context can be disposed." );
         }
 
-        CachingContext.Current = this.suspendedContext;
+        CachingContext.Current = this._suspendedContext;
     }
 }

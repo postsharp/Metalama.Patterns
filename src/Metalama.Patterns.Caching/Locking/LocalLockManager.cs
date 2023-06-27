@@ -11,12 +11,12 @@ namespace Metalama.Patterns.Caching.Locking;
 /// </summary>
 public sealed class LocalLockManager : ILockManager
 {
-    private readonly ConcurrentDictionary<string, Lock> locks = new( StringComparer.OrdinalIgnoreCase );
+    private readonly ConcurrentDictionary<string, Lock> _locks = new( StringComparer.OrdinalIgnoreCase );
 
     /// <inheritdoc />
     public ILockHandle GetLock( string key )
     {
-        var @lock = this.locks.AddOrUpdate( key, k => new Lock( this, k ), ( k, l ) => l.AddReference() );
+        var @lock = this._locks.AddOrUpdate( key, k => new Lock( this, k ), ( k, l ) => l.AddReference() );
 #if DEBUG
         if ( @lock.References <= 0 )
         {
@@ -28,47 +28,47 @@ public sealed class LocalLockManager : ILockManager
 
     private class LockHandle : ILockHandle
     {
-        private static readonly Task doneTask = Task.FromResult( true );
+        private static readonly Task _doneTask = Task.FromResult( true );
 
-        private readonly Lock @lock;
-        private bool disposed;
-        private bool acquired;
+        private readonly Lock _lock;
+        private bool _disposed;
+        private bool _acquired;
 
         public LockHandle( Lock @lock )
         {
-            this.@lock = @lock;
+            this._lock = @lock;
         }
 
         public bool Acquire( TimeSpan timeout, CancellationToken cancellationToken )
         {
-            if ( this.acquired )
+            if ( this._acquired )
             {
                 throw new InvalidOperationException();
             }
 
-            this.acquired = this.@lock.Wait( timeout, cancellationToken );
+            this._acquired = this._lock.Wait( timeout, cancellationToken );
 
-            return this.acquired;
+            return this._acquired;
         }
 
         public async Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken )
         {
-            if ( this.acquired )
+            if ( this._acquired )
             {
                 throw new InvalidOperationException();
             }
 
-            this.acquired = await this.@lock.WaitAsync( timeout, cancellationToken );
+            this._acquired = await this._lock.WaitAsync( timeout, cancellationToken );
 
-            return this.acquired;
+            return this._acquired;
         }
 
         public void Release()
         {
-            if ( this.acquired )
+            if ( this._acquired )
             {
-                this.@lock.Release();
-                this.acquired = false;
+                this._lock.Release();
+                this._acquired = false;
             }
         }
 
@@ -76,20 +76,20 @@ public sealed class LocalLockManager : ILockManager
         {
             this.Release();
 
-            return doneTask;
+            return _doneTask;
         }
 
         public void Dispose()
         {
-            if ( this.acquired )
+            if ( this._acquired )
             {
                 throw new InvalidOperationException( "The lock is still acquired." );
             }
 
-            if ( !this.disposed )
+            if ( !this._disposed )
             {
-                this.@lock.RemoveReference();
-                this.disposed = true;
+                this._lock.RemoveReference();
+                this._disposed = true;
 
 #if DEBUG
                 GC.SuppressFinalize( this );
@@ -112,21 +112,21 @@ public sealed class LocalLockManager : ILockManager
 
     private class Lock : SemaphoreSlim
     {
-        private readonly LocalLockManager parent;
-        private readonly string key;
+        private readonly LocalLockManager _parent;
+        private readonly string _key;
 
         public int References { get; private set; } = 1;
 
         // This locks prevents a data race between AddReference and RemoveReference. 
         // It enforces the following invariant: this.References == 0 and 'this' is not present in in this.parent.lock.
 #pragma warning disable IDE0044 // Add readonly modifier (this is a mutable struct type)
-        private SpinLock spinLock;
+        private SpinLock _spinLock;
 #pragma warning restore IDE0044 // Add readonly modifier
 
         public Lock( LocalLockManager parent, string key ) : base( 1 )
         {
-            this.parent = parent;
-            this.key = key;
+            this._parent = parent;
+            this._key = key;
         }
 
         public Lock AddReference()
@@ -135,14 +135,14 @@ public sealed class LocalLockManager : ILockManager
 
             try
             {
-                this.spinLock.Enter( ref lockTaken );
+                this._spinLock.Enter( ref lockTaken );
                 this.References++;
             }
             finally
             {
                 if ( lockTaken )
                 {
-                    this.spinLock.Exit( true );
+                    this._spinLock.Exit( true );
                 }
             }
 
@@ -155,7 +155,7 @@ public sealed class LocalLockManager : ILockManager
 
             try
             {
-                this.spinLock.Enter( ref lockTaken );
+                this._spinLock.Enter( ref lockTaken );
 
                 this.References--;
 
@@ -163,7 +163,7 @@ public sealed class LocalLockManager : ILockManager
                 {
                     Lock removedLock;
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                    if ( !this.parent.locks.TryRemove( this.key, out removedLock ) || removedLock != this )
+                    if ( !this._parent._locks.TryRemove( this._key, out removedLock ) || removedLock != this )
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     {
                         throw new MetalamaPatternsCachingAssertionFailedException( "Data race." );
@@ -174,7 +174,7 @@ public sealed class LocalLockManager : ILockManager
             {
                 if ( lockTaken )
                 {
-                    this.spinLock.Exit( true );
+                    this._spinLock.Exit( true );
                 }
             }
         }

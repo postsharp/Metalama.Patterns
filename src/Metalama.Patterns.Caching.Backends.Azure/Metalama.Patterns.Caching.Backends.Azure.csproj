@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
-    <RootNamespace>Metalama.Patterns.Caching.Backends</RootNamespace>    
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

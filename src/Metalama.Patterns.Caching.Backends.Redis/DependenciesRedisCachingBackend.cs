@@ -11,18 +11,18 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 
 internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 {
-    private const char dependenciesSeparator = '\n';
-    private static readonly string dependenciesSeparatorString = new( dependenciesSeparator, 1 );
-    private const int itemVersionIndex = 0;
-    private const int itemValueIndex = 1;
-    private const int itemVersionInDependenciesIndex = 0;
-    private const int firstDependencyIndex = 1;
-    private const string noDependencyVersion = "-";
-    private const string tooManyGetItemAttemptsErrorMessage = "Too many get-item attempts.";
+    private const char _dependenciesSeparator = '\n';
+    private static readonly string _dependenciesSeparatorString = new( _dependenciesSeparator, 1 );
+    private const int _itemVersionIndex = 0;
+    private const int _itemValueIndex = 1;
+    private const int _itemVersionInDependenciesIndex = 0;
+    private const int _firstDependencyIndex = 1;
+    private const string _noDependencyVersion = "-";
+    private const string _tooManyGetItemAttemptsErrorMessage = "Too many get-item attempts.";
     internal const string TooManyTransactionAttemptsErrorMessage = "Too many transaction attempts.";
 
-    private const string dependencyInvalidatedEvent = "dependency";
-    private const string itemInvalidatedEvent = "item-invalidated";
+    private const string _dependencyInvalidatedEvent = "dependency";
+    private const string _itemInvalidatedEvent = "item-invalidated";
 
     internal DependenciesRedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration = null )
         : base( connection, configuration ) { }
@@ -53,7 +53,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             }
         }
 
-        return dependencies?.Split( dependenciesSeparator );
+        return dependencies?.Split( _dependenciesSeparator );
     }
 
     internal async Task<string[]> GetDependenciesAsync( string key, ITransaction transaction = null )
@@ -73,7 +73,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             }
         }
 
-        return dependencies?.Split( dependenciesSeparator );
+        return dependencies?.Split( _dependenciesSeparator );
     }
 
     protected override bool ProcessEvent( string kind, string key, Guid sourceId )
@@ -85,12 +85,12 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
         switch ( kind )
         {
-            case dependencyInvalidatedEvent:
+            case _dependencyInvalidatedEvent:
                 this.OnDependencyInvalidated( key, sourceId );
 
                 return true;
 
-            case itemInvalidatedEvent:
+            case _itemInvalidatedEvent:
                 this.OnItemRemoved( key, CacheItemRemovedReason.Invalidated, sourceId );
 
                 return true;
@@ -153,7 +153,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         var dependenciesKey = this.KeyBuilder.GetDependenciesKey( key );
         var valueKey = this.KeyBuilder.GetValueKey( key );
 
-        if ( dependencies != null && dependencies.Length > firstDependencyIndex )
+        if ( dependencies != null && dependencies.Length > _firstDependencyIndex )
         {
             this.RemoveDependenciesTransaction( key, dependencies, transaction );
         }
@@ -172,7 +172,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     {
         if ( dependencies != null )
         {
-            for ( var i = firstDependencyIndex; i < dependencies.Length; i++ )
+            for ( var i = _firstDependencyIndex; i < dependencies.Length; i++ )
             {
                 this.RemoveDependencyAsync( key, dependencies[i], transaction );
             }
@@ -220,7 +220,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         {
             var transaction = this.Database.CreateTransaction();
 
-            var version = this.Database.ListGetByIndex( valueKey, itemVersionIndex );
+            var version = this.Database.ListGetByIndex( valueKey, _itemVersionIndex );
 
             if ( version.HasValue )
             {
@@ -235,10 +235,10 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                         version,
                         valueKey ) );
 
-                transaction.AddCondition( Condition.ListIndexEqual( valueKey, itemVersionIndex, version ) );
+                transaction.AddCondition( Condition.ListIndexEqual( valueKey, _itemVersionIndex, version ) );
                 transaction.KeyDeleteAsync( valueKey );
 
-                if ( version != noDependencyVersion )
+                if ( version != _noDependencyVersion )
                 {
                     string[] dependencies = this.GetDependencies( key, transaction );
                     this.RemoveDependenciesTransaction( key, dependencies, transaction );
@@ -274,7 +274,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             var transaction = this.Database.CreateTransaction();
 #pragma warning disable 4014
 
-            var version = await this.Database.ListGetByIndexAsync( valueKey, itemVersionIndex );
+            var version = await this.Database.ListGetByIndexAsync( valueKey, _itemVersionIndex );
 
             if ( version.HasValue )
             {
@@ -289,12 +289,12 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                         version,
                         valueKey ) );
 
-                transaction.AddCondition( Condition.ListIndexEqual( valueKey, itemVersionIndex, version ) );
+                transaction.AddCondition( Condition.ListIndexEqual( valueKey, _itemVersionIndex, version ) );
 #pragma warning disable 4014
                 transaction.KeyDeleteAsync( valueKey );
 #pragma warning restore 4014
 
-                if ( version != noDependencyVersion )
+                if ( version != _noDependencyVersion )
                 {
                     string[] dependencies = this.GetDependencies( key, transaction );
                     this.RemoveDependenciesTransaction( key, dependencies, transaction );
@@ -335,7 +335,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
         if ( item.Dependencies == null )
         {
-            version = noDependencyVersion;
+            version = _noDependencyVersion;
         }
         else
         {
@@ -348,7 +348,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             // Generate unique identifier of the value
             version = Guid.NewGuid().ToString();
-            var dependenciesString = version + dependenciesSeparator + string.Join( dependenciesSeparatorString, item.Dependencies );
+            var dependenciesString = version + _dependenciesSeparator + string.Join( _dependenciesSeparatorString, item.Dependencies );
             transaction.StringSetAsync( this.KeyBuilder.GetDependenciesKey( key ), dependenciesString );
         }
 
@@ -373,24 +373,24 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 return null;
             }
 
-            if ( !includeDependencies || itemList[itemVersionIndex] == noDependencyVersion )
+            if ( !includeDependencies || itemList[_itemVersionIndex] == _noDependencyVersion )
             {
                 goto itemGotten;
             }
 
             dependencies = this.GetDependencies( key );
 
-            if ( dependencies != null && dependencies[itemVersionInDependenciesIndex] == (string) itemList[itemVersionIndex] )
+            if ( dependencies != null && dependencies[_itemVersionInDependenciesIndex] == (string) itemList[_itemVersionIndex] )
             {
                 goto itemGotten;
             }
         }
 
-        throw new CachingException( tooManyGetItemAttemptsErrorMessage );
+        throw new CachingException( _tooManyGetItemAttemptsErrorMessage );
 
     itemGotten:
 
-        var cacheValue = this.GetCacheValue( valueKey, itemList[itemValueIndex] );
+        var cacheValue = this.GetCacheValue( valueKey, itemList[_itemValueIndex] );
 
         if ( dependencies == null )
         {
@@ -398,7 +398,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         }
         else
         {
-            return new CacheValue( cacheValue, ImmutableArray.Create( dependencies, firstDependencyIndex, dependencies.Length - 1 ) );
+            return new CacheValue( cacheValue, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
         }
     }
 
@@ -418,24 +418,24 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 return null;
             }
 
-            if ( !includeDependencies || itemList[itemVersionIndex] == noDependencyVersion )
+            if ( !includeDependencies || itemList[_itemVersionIndex] == _noDependencyVersion )
             {
                 goto itemGotten;
             }
 
             dependencies = await this.GetDependenciesAsync( key );
 
-            if ( dependencies != null && dependencies[itemVersionInDependenciesIndex] == (string) itemList[itemVersionIndex] )
+            if ( dependencies != null && dependencies[_itemVersionInDependenciesIndex] == (string) itemList[_itemVersionIndex] )
             {
                 goto itemGotten;
             }
         }
 
-        throw new CachingException( tooManyGetItemAttemptsErrorMessage );
+        throw new CachingException( _tooManyGetItemAttemptsErrorMessage );
 
     itemGotten:
 
-        var cacheValue = this.GetCacheValue( valueKey, itemList[itemValueIndex] );
+        var cacheValue = this.GetCacheValue( valueKey, itemList[_itemValueIndex] );
 
         if ( dependencies == null )
         {
@@ -443,7 +443,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         }
         else
         {
-            return new CacheValue( cacheValue, ImmutableArray.Create( dependencies, firstDependencyIndex, dependencies.Length - 1 ) );
+            return new CacheValue( cacheValue, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
         }
     }
 
@@ -485,11 +485,11 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             if ( await transaction.ExecuteAsync() )
             {
                 // Send notifications.
-                await this.SendEventAsync( dependencyInvalidatedEvent, key );
+                await this.SendEventAsync( _dependencyInvalidatedEvent, key );
 
                 foreach ( var dependentItemKey in dependentItemKeys )
                 {
-                    await this.SendEventAsync( itemInvalidatedEvent, dependentItemKey );
+                    await this.SendEventAsync( _itemInvalidatedEvent, dependentItemKey );
                 }
 
                 return;
@@ -528,11 +528,11 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             if ( transaction.Execute() )
             {
                 // Send notifications.
-                this.SendEvent( dependencyInvalidatedEvent, key );
+                this.SendEvent( _dependencyInvalidatedEvent, key );
 
                 foreach ( var dependentItemKey in dependentItemKeys )
                 {
-                    this.SendEvent( itemInvalidatedEvent, dependentItemKey );
+                    this.SendEvent( _itemInvalidatedEvent, dependentItemKey );
                 }
 
                 return;
@@ -631,12 +631,12 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private async Task CleanUpValue( RedisKey redisKey, string smallKey )
     {
-        string itemVersion = this.Database.ListGetByIndex( redisKey, itemVersionIndex, CommandFlags.PreferSlave );
+        string itemVersion = this.Database.ListGetByIndex( redisKey, _itemVersionIndex, CommandFlags.PreferSlave );
         string[] dependencies = await this.GetDependenciesAsync( smallKey );
 
         if ( dependencies == null )
         {
-            if ( itemVersion == noDependencyVersion )
+            if ( itemVersion == _noDependencyVersion )
             {
                 return;
             }
@@ -648,14 +648,14 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             return;
         }
 
-        if ( itemVersion != dependencies[itemVersionInDependenciesIndex] )
+        if ( itemVersion != dependencies[_itemVersionInDependenciesIndex] )
         {
             this.LogSource.Warning.Write(
                 Formatted(
                     "The value {Key} version and the corresponding dependencies version differ. Deleting both.",
                     smallKey ) );
 
-            for ( var i = firstDependencyIndex; i < dependencies.Length; i++ )
+            for ( var i = _firstDependencyIndex; i < dependencies.Length; i++ )
             {
                 await this.RemoveDependencyAsync( smallKey, dependencies[i], this.Database );
             }
@@ -666,7 +666,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             return;
         }
 
-        for ( var i = firstDependencyIndex; i < dependencies.Length; i++ )
+        for ( var i = _firstDependencyIndex; i < dependencies.Length; i++ )
         {
             if ( !await this.Database.SetContainsAsync( this.KeyBuilder.GetDependencyKey( dependencies[i] ), smallKey ) )
             {

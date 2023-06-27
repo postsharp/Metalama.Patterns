@@ -22,18 +22,18 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     /// </summary>
     public class AzureCacheInvalidator2 : CacheInvalidator
     {
-        private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching )
+        private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching )
             .GetLogSource( typeof(AzureCacheInvalidator2) );
 
-        private string subscriptionName;
-        private readonly TopicClient topic;
-        private SubscriptionClient subscription;
-        private readonly ServiceBusConnectionStringBuilder connectionStringBuilder;
+        private string _subscriptionName;
+        private readonly TopicClient _topic;
+        private SubscriptionClient _subscription;
+        private readonly ServiceBusConnectionStringBuilder _connectionStringBuilder;
 
         private AzureCacheInvalidator2( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions2 options ) : base( underlyingBackend, options )
         {
-            this.connectionStringBuilder = new ServiceBusConnectionStringBuilder( options.ConnectionString );
-            this.topic = new TopicClient( this.connectionStringBuilder );
+            this._connectionStringBuilder = new ServiceBusConnectionStringBuilder( options.ConnectionString );
+            this._topic = new TopicClient( this._connectionStringBuilder );
         }
 
         /// <summary>
@@ -70,20 +70,20 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         {
             if ( options.SubscriptionName == null )
             {
-                this.subscriptionName = await CreateSubscription( options );
+                this._subscriptionName = await CreateSubscription( options );
             }
             else
             {
-                this.subscriptionName = options.SubscriptionName;
+                this._subscriptionName = options.SubscriptionName;
             }
 
-            this.subscription = new SubscriptionClient( this.connectionStringBuilder, this.subscriptionName, ReceiveMode.ReceiveAndDelete );
-            this.subscription.RegisterMessageHandler( this.ProcessSingleMessage, this.ProcessSingleException );
+            this._subscription = new SubscriptionClient( this._connectionStringBuilder, this._subscriptionName, ReceiveMode.ReceiveAndDelete );
+            this._subscription.RegisterMessageHandler( this.ProcessSingleMessage, this.ProcessSingleException );
         }
 
         private Task ProcessSingleException( ExceptionReceivedEventArgs arg )
         {
-            logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception coming from Azure Service bus." ), arg.Exception );
+            _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception coming from Azure Service bus." ), arg.Exception );
 
             return Task.CompletedTask;
         }
@@ -100,7 +100,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             catch ( Exception e )
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
             }
 
             return Task.CompletedTask;
@@ -115,14 +115,14 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                 ContentType = "text/plain", Label = "InvalidationMessage", TimeToLive = TimeSpan.FromMinutes( 5 )
             };
 
-            return this.topic.SendAsync( azureMessage );
+            return this._topic.SendAsync( azureMessage );
         }
 
         /// <inheritdoc />
         protected override void DisposeCore( bool disposing )
         {
-            this.subscription.CloseAsync();
-            this.topic.CloseAsync();
+            this._subscription.CloseAsync();
+            this._topic.CloseAsync();
 
             if ( disposing )
             {
@@ -133,8 +133,8 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <inheritdoc />
         protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
         {
-            await this.subscription.CloseAsync();
-            await this.topic.CloseAsync();
+            await this._subscription.CloseAsync();
+            await this._topic.CloseAsync();
             GC.SuppressFinalize( this );
         }
 
@@ -173,7 +173,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             }
             catch ( Exception e )
             {
-                logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
+                _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
 
                 throw;
             }
@@ -206,7 +206,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             }
             catch ( Exception e )
             {
-                logger.Error.Write( FormattedMessageBuilder.Formatted( "Could not create an Azure Service Bus token." ), e );
+                _logger.Error.Write( FormattedMessageBuilder.Formatted( "Could not create an Azure Service Bus token." ), e );
 
                 throw;
             }

@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// </summary>
 public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 {
-    private readonly TimeSpan removedItemTransitionPeriod = TimeSpan.FromMinutes( 1 );
+    private readonly TimeSpan _removedItemTransitionPeriod = TimeSpan.FromMinutes( 1 );
 
     /// <summary>
     /// Gets the in-memory local cache.
@@ -306,7 +306,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         }
         else
         {
-            this.LocalCache.InvalidateDependencyImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
+            this.LocalCache.InvalidateDependencyImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this._removedItemTransitionPeriod );
         }
 
         this.UnderlyingBackend.InvalidateDependency( key );
@@ -321,7 +321,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         }
         else
         {
-            this.LocalCache.InvalidateDependencyImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
+            this.LocalCache.InvalidateDependencyImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this._removedItemTransitionPeriod );
         }
 
         return this.UnderlyingBackend.InvalidateDependencyAsync( key, cancellationToken );
@@ -336,7 +336,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         }
         else
         {
-            this.LocalCache.RemoveItemImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
+            this.LocalCache.RemoveItemImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this._removedItemTransitionPeriod );
         }
 
         this.UnderlyingBackend.RemoveItem( key );
@@ -351,7 +351,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         }
         else
         {
-            this.LocalCache.RemoveItemImpl( key, new RemovedValue(), DateTime.UtcNow + this.removedItemTransitionPeriod );
+            this.LocalCache.RemoveItemImpl( key, new RemovedValue(), DateTime.UtcNow + this._removedItemTransitionPeriod );
         }
 
         return this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken );

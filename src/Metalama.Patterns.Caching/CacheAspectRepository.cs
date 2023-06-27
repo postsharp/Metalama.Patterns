@@ -9,12 +9,12 @@ namespace Metalama.Patterns.Caching;
 
 internal static class CacheAspectRepository
 {
-    private static readonly ConcurrentDictionary<MethodInfo, ICacheAspect> configurations = new();
+    private static readonly ConcurrentDictionary<MethodInfo, ICacheAspect> _configurations = new();
 
     public static void Add( MethodInfo method, ICacheAspect aspect )
     {
         // We need the aspect initialization to run as soon as the module is loaded (module initializer)
-        configurations[method] = aspect;
+        _configurations[method] = aspect;
     }
 
     public static ICacheAspect Get( MethodInfo method )
@@ -22,7 +22,7 @@ internal static class CacheAspectRepository
         ICacheAspect configuration;
         var genericMethod = GetGenericDefinition( method );
 
-        if ( !configurations.TryGetValue( genericMethod, out configuration ) )
+        if ( !_configurations.TryGetValue( genericMethod, out configuration ) )
         {
             if ( !genericMethod.IsDefined( typeof(CacheAttribute) ) )
             {

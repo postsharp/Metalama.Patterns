@@ -11,30 +11,30 @@ namespace Metalama.Patterns.Caching.Implementation;
 [ExplicitCrossPackageInternal]
 public sealed class BackgroundTaskScheduler
 {
-    private volatile int backgroundTaskExceptions;
-    private static volatile int allBackgroundTaskExceptions;
-    private volatile int backgroundTaskCount;
-    private readonly AwaitableEvent backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
-    private bool backgroundTasksForbidden;
-    private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource();
-    private readonly bool sequential;
+    private volatile int _backgroundTaskExceptions;
+    private static volatile int _allBackgroundTaskExceptions;
+    private volatile int _backgroundTaskCount;
+    private readonly AwaitableEvent _backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
+    private bool _backgroundTasksForbidden;
+    private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource();
+    private readonly bool _sequential;
 
 #if DEBUG
-    private volatile int nextTaskId;
-    private readonly ConcurrentDictionary<int, PendingTask> pendingBackgroundTasks = new();
+    private volatile int _nextTaskId;
+    private readonly ConcurrentDictionary<int, PendingTask> _pendingBackgroundTasks = new();
 #endif
 
-    public int BackgroundTaskExceptions => this.backgroundTaskExceptions;
+    public int BackgroundTaskExceptions => this._backgroundTaskExceptions;
 
-    private volatile Task lastTask = Task.CompletedTask;
+    private volatile Task _lastTask = Task.CompletedTask;
 
-    private readonly object sync = new();
+    private readonly object _sync = new();
 
     public BackgroundTaskScheduler() : this( false ) { }
 
     public BackgroundTaskScheduler( bool sequential )
     {
-        this.sequential = sequential;
+        this._sequential = sequential;
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public sealed class BackgroundTaskScheduler
     /// </summary>
     public void StopAcceptingBackgroundTasks()
     {
-        this.backgroundTasksForbidden = true;
+        this._backgroundTasksForbidden = true;
     }
 
     /// <summary>
@@ -51,34 +51,34 @@ public sealed class BackgroundTaskScheduler
     /// <param name="task">A function creating a <see cref="Task"/>.</param>
     public void EnqueueBackgroundTask( Func<Task> task )
     {
-        if ( this.backgroundTasksForbidden )
+        if ( this._backgroundTasksForbidden )
         {
             throw new InvalidOperationException(
                 string.Format( CultureInfo.InvariantCulture, "The current {0} can no longer accept background tasks.", nameof(CachingBackend) ) );
         }
 
-        lock ( this.backgroundTasksFinishedEvent )
+        lock ( this._backgroundTasksFinishedEvent )
         {
-            this.backgroundTaskCount++;
+            this._backgroundTaskCount++;
 
-            if ( this.backgroundTaskCount == 1 )
+            if ( this._backgroundTaskCount == 1 )
             {
-                this.backgroundTasksFinishedEvent.Reset();
+                this._backgroundTasksFinishedEvent.Reset();
             }
         }
 
 #if DEBUG
-        var taskId = Interlocked.Increment( ref this.nextTaskId );
+        var taskId = Interlocked.Increment( ref this._nextTaskId );
         var pendingTask = new PendingTask { StackTrace = new StackTrace(), Id = taskId };
 
-        this.pendingBackgroundTasks.TryAdd( taskId, pendingTask );
+        this._pendingBackgroundTasks.TryAdd( taskId, pendingTask );
 #endif
 
-        if ( this.sequential )
+        if ( this._sequential )
         {
-            lock ( this.sync )
+            lock ( this._sync )
             {
-                var previousTask = this.lastTask;
+                var previousTask = this._lastTask;
 
                 var createdTask = Task.Run(
                     () => this.RunTask(
@@ -90,7 +90,7 @@ public sealed class BackgroundTaskScheduler
 #endif
                     ) );
 
-                this.lastTask = createdTask;
+                this._lastTask = createdTask;
             }
         }
 
@@ -134,31 +134,31 @@ public sealed class BackgroundTaskScheduler
         catch ( Exception e )
 #pragma warning restore CA1031 // Do not catch general exception types
         {
-            logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
+            _logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
 
 #if DEBUG
-            logger.Debug.EnabledOrNull?.Write(
+            _logger.Debug.EnabledOrNull?.Write(
                 FormattedMessageBuilder.Formatted( "Stack trace that created the failing task: {StackTrace}", pendingTask.StackTrace ) );
 #endif
 
-            Interlocked.Increment( ref this.backgroundTaskExceptions );
-            Interlocked.Increment( ref allBackgroundTaskExceptions );
+            Interlocked.Increment( ref this._backgroundTaskExceptions );
+            Interlocked.Increment( ref _allBackgroundTaskExceptions );
         }
         finally
         {
-            lock ( this.backgroundTasksFinishedEvent )
+            lock ( this._backgroundTasksFinishedEvent )
             {
-                this.backgroundTaskCount--;
+                this._backgroundTaskCount--;
 
-                if ( this.backgroundTaskCount == 0 )
+                if ( this._backgroundTaskCount == 0 )
                 {
-                    this.backgroundTasksFinishedEvent.Set();
+                    this._backgroundTasksFinishedEvent.Set();
                 }
             }
 
 #if DEBUG
             PendingTask removedTask;
-            this.pendingBackgroundTasks.TryRemove( pendingTask.Id, out removedTask );
+            this._pendingBackgroundTasks.TryRemove( pendingTask.Id, out removedTask );
 #endif
         }
     }
@@ -173,18 +173,18 @@ public sealed class BackgroundTaskScheduler
         cancellationToken.ThrowIfCancellationRequested();
 
         // AwaitableEvent does not support CancellationToken.
-        await this.backgroundTasksFinishedEvent.WaitAsync( CancellationToken.None );
+        await this._backgroundTasksFinishedEvent.WaitAsync( CancellationToken.None );
     }
 
     internal static int AllBackgroundTaskExceptions
     {
-        get { return allBackgroundTaskExceptions; }
+        get { return _allBackgroundTaskExceptions; }
     }
 
     public void Dispose()
     {
         this.StopAcceptingBackgroundTasks();
-        this.backgroundTasksFinishedEvent.Wait();
+        this._backgroundTasksFinishedEvent.Wait();
     }
 
     public Task DisposeAsync( CancellationToken cancellationToken )

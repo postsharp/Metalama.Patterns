@@ -11,9 +11,9 @@ namespace Metalama.Patterns.Caching;
 /// </summary>
 public static partial class CachingServices
 {
-    private static volatile CacheKeyBuilder keyBuilder = new();
-    private static volatile CachingBackend backend = new UninitializedCachingBackend();
-    private static readonly LogSource defaultLogger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
+    private static volatile CacheKeyBuilder _keyBuilder = new();
+    private static volatile CachingBackend _backend = new UninitializedCachingBackend();
+    private static readonly LogSource _defaultLogger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
 
     static CachingServices()
     {
@@ -25,8 +25,8 @@ public static partial class CachingServices
     /// </summary>
     public static CacheKeyBuilder DefaultKeyBuilder
     {
-        get { return keyBuilder; }
-        set { keyBuilder = value ?? new CacheKeyBuilder(); }
+        get { return _keyBuilder; }
+        set { _keyBuilder = value ?? new CacheKeyBuilder(); }
     }
 
     /// <summary>
@@ -34,15 +34,15 @@ public static partial class CachingServices
     /// </summary>
     public static CachingBackend DefaultBackend
     {
-        get { return backend; }
+        get { return _backend; }
         set
         {
-            if ( backend == value )
+            if ( _backend == value )
             {
                 return;
             }
 
-            backend = value ?? new NullCachingBackend();
+            _backend = value ?? new NullCachingBackend();
         }
     }
 

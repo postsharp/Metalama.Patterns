@@ -11,22 +11,22 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// </summary>
 public class RedisCachingBackendConfiguration : ICloneable
 {
-    private string keyPrefix = "cache";
-    private int database = -1;
-    private Func<ISerializer> createSerializer;
-    private bool ownsConnection;
-    private int transactionMaxRetries = 5;
-    private bool supportsDependencies;
-    private bool isLocallyCached;
-    private TimeSpan connectionTimeout = RedisNotificationQueue.DefaultSubscriptionTimeout;
-    private TimeSpan defaultExpiration = TimeSpan.FromDays( 1 );
+    private string _keyPrefix = "cache";
+    private int _database = -1;
+    private Func<ISerializer> _createSerializer;
+    private bool _ownsConnection;
+    private int _transactionMaxRetries = 5;
+    private bool _supportsDependencies;
+    private bool _isLocallyCached;
+    private TimeSpan _connectionTimeout = RedisNotificationQueue.DefaultSubscriptionTimeout;
+    private TimeSpan _defaultExpiration = TimeSpan.FromDays( 1 );
 
     /// <summary>
     /// Gets the prefix for the key of all Redis items created by the <see cref="RedisCachingBackend"/>. The default value is <c>cache</c>.
     /// </summary>
     public string KeyPrefix
     {
-        get { return this.keyPrefix; }
+        get { return this._keyPrefix; }
         set
         {
             this.CheckFrozen();
@@ -42,7 +42,7 @@ public class RedisCachingBackendConfiguration : ICloneable
                 throw new ArgumentOutOfRangeException( nameof(value), "The KeyPrefix property value cannot contain the ':' character." );
             }
 
-            this.keyPrefix = value;
+            this._keyPrefix = value;
         }
     }
 
@@ -51,11 +51,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public int Database
     {
-        get { return this.database; }
+        get { return this._database; }
         set
         {
             this.CheckFrozen();
-            this.database = value;
+            this._database = value;
         }
     }
 
@@ -65,11 +65,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public Func<ISerializer> CreateSerializer
     {
-        get { return this.createSerializer; }
+        get { return this._createSerializer; }
         set
         {
             this.CheckFrozen();
-            this.createSerializer = value;
+            this._createSerializer = value;
         }
     }
 
@@ -79,11 +79,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public bool OwnsConnection
     {
-        get { return this.ownsConnection; }
+        get { return this._ownsConnection; }
         set
         {
             this.CheckFrozen();
-            this.ownsConnection = value;
+            this._ownsConnection = value;
         }
     }
 
@@ -93,11 +93,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public int TransactionMaxRetries
     {
-        get { return this.transactionMaxRetries; }
+        get { return this._transactionMaxRetries; }
         set
         {
             this.CheckFrozen();
-            this.transactionMaxRetries = value;
+            this._transactionMaxRetries = value;
         }
     }
 
@@ -108,11 +108,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public bool SupportsDependencies
     {
-        get { return this.supportsDependencies; }
+        get { return this._supportsDependencies; }
         set
         {
             this.CheckFrozen();
-            this.supportsDependencies = value;
+            this._supportsDependencies = value;
         }
     }
 
@@ -121,11 +121,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public bool IsLocallyCached
     {
-        get { return this.isLocallyCached; }
+        get { return this._isLocallyCached; }
         set
         {
             this.CheckFrozen();
-            this.isLocallyCached = value;
+            this._isLocallyCached = value;
         }
     }
 
@@ -137,11 +137,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public TimeSpan DefaultExpiration
     {
-        get { return this.defaultExpiration; }
+        get { return this._defaultExpiration; }
         set
         {
             this.CheckFrozen();
-            this.defaultExpiration = value;
+            this._defaultExpiration = value;
         }
     }
 
@@ -190,11 +190,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </remarks>
     public TimeSpan ConnectionTimeout
     {
-        get => this.connectionTimeout;
+        get => this._connectionTimeout;
         set
         {
             this.CheckFrozen();
-            this.connectionTimeout = value;
+            this._connectionTimeout = value;
         }
     }
 }

@@ -16,8 +16,8 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// </summary>
 public class CacheKeyBuilder : IDisposable
 {
-    private readonly ConcurrentDictionary<MethodInfo, CachedMethodInfo> methodInfoCache = new();
-    private readonly UnsafeStringBuilderPool stringBuilderPool;
+    private readonly ConcurrentDictionary<MethodInfo, CachedMethodInfo> _methodInfoCache = new();
+    private readonly UnsafeStringBuilderPool _stringBuilderPool;
     private readonly IFormatterRepository _formatterRepository;
 
     /// <summary>
@@ -50,13 +50,13 @@ public class CacheKeyBuilder : IDisposable
     public CacheKeyBuilder( int maxKeySize, IFormatterRepository? formatterRepository = null )
     {
         this._formatterRepository = formatterRepository ?? CachingServices.Formatters.Instance;
-        this.stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
+        this._stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
     }
 
     /// <summary>
     /// Gets the maximal number of characters in cache keys.
     /// </summary>
-    public int MaxKeySize => this.stringBuilderPool.StringBuilderCapacity;
+    public int MaxKeySize => this._stringBuilderPool.StringBuilderCapacity;
 
     /// <summary>
     /// Gets the <see cref="CachedMethodInfo"/> for a given <see cref="MethodInfo"/>.
@@ -67,11 +67,11 @@ public class CacheKeyBuilder : IDisposable
     {
         CachedMethodInfo cachedMethodInfo;
 
-        if ( !this.methodInfoCache.TryGetValue( method, out cachedMethodInfo ) )
+        if ( !this._methodInfoCache.TryGetValue( method, out cachedMethodInfo ) )
         {
             cachedMethodInfo = GetCachedMethodInfoCore( method );
 
-            this.methodInfoCache.TryAdd( method, cachedMethodInfo );
+            this._methodInfoCache.TryAdd( method, cachedMethodInfo );
         }
 
         return cachedMethodInfo;
@@ -146,7 +146,7 @@ public class CacheKeyBuilder : IDisposable
         var cachedMethodInfo = this.GetCachedMethodInfo( method );
 
         // Compute the caching key.
-        var stringBuilder = this.stringBuilderPool.GetInstance();
+        var stringBuilder = this._stringBuilderPool.GetInstance();
 
         this.AppendMethod( stringBuilder, method );
         stringBuilder.Append( '(' );
@@ -178,7 +178,7 @@ public class CacheKeyBuilder : IDisposable
 
         stringBuilder.Append( ')' );
         var cacheKey = stringBuilder.ToString();
-        this.stringBuilderPool.ReturnInstance( stringBuilder );
+        this._stringBuilderPool.ReturnInstance( stringBuilder );
 
         return cacheKey;
     }
@@ -192,11 +192,11 @@ public class CacheKeyBuilder : IDisposable
     [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public virtual string BuildDependencyKey( [Required] object o )
     {
-        var stringBuilder = this.stringBuilderPool.GetInstance();
+        var stringBuilder = this._stringBuilderPool.GetInstance();
         this.AppendObject( stringBuilder, o );
 
         var key = stringBuilder.ToString();
-        this.stringBuilderPool.ReturnInstance( stringBuilder );
+        this._stringBuilderPool.ReturnInstance( stringBuilder );
 
         return key;
     }
@@ -309,7 +309,7 @@ public class CacheKeyBuilder : IDisposable
     /// <param name="disposing"><c>true</c> if the <see cref="Dispose()"/> method has been called, <c>false</c> if the object is being finalized by the garbage collector.</param>
     protected virtual void Dispose( bool disposing )
     {
-        this.stringBuilderPool.Dispose();
+        this._stringBuilderPool.Dispose();
     }
 
     /// <inheritdoc />

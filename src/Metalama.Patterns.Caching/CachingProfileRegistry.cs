@@ -15,10 +15,10 @@ partial class CachingServices
     /// </summary>
     public sealed class CachingProfileRegistry
     {
-        private volatile ImmutableDictionary<string, CachingProfile> profiles =
+        private volatile ImmutableDictionary<string, CachingProfile> _profiles =
             ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
 
-        private int revisionNumber;
+        private int _revisionNumber;
 
         internal CachingProfileRegistry()
         {
@@ -29,9 +29,9 @@ partial class CachingServices
         /// Gets the revision number of all caching profiles. This property is incremented every time
         /// a profile is registered or modified.
         /// </summary>
-        public int RevisionNumber => this.revisionNumber;
+        public int RevisionNumber => this._revisionNumber;
 
-        internal void OnProfileChanged() => Interlocked.Increment( ref this.revisionNumber );
+        internal void OnProfileChanged() => Interlocked.Increment( ref this._revisionNumber );
 
         /// <summary>
         /// Gets the default <see cref="CachingProfile"/>.
@@ -54,7 +54,7 @@ partial class CachingServices
 
                 do
                 {
-                    oldDictionary = this.profiles;
+                    oldDictionary = this._profiles;
 
                     if ( oldDictionary.TryGetValue( profileName ?? CachingProfile.DefaultName, out profile ) )
                     {
@@ -65,7 +65,7 @@ partial class CachingServices
                     newDictionary = oldDictionary.SetItem( profile.Name, profile );
                 }
 #pragma warning disable 420
-                while ( Interlocked.CompareExchange( ref this.profiles, newDictionary, oldDictionary ) != oldDictionary );
+                while ( Interlocked.CompareExchange( ref this._profiles, newDictionary, oldDictionary ) != oldDictionary );
 #pragma warning restore 420
 
                 this.OnProfileChanged();
@@ -85,11 +85,11 @@ partial class CachingServices
 
             do
             {
-                oldDictionary = this.profiles;
+                oldDictionary = this._profiles;
                 newDictionary = oldDictionary.SetItem( profile.Name, profile );
             }
 #pragma warning disable 420
-            while ( Interlocked.CompareExchange( ref this.profiles, newDictionary, oldDictionary ) != oldDictionary );
+            while ( Interlocked.CompareExchange( ref this._profiles, newDictionary, oldDictionary ) != oldDictionary );
 #pragma warning restore 420
 
             this.OnProfileChanged();
@@ -100,7 +100,7 @@ partial class CachingServices
         /// </summary>
         public void Reset()
         {
-            this.profiles = ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
+            this._profiles = ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
             this.Register( new CachingProfile( CachingProfile.DefaultName ) );
             this.OnProfileChanged();
         }

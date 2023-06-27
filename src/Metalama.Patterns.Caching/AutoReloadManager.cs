@@ -10,14 +10,14 @@ namespace Metalama.Patterns.Caching;
 
 internal sealed class AutoReloadManager
 {
-    private readonly CachingBackend backend;
-    private int autoRefreshSubscriptions;
-    private readonly ConcurrentDictionary<string, AutoRefreshInfo> autoRefreshInfos = new();
-    private readonly BackgroundTaskScheduler backgroundTaskScheduler = new();
+    private readonly CachingBackend _backend;
+    private int _autoRefreshSubscriptions;
+    private readonly ConcurrentDictionary<string, AutoRefreshInfo> _autoRefreshInfos = new();
+    private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
 
     public AutoReloadManager( CachingBackend backend )
     {
-        this.backend = backend;
+        this._backend = backend;
     }
 
     private void BeginAutoRefreshValue( object sender, CacheItemRemovedEventArgs args )
@@ -25,15 +25,15 @@ internal sealed class AutoReloadManager
         var key = args.Key;
         AutoRefreshInfo autoRefreshInfo;
 
-        if ( this.autoRefreshInfos.TryGetValue( key, out autoRefreshInfo ) )
+        if ( this._autoRefreshInfos.TryGetValue( key, out autoRefreshInfo ) )
         {
             if ( autoRefreshInfo.IsAsync )
             {
-                this.backgroundTaskScheduler.EnqueueBackgroundTask( () => AutoRefreshCoreAsync( key, autoRefreshInfo, CancellationToken.None ) );
+                this._backgroundTaskScheduler.EnqueueBackgroundTask( () => AutoRefreshCoreAsync( key, autoRefreshInfo, CancellationToken.None ) );
             }
             else
             {
-                this.backgroundTaskScheduler.EnqueueBackgroundTask( () => Task.Run( () => AutoRefreshCore( key, autoRefreshInfo ) ) );
+                this._backgroundTaskScheduler.EnqueueBackgroundTask( () => Task.Run( () => AutoRefreshCore( key, autoRefreshInfo ) ) );
             }
         }
     }
@@ -46,22 +46,22 @@ internal sealed class AutoReloadManager
         LogSource logger,
         bool isAsync )
     {
-        if ( !this.backend.SupportedFeatures.Events )
+        if ( !this._backend.SupportedFeatures.Events )
         {
-            logger.Warning.Write( Formatted( "The backend {Backend} does not support auto-refresh.", this.backend ) );
+            logger.Warning.Write( Formatted( "The backend {Backend} does not support auto-refresh.", this._backend ) );
 
             return;
         }
 
         // TODO: We may want to preemptively renew the cache item before it gets removed, otherwise there could be latency.
 
-        this.autoRefreshInfos.GetOrAdd(
+        this._autoRefreshInfos.GetOrAdd(
             key,
             k =>
             {
-                if ( Interlocked.Increment( ref this.autoRefreshSubscriptions ) == 1 )
+                if ( Interlocked.Increment( ref this._autoRefreshSubscriptions ) == 1 )
                 {
-                    this.backend.ItemRemoved += this.BeginAutoRefreshValue;
+                    this._backend.ItemRemoved += this.BeginAutoRefreshValue;
                 }
 
                 return new AutoRefreshInfo( configuration, valueType, valueProvider, logger, isAsync );

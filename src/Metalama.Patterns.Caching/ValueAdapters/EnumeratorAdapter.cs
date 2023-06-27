@@ -25,24 +25,24 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
 
     private class Enumerator : IEnumerator<T>
     {
-        private int index = -1;
-        private readonly List<T> list;
+        private int _index = -1;
+        private readonly List<T> _list;
 
         public Enumerator( List<T> list )
         {
-            this.list = list;
+            this._list = list;
         }
 
         public T Current
         {
             get
             {
-                if ( this.index < 0 || this.list.Count <= this.index )
+                if ( this._index < 0 || this._list.Count <= this._index )
                 {
                     throw new InvalidOperationException();
                 }
 
-                return this.list[this.index];
+                return this._list[this._index];
             }
         }
 
@@ -52,9 +52,9 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
 
         public bool MoveNext()
         {
-            this.index++;
+            this._index++;
 
-            return this.list.Count > this.index;
+            return this._list.Count > this._index;
         }
 
         public void Reset()

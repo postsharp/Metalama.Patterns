@@ -13,27 +13,27 @@ namespace Metalama.Patterns.Caching;
 [Serializable]
 internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICachingContext
 {
-    private static readonly AsyncLocal<ICachingContext> currentContext = new();
+    private static readonly AsyncLocal<ICachingContext> _currentContext = new();
 
     public static ICachingContext Current
     {
-        get { return currentContext.Value ?? (currentContext.Value = new NullCachingContext()); }
-        internal set { currentContext.Value = value; }
+        get { return _currentContext.Value ?? (_currentContext.Value = new NullCachingContext()); }
+        internal set { _currentContext.Value = value; }
     }
 
-    private readonly string key;
-    private bool disposed;
-    private readonly object dependenciesSync = new();
-    private HashSet<string> dependencies;
+    private readonly string _key;
+    private bool _disposed;
+    private readonly object _dependenciesSync = new();
+    private HashSet<string> _dependencies;
 
     [SuppressMessage( "Microsoft.Usage", "CA2235:MarkAllNonSerializableFields", Justification = "Not really serialized." )]
-    private ImmutableHashSet<string> immutableDependencies;
+    private ImmutableHashSet<string> _immutableDependencies;
 
     private CachingContext() { }
 
     private CachingContext( string key, CachingContextKind options, ICachingContext parent )
     {
-        this.key = key;
+        this._key = key;
         this.Kind = options;
         this.Parent = parent;
     }
@@ -44,22 +44,22 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
     {
         get
         {
-            if ( this.immutableDependencies == null )
+            if ( this._immutableDependencies == null )
             {
-                lock ( this.dependenciesSync )
+                lock ( this._dependenciesSync )
                 {
-                    if ( this.dependencies == null )
+                    if ( this._dependencies == null )
                     {
-                        this.immutableDependencies = ImmutableHashSet<string>.Empty;
+                        this._immutableDependencies = ImmutableHashSet<string>.Empty;
                     }
                     else
                     {
-                        this.immutableDependencies = this.dependencies.ToImmutableHashSet();
+                        this._immutableDependencies = this._dependencies.ToImmutableHashSet();
                     }
                 }
             }
 
-            return this.immutableDependencies;
+            return this._immutableDependencies;
         }
     }
 
@@ -91,33 +91,33 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
 
     public void AddDependency( [Required] ICacheDependency dependency )
     {
-        if ( string.IsNullOrEmpty( this.key ) )
+        if ( string.IsNullOrEmpty( this._key ) )
         {
             throw new InvalidOperationException( "This method can be invoked only in the context of a cached method." );
         }
 
-        if ( this.disposed )
+        if ( this._disposed )
         {
             this.Parent?.AddDependency( dependency );
 
             return;
         }
 
-        lock ( this.dependenciesSync )
+        lock ( this._dependenciesSync )
         {
             this.PrepareAddDependency();
-            this.dependencies.Add( dependency.GetCacheKey() );
+            this._dependencies.Add( dependency.GetCacheKey() );
         }
     }
 
     private void PrepareAddDependency()
     {
-        if ( this.dependencies == null )
+        if ( this._dependencies == null )
         {
-            this.dependencies = new HashSet<string>();
+            this._dependencies = new HashSet<string>();
         }
 
-        this.immutableDependencies = null;
+        this._immutableDependencies = null;
     }
 
     public void AddDependency( [Required] object dependency )
@@ -145,7 +145,7 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
     {
         this.AddDependency( new StringDependency( dependency ) );
 
-        if ( this.disposed )
+        if ( this._disposed )
         {
             this.Parent?.AddDependency( dependency );
 
@@ -155,12 +155,12 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
 
     public void AddDependencies( IEnumerable<ICacheDependency> dependencies )
     {
-        if ( string.IsNullOrEmpty( this.key ) )
+        if ( string.IsNullOrEmpty( this._key ) )
         {
             throw new InvalidOperationException( "This method can be invoked only in the context of a cached method." );
         }
 
-        if ( this.disposed )
+        if ( this._disposed )
         {
             this.Parent?.AddDependencies( dependencies );
 
@@ -169,13 +169,13 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
 
         if ( dependencies != null )
         {
-            lock ( this.dependenciesSync )
+            lock ( this._dependenciesSync )
             {
                 this.PrepareAddDependency();
 
                 foreach ( var dependency in dependencies )
                 {
-                    this.dependencies.Add( dependency.GetCacheKey() );
+                    this._dependencies.Add( dependency.GetCacheKey() );
                 }
             }
         }
@@ -183,7 +183,7 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
 
     public void AddDependencies( IEnumerable<string> dependencies )
     {
-        if ( this.disposed )
+        if ( this._disposed )
         {
             this.Parent?.AddDependencies( dependencies );
 
@@ -192,13 +192,13 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
 
         if ( dependencies != null )
         {
-            lock ( this.dependenciesSync )
+            lock ( this._dependenciesSync )
             {
                 this.PrepareAddDependency();
 
                 foreach ( var dependency in dependencies )
                 {
-                    this.dependencies.Add( dependency );
+                    this._dependencies.Add( dependency );
                 }
             }
         }
@@ -212,7 +212,7 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
 
             if ( CachingServices.DefaultBackend.SupportedFeatures.Dependencies )
             {
-                this.Parent.AddDependency( this.key );
+                this.Parent.AddDependency( this._key );
             }
             else
             {
@@ -228,7 +228,7 @@ internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICaching
             throw new InvalidOperationException( "Only the current context can be disposed." );
         }
 
-        this.disposed = true;
+        this._disposed = true;
 
         Current = this.Parent;
     }

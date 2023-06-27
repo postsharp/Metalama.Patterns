@@ -16,24 +16,25 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     /// </summary>
     public class AzureCacheInvalidator : CacheInvalidator
     {
-        private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(AzureCacheInvalidator) );
-        private readonly string subscriptionName = Guid.NewGuid().ToString();
-        private readonly NamespaceManager serviceBusNamespaceManager;
-        private readonly TopicClient topic;
-        private SubscriptionClient subscription;
-        private volatile bool isStopped;
-        private Task processMessageTask;
-        private readonly AzureCacheInvalidatorOptions options;
+        private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(AzureCacheInvalidator) );
+        private readonly string _subscriptionName = Guid.NewGuid().ToString();
+        private readonly NamespaceManager _serviceBusNamespaceManager;
+        private readonly TopicClient _topic;
+        private readonly AzureCacheInvalidatorOptions _options;
+
+        private SubscriptionClient _subscription;
+        private volatile bool _isStopped;
+        private Task _processMessageTask;
 
         private AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions options ) : base(underlyingBackend, options)
         {
-            this.options = options;
-            this.topic = TopicClient.CreateFromConnectionString(options.ConnectionString );
+            this._options = options;
+            this._topic = TopicClient.CreateFromConnectionString(options.ConnectionString );
 
             ServiceBusConnectionStringBuilder connectionStringBuilder = new ServiceBusConnectionStringBuilder(options.ConnectionString);
             connectionStringBuilder.EntityPath = null;
 
-            this.serviceBusNamespaceManager = NamespaceManager.CreateFromConnectionString(connectionStringBuilder.ToString());
+            this._serviceBusNamespaceManager = NamespaceManager.CreateFromConnectionString(connectionStringBuilder.ToString());
         }
 
         /// <summary>
@@ -52,7 +53,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         private void Init()
         {
-            this.serviceBusNamespaceManager.CreateSubscription(this.CreateSubscriptionDescription());
+            this._serviceBusNamespaceManager.CreateSubscription(this.CreateSubscriptionDescription());
 
             this.InitCommon();
         }
@@ -74,7 +75,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         private async Task<AzureCacheInvalidator> InitAsync()
         {
-            await this.serviceBusNamespaceManager.CreateSubscriptionAsync(this.CreateSubscriptionDescription());
+            await this._serviceBusNamespaceManager.CreateSubscriptionAsync(this.CreateSubscriptionDescription());
 
             this.InitCommon();
 
@@ -83,7 +84,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         private SubscriptionDescription CreateSubscriptionDescription()
         {
-            return new SubscriptionDescription(this.topic.Path, this.subscriptionName)
+            return new SubscriptionDescription(this._topic.Path, this._subscriptionName)
                    {
                        AutoDeleteOnIdle = TimeSpan.FromMinutes(5),
 
@@ -92,19 +93,19 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         private void InitCommon()
         {
-            this.subscription =
- SubscriptionClient.CreateFromConnectionString( this.options.ConnectionString, this.topic.Path, this.subscriptionName, ReceiveMode.ReceiveAndDelete );
+            this._subscription =
+ SubscriptionClient.CreateFromConnectionString( this._options.ConnectionString, this._topic.Path, this._subscriptionName, ReceiveMode.ReceiveAndDelete );
 
-            this.processMessageTask = Task.Run(this.ProcessMessages);
+            this._processMessageTask = Task.Run(this.ProcessMessages);
         }
 
         private async Task ProcessMessages()
         {
-            while ( !this.isStopped )
+            while ( !this._isStopped )
             {
                 try
                 {
-                    using ( BrokeredMessage message = await this.subscription.ReceiveAsync() )
+                    using ( BrokeredMessage message = await this._subscription.ReceiveAsync() )
                     {
 
                         if ( message == null )
@@ -128,7 +129,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                 catch ( Exception e)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    logger.Error.Write( FormattedMessageBuilder.Formatted(  "Exception while processing Azure Service Bus message." ), e );
+                    _logger.Error.Write( FormattedMessageBuilder.Formatted(  "Exception while processing Azure Service Bus message." ), e );
                 }
             }
         }
@@ -138,18 +139,18 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         protected override Task SendMessageAsync( string message, CancellationToken cancellationToken )
         {
             BrokeredMessage brokeredMessage = new BrokeredMessage( message );
-            return this.topic.SendAsync(brokeredMessage);
+            return this._topic.SendAsync(brokeredMessage);
         }
 
 
         /// <inheritdoc />
         protected override void DisposeCore(bool disposing)
         {
-            this.isStopped = true;
-            this.subscription.Close();
-            this.topic.Close();
-            this.serviceBusNamespaceManager.DeleteSubscription( this.topic.Path, this.subscriptionName );
-            this.processMessageTask.Wait();
+            this._isStopped = true;
+            this._subscription.Close();
+            this._topic.Close();
+            this._serviceBusNamespaceManager.DeleteSubscription( this._topic.Path, this._subscriptionName );
+            this._processMessageTask.Wait();
 
             if ( disposing )
             {
@@ -160,11 +161,11 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <inheritdoc />
         protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
         {
-            this.isStopped = true;
-            await this.subscription.CloseAsync();
-            await this.topic.CloseAsync();
-            await this.serviceBusNamespaceManager.DeleteSubscriptionAsync( this.topic.Path, this.subscriptionName );
-            await this.processMessageTask;
+            this._isStopped = true;
+            await this._subscription.CloseAsync();
+            await this._topic.CloseAsync();
+            await this._serviceBusNamespaceManager.DeleteSubscriptionAsync( this._topic.Path, this._subscriptionName );
+            await this._processMessageTask;
             GC.SuppressFinalize(this);
         }
 

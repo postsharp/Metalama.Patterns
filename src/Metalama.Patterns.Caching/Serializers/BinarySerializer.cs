@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Caching.Serializers;
 /// </summary>
 public sealed class BinarySerializer : ISerializer
 {
-    private readonly BinaryFormatter serializer = new();
+    private readonly BinaryFormatter _serializer = new();
 
     /// <inheritdoc />
     public byte[] Serialize( object value )
@@ -23,7 +23,7 @@ public sealed class BinarySerializer : ISerializer
         using ( var stream = new MemoryStream() )
         {
 #pragma warning disable SYSLIB0011
-            this.serializer.Serialize( stream, value );
+            this._serializer.Serialize( stream, value );
 #pragma warning restore SYSLIB0011
             return stream.ToArray();
         }
@@ -40,7 +40,7 @@ public sealed class BinarySerializer : ISerializer
         using ( var stream = new MemoryStream( array ) )
         {
 #pragma warning disable SYSLIB0011
-            return this.serializer.Deserialize( stream );
+            return this._serializer.Deserialize( stream );
 #pragma warning restore SYSLIB0011
         }
     }

@@ -16,13 +16,13 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public const string DefaultName = "default";
 
-    private bool isEnabled = true;
-    private bool? autoReload;
-    private TimeSpan? absoluteExpiration;
-    private TimeSpan? slidingExpiration;
-    private CacheItemPriority? priority;
-    private ILockManager lockManager = new NullLockManager();
-    private IAcquireLockTimeoutStrategy acquireLockTimeoutStrategy = new DefaultAcquireLockTimeoutStrategy();
+    private bool _isEnabled = true;
+    private bool? _autoReload;
+    private TimeSpan? _absoluteExpiration;
+    private TimeSpan? _slidingExpiration;
+    private CacheItemPriority? _priority;
+    private ILockManager _lockManager = new NullLockManager();
+    private IAcquireLockTimeoutStrategy _acquireLockTimeoutStrategy = new DefaultAcquireLockTimeoutStrategy();
 
     /// <summary>
     /// Initializes a new <see cref="CachingProfile"/>.
@@ -43,11 +43,11 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public bool IsEnabled
     {
-        get { return this.isEnabled; }
+        get { return this._isEnabled; }
         set
         {
             CachingServices.Profiles.OnProfileChanged();
-            this.isEnabled = value;
+            this._isEnabled = value;
         }
     }
 
@@ -57,11 +57,11 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public bool? AutoReload
     {
-        get { return this.autoReload; }
+        get { return this._autoReload; }
         set
         {
             CachingServices.Profiles.OnProfileChanged();
-            this.autoReload = value;
+            this._autoReload = value;
         }
     }
 
@@ -71,11 +71,11 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public TimeSpan? AbsoluteExpiration
     {
-        get { return this.absoluteExpiration; }
+        get { return this._absoluteExpiration; }
         set
         {
             CachingServices.Profiles.OnProfileChanged();
-            this.absoluteExpiration = value;
+            this._absoluteExpiration = value;
         }
     }
 
@@ -85,11 +85,11 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public TimeSpan? SlidingExpiration
     {
-        get { return this.slidingExpiration; }
+        get { return this._slidingExpiration; }
         set
         {
             CachingServices.Profiles.OnProfileChanged();
-            this.slidingExpiration = value;
+            this._slidingExpiration = value;
         }
     }
 
@@ -98,11 +98,11 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public CacheItemPriority? Priority
     {
-        get { return this.priority; }
+        get { return this._priority; }
         set
         {
             CachingServices.Profiles.OnProfileChanged();
-            this.priority = value;
+            this._priority = value;
         }
     }
 
@@ -134,8 +134,8 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public ILockManager LockManager
     {
-        get { return this.lockManager; }
-        set { this.lockManager = value ?? new NullLockManager(); }
+        get { return this._lockManager; }
+        set { this._lockManager = value ?? new NullLockManager(); }
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public IAcquireLockTimeoutStrategy AcquireLockTimeoutStrategy
     {
-        get { return this.acquireLockTimeoutStrategy; }
-        set { this.acquireLockTimeoutStrategy = value ?? new DefaultAcquireLockTimeoutStrategy(); }
+        get { return this._acquireLockTimeoutStrategy; }
+        set { this._acquireLockTimeoutStrategy = value ?? new DefaultAcquireLockTimeoutStrategy(); }
     }
 }

@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 [ExplicitCrossPackageInternal]
 internal sealed class AwaitableEvent
 {
-    private static readonly TimeSpan infiniteTimeSpan = TimeSpan.FromMilliseconds( -1 );
+    private static readonly TimeSpan _infiniteTimeSpan = TimeSpan.FromMilliseconds( -1 );
 
     // ReSharper disable InconsistentNaming
     // states of the wait handle
@@ -27,13 +27,13 @@ internal sealed class AwaitableEvent
 
     // ReSharper restore InconsistentNaming
 
-    private readonly int resetMode;
-    internal readonly ConcurrentQueue<WaitOperationBase> operations;
+    private readonly int _resetMode;
+    internal readonly ConcurrentQueue<WaitOperationBase> Operations;
 
-    internal volatile int signalState;
+    internal volatile int SignalState;
 
     [ThreadStatic]
-    private static volatile ManualResetEventSlim threadLocalEvent;
+    private static volatile ManualResetEventSlim _threadLocalEvent;
 
     public AwaitableEvent( EventResetMode resetMode )
         : this( resetMode, false ) { }
@@ -41,15 +41,15 @@ internal sealed class AwaitableEvent
     public AwaitableEvent( EventResetMode resetMode, bool signaled )
     {
         // Make sure that readonly field values are visible for other threads when we leave constructor.
-        Volatile.Write( ref this.resetMode, (int) resetMode );
-        Volatile.Write( ref this.operations, new ConcurrentQueue<WaitOperationBase>() );
+        Volatile.Write( ref this._resetMode, (int) resetMode );
+        Volatile.Write( ref this.Operations, new ConcurrentQueue<WaitOperationBase>() );
 
-        this.signalState = signaled ? SIGNALED : NOT_SIGNALED;
+        this.SignalState = signaled ? SIGNALED : NOT_SIGNALED;
     }
 
     public bool Wait()
     {
-        return this.WaitInternal( infiniteTimeSpan );
+        return this.WaitInternal( _infiniteTimeSpan );
     }
 
     public bool Wait( TimeSpan timeout )
@@ -59,7 +59,7 @@ internal sealed class AwaitableEvent
 
     public Awaiter WaitAsync()
     {
-        return this.WaitOneAsyncInternal( infiniteTimeSpan, CancellationToken.None );
+        return this.WaitOneAsyncInternal( _infiniteTimeSpan, CancellationToken.None );
     }
 
     public Awaiter WaitAsync( TimeSpan timeout )
@@ -69,7 +69,7 @@ internal sealed class AwaitableEvent
 
     public Awaiter WaitAsync( CancellationToken cancellationToken )
     {
-        return this.WaitOneAsyncInternal( infiniteTimeSpan, cancellationToken );
+        return this.WaitOneAsyncInternal( _infiniteTimeSpan, cancellationToken );
     }
 
     public Awaiter WaitAsync( TimeSpan timeout, CancellationToken cancellationToken )
@@ -79,7 +79,7 @@ internal sealed class AwaitableEvent
 
     public Awaiter<TData> WaitAsync<TData>()
     {
-        return this.WaitOneAsyncInternal<TData>( infiniteTimeSpan, CancellationToken.None );
+        return this.WaitOneAsyncInternal<TData>( _infiniteTimeSpan, CancellationToken.None );
     }
 
     public Awaiter<TData> WaitAsync<TData>( TimeSpan timeout )
@@ -89,7 +89,7 @@ internal sealed class AwaitableEvent
 
     public Awaiter<TData> WaitAsync<TData>( CancellationToken cancellationToken )
     {
-        return this.WaitOneAsyncInternal<TData>( infiniteTimeSpan, cancellationToken );
+        return this.WaitOneAsyncInternal<TData>( _infiniteTimeSpan, cancellationToken );
     }
 
     public Awaiter<TData> WaitAsync<TData>( TimeSpan timeout, CancellationToken cancellationToken )
@@ -105,7 +105,7 @@ internal sealed class AwaitableEvent
 
         ConcurrencyTestingApi.TraceEvent( "Begin Set operation." );
 
-        if ( this.resetMode == (int) EventResetMode.AutoReset )
+        if ( this._resetMode == (int) EventResetMode.AutoReset )
         {
             this.SetAutoReset();
         }
@@ -125,7 +125,7 @@ internal sealed class AwaitableEvent
 
             WaitOperationBase op;
 
-            if ( this.operations.TryDequeue( out op ) )
+            if ( this.Operations.TryDequeue( out op ) )
             {
             HandleDequeuedOperation:
                 ConcurrencyTestingApi.TraceEvent( "Operation dequeued." );
@@ -160,13 +160,13 @@ internal sealed class AwaitableEvent
                 ConcurrencyTestingApi.TraceEvent( "No WaitOne operation to activate." );
 
                 // no operation is waiting, let's try to signal
-                if ( NOT_SIGNALED == Interlocked.CompareExchange( ref this.signalState, SIGNALED, NOT_SIGNALED ) )
+                if ( NOT_SIGNALED == Interlocked.CompareExchange( ref this.SignalState, SIGNALED, NOT_SIGNALED ) )
                 {
                     // signal successful
                     ConcurrencyTestingApi.TraceEvent( "Signal set." );
 
                     // peek into queue for an operation
-                    if ( this.operations.TryPeek( out op ) )
+                    if ( this.Operations.TryPeek( out op ) )
                     {
                         ConcurrencyTestingApi.TraceEvent( "Peeked an operation in queue, make sure that it is not waiting." );
 
@@ -176,7 +176,7 @@ internal sealed class AwaitableEvent
                         if ( opState == WAITING )
                         {
                             // other thread may have missed our signal
-                            if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                            if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
                             {
                                 // we have our signal back, now we need to restart
                                 ConcurrencyTestingApi.TraceEvent( "Signal taken back, restart." );
@@ -229,7 +229,7 @@ internal sealed class AwaitableEvent
     private void SetManualReset()
     {
         // set the signal
-        this.signalState = SIGNALED;
+        this.SignalState = SIGNALED;
 
         ConcurrencyTestingApi.TraceEvent( "Signal set." );
 
@@ -237,7 +237,7 @@ internal sealed class AwaitableEvent
         // we don't care if there are multiple threads competing
         while ( true )
         {
-            var mySignalState = this.signalState;
+            var mySignalState = this.SignalState;
 
             if ( mySignalState == NOT_SIGNALED )
             {
@@ -247,7 +247,7 @@ internal sealed class AwaitableEvent
             // activate one
             WaitOperationBase op;
 
-            if ( this.operations.TryDequeue( out op ) )
+            if ( this.Operations.TryDequeue( out op ) )
             {
             HandleDequeuedOperation:
                 ConcurrencyTestingApi.TraceEvent( "Operation dequeued." );
@@ -282,29 +282,29 @@ internal sealed class AwaitableEvent
 
     public void Reset()
     {
-        if ( this.resetMode == (int) EventResetMode.AutoReset )
+        if ( this._resetMode == (int) EventResetMode.AutoReset )
         {
             // TODO: does this work correctly with Set()?
-            this.signalState = NOT_SIGNALED;
+            this.SignalState = NOT_SIGNALED;
         }
         else
         {
-            this.signalState = NOT_SIGNALED;
+            this.SignalState = NOT_SIGNALED;
         }
     }
 
     private static ManualResetEventSlim GetThreadLocalEvent()
     {
-        if ( threadLocalEvent == null )
+        if ( _threadLocalEvent == null )
         {
-            threadLocalEvent = new ManualResetEventSlim( false );
+            _threadLocalEvent = new ManualResetEventSlim( false );
         }
         else
         {
-            threadLocalEvent.Reset();
+            _threadLocalEvent.Reset();
         }
 
-        return threadLocalEvent;
+        return _threadLocalEvent;
     }
 
     private bool WaitInternal( TimeSpan timeout )
@@ -318,7 +318,7 @@ internal sealed class AwaitableEvent
             {
                 // we need to just peek if the handle is signaled (and consume the signal in case of auto reset event)
                 // this does not race with Set/Reset as we do not work with the queue
-                if ( this.resetMode == (int) EventResetMode.AutoReset )
+                if ( this._resetMode == (int) EventResetMode.AutoReset )
                 {
                     return this.NoWaitAutoReset();
                 }
@@ -329,7 +329,7 @@ internal sealed class AwaitableEvent
             }
             else
             {
-                if ( this.resetMode == (int) EventResetMode.AutoReset )
+                if ( this._resetMode == (int) EventResetMode.AutoReset )
                 {
                     return this.WaitAutoReset( timeout );
                 }
@@ -347,7 +347,7 @@ internal sealed class AwaitableEvent
 
     private bool NoWaitAutoReset()
     {
-        if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+        if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
         {
             ConcurrencyTestingApi.TraceEvent( "Signal consumed, return true." );
 
@@ -363,14 +363,14 @@ internal sealed class AwaitableEvent
 
     private bool NoWaitManualReset()
     {
-        return this.signalState == SIGNALED;
+        return this.SignalState == SIGNALED;
     }
 
     private bool WaitAutoReset( TimeSpan timeout )
     {
         // AUTO RESET:
         // if the event is signaled, consume the signal and go through if successful
-        if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+        if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
         {
             ConcurrencyTestingApi.TraceEvent( "Signal consumed, return true." );
 
@@ -385,11 +385,11 @@ internal sealed class AwaitableEvent
             };
 
         // enqueue the operation (other threads will now see it)
-        this.operations.Enqueue( op );
+        this.Operations.Enqueue( op );
 
         ConcurrencyTestingApi.TraceEvent( "Enqueued operation." );
 
-        if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+        if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
         {
             ConcurrencyTestingApi.TraceEvent( "Signal taken, try to finish current operation." );
 
@@ -412,7 +412,7 @@ internal sealed class AwaitableEvent
             {
                 ConcurrencyTestingApi.TraceEvent( "Operation moved to waiting state, try to consume the signal again." );
 
-                if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal taken, try to finish current operation." );
 
@@ -476,7 +476,7 @@ internal sealed class AwaitableEvent
     {
         // MANUAL RESET:
         // if the event is signaled, just go through
-        if ( this.signalState == SIGNALED )
+        if ( this.SignalState == SIGNALED )
         {
             ConcurrencyTestingApi.TraceEvent( "Event is signaled, return true." );
 
@@ -491,11 +491,11 @@ internal sealed class AwaitableEvent
             };
 
         // enqueue the operation (other threads will now see it)
-        this.operations.Enqueue( op );
+        this.Operations.Enqueue( op );
 
         ConcurrencyTestingApi.TraceEvent( "Enqueued operation." );
 
-        if ( this.signalState == SIGNALED )
+        if ( this.SignalState == SIGNALED )
         {
             // we don't have to use CAS as we don't care if someone else finished our op before us
             op.State = SUCCESS;
@@ -512,7 +512,7 @@ internal sealed class AwaitableEvent
             {
                 ConcurrencyTestingApi.TraceEvent( "Operation moved to waiting state, check the signal again." );
 
-                if ( this.signalState == SIGNALED )
+                if ( this.SignalState == SIGNALED )
                 {
                     // we don't have to use CAS as we don't care if someone else finished our op before us
                     op.State = SUCCESS;
@@ -569,7 +569,7 @@ internal sealed class AwaitableEvent
 
     private Awaiter WaitOneAsyncInternal( TimeSpan timeout, CancellationToken cancellationToken )
     {
-        if ( timeout != TimeSpan.Zero && timeout != infiniteTimeSpan )
+        if ( timeout != TimeSpan.Zero && timeout != _infiniteTimeSpan )
         {
             throw new InvalidOperationException( "Support for non-zero finite timeout is not currently implemented." );
         }
@@ -585,9 +585,9 @@ internal sealed class AwaitableEvent
 
             // we need to just peek if the handle is signaled (and consume the signal in case of auto reset event)
             // this does not race with Set/Reset as we do not work with the queue
-            if ( this.resetMode == (int) EventResetMode.AutoReset )
+            if ( this._resetMode == (int) EventResetMode.AutoReset )
             {
-                if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal consumed, return awaiter with ImmediateResult=true." );
 
@@ -602,7 +602,7 @@ internal sealed class AwaitableEvent
             }
             else
             {
-                if ( this.signalState == SIGNALED )
+                if ( this.SignalState == SIGNALED )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal observed, return awaiter with ImmediateResult=true." );
 
@@ -618,11 +618,11 @@ internal sealed class AwaitableEvent
         }
         else
         {
-            if ( this.resetMode == (int) EventResetMode.AutoReset )
+            if ( this._resetMode == (int) EventResetMode.AutoReset )
             {
                 // AUTO RESET:
                 // if the event is signaled, consume the signal and go through if successful
-                if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal consumed, return awaiter with ImmediateResult=true." );
 
@@ -632,7 +632,7 @@ internal sealed class AwaitableEvent
             else
             {
                 // MANUAL RESET:
-                if ( this.signalState == SIGNALED )
+                if ( this.SignalState == SIGNALED )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal observed, return true." );
 
@@ -652,7 +652,7 @@ internal sealed class AwaitableEvent
 
     private Awaiter<TData> WaitOneAsyncInternal<TData>( TimeSpan timeout, CancellationToken cancellationToken )
     {
-        if ( timeout != TimeSpan.Zero && timeout != infiniteTimeSpan )
+        if ( timeout != TimeSpan.Zero && timeout != _infiniteTimeSpan )
         {
             throw new InvalidOperationException( "Support for non-zero finite timeout is not currently implemented." );
         }
@@ -668,9 +668,9 @@ internal sealed class AwaitableEvent
 
             // we need to just peek if the handle is signaled (and consume the signal in case of auto reset event)
             // this does not race with Set/Reset as we do not work with the queue
-            if ( this.resetMode == (int) EventResetMode.AutoReset )
+            if ( this._resetMode == (int) EventResetMode.AutoReset )
             {
-                if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal consumed, return awaiter with ImmediateResult=true." );
 
@@ -685,7 +685,7 @@ internal sealed class AwaitableEvent
             }
             else
             {
-                if ( this.signalState == SIGNALED )
+                if ( this.SignalState == SIGNALED )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal observed, return awaiter with ImmediateResult=true." );
 
@@ -701,11 +701,11 @@ internal sealed class AwaitableEvent
         }
         else
         {
-            if ( this.resetMode == (int) EventResetMode.AutoReset )
+            if ( this._resetMode == (int) EventResetMode.AutoReset )
             {
                 // AUTO RESET:
                 // if the event is signaled, consume the signal and go through if successful
-                if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal consumed, return awaiter with ImmediateResult=true." );
 
@@ -715,7 +715,7 @@ internal sealed class AwaitableEvent
             else
             {
                 // MANUAL RESET:
-                if ( this.signalState == SIGNALED )
+                if ( this.SignalState == SIGNALED )
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal observed, return true." );
 
@@ -759,13 +759,13 @@ internal sealed class AwaitableEvent
         //       we need to run Activate in order to continue the workflow
 
         // enqueue the operation (other threads will now see it)
-        this.operations.Enqueue( op );
+        this.Operations.Enqueue( op );
 
         ConcurrencyTestingApi.TraceEvent( "Enqueued operation." );
 
-        if ( this.resetMode == (int) EventResetMode.AutoReset )
+        if ( this._resetMode == (int) EventResetMode.AutoReset )
         {
-            if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+            if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
             {
                 ConcurrencyTestingApi.TraceEvent( "Signal taken, try to finish current operation." );
 
@@ -787,7 +787,7 @@ internal sealed class AwaitableEvent
                 {
                     ConcurrencyTestingApi.TraceEvent( "Operation moved to waiting state, try to consume the signal again." );
 
-                    if ( SIGNALED == Interlocked.CompareExchange( ref this.signalState, NOT_SIGNALED, SIGNALED ) )
+                    if ( SIGNALED == Interlocked.CompareExchange( ref this.SignalState, NOT_SIGNALED, SIGNALED ) )
                     {
                         ConcurrencyTestingApi.TraceEvent( "Signal taken, try to finish current operation." );
 
@@ -806,7 +806,7 @@ internal sealed class AwaitableEvent
                     {
                         ConcurrencyTestingApi.TraceEvent( "Signal not taken, wait." );
 
-                        if ( op.Timeout == infiniteTimeSpan )
+                        if ( op.Timeout == _infiniteTimeSpan )
                         {
                             // if there is no cancellation token, we simply exit
 
@@ -838,7 +838,7 @@ internal sealed class AwaitableEvent
         }
         else
         {
-            if ( this.signalState == SIGNALED )
+            if ( this.SignalState == SIGNALED )
             {
                 ConcurrencyTestingApi.TraceEvent( "Event is signaled, try to finish the operation." );
 
@@ -860,7 +860,7 @@ internal sealed class AwaitableEvent
                 {
                     ConcurrencyTestingApi.TraceEvent( "Operation moved to waiting state, check the signal again." );
 
-                    if ( this.signalState == SIGNALED )
+                    if ( this.SignalState == SIGNALED )
                     {
                         ConcurrencyTestingApi.TraceEvent( "Event is signaled, try to finish the operation." );
 
@@ -878,7 +878,7 @@ internal sealed class AwaitableEvent
                     {
                         ConcurrencyTestingApi.TraceEvent( "Signal not taken, wait." );
 
-                        if ( op.Timeout == infiniteTimeSpan )
+                        if ( op.Timeout == _infiniteTimeSpan )
                         {
                             // if there is no cancellation token, we simply exit
 
@@ -953,7 +953,7 @@ internal sealed class AwaitableEvent
     internal sealed class WaitOperationAsync : WaitOperationAsyncBase
     {
         // caching delegate
-        private static readonly WaitCallback runContinuationWaitCallback = RunContinuation;
+        private static readonly WaitCallback _runContinuationWaitCallback = RunContinuation;
 
         // continuation
         public volatile Action Continuation;
@@ -992,11 +992,11 @@ internal sealed class AwaitableEvent
             }
             else if ( this.FlowContext )
             {
-                ThreadPool.QueueUserWorkItem( runContinuationWaitCallback, this.Continuation );
+                ThreadPool.QueueUserWorkItem( _runContinuationWaitCallback, this.Continuation );
             }
             else
             {
-                ThreadPool.UnsafeQueueUserWorkItem( runContinuationWaitCallback, this.Continuation );
+                ThreadPool.UnsafeQueueUserWorkItem( _runContinuationWaitCallback, this.Continuation );
             }
 
             return true;
@@ -1013,9 +1013,9 @@ internal sealed class AwaitableEvent
     {
         // caching delegates
         // ReSharper disable StaticMemberInGenericType
-        private static readonly Action<object> runContinuationAction = RunContinuation;
+        private static readonly Action<object> _runContinuationAction = RunContinuation;
 
-        private static readonly WaitCallback runContinuationWaitCallback = RunContinuation;
+        private static readonly WaitCallback _runContinuationWaitCallback = RunContinuation;
 
         // ReSharper restore StaticMemberInGenericType
 
@@ -1061,7 +1061,7 @@ internal sealed class AwaitableEvent
             if ( this.TaskScheduler != TaskScheduler.Default )
             {
                 Task.Factory.StartNew(
-                    runContinuationAction,
+                    _runContinuationAction,
                     this,
                     default,
                     TaskCreationOptions.PreferFairness,
@@ -1069,11 +1069,11 @@ internal sealed class AwaitableEvent
             }
             else if ( this.FlowContext )
             {
-                ThreadPool.QueueUserWorkItem( runContinuationWaitCallback, this );
+                ThreadPool.QueueUserWorkItem( _runContinuationWaitCallback, this );
             }
             else
             {
-                ThreadPool.UnsafeQueueUserWorkItem( runContinuationWaitCallback, this );
+                ThreadPool.UnsafeQueueUserWorkItem( _runContinuationWaitCallback, this );
             }
 
             return true;
@@ -1089,44 +1089,44 @@ internal sealed class AwaitableEvent
     [EditorBrowsable( EditorBrowsableState.Never )]
     public readonly struct Awaiter : ICriticalNotifyCompletion
     {
-        private readonly AwaitableEvent owner;
+        private readonly AwaitableEvent _owner;
 
-        private readonly WaitOperationAsync operation;
+        private readonly WaitOperationAsync _operation;
 
-        private readonly bool? immediateResult;
+        private readonly bool? _immediateResult;
 
         public Awaiter( AwaitableEvent owner, bool immediateResult )
         {
-            this.owner = owner;
-            this.operation = null;
-            this.immediateResult = immediateResult;
+            this._owner = owner;
+            this._operation = null;
+            this._immediateResult = immediateResult;
         }
 
         public Awaiter( AwaitableEvent owner, WaitOperationAsync operation )
         {
-            this.operation = operation;
-            this.owner = owner;
-            this.immediateResult = null;
+            this._operation = operation;
+            this._owner = owner;
+            this._immediateResult = null;
         }
 
         public bool IsCompleted
         {
-            get { return this.immediateResult != null; }
+            get { return this._immediateResult != null; }
         }
 
         public void OnCompleted( Action continuation )
         {
-            this.owner.ScheduleContinuation( this.operation, continuation, true );
+            this._owner.ScheduleContinuation( this._operation, continuation, true );
         }
 
         public void UnsafeOnCompleted( Action continuation )
         {
-            this.owner.ScheduleContinuation( this.operation, continuation, false );
+            this._owner.ScheduleContinuation( this._operation, continuation, false );
         }
 
         public bool GetResult()
         {
-            return this.immediateResult ?? (this.operation.State == SUCCESS);
+            return this._immediateResult ?? (this._operation.State == SUCCESS);
         }
 
         public Awaiter GetAwaiter()
@@ -1140,44 +1140,44 @@ internal sealed class AwaitableEvent
     [EditorBrowsable( EditorBrowsableState.Never )]
     public readonly struct Awaiter<TData>
     {
-        private readonly AwaitableEvent owner;
+        private readonly AwaitableEvent _owner;
 
         internal readonly WaitOperationAsync<TData> Operation;
 
-        private readonly bool? immediateResult;
+        private readonly bool? _immediateResult;
 
         public Awaiter( AwaitableEvent owner, bool immediateResult )
         {
-            this.owner = owner;
+            this._owner = owner;
             this.Operation = null;
-            this.immediateResult = immediateResult;
+            this._immediateResult = immediateResult;
         }
 
         public Awaiter( AwaitableEvent owner, WaitOperationAsync<TData> operation )
         {
             this.Operation = operation;
-            this.owner = owner;
-            this.immediateResult = null;
+            this._owner = owner;
+            this._immediateResult = null;
         }
 
         public bool IsCompleted
         {
-            get { return this.immediateResult != null; }
+            get { return this._immediateResult != null; }
         }
 
         public void OnCompleted( Action<WaitOperationAsync<TData>> continuation )
         {
-            this.owner.ScheduleContinuation( this.Operation, continuation, true );
+            this._owner.ScheduleContinuation( this.Operation, continuation, true );
         }
 
         public void UnsafeOnCompleted( Action<WaitOperationAsync<TData>> continuation )
         {
-            this.owner.ScheduleContinuation( this.Operation, continuation, false );
+            this._owner.ScheduleContinuation( this.Operation, continuation, false );
         }
 
         public bool GetResult()
         {
-            return this.immediateResult ?? (this.Operation.State == SUCCESS);
+            return this._immediateResult ?? (this.Operation.State == SUCCESS);
         }
 
         public Awaiter<TData> GetAwaiter()

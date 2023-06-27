@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// </summary>
 public abstract class CacheInvalidator : CachingBackendEnhancer
 {
-    private readonly BackgroundTaskScheduler backgroundTaskScheduler = new();
+    private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
 
     /// <summary>
     /// Gets the options of the current <see cref="CacheInvalidator"/>.
@@ -34,7 +34,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     {
         await base.RemoveItemAsyncCore( key, cancellationToken );
 
-        this.backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Item, CancellationToken.None ) );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Item, CancellationToken.None ) );
     }
 
     /// <inheritdoc />
@@ -42,7 +42,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     {
         base.RemoveItemCore( key );
 
-        this.backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Item, CancellationToken.None ) );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Item, CancellationToken.None ) );
     }
 
     /// <inheritdoc />
@@ -50,7 +50,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     {
         await base.InvalidateDependencyAsyncCore( key, cancellationToken );
 
-        this.backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Dependency, CancellationToken.None ) );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Dependency, CancellationToken.None ) );
     }
 
     /// <inheritdoc />
@@ -58,7 +58,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     {
         base.InvalidateDependencyCore( key );
 
-        this.backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Dependency, CancellationToken.None ) );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Dependency, CancellationToken.None ) );
     }
 
     /// <summary>
