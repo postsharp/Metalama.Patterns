@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <AssemblyName>PostSharp.Patterns.Caching.Backends.IMemoryCache</AssemblyName>
+    <RootNamespace>PostSharp.Patterns.Caching.Backends</RootNamespace>    
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="$(MicrosoftExtensionsCachingMemoryVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" Private="False" />
+  </ItemGroup>
+
+</Project>

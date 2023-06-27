@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>PostSharp.Patterns.Caching.Backends.Redis</RootNamespace>
+    <AssemblyName>PostSharp.Patterns.Caching.Backends.Redis</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>    
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" />
+	<PackageReference Include="System.ValueTuple" Version="$(SystemValueTupleVersion)" />
+	<PackageReference Include="StackExchange.Redis" Version="$(StackExchangeRedisVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\PostSharp.Patterns.Common\PostSharp.Patterns.Common.csproj" Private="false" />
+    <ProjectReference Include="..\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" Private="false" />
+  </ItemGroup>
+
+</Project>

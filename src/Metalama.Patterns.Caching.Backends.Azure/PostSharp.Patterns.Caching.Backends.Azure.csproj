@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>PostSharp.Patterns.Caching.Backends.Azure</RootNamespace>
+    <AssemblyName>PostSharp.Patterns.Caching.Backends.Azure</AssemblyName>    
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" />
+	<PackageReference Include="System.ValueTuple" Version="$(SystemValueTupleVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="WindowsAzure.ServiceBus" Version="$(WindowsAzureServiceBusVersion)" />
+    <PackageReference Include="Microsoft.WindowsAzure.ConfigurationManager" Version="$(MicrosoftWindowsAzureConfigurationManagerVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' OR '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <PackageReference Include="Microsoft.Azure.Management.ServiceBus" Version="$(MicrosoftAzureManagementServiceBusVersion)" />
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="$(MicrosoftAzureServiceBusVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\PostSharp.Patterns.Common\PostSharp.Patterns.Common.csproj" Private="False" />
+    <ProjectReference Include="..\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" Private="False" />
+  </ItemGroup>
+
+</Project>

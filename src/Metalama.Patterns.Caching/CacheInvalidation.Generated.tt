@@ -1,0 +1,164 @@
+﻿// THIS FILE IS T4-GENERATED.
+// To edit, go to CacheInvalidation.Generated.tt.
+// To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" CacheInvalidation.Generated.tt
+// The transformation is not automatic because we are in a shared project.
+
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+
+
+using System;
+using System.Threading.Tasks;
+using PostSharp.Patterns.Contracts;
+using PostSharp.Patterns.Diagnostics;
+using PostSharp.Patterns.Threading;
+using static PostSharp.Patterns.Diagnostics.SemanticMessageBuilder;
+
+namespace PostSharp.Patterns.Caching
+{
+	public static partial class CachingServices
+    {
+        /// <summary>
+        /// Invalidates the cache.
+        /// </summary>
+        public static partial class Invalidation
+		{
+		<# for ( int i = 1; i <= 10; i++ )
+		{	#>
+
+		    /// <summary>
+            /// Removes a method call result from the cache giving the delegate of the method. This overload is for methods with <#=i#> parameter<#=GetPlural(i)#>.
+            /// </summary>
+            /// <typeparam name="TReturn">The return type of the method.</typeparam>
+            /// <param name="method">A delegate of the method to invalidate.</param>
+<#GenerateXmlDoc(i);#>
+  			public static void Invalidate<TReturn, <#=Repeat( "TParam{0}", i )#>>( [Required] Func<<#=Repeat( "TParam{0}", i )#>, TReturn> method, <#=Repeat( "TParam{0} arg{0}", i )#> )
+            {
+                InvalidateDelegate( method, <#=Repeat( "arg{0}", i )#> );
+            }
+
+			 /// <summary>
+            /// Asynchronously removes a method call result from the cache giving the delegate of the method. This overload is for methods with <#=i#> parameter<#=GetPlural(i)#>.
+            /// </summary>
+            /// <typeparam name="TReturn">The return type of the method.</typeparam>
+            /// <param name="method">A delegate of the method to invalidate.</param>
+			/// <returns>A <see cref="Task"/>.</returns>
+<#GenerateXmlDoc(i);#>
+			public static Task InvalidateAsync<TReturn, <#=Repeat( "TParam{0}", i )#>>( [Required] Func<<#=Repeat( "TParam{0}", i )#>, TReturn> method, <#=Repeat( "TParam{0} arg{0}", i )#> )
+            {
+                return InvalidateDelegateAsync( method, <#=Repeat( "arg{0}", i )#> );
+            }
+
+			/// <summary>
+            /// Evaluates a method, ignoring the currently cached value, and replaces the corresponding cache item with the new return value of the method. This overload is for methods with <#=i#> parameter<#=GetPlural(i)#>.
+            /// </summary>
+            /// <typeparam name="TReturn">The return type of the method.</typeparam>
+            /// <param name="method">A delegate of the method to evaluate.</param>
+            /// <returns>The return value of <paramref name="method"/>.</returns>
+<#GenerateXmlDoc(i);#>
+			public static TReturn Recache<TReturn,  <#=Repeat( "TParam{0}", i )#>>( [Required] Func< <#=Repeat( "TParam{0}", i )#>, TReturn> method, <#=Repeat( "TParam{0} arg{0}", i )#> )
+            {
+				using ( var activity = defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                {
+                    try
+                    {
+                        TReturn result;
+
+                        using ( OpenRecacheContext( method, <#=Repeat( "arg{0}", i )#> ) )
+                        {
+                            result = method( <#=Repeat( "arg{0}", i )#>  );
+                        }
+
+                        activity.SetSuccess();
+
+                        return result;
+                    }
+                    catch ( Exception e ) 
+                    {
+                        activity.SetException(e);
+                        throw;
+                    }
+                }
+            }
+
+			/// <summary>
+            /// Asynchronously evaluates a method, ignoring the currently cached value, and replaces the corresponding cache item with the new return value of the method. This overload is for methods with <#=i#> parameter<#=GetPlural(i)#>.
+            /// </summary>
+            /// <typeparam name="TReturn">The return type of the method.</typeparam>
+            /// <param name="method">A delegate of the method to evaluate.</param>
+            /// <returns>A <see cref="Task{TResult}"/> that evaluates to the return value of <paramref name="method"/>.</returns>
+<#GenerateXmlDoc(i);#>
+			public static async Task<TReturn> RecacheAsync<TReturn,  <#=Repeat( "TParam{0}", i )#>>( [Required] Func<<#=Repeat( "TParam{0}", i )#>, Task<TReturn>> method, <#=Repeat( "TParam{0} arg{0}", i )#> )
+            {
+                using ( var activity = defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                {
+                    try
+                    {
+                        TReturn result;
+
+                        using ( OpenRecacheContext( method, <#=Repeat( "arg{0}", i )#> ) )
+                        {
+                            result = await method( <#=Repeat( "arg{0}", i )#>  );
+                        }
+
+                        activity.SetSuccess();
+
+                        return result;
+                    }
+                    catch ( Exception e ) 
+                    {
+                        activity.SetException(e);
+                        throw;
+                    }
+                }
+            }
+
+			<# }	#>
+	
+		}
+    
+	}
+}
+
+<#+
+static string Repeat( string format, int count )
+{
+	string s = "";
+	for ( int i = 1; i <= count; i++ )
+	{
+		if ( i > 1 ) s += ", ";
+		s += string.Format( format, i );
+	}
+
+	return s;
+}
+
+static string GetOrdinal(int count)
+{
+   switch ( count )
+   {
+	 case 1: return "first";
+	 case 2: return "second";
+	 case 3: return "third";
+	 default: return count + "-th";
+   }
+}
+
+
+static string GetPlural( int count )
+{
+	return count > 1 ? "s" : "";
+}
+
+void GenerateXmlDoc( int count )
+{
+	for ( int i = 1; i <= count; i++ )
+	{
+	#>
+			/// <typeparam name="TParam<#=i#>">Type of the <#=GetOrdinal(i)#> parameter.</typeparam>
+			/// <param name="arg<#= i #>">Value of the <#=GetOrdinal(i)#> parameter.</param>
+	<#+
+	}
+}
+
+#>
