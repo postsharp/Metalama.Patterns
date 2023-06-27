@@ -2,6 +2,7 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 

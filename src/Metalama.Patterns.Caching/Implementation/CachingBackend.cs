@@ -939,9 +939,9 @@ namespace Metalama.Patterns.Caching.Implementation
         }
 
 
-
+        // TODO: [Porting] Used by Redis backend. Making protected for now.
         [ExplicitCrossPackageInternal]
-        internal virtual int BackgroundTaskExceptions
+        protected virtual int BackgroundTaskExceptions
         {
             get
             {

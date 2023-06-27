@@ -1,12 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
+using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis
 {
@@ -74,7 +77,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
         private void Init()
         {
-            this.logger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource(this.GetType());
+            this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource(this.GetType());
         
             DateTime startedAt = DateTime.Now;
             
@@ -100,7 +103,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
         private async Task<RedisNotificationQueue> InitAsync(CancellationToken cancellationToken)
         {
-            this.logger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource(this.GetType());
+            this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource(this.GetType());
 
             foreach (RedisChannel channel in this.channels)
             {

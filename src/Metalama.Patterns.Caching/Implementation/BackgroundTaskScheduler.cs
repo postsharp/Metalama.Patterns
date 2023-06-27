@@ -8,8 +8,9 @@ using System.Globalization;
 
 namespace Metalama.Patterns.Caching.Implementation
 {
+    // TODO: [Porting] Used by Redis backend. Making public for now.
     [ExplicitCrossPackageInternal]
-    internal sealed class BackgroundTaskScheduler
+    public sealed class BackgroundTaskScheduler
     {
         private volatile int backgroundTaskExceptions;
         private static volatile int allBackgroundTaskExceptions;

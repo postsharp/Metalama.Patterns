@@ -1,12 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
+using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis
 {
@@ -251,20 +254,20 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
             if ( kind == null || sourceIdStr == null || key == null )
             {
-                this.LogSource.Write( LogLevel.Warning, "Cannot parse the event '{Event}'. Skipping it.", notification.Value );
+                this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
                 return;
             }
 
             Guid sourceId;
             if ( !Guid.TryParse( sourceIdStr, out sourceId ) )
             {
-                this.LogSource.Write( LogLevel.Warning, "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr);
+                this.LogSource.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr ) );
                 return;
             }
 
             if ( !this.ProcessEvent( kind, key, sourceId ) )
             {
-                this.LogSource.Write( LogLevel.Warning, "Don't know how to process the event kind {Kind}.", kind );
+                this.LogSource.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind ) );
             }
         }
 
@@ -284,7 +287,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                     return true;
 
                 default:
-                    this.LogSource.Write( LogLevel.Debug, "Event {Kind} ignored.", kind );
+                    this.LogSource.Debug.Write( Formatted( "Event {Kind} ignored.", kind ) );
                     break;
             }
 
@@ -300,7 +303,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         protected Task SendEventAsync( string kind, string key )
         {
             string value = kind + ":" + this.Id + ":" + key;
-            this.LogSource.Write( LogLevel.Debug, "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel );
+            this.LogSource.Debug.Write( Formatted(  "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ));
             
             return this.notificationQueue.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
         }
@@ -313,7 +316,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         protected void SendEvent( string kind, string key )
         {
             string value = kind + ":" + this.Id + ":" + key;
-            this.LogSource.Write( LogLevel.Debug, "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel );
+            this.LogSource.Debug.Write( Formatted(  "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ));
 
             this.notificationQueue.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
         }
@@ -600,7 +603,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             }
             catch ( Exception e )
             {
-                this.LogSource.WriteException( LogLevel.Error, e, "Exception when finalizing the RedisNotificationQueue." );
+                this.LogSource.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
             }
             
         }
@@ -634,7 +637,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             }
         }
 
-        internal override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this.notificationQueue.BackgroundTaskExceptions;
+        protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this.notificationQueue.BackgroundTaskExceptions;
 
         /// <summary>
         /// Features of <see cref="RedisCachingBackend"/>.

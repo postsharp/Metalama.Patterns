@@ -33,7 +33,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                 this.CheckFrozen();
 
                 if ( value != null
-#if NETFRAMEWORK
+#if NETFRAMEWORK || NETSTANDARD
                     && value.IndexOf( ":", StringComparison.Ordinal ) != -1
 #else
                     && value.Contains( ":", StringComparison.Ordinal )

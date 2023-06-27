@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-namespace Metalama.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Backends.Redis
 {
     // TODO: [Porting] Outdated?
     // TODO: [Porting] Consider using microsoft.toolkit.highperformance.extensions.stringextensions (now called CommunityToolkit)?
     // https://learn.microsoft.com/en-us/dotnet/api/microsoft.toolkit.highperformance.extensions.stringextensions.tokenize?view=win-comm-toolkit-dotnet-6.1#microsoft-toolkit-highperformance-extensions-stringextensions-tokenize(system-string-system-char)
-    // NB: Also used by Redis backend, copied local for now.
+    // NB: Also used by Metalama.Patterns.Caching, copied local for now.
     // Ported from PostSharp.Patterns.Common/Utilities
     [ExplicitCrossPackageInternal]
     internal struct StringTokenizer

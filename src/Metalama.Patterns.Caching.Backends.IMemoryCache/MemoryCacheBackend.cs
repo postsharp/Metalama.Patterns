@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
-#pragma warning disable CA1303
-#pragma warning disable CA1062
+
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Contracts;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Immutable;
 using System.Globalization;

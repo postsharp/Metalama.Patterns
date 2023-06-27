@@ -14,4 +14,6 @@ namespace Metalama.Patterns.Caching
     {
         public ImportSerializerAttribute( Type objectType, Type serializerType ) { }
     }
+
+    public sealed class ProtectedAttribute : Attribute { }
 }

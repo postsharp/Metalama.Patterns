@@ -3,8 +3,9 @@
 
 namespace Metalama.Patterns.Caching.Implementation
 {
+    // TODO: [Porting] Interface needs to be common, but is testing-only implementation detail. Making public for now.
     [ExplicitCrossPackageInternal]
-    internal interface ITestableCachingComponent : IDisposable
+    public interface ITestableCachingComponent : IDisposable
     {
         Task DisposeAsync( CancellationToken cancellationToken = default(CancellationToken) );
 

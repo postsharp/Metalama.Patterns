@@ -1,9 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
+using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis
 {
@@ -18,7 +21,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
     public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingComponent
     {
         private RedisKeyBuilder keyBuilder;
-        private readonly LogSource logger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource( typeof(RedisCacheDependencyGarbageCollector) );
+        private readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(RedisCacheDependencyGarbageCollector) );
         internal RedisNotificationQueue NotificationQueue { get; private set; }
 
         private readonly bool ownsBackend;
