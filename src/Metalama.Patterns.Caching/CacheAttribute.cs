@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
 using System.Reflection;
+using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching
 {
@@ -19,6 +21,7 @@ namespace Metalama.Patterns.Caching
     /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
     /// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingServices.Invalidation"/>.</para>
     /// </remarks>
+#if TODO
     [Metric("UsedFeatures", "Patterns.Caching.Cache")]
     [ProvideAspectRole(StandardRoles.Caching)]
     [AspectRoleDependency(AspectDependencyAction.Order, AspectDependencyPosition.After, StandardRoles.Validation)]
@@ -26,7 +29,8 @@ namespace Metalama.Patterns.Caching
     [LinesOfCodeAvoided(3)]
     [PSerializable]
     [MulticastAttributeUsage(PersistMetaData = true)]
-    public sealed class CacheAttribute : MethodInterceptionAspect, ICacheAspect
+#endif
+    public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
     {
         private CacheItemConfiguration configuration = new CacheItemConfiguration();
 
@@ -108,6 +112,7 @@ namespace Metalama.Patterns.Caching
             set { this.configuration.IgnoreThisParameter = value; }
         }
 
+#if TODO
         /// <exclude />
         public override void CompileTimeInitialize( MethodBase method, AspectInfo aspectInfo )
         {
@@ -140,7 +145,7 @@ namespace Metalama.Patterns.Caching
 
             CacheAspectRepository.Add( (MethodInfo) method, this );
         }
-
+#endif
         private CacheItemConfiguration MergedConfiguration
         {
             get
@@ -192,13 +197,13 @@ namespace Metalama.Patterns.Caching
         {
             if (this.logger == null )
             {
-                this.logger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource(this.targetMethod.DeclaringType);
+                this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource(this.targetMethod.DeclaringType);
             }
 
             return this.logger;
         }
 
-
+#if TODO
         /// <exclude />
         public override void OnInvoke( MethodInterceptionArgs args )
         {
@@ -353,5 +358,6 @@ namespace Metalama.Patterns.Caching
                 return await this.asyncMethodBinding.InvokeAsync(ref this.instance, this.arguments);
             }
         }
+#endif
     }
 }

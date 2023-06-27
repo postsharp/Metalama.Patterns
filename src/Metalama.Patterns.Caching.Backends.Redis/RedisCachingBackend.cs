@@ -251,20 +251,20 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
             if ( kind == null || sourceIdStr == null || key == null )
             {
-                this.Logger.Write( LogLevel.Warning, "Cannot parse the event '{Event}'. Skipping it.", notification.Value );
+                this.LogSource.Write( LogLevel.Warning, "Cannot parse the event '{Event}'. Skipping it.", notification.Value );
                 return;
             }
 
             Guid sourceId;
             if ( !Guid.TryParse( sourceIdStr, out sourceId ) )
             {
-                this.Logger.Write( LogLevel.Warning, "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr);
+                this.LogSource.Write( LogLevel.Warning, "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr);
                 return;
             }
 
             if ( !this.ProcessEvent( kind, key, sourceId ) )
             {
-                this.Logger.Write( LogLevel.Warning, "Don't know how to process the event kind {Kind}.", kind );
+                this.LogSource.Write( LogLevel.Warning, "Don't know how to process the event kind {Kind}.", kind );
             }
         }
 
@@ -284,7 +284,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                     return true;
 
                 default:
-                    this.Logger.Write( LogLevel.Debug, "Event {Kind} ignored.", kind );
+                    this.LogSource.Write( LogLevel.Debug, "Event {Kind} ignored.", kind );
                     break;
             }
 
@@ -300,7 +300,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         protected Task SendEventAsync( string kind, string key )
         {
             string value = kind + ":" + this.Id + ":" + key;
-            this.Logger.Write( LogLevel.Debug, "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel );
+            this.LogSource.Write( LogLevel.Debug, "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel );
             
             return this.notificationQueue.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
         }
@@ -313,7 +313,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         protected void SendEvent( string kind, string key )
         {
             string value = kind + ":" + this.Id + ":" + key;
-            this.Logger.Write( LogLevel.Debug, "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel );
+            this.LogSource.Write( LogLevel.Debug, "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel );
 
             this.notificationQueue.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
         }
@@ -600,7 +600,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             }
             catch ( Exception e )
             {
-                this.Logger.WriteException( LogLevel.Error, e, "Exception when finalizing the RedisNotificationQueue." );
+                this.LogSource.WriteException( LogLevel.Error, e, "Exception when finalizing the RedisNotificationQueue." );
             }
             
         }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 
@@ -13,16 +14,12 @@ namespace Metalama.Patterns.Caching
     {
         private static volatile CacheKeyBuilder keyBuilder = new CacheKeyBuilder();
         private static volatile CachingBackend backend = new UninitializedCachingBackend();
-        private static readonly LogSource defaultLogger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
+        private static readonly LogSource defaultLogger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static CachingServices()
         {
-            Formatters.Initialize();
+            _ = Formatters.Instance;
         }
-
-
 
         /// <summary>
         /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.

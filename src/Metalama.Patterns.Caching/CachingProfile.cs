@@ -3,6 +3,7 @@
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Locking;
+using Metalama.Patterns.Contracts;
 
 namespace Metalama.Patterns.Caching
 {

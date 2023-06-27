@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace.Formatters;
+using Metalama.Patterns.Contracts;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -16,25 +18,37 @@ namespace Metalama.Patterns.Caching.Implementation
     {
         private readonly ConcurrentDictionary<MethodInfo, CachedMethodInfo> methodInfoCache = new ConcurrentDictionary<MethodInfo, CachedMethodInfo>();
         private readonly UnsafeStringBuilderPool stringBuilderPool;
-
+        private readonly IFormatterRepository _formatterRepository;
         /// <summary>
         /// A sentinel object that means that the parameter is not a part of the cache key, and should be ignored.
         /// </summary>
         protected object IgnoredParameterSentinel { get; } = new object();
 
         /// <summary>
-        /// Initializes a new <see cref="CacheKeyBuilder"/> with a default maximal key size of 2048 characters.
+        /// Initializes a new instance of the <see cref="CacheKeyBuilder"/> class optionally specifying a
+        /// <see cref="IFormatterRepository"/>.
         /// </summary>
-        public CacheKeyBuilder() : this(2048)
+        /// <param name="formatterRepository">
+        /// The <see cref="IFormatterRepository"/> from which to obtain formatters, or <see langword="null"/> to
+        /// use <see cref="CachingServices.Formatters.Instance"/>.
+        /// </param>
+        public CacheKeyBuilder( IFormatterRepository? formatterRepository = null ) : this(2048)
         {
+            this._formatterRepository = formatterRepository ?? CachingServices.Formatters.Instance;
         }
 
         /// <summary>
-        /// Initializes a new <see cref="CacheKeyBuilder"/> and specifies the maximal key size.
+        /// Initializes a new instance of the <see cref="CacheKeyBuilder"/> class specifying the maximal key size 
+        /// and optionally a <see cref="IFormatterRepository"/>.
         /// </summary>
         /// <param name="maxKeySize">The maximal number of characters in cache keys.</param>
-        public CacheKeyBuilder(int maxKeySize)
+        /// <param name="formatterRepository">
+        /// The <see cref="IFormatterRepository"/> from which to obtain formatters, or <see langword="null"/> to
+        /// use <see cref="CachingServices.Formatters.Instance"/>.
+        /// </param>
+        public CacheKeyBuilder(int maxKeySize, IFormatterRepository? formatterRepository = null )
         {
+            this._formatterRepository = formatterRepository ?? CachingServices.Formatters.Instance;
             this.stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
         }
 
@@ -88,7 +102,7 @@ namespace Metalama.Patterns.Caching.Implementation
 
             if ( cacheAspect == null )
             {
-                throw new AssertionFailedException( string.Format( CultureInfo.InvariantCulture, "Declaring type of '{0}' method has not been initialized.", method ) );
+                throw new MetalamaPatternsCachingAssertionFailedException( string.Format( CultureInfo.InvariantCulture, "Declaring type of '{0}' method has not been initialized.", method ) );
             }
 
             bool isThisParameterIgnored = cacheAspect.BuildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault();
@@ -228,7 +242,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="type">A <see cref="Type"/>.</param>
         protected virtual void AppendType( UnsafeStringBuilder stringBuilder, [Required] Type type )
         {
-            TypeFormatter.Instance.Write( stringBuilder, type );
+            this._formatterRepository.Get<Type>().Write( stringBuilder, type );
         }
 
         /// <summary>
@@ -245,7 +259,7 @@ namespace Metalama.Patterns.Caching.Implementation
             }
             else
             {
-                IFormatter formatter = CachingServices.Formatters.Get( o.GetType() );
+                IFormatter formatter = this._formatterRepository.Get( o.GetType() );
                 formatter.Write( stringBuilder, o );
             }
         }

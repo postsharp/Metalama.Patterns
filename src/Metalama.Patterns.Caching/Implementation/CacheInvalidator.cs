@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Patterns.Contracts;
 using System.Diagnostics.CodeAnalysis;
+using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation
 {
@@ -76,7 +78,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 return;
             }
 
-            LogActivity activity = this.Logger.OpenActivity("{This} is processing the message {Message}.", this, message);
+            var activity = this.LogSource.Default.OpenActivity( Formatted( "{This} is processing the message {Message}.", this, message ) );
             try
             {
 
@@ -88,7 +90,7 @@ namespace Metalama.Patterns.Caching.Implementation
                 Guid sourceId;
                 if (!Guid.TryParse(backendIdStr, out sourceId))
                 {
-                    activity.SetFailure("Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", backendIdStr);
+                    activity.SetOutcome( this.LogSource.Failure.Level, Formatted( "Failed: cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", backendIdStr ) );
                     return;
                 }
 
@@ -97,7 +99,8 @@ namespace Metalama.Patterns.Caching.Implementation
 
                 if (sourceId == this.UnderlyingBackend.Id)
                 {
-                    activity.SetSuccess("Skipped the message {Message} because it has sent it itself.", message);
+                    this.LogSource.Default.Write( Formatted( "Skipping the message {Message} because it has sent it itself.", message ) );
+                    activity.SetResult( "Skipped." );
                     return;
                 }
 
@@ -106,16 +109,18 @@ namespace Metalama.Patterns.Caching.Implementation
                 {
                     case "dependency":
                         this.UnderlyingBackend.InvalidateDependency(key);
-                        activity.SetSuccess("Invalidated the dependency {Key}.", key);
+                        this.LogSource.Default.Write( Formatted( "Invalidated the dependency {Key}.", key ) );
+                        activity.SetSuccess();
                         break;
 
                     case "item":
                         this.UnderlyingBackend.RemoveItem(key);
-                        activity.SetSuccess("Removed the item {Key}.", key);
+                        this.LogSource.Default.Write( Formatted( "Removed the item {Key}.", key ) );
+                        activity.SetSuccess();
                         break;
 
                     default:
-                        activity.SetFailure("Invalid kind key: {Kind}.", kind);
+                        activity.SetOutcome( this.LogSource.Failure.Level, Formatted( "Failed: invalid kind key: {Kind}.", kind ) );
                         break;
                 }
 
@@ -140,7 +145,7 @@ namespace Metalama.Patterns.Caching.Implementation
         {
             string message = this.GetMessage(cacheKeyKind, key);
 
-            this.Logger.Write( LogLevel.Debug, "{This} is sending the message {Message}.", this, message );
+            this.LogSource.Debug.Write( Formatted( "{This} is sending the message {Message}.", this, message ) );
 
             return this.SendMessageAsync(message, cancellationToken);
         }

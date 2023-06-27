@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Caching
 
             PopulateConfigurations( method.DeclaringType, configurations );
 
-            ICacheItemConfiguration assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType.GetAssembly() );
+            ICacheItemConfiguration assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType.Assembly );
             if ( assemblyConfiguration != null )
             {
                 configurations.Add( assemblyConfiguration );
@@ -54,7 +54,7 @@ namespace Metalama.Patterns.Caching
                 configurations.Add( configuration );
             }
 
-            Type baseType = type.GetBaseType();
+            Type baseType = type.BaseType;
 
             if ( baseType != null )
             {
@@ -62,9 +62,12 @@ namespace Metalama.Patterns.Caching
             }
         }
 
+        // TODO: [Porting] Use of PostSharpEnvironment.CurrentProject.StateStore
 
         private static ICacheItemConfiguration GetConfigurationOnDeclaration( ICustomAttributeProvider declaration )
         {
+            throw new NotImplementedException( "Porting - PostSharpEnvironment.CurrentProject.StateStore" );
+#if TODO
             CacheConfigurationAttributeCache attributeCache = PostSharpEnvironment.CurrentProject.StateStore.Get<CacheConfigurationAttributeCache>();
 
             if ( attributeCache == null )
@@ -81,6 +84,7 @@ namespace Metalama.Patterns.Caching
             }
 
             return attribute?.Configuration;
+#endif
         }
 
         private sealed class CacheConfigurationAttributeCache

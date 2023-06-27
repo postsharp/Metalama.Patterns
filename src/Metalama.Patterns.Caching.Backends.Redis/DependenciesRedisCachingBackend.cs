@@ -115,7 +115,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                 }
                 else
                 {
-                    this.Logger.Write( LogLevel.Debug, "Transaction DeleteItem failed. Retrying." );
+                    this.LogSource.Write( LogLevel.Debug, "Transaction DeleteItem failed. Retrying." );
                 }
             }
 
@@ -124,7 +124,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
         private void LogRetryTransaction( [CallerMemberName] string memberName = null )
         {
-            this.Logger.Write(LogLevel.Debug, "Transaction {Method} failed. Retrying.", memberName);
+            this.LogSource.Write(LogLevel.Debug, "Transaction {Method} failed. Retrying.", memberName);
         }
 
         /// <inheritdoc />
@@ -161,9 +161,9 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
 #pragma warning disable 4014
 
-            this.Logger.Write( LogLevel.Debug, "KeyDelete({Key})", dependenciesKey );
+            this.LogSource.Write( LogLevel.Debug, "KeyDelete({Key})", dependenciesKey );
             transaction.KeyDeleteAsync( dependenciesKey );
-            this.Logger.Write( LogLevel.Debug, "KeyDelete({Key})", valueKey );
+            this.LogSource.Write( LogLevel.Debug, "KeyDelete({Key})", valueKey );
             transaction.KeyDeleteAsync( valueKey );
 
 #pragma warning restore 4014
@@ -183,7 +183,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         private Task RemoveDependencyAsync( string valueKey, string dependency, IDatabaseAsync database )
         {
             RedisKey dependencyKey = this.KeyBuilder.GetDependencyKey( dependency );
-            this.Logger.Write( LogLevel.Debug, "SetRemove({DependencyKey}, {ValueKey})", dependencyKey, valueKey );
+            this.LogSource.Write( LogLevel.Debug, "SetRemove({DependencyKey}, {ValueKey})", dependencyKey, valueKey );
             return database.SetRemoveAsync( dependencyKey, valueKey );
         }
 
@@ -229,7 +229,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                     // However, we want to prevent corrupted entries, i.e. we want to ensure that the value/dependency/dependencies
                     // keys are all consistent. This is why we're using the item versioning thing.
 
-                    this.Logger.Write( LogLevel.Debug, "Version of existing item is {Version}. Deleting the key {Key} under the condition that the version remains equal.", version, valueKey );
+                    this.LogSource.Write( LogLevel.Debug, "Version of existing item is {Version}. Deleting the key {Key} under the condition that the version remains equal.", version, valueKey );
                     transaction.AddCondition( Condition.ListIndexEqual( valueKey, itemVersionIndex, version ) );
                     transaction.KeyDeleteAsync( valueKey );
 
@@ -278,7 +278,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                     // However, we want to prevent corrupted entries, i.e. we want to ensure that the value/dependency/dependencies
                     // keys are all consistent. This is why we're using the item versioning thing.
 
-                    this.Logger.Write( LogLevel.Debug, "Version of existing item is {Version}. Deleting the key {Key} under the condition that the version remains equal.", version, valueKey );
+                    this.LogSource.Write( LogLevel.Debug, "Version of existing item is {Version}. Deleting the key {Key} under the condition that the version remains equal.", version, valueKey );
                     transaction.AddCondition( Condition.ListIndexEqual( valueKey, itemVersionIndex, version ) );
 #pragma warning disable 4014
                     transaction.KeyDeleteAsync( valueKey );
@@ -305,7 +305,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                 }
                 else
                 {
-                    this.Logger.Write( LogLevel.Debug, "Transaction SetItem failed. Retrying." );
+                    this.LogSource.Write( LogLevel.Debug, "Transaction SetItem failed. Retrying." );
                 }
             }
 
@@ -485,7 +485,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                 }
                 else
                 {
-                    this.Logger.Write( LogLevel.Debug, "Transaction InvalidateDependency failed. Retrying." );
+                    this.LogSource.Write( LogLevel.Debug, "Transaction InvalidateDependency failed. Retrying." );
                 }
             }
 
@@ -554,7 +554,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
                 if ( keyPrefix != this.KeyBuilder.KeyPrefix )
                 {
-                    this.Logger.Write( LogLevel.Warning, "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix );
+                    this.LogSource.Write( LogLevel.Warning, "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix );
                     continue;
                 }
 
@@ -594,7 +594,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             {
                 if ( !await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( item ) ) )
                 {
-                    this.Logger.Write( LogLevel.Warning, "The dependency key {Key} does not have the corresponding dependencies key. Deleting it.", key );
+                    this.LogSource.Write( LogLevel.Warning, "The dependency key {Key} does not have the corresponding dependencies key. Deleting it.", key );
 
                     await this.RemoveDependencyAsync( item, key, this.Database );
                 }
@@ -605,7 +605,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
         {
             if ( !await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ) ) )
             {
-                this.Logger.Write( LogLevel.Warning, "The dependencies key {Key} does not have the corresponding value key. Deleting it.", key );
+                this.LogSource.Write( LogLevel.Warning, "The dependencies key {Key} does not have the corresponding value key. Deleting it.", key );
 
                 await this.DeleteItemAsync( key );
             }
@@ -623,7 +623,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
                     return;
                 }
 
-                this.Logger.Write( LogLevel.Warning, "The value key {Key} does not have the corresponding dependencies key. Deleting it.", smallKey );
+                this.LogSource.Write( LogLevel.Warning, "The value key {Key} does not have the corresponding dependencies key. Deleting it.", smallKey );
 
                 await this.Database.KeyDeleteAsync( redisKey );
 
@@ -632,7 +632,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
 
             if ( itemVersion != dependencies[itemVersionInDependenciesIndex] )
             {
-                this.Logger.Write( LogLevel.Warning, "The value {Key} version and the corresponding dependencies version differ. Deleting both.",
+                this.LogSource.Write( LogLevel.Warning, "The value {Key} version and the corresponding dependencies version differ. Deleting both.",
                                    smallKey );
 
                 for ( int i = firstDependencyIndex; i < dependencies.Length; i++ )
@@ -650,7 +650,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis
             {
                 if ( !await this.Database.SetContainsAsync( this.KeyBuilder.GetDependencyKey( dependencies[i] ), smallKey ) )
                 {
-                    this.Logger.Write( LogLevel.Warning, "The value key {Key} does not have the corresponding dependency key {Dependency}. Deleting it.",
+                    this.LogSource.Write( LogLevel.Warning, "The value key {Key} does not have the corresponding dependency key {Dependency}. Deleting it.",
                                         smallKey, dependencies[i] );
 
                     await this.DeleteItemAsync( smallKey );

@@ -2,6 +2,7 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Runtime.Serialization;

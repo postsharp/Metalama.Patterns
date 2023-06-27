@@ -1,11 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.ValueAdapters;
+using Metalama.Patterns.Contracts;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using static Flashtrace.FormattedMessageBuilder;
 
-#pragma warning disable 420
+// TODO: [Porting] Remove?
+// #pragma warning disable 420
 
 namespace Metalama.Patterns.Caching.Implementation
 {
@@ -33,10 +37,10 @@ namespace Metalama.Patterns.Caching.Implementation
         
 
         /// <summary>
-        /// Gets the <see cref="PostSharp.Patterns.Diagnostics.Logger"/> that implementations can use to emit
+        /// Gets the <see cref="Flashtrace.LogSource"/> that implementations can use to emit
         /// log records.
         /// </summary>
-        protected Logger Logger { get; }
+        protected LogSource LogSource { get; }
 
         /// <summary>
         /// Gets the <see cref="Guid"/> of the current <see cref="CachingBackend"/>.
@@ -100,7 +104,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="item">The cache item.</param>
         public void SetItem( [Required] string key, [Required] CacheItem item )
         {
-            using ( LogActivity activity = this.Logger.OpenActivity( "SetItem( \"{Key}\" )", key ) )
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "SetItem( \"{Key}\" )", key ) ) )
             {
                 try
                 {
@@ -110,9 +114,9 @@ namespace Metalama.Patterns.Caching.Implementation
 
                     activity.SetSuccess();
                 }
-                catch ( Exception e ) when (activity.SetException(e) )
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -127,21 +131,21 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns>A <see cref="Task"/>.</returns>
         public async Task SetItemAsync( [Required] string key, [Required] CacheItem item, CancellationToken cancellationToken = default(CancellationToken) )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("SetItemAsync( \"{Key}\")", key)) 
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "SetItemAsync( \"{Key}\")", key ) ) )
             {
                 try
                 {
                     this.Validate( item );
 
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     await this.SetItemAsyncCore( key, item, cancellationToken );
 
                     activity.SetSuccess();
                 }
-                catch ( Exception e ) when (activity.SetException(e))
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -178,19 +182,19 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns><c>true</c> if the cache contains an item whose key is <paramref name="key"/>, otherwise <c>false</c>.</returns>
         public bool ContainsItem( [Required] string key )
         {
-            using ( LogActivity activity = this.Logger.OpenActivity( "ContainsItem( \"{Key}\" )", key ) )
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsItem( \"{Key}\" )", key ) ) )
             {
                 try
                 {
                     bool present = this.ContainsItemCore( key );
 
-                    activity.SetSuccess( present ? "Cache hit." : "Cache miss." );
+                    activity.SetResult( present ? "Cache hit." : "Cache miss." );
 
                     return present;
                 }
-                catch ( Exception e ) when (activity.SetException(e) )
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -204,7 +208,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns>A <see cref="Task"/> that evaluates to <c>true</c> if the cache contains an item whose key is <paramref name="key"/>, otherwise <c>false</c>.</returns>
         public async Task<bool> ContainsItemAsync([Required] string key, CancellationToken cancellationToken = default(CancellationToken) )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("ContainsItemAsync( \"{Key}\" )", key))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsItemAsync( \"{Key}\" )", key ) ) )
             {
                 try
                 {
@@ -212,13 +216,13 @@ namespace Metalama.Patterns.Caching.Implementation
 
                     bool present = await this.ContainsItemAsyncCore( key, cancellationToken );
 
-                    activity.SetSuccess( present ? "Cache hit." : "Cache miss." );
+                    activity.SetResult( present ? "Cache hit." : "Cache miss." );
 
                     return present;
                 }
-                catch ( Exception e ) when (activity.SetException(e) )
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -261,7 +265,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns>A <see cref="CacheValue"/>, or <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
         public CacheValue GetItem( [Required] string key, bool includeDependencies = true )
         {
-            using ( LogActivity activity = this.Logger.OpenActivity( "GetItem( \"{Key}\" )", key ) )
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "GetItem( \"{Key}\" )", key ) ) )
             {
                 try
                 {
@@ -273,19 +277,21 @@ namespace Metalama.Patterns.Caching.Implementation
                     }
                     catch ( Exception e ) when ( e is InvalidCacheItemException || e is InvalidCastException )
                     {
-                        activity.WriteException( LogLevel.Warning, e,
-                                                 "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item. " +
-                                                 "To avoid this warning, change the cache key prefix when you do breaking changes to the source code." );
+                        this.LogSource.Warning.Write( 
+                            Formatted( 
+                                "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item. " +
+                                "To avoid this warning, change the cache key prefix when you do breaking changes to the source code." ),
+                            e );
                         this.RemoveItemCore( key );
                     }
 
-                    activity.SetSuccess( item != null ? "Cache hit." : "Cache miss." );
+                    activity.SetResult( item != null ? "Cache hit." : "Cache miss." );
 
                     return item;
                 }
-                catch ( Exception e ) when (activity.SetException(e) )
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -302,7 +308,7 @@ namespace Metalama.Patterns.Caching.Implementation
         public async Task<CacheValue> GetItemAsync( [Required] string key, bool includeDependencies = true,
                                                     CancellationToken cancellationToken = default(CancellationToken) )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("GetItemAsync( \"{Key}\" )", key))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "GetItemAsync( \"{Key}\" )", key ) ) )
             {
                 try
                 {
@@ -316,18 +322,17 @@ namespace Metalama.Patterns.Caching.Implementation
                     }
                     catch ( Exception e ) when ( e is InvalidCacheItemException || e is InvalidCastException )
                     {
-                        activity.WriteException( LogLevel.Info, e,
-                                                 "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item." );
+                        LogSource.Info.Write( Formatted( "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item." ), e );
                         await this.RemoveItemAsyncCore( key, cancellationToken );
                     }
 
-                    activity.SetSuccess( item != null ? "Cache hit." : "Cache miss." );
+                    activity.SetResult( item != null ? "Cache hit." : "Cache miss." );
 
                     return item;
                 }
-                catch ( Exception e ) when (activity.SetException(e))
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -365,7 +370,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The key of the cache item.</param>
         public void RemoveItem( [Required] string key )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("RemoveItem( \"{Key}\" )", key))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "RemoveItem( \"{Key}\" )", key ) ) )
             {
                 try
                 {
@@ -373,9 +378,9 @@ namespace Metalama.Patterns.Caching.Implementation
 
                     activity.SetSuccess();
                 }
-                catch ( Exception e ) when (activity.SetException(e) )
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -389,7 +394,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns>A <see cref="Task"/>.</returns>
         public async Task RemoveItemAsync( [Required] string key, CancellationToken cancellationToken = default(CancellationToken) )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("RemoveItemAsync( \"{Key}\" )", key))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "RemoveItemAsync( \"{Key}\" )", key ) ) )
             {
                 try
                 {
@@ -399,9 +404,9 @@ namespace Metalama.Patterns.Caching.Implementation
 
                     activity.SetSuccess();
                 }
-                catch ( Exception e ) when (activity.SetException(e) )
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -437,19 +442,19 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="key">The dependency key.</param>
         public void InvalidateDependency( [Required] string key )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("InvalidateDependency( \"{Key}\" )", key))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "InvalidateDependency( \"{Key}\" )", key ) ) )
             {
                 try
                 {
-                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
+                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
 
                     this.InvalidateDependencyCore( key );
 
                     activity.SetSuccess();
                 }
-                catch ( Exception e) when (activity.SetException(e))
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -463,11 +468,11 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns>A <see cref="Task"/>.</returns>
         public async Task InvalidateDependencyAsync( [Required] string key, CancellationToken cancellationToken = default(CancellationToken) )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("InvalidateDependencyAsync( \"{Key}\" )", key))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "InvalidateDependencyAsync( \"{Key}\" )", key ) ) )
             {
                 try
                 {
-                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
+                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
 
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -475,9 +480,9 @@ namespace Metalama.Patterns.Caching.Implementation
 
                     activity.SetSuccess();
                 }
-                catch ( Exception e) when (activity.SetException(e))
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -514,22 +519,22 @@ namespace Metalama.Patterns.Caching.Implementation
 
         public bool ContainsDependency( [Required] string key )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("ContainsDependency( \"{Key}\" )", key))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsDependency( \"{Key}\" )", key ) ) )
             {
                 try
                 {
-                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
-                    this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof(this.SupportedFeatures.ContainsDependency) );
+                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
+                    this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof( this.SupportedFeatures.ContainsDependency ) );
 
                     bool present = this.ContainsDependencyCore( key );
 
-                    activity.SetSuccess( present ? "Cache hit." : "Cache miss." );
+                    activity.SetResult( present ? "Cache hit." : "Cache miss." );
 
                     return present;
                 }
-                catch ( Exception e) when (activity.SetException(e))
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -543,26 +548,26 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns>A <see cref="Task"/> evaluating to <c>true</c> if the cache contains the dependency <paramref name="key"/>, otherwise <c>false</c>.</returns>
         public async Task<bool> ContainsDependencyAsync( [Required] string key, CancellationToken cancellationToken = default(CancellationToken) )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("ContainsDependencyAsync( \"{Key}\" )", key))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsDependencyAsync( \"{Key}\" )", key ) ) )
             {
                 try
                 {
-                    activity.Write( LogLevel.Debug, "The dependency key is \"{Key}\".", key );
+                    LogSource.Debug.Write( Formatted( "The dependency key is \"{Key}\".", key ) );
 
-                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
-                    this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof(this.SupportedFeatures.ContainsDependency) );
+                    this.RequireFeature( this.SupportedFeatures.Dependencies, nameof( this.SupportedFeatures.Dependencies ) );
+                    this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof( this.SupportedFeatures.ContainsDependency ) );
 
                     cancellationToken.ThrowIfCancellationRequested();
 
                     bool present = await this.ContainsDependencyAsyncCore( key, cancellationToken );
 
-                    activity.SetSuccess( present ? "Cache hit." : "Cache miss." );
+                    activity.SetResult( present ? "Cache hit." : "Cache miss." );
 
                     return present;
                 }
-                catch ( Exception e) when (activity.SetException(e))
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -593,7 +598,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// </summary>
         public void Clear()
         {
-            using ( LogActivity activity = this.Logger.OpenActivity( "Clear()" ) )
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "Clear()" ) ) )
             {
                 try
                 {
@@ -601,9 +606,9 @@ namespace Metalama.Patterns.Caching.Implementation
 
                     activity.SetSuccess();
                 }
-                catch ( Exception e) when (activity.SetException(e))
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -616,7 +621,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <returns>A <see cref="Task"/>.</returns>
         public async Task ClearAsync( CancellationToken cancellationToken = default(CancellationToken) )
         {
-            using (LogActivity activity = this.Logger.OpenActivity("ClearAsync()"))
+            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ClearAsync()" ) ) )
             {
                 try
                 {
@@ -624,9 +629,9 @@ namespace Metalama.Patterns.Caching.Implementation
 
                     await this.ClearAsyncCore( cancellationToken );
                 }
-                catch ( Exception e) when (activity.SetException(e))
+                catch ( Exception e )
                 {
-                    // Unreachable.
+                    activity.SetException( e );
                     throw;
                 }
             }
@@ -656,7 +661,7 @@ namespace Metalama.Patterns.Caching.Implementation
 
             // TODO: We may need an instance-scoped logger instead of a type-scoped logger.
 #pragma warning disable 618
-            this.Logger = this.Logger.GetLogger( LoggingRoles.Caching, this.GetType() );
+            this.LogSource = LogSource.Get( this.GetType(), LoggingRoles.Caching );
 #pragma warning restore 618
         }
 
@@ -683,7 +688,7 @@ namespace Metalama.Patterns.Caching.Implementation
         public virtual Task WhenBackgroundTasksCompleted( CancellationToken cancellationToken )
         {
             if ( this.backgroundTaskScheduler == null )
-                return PortableThreadingApi.CompletedTask;
+                return Task.CompletedTask;
             else
                 return  this.backgroundTaskScheduler.WhenBackgroundTasksCompleted( cancellationToken );
         }
@@ -759,7 +764,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="args">Event arguments.</param>
         protected void OnItemRemoved( [Required] CacheItemRemovedEventArgs args )
         {
-            this.Logger.Write( LogLevel.Debug, "Item removed. Reason={Reason}, Key=\"{Key}\"", args.RemovedReason, args.Key );
+            this.LogSource.Debug.Write( Formatted( "Item removed. Reason={Reason}, Key=\"{Key}\"", args.RemovedReason, args.Key ) );
             this.itemRemoved?.Invoke( this, args );
         }
 
@@ -773,7 +778,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// or <see cref="Guid.Empty"/> if the source <see cref="CachingBackend"/> cannot be determined.</param>
         protected void OnItemRemoved( [Required] string key, CacheItemRemovedReason reason, Guid sourceId )
         {
-            this.Logger.Write( LogLevel.Debug, "Item removed. Reason={Reason}, Key=\"{Key}\"", reason, key );
+            this.LogSource.Debug.Write( Formatted( "Item removed. Reason={Reason}, Key=\"{Key}\"", reason, key ) );
             this.itemRemoved?.Invoke( this, new CacheItemRemovedEventArgs( key, reason, sourceId ) );
         }
 
@@ -786,7 +791,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// or <see cref="Guid.Empty"/> if the source <see cref="CachingBackend"/> cannot be determined.</param>
         protected void OnDependencyInvalidated( [Required] string key, Guid sourceId )
         {
-            this.Logger.Write( LogLevel.Debug, "Dependency invalidated. Key=\"{Key}\"", key );
+            this.LogSource.Debug.Write( Formatted( "Dependency invalidated. Key=\"{Key}\"", key ) );
             this.dependencyInvalidated?.Invoke( this, new CacheDependencyInvalidatedEventArgs( key, sourceId ) );
         }
 
@@ -796,7 +801,7 @@ namespace Metalama.Patterns.Caching.Implementation
         /// <param name="args">A <see cref="CacheDependencyInvalidatedEventArgs"/>.</param>
         protected void OnDependencyInvalidated( [Required] CacheDependencyInvalidatedEventArgs args )
         {
-            this.Logger.Write( LogLevel.Debug, "Dependency invalidated. Key=\"{Key}\"", args.Key );
+            this.LogSource.Debug.Write( Formatted( "Dependency invalidated. Key=\"{Key}\"", args.Key ) );
             this.dependencyInvalidated?.Invoke( this, args );
         }
 
@@ -821,7 +826,7 @@ namespace Metalama.Patterns.Caching.Implementation
         {
             if ( this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) )
             {
-                using ( LogActivity activity = this.Logger.OpenActivity( "Disposing" ) )
+                using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "Disposing" ) ) )
                 {
                     try
                     {
@@ -830,9 +835,9 @@ namespace Metalama.Patterns.Caching.Implementation
                         if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
                         {
 #if DEBUG
-                            throw new AssertionFailedException();
+                            throw new MetalamaPatternsCachingAssertionFailedException();
 #else
-                            this.Logger.Write( LogLevel.Error, "Cannot dispose back-end: cannot change the status to Disposed." );
+                            this.LogSource.Error.Write( Formatted( "Cannot dispose back-end: cannot change the status to Disposed." ) );
                             return;
 #endif
                         }
@@ -842,12 +847,12 @@ namespace Metalama.Patterns.Caching.Implementation
                     }
                     catch ( Exception e )
                     {
-                        if (!this.TryChangeStatus(CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed))
+                        if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
                         {
 #if DEBUG
-                            throw new AssertionFailedException();
+                            throw new MetalamaPatternsCachingAssertionFailedException();
 #else
-                            this.Logger.Write( LogLevel.Error, "Cannot dispose back-end: cannot change the status to DisposeFailed." );
+                            this.LogSource.Error.Write( Formatted( "Cannot dispose back-end: cannot change the status to DisposeFailed." ) );
                             return;
 #endif
                         }
@@ -887,22 +892,22 @@ namespace Metalama.Patterns.Caching.Implementation
         {
             if (this.TryChangeStatus(CachingBackendStatus.Default, CachingBackendStatus.Disposing))
             {
-                using (LogActivity activity = this.Logger.OpenActivity( "Disposing" ) )
+                using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "Disposing" ) ) )
                 {
                     try
                     {
                         await this.DisposeAsyncCore( cancellationToken );
 
                         if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
-                            throw new AssertionFailedException();
+                            throw new MetalamaPatternsCachingAssertionFailedException();
 
                         this.disposeTask.SetResult( true );
                         activity.SetSuccess();
                     }
                     catch ( Exception e )
                     {
-                        if (!this.TryChangeStatus(CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed))
-                            throw new AssertionFailedException();
+                        if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
+                            throw new MetalamaPatternsCachingAssertionFailedException();
 
                         this.disposeTask.SetException( e );
                         activity.SetException( e );

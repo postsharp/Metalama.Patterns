@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
+using Flashtrace.Formatters;
 using System.Collections.Concurrent;
 
 namespace Metalama.Patterns.Caching.ValueAdapters
 {
+    // TODO: [Porting] ValueAdapterFactory uses TypeExtensionFactory et al, requires them to be public in FT.Formatters.
     /// <summary>
     /// Registers and provides value adapters (<see cref="IValueAdapter"/>), which allow for instance to cache things like <see cref="System.IO.Stream"/> or <see cref="System.Collections.IEnumerable"/>,
     /// which could not be otherwise cached.
@@ -12,8 +15,8 @@ namespace Metalama.Patterns.Caching.ValueAdapters
     public sealed class ValueAdapterFactory 
     {
         private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IValueAdapter>> valueAdaptersByValueType = new ConcurrentDictionary<Type, TypeExtensionInfo<IValueAdapter>>();
-        private static readonly LogSource logger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource( typeof(ValueAdapterFactory) );
-        private readonly TypeExtensionFactory<IValueAdapter> factory = new TypeExtensionFactory<IValueAdapter>( typeof(IValueAdapter<>), null, null, logger );
+        private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(ValueAdapterFactory) );
+        private readonly TypeExtensionFactory<IValueAdapter> factory = new TypeExtensionFactory<IValueAdapter>( typeof(IValueAdapter<>), null );
 
 
         internal ValueAdapterFactory()

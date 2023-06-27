@@ -2,6 +2,8 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 #if NETFRAMEWORK
+using Metalama.Patterns.Caching.Implementation;
+
 namespace Metalama.Patterns.Caching.Backends.Azure
 {
     /// <summary>

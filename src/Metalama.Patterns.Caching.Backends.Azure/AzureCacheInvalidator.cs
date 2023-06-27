@@ -4,6 +4,8 @@
 #if NETFRAMEWORK
 
 using Flashtrace;
+using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Contracts;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using System.Diagnostics.CodeAnalysis;

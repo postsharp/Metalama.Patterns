@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
@@ -15,7 +16,7 @@ namespace Metalama.Patterns.Caching.Implementation
         private volatile int backgroundTaskCount;
         private readonly AwaitableEvent backgroundTasksFinishedEvent = new AwaitableEvent( EventResetMode.ManualReset, true );
         private bool backgroundTasksForbidden;
-        private static readonly LogSource logger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource();
+        private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource();
         private readonly bool sequential;
 
 #if DEBUG
@@ -25,7 +26,7 @@ namespace Metalama.Patterns.Caching.Implementation
 
         public int BackgroundTaskExceptions => this.backgroundTaskExceptions;
 
-        private volatile Task lastTask = PortableThreadingApi.CompletedTask;
+        private volatile Task lastTask = Task.CompletedTask;
 
         private readonly object sync = new object();
 

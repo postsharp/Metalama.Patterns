@@ -3,8 +3,10 @@
 
 namespace Metalama.Patterns.Caching
 {
+    [Obsolete("Porting TODO")]
     internal class CachingMessageSource
     {
+#if TODO
         public static readonly MessageSource Instance = new MessageSource( "PostSharp.Patterns.Caching", new CachingMessageDispenser() );
 
         private class CachingMessageDispenser : MessageDispenser
@@ -56,5 +58,6 @@ namespace Metalama.Patterns.Caching
                 }
             }
         }
+#endif
     }
 }

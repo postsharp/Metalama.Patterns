@@ -1,10 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.Locking;
 using Metalama.Patterns.Caching.ValueAdapters;
 using System.Collections.Immutable;
 using System.Reflection;
+using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation
 {
@@ -87,7 +89,7 @@ namespace Metalama.Patterns.Caching.Implementation
 #if DEBUG
                     // At this point, we assume we own the lock.
                     if ( lockHandle == null )
-                        throw new AssertionFailedException();
+                        throw new MetalamaPatternsCachingAssertionFailedException();
 #endif
 
                     // Cache miss.
@@ -206,7 +208,7 @@ namespace Metalama.Patterns.Caching.Implementation
 #if DEBUG
                     // At this point, we assume we own the lock.
                     if (lockHandle == null)
-                        throw new AssertionFailedException();
+                        throw new MetalamaPatternsCachingAssertionFailedException();
 #endif
 
 

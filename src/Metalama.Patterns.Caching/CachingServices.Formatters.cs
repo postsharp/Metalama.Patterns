@@ -2,10 +2,7 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Patterns.Caching.Formatters;
-using System.Diagnostics.CodeAnalysis;
-
-#pragma warning disable CA1034 // Nested types should not be visible
-
+using Flashtrace.Formatters;
 
 namespace Metalama.Patterns.Caching
 {
@@ -13,24 +10,16 @@ namespace Metalama.Patterns.Caching
     {
         /// <summary>
         /// Allows to get and register formatters used to generate caching keys.
-        /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1724")]
-        public sealed class Formatters : FormatterRepository<CachingFormattingRole>
+        /// </summary>        
+        public sealed class Formatters : FormatterRepository
         {
-            static Formatters()
-            {
-                Register(typeof(IEnumerable<>), typeof(CollectionFormatter<,>));
-            }
-            private Formatters()
-            {
+            public static Formatters Instance { get; } = new Formatters( CachingFormattingRole.Instance );
 
-            }
-
-            internal static void Initialize()
+            private Formatters( FormattingRole role ) 
+                : base( role )
             {
-                // Force the static constructor to run.
+                this.Register( typeof( IEnumerable<> ), typeof( CollectionFormatter<> ) );
             }
-        }
-       
+        }       
     }
 }

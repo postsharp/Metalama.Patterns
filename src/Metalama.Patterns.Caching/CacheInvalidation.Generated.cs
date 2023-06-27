@@ -1,9 +1,15 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
-// THIS FILE IS T4-GENERATED.
+﻿// THIS FILE IS T4-GENERATED.
 // To edit, go to CacheInvalidation.Generated.tt.
 // To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" CacheInvalidation.Generated.tt
 // The transformation is not automatic because we are in a shared project.
+
+
+
+using System;
+using System.Threading.Tasks;
+using Metalama.Patterns.Contracts;
+using Flashtrace;
+using static Flashtrace.SemanticMessageBuilder;
 
 namespace Metalama.Patterns.Caching
 {

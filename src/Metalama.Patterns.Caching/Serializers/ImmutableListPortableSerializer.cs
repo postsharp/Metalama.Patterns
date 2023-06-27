@@ -5,7 +5,11 @@ using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching.Serializers
 {
-    internal sealed class ImmutableListPortableSerializer<T> : ReferenceTypeSerializer
+    internal sealed class ImmutableListPortableSerializer<T>
+#if !TODO
+    { }
+#else
+        : ReferenceTypeSerializer
     {
         private const string keyName = "_";
 
@@ -37,4 +41,5 @@ namespace Metalama.Patterns.Caching.Serializers
         {
         }
     }
+#endif
 }

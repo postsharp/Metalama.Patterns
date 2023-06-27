@@ -9,12 +9,11 @@
 
 using System;
 using System.Threading.Tasks;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Patterns.Threading;
-using static PostSharp.Patterns.Diagnostics.SemanticMessageBuilder;
+using Metalama.Patterns.Contracts;
+using Flashtrace;
+using static Flashtrace.SemanticMessageBuilder;
 
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
 	public static partial class CachingServices
     {

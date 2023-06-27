@@ -20,7 +20,7 @@ namespace Metalama.Patterns.Caching.Locking
             Lock @lock = this.locks.AddOrUpdate( key, k => new Lock(this, k), ( k, l ) =>  l.AddReference());
 #if DEBUG
             if ( @lock.References <= 0 )
-                throw new AssertionFailedException();
+                throw new MetalamaPatternsCachingAssertionFailedException();
 #endif
             return new LockHandle( @lock );
         }
@@ -91,7 +91,7 @@ namespace Metalama.Patterns.Caching.Locking
 
             {
 
-                throw new AssertionFailedException("The Dispose method has not been invoked.");
+                throw new MetalamaPatternsCachingAssertionFailedException("The Dispose method has not been invoked.");
 
             }
 #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
@@ -155,7 +155,7 @@ namespace Metalama.Patterns.Caching.Locking
 #pragma warning disable CA2000 // Dispose objects before losing scope
                         if ( !this.parent.locks.TryRemove( this.key, out removedLock ) || removedLock != this)
 #pragma warning restore CA2000 // Dispose objects before losing scope
-                            throw new AssertionFailedException( "Data race." );
+                            throw new MetalamaPatternsCachingAssertionFailedException( "Data race." );
                     }
                 }
                 finally

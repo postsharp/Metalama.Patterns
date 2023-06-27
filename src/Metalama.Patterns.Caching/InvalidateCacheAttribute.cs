@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections;
 using System.Globalization;
@@ -12,6 +13,7 @@ namespace Metalama.Patterns.Caching
     /// Custom attribute that, when applied on a method, causes an invocation of this method to remove from
     /// the cache the result of invocations of other given methods with the same parameter values. 
     /// </summary>
+#if TODO
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
     [MulticastAttributeUsage( MulticastTargets.Method, AllowMultiple = true )]
     [Metric("UsedFeatures", "Patterns.Caching.InvalidateCache")]
@@ -20,7 +22,8 @@ namespace Metalama.Patterns.Caching
     [AspectRoleDependency(AspectDependencyAction.Order, AspectDependencyPosition.After, StandardRoles.Tracing)]
     [LinesOfCodeAvoided(1)]
     [PSerializable]
-    public sealed class InvalidateCacheAttribute : MethodInterceptionAspect
+#endif
+    public sealed class InvalidateCacheAttribute // : MethodInterceptionAspect
     {
        
         [PNonSerialized]
@@ -35,8 +38,10 @@ namespace Metalama.Patterns.Caching
         [PNonSerialized]
         private LogSource logger;
 
+#if TODO
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
         private List<InvalidatedMethodInfo> invalidatedMethods = new List<InvalidatedMethodInfo>();
+#endif
 
         /// <summary>
         /// Determines whether the current <see cref="InvalidateCacheAttribute"/> can match several overloads of the methods.
@@ -71,6 +76,7 @@ namespace Metalama.Patterns.Caching
             this.invalidatedMethodNames = methodNames;
         }
 
+#if TODO
         /// <exclude/>
         public override bool CompileTimeValidate( MethodBase method )
         {
@@ -455,5 +461,6 @@ namespace Metalama.Patterns.Caching
             public int[] ParameterMap;
             // ReSharper restore FieldCanBeMadeReadOnly.Local
         }
+#endif
     }
 }

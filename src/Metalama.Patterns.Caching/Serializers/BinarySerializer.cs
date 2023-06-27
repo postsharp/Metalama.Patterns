@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Caching.Serializers
         public byte[] Serialize( object value )
         {
             if ( value == null )
-                return ArrayHelper.Empty<byte>();
+                return Array.Empty<byte>();
 
             using ( MemoryStream stream = new MemoryStream() )
             {
