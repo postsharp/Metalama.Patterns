@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
     <ProjectReference Include="..\Flashtrace\Flashtrace.csproj" />
+    <ProjectReference Include="..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

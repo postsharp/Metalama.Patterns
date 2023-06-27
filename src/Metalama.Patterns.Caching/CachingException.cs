@@ -1,11 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Patterns.Contracts;
-using System;
-#if SERIALIZABLE
+using Metalama.Patterns.Contracts;
 using System.Runtime.Serialization;
-#endif
 
 namespace PostSharp.Patterns.Caching
 {
@@ -13,9 +10,7 @@ namespace PostSharp.Patterns.Caching
     /// <summary>
     /// Exception thrown by <c>PostSharp.Patterns.Caching</c>.
     /// </summary>
-#if SERIALIZABLE
     [Serializable]
-#endif
     public class CachingException : Exception
     {
 
@@ -44,7 +39,6 @@ namespace PostSharp.Patterns.Caching
         {
         }
 
-        #if SERIALIZABLE
         /// <summary>
         /// Deserialization constructor.
         /// </summary>
@@ -55,7 +49,6 @@ namespace PostSharp.Patterns.Caching
             StreamingContext context ) : base( info, context )
         {
         }
-        #endif
     }
 
     

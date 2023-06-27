@@ -34,10 +34,10 @@ namespace PostSharp.Patterns.Caching.Backends.Redis
                 this.CheckFrozen();
 
                 if ( value != null
-#if STRING_COMPARISON_NET50
-                    && value.Contains( ":", StringComparison.Ordinal )
+#if NETFRAMEWORK
+                    && value.IndexOf( ":", StringComparison.Ordinal ) != -1
 #else
-                    && value.Contains( ":" )
+                    && value.Contains( ":", StringComparison.Ordinal )
 #endif
                     )
                     throw new ArgumentOutOfRangeException( nameof(value), "The KeyPrefix property value cannot contain the ':' character." );

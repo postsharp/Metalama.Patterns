@@ -1,17 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Threading;
+using Metalama.Patterns.Contracts;
 using PostSharp.Patterns.Caching.Dependencies;
-using System.Reflection;
-using PostSharp.Patterns.Contracts;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-#if !ASYNC_LOCAL
-using System.Runtime.Remoting.Messaging;
-#endif
+using System.Reflection;
 
 namespace PostSharp.Patterns.Caching
 {
@@ -20,7 +14,6 @@ namespace PostSharp.Patterns.Caching
     [Serializable]
     internal sealed class CachingContext : MarshalByRefObject, IDisposable, ICachingContext
     {
-#if ASYNC_LOCAL
         private static readonly AsyncLocal<ICachingContext> currentContext = new AsyncLocal<ICachingContext>();
 
         public static ICachingContext Current
@@ -28,26 +21,6 @@ namespace PostSharp.Patterns.Caching
             get { return currentContext.Value ?? (currentContext.Value = new NullCachingContext()); }
             internal set { currentContext.Value = value; }
         }
-#else
-        private const string callContextSlotName = "_psc";
-
-        public static ICachingContext Current
-        {
-            get
-            {
-                ICachingContext context = (ICachingContext)CallContext.LogicalGetData(callContextSlotName);
-                
-                if (context == null)
-                {
-                    context = new NullCachingContext();
-                    CallContext.LogicalSetData(callContextSlotName, context);
-                }
-
-                return context;
-            }
-            internal set { CallContext.LogicalSetData(callContextSlotName, value); }
-        }
-#endif
 
         private readonly string key;
         private bool disposed;

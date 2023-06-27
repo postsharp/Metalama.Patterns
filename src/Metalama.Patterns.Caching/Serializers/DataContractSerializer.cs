@@ -1,16 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
+#if NETFRAMEWORK
+#define NET_DATA_CONTRACT_SERIALIZER
+#endif
 
-using System;
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 
 namespace PostSharp.Patterns.Caching.Serializers
 {
 
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
     /// <summary>
     /// An implementation of <see cref="ISerializer"/> that uses <see cref="NetDataContractSerializer"/>.
     /// You can derive this class to use a different <see cref="XmlObjectSerializer"/>.
@@ -58,11 +57,7 @@ namespace PostSharp.Patterns.Caching.Serializers
         {
 #if NET_DATA_CONTRACT_SERIALIZER
             if ( value == null )
-#if ARRAY_EMPTY
                 return Array.Empty<byte>();
-#else
-                return new byte[0];
-#endif
 
             XmlObjectSerializer serializer = this.CreateSerializer();
 

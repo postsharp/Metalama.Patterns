@@ -1,18 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-#if !NETSTANDARD && !NET5_0 && !NET6_0 && !NET7_0
-using System;
-using System.Data.SqlTypes;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
+#if NETFRAMEWORK
+
+using Flashtrace;
+using Metalama.Patterns.Contracts;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
 namespace PostSharp.Patterns.Caching.Backends.Azure
 {
     /// <summary>
@@ -21,7 +18,7 @@ namespace PostSharp.Patterns.Caching.Backends.Azure
     /// </summary>
     public class AzureCacheInvalidator : CacheInvalidator
     {
-        private static readonly LogSource logger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource( typeof(AzureCacheInvalidator) );
+        private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(AzureCacheInvalidator) );
         private readonly string subscriptionName = Guid.NewGuid().ToString();
         private readonly NamespaceManager serviceBusNamespaceManager;
         private readonly TopicClient topic;

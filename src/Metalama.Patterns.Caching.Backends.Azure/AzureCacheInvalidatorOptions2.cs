@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial source-available license. Please see the LICENSE.md file in the repository root for details.
 
-#if NETSTANDARD || NET5_0 || NET6_0 || NET7_0
+#if NETSTANDARD || NETCOREAPP
 using PostSharp.Patterns.Caching.Implementation;
 
 namespace PostSharp.Patterns.Caching.Backends.Azure

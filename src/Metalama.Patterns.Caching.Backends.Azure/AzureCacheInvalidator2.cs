@@ -1,22 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial source-available license. Please see the LICENSE.md file in the repository root for details.
 
-#if NETSTANDARD || NET5_0 || NET6_0 || NET7_0
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+#if NETSTANDARD || NETCOREAPP
+
+using Flashtrace;
+using Metalama.Patterns.Contracts;
 using Microsoft.Azure.Management.ServiceBus;
 using Microsoft.Azure.Management.ServiceBus.Models;
 using Microsoft.Azure.ServiceBus;
-using Microsoft.Azure.ServiceBus.Management;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Rest;
 using Newtonsoft.Json;
-using PostSharp.Aspects.Advices;
 using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace PostSharp.Patterns.Caching.Backends.Azure
 {
@@ -26,7 +22,7 @@ namespace PostSharp.Patterns.Caching.Backends.Azure
     /// </summary>
     public class AzureCacheInvalidator2 : CacheInvalidator
     {
-        private static readonly LogSource logger = LogSourceFactory.ForRole3( LoggingRoles.Caching )
+        private static readonly LogSource logger = LogSourceFactory.ForRole( LoggingRoles.Caching )
                                                                    .GetLogSource( typeof(AzureCacheInvalidator2) );
 
         private string subscriptionName;

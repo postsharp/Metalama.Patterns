@@ -1,11 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
+using Metalama.Patterns.Contracts;
 using System.Runtime.Serialization;
-using System.Text;
-using PostSharp.Patterns.Contracts;
 
 namespace PostSharp.Patterns.Caching
 {
@@ -13,9 +10,7 @@ namespace PostSharp.Patterns.Caching
     /// Exception thrown by a caching back-end during cache item retrieval (e.g. when the cached data cannot be serialized by the current object model).
     /// Throwing this exception causes removal of the invalid item.
     /// </summary>
-#if SERIALIZABLE
     [Serializable]
-#endif
     public class InvalidCacheItemException : CachingException
     {
         /// <summary>
@@ -42,7 +37,6 @@ namespace PostSharp.Patterns.Caching
         {
         }
 
-#if SERIALIZABLE
         /// <summary>
         /// Deserialization constructor.
         /// </summary>
@@ -53,6 +47,5 @@ namespace PostSharp.Patterns.Caching
             StreamingContext context ) : base( info, context )
         {
         }
-#endif
     }
 }
