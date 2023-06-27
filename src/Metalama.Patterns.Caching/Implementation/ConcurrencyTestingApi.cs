@@ -8,24 +8,23 @@ using System.Text;
 
 // Ported from PostSharp.Patterns.Common/Threading
 
-namespace Metalama.Patterns.Caching.Implementation
-{
-    internal static class ConcurrencyTestingApi
-    {
-        public static ConcurrencyTestingApiImpl Implementation;
+namespace Metalama.Patterns.Caching.Implementation;
 
-        [Conditional( "DEBUG" )]
-        public static void TraceEvent( string message )
+internal static class ConcurrencyTestingApi
+{
+    public static ConcurrencyTestingApiImpl Implementation;
+
+    [Conditional( "DEBUG" )]
+    public static void TraceEvent( string message )
+    {
+        if ( Implementation != null )
         {
-            if ( Implementation != null )
-            {
-                Implementation.TraceEvent( message );
-            }
+            Implementation.TraceEvent( message );
         }
     }
+}
 
-    internal abstract class ConcurrencyTestingApiImpl
-    {
-        public abstract void TraceEvent( string message );
-    }
+internal abstract class ConcurrencyTestingApiImpl
+{
+    public abstract void TraceEvent( string message );
 }

@@ -2,36 +2,35 @@
 
 using Metalama.Patterns.Contracts;
 
-namespace Metalama.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Implementation;
+
+/// <summary>
+/// Arguments of the <see cref="CachingBackend.DependencyInvalidated"/> event.
+/// </summary>
+public sealed class CacheDependencyInvalidatedEventArgs : EventArgs
 {
     /// <summary>
-    /// Arguments of the <see cref="CachingBackend.DependencyInvalidated"/> event.
+    /// Gets the key of the invalidated dependency.
     /// </summary>
-    public sealed class CacheDependencyInvalidatedEventArgs : EventArgs
+    public string Key { get; }
+
+    /// <summary>
+    /// Gets the <see cref="Guid"/> of the <see cref="CachingBackend"/>
+    /// instance that requested the invalidation, or <see cref="Guid.Empty"/>
+    /// if this information is not available.
+    /// </summary>
+    public Guid SourceId { get; }
+
+    /// <summary>
+    /// Initializes a new <see cref="CacheDependencyInvalidatedEventArgs"/>.
+    /// </summary>
+    /// <param name="key">The key of the invalidated dependency.</param>
+    /// <param name="sourceId">The <see cref="Guid"/> of the <see cref="CachingBackend"/>
+    /// instance that requested the invalidation, or <see cref="Guid.Empty"/>
+    /// if this information is not available.</param>
+    public CacheDependencyInvalidatedEventArgs( [Required] string key, Guid sourceId )
     {
-        /// <summary>
-        /// Gets the key of the invalidated dependency.
-        /// </summary>
-        public string Key { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Guid"/> of the <see cref="CachingBackend"/>
-        /// instance that requested the invalidation, or <see cref="Guid.Empty"/>
-        /// if this information is not available.
-        /// </summary>
-        public Guid SourceId { get; }
-
-        /// <summary>
-        /// Initializes a new <see cref="CacheDependencyInvalidatedEventArgs"/>.
-        /// </summary>
-        /// <param name="key">The key of the invalidated dependency.</param>
-        /// <param name="sourceId">The <see cref="Guid"/> of the <see cref="CachingBackend"/>
-        /// instance that requested the invalidation, or <see cref="Guid.Empty"/>
-        /// if this information is not available.</param>
-        public CacheDependencyInvalidatedEventArgs( [Required] string key, Guid sourceId )
-        {
-            this.Key = key;
-            this.SourceId = sourceId;
-        }
+        this.Key = key;
+        this.SourceId = sourceId;
     }
 }

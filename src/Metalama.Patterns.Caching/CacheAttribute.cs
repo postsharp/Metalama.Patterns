@@ -5,21 +5,21 @@ using Metalama.Patterns.Caching.Implementation;
 using System.Reflection;
 using static Flashtrace.FormattedMessageBuilder;
 
-namespace Metalama.Patterns.Caching
-{
-    /// <summary>
-    /// Custom attribute that, when applied on a method, causes the return value of the method to be cached
-    /// for the specific list of arguments passed to this method call.
-    /// </summary>
-    /// <remarks>
-    /// <para>There are several ways to configure the behavior of the <see cref="CacheAttribute"/> aspect: you can set the properties of the
-    /// <see cref="CacheAttribute"/> class, such as <see cref="AbsoluteExpiration"/> or <see cref="SlidingExpiration"/>. You can
-    /// add the <see cref="CacheConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
-    /// Finally, you can define a profile by setting the <see cref="ProfileName"/> property and configure the profile at run time
-    /// by accessing the <see cref="CachingServices.Profiles"/> collection of the <see cref="CachingServices"/> class.</para>
-    /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
-    /// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingServices.Invalidation"/>.</para>
-    /// </remarks>
+namespace Metalama.Patterns.Caching;
+
+/// <summary>
+/// Custom attribute that, when applied on a method, causes the return value of the method to be cached
+/// for the specific list of arguments passed to this method call.
+/// </summary>
+/// <remarks>
+/// <para>There are several ways to configure the behavior of the <see cref="CacheAttribute"/> aspect: you can set the properties of the
+/// <see cref="CacheAttribute"/> class, such as <see cref="AbsoluteExpiration"/> or <see cref="SlidingExpiration"/>. You can
+/// add the <see cref="CacheConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
+/// Finally, you can define a profile by setting the <see cref="ProfileName"/> property and configure the profile at run time
+/// by accessing the <see cref="CachingServices.Profiles"/> collection of the <see cref="CachingServices"/> class.</para>
+/// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
+/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingServices.Invalidation"/>.</para>
+/// </remarks>
 #if TODO
     [Metric("UsedFeatures", "Patterns.Caching.Cache")]
     [ProvideAspectRole(StandardRoles.Caching)]
@@ -29,87 +29,87 @@ namespace Metalama.Patterns.Caching
     [PSerializable]
     [MulticastAttributeUsage(PersistMetaData = true)]
 #endif
-    public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
+public sealed class CacheAttribute // : MethodInterceptionAspect, ICacheAspect
+{
+    private CacheItemConfiguration configuration = new();
+
+    [PNonSerialized]
+    private SpinLock initializeLock;
+
+    private static readonly CachingProfile disabledProfile = new( "Disabled" ) { IsEnabled = false };
+
+    [PNonSerialized]
+    private CachingProfile profile;
+
+    [PNonSerialized]
+    private int profileRevision;
+
+    [PNonSerialized]
+    private LogSource logger;
+
+    [PNonSerialized]
+    private CacheItemConfiguration mergedConfiguration;
+
+    [PNonSerialized]
+    private MethodInfo targetMethod;
+
+    /// <summary>
+    /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the current <see cref="CacheAttribute"/>.
+    /// </summary>
+    public string ProfileName
     {
-        private CacheItemConfiguration configuration = new();
+        get { return this.configuration.ProfileName; }
+        set { this.configuration.ProfileName = value; }
+    }
 
-        [PNonSerialized]
-        private SpinLock initializeLock;
+    /// <summary>
+    /// Determines whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
+    /// when the cache item is removed from the cache.
+    /// </summary>
+    public bool AutoReload
+    {
+        get { return this.configuration.AutoReload.GetValueOrDefault(); }
+        set { this.configuration.AutoReload = value; }
+    }
 
-        private static readonly CachingProfile disabledProfile = new( "Disabled" ) { IsEnabled = false };
+    /// <summary>
+    /// Gets or sets the total duration, in minutes, during which the result of the current method is stored in cache. The absolute
+    /// expiration time is counted from the moment the method is evaluated and cached.
+    /// </summary>
+    public double AbsoluteExpiration
+    {
+        get { return this.configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
+        set { this.configuration.AbsoluteExpiration = TimeSpan.FromMinutes( value ); }
+    }
 
-        [PNonSerialized]
-        private CachingProfile profile;
+    /// <summary>
+    /// Gets or sets the duration, in minutes, during which the result of the current method is stored in cache after it has been
+    /// added to or accessed from the cache. The expiration is extended every time the value is accessed from the cache.
+    /// </summary>
+    public double SlidingExpiration
+    {
+        get { return this.configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
+        set { this.configuration.SlidingExpiration = TimeSpan.FromMinutes( value ); }
+    }
 
-        [PNonSerialized]
-        private int profileRevision;
+    /// <summary>
+    /// Gets or sets the priority of the current method.
+    /// </summary>
+    public CacheItemPriority Priority
+    {
+        get { return this.configuration.Priority.GetValueOrDefault( CacheItemPriority.Default ); }
+        set { this.configuration.Priority = value; }
+    }
 
-        [PNonSerialized]
-        private LogSource logger;
-
-        [PNonSerialized]
-        private CacheItemConfiguration mergedConfiguration;
-
-        [PNonSerialized]
-        private MethodInfo targetMethod;
-
-        /// <summary>
-        /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the current <see cref="CacheAttribute"/>.
-        /// </summary>
-        public string ProfileName
-        {
-            get { return this.configuration.ProfileName; }
-            set { this.configuration.ProfileName = value; }
-        }
-
-        /// <summary>
-        /// Determines whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
-        /// when the cache item is removed from the cache.
-        /// </summary>
-        public bool AutoReload
-        {
-            get { return this.configuration.AutoReload.GetValueOrDefault(); }
-            set { this.configuration.AutoReload = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the total duration, in minutes, during which the result of the current method is stored in cache. The absolute
-        /// expiration time is counted from the moment the method is evaluated and cached.
-        /// </summary>
-        public double AbsoluteExpiration
-        {
-            get { return this.configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
-            set { this.configuration.AbsoluteExpiration = TimeSpan.FromMinutes( value ); }
-        }
-
-        /// <summary>
-        /// Gets or sets the duration, in minutes, during which the result of the current method is stored in cache after it has been
-        /// added to or accessed from the cache. The expiration is extended every time the value is accessed from the cache.
-        /// </summary>
-        public double SlidingExpiration
-        {
-            get { return this.configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes; }
-            set { this.configuration.SlidingExpiration = TimeSpan.FromMinutes( value ); }
-        }
-
-        /// <summary>
-        /// Gets or sets the priority of the current method.
-        /// </summary>
-        public CacheItemPriority Priority
-        {
-            get { return this.configuration.Priority.GetValueOrDefault( CacheItemPriority.Default ); }
-            set { this.configuration.Priority = value; }
-        }
-
-        /// <summary>
-        /// Determines whether the <c>this</c> instance should be a part of the cache key. The default value of this property is <c>false</c>,
-        /// which means that by default the <c>this</c> instance is a part of the cache key.
-        /// </summary>
-        public bool IgnoreThisParameter
-        {
-            get { return this.configuration.IgnoreThisParameter.GetValueOrDefault(); }
-            set { this.configuration.IgnoreThisParameter = value; }
-        }
+    /// <summary>
+    /// Determines whether the <c>this</c> instance should be a part of the cache key. The default value of this property is <c>false</c>,
+    /// which means that by default the <c>this</c> instance is a part of the cache key.
+    /// </summary>
+    public bool IgnoreThisParameter
+    {
+        get { return this.configuration.IgnoreThisParameter.GetValueOrDefault(); }
+        set { this.configuration.IgnoreThisParameter = value; }
+    }
 
 #if TODO
         /// <exclude />
@@ -145,68 +145,68 @@ namespace Metalama.Patterns.Caching
             CacheAspectRepository.Add( (MethodInfo) method, this );
         }
 #endif
-        private CacheItemConfiguration MergedConfiguration
+    private CacheItemConfiguration MergedConfiguration
+    {
+        get
         {
-            get
+            if ( this.profile == null || this.profileRevision < CachingServices.Profiles.RevisionNumber )
             {
-                if ( this.profile == null || this.profileRevision < CachingServices.Profiles.RevisionNumber )
+                var initializeLockTaken = false;
+
+                try
                 {
-                    var initializeLockTaken = false;
+                    this.initializeLock.Enter( ref initializeLockTaken );
 
-                    try
+                    if ( this.profile == null || this.profileRevision < CachingServices.Profiles.RevisionNumber )
                     {
-                        this.initializeLock.Enter( ref initializeLockTaken );
+                        var profileName = this.configuration.ProfileName ?? CachingProfile.DefaultName;
 
-                        if ( this.profile == null || this.profileRevision < CachingServices.Profiles.RevisionNumber )
+                        var localProfile = CachingServices.Profiles[profileName];
+
+                        if ( localProfile == null )
                         {
-                            var profileName = this.configuration.ProfileName ?? CachingProfile.DefaultName;
+                            this.profile = disabledProfile;
 
-                            var localProfile = CachingServices.Profiles[profileName];
-
-                            if ( localProfile == null )
-                            {
-                                this.profile = disabledProfile;
-
-                                this.GetLogger()
-                                    .Warning.Write(
-                                        Formatted(
-                                            "The cache is incorrectly configured for method {Method}: there is no profile named {Profile}.",
-                                            this.targetMethod,
-                                            profileName ) );
-                            }
-
-                            this.mergedConfiguration = this.configuration.Clone();
-                            this.mergedConfiguration.ApplyFallback( localProfile );
-
-                            Thread.MemoryBarrier();
-
-                            // Need to set this after setting mergedConfiguration to prevent data races.
-                            this.profile = localProfile;
-                            this.profileRevision = CachingServices.Profiles.RevisionNumber;
+                            this.GetLogger()
+                                .Warning.Write(
+                                    Formatted(
+                                        "The cache is incorrectly configured for method {Method}: there is no profile named {Profile}.",
+                                        this.targetMethod,
+                                        profileName ) );
                         }
-                    }
-                    finally
-                    {
-                        if ( initializeLockTaken )
-                        {
-                            this.initializeLock.Exit();
-                        }
+
+                        this.mergedConfiguration = this.configuration.Clone();
+                        this.mergedConfiguration.ApplyFallback( localProfile );
+
+                        Thread.MemoryBarrier();
+
+                        // Need to set this after setting mergedConfiguration to prevent data races.
+                        this.profile = localProfile;
+                        this.profileRevision = CachingServices.Profiles.RevisionNumber;
                     }
                 }
-
-                return this.mergedConfiguration;
+                finally
+                {
+                    if ( initializeLockTaken )
+                    {
+                        this.initializeLock.Exit();
+                    }
+                }
             }
-        }
 
-        private LogSource GetLogger()
+            return this.mergedConfiguration;
+        }
+    }
+
+    private LogSource GetLogger()
+    {
+        if ( this.logger == null )
         {
-            if ( this.logger == null )
-            {
-                this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.targetMethod.DeclaringType );
-            }
-
-            return this.logger;
+            this.logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.targetMethod.DeclaringType );
         }
+
+        return this.logger;
+    }
 
 #if TODO
         /// <exclude />
@@ -365,5 +365,4 @@ namespace Metalama.Patterns.Caching
             }
         }
 #endif
-    }
 }

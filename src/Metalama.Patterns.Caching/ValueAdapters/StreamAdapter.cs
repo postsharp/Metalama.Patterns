@@ -1,66 +1,65 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Caching.ValueAdapters
+namespace Metalama.Patterns.Caching.ValueAdapters;
+
+internal sealed class StreamAdapter : ValueAdapter<Stream>
 {
-    internal sealed class StreamAdapter : ValueAdapter<Stream>
+    public override bool IsAsyncSupported => true;
+
+    public override object GetStoredValue( Stream value )
     {
-        public override bool IsAsyncSupported => true;
-
-        public override object GetStoredValue( Stream value )
+        if ( value == null )
         {
-            if ( value == null )
-            {
-                return null;
-            }
-
-            var buffer = new byte[8192];
-
-            using ( var memoryStream = new MemoryStream() )
-            {
-                int bytes;
-
-                while ( (bytes = value.Read( buffer, 0, buffer.Length )) > 0 )
-                {
-                    memoryStream.Write( buffer, 0, bytes );
-                }
-
-                return memoryStream.ToArray();
-            }
+            return null;
         }
 
-        public override async Task<object> GetStoredValueAsync( Stream value, CancellationToken cancellationToken )
+        var buffer = new byte[8192];
+
+        using ( var memoryStream = new MemoryStream() )
         {
-            if ( value == null )
+            int bytes;
+
+            while ( (bytes = value.Read( buffer, 0, buffer.Length )) > 0 )
             {
-                return null;
+                memoryStream.Write( buffer, 0, bytes );
             }
 
-            var buffer = new byte[8192];
+            return memoryStream.ToArray();
+        }
+    }
 
-            using ( var memoryStream = new MemoryStream() )
-            {
-                int bytes;
+    public override async Task<object> GetStoredValueAsync( Stream value, CancellationToken cancellationToken )
+    {
+        if ( value == null )
+        {
+            return null;
+        }
+
+        var buffer = new byte[8192];
+
+        using ( var memoryStream = new MemoryStream() )
+        {
+            int bytes;
 #pragma warning disable CA1835 // Use Memory<T> instead of T[]
-                while ( (bytes = await value.ReadAsync( buffer, 0, buffer.Length, cancellationToken )) > 0 )
+            while ( (bytes = await value.ReadAsync( buffer, 0, buffer.Length, cancellationToken )) > 0 )
 #pragma warning disable CA1835 // Use Memory<T> instead of T[]
-                {
-                    memoryStream.Write( buffer, 0, bytes );
-                }
-
-                return memoryStream.ToArray();
-            }
-        }
-
-        public override Stream GetExposedValue( object storedValue )
-        {
-            if ( storedValue == null )
             {
-                return null;
+                memoryStream.Write( buffer, 0, bytes );
             }
 
-            var buffer = (byte[]) storedValue;
-
-            return new MemoryStream( buffer, false );
+            return memoryStream.ToArray();
         }
+    }
+
+    public override Stream GetExposedValue( object storedValue )
+    {
+        if ( storedValue == null )
+        {
+            return null;
+        }
+
+        var buffer = (byte[]) storedValue;
+
+        return new MemoryStream( buffer, false );
     }
 }

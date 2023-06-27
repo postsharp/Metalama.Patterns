@@ -1,22 +1,21 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Caching.ValueAdapters
+namespace Metalama.Patterns.Caching.ValueAdapters;
+
+internal sealed class EnumerableAdapter<T> : ValueAdapter<IEnumerable<T>>
 {
-    internal sealed class EnumerableAdapter<T> : ValueAdapter<IEnumerable<T>>
+    public override object GetStoredValue( IEnumerable<T> value )
     {
-        public override object GetStoredValue( IEnumerable<T> value )
+        if ( value == null )
         {
-            if ( value == null )
-            {
-                return null;
-            }
-
-            return new List<T>( value );
+            return null;
         }
 
-        public override IEnumerable<T> GetExposedValue( object storedValue )
-        {
-            return (IEnumerable<T>) storedValue;
-        }
+        return new List<T>( value );
+    }
+
+    public override IEnumerable<T> GetExposedValue( object storedValue )
+    {
+        return (IEnumerable<T>) storedValue;
     }
 }

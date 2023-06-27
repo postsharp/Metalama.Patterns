@@ -2,30 +2,29 @@
 
 using System.Reflection;
 
-namespace Metalama.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Implementation;
+
+/// <summary>
+/// Encapsulates information about a parameter of a method
+/// being cached. Exposed by the <see cref="CachedMethodInfo"/> class.
+/// </summary>
+public sealed class CachedParameterInfo
 {
     /// <summary>
-    /// Encapsulates information about a parameter of a method
-    /// being cached. Exposed by the <see cref="CachedMethodInfo"/> class.
+    /// Gets the <see cref="ParameterInfo"/> of the parameter.
     /// </summary>
-    public sealed class CachedParameterInfo
+    public ParameterInfo Parameter { get; }
+
+    /// <summary>
+    /// Determines whether the parameter should be excluded
+    /// from the cache key. When the value of this property is <c>false</c>,
+    /// the parameter should be included in the cache key.
+    /// </summary>
+    public bool IsIgnored { get; }
+
+    internal CachedParameterInfo( ParameterInfo parameter, bool isIgnored )
     {
-        /// <summary>
-        /// Gets the <see cref="ParameterInfo"/> of the parameter.
-        /// </summary>
-        public ParameterInfo Parameter { get; }
-
-        /// <summary>
-        /// Determines whether the parameter should be excluded
-        /// from the cache key. When the value of this property is <c>false</c>,
-        /// the parameter should be included in the cache key.
-        /// </summary>
-        public bool IsIgnored { get; }
-
-        internal CachedParameterInfo( ParameterInfo parameter, bool isIgnored )
-        {
-            this.Parameter = parameter;
-            this.IsIgnored = isIgnored;
-        }
+        this.Parameter = parameter;
+        this.IsIgnored = isIgnored;
     }
 }

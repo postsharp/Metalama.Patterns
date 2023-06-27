@@ -3,69 +3,69 @@
 using Metalama.Patterns.Caching.Implementation;
 using System.Reflection;
 
-namespace Metalama.Patterns.Caching
+namespace Metalama.Patterns.Caching;
+
+internal static class BuildTimeCacheConfigurationManager
 {
-    internal static class BuildTimeCacheConfigurationManager
+    public static ICacheItemConfiguration GetConfigurationFromAttributes( MemberInfo method )
     {
-        public static ICacheItemConfiguration GetConfigurationFromAttributes( MemberInfo method )
+        List<ICacheItemConfiguration> configurations = new();
+
+        PopulateConfigurations( method.DeclaringType, configurations );
+
+        var assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType.Assembly );
+
+        if ( assemblyConfiguration != null )
         {
-            List<ICacheItemConfiguration> configurations = new();
-
-            PopulateConfigurations( method.DeclaringType, configurations );
-
-            var assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType.Assembly );
-
-            if ( assemblyConfiguration != null )
-            {
-                configurations.Add( assemblyConfiguration );
-            }
-
-            var mergedConfiguration = new CacheItemConfiguration();
-
-            foreach ( var configuration in configurations )
-            {
-                mergedConfiguration.ApplyFallback( configuration );
-            }
-
-            return mergedConfiguration;
+            configurations.Add( assemblyConfiguration );
         }
 
-        private static CacheConfigurationAttribute GetConfigurationAttribute( ICustomAttributeProvider declaration )
-        {
-            object[] attributes = declaration.GetCustomAttributes( typeof(CacheConfigurationAttribute), false );
+        var mergedConfiguration = new CacheItemConfiguration();
 
-            if ( attributes.Length > 0 )
-            {
-                return (CacheConfigurationAttribute) attributes[0];
-            }
-            else
-            {
-                return null;
-            }
+        foreach ( var configuration in configurations )
+        {
+            mergedConfiguration.ApplyFallback( configuration );
         }
 
-        private static void PopulateConfigurations( Type type, List<ICacheItemConfiguration> configurations )
+        return mergedConfiguration;
+    }
+
+    private static CacheConfigurationAttribute GetConfigurationAttribute( ICustomAttributeProvider declaration )
+    {
+        object[] attributes = declaration.GetCustomAttributes( typeof(CacheConfigurationAttribute), false );
+
+        if ( attributes.Length > 0 )
         {
-            var configuration = GetConfigurationOnDeclaration( type );
+            return (CacheConfigurationAttribute) attributes[0];
+        }
+        else
+        {
+            return null;
+        }
+    }
 
-            if ( configuration != null )
-            {
-                configurations.Add( configuration );
-            }
+    private static void PopulateConfigurations( Type type, List<ICacheItemConfiguration> configurations )
+    {
+        var configuration = GetConfigurationOnDeclaration( type );
 
-            var baseType = type.BaseType;
-
-            if ( baseType != null )
-            {
-                PopulateConfigurations( baseType, configurations );
-            }
+        if ( configuration != null )
+        {
+            configurations.Add( configuration );
         }
 
-        // TODO: [Porting] Use of PostSharpEnvironment.CurrentProject.StateStore
+        var baseType = type.BaseType;
 
-        private static ICacheItemConfiguration GetConfigurationOnDeclaration( ICustomAttributeProvider declaration )
+        if ( baseType != null )
         {
-            throw new NotImplementedException( "Porting - PostSharpEnvironment.CurrentProject.StateStore" );
+            PopulateConfigurations( baseType, configurations );
+        }
+    }
+
+    // TODO: [Porting] Use of PostSharpEnvironment.CurrentProject.StateStore
+
+    private static ICacheItemConfiguration GetConfigurationOnDeclaration( ICustomAttributeProvider declaration )
+    {
+        throw new NotImplementedException( "Porting - PostSharpEnvironment.CurrentProject.StateStore" );
 #if TODO
             CacheConfigurationAttributeCache attributeCache = PostSharpEnvironment.CurrentProject.StateStore.Get<CacheConfigurationAttributeCache>();
 
@@ -84,11 +84,10 @@ namespace Metalama.Patterns.Caching
 
             return attribute?.Configuration;
 #endif
-        }
+    }
 
-        private sealed class CacheConfigurationAttributeCache
-        {
-            public readonly Dictionary<object, CacheConfigurationAttribute> Attributes = new();
-        }
+    private sealed class CacheConfigurationAttributeCache
+    {
+        public readonly Dictionary<object, CacheConfigurationAttribute> Attributes = new();
     }
 }

@@ -2,23 +2,22 @@
 
 using Metalama.Patterns.Caching.Dependencies;
 
-namespace Metalama.Patterns.Caching
+namespace Metalama.Patterns.Caching;
+
+[Serializable]
+internal sealed class NullCachingContext : MarshalByRefObject, ICachingContext
 {
-    [Serializable]
-    internal sealed class NullCachingContext : MarshalByRefObject, ICachingContext
-    {
-        public ICachingContext Parent => null;
+    public ICachingContext Parent => null;
 
-        public void AddDependencies( IEnumerable<string> dependencies ) { }
+    public void AddDependencies( IEnumerable<string> dependencies ) { }
 
-        public void AddDependencies( IEnumerable<ICacheDependency> dependencies ) { }
+    public void AddDependencies( IEnumerable<ICacheDependency> dependencies ) { }
 
-        public void AddDependency( string dependency ) { }
+    public void AddDependency( string dependency ) { }
 
-        public void AddDependency( object dependency ) { }
+    public void AddDependency( object dependency ) { }
 
-        public void AddDependency( ICacheDependency dependency ) { }
+    public void AddDependency( ICacheDependency dependency ) { }
 
-        public CachingContextKind Kind => CachingContextKind.None;
-    }
+    public CachingContextKind Kind => CachingContextKind.None;
 }

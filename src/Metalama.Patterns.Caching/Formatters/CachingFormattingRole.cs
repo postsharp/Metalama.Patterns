@@ -2,17 +2,15 @@
 
 using Flashtrace.Formatters;
 
-namespace Metalama.Patterns.Caching.Formatters
+namespace Metalama.Patterns.Caching.Formatters;
+// TODO: Move to a different namespace because this namespace has only one public type.
+
+/// <summary>
+/// The <see cref="FormattingRole"/> for <c>PostSharp.Patterns.Caching</c>.
+/// </summary>
+public sealed class CachingFormattingRole : FormattingRole
 {
-    // TODO: Move to a different namespace because this namespace has only one public type.
+    public static CachingFormattingRole Instance { get; } = new();
 
-    /// <summary>
-    /// The <see cref="FormattingRole"/> for <c>PostSharp.Patterns.Caching</c>.
-    /// </summary>
-    public sealed class CachingFormattingRole : FormattingRole
-    {
-        public static CachingFormattingRole Instance { get; } = new();
-
-        private CachingFormattingRole() : base( "Caching" ) { }
-    }
+    private CachingFormattingRole() : base( "Caching" ) { }
 }

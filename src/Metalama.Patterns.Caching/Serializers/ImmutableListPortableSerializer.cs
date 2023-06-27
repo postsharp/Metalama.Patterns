@@ -2,11 +2,11 @@
 
 using System.Collections.Immutable;
 
-namespace Metalama.Patterns.Caching.Serializers
-{
-    internal sealed class ImmutableListPortableSerializer<T>
+namespace Metalama.Patterns.Caching.Serializers;
+
+internal sealed class ImmutableListPortableSerializer<T>
 #if !TODO
-    { }
+{ }
 #else
         : ReferenceTypeSerializer
     {
@@ -41,4 +41,3 @@ namespace Metalama.Patterns.Caching.Serializers
         }
     }
 #endif
-}

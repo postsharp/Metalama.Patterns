@@ -2,65 +2,64 @@
 
 using System.Collections;
 
-namespace Metalama.Patterns.Caching.ValueAdapters
+namespace Metalama.Patterns.Caching.ValueAdapters;
+
+internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
 {
-    internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
+    public override object GetStoredValue( IEnumerator<T> value )
     {
-        public override object GetStoredValue( IEnumerator<T> value )
+        List<T> list = new();
+
+        while ( value.MoveNext() )
         {
-            List<T> list = new();
-
-            while ( value.MoveNext() )
-            {
-                list.Add( value.Current );
-            }
-
-            return list;
+            list.Add( value.Current );
         }
 
-        public override IEnumerator<T> GetExposedValue( object storedValue )
+        return list;
+    }
+
+    public override IEnumerator<T> GetExposedValue( object storedValue )
+    {
+        return new Enumerator( (List<T>) storedValue );
+    }
+
+    private class Enumerator : IEnumerator<T>
+    {
+        private int index = -1;
+        private readonly List<T> list;
+
+        public Enumerator( List<T> list )
         {
-            return new Enumerator( (List<T>) storedValue );
+            this.list = list;
         }
 
-        private class Enumerator : IEnumerator<T>
+        public T Current
         {
-            private int index = -1;
-            private readonly List<T> list;
-
-            public Enumerator( List<T> list )
+            get
             {
-                this.list = list;
-            }
-
-            public T Current
-            {
-                get
+                if ( this.index < 0 || this.list.Count <= this.index )
                 {
-                    if ( this.index < 0 || this.list.Count <= this.index )
-                    {
-                        throw new InvalidOperationException();
-                    }
-
-                    return this.list[this.index];
+                    throw new InvalidOperationException();
                 }
+
+                return this.list[this.index];
             }
+        }
 
-            object IEnumerator.Current => this.Current;
+        object IEnumerator.Current => this.Current;
 
-            public void Dispose() { }
+        public void Dispose() { }
 
-            public bool MoveNext()
-            {
-                this.index++;
+        public bool MoveNext()
+        {
+            this.index++;
 
-                return this.list.Count > this.index;
-            }
+            return this.list.Count > this.index;
+        }
 
-            public void Reset()
-            {
-                throw new NotSupportedException( "Cannot reset a cached enumerator." );
-            }
+        public void Reset()
+        {
+            throw new NotSupportedException( "Cannot reset a cached enumerator." );
         }
     }
 }

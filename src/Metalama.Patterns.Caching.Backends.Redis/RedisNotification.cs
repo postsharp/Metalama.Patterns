@@ -2,11 +2,10 @@
 
 using StackExchange.Redis;
 
-namespace Metalama.Patterns.Caching.Backends.Redis
+namespace Metalama.Patterns.Caching.Backends.Redis;
+
+internal struct RedisNotification
 {
-    internal struct RedisNotification
-    {
-        public RedisChannel Channel;
-        public RedisValue Value;
-    }
+    public RedisChannel Channel;
+    public RedisValue Value;
 }

@@ -2,25 +2,24 @@
 
 using System.Runtime.Serialization;
 
-namespace Metalama.Patterns.Caching.Backends.Redis
+namespace Metalama.Patterns.Caching.Backends.Redis;
+
+[PSerializable]
+[Serializable]
+[DataContract]
+internal class RedisCacheValue
 {
-    [PSerializable]
-    [Serializable]
-    [DataContract]
-    internal class RedisCacheValue
+    public RedisCacheValue( object value, TimeSpan slidingExpiration )
     {
-        public RedisCacheValue( object value, TimeSpan slidingExpiration )
-        {
-            this.Value = value;
-            this.SlidingExpiration = slidingExpiration;
-        }
-
-        public RedisCacheValue() { }
-
-        [DataMember]
-        public object Value { get; set; }
-
-        [DataMember]
-        public TimeSpan SlidingExpiration { get; set; }
+        this.Value = value;
+        this.SlidingExpiration = slidingExpiration;
     }
+
+    public RedisCacheValue() { }
+
+    [DataMember]
+    public object Value { get; set; }
+
+    [DataMember]
+    public TimeSpan SlidingExpiration { get; set; }
 }

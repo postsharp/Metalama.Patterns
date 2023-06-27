@@ -6,12 +6,12 @@ using System.Collections;
 using System.Globalization;
 using System.Reflection;
 
-namespace Metalama.Patterns.Caching
-{
-    /// <summary>
-    /// Custom attribute that, when applied on a method, causes an invocation of this method to remove from
-    /// the cache the result of invocations of other given methods with the same parameter values. 
-    /// </summary>
+namespace Metalama.Patterns.Caching;
+
+/// <summary>
+/// Custom attribute that, when applied on a method, causes an invocation of this method to remove from
+/// the cache the result of invocations of other given methods with the same parameter values. 
+/// </summary>
 #if TODO
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
     [MulticastAttributeUsage( MulticastTargets.Method, AllowMultiple = true )]
@@ -22,54 +22,54 @@ namespace Metalama.Patterns.Caching
     [LinesOfCodeAvoided(1)]
     [PSerializable]
 #endif
-    public sealed class InvalidateCacheAttribute // : MethodInterceptionAspect
-    {
-        [PNonSerialized]
-        private Type invalidatedMethodsDeclaringType;
+public sealed class InvalidateCacheAttribute // : MethodInterceptionAspect
+{
+    [PNonSerialized]
+    private Type invalidatedMethodsDeclaringType;
 
-        [PNonSerialized]
-        private readonly string[] invalidatedMethodNames;
+    [PNonSerialized]
+    private readonly string[] invalidatedMethodNames;
 
-        [PNonSerialized]
-        private MethodInfo targetMethod;
+    [PNonSerialized]
+    private MethodInfo targetMethod;
 
-        [PNonSerialized]
-        private LogSource logger;
+    [PNonSerialized]
+    private LogSource logger;
 
 #if TODO
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
         private List<InvalidatedMethodInfo> invalidatedMethods = new List<InvalidatedMethodInfo>();
 #endif
 
-        /// <summary>
-        /// Determines whether the current <see cref="InvalidateCacheAttribute"/> can match several overloads of the methods.
-        /// The default value is <c>false</c>, which means that an error will be emitted if the current <see cref="InvalidateCacheAttribute"/> matches
-        /// several methods of the same name.
-        /// </summary>
-        public bool AllowMultipleOverloads { get; set; }
+    /// <summary>
+    /// Determines whether the current <see cref="InvalidateCacheAttribute"/> can match several overloads of the methods.
+    /// The default value is <c>false</c>, which means that an error will be emitted if the current <see cref="InvalidateCacheAttribute"/> matches
+    /// several methods of the same name.
+    /// </summary>
+    public bool AllowMultipleOverloads { get; set; }
 
-        /// <summary>
-        /// Initializes a new <see cref="InvalidateCacheAttribute"/> that invalidates method of the same type as the
-        /// type to which the current <see cref="InvalidateCacheAttribute"/> aspect is being applied.
-        /// </summary>
-        /// <param name="methodNames">A list of names of methods to invalidate. All parameters of these methods (except those marked 
-        /// with <see cref="NotCacheKeyAttribute"/>) must have a parameter of the same name and compatible type in the target
-        /// method of the current <see cref="InvalidateCacheAttribute"/> aspect.</param>
-        public InvalidateCacheAttribute( params string[] methodNames ) : this( null, methodNames ) { }
+    /// <summary>
+    /// Initializes a new <see cref="InvalidateCacheAttribute"/> that invalidates method of the same type as the
+    /// type to which the current <see cref="InvalidateCacheAttribute"/> aspect is being applied.
+    /// </summary>
+    /// <param name="methodNames">A list of names of methods to invalidate. All parameters of these methods (except those marked 
+    /// with <see cref="NotCacheKeyAttribute"/>) must have a parameter of the same name and compatible type in the target
+    /// method of the current <see cref="InvalidateCacheAttribute"/> aspect.</param>
+    public InvalidateCacheAttribute( params string[] methodNames ) : this( null, methodNames ) { }
 
-        /// <summary>
-        /// Initializes a new <see cref="InvalidateCacheAttribute"/> that invalidates method of a different type than the
-        /// type to which the current <see cref="InvalidateCacheAttribute"/> aspect is being applied.
-        /// </summary>
-        /// <param name="declaringType">The type containing the methods to invalidate.</param>
-        /// <param name="methodNames">A list of names of methods to invalidate. All parameters of these methods (except those marked 
-        /// with <see cref="NotCacheKeyAttribute"/>) must have a parameter of the same name and compatible type in the target
-        /// method of the current <see cref="InvalidateCacheAttribute"/> aspect.</param>
-        public InvalidateCacheAttribute( Type declaringType, params string[] methodNames )
-        {
-            this.invalidatedMethodsDeclaringType = declaringType;
-            this.invalidatedMethodNames = methodNames;
-        }
+    /// <summary>
+    /// Initializes a new <see cref="InvalidateCacheAttribute"/> that invalidates method of a different type than the
+    /// type to which the current <see cref="InvalidateCacheAttribute"/> aspect is being applied.
+    /// </summary>
+    /// <param name="declaringType">The type containing the methods to invalidate.</param>
+    /// <param name="methodNames">A list of names of methods to invalidate. All parameters of these methods (except those marked 
+    /// with <see cref="NotCacheKeyAttribute"/>) must have a parameter of the same name and compatible type in the target
+    /// method of the current <see cref="InvalidateCacheAttribute"/> aspect.</param>
+    public InvalidateCacheAttribute( Type declaringType, params string[] methodNames )
+    {
+        this.invalidatedMethodsDeclaringType = declaringType;
+        this.invalidatedMethodNames = methodNames;
+    }
 
 #if TODO
         /// <exclude/>
@@ -459,5 +459,4 @@ namespace Metalama.Patterns.Caching
             // ReSharper restore FieldCanBeMadeReadOnly.Local
         }
 #endif
-    }
 }

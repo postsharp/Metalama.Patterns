@@ -2,18 +2,17 @@
 
 // TODO: [Porting] Temporary atrributes - resolve usages and remove.
 
-namespace Metalama.Patterns.Caching
+namespace Metalama.Patterns.Caching;
+
+public sealed class PSerializableAttribute : Attribute { }
+
+public sealed class PNonSerializedAttribute : Attribute { }
+
+public sealed class ExplicitCrossPackageInternalAttribute : Attribute { }
+
+public sealed class ImportSerializerAttribute : Attribute
 {
-    public sealed class PSerializableAttribute : Attribute { }
-
-    public sealed class PNonSerializedAttribute : Attribute { }
-
-    public sealed class ExplicitCrossPackageInternalAttribute : Attribute { }
-
-    public sealed class ImportSerializerAttribute : Attribute
-    {
-        public ImportSerializerAttribute( Type objectType, Type serializerType ) { }
-    }
-
-    public sealed class ProtectedAttribute : Attribute { }
+    public ImportSerializerAttribute( Type objectType, Type serializerType ) { }
 }
+
+public sealed class ProtectedAttribute : Attribute { }

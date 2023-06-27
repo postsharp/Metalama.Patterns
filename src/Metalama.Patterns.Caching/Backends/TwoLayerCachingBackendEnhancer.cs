@@ -6,481 +6,480 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Runtime.Serialization;
 
-namespace Metalama.Patterns.Caching.Backends
+namespace Metalama.Patterns.Caching.Backends;
+
+/// <summary>
+/// A <see cref="CachingBackendEnhancer"/> that adds a local (fast) <see cref="MemoryCachingBackend"/> to a remote (slower) cache.
+/// This class is typically instantiate in the back-end factory method. You should normally not use this class unless you develop a custom caching back-end.
+/// </summary>
+public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 {
+    private readonly TimeSpan removedItemTransitionPeriod = TimeSpan.FromMinutes( 1 );
+
     /// <summary>
-    /// A <see cref="CachingBackendEnhancer"/> that adds a local (fast) <see cref="MemoryCachingBackend"/> to a remote (slower) cache.
-    /// This class is typically instantiate in the back-end factory method. You should normally not use this class unless you develop a custom caching back-end.
+    /// Gets the in-memory local cache.
     /// </summary>
-    public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
+    public MemoryCachingBackend LocalCache { get; }
+
+    /// <summary>
+    /// Initializes a new <see cref="TwoLayerCachingBackendEnhancer"/>.
+    /// </summary>
+    /// <param name="remoteCache">The remote <see cref="CachingBackend"/>.</param>
+    /// <param name="memoryCache">A <see cref="MemoryCachingBackend"/>, or <c>null</c> to use a new default <see cref="MemoryCachingBackend"/>.</param>
+    public TwoLayerCachingBackendEnhancer( [Required] CachingBackend remoteCache, MemoryCachingBackend memoryCache = null ) : base( remoteCache )
     {
-        private readonly TimeSpan removedItemTransitionPeriod = TimeSpan.FromMinutes( 1 );
+        this.LocalCache = memoryCache ?? new MemoryCachingBackend();
+    }
 
-        /// <summary>
-        /// Gets the in-memory local cache.
-        /// </summary>
-        public MemoryCachingBackend LocalCache { get; }
-
-        /// <summary>
-        /// Initializes a new <see cref="TwoLayerCachingBackendEnhancer"/>.
-        /// </summary>
-        /// <param name="remoteCache">The remote <see cref="CachingBackend"/>.</param>
-        /// <param name="memoryCache">A <see cref="MemoryCachingBackend"/>, or <c>null</c> to use a new default <see cref="MemoryCachingBackend"/>.</param>
-        public TwoLayerCachingBackendEnhancer( [Required] CachingBackend remoteCache, MemoryCachingBackend memoryCache = null ) : base( remoteCache )
+    /// <inheritdoc />
+    protected override void OnBackendDependencyInvalidated( object sender, CacheDependencyInvalidatedEventArgs args )
+    {
+        if ( args.SourceId != this.UnderlyingBackend.Id )
         {
-            this.LocalCache = memoryCache ?? new MemoryCachingBackend();
+            this.LocalCache.InvalidateDependency( args.Key );
         }
 
-        /// <inheritdoc />
-        protected override void OnBackendDependencyInvalidated( object sender, CacheDependencyInvalidatedEventArgs args )
+        base.OnBackendDependencyInvalidated( sender, args );
+    }
+
+    /// <inheritdoc />
+    protected override void OnBackendItemRemoved( object sender, CacheItemRemovedEventArgs args )
+    {
+        if ( args.SourceId != this.UnderlyingBackend.Id )
         {
-            if ( args.SourceId != this.UnderlyingBackend.Id )
+            this.LocalCache.RemoveItem( args.Key );
+        }
+
+        base.OnBackendItemRemoved( sender, args );
+    }
+
+    /// <inheritdoc />
+    protected override void SetItemCore( string key, CacheItem item )
+    {
+        var value = new TwoLayerCacheValue( item );
+        var newItem = item.WithValue( value );
+
+        this.LocalCache.SetItem( key, item );
+        this.UnderlyingBackend.SetItem( key, newItem );
+    }
+
+    /// <inheritdoc />
+    protected override Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
+    {
+        var value = new TwoLayerCacheValue( item );
+        var newItem = item.WithValue( value );
+
+        this.LocalCache.SetItem( key, item );
+
+        return this.UnderlyingBackend.SetItemAsync( key, newItem, cancellationToken );
+    }
+
+    /// <inheritdoc />
+    protected override bool ContainsItemCore( string key )
+    {
+        if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
+        {
+            return this.LocalCache.ContainsItem( key ) || this.UnderlyingBackend.ContainsItem( key );
+        }
+        else
+        {
+            return this.GetItemCore( key, false ) != null;
+        }
+    }
+
+    /// <inheritdoc />
+    protected override async Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
+    {
+        if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
+        {
+            return this.LocalCache.ContainsItem( key ) || await this.UnderlyingBackend.ContainsItemAsync( key, cancellationToken );
+        }
+        else
+        {
+            return (await this.GetItemAsyncCore( key, false, cancellationToken )) != null;
+        }
+    }
+
+    /// <inheritdoc />
+    protected override bool ContainsDependencyCore( string key )
+    {
+        if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
+        {
+            return this.LocalCache.ContainsDependency( key ) || this.UnderlyingBackend.ContainsDependency( key );
+        }
+        else
+        {
+            throw new NotSupportedException(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "ContainsDependency is not supported with in {0} with a non-blocking remote backend.",
+                    nameof(TwoLayerCachingBackendEnhancer) ) );
+        }
+    }
+
+    /// <inheritdoc />
+    protected override async Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    {
+        if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
+        {
+            return this.LocalCache.ContainsDependency( key ) || await this.UnderlyingBackend.ContainsDependencyAsync( key, cancellationToken );
+        }
+        else
+        {
+            throw new NotSupportedException(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "ContainsDependencyAsync is not supported with in {0} with a non-blocking remote backend.",
+                    nameof(TwoLayerCachingBackendEnhancer) ) );
+        }
+    }
+
+    /// <inheritdoc />
+    protected override CacheValue GetItemCore( string key, bool includeDependencies )
+    {
+        var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
+
+        if ( localCacheValue == null )
+        {
+            var remoteCacheValue = this.GetValueFromUnderlyingBackend( key );
+
+            if ( remoteCacheValue != null )
             {
-                this.LocalCache.InvalidateDependency( args.Key );
-            }
+                // We have a value stored remotely.
+                // Cache in local memory.
+                this.SetMemoryCacheFromRemote( key, remoteCacheValue );
 
-            base.OnBackendDependencyInvalidated( sender, args );
-        }
-
-        /// <inheritdoc />
-        protected override void OnBackendItemRemoved( object sender, CacheItemRemovedEventArgs args )
-        {
-            if ( args.SourceId != this.UnderlyingBackend.Id )
-            {
-                this.LocalCache.RemoveItem( args.Key );
-            }
-
-            base.OnBackendItemRemoved( sender, args );
-        }
-
-        /// <inheritdoc />
-        protected override void SetItemCore( string key, CacheItem item )
-        {
-            var value = new TwoLayerCacheValue( item );
-            var newItem = item.WithValue( value );
-
-            this.LocalCache.SetItem( key, item );
-            this.UnderlyingBackend.SetItem( key, newItem );
-        }
-
-        /// <inheritdoc />
-        protected override Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
-        {
-            var value = new TwoLayerCacheValue( item );
-            var newItem = item.WithValue( value );
-
-            this.LocalCache.SetItem( key, item );
-
-            return this.UnderlyingBackend.SetItemAsync( key, newItem, cancellationToken );
-        }
-
-        /// <inheritdoc />
-        protected override bool ContainsItemCore( string key )
-        {
-            if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
-            {
-                return this.LocalCache.ContainsItem( key ) || this.UnderlyingBackend.ContainsItem( key );
+                return GetReturnValue( remoteCacheValue );
             }
             else
-            {
-                return this.GetItemCore( key, false ) != null;
-            }
-        }
-
-        /// <inheritdoc />
-        protected override async Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
-        {
-            if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
-            {
-                return this.LocalCache.ContainsItem( key ) || await this.UnderlyingBackend.ContainsItemAsync( key, cancellationToken );
-            }
-            else
-            {
-                return (await this.GetItemAsyncCore( key, false, cancellationToken )) != null;
-            }
-        }
-
-        /// <inheritdoc />
-        protected override bool ContainsDependencyCore( string key )
-        {
-            if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
-            {
-                return this.LocalCache.ContainsDependency( key ) || this.UnderlyingBackend.ContainsDependency( key );
-            }
-            else
-            {
-                throw new NotSupportedException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "ContainsDependency is not supported with in {0} with a non-blocking remote backend.",
-                        nameof(TwoLayerCachingBackendEnhancer) ) );
-            }
-        }
-
-        /// <inheritdoc />
-        protected override async Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
-        {
-            if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
-            {
-                return this.LocalCache.ContainsDependency( key ) || await this.UnderlyingBackend.ContainsDependencyAsync( key, cancellationToken );
-            }
-            else
-            {
-                throw new NotSupportedException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "ContainsDependencyAsync is not supported with in {0} with a non-blocking remote backend.",
-                        nameof(TwoLayerCachingBackendEnhancer) ) );
-            }
-        }
-
-        /// <inheritdoc />
-        protected override CacheValue GetItemCore( string key, bool includeDependencies )
-        {
-            var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
-
-            if ( localCacheValue == null )
-            {
-                var remoteCacheValue = this.GetValueFromUnderlyingBackend( key );
-
-                if ( remoteCacheValue != null )
-                {
-                    // We have a value stored remotely.
-                    // Cache in local memory.
-                    this.SetMemoryCacheFromRemote( key, remoteCacheValue );
-
-                    return GetReturnValue( remoteCacheValue );
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                switch ( localCacheValue )
-                {
-                    case RemovedValue removedValue:
-                        {
-                            // We have the magic string meaning that the node has been deleted.
-
-                            var remoteCacheValue = this.GetValueFromUnderlyingBackend( key );
-
-                            if ( remoteCacheValue == null )
-                            {
-                                return null;
-                            }
-                            else
-                            {
-                                var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
-
-                                if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
-                                {
-                                    this.SetMemoryCacheFromRemote( key, remoteCacheValue );
-
-                                    return GetReturnValue( remoteCacheValue );
-                                }
-                                else
-                                {
-                                    // The remote value is older than the deletion.
-                                    return null;
-                                }
-                            }
-                        }
-
-                    default:
-                        return localCacheValue;
-                }
-            }
-        }
-
-        private CacheValue GetValueFromUnderlyingBackend( string key )
-        {
-            var cacheValue = this.UnderlyingBackend.GetItem( key, true );
-
-            if ( cacheValue == null )
             {
                 return null;
             }
-
-            return cacheValue;
         }
-
-        private async Task<CacheValue> GetValueFromUnderlyingBackendAsync( string key, CancellationToken cancellationToken )
+        else
         {
-            var cacheValue = await this.UnderlyingBackend.GetItemAsync( key, true, cancellationToken );
-
-            if ( cacheValue == null )
+            switch ( localCacheValue )
             {
-                return null;
-            }
+                case RemovedValue removedValue:
+                    {
+                        // We have the magic string meaning that the node has been deleted.
 
-            return cacheValue;
-        }
+                        var remoteCacheValue = this.GetValueFromUnderlyingBackend( key );
 
-        private static CacheValue GetReturnValue( CacheValue storedCacheValue )
-        {
-            var multiLayerCacheValue = (TwoLayerCacheValue) storedCacheValue.Value;
-
-            return new CacheValue( multiLayerCacheValue.Value, storedCacheValue.Dependencies );
-        }
-
-        private void SetMemoryCacheFromRemote( string key, CacheValue remoteCacheValue )
-        {
-            var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
-
-            var cacheItem = new CacheItem(
-                multiLayerCacheValue.Value,
-                remoteCacheValue.Dependencies?.ToImmutableList(),
-                multiLayerCacheValue.ToCacheItemConfiguration() );
-
-            this.LocalCache.SetItem( key, cacheItem );
-        }
-
-        /// <inheritdoc />
-        protected override async Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
-        {
-            var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
-
-            if ( localCacheValue == null )
-            {
-                var remoteCacheValue = await this.GetValueFromUnderlyingBackendAsync( key, cancellationToken );
-
-                if ( remoteCacheValue != null )
-                {
-                    // We have a value stored remotely.
-                    // Cache in local memory.
-                    this.SetMemoryCacheFromRemote( key, remoteCacheValue );
-
-                    return GetReturnValue( remoteCacheValue );
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                switch ( localCacheValue )
-                {
-                    case RemovedValue removedValue:
+                        if ( remoteCacheValue == null )
                         {
-                            // We have the magic string meaning that the node has been deleted.
+                            return null;
+                        }
+                        else
+                        {
+                            var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
 
-                            var remoteCacheValue = await this.GetValueFromUnderlyingBackendAsync( key, cancellationToken );
-
-                            if ( remoteCacheValue == null )
+                            if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
                             {
-                                return null;
+                                this.SetMemoryCacheFromRemote( key, remoteCacheValue );
+
+                                return GetReturnValue( remoteCacheValue );
                             }
                             else
                             {
-                                var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
-
-                                if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
-                                {
-                                    this.SetMemoryCacheFromRemote( key, remoteCacheValue );
-
-                                    return GetReturnValue( remoteCacheValue );
-                                }
-                                else
-                                {
-                                    // The remote value is older than the deletion.
-                                    return null;
-                                }
+                                // The remote value is older than the deletion.
+                                return null;
                             }
                         }
+                    }
 
-                    default:
-                        return localCacheValue;
-                }
+                default:
+                    return localCacheValue;
             }
         }
+    }
 
-        /// <inheritdoc />
-        protected override void InvalidateDependencyCore( string key )
+    private CacheValue GetValueFromUnderlyingBackend( string key )
+    {
+        var cacheValue = this.UnderlyingBackend.GetItem( key, true );
+
+        if ( cacheValue == null )
         {
-            if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
+            return null;
+        }
+
+        return cacheValue;
+    }
+
+    private async Task<CacheValue> GetValueFromUnderlyingBackendAsync( string key, CancellationToken cancellationToken )
+    {
+        var cacheValue = await this.UnderlyingBackend.GetItemAsync( key, true, cancellationToken );
+
+        if ( cacheValue == null )
+        {
+            return null;
+        }
+
+        return cacheValue;
+    }
+
+    private static CacheValue GetReturnValue( CacheValue storedCacheValue )
+    {
+        var multiLayerCacheValue = (TwoLayerCacheValue) storedCacheValue.Value;
+
+        return new CacheValue( multiLayerCacheValue.Value, storedCacheValue.Dependencies );
+    }
+
+    private void SetMemoryCacheFromRemote( string key, CacheValue remoteCacheValue )
+    {
+        var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
+
+        var cacheItem = new CacheItem(
+            multiLayerCacheValue.Value,
+            remoteCacheValue.Dependencies?.ToImmutableList(),
+            multiLayerCacheValue.ToCacheItemConfiguration() );
+
+        this.LocalCache.SetItem( key, cacheItem );
+    }
+
+    /// <inheritdoc />
+    protected override async Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    {
+        var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
+
+        if ( localCacheValue == null )
+        {
+            var remoteCacheValue = await this.GetValueFromUnderlyingBackendAsync( key, cancellationToken );
+
+            if ( remoteCacheValue != null )
             {
-                this.LocalCache.InvalidateDependency( key );
+                // We have a value stored remotely.
+                // Cache in local memory.
+                this.SetMemoryCacheFromRemote( key, remoteCacheValue );
+
+                return GetReturnValue( remoteCacheValue );
             }
             else
             {
-                this.LocalCache.InvalidateDependencyImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
+                return null;
             }
-
-            this.UnderlyingBackend.InvalidateDependency( key );
         }
-
-        /// <inheritdoc />
-        protected override Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
+        else
         {
-            if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
+            switch ( localCacheValue )
             {
-                this.LocalCache.InvalidateDependency( key );
+                case RemovedValue removedValue:
+                    {
+                        // We have the magic string meaning that the node has been deleted.
+
+                        var remoteCacheValue = await this.GetValueFromUnderlyingBackendAsync( key, cancellationToken );
+
+                        if ( remoteCacheValue == null )
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
+
+                            if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
+                            {
+                                this.SetMemoryCacheFromRemote( key, remoteCacheValue );
+
+                                return GetReturnValue( remoteCacheValue );
+                            }
+                            else
+                            {
+                                // The remote value is older than the deletion.
+                                return null;
+                            }
+                        }
+                    }
+
+                default:
+                    return localCacheValue;
             }
-            else
-            {
-                this.LocalCache.InvalidateDependencyImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
-            }
-
-            return this.UnderlyingBackend.InvalidateDependencyAsync( key, cancellationToken );
         }
+    }
 
-        /// <inheritdoc />
-        protected override void RemoveItemCore( string key )
+    /// <inheritdoc />
+    protected override void InvalidateDependencyCore( string key )
+    {
+        if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
-            if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
-            {
-                this.LocalCache.RemoveItem( key );
-            }
-            else
-            {
-                this.LocalCache.RemoveItemImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
-            }
-
-            this.UnderlyingBackend.RemoveItem( key );
+            this.LocalCache.InvalidateDependency( key );
         }
-
-        /// <inheritdoc />
-        protected override Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
+        else
         {
-            if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
-            {
-                this.LocalCache.RemoveItem( key );
-            }
-            else
-            {
-                this.LocalCache.RemoveItemImpl( key, new RemovedValue(), DateTime.UtcNow + this.removedItemTransitionPeriod );
-            }
-
-            return this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken );
+            this.LocalCache.InvalidateDependencyImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
         }
 
-        /// <inheritdoc />
-        protected override void ClearCore()
+        this.UnderlyingBackend.InvalidateDependency( key );
+    }
+
+    /// <inheritdoc />
+    protected override Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    {
+        if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
-            this.LocalCache.Clear();
-            this.UnderlyingBackend.Clear();
+            this.LocalCache.InvalidateDependency( key );
         }
-
-        /// <inheritdoc />
-        protected override Task ClearAsyncCore( CancellationToken cancellationToken )
+        else
         {
-            this.LocalCache.Clear();
-
-            return this.UnderlyingBackend.ClearAsync( cancellationToken );
+            this.LocalCache.InvalidateDependencyImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
         }
 
-        /// <inheritdoc />
-        protected override void DisposeCore( bool disposing )
+        return this.UnderlyingBackend.InvalidateDependencyAsync( key, cancellationToken );
+    }
+
+    /// <inheritdoc />
+    protected override void RemoveItemCore( string key )
+    {
+        if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
-            base.DisposeCore( disposing );
-
-            this.LocalCache.Dispose();
+            this.LocalCache.RemoveItem( key );
         }
-
-        /// <inheritdoc />
-        protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
+        else
         {
-            await base.DisposeAsyncCore( cancellationToken );
-            await this.LocalCache.DisposeAsync( cancellationToken );
+            this.LocalCache.RemoveItemImpl( key, new RemovedValue(), DateTimeOffset.UtcNow + this.removedItemTransitionPeriod );
         }
 
-        /// <inheritdoc />
-        protected override CachingBackendFeatures CreateFeatures()
+        this.UnderlyingBackend.RemoveItem( key );
+    }
+
+    /// <inheritdoc />
+    protected override Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
+    {
+        if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
-            return new Features( this.UnderlyingBackend.SupportedFeatures );
+            this.LocalCache.RemoveItem( key );
         }
-
-        internal static long GetTimestamp()
+        else
         {
-            return DateTimeOffset.UtcNow.UtcTicks;
+            this.LocalCache.RemoveItemImpl( key, new RemovedValue(), DateTime.UtcNow + this.removedItemTransitionPeriod );
         }
 
-        private sealed class Features : CachingBackendEnhancerFeatures
-        {
-            public Features( CachingBackendFeatures underlyingBackendFeatures ) : base( underlyingBackendFeatures ) { }
+        return this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken );
+    }
 
-            public override bool ContainsDependency => this.UnderlyingBackendFeatures.ContainsDependency && this.UnderlyingBackendFeatures.Blocking;
-        }
+    /// <inheritdoc />
+    protected override void ClearCore()
+    {
+        this.LocalCache.Clear();
+        this.UnderlyingBackend.Clear();
+    }
 
-        private sealed class RemovedValue : MemoryCacheValue
-        {
-            public readonly long Timestamp = GetTimestamp();
+    /// <inheritdoc />
+    protected override Task ClearAsyncCore( CancellationToken cancellationToken )
+    {
+        this.LocalCache.Clear();
 
-            public RemovedValue() : base( null, null, new object() ) { }
-        }
+        return this.UnderlyingBackend.ClearAsync( cancellationToken );
+    }
 
-        /// <summary>
-        /// The object stored in the remote class.
-        /// </summary>
-        [PSerializable]
-        [Serializable]
-        [DataContract]
+    /// <inheritdoc />
+    protected override void DisposeCore( bool disposing )
+    {
+        base.DisposeCore( disposing );
 
-        // TODO: Unnest this type.
+        this.LocalCache.Dispose();
+    }
+
+    /// <inheritdoc />
+    protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
+    {
+        await base.DisposeAsyncCore( cancellationToken );
+        await this.LocalCache.DisposeAsync( cancellationToken );
+    }
+
+    /// <inheritdoc />
+    protected override CachingBackendFeatures CreateFeatures()
+    {
+        return new Features( this.UnderlyingBackend.SupportedFeatures );
+    }
+
+    internal static long GetTimestamp()
+    {
+        return DateTimeOffset.UtcNow.UtcTicks;
+    }
+
+    private sealed class Features : CachingBackendEnhancerFeatures
+    {
+        public Features( CachingBackendFeatures underlyingBackendFeatures ) : base( underlyingBackendFeatures ) { }
+
+        public override bool ContainsDependency => this.UnderlyingBackendFeatures.ContainsDependency && this.UnderlyingBackendFeatures.Blocking;
+    }
+
+    private sealed class RemovedValue : MemoryCacheValue
+    {
+        public readonly long Timestamp = GetTimestamp();
+
+        public RemovedValue() : base( null, null, new object() ) { }
+    }
+
+    /// <summary>
+    /// The object stored in the remote class.
+    /// </summary>
+    [PSerializable]
+    [Serializable]
+    [DataContract]
+
+    // TODO: Unnest this type.
 #pragma warning disable CA1034 // Nested types should not be visible
-        public sealed class TwoLayerCacheValue
+    public sealed class TwoLayerCacheValue
 #pragma warning restore CA1034 // Nested types should not be visible
+    {
+        /// <summary>
+        /// Initializes a new <see cref="TwoLayerCacheValue"/>.
+        /// </summary>
+        /// <param name="item">The original <see cref="CacheItem"/>.</param>
+        public TwoLayerCacheValue( [Required] CacheItem item )
         {
-            /// <summary>
-            /// Initializes a new <see cref="TwoLayerCacheValue"/>.
-            /// </summary>
-            /// <param name="item">The original <see cref="CacheItem"/>.</param>
-            public TwoLayerCacheValue( [Required] CacheItem item )
-            {
-                this.Value = item.Value;
-                this.SlidingExpiration = item.Configuration?.SlidingExpiration;
-                this.Priority = item.Configuration?.Priority;
+            this.Value = item.Value;
+            this.SlidingExpiration = item.Configuration?.SlidingExpiration;
+            this.Priority = item.Configuration?.Priority;
 
-                if ( item.Configuration?.AbsoluteExpiration != null )
-                {
-                    this.AbsoluteExpiration = DateTime.UtcNow + item.Configuration?.AbsoluteExpiration.Value;
-                }
+            if ( item.Configuration?.AbsoluteExpiration != null )
+            {
+                this.AbsoluteExpiration = DateTime.UtcNow + item.Configuration?.AbsoluteExpiration.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the timestamp of the cache item.
+        /// </summary>
+        [DataMember]
+        public long Timestamp { get; set; } = GetTimestamp();
+
+        /// <summary>
+        /// Gets or sets the cached value.
+        /// </summary>
+        [DataMember]
+        public object Value { get; set; }
+
+        /// <summary>
+        /// Gets or sets the absolute expiration of the cache item.
+        /// </summary>
+        [DataMember]
+        public DateTime? AbsoluteExpiration { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sliding expiration of the cache item.
+        /// </summary>
+        [DataMember]
+        public TimeSpan? SlidingExpiration { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache item priority.
+        /// </summary>
+        [DataMember]
+        public CacheItemPriority? Priority { get; set; }
+
+        internal CacheItemConfiguration ToCacheItemConfiguration()
+        {
+            var configuration = new CacheItemConfiguration { Priority = this.Priority, SlidingExpiration = this.SlidingExpiration };
+
+            if ( this.AbsoluteExpiration != null )
+            {
+                configuration.AbsoluteExpiration = DateTime.UtcNow - this.AbsoluteExpiration.Value;
             }
 
-            /// <summary>
-            /// Gets or sets the timestamp of the cache item.
-            /// </summary>
-            [DataMember]
-            public long Timestamp { get; set; } = GetTimestamp();
-
-            /// <summary>
-            /// Gets or sets the cached value.
-            /// </summary>
-            [DataMember]
-            public object Value { get; set; }
-
-            /// <summary>
-            /// Gets or sets the absolute expiration of the cache item.
-            /// </summary>
-            [DataMember]
-            public DateTime? AbsoluteExpiration { get; set; }
-
-            /// <summary>
-            /// Gets or sets the sliding expiration of the cache item.
-            /// </summary>
-            [DataMember]
-            public TimeSpan? SlidingExpiration { get; set; }
-
-            /// <summary>
-            /// Gets or sets the cache item priority.
-            /// </summary>
-            [DataMember]
-            public CacheItemPriority? Priority { get; set; }
-
-            internal CacheItemConfiguration ToCacheItemConfiguration()
-            {
-                var configuration = new CacheItemConfiguration { Priority = this.Priority, SlidingExpiration = this.SlidingExpiration };
-
-                if ( this.AbsoluteExpiration != null )
-                {
-                    configuration.AbsoluteExpiration = DateTime.UtcNow - this.AbsoluteExpiration.Value;
-                }
-
-                return configuration;
-            }
+            return configuration;
         }
     }
 }

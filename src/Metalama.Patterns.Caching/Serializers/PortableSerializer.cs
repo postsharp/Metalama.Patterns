@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Caching.Serializers
+namespace Metalama.Patterns.Caching.Serializers;
+
+/// <summary>
+/// An implementation of <see cref="ISerializer"/> that uses the <see cref="PortableFormatter"/>
+/// (for classes annotated with <see cref="PSerializableAttribute"/>).
+/// </summary>
+[Obsolete( "Porting TODO", true )]
+public sealed class PortableSerializer : ISerializer
 {
-    /// <summary>
-    /// An implementation of <see cref="ISerializer"/> that uses the <see cref="PortableFormatter"/>
-    /// (for classes annotated with <see cref="PSerializableAttribute"/>).
-    /// </summary>
-    [Obsolete( "Porting TODO", true )]
-    public sealed class PortableSerializer : ISerializer
-    {
 #if TODO
         private readonly PortableFormatter serializer;
 
@@ -29,11 +29,11 @@ namespace Metalama.Patterns.Caching.Serializers
         }
 #endif
 
-        /// <inheritdoc />
-        public byte[] Serialize( object value )
-        {
+    /// <inheritdoc />
+    public byte[] Serialize( object value )
+    {
 #if !TODO
-            throw new NotImplementedException( "TODO" );
+        throw new NotImplementedException( "TODO" );
 #else
             if ( value == null )
                 return ArrayHelper.Empty<byte>();
@@ -44,13 +44,13 @@ namespace Metalama.Patterns.Caching.Serializers
                 return stream.ToArray();
             }
 #endif
-        }
+    }
 
-        /// <inheritdoc />
-        public object Deserialize( byte[] array )
-        {
+    /// <inheritdoc />
+    public object Deserialize( byte[] array )
+    {
 #if !TODO
-            throw new NotImplementedException( "TODO" );
+        throw new NotImplementedException( "TODO" );
 #else
             if ( array == null || array.Length == 0 )
                 return null;
@@ -60,6 +60,5 @@ namespace Metalama.Patterns.Caching.Serializers
                 return this.serializer.Deserialize( stream );
             }
 #endif
-        }
     }
 }
