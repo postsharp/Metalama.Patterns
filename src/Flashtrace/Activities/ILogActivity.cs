@@ -30,7 +30,7 @@ public interface ILogActivity : IDisposable
     void SetSuccess( in CloseActivityOptions options, ref CallerInfo callerInfo );
 
     /// <summary>
-    /// Closes the activity with success and sets includes a result in the outcome message.
+    /// Closes the activity with success and includes a result in the outcome message.
     /// </summary>
     /// <param name="result">The result of the activity.</param>
     /// <param name="options">Options.</param>
