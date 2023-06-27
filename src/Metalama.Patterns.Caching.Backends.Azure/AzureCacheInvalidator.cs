@@ -4,13 +4,11 @@
 #if NETFRAMEWORK
 
 using Flashtrace;
-using Metalama.Patterns.Contracts;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
-using PostSharp.Patterns.Caching.Implementation;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PostSharp.Patterns.Caching.Backends.Azure
+namespace Metalama.Patterns.Caching.Backends.Azure
 {
     /// <summary>
     /// An implementation of <see cref="CacheInvalidator"/> based on Microsoft Azure Service Bus, using the older API, <c>WindowsAzure.ServiceBus</c>,

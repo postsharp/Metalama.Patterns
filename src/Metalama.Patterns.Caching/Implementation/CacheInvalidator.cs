@@ -1,15 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Patterns.Utilities;
 
-namespace PostSharp.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Implementation
 {
     /// <summary>
     /// Base class for a kind of <see cref="CachingBackendEnhancer"/> that allows several instances of the same application to use

@@ -1,20 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Concurrent;
+using Metalama.Patterns.Caching.ValueAdapters;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.ValueAdapters;
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Threading.Primitives;
 
 #pragma warning disable 420
 
-namespace PostSharp.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Implementation
 {
 
     /// <summary>
@@ -663,7 +656,7 @@ namespace PostSharp.Patterns.Caching.Implementation
 
             // TODO: We may need an instance-scoped logger instead of a type-scoped logger.
 #pragma warning disable 618
-            this.Logger = Logger.GetLogger( LoggingRoles.Caching, this.GetType() );
+            this.Logger = this.Logger.GetLogger( LoggingRoles.Caching, this.GetType() );
 #pragma warning restore 618
         }
 

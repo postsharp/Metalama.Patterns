@@ -3,7 +3,7 @@
 
 using System.Collections.Immutable;
 
-namespace PostSharp.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Implementation
 {
     /// <summary>
     /// Return value of the <see cref="CachingBackend.GetItem(string, bool)"/> method, i.e. represents an item retrieved from the cache (items being stored in the cache are represented by the <see cref="CacheItem"/> class).

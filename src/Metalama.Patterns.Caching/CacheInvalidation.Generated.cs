@@ -5,16 +5,7 @@
 // To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" CacheInvalidation.Generated.tt
 // The transformation is not automatic because we are in a shared project.
 
-
-
-using System;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Patterns.Threading;
-using static PostSharp.Patterns.Diagnostics.SemanticMessageBuilder;
-
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
 	public static partial class CachingServices
     {

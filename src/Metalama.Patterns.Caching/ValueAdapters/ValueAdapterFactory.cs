@@ -1,13 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Patterns.Utilities;
 
-namespace PostSharp.Patterns.Caching.ValueAdapters
+namespace Metalama.Patterns.Caching.ValueAdapters
 {
     /// <summary>
     /// Registers and provides value adapters (<see cref="IValueAdapter"/>), which allow for instance to cache things like <see cref="System.IO.Stream"/> or <see cref="System.Collections.IEnumerable"/>,

@@ -1,20 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using Metalama.Patterns.Caching.Dependencies;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Dependencies;
 using System.Reflection;
-using PostSharp.Patterns.Contracts;
-using PostSharp.Patterns.Diagnostics;
-using static PostSharp.Patterns.Diagnostics.FormattedMessageBuilder;
 
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable IDE0008 // Use explicit type (we use var for logging)
 
 
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
     public static partial class CachingServices
     {

@@ -1,12 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Globalization;
-using PostSharp.Patterns.Utilities;
 using StackExchange.Redis;
+using System.Globalization;
 
-namespace PostSharp.Patterns.Caching.Backends.Redis
+namespace Metalama.Patterns.Caching.Backends.Redis
 {
     internal class RedisKeyBuilder
     {

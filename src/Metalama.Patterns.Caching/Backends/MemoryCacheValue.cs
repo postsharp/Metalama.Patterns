@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
-using PostSharp.Patterns.Caching.Implementation;
 
-namespace PostSharp.Patterns.Caching.Backends
+namespace Metalama.Patterns.Caching.Backends
 {
     /// <summary>
     /// Meant to be used by caching backends. It's a <see cref="CacheValue"/> with an extra object that functions as a lock. Do not use this if you're not

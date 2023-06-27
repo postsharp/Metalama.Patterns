@@ -1,12 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Contracts;
-
-namespace PostSharp.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Implementation
 {
     /// <summary>
     /// A base class for all cache enhancers. A <see cref="CachingBackendEnhancer"/> is a node in a chain of responsibility where

@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Contracts;
-using PostSharp.Patterns.Caching.Dependencies;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
     // Needs to be [Serializable] and derived from MarshalByRefObject because we are using CallContext in .NET 4.5.
     // No serialization actually occurs, but CallContext requires this.

@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Patterns.Caching.Implementation;
 using System.Globalization;
-using PostSharp.Patterns.Caching.Implementation;
 
-namespace PostSharp.Patterns.Caching.Backends
+namespace Metalama.Patterns.Caching.Backends
 {
     /// <summary>
     /// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend until you see <see cref="CachingServices.DefaultBackend"/> to something else.

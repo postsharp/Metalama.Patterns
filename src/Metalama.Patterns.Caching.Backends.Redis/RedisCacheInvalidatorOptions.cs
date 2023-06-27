@@ -1,10 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using PostSharp.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Implementation;
 
-namespace PostSharp.Patterns.Caching.Backends.Redis
+namespace Metalama.Patterns.Caching.Backends.Redis
 {
     /// <summary>
     /// Options for <see cref="RedisCacheInvalidator"/>.

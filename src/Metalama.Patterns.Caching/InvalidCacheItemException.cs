@@ -4,7 +4,7 @@
 using Metalama.Patterns.Contracts;
 using System.Runtime.Serialization;
 
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
     /// <summary>
     /// Exception thrown by a caching back-end during cache item retrieval (e.g. when the cached data cannot be serialized by the current object model).

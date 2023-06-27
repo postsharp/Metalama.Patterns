@@ -1,21 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using Metalama.Patterns.Caching.Implementation;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using PostSharp.Aspects;
-using PostSharp.Aspects.Dependencies;
-using PostSharp.Extensibility;
-using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Serialization;
 
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
     /// <summary>
     /// Custom attribute that, when applied on a method, causes an invocation of this method to remove from

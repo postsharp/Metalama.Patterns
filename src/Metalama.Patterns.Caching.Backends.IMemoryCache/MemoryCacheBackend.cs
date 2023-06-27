@@ -2,22 +2,16 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 #pragma warning disable CA1303
 #pragma warning disable CA1062
-using System;
-using System.Collections.Generic;
+using Metalama.Patterns.Caching.Implementation;
+using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
-using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Contracts;
 using CacheItemPriority = Microsoft.Extensions.Caching.Memory.CacheItemPriority;
 using MemoryCache = Microsoft.Extensions.Caching.Memory.MemoryCache;
-using PSCacheItem = PostSharp.Patterns.Caching.Implementation.CacheItem;
-using PSCacheItemPriority = PostSharp.Patterns.Caching.Implementation.CacheItemPriority;
+using PSCacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
+using PSCacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
-namespace PostSharp.Patterns.Caching.Backends
+namespace Metalama.Patterns.Caching.Backends
 {
     /// <summary>
     /// A <see cref="CachingBackend"/> based on Microsoft.Extensions.Caching.Memory.IMemoryCache (<see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache"/>).

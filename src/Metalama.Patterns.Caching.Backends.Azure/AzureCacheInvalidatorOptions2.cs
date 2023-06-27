@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial source-available license. Please see the LICENSE.md file in the repository root for details.
 
 #if NETSTANDARD || NETCOREAPP
-using PostSharp.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Implementation;
 
-namespace PostSharp.Patterns.Caching.Backends.Azure
+namespace Metalama.Patterns.Caching.Backends.Azure
 {
     /// <summary>
     /// Options that determine the mode of operation of an <see cref="AzureCacheInvalidator2"/> instance.

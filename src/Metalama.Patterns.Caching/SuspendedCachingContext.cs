@@ -1,11 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using PostSharp.Patterns.Caching.Dependencies;
+using Metalama.Patterns.Caching.Dependencies;
 
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
     [Serializable]
     internal sealed class SuspendedCachingContext : MarshalByRefObject, IDisposable, ICachingContext

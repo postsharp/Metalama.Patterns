@@ -1,10 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Patterns.Diagnostics;
-using PostSharp.Patterns.Formatters;
-
-namespace PostSharp.Patterns.Caching.Formatters
+namespace Metalama.Patterns.Caching.Formatters
 {
     // TODO: Move to a different namespace because this namespace has only one public type.
     

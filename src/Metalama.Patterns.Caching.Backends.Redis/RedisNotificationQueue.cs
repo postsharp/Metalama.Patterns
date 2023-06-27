@@ -1,20 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Diagnostics;
-using static PostSharp.Patterns.Diagnostics.FormattedMessageBuilder;
-using StackExchange.Redis;
 
-namespace PostSharp.Patterns.Caching.Backends.Redis
+namespace Metalama.Patterns.Caching.Backends.Redis
 {
     internal class RedisNotificationQueue : ITestableCachingComponent
     {

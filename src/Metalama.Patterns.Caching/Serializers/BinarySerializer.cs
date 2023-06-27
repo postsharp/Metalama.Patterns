@@ -1,12 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using PostSharp.Patterns.Utilities;
-using System;
-using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace PostSharp.Patterns.Caching.Serializers
+namespace Metalama.Patterns.Caching.Serializers
 {
     /// <summary>
     /// An implementation of <see cref="BinaryFormatter"/> that uses <see cref="BinaryFormatter"/>

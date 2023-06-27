@@ -1,12 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using Metalama.Patterns.Caching.Serializers;
 using System.Collections.Immutable;
-using PostSharp.Serialization;
-using PostSharp.Patterns.Caching.Serializers;
 
-namespace PostSharp.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Implementation
 {
     /// <summary>
     /// Represents an item being added to the cache.

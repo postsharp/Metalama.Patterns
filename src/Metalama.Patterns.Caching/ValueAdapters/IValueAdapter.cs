@@ -2,10 +2,8 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace PostSharp.Patterns.Caching.ValueAdapters
+namespace Metalama.Patterns.Caching.ValueAdapters
 {
     /// <summary>
     /// A strongly-typed version of <see cref="IValueAdapter"/>.

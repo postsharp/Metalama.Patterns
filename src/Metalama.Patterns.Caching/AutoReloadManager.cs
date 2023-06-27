@@ -1,15 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Diagnostics;
-using static PostSharp.Patterns.Diagnostics.FormattedMessageBuilder;
 
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
     internal sealed class AutoReloadManager
     {

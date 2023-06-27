@@ -1,14 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Collections.Immutable;
-using System.Threading;
-using PostSharp.Patterns.Contracts;
 
 #pragma warning disable CA1034 // Nested types should not be visible
 
-namespace PostSharp.Patterns.Caching
+namespace Metalama.Patterns.Caching
 {
     partial class CachingServices
     {

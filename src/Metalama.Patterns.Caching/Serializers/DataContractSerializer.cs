@@ -7,7 +7,7 @@
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
-namespace PostSharp.Patterns.Caching.Serializers
+namespace Metalama.Patterns.Caching.Serializers
 {
 
     /// <summary>

@@ -2,9 +2,7 @@
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
 #if NETFRAMEWORK
-using PostSharp.Patterns.Caching.Implementation;
-
-namespace PostSharp.Patterns.Caching.Backends.Azure
+namespace Metalama.Patterns.Caching.Backends.Azure
 {
     /// <summary>
     /// Options for <see cref="AzureCacheInvalidator"/>.

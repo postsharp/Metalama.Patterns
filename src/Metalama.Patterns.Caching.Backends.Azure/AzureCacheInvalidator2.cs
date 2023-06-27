@@ -3,6 +3,7 @@
 #if NETSTANDARD || NETCOREAPP
 
 using Flashtrace;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using Microsoft.Azure.Management.ServiceBus;
 using Microsoft.Azure.Management.ServiceBus.Models;
@@ -10,11 +11,10 @@ using Microsoft.Azure.ServiceBus;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Rest;
 using Newtonsoft.Json;
-using PostSharp.Patterns.Caching.Implementation;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace PostSharp.Patterns.Caching.Backends.Azure
+namespace Metalama.Patterns.Caching.Backends.Azure
 {
     /// <summary>
     /// An implementation of <see cref="CacheInvalidator"/> based on Microsoft Azure Service Bus, using the <c>Microsoft.Azure.ServiceBus</c> API

@@ -1,19 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
+using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Runtime.Caching;
-using PostSharp.Patterns.Caching.Implementation;
-using PSCacheItem = PostSharp.Patterns.Caching.Implementation.CacheItem;
+using PSCacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
 using MemoryCacheItemPolicy = System.Runtime.Caching.CacheItemPolicy;
-using PSCacheItemPriority = PostSharp.Patterns.Caching.Implementation.CacheItemPriority;
-using System.Linq;
-using System.Threading;
+using PSCacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
-namespace PostSharp.Patterns.Caching.Backends
+namespace Metalama.Patterns.Caching.Backends
 {
     /// <summary>
     /// A <see cref="CachingBackend"/> based on <c>System.Runtime.Caching.MemoryCache</c> (<see cref="MemoryCache"/>). This cache is part of .NET Framework

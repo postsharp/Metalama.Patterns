@@ -3,7 +3,7 @@
 
 using StackExchange.Redis;
 
-namespace PostSharp.Patterns.Caching.Backends.Redis
+namespace Metalama.Patterns.Caching.Backends.Redis
 {
     internal struct RedisNotification
     {

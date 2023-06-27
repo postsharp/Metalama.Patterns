@@ -4,7 +4,7 @@
 using System.Collections.Immutable;
 using System.Reflection;
 
-namespace PostSharp.Patterns.Caching.Implementation
+namespace Metalama.Patterns.Caching.Implementation
 {
     /// <summary>
     /// Encapsulates information about a method being cached.
