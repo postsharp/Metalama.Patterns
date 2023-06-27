@@ -2,7 +2,7 @@
 
 namespace Flashtrace.Formatters;
 
-internal readonly struct TypeExtensionInfo<T>
+public readonly struct TypeExtensionInfo<T>
     where T : class
 {
     internal TypeExtensionInfo( T extension, Type objectType, bool isGeneric )
@@ -24,5 +24,5 @@ internal readonly struct TypeExtensionInfo<T>
         => CovariantTypeExtensionFactory<T>.ShouldOverwrite( this.ObjectType, this.IsGeneric, typeExtension.ObjectType, this.IsGeneric );
 }
 
-internal delegate void TypeExtensionCacheUpdateCallback<T>( TypeExtensionInfo<T> typeExtension )
+public delegate void TypeExtensionCacheUpdateCallback<T>( TypeExtensionInfo<T> typeExtension )
     where T : class;

@@ -10,7 +10,7 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// The base class for type extension factories for types deriving or implementing <typeparamref name="T"/>.
 /// </summary>
-internal abstract class TypeExtensionFactoryBase<T>
+public abstract class TypeExtensionFactoryBase<T>
     where T : class
 {
     private readonly Type _genericInterfaceType;

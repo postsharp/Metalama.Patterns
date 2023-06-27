@@ -10,7 +10,7 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// A TypeExtensionFactory for types deriving or implementing <typeparamref name="T"/>, where those types must have a constructor accepting a single argument of type <typeparamref name="TContext"/>.
 /// </summary>
-internal class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
+public class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
     where T : class
 {
     private readonly object?[] _contextArray;

@@ -7,7 +7,7 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// A TypeExtensionFactory for types deriving or implementing <typeparamref name="T"/>, where those types must have a parameterless constructor.
 /// </summary>
-internal class TypeExtensionFactory<T> : TypeExtensionFactoryBase<T>
+public  class TypeExtensionFactory<T> : TypeExtensionFactoryBase<T>
     where T : class
 {
     // ReSharper disable once MemberCanBeProtected.Global
