@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Contracts;
 using System.Collections.Concurrent;
@@ -16,6 +17,7 @@ public static partial class CachingServices
     /// <summary>
     /// Invalidates the cache.
     /// </summary>
+    [PublicAPI]
     public static partial class Invalidation
     {
         private static readonly ConcurrentDictionary<MethodInfo, int> _nestedCachedMethods = new();
@@ -191,7 +193,7 @@ public static partial class CachingServices
         /// <param name="method">The <see cref="MethodInfo"/> of the method call.</param>
         /// <param name="instance">The value of the <c>this</c> instance, or <c>null</c> for static methods.</param>
         /// <param name="args">The method arguments.</param>
-        public static void Invalidate( [Required] MethodInfo method, object instance, params object[] args )
+        public static void Invalidate( [Required] MethodInfo method, object? instance, params object?[] args )
         {
             using ( var activity = _defaultLogger.Default.OpenActivity( Formatted( "Invalidate( method = {Method} )", method ) ) )
             {
@@ -233,7 +235,7 @@ public static partial class CachingServices
         /// <param name="method">The <see cref="MethodInfo"/> of the method call.</param>
         /// <param name="instance">The value of the <c>this</c> instance, or <c>null</c> for static methods.</param>
         /// <param name="args">The method arguments.</param>
-        public static async Task InvalidateAsync( [Required] MethodInfo method, object instance, params object[] args )
+        public static async Task InvalidateAsync( [Required] MethodInfo method, object? instance, params object[] args )
         {
             using ( var activity = _defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
             {

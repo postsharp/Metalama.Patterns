@@ -21,11 +21,11 @@ public sealed class CacheConfigurationAttribute : Attribute
     internal CacheItemConfiguration Configuration { get; } = new();
 
     /// <summary>
-    /// Gets or sets the name of the <see cref="CachingProfile"/>  that contains the configuration of the cached methods.
+    /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the cached methods.
     /// </summary>
     public string ProfileName
     {
-        get => this.Configuration.ProfileName;
+        get => this.Configuration.ProfileName ?? CachingProfile.DefaultName;
         set => this.Configuration.ProfileName = value;
     }
 

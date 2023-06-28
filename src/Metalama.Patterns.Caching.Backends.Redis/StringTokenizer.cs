@@ -3,20 +3,23 @@
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
 // TODO: [Porting] Outdated?
-// TODO: [Porting] Consider using microsoft.toolkit.highperformance.extensions.stringextensions (now called CommunityToolkit)?
+// TODO: [Porting] Consider using Microsoft.Toolkit.HighPerformance.Extensions.StringExtensions (now called CommunityToolkit)?
+// ReSharper disable CommentTypo
 // https://learn.microsoft.com/en-us/dotnet/api/microsoft.toolkit.highperformance.extensions.stringextensions.tokenize?view=win-comm-toolkit-dotnet-6.1#microsoft-toolkit-highperformance-extensions-stringextensions-tokenize(system-string-system-char)
-// NB: Also used by Metalama.Patterns.Caching, copied local for now.
+// ReSharper restore CommentTypo
+
+// NB: Also used by Redis backend, copied local for now.
 // Ported from PostSharp.Patterns.Common/Utilities
 [ExplicitCrossPackageInternal]
 internal struct StringTokenizer
 {
     private readonly string _s;
-    private int _position;
     private readonly char _separator;
-
+    private int _position;
+    
     public StringTokenizer( string s, char separator = ':' )
     {
-        this._s = s;
+        this._s = s ?? throw new ArgumentNullException( nameof(s) );
         this._position = 0;
         this._separator = separator;
     }
@@ -38,8 +41,5 @@ internal struct StringTokenizer
         }
     }
 
-    public string GetRest()
-    {
-        return this._s.Substring( this._position );
-    }
+    public string GetRest() => this._s.Substring( this._position );
 }

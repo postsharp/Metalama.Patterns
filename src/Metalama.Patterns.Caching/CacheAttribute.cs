@@ -7,6 +7,10 @@ using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching;
 
+// TODO: [Porting] Pending rewrite. Remove disables when done.
+// ReSharper disable all
+#pragma warning disable
+
 /// <summary>
 /// Custom attribute that, when applied on a method, causes the return value of the method to be cached
 /// for the specific list of arguments passed to this method call.

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Reflection;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -8,6 +9,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// Encapsulates information about a parameter of a method
 /// being cached. Exposed by the <see cref="CachedMethodInfo"/> class.
 /// </summary>
+[PublicAPI] // TODO: [Porting] Does CachedParameterInfo need to be public? 
 public sealed class CachedParameterInfo
 {
     /// <summary>
@@ -16,7 +18,7 @@ public sealed class CachedParameterInfo
     public ParameterInfo Parameter { get; }
 
     /// <summary>
-    /// Determines whether the parameter should be excluded
+    /// Gets a value indicating whether the parameter should be excluded
     /// from the cache key. When the value of this property is <c>false</c>,
     /// the parameter should be included in the cache key.
     /// </summary>

@@ -5,14 +5,14 @@ namespace Flashtrace.Formatters;
 public readonly struct TypeExtensionInfo<T>
     where T : class
 {
-    internal TypeExtensionInfo( T extension, Type objectType, bool isGeneric )
+    internal TypeExtensionInfo( T? extension, Type objectType, bool isGeneric )
     {
-        this.Extension = extension ?? throw new ArgumentNullException( nameof(extension) );
+        this.Extension = extension;
         this.ObjectType = objectType ?? throw new ArgumentNullException( nameof(objectType) );
         this.IsGeneric = isGeneric;
     }
 
-    public T Extension { get; }
+    public T? Extension { get; }
 
     // ReSharper disable once MemberCanBePrivate.Global
     public Type ObjectType { get; }
@@ -20,7 +20,7 @@ public readonly struct TypeExtensionInfo<T>
     // ReSharper disable once MemberCanBePrivate.Global
     public bool IsGeneric { get; }
 
-    public bool ShouldOverwrite( TypeExtensionInfo<T> typeExtension )
+    internal bool ShouldOverwrite( TypeExtensionInfo<T> typeExtension )
         => CovariantTypeExtensionFactory<T>.ShouldOverwrite( this.ObjectType, this.IsGeneric, typeExtension.ObjectType, this.IsGeneric );
 }
 

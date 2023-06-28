@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -18,12 +18,13 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// at least one dependency-enabled <see cref="RedisCachingBackend"/> instance is running, you must initiate full garbage collection
 /// by calling the <see cref="PerformFullCollectionAsync(RedisCachingBackend,CancellationToken)"/> method.
 /// </summary>
+[PublicAPI] // Comments above indicate use case.
 public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingComponent
 {
     private readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(RedisCacheDependencyGarbageCollector) );
-    private RedisKeyBuilder _keyBuilder;
+    private RedisKeyBuilder _keyBuilder = null!; // "Guaranteed" to be initialized via Init et al.
 
-    private RedisNotificationQueue NotificationQueue { get; set; }
+    private RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
 
     private readonly bool _ownsBackend;
     private readonly DependenciesRedisCachingBackend _backend;
@@ -31,7 +32,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     private RedisCacheDependencyGarbageCollector( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration )
     {
         this.Connection = connection;
-        this.Database = this.Connection.GetDatabase( configuration?.Database ?? -1 );
+        this.Database = this.Connection.GetDatabase( configuration.Database );
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
         this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration );
         this._ownsBackend = true;
@@ -51,7 +52,6 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="connection">A Redis connection.</param>
     /// <param name="configuration">A configuration object.</param>
     /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static RedisCacheDependencyGarbageCollector Create(
         [Required] IConnectionMultiplexer connection,
         [Required] RedisCachingBackendConfiguration configuration )
@@ -82,7 +82,6 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// </summary>
     /// <param name="backend">An existing Redis <see cref="CachingBackend"/>, as returned by <see cref="RedisCachingBackend.Create"/>.</param>
     /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="backend"/>.</returns>
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static RedisCacheDependencyGarbageCollector Create( [Required] CachingBackend backend )
     {
         var redisCachingBackend = FindRedisCachingBackend( backend );
@@ -105,10 +104,9 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="configuration">A configuration object.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/> returning a <see cref="RedisCacheDependencyGarbageCollector"/> that uses <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static Task<RedisCacheDependencyGarbageCollector> CreateAsync(
         [Required] IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration configuration,
+        [Required] RedisCachingBackendConfiguration configuration,
         CancellationToken cancellationToken = default )
     {
         var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
@@ -122,7 +120,6 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="backend">An existing <see cref="CachingBackend"/>, as returned by <see cref="RedisCachingBackend.Create"/>, that supports dependencies.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/> returning a <see cref="RedisCacheDependencyGarbageCollector"/> that uses <paramref name="backend"/>.</returns>
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static Task<RedisCacheDependencyGarbageCollector> CreateAsync( [Required] CachingBackend backend, CancellationToken cancellationToken = default )
     {
         var redisCachingBackend = FindRedisCachingBackend( backend );
@@ -141,8 +138,9 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     {
         this.InitCommon( configuration );
 
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         this.NotificationQueue = RedisNotificationQueue.Create(
-            this.ToString(),
+            this.ToString()!,
             this.Connection,
             ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
             this.ProcessKeyspaceNotification,
@@ -155,8 +153,9 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     {
         this.InitCommon( configuration );
 
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
-            this.ToString(),
+            this.ToString()!,
             this.Connection,
             ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
             this.ProcessKeyspaceNotification,
@@ -166,10 +165,8 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         return this;
     }
 
-    private void InitCommon( RedisCachingBackendConfiguration configuration )
-    {
-        this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
-    }
+    private void InitCommon( RedisCachingBackendConfiguration configuration ) 
+        => this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
     /// <summary>
     /// Gets the Redis <see cref="IDatabase"/> used by the current object.
@@ -187,10 +184,8 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
 
         var tokenizer = new StringTokenizer( channelName );
 
-        if ( tokenizer.GetNext() == null )
-        {
-            return;
-        }
+        // Was: `if ( tokenizer.GetNext() == null ) return;` - However, GetNext() never returns null, but does have side effects, so using discard.   
+        _ = tokenizer.GetNext();
 
         var prefix = tokenizer.GetNext();
 
@@ -214,6 +209,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
                     case "evicted":
                         if ( this.Database.KeyDelete( this._keyBuilder.GetValueKey( itemKey ) ) )
                         {
+                            // ReSharper disable once StringLiteralTypo
                             this._logger.Warning.Write(
                                 Formatted(
                                     "The dependencies key for item {Item} has been {State} but should not. The Redis server is probably misconfigured. " +
@@ -234,6 +230,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
                 {
                     case "expired":
                     case "evicted":
+                        // ReSharper disable once StringLiteralTypo
                         this._logger.Warning.Write(
                             Formatted(
                                 "The dependency key {Key} has been {State} but should not. The Redis server is probably misconfigured. " +
@@ -279,7 +276,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
                 // The value has been set again in the meanwhile
                 valueKeyExistsTask.Result
 
-                // The garabage collection has been performed by another client already
+                // The garbage collection has been performed by another client already
                 || !dependenciesKeyExistsTask.Result )
             {
                 return;
@@ -288,7 +285,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
             var transaction = this.Database.CreateTransaction();
             transaction.AddCondition( Condition.KeyNotExists( valueKey ) );
             transaction.AddCondition( Condition.KeyExists( dependenciesKey ) );
-            string[] dependencies = await this._backend.GetDependenciesAsync( key, transaction );
+            var dependencies = await this._backend.GetDependenciesAsync( key, transaction );
             this._backend.RemoveDependenciesTransaction( key, dependencies, transaction );
 #pragma warning disable 4014
             transaction.KeyDeleteAsync( dependenciesKey );

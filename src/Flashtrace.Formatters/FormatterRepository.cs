@@ -144,10 +144,22 @@ public class FormatterRepository : IFormatterRepository
     /// <param name="objectType">Object type.</param>
     /// <returns>The formatter the object <paramref name="objectType"/>.</returns>
     public IFormatter Get( Type objectType )
+        => this._dynamicFormatterCache.GetOrAdd( objectType, this._getFormatterFunc ).Extension
+           ?? throw new FormatterNotFoundException();
+    
+    /// <summary>
+    /// Attempts to get the <see cref="IFormatter"/> for the specified <see cref="Type"/>.
+    /// </summary>
+    /// <param name="objectType">Object type.</param>
+    /// <param name="formatter">The formatter for objects of the specified type, or null if the repository is unable to provide a formatter for the specified type.</param>
+    /// <returns>true if the repository was able to provide a formatter for the specified type; otherwise, false.</returns>
+    public bool TryGet( Type objectType, out IFormatter? formatter )
     {
-        return this._dynamicFormatterCache.GetOrAdd( objectType, this._getFormatterFunc ).Extension;
-    }
+        formatter = this._dynamicFormatterCache.GetOrAdd( objectType, this._getFormatterFunc ).Extension;
 
+        return formatter != null;
+    }
+    
     private void UpdateFormatterCache( Type objectType, TypeExtensionInfo<IFormatter> newFormatterInfo )
     {
         while ( true )
@@ -198,7 +210,9 @@ public class FormatterRepository : IFormatterRepository
         {
             this._parent = parent;
             this._formatterInfo = parent._formatterFactory.GetTypeExtension( typeof(T), this.UpdateCacheCallback, this.CreateDefaultFormatter );
-            this._formatter = (IFormatter<T>) this._formatterInfo.Extension;
+
+            this._formatter = (IFormatter<T>) (this._formatterInfo.Extension
+                                               ?? throw new FlashtraceFormattersAssertionFailedException( "null was not expected." ));
         }
 
         private IFormatter CreateDefaultFormatter()
@@ -221,7 +235,9 @@ public class FormatterRepository : IFormatterRepository
         {
             if ( typeExtensionInfo.ShouldOverwrite( this._formatterInfo ) )
             {
-                this._formatter = (IFormatter<T>) this._parent._formatterFactory.Convert( typeExtensionInfo.Extension, typeof(T) );
+                this._formatter = (IFormatter<T>) (this._parent._formatterFactory.Convert( typeExtensionInfo.Extension, typeof(T) )
+                                                   ?? throw new FlashtraceFormattersAssertionFailedException( "null was not expected." ));
+
                 this._formatterInfo = typeExtensionInfo;
             }
         }

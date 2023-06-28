@@ -6,7 +6,7 @@ internal sealed class StreamAdapter : ValueAdapter<Stream>
 {
     public override bool IsAsyncSupported => true;
 
-    public override object GetStoredValue( Stream value )
+    public override object? GetStoredValue( Stream? value )
     {
         if ( value == null )
         {
@@ -28,7 +28,7 @@ internal sealed class StreamAdapter : ValueAdapter<Stream>
         }
     }
 
-    public override async Task<object> GetStoredValueAsync( Stream value, CancellationToken cancellationToken )
+    public override async Task<object?> GetStoredValueAsync( Stream? value, CancellationToken cancellationToken )
     {
         if ( value == null )
         {
@@ -51,7 +51,7 @@ internal sealed class StreamAdapter : ValueAdapter<Stream>
         }
     }
 
-    public override Stream GetExposedValue( object storedValue )
+    public override Stream? GetExposedValue( object? storedValue )
     {
         if ( storedValue == null )
         {

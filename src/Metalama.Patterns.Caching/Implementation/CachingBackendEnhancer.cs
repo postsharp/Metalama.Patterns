@@ -16,7 +16,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 public abstract class CachingBackendEnhancer : CachingBackend
 {
     /// <summary>
-    /// Initializes a new <see cref="CachingBackendEnhancer"/>.
+    /// Initializes a new instance of the <see cref="CachingBackendEnhancer"/> class.
     /// </summary>
     /// <param name="underlyingBackend">The next <see cref="CachingBackend"/> in the chain of responsibility.</param>
     protected CachingBackendEnhancer( [Required] CachingBackend underlyingBackend )
@@ -40,7 +40,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
     /// </summary>
     /// <param name="sender">The sender (typically the value of the <see cref="UnderlyingBackend"/> property).</param>
     /// <param name="args">The <see cref="CacheDependencyInvalidatedEventArgs"/>.</param>
-    protected virtual void OnBackendDependencyInvalidated( object sender, CacheDependencyInvalidatedEventArgs args ) => this.OnDependencyInvalidated( args );
+    protected virtual void OnBackendDependencyInvalidated( object? sender, CacheDependencyInvalidatedEventArgs args ) => this.OnDependencyInvalidated( args );
 
     /// <summary>
     /// Method invoked when the <see cref="CachingBackend.ItemRemoved"/> event of the next <see cref="UnderlyingBackend"/>
@@ -48,7 +48,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
     /// </summary>
     /// <param name="sender">The sender (typically the value of the <see cref="UnderlyingBackend"/> property).</param>
     /// <param name="args">The <see cref="CacheItemRemovedEventArgs"/>.</param>
-    protected virtual void OnBackendItemRemoved( object sender, CacheItemRemovedEventArgs args ) => this.OnItemRemoved( args );
+    protected virtual void OnBackendItemRemoved( object? sender, CacheItemRemovedEventArgs args ) => this.OnItemRemoved( args );
 
     /// <summary>
     /// Gets the next <see cref="CachingBackend"/> in the chain of responsibility.
@@ -65,7 +65,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
     protected override bool ContainsItemCore( string key ) => this.UnderlyingBackend.ContainsItem( key );
 
     /// <inheritdoc />
-    protected override CacheValue GetItemCore( string key, bool includeDependencies ) => this.UnderlyingBackend.GetItem( key, includeDependencies );
+    protected override CacheValue? GetItemCore( string key, bool includeDependencies ) => this.UnderlyingBackend.GetItem( key, includeDependencies );
 
     /// <inheritdoc />
     protected override void RemoveItemCore( string key ) => this.UnderlyingBackend.RemoveItem( key );
@@ -89,7 +89,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
     protected override Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken ) => this.UnderlyingBackend.ContainsDependencyAsync( key, cancellationToken );
 
     /// <inheritdoc />
-    protected override Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken ) => this.UnderlyingBackend.GetItemAsync( key, includeDependencies, cancellationToken );
+    protected override Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken ) => this.UnderlyingBackend.GetItemAsync( key, includeDependencies, cancellationToken );
 
     /// <inheritdoc />
     protected override Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken ) => this.UnderlyingBackend.InvalidateDependencyAsync( key, cancellationToken );

@@ -13,7 +13,7 @@ public sealed class BinarySerializer : ISerializer
     private readonly BinaryFormatter _serializer = new();
 
     /// <inheritdoc />
-    public byte[] Serialize( object value )
+    public byte[] Serialize( object? value )
     {
         if ( value == null )
         {
@@ -30,7 +30,7 @@ public sealed class BinarySerializer : ISerializer
     }
 
     /// <inheritdoc />  
-    public object Deserialize( byte[] array )
+    public object? Deserialize( byte[]? array )
     {
         if ( array == null || array.Length == 0 )
         {

@@ -6,8 +6,13 @@ namespace Metalama.Patterns.Caching.ValueAdapters;
 
 internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
 {
-    public override object GetStoredValue( IEnumerator<T> value )
+    public override object? GetStoredValue( IEnumerator<T>? value )
     {
+        if ( value == null )
+        {
+            return null;
+        }
+        
         List<T> list = new();
 
         while ( value.MoveNext() )
@@ -18,12 +23,12 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
         return list;
     }
 
-    public override IEnumerator<T> GetExposedValue( object storedValue ) => new Enumerator( (List<T>) storedValue );
+    public override IEnumerator<T>? GetExposedValue( object? storedValue ) => storedValue == null ? null : new Enumerator( (List<T>) storedValue );
 
-    private class Enumerator : IEnumerator<T>
+    private sealed class Enumerator : IEnumerator<T>
     {
-        private int _index = -1;
         private readonly List<T> _list;
+        private int _index = -1;
 
         public Enumerator( List<T> list )
         {
@@ -43,7 +48,10 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
             }
         }
 
-        object IEnumerator.Current => this.Current;
+#nullable disable // Duplicate behaviour from IEnumerator<T>.
+        object IEnumerator.Current 
+#nullable restore
+            => this.Current;
 
         public void Dispose() { }
 

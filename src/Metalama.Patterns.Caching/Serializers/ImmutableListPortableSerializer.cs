@@ -1,5 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+// TODO: [Porting] Should we still use PortableSerializer/PortableFormatter? Remove disables once decided.
+// ReSharper disable All
+#pragma warning disable
+
 using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching.Serializers;

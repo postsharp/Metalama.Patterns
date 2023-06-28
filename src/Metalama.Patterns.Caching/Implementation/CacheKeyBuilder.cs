@@ -116,7 +116,7 @@ public class CacheKeyBuilder : IDisposable
     /// <param name="arguments">The arguments passed to the <paramref name="method"/> call.</param>
     /// <param name="instance">The <c>this</c> instance of the <paramref name="method"/> call, or <c>null</c> if <paramref name="method"/> is static.</param>
     /// <returns>A string uniquely representing the method call.</returns>
-    public virtual string BuildMethodKey( [Required] MethodInfo method, [Required] IList<object> arguments, object? instance = null )
+    public virtual string BuildMethodKey( [Required] MethodInfo method, [Required] IList<object?> arguments, object? instance = null )
     {
         var parameters = method.GetParameters();
 
@@ -215,7 +215,7 @@ public class CacheKeyBuilder : IDisposable
         }
     }
 
-    private void AppendArgument( UnsafeStringBuilder stringBuilder, Type parameterType, object parameterValue, ref bool addComma )
+    private void AppendArgument( UnsafeStringBuilder stringBuilder, Type parameterType, object? parameterValue, ref bool addComma )
     {
         if ( addComma )
         {

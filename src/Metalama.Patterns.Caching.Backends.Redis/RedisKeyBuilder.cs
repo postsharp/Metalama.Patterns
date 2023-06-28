@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using StackExchange.Redis;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -12,16 +13,18 @@ internal class RedisKeyBuilder
     public const string DependencyKindPrefix = "dependency";
     public const string DependenciesKindPrefix = "dependencies";
 
-    public readonly RedisKey HearbeatKey;
+#pragma warning disable SA1401
+    public readonly RedisKey HeartbeatKey;
     public readonly RedisChannel NotificationChannel;
     public readonly RedisChannel EventsChannel;
+#pragma warning restore SA1401
 
-    public string KeyPrefix { get; private set; }
+    public string KeyPrefix { get; }
 
-    public RedisKeyBuilder( IDatabase database, RedisCachingBackendConfiguration configuration )
+    public RedisKeyBuilder( IDatabase database, RedisCachingBackendConfiguration? configuration )
     {
         this.KeyPrefix = configuration?.KeyPrefix ?? "_";
-        this.HearbeatKey = this.KeyPrefix + ":" + GarbageCollectionPrefix + ":heartbeat";
+        this.HeartbeatKey = this.KeyPrefix + ":" + GarbageCollectionPrefix + ":heartbeat";
         this.EventsChannel = this.KeyPrefix + ":events";
         this.NotificationChannel = string.Format( CultureInfo.InvariantCulture, "__keyspace@{0}__:{1}*", database.Database, this.KeyPrefix );
     }
@@ -41,14 +44,15 @@ internal class RedisKeyBuilder
         return this.KeyPrefix + ":" + DependenciesKindPrefix + ":" + item;
     }
 
-    public bool TryParseKeyspaceNotification( string channelName, out string keyKind, out string itemKey )
+    public bool TryParseKeyspaceNotification( string channelName, [NotNullWhen( true )] out string? keyKind, [NotNullWhen( true )] out string? itemKey )
     {
         keyKind = null;
         itemKey = null;
 
         var tokenizer = new StringTokenizer( channelName );
 
-        if ( tokenizer.GetNext() == null )
+        // [Porting] Was `if ( tokenizer.GetNext() == null )`, but tokenizer.GetNext() never returns null. Updated check, behaviour may have changed. 
+        if ( string.IsNullOrEmpty( tokenizer.GetNext() ) )
         {
             return false;
         }

@@ -12,12 +12,12 @@ public interface ISerializer
     /// </summary>
     /// <param name="value">The object to serialize.</param>
     /// <returns>A byte array representing <paramref name="value"/>.</returns>
-    byte[] Serialize( object value );
+    byte[] Serialize( object? value );
 
     /// <summary>
     /// Deserializes a byte array into an object.
     /// </summary>
     /// <param name="array">A byte array.</param>
     /// <returns>The object represented by <paramref name="array"/>.</returns>
-    object Deserialize( byte[] array );
+    object? Deserialize( byte[]? array );
 }

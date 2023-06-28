@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching.Backends;
@@ -7,6 +8,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// <summary>
 /// An implementation of <see cref="CachingBackend"/> that does not cache at all.
 /// </summary>
+[PublicAPI]
 public class NullCachingBackend : CachingBackend
 {
     /// <inheritdoc />
@@ -16,7 +18,7 @@ public class NullCachingBackend : CachingBackend
     protected override bool ContainsItemCore( string key ) => false;
 
     /// <inheritdoc />
-    protected override CacheValue GetItemCore( string key, bool includeDependencies ) => null;
+    protected override CacheValue? GetItemCore( string key, bool includeDependencies ) => null;
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key ) { }

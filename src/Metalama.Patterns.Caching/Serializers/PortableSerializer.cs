@@ -2,11 +2,16 @@
 
 namespace Metalama.Patterns.Caching.Serializers;
 
+// TODO: [Porting] Should we still use PortableSerializer/PortableFormatter? Remove disables once decided.
+
+// ReSharper disable once InvalidXmlDocComment
 /// <summary>
 /// An implementation of <see cref="ISerializer"/> that uses the <see cref="PortableFormatter"/>
 /// (for classes annotated with <see cref="PSerializableAttribute"/>).
 /// </summary>
 [Obsolete( "Porting TODO", true )]
+
+// ReSharper disable once UnusedType.Global
 public sealed class PortableSerializer : ISerializer
 {
 #if TODO
@@ -30,7 +35,7 @@ public sealed class PortableSerializer : ISerializer
 #endif
 
     /// <inheritdoc />
-    public byte[] Serialize( object value )
+    public byte[] Serialize( object? value )
     {
 #if !TODO
         throw new NotImplementedException( "TODO" );
@@ -47,7 +52,7 @@ public sealed class PortableSerializer : ISerializer
     }
 
     /// <inheritdoc />
-    public object Deserialize( byte[] array )
+    public object Deserialize( byte[]? array )
     {
 #if !TODO
         throw new NotImplementedException( "TODO" );

@@ -1,33 +1,31 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.ValueAdapters;
 using Metalama.Patterns.Contracts;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using static Flashtrace.FormattedMessageBuilder;
-
-// TODO: [Porting] Remove?
-// #pragma warning disable 420
 
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
 /// An abstraction of the physical implementation of the cache, where the <see cref="CacheAttribute"/> ends up writing to and reading from.
 /// </summary>
+[PublicAPI]
 public abstract class CachingBackend : ITestableCachingComponent
 {
+    private const int _disposeTimeout = 30000;
+
     private static readonly Task<bool> _falseTaskResult = Task.FromResult( false );
     private static readonly Task<bool> _trueTaskResult = Task.FromResult( true );
-    private CachingBackendFeatures _features;
-    private int _status;
-    private const int _disposeTimeout = 30000;
+    
     private readonly TaskCompletionSource<bool> _disposeTask = new();
-    private EventHandler<CacheItemRemovedEventArgs> _itemRemoved;
-    private EventHandler<CacheDependencyInvalidatedEventArgs> _dependencyInvalidated;
-    private BackgroundTaskScheduler _backgroundTaskScheduler;
 
-    private BackgroundTaskScheduler GetLegacyBackgroundTaskScheduler() => LazyInitializer.EnsureInitialized( ref this._backgroundTaskScheduler );
+    private CachingBackendFeatures? _features;
+    private int _status;
+    private EventHandler<CacheItemRemovedEventArgs>? _itemRemoved;
+    private EventHandler<CacheDependencyInvalidatedEventArgs>? _dependencyInvalidated;
 
     /// <summary>
     /// Gets the <see cref="Flashtrace.LogSource"/> that implementations can use to emit
@@ -56,7 +54,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <summary>
     /// Gets the set of features supported by the current <see cref="CachingBackend"/>.
     /// </summary>
-    public CachingBackendFeatures SupportedFeatures => this._features ?? (this._features = this.CreateFeatures());
+    public CachingBackendFeatures SupportedFeatures => this._features ??= this.CreateFeatures();
 
     private void RequireFeature( bool feature, string featureName )
     {
@@ -66,9 +64,7 @@ public abstract class CachingBackend : ITestableCachingComponent
                 string.Format( CultureInfo.InvariantCulture, "Feature \"{0}\" is not supported by {1}.", featureName, this.GetType().Name ) );
         }
     }
-
-    #region SetItem
-
+    
     /// <summary>
     /// Sets a cache item. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -149,10 +145,6 @@ public abstract class CachingBackend : ITestableCachingComponent
         }
     }
 
-    #endregion
-
-    #region ContainsItem
-
     /// <summary>
     /// Determines whether the cache contains an item of a given key. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -227,11 +219,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-
-    #endregion
-
-    #region GetItem
-
+    
     /// <summary>
     /// Gets a cache item given its key. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -263,19 +251,19 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="includeDependencies"><c>true</c> if the <see cref="CacheValue.Dependencies"/> properties of the
     /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
     /// <returns>A <see cref="CacheValue"/>, or <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-    public CacheValue GetItem( [Required] string key, bool includeDependencies = true )
+    public CacheValue? GetItem( [Required] string key, bool includeDependencies = true )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "GetItem( \"{Key}\" )", key ) ) )
         {
             try
             {
-                CacheValue item = null;
+                CacheValue? item = null;
 
                 try
                 {
                     item = this.GetItemCore( key, includeDependencies );
                 }
-                catch ( Exception e ) when ( e is InvalidCacheItemException || e is InvalidCastException )
+                catch ( Exception e ) when ( e is InvalidCacheItemException or InvalidCastException )
                 {
                     this.LogSource.Warning.Write(
                         Formatted(
@@ -308,7 +296,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> evaluating to a <see cref="CacheValue"/>, or evaluating to <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-    public async Task<CacheValue> GetItemAsync(
+    public async Task<CacheValue?> GetItemAsync(
         [Required] string key,
         bool includeDependencies = true,
         CancellationToken cancellationToken = default )
@@ -319,13 +307,13 @@ public abstract class CachingBackend : ITestableCachingComponent
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                CacheValue item = null;
+                CacheValue? item = null;
 
                 try
                 {
                     item = await this.GetItemAsyncCore( key, includeDependencies, cancellationToken );
                 }
-                catch ( Exception e ) when ( e is InvalidCacheItemException || e is InvalidCastException )
+                catch ( Exception e ) when ( e is InvalidCacheItemException or InvalidCastException )
                 {
                     this.LogSource.Info.Write(
                         Formatted(
@@ -347,11 +335,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-
-    #endregion
-
-    #region RemoveItem
-
+    
     /// <summary>
     /// Removes a cache item from the cache given its key. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -422,11 +406,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-
-    #endregion
-
-    #region InvalidateDependency
-
+    
     /// <summary>
     /// Removes from the cache all items that have a specific dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -501,11 +481,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-
-    #endregion
-
-    #region ContainsDependency
-
+    
     /// <summary>
     /// Determines whether the cache contains a given dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -588,11 +564,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-
-    #endregion
-
-    #region Clear
-
+    
     /// <summary>
     /// Clears the cache. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. 
     /// </summary>
@@ -656,8 +628,6 @@ public abstract class CachingBackend : ITestableCachingComponent
         }
     }
 
-    #endregion
-
     /// <summary>
     /// Gets the status of the current <see cref="CachingBackend"/> (<see cref="CachingBackendStatus.Default"/>,
     /// <see cref="CachingBackendStatus.Disposing"/> or <see cref="CachingBackendStatus.Disposed"/>).
@@ -667,7 +637,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     private bool TryChangeStatus( CachingBackendStatus expectedStatus, CachingBackendStatus newStatus ) => Interlocked.CompareExchange( ref this._status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
 
     /// <summary>
-    /// Initializes a new <see cref="CachingBackend"/>.
+    /// Initializes a new instance of the <see cref="CachingBackend"/> class.
     /// </summary>
     protected CachingBackend()
     {
@@ -689,7 +659,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> that is signaled to the complete state when all background tasks
-    /// have completed</returns>
+    /// have completed.</returns>
     /// <remarks>
     /// <para>
     /// Other background tasks may possibly be enqueued between the time
@@ -697,17 +667,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// by the caller.
     /// </para>
     /// </remarks>
-    public virtual Task WhenBackgroundTasksCompleted( CancellationToken cancellationToken )
-    {
-        if ( this._backgroundTaskScheduler == null )
-        {
-            return Task.CompletedTask;
-        }
-        else
-        {
-            return this._backgroundTaskScheduler.WhenBackgroundTasksCompleted( cancellationToken );
-        }
-    }
+    public virtual Task WhenBackgroundTasksCompleted( CancellationToken cancellationToken ) => Task.CompletedTask;
 
     /// <summary>
     /// Event raised when a cache item is removed from the cache. Check the <see cref="CachingBackendFeatures.Events"/>
@@ -826,8 +786,6 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <summary>
     /// Synchronously disposes the current <see cref="CachingBackend"/>.
     /// </summary>
-    [SuppressMessage( "Microsoft.Design", "CA1063:ImplementIDisposableCorrectly" )]
-    [SuppressMessage( "Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations" )]
     public void Dispose() => this.Dispose( true );
 
     /// <summary>
@@ -835,7 +793,6 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// of a call to the <see cref="Dispose()"/> method or because of object finalizing.
     /// </summary>
     /// <param name="disposing"><c>true</c> if this method is called because the <see cref="Dispose()"/> method has been called, or <c>false</c> if the object is being finalized.</param>
-    [SuppressMessage( "Microsoft.Design", "CA1063" )] // The Dispose pattern is implemented differently.
     protected void Dispose( bool disposing )
     {
         if ( this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) )
@@ -959,20 +916,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
     // TODO: [Porting] Used by Redis backend. Making protected for now.
     [ExplicitCrossPackageInternal]
-    protected virtual int BackgroundTaskExceptions
-    {
-        get
-        {
-            if ( this._backgroundTaskScheduler == null )
-            {
-                return 0;
-            }
-            else
-            {
-                return this._backgroundTaskScheduler.BackgroundTaskExceptions;
-            }
-        }
-    }
+    protected virtual int BackgroundTaskExceptions => 0;
 
     int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
 

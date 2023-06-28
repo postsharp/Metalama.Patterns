@@ -7,11 +7,11 @@ namespace Metalama.Patterns.Caching;
 [Serializable]
 internal sealed class NullCachingContext : MarshalByRefObject, ICachingContext
 {
-    public ICachingContext Parent => null;
+    public ICachingContext? Parent => null;
 
-    public void AddDependencies( IEnumerable<string> dependencies ) { }
+    public void AddDependencies( IEnumerable<string>? dependencies ) { }
 
-    public void AddDependencies( IEnumerable<ICacheDependency> dependencies ) { }
+    public void AddDependencies( IEnumerable<ICacheDependency>? dependencies ) { }
 
     public void AddDependency( string dependency ) { }
 

@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
+// TODO: [Porting] Consider deprecating WithValue and relying on C# 'with' expressions. Requires conversion to record in C#9, C#10 supports 'with' with struct.
 /// <summary>
 /// Return value of the <see cref="CachingBackend.GetItem(string, bool)"/> method, i.e. represents an item retrieved from the cache (items being stored in the cache are represented by the <see cref="CacheItem"/> class).
 /// </summary>

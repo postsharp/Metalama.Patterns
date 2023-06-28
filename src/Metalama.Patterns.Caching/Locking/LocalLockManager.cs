@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Collections.Concurrent;
 
 namespace Metalama.Patterns.Caching.Locking;
@@ -9,6 +10,7 @@ namespace Metalama.Patterns.Caching.Locking;
 /// has its own set of named locks that are not shared in any way with other instances. The <see cref="LocalLockManager"/> can
 /// be used to synchronize the execution of methods in the current process and <see cref="AppDomain"/>.
 /// </summary>
+[PublicAPI]
 public sealed class LocalLockManager : ILockManager
 {
     private readonly ConcurrentDictionary<string, Lock> _locks = new( StringComparer.OrdinalIgnoreCase );
@@ -16,7 +18,7 @@ public sealed class LocalLockManager : ILockManager
     /// <inheritdoc />
     public ILockHandle GetLock( string key )
     {
-        var @lock = this._locks.AddOrUpdate( key, k => new Lock( this, k ), ( k, l ) => l.AddReference() );
+        var @lock = this._locks.AddOrUpdate( key, k => new Lock( this, k ), ( _, l ) => l.AddReference() );
 #if DEBUG
         if ( @lock.References <= 0 )
         {
@@ -101,7 +103,6 @@ public sealed class LocalLockManager : ILockManager
 #pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
 #pragma warning disable CA1821 // Remove empty Finalizers
         ~LockHandle()
-
         {
             throw new MetalamaPatternsCachingAssertionFailedException( "The Dispose method has not been invoked." );
         }
@@ -161,10 +162,7 @@ public sealed class LocalLockManager : ILockManager
 
                 if ( this.References == 0 )
                 {
-                    Lock removedLock;
-#pragma warning disable CA2000 // Dispose objects before losing scope
-                    if ( !this._parent._locks.TryRemove( this._key, out removedLock ) || removedLock != this )
-#pragma warning restore CA2000 // Dispose objects before losing scope
+                    if ( !this._parent._locks.TryRemove( this._key, out var removedLock ) || removedLock != this )
                     {
                         throw new MetalamaPatternsCachingAssertionFailedException( "Data race." );
                     }

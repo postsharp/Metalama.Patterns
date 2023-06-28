@@ -5,15 +5,21 @@ using System.Reflection;
 
 namespace Metalama.Patterns.Caching;
 
+// TODO: [Porting] Remove BuildTimeCacheConfigurationManager if still unused after Metalama aspect development. 
+// ReSharper disable once UnusedType.Global
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable UnusedType.Local
+#pragma warning disable IDE0051
 internal static class BuildTimeCacheConfigurationManager
 {
     public static ICacheItemConfiguration GetConfigurationFromAttributes( MemberInfo method )
     {
         List<ICacheItemConfiguration> configurations = new();
 
-        PopulateConfigurations( method.DeclaringType, configurations );
+        PopulateConfigurations( method.DeclaringType!, configurations );
 
-        var assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType.Assembly );
+        var assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType!.Assembly );
 
         if ( assemblyConfiguration != null )
         {
@@ -30,9 +36,9 @@ internal static class BuildTimeCacheConfigurationManager
         return mergedConfiguration;
     }
 
-    private static CacheConfigurationAttribute GetConfigurationAttribute( ICustomAttributeProvider declaration )
+    private static CacheConfigurationAttribute? GetConfigurationAttribute( ICustomAttributeProvider declaration )
     {
-        object[] attributes = declaration.GetCustomAttributes( typeof(CacheConfigurationAttribute), false );
+        var attributes = declaration.GetCustomAttributes( typeof(CacheConfigurationAttribute), false );
 
         if ( attributes.Length > 0 )
         {
@@ -63,7 +69,10 @@ internal static class BuildTimeCacheConfigurationManager
 
     // TODO: [Porting] Use of PostSharpEnvironment.CurrentProject.StateStore
 
-    private static ICacheItemConfiguration GetConfigurationOnDeclaration( ICustomAttributeProvider declaration )
+    // TODO: [Porting] Remove these disables if class is retained.
+    // ReSharper disable once ReturnTypeCanBeNotNullable
+    // ReSharper disable once UnusedParameter.Local
+    private static ICacheItemConfiguration? GetConfigurationOnDeclaration( ICustomAttributeProvider declaration )
     {
         throw new NotImplementedException( "Porting - PostSharpEnvironment.CurrentProject.StateStore" );
 #if TODO
@@ -88,6 +97,9 @@ internal static class BuildTimeCacheConfigurationManager
 
     private sealed class CacheConfigurationAttributeCache
     {
+        // TODO: [Porting] Remove this disable if class is retained.
+#pragma warning disable SA1401
         public readonly Dictionary<object, CacheConfigurationAttribute> Attributes = new();
+#pragma warning restore SA1401
     }
 }

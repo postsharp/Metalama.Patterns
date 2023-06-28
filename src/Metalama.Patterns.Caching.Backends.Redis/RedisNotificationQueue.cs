@@ -6,15 +6,16 @@ using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-internal class RedisNotificationQueue : ITestableCachingComponent
+internal sealed class RedisNotificationQueue : ITestableCachingComponent
 {
-    private LogSource _logger;
+    private const int _connectDelay = 10;
+
+    private LogSource _logger = null!; // "Guaranteed" to be initialized via Init et al.
 
     public ISubscriber Subscriber { get; }
 
@@ -22,6 +23,8 @@ internal class RedisNotificationQueue : ITestableCachingComponent
     private readonly BlockingCollection<RedisNotification> _notificationQueue = new();
     private readonly ManualResetEventSlim _notificationProcessingLock = new( true );
 #pragma warning restore CA2213
+    private readonly TaskCompletionSource<bool> _disposeTask = new();
+    private readonly StackTrace _allocationStackTrace = new();
 
     private readonly Thread _notificationProcessingThread;
     private readonly TaskCompletionSource<bool> _notificationProcessingThreadCompleted = new();
@@ -31,10 +34,7 @@ internal class RedisNotificationQueue : ITestableCachingComponent
     private volatile TaskCompletionSource<bool> _queueEmptyTask = new();
     private static volatile int _notificationProcessingThreads;
     private readonly string _id;
-    private const int _connectDelay = 10;
     private volatile int _status;
-    private readonly TaskCompletionSource<bool> _disposeTask = new();
-    private readonly StackTrace _allocationStackTrace = new();
 
     private RedisNotificationQueue(
         string id,
@@ -55,7 +55,6 @@ internal class RedisNotificationQueue : ITestableCachingComponent
         };
     }
 
-    [SuppressMessage( "Microsoft.Design", "CA1031" )]
     ~RedisNotificationQueue()
     {
         try
@@ -75,7 +74,10 @@ internal class RedisNotificationQueue : ITestableCachingComponent
                 this._logger.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
             }
         }
-        catch { }
+        catch
+        {
+            // ignored
+        }
     }
 
     private void Init()
@@ -133,7 +135,6 @@ internal class RedisNotificationQueue : ITestableCachingComponent
         return this;
     }
 
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static RedisNotificationQueue Create(
         string id,
         IConnectionMultiplexer connection,
@@ -147,7 +148,6 @@ internal class RedisNotificationQueue : ITestableCachingComponent
         return queue;
     }
 
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static Task<RedisNotificationQueue> CreateAsync(
         string id,
         IConnectionMultiplexer connection,
@@ -179,14 +179,14 @@ internal class RedisNotificationQueue : ITestableCachingComponent
         this._logger.Debug.EnabledOrNull?.Write( Formatted( "The notification was not queued because the queue was already disposed." ) );
     }
 
-    [SuppressMessage( "Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes" )]
-    private static void ProcessNotificationQueue( object state )
+    private static void ProcessNotificationQueue( object? state )
     {
-        WeakReference<RedisNotificationQueue> queueRef = (WeakReference<RedisNotificationQueue>) state;
+        if ( state is not WeakReference<RedisNotificationQueue> queueRef )
+        {
+            throw new RedisCachingBackendAssertionFailedException( "null was not expected." );
+        }
 
-        RedisNotificationQueue queue;
-
-        if ( !queueRef.TryGetTarget( out queue ) )
+        if ( !queueRef.TryGetTarget( out var queue ) )
         {
             return;
         }
@@ -271,13 +271,19 @@ internal class RedisNotificationQueue : ITestableCachingComponent
         }
     }
 
+    // TODO: [Porting] Check if used by unit tests, otherwise remove.
+    // ReSharper disable once UnusedMember.Global
     internal static int NotificationProcessingThreads => _notificationProcessingThreads;
 
+    // TODO: [Porting] Check if used by unit tests, otherwise remove.
+    // ReSharper disable once UnusedMember.Global
     internal void SuspendProcessing()
     {
         this._notificationProcessingLock.Reset();
     }
 
+    // TODO: [Porting] Check if used by unit tests, otherwise remove.
+    // ReSharper disable once UnusedMember.Global
     internal void ResumeProcessing()
     {
         this._notificationProcessingLock.Set();
@@ -409,6 +415,11 @@ internal class RedisNotificationQueue : ITestableCachingComponent
                     this._notificationProcessingLock.Set();
                     this._notificationQueue.CompleteAdding();
 
+                    // ReSharper disable once MethodSupportsCancellation
+                    // ReSharper disable once BadPreprocessorIndent
+#if NETCOREAPP
+                    await
+#endif
                     using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                     {
                         // All messages are processed at this point.

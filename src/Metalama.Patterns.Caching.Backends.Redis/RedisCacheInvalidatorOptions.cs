@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -7,15 +8,16 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// <summary>
 /// Options for <see cref="RedisCacheInvalidator"/>.
 /// </summary>
+[PublicAPI] // TODO: [Porting] RedisCacheInvalidatorOptions is used with RedisCacheInvalidator, see TODO there.
 public class RedisCacheInvalidatorOptions : CacheInvalidatorOptions
 {
     /// <summary>
-    /// Name of the Redis channel to use to exchange invalidation messages. The default value is <c>RedisCacheInvalidator</c>.
+    /// Gets or sets the name of the Redis channel to use to exchange invalidation messages. The default value is <c>RedisCacheInvalidator</c>.
     /// </summary>
     public string ChannelName { get; set; } = nameof(RedisCacheInvalidator);
 
     /// <summary>
-    /// Determines whether disposing the <see cref="RedisCacheInvalidator"/> also disposes the Redis connection. The default value is <c>false</c>.
+    /// Gets or sets a value indicating whether determines whether disposing the <see cref="RedisCacheInvalidator"/> also disposes the Redis connection. The default value is <c>false</c>.
     /// </summary>
     public bool OwnsConnection { get; set; }
 

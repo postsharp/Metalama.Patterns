@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
 using ISerializer = Metalama.Patterns.Caching.Serializers.ISerializer;
@@ -9,11 +10,12 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// <summary>
 /// Configuration for <see cref="RedisCachingBackend"/>.
 /// </summary>
+[PublicAPI]
 public class RedisCachingBackendConfiguration : ICloneable
 {
-    private string _keyPrefix = "cache";
+    private string? _keyPrefix = "cache";
     private int _database = -1;
-    private Func<ISerializer> _createSerializer;
+    private Func<ISerializer>? _createSerializer;
     private bool _ownsConnection;
     private int _transactionMaxRetries = 5;
     private bool _supportsDependencies;
@@ -22,11 +24,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     private TimeSpan _defaultExpiration = TimeSpan.FromDays( 1 );
 
     /// <summary>
-    /// Gets the prefix for the key of all Redis items created by the <see cref="RedisCachingBackend"/>. The default value is <c>cache</c>.
+    /// Gets or sets the prefix for the key of all Redis items created by the <see cref="RedisCachingBackend"/>. The default value is <c>cache</c>.
     /// </summary>
-    public string KeyPrefix
+    public string? KeyPrefix
     {
-        get { return this._keyPrefix; }
+        get => this._keyPrefix;
         set
         {
             this.CheckFrozen();
@@ -47,11 +49,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     }
 
     /// <summary>
-    /// Gets the index of the database to use. The default value is <c>-1</c> (automatic selection).
+    /// Gets or sets the index of the database to use. The default value is <c>-1</c> (automatic selection).
     /// </summary>
     public int Database
     {
-        get { return this._database; }
+        get => this._database;
         set
         {
             this.CheckFrozen();
@@ -63,9 +65,9 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// Gets or sets a function that creates the serializer used to serialize objects into byte arrays (and conversely).
     /// The default value is <c>null</c>, which means that <see cref="BinarySerializer"/> will be used.
     /// </summary>
-    public Func<ISerializer> CreateSerializer
+    public Func<ISerializer>? CreateSerializer
     {
-        get { return this._createSerializer; }
+        get => this._createSerializer;
         set
         {
             this.CheckFrozen();
@@ -74,12 +76,12 @@ public class RedisCachingBackendConfiguration : ICloneable
     }
 
     /// <summary>
-    /// Determines whether the <see cref="RedisCachingBackend"/> should dispose the Redis connection when the <see cref="RedisCachingBackend"/>
+    /// Gets or sets a value indicating whether determines whether the <see cref="RedisCachingBackend"/> should dispose the Redis connection when the <see cref="RedisCachingBackend"/>
     /// itself is disposed.
     /// </summary>
     public bool OwnsConnection
     {
-        get { return this._ownsConnection; }
+        get => this._ownsConnection;
         set
         {
             this.CheckFrozen();
@@ -93,7 +95,7 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public int TransactionMaxRetries
     {
-        get { return this._transactionMaxRetries; }
+        get => this._transactionMaxRetries;
         set
         {
             this.CheckFrozen();
@@ -102,13 +104,13 @@ public class RedisCachingBackendConfiguration : ICloneable
     }
 
     /// <summary>
-    /// Determines whether the <see cref="RedisCachingBackend"/> should support dependencies. When this property is used,
+    /// Gets or sets a value indicating whether the <see cref="RedisCachingBackend"/> should support dependencies. When this property is used,
     /// the <see cref="DependenciesRedisCachingBackend"/> class is used instead of <see cref="RedisCachingBackend"/>. When dependencies
     /// are enabled, at least one instance of the <see cref="RedisCacheDependencyGarbageCollector"/> MUST run.
     /// </summary>
     public bool SupportsDependencies
     {
-        get { return this._supportsDependencies; }
+        get => this._supportsDependencies;
         set
         {
             this.CheckFrozen();
@@ -117,11 +119,11 @@ public class RedisCachingBackendConfiguration : ICloneable
     }
 
     /// <summary>
-    /// Determines whether a <see cref="MemoryCachingBackend"/> should be added in front of the <see cref="RedisCachingBackend"/>.
+    /// Gets or sets a value indicating whether a <see cref="MemoryCachingBackend"/> should be added in front of the <see cref="RedisCachingBackend"/>.
     /// </summary>
     public bool IsLocallyCached
     {
-        get { return this._isLocallyCached; }
+        get => this._isLocallyCached;
         set
         {
             this.CheckFrozen();
@@ -137,7 +139,7 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// </summary>
     public TimeSpan DefaultExpiration
     {
-        get { return this._defaultExpiration; }
+        get => this._defaultExpiration;
         set
         {
             this.CheckFrozen();
@@ -148,7 +150,7 @@ public class RedisCachingBackendConfiguration : ICloneable
     /// <summary>
     /// Throws an <see cref="InvalidOperationException"/> if the object has been frozen.
     /// </summary>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException">The object can no longer be modified.</exception>
     protected void CheckFrozen()
     {
         if ( this.IsFrozen )
@@ -177,7 +179,7 @@ public class RedisCachingBackendConfiguration : ICloneable
     }
 
     /// <summary>
-    /// Determines whether the current instance is frozen (i.e. read-only).
+    /// Gets a value indicating whether the current instance is frozen (i.e. read-only).
     /// </summary>
     public bool IsFrozen { get; private set; }
 

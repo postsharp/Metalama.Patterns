@@ -14,15 +14,15 @@ public abstract class TypeExtensionFactoryBase<T>
     where T : class
 {
     private readonly Type _genericInterfaceType;
-    private readonly Type _converterType;
+    private readonly Type? _converterType;
     private readonly Dictionary<Type, T> _instances = new();
     private readonly Dictionary<Type, Type> _genericExtensionTypes = new();
 
     private readonly Dictionary<Type, TypeExtensionCacheUpdateCallback<T>> _cacheInvalidationCallbacks = new();
 
-    protected TypeExtensionFactoryBase( Type genericInterfaceType, Type converterType )
+    protected TypeExtensionFactoryBase( Type genericInterfaceType, Type? converterType )
     {
-        this._genericInterfaceType = genericInterfaceType;
+        this._genericInterfaceType = genericInterfaceType ?? throw new ArgumentException( nameof(genericInterfaceType) );
         this._converterType = converterType;
     }
 
@@ -237,19 +237,19 @@ public abstract class TypeExtensionFactoryBase<T>
             this._genericExtensionTypes.Clear();
         }
     }
-
+    
     protected TypeExtensionInfo<T> GetTypeExtension(
         Type objectType,
-        object?[]? constructorArgs,
-        TypeExtensionCacheUpdateCallback<T>? cacheUpdateCallback,
-        Func<T> createDefault,
+        object?[]? constructorArgs = null,
+        TypeExtensionCacheUpdateCallback<T>? cacheUpdateCallback = null,
+        Func<T?>? createDefault = null,
         Action<Exception>? onExceptionWhileCreatingTypeExtension = null )
     {
         lock ( this._instances )
         {
             var bestTypeExtension =
                 this.GetExtensionCore( objectType, constructorArgs, out var isGeneric, out var targetType, onExceptionWhileCreatingTypeExtension ) ??
-                createDefault();
+                createDefault?.Invoke();
 
             if ( cacheUpdateCallback != null )
             {
@@ -287,6 +287,12 @@ public abstract class TypeExtensionFactoryBase<T>
             return o;
         }
 
+        if ( this._converterType == null )
+        {
+            throw new InvalidOperationException(
+                "The object cannot be converted without using a conversion wrapper, but the current TypeExtensionFactory was initialized without a converter type." );
+        }
+        
         var extensionType = this.FindInterfaceGenericInstance( o.GetType() );
 
         Type wrapperType;
@@ -318,6 +324,7 @@ public abstract class TypeExtensionFactoryBase<T>
         return (T) Activator.CreateInstance( wrapperType, ctorArgs )!;
     }
 
+    // ReSharper disable once MemberCanBeInternal
     /// <remarks>This logic is supposed to mimic overload resolution in C#.</remarks>
     public static bool ShouldOverwrite( Type newExtensionTargetType, bool isNewGeneric, Type oldExtensionTargetType, bool isOldGeneric )
     {

@@ -2,28 +2,29 @@
 
 using Flashtrace;
 using Metalama.Patterns.Caching.Locking;
-using Metalama.Patterns.Caching.ValueAdapters;
 using System.Collections.Immutable;
 using System.Reflection;
 using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
+// TODO: [Porting] Was called from CacheAttribute. If CachingFrontend is retained, remove these disables.
+// ReSharper disable UnusedMember.Global
 internal static class CachingFrontend
 {
-    internal static object GetOrAdd(
+    internal static object? GetOrAdd(
         MethodInfo method,
         string key,
         Type valueType,
         CacheItemConfiguration configuration,
-        Func<object> valueProvider,
+        Func<object?> valueProvider,
         LogSource logger )
     {
-        ILockHandle lockHandle = null;
-        CacheValue item = null;
+        ILockHandle? lockHandle = null;
+        CacheValue? item = null;
         var backend = CachingServices.DefaultBackend;
 
-        var profile = CachingServices.Profiles[configuration.ProfileName];
+        var profile = CachingServices.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
 
         try
         {
@@ -78,7 +79,7 @@ internal static class CachingFrontend
                 }
             }
 
-            object value;
+            object? value;
 
             if ( item == null )
             {
@@ -131,7 +132,7 @@ internal static class CachingFrontend
         }
     }
 
-    internal static async Task<object> GetOrAddAsync(
+    internal static async Task<object?> GetOrAddAsync(
         MethodInfo method,
         string key,
         Type valueType,
@@ -141,10 +142,10 @@ internal static class CachingFrontend
         CancellationToken cancellationToken )
     {
         var backend = CachingServices.DefaultBackend;
-        CacheValue item = null;
-        ILockHandle lockHandle = null;
+        CacheValue? item = null;
+        ILockHandle? lockHandle = null;
 
-        var profile = CachingServices.Profiles[configuration.ProfileName];
+        var profile = CachingServices.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
 
         try
         {
@@ -199,7 +200,7 @@ internal static class CachingFrontend
                 }
             }
 
-            object value;
+            object? value;
 
             if ( item == null )
             {
@@ -223,11 +224,11 @@ internal static class CachingFrontend
 
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    Task<object> invokeValueProviderTask = valueProvider.Invoke();
+                    var invokeValueProviderTask = valueProvider.Invoke();
 
                     value = await invokeValueProviderTask;
 
-                    Task<object> invokeSetItemAsyncTask = SetItemAsync( key, value, valueType, configuration, context, cancellationToken );
+                    var invokeSetItemAsyncTask = SetItemAsync( key, value, valueType, configuration, context, cancellationToken );
 
                     value = await invokeSetItemAsyncTask;
 
@@ -267,7 +268,7 @@ internal static class CachingFrontend
         }
     }
 
-    internal static object SetItem( string key, object value, Type valueType, CacheItemConfiguration configuration, CachingContext context )
+    internal static object? SetItem( string key, object? value, Type valueType, CacheItemConfiguration configuration, CachingContext context )
     {
         var exposedValue = value;
 
@@ -282,16 +283,16 @@ internal static class CachingFrontend
             }
         }
 
-        var cacheItem = new CacheItem( value, context?.Dependencies?.ToImmutableList(), configuration );
+        var cacheItem = new CacheItem( value, context.Dependencies.ToImmutableList(), configuration );
 
         CachingServices.DefaultBackend.SetItem( key, cacheItem );
 
         return exposedValue;
     }
 
-    internal static async Task<object> SetItemAsync(
+    internal static async Task<object?> SetItemAsync(
         string key,
-        object value,
+        object? value,
         Type valueType,
         CacheItemConfiguration configuration,
         CachingContext context,
@@ -307,11 +308,12 @@ internal static class CachingFrontend
             {
                 if ( valueAdapter.IsAsyncSupported )
                 {
-                    Task<object> getStoredValueTask = valueAdapter.GetStoredValueAsync( value, cancellationToken );
+                    var getStoredValueTask = valueAdapter.GetStoredValueAsync( value, cancellationToken );
                     value = await getStoredValueTask;
                 }
                 else
                 {
+                    // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                     value = valueAdapter.GetStoredValue( value );
                 }
 
@@ -319,7 +321,7 @@ internal static class CachingFrontend
             }
         }
 
-        var cacheItem = new CacheItem( value, context?.Dependencies?.ToImmutableList(), configuration );
+        var cacheItem = new CacheItem( value, context.Dependencies.ToImmutableList(), configuration );
 
         var setItemTask = CachingServices.DefaultBackend.SetItemAsync( key, cacheItem, cancellationToken );
         await setItemTask;

@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 [DataContract]
 internal class RedisCacheValue
 {
-    public RedisCacheValue( object value, TimeSpan slidingExpiration )
+    public RedisCacheValue( object? value, TimeSpan slidingExpiration )
     {
         this.Value = value;
         this.SlidingExpiration = slidingExpiration;
@@ -18,8 +18,8 @@ internal class RedisCacheValue
     public RedisCacheValue() { }
 
     [DataMember]
-    public object Value { get; set; }
+    public object? Value { get; }
 
     [DataMember]
-    public TimeSpan SlidingExpiration { get; set; }
+    public TimeSpan SlidingExpiration { get; }
 }

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching.Backends;
@@ -8,15 +9,19 @@ namespace Metalama.Patterns.Caching.Backends;
 /// A <see cref="CachingBackendEnhancer"/> that modifies all write operations to run in the background and
 /// immediately return to the caller.
 /// </summary>
+[PublicAPI]
 public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
 {
     private static readonly Task<bool> _finishedTask = Task.FromResult( true );
-    private BackgroundTaskScheduler _taskScheduler = new( true );
+    private readonly BackgroundTaskScheduler _taskScheduler = new( true );
 
     /// <inheritdoc />
     protected override CachingBackendFeatures CreateFeatures() => new Features( this.UnderlyingBackend.SupportedFeatures );
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NonBlockingCachingBackendEnhancer"/> class.
+    /// </summary>
+    /// <param name="underlyingBackend"><inheritdoc cref="CachingBackendEnhancer(CachingBackend)"/></param>
     public NonBlockingCachingBackendEnhancer( CachingBackend underlyingBackend ) : base( underlyingBackend ) { }
 
     private void EnqueueBackgroundTask( Func<Task> task ) => this._taskScheduler.EnqueueBackgroundTask( task );

@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
@@ -12,18 +12,19 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// An implementation of <see cref="CacheInvalidator"/>  that uses Redis publish/subscribe channels to invalidate several
 /// instances of local caches.
 /// </summary>
-public class RedisCacheInvalidator : CacheInvalidator
+[PublicAPI] // TODO: [Porting] Where would RedisCacheInvalidator be used (nothing is PS conceptual docs)? Can it be removed?
+public sealed class RedisCacheInvalidator : CacheInvalidator
 {
     private readonly bool _ownsConnection;
     private readonly RedisChannel _channel;
     private readonly TimeSpan _connectionTimeout;
 
-    internal RedisNotificationQueue NotificationQueue { get; private set; }
+    private RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
 
     /// <summary>
     /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current <see cref="RedisCacheInvalidator"/>.
     /// </summary>
-    public IConnectionMultiplexer Connection { get; }
+    private IConnectionMultiplexer Connection { get; }
 
     private RedisCacheInvalidator(
         CachingBackend underlyingBackend,
@@ -66,7 +67,6 @@ public class RedisCacheInvalidator : CacheInvalidator
     /// <param name="connection">A Redis connection.</param>
     /// <param name="options">Options.</param>
     /// <returns>A new <see cref="RedisCacheInvalidator"/>.</returns>
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static RedisCacheInvalidator Create(
         [Required] CachingBackend backend,
         [Required] IConnectionMultiplexer connection,
@@ -86,7 +86,6 @@ public class RedisCacheInvalidator : CacheInvalidator
     /// <param name="options">Options.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> returning a new <see cref="RedisCacheInvalidator"/>.</returns>
-    [SuppressMessage( "Microsoft.Reliability", "CA2000:Dispose objects before losing scope" )]
     public static Task<RedisCacheInvalidator> CreateAsync(
         [Required] CachingBackend backend,
         [Required] IConnectionMultiplexer connection,

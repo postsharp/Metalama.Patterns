@@ -41,7 +41,7 @@ internal sealed class AutoReloadManager
         string key,
         Type valueType,
         CacheItemConfiguration configuration,
-        Func<object> valueProvider,
+        Func<object?> valueProvider,
         LogSource logger,
         bool isAsync )
     {
@@ -99,8 +99,8 @@ internal sealed class AutoReloadManager
             {
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    var invokeValueProviderTask = (Task<object>) info.ValueProvider.Invoke();
-                    var value = await invokeValueProviderTask;
+                    var invokeValueProviderTask = (Task<object?>?) info.ValueProvider.Invoke();
+                    var value = invokeValueProviderTask == null ? null : await invokeValueProviderTask;
 
                     await CachingFrontend.SetItemAsync( key, value, info.ReturnType, info.Configuration, context, cancellationToken );
                 }
@@ -116,25 +116,5 @@ internal sealed class AutoReloadManager
         }
     }
 
-    private sealed class AutoRefreshInfo
-    {
-        public AutoRefreshInfo( CacheItemConfiguration configuration, Type returnType, Func<object> valueProvider, LogSource logger, bool isAsync )
-        {
-            this.Configuration = configuration;
-            this.ReturnType = returnType;
-            this.ValueProvider = valueProvider;
-            this.Logger = logger;
-            this.IsAsync = isAsync;
-        }
-
-        public Type ReturnType { get; }
-
-        public Func<object> ValueProvider { get; }
-
-        public LogSource Logger { get; }
-
-        public bool IsAsync { get; }
-
-        public CacheItemConfiguration Configuration { get; }
-    }
+    private sealed record AutoRefreshInfo( CacheItemConfiguration Configuration, Type ReturnType, Func<object?> ValueProvider, LogSource Logger, bool IsAsync ); 
 }

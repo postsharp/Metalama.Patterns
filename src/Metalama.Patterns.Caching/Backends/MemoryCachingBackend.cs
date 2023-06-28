@@ -1,12 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Runtime.Caching;
 using CacheItemPriority = System.Runtime.Caching.CacheItemPriority;
-using PSCacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
 using MemoryCacheItemPolicy = System.Runtime.Caching.CacheItemPolicy;
+using PSCacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
 using PSCacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
 namespace Metalama.Patterns.Caching.Backends;
@@ -15,6 +16,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// A <see cref="CachingBackend"/> based on <c>System.Runtime.Caching.MemoryCache</c> (<see cref="MemoryCache"/>). This cache is part of .NET Framework
 /// and is available for .NET Standard in the NuGet package System.Runtime.Caching.
 /// </summary>
+[PublicAPI]
 public sealed class MemoryCachingBackend : CachingBackend
 {
     private static readonly MemoryCacheItemPolicy _dependencyCacheItemPolicy = new() { Priority = CacheItemPriority.NotRemovable };
@@ -26,15 +28,15 @@ public sealed class MemoryCachingBackend : CachingBackend
     private static string GetDependencyKey( string key ) => nameof(MemoryCachingBackend) + ":dependency:" + key;
 
     /// <summary>
-    /// Initializes a new <see cref="MemoryCachingBackend"/> based on the <see cref="MemoryCache.Default"/> instance of the <see cref="MemoryCache"/> class.
+    /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the <see cref="MemoryCache.Default"/> instance of the <see cref="MemoryCache"/> class.
     /// </summary>
     public MemoryCachingBackend() : this( null ) { }
 
     /// <summary>
-    /// Initializes a new <see cref="MemoryCachingBackend"/> based on the given <see cref="MemoryCache"/>.
+    /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the given <see cref="MemoryCache"/>.
     /// </summary>
     /// <param name="cache">A <see cref="MemoryCache"/>, or <c>null</c> to use  the <see cref="MemoryCache.Default"/> instance of the <see cref="MemoryCache"/> class.</param>
-    public MemoryCachingBackend( MemoryCache cache )
+    public MemoryCachingBackend( MemoryCache? cache )
     {
         this._cache = cache ?? MemoryCache.Default;
     }
@@ -126,9 +128,9 @@ public sealed class MemoryCachingBackend : CachingBackend
         }
     }
 
-    private void AddDependencies( string key, IImmutableList<string> dependencies )
+    private void AddDependencies( string key, IImmutableList<string>? dependencies )
     {
-        if ( dependencies == null || dependencies.Count <= 0 )
+        if ( dependencies is not { Count: > 0 } )
         {
             return;
         }
@@ -137,7 +139,7 @@ public sealed class MemoryCachingBackend : CachingBackend
         {
             var dependencyKey = GetDependencyKey( dependency );
 
-            HashSet<string> backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
+            var backwardDependencies = (HashSet<string>?) this._cache.Get( dependencyKey );
 
             if ( backwardDependencies == null )
             {
@@ -150,7 +152,7 @@ public sealed class MemoryCachingBackend : CachingBackend
                 backwardDependencies.Add( key );
 
                 // The invalidation callback may have removed the key.
-                var addOrGetExisting = this._cache.AddOrGetExisting( dependencyKey, backwardDependencies, _dependencyCacheItemPolicy );
+                _ = this._cache.AddOrGetExisting( dependencyKey, backwardDependencies, _dependencyCacheItemPolicy );
             }
         }
     }
@@ -160,7 +162,7 @@ public sealed class MemoryCachingBackend : CachingBackend
     {
         var itemKey = GetItemKey( key );
         var lockTaken = false;
-        var previousValue = (MemoryCacheValue) this._cache.Get( itemKey );
+        var previousValue = (MemoryCacheValue?) this._cache.Get( itemKey );
 
         try
         {
@@ -170,7 +172,7 @@ public sealed class MemoryCachingBackend : CachingBackend
                 this.CleanDependencies( key, previousValue );
             }
 
-            if ( item.Dependencies != null && item.Dependencies.Count > 0 )
+            if ( item.Dependencies is { Count: > 0 } )
             {
                 this.AddDependencies( key, item.Dependencies );
             }
@@ -184,7 +186,7 @@ public sealed class MemoryCachingBackend : CachingBackend
         {
             if ( lockTaken )
             {
-                Monitor.Exit( previousValue.Sync );
+                Monitor.Exit( previousValue!.Sync );
             }
         }
     }
@@ -193,14 +195,14 @@ public sealed class MemoryCachingBackend : CachingBackend
     protected override bool ContainsItemCore( string key ) => this._cache.Contains( GetItemKey( key ) );
 
     /// <inheritdoc />  
-    protected override CacheValue GetItemCore( string key, bool includeDependencies ) => (CacheValue) this._cache.Get( GetItemKey( key ) );
+    protected override CacheValue? GetItemCore( string key, bool includeDependencies ) => (CacheValue?) this._cache.Get( GetItemKey( key ) );
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key ) => this.InvalidateDependencyImpl( key );
 
-    internal void InvalidateDependencyImpl( string key, MemoryCacheValue replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
+    internal void InvalidateDependencyImpl( string key, MemoryCacheValue? replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
     {
-        HashSet<string> items = (HashSet<string>) this._cache.Get( GetDependencyKey( key ) );
+        var items = (HashSet<string>?) this._cache.Get( GetDependencyKey( key ) );
 
         if ( items != null )
         {
@@ -222,11 +224,17 @@ public sealed class MemoryCachingBackend : CachingBackend
         this.OnDependencyInvalidated( key, this.Id );
     }
 
-    internal bool RemoveItemImpl( string key, MemoryCacheValue replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
+    internal bool RemoveItemImpl( string key, MemoryCacheValue? replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
     {
+        if ( replacementValue != null && replacementValueExpiration == null )
+        {
+            throw new ArgumentException(
+                "If " + nameof(replacementValue) + " is specified, " + nameof(replacementValueExpiration) + " must also be specified." );
+        }
+        
         var itemKey = GetItemKey( key );
 
-        var cacheValue = (MemoryCacheValue) this._cache.Get( itemKey );
+        var cacheValue = (MemoryCacheValue?) this._cache.Get( itemKey );
 
         if ( cacheValue == null )
         {
@@ -248,7 +256,7 @@ public sealed class MemoryCachingBackend : CachingBackend
             else
             {
                 replacementValue.Sync = cacheValue.Sync;
-                this._cache.Set( itemKey, replacementValue, replacementValueExpiration.Value );
+                this._cache.Set( itemKey, replacementValue, replacementValueExpiration!.Value );
             }
 
             this.CleanDependencies( key, cacheValue );
@@ -267,7 +275,7 @@ public sealed class MemoryCachingBackend : CachingBackend
         foreach ( var dependency in cacheValue.Dependencies )
         {
             var dependencyKey = GetDependencyKey( dependency );
-            HashSet<string> backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
+            var backwardDependencies = (HashSet<string>?) this._cache.Get( dependencyKey );
 
             if ( backwardDependencies == null )
             {

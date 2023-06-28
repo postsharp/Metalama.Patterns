@@ -1,13 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
 using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -15,26 +14,29 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// <summary>
 /// A <see cref="CachingBackend"/> for Redis, based on the <c>StackExchange.Redis</c> client.
 /// </summary>
+[PublicAPI]
 public class RedisCachingBackend : CachingBackend
 {
+    private const string _itemRemovedEvent = "item-removed";
+
     private readonly Func<ISerializer> _createSerializerFunc;
     private readonly ConcurrentStack<ISerializer> _serializerPool = new();
     private readonly bool _ownsConnection;
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
+#pragma warning disable SA1401
+    private protected readonly RedisKeyBuilder _keyBuilder;
+#pragma warning restore SA1401
 
-    #region Events
-
-    private const string _itemRemovedEvent = "item-removed";
-
-#pragma warning disable CA2213 // We're doing DisposeAsync.
-    private RedisNotificationQueue _notificationQueue;
+#pragma warning disable CA2213                                  // We're doing DisposeAsync.
+    private RedisNotificationQueue? _notificationQueue;
 #pragma warning restore CA2213
 
-    #endregion
-
-    [Protected]
-    internal readonly RedisKeyBuilder KeyBuilder;
-
+    /// <summary>
+    /// Gets <see cref="_notificationQueue"/> if not null, otherwise throws <see cref="RedisCachingBackendAssertionFailedException"/>.
+    /// </summary>
+    private RedisNotificationQueue NotificationQueue
+        => this._notificationQueue ?? throw new RedisCachingBackendAssertionFailedException( nameof(this._notificationQueue) + " has not been initialized." );
+    
     /// <summary>
     /// Gets the Redis database used by the current <see cref="RedisCachingBackend"/>.
     /// </summary>
@@ -51,7 +53,7 @@ public class RedisCachingBackend : CachingBackend
     public RedisCachingBackendConfiguration Configuration { get; }
 
     /// <summary>
-    /// Initializes a new <see cref="RedisCachingBackend"/>.
+    /// Initializes a new instance of the <see cref="RedisCachingBackend"/> class.
     /// </summary>
     /// <param name="connection">The Redis connection.</param>
     /// <param name="configuration">Configuration.</param>
@@ -62,11 +64,27 @@ public class RedisCachingBackend : CachingBackend
         this.Configuration = configuration;
         this.Database = this.Connection.GetDatabase( configuration.Database );
 
-        this.KeyBuilder = new RedisKeyBuilder( this.Database, configuration );
+        this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
         this._createSerializerFunc = configuration.CreateSerializer ?? (() => new BinarySerializer());
     }
 
+    internal RedisCachingBackend(
+        IConnectionMultiplexer connection,
+        IDatabase database,
+        RedisKeyBuilder keyBuilder,
+        RedisCachingBackendConfiguration? configuration )
+    {
+        this.Connection = connection;
+        this.Database = database;
+        this._keyBuilder = keyBuilder;
+        this.Configuration = configuration ?? new RedisCachingBackendConfiguration();
+        this._ownsConnection = false;
+        
+        // [Porting] This line added to fix _createSerializerFunc being possible null. Might cause change of behaviour. 
+        this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new BinarySerializer());
+    }
+    
     /// <summary>
     /// Initializes the current <see cref="RedisCachingBackend"/>.
     /// </summary>
@@ -75,7 +93,7 @@ public class RedisCachingBackend : CachingBackend
         this._notificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel ),
+            ImmutableArray.Create( this._keyBuilder.EventsChannel, this._keyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout );
     }
@@ -91,8 +109,8 @@ public class RedisCachingBackend : CachingBackend
             this.ToString(),
             this.Connection,
             ImmutableArray.Create(
-                this.KeyBuilder.EventsChannel,
-                this.KeyBuilder.NotificationChannel ),
+                this._keyBuilder.EventsChannel,
+                this._keyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
             cancellationToken );
@@ -127,16 +145,9 @@ public class RedisCachingBackend : CachingBackend
 
         configuration.Freeze();
 
-        RedisCachingBackend backend;
-
-        if ( configuration.SupportsDependencies )
-        {
-            backend = new DependenciesRedisCachingBackend( connection, configuration );
-        }
-        else
-        {
-            backend = new RedisCachingBackend( connection, configuration );
-        }
+        var backend = configuration.SupportsDependencies
+            ? new DependenciesRedisCachingBackend( connection, configuration )
+            : new RedisCachingBackend( connection, configuration );
 
         backend.Init();
 
@@ -169,16 +180,9 @@ public class RedisCachingBackend : CachingBackend
     {
         configuration.Freeze();
 
-        RedisCachingBackend backend;
-
-        if ( configuration.SupportsDependencies )
-        {
-            backend = new DependenciesRedisCachingBackend( connection, configuration );
-        }
-        else
-        {
-            backend = new RedisCachingBackend( connection, configuration );
-        }
+        var backend = configuration.SupportsDependencies 
+            ? new DependenciesRedisCachingBackend( connection, configuration ) 
+            : new RedisCachingBackend( connection, configuration );
 
         await backend.InitAsync( cancellationToken );
 
@@ -197,28 +201,13 @@ public class RedisCachingBackend : CachingBackend
 
         return enhancer;
     }
-
-    internal RedisCachingBackend(
-        IConnectionMultiplexer connection,
-        IDatabase database,
-        RedisKeyBuilder keyBuilder,
-        RedisCachingBackendConfiguration configuration )
-    {
-        this.Connection = connection;
-        this.Database = database;
-        this.KeyBuilder = keyBuilder;
-        this.Configuration = configuration ?? new RedisCachingBackendConfiguration();
-        this._ownsConnection = false;
-    }
-
+    
     /// <inheritdoc />
     protected override CachingBackendFeatures CreateFeatures() => new RedisCachingBackendFeatures( this );
 
-    #region Events
-
     private void ProcessNotification( RedisNotification notification )
     {
-        if ( notification.Channel == this.KeyBuilder.EventsChannel )
+        if ( notification.Channel == this._keyBuilder.EventsChannel )
         {
             this.ProcessEvent( notification );
         }
@@ -232,10 +221,7 @@ public class RedisCachingBackend : CachingBackend
     {
         string channelName = notification.Channel;
 
-        string keyKind;
-        string itemKey;
-
-        if ( !this.KeyBuilder.TryParseKeyspaceNotification( channelName, out keyKind, out itemKey ) )
+        if ( !this._keyBuilder.TryParseKeyspaceNotification( channelName, out var keyKind, out var itemKey ) )
         {
             return;
         }
@@ -273,16 +259,15 @@ public class RedisCachingBackend : CachingBackend
         var sourceIdStr = tokenizer.GetNext();
         var key = tokenizer.GetRest();
 
-        if ( kind == null || sourceIdStr == null || key == null )
+        // [Porting] Was `if ( kind == null || sourceIdStr == null || key == null )`, but tokenizer.GetNext() never returns null, so updated checks. May cause change in behaviour.
+        if ( string.IsNullOrEmpty( kind ) || string.IsNullOrEmpty( sourceIdStr ) || string.IsNullOrEmpty( key ) )
         {
             this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
 
             return;
         }
 
-        Guid sourceId;
-
-        if ( !Guid.TryParse( sourceIdStr, out sourceId ) )
+        if ( !Guid.TryParse( sourceIdStr, out var sourceId ) )
         {
             this.LogSource.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr ) );
 
@@ -329,9 +314,9 @@ public class RedisCachingBackend : CachingBackend
     protected Task SendEventAsync( string kind, string key )
     {
         var value = kind + ":" + this.Id + ":" + key;
-        this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
+        this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
 
-        return this._notificationQueue.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
+        return this.NotificationQueue.Subscriber.PublishAsync( this._keyBuilder.EventsChannel, value );
     }
 
     /// <summary>
@@ -342,23 +327,21 @@ public class RedisCachingBackend : CachingBackend
     protected void SendEvent( string kind, string key )
     {
         var value = kind + ":" + this.Id + ":" + key;
-        this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
+        this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
 
-        this._notificationQueue.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
+        this.NotificationQueue.Subscriber.Publish( this._keyBuilder.EventsChannel, value );
     }
-
-    #endregion
 
     /// <exclude />
     protected virtual async Task DeleteItemAsync( string key )
     {
-        await this.Database.KeyDeleteAsync( this.KeyBuilder.GetValueKey( key ) );
+        await this.Database.KeyDeleteAsync( this._keyBuilder.GetValueKey( key ) );
     }
 
     /// <exclude />
     protected virtual void DeleteItem( string key )
     {
-        this.Database.KeyDelete( this.KeyBuilder.GetValueKey( key ) );
+        this.Database.KeyDelete( this._keyBuilder.GetValueKey( key ) );
     }
 
     private TimeSpan? CreateExpiry( CacheItem policy )
@@ -384,11 +367,9 @@ public class RedisCachingBackend : CachingBackend
         return ttl;
     }
 
-    private byte[] Serialize( object item )
+    private byte[] Serialize( object? item )
     {
-        ISerializer serializer;
-
-        if ( !this._serializerPool.TryPop( out serializer ) )
+        if ( !this._serializerPool.TryPop( out var serializer ) )
         {
             serializer = this._createSerializerFunc();
         }
@@ -402,16 +383,14 @@ public class RedisCachingBackend : CachingBackend
         return bytes;
     }
 
-    private object Deserialize( byte[] bytes )
+    private object? Deserialize( byte[] bytes )
     {
-        ISerializer serializer;
-
-        if ( !this._serializerPool.TryPop( out serializer ) )
+        if ( !this._serializerPool.TryPop( out var serializer ) )
         {
             serializer = this._createSerializerFunc();
         }
 
-        object item;
+        object? item;
 
         try
         {
@@ -436,7 +415,7 @@ public class RedisCachingBackend : CachingBackend
     /// <returns>The <see cref="object"/> that should be serialized or stored in the cache. Typically
     /// <see cref="CacheItem.Value"/> or a <see cref="RedisCacheValue"/>.
     /// </returns>
-    private static object CreateCacheValue( CacheItem item )
+    private static object? CreateCacheValue( CacheItem item )
     {
         if ( item.Configuration?.SlidingExpiration == null )
         {
@@ -460,7 +439,7 @@ public class RedisCachingBackend : CachingBackend
     {
         // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
         var value = this.CreateRedisValue( item );
-        var valueKey = this.KeyBuilder.GetValueKey( key );
+        var valueKey = this._keyBuilder.GetValueKey( key );
 
         var expiry = this.CreateExpiry( item );
 
@@ -473,7 +452,7 @@ public class RedisCachingBackend : CachingBackend
         // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
         var value = this.CreateRedisValue( item );
 
-        var valueKey = this.KeyBuilder.GetValueKey( key );
+        var valueKey = this._keyBuilder.GetValueKey( key );
 
         var expiry = this.CreateExpiry( item );
 
@@ -483,17 +462,17 @@ public class RedisCachingBackend : CachingBackend
     /// <inheritdoc />
     protected override bool ContainsItemCore( string key )
     {
-        return this.Database.KeyExists( this.KeyBuilder.GetValueKey( key ) );
+        return this.Database.KeyExists( this._keyBuilder.GetValueKey( key ) );
     }
 
     /// <inheritdoc />
     protected override Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
     {
-        return this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ) );
+        return this.Database.KeyExistsAsync( this._keyBuilder.GetValueKey( key ) );
     }
 
     /// <exclude />
-    protected object GetCacheValue( RedisKey valueKey, RedisValue value )
+    protected object? GetCacheValue( RedisKey valueKey, RedisValue value )
     {
         var cacheValue = this.Deserialize( value );
 
@@ -509,7 +488,7 @@ public class RedisCachingBackend : CachingBackend
     /// <exclude />
     protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
-        var valueKey = this.KeyBuilder.GetValueKey( key );
+        var valueKey = this._keyBuilder.GetValueKey( key );
         var serializedValue = this.Database.StringGet( valueKey );
 
         if ( !serializedValue.HasValue )
@@ -525,7 +504,7 @@ public class RedisCachingBackend : CachingBackend
     /// <exclude />
     protected override async Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
-        var valueKey = this.KeyBuilder.GetValueKey( key );
+        var valueKey = this._keyBuilder.GetValueKey( key );
         var serializedValue = await this.Database.StringGetAsync( valueKey );
 
         if ( !serializedValue.HasValue )
@@ -611,10 +590,9 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <summary>
+    /// Finalizes an instance of the <see cref="RedisCachingBackend"/> class.
     /// Destructor.
     /// </summary>
-    [SuppressMessage( "Microsoft.Design", "CA1031" )]
-#pragma warning disable CA1063 // Implement IDisposable Correctly
     ~RedisCachingBackend()
     {
         try
@@ -656,7 +634,7 @@ public class RedisCachingBackend : CachingBackend
         }
     }
 
-    protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._notificationQueue.BackgroundTaskExceptions;
+    protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this.NotificationQueue.BackgroundTaskExceptions;
 
     /// <summary>
     /// Features of <see cref="RedisCachingBackend"/>.
@@ -666,7 +644,7 @@ public class RedisCachingBackend : CachingBackend
         private readonly RedisCachingBackend _parent;
 
         /// <summary>
-        /// Initializes a new <see cref="RedisCachingBackendFeatures"/>.
+        /// Initializes a new instance of the <see cref="RedisCachingBackendFeatures"/> class.
         /// </summary>
         /// <param name="parent">The parent <see cref="RedisCachingBackend"/>.</param>
         public RedisCachingBackendFeatures( [Required] RedisCachingBackend parent )

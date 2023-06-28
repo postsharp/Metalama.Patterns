@@ -4,7 +4,7 @@ namespace Metalama.Patterns.Caching.ValueAdapters;
 
 internal sealed class EnumerableAdapter<T> : ValueAdapter<IEnumerable<T>>
 {
-    public override object GetStoredValue( IEnumerable<T> value )
+    public override object? GetStoredValue( IEnumerable<T>? value )
     {
         if ( value == null )
         {
@@ -14,5 +14,5 @@ internal sealed class EnumerableAdapter<T> : ValueAdapter<IEnumerable<T>>
         return new List<T>( value );
     }
 
-    public override IEnumerable<T> GetExposedValue( object storedValue ) => (IEnumerable<T>) storedValue;
+    public override IEnumerable<T>? GetExposedValue( object? storedValue ) => (IEnumerable<T>?) storedValue;
 }

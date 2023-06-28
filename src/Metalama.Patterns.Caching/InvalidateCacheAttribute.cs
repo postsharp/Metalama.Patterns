@@ -1,12 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
-using Metalama.Patterns.Caching.Implementation;
-using System.Collections;
-using System.Globalization;
 using System.Reflection;
 
 namespace Metalama.Patterns.Caching;
+
+// TODO: [Porting] Pending rewrite. Remove disables when done.
+// ReSharper disable all
+#pragma warning disable
 
 /// <summary>
 /// Custom attribute that, when applied on a method, causes an invocation of this method to remove from

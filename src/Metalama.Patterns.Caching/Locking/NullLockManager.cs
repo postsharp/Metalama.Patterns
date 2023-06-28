@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.Caching.Locking;
 
 /// <summary>
 /// An implementation of <see cref="ILockManager"/> which does not acquire any lock.
 /// </summary>
+[PublicAPI]
 public class NullLockManager : ILockManager
 {
     /// <inheritdoc />

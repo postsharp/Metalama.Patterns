@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
@@ -12,6 +13,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// A <see cref="CachingBackendEnhancer"/> that adds a local (fast) <see cref="MemoryCachingBackend"/> to a remote (slower) cache.
 /// This class is typically instantiate in the back-end factory method. You should normally not use this class unless you develop a custom caching back-end.
 /// </summary>
+[PublicAPI]
 public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 {
     private readonly TimeSpan _removedItemTransitionPeriod = TimeSpan.FromMinutes( 1 );
@@ -22,17 +24,18 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     public MemoryCachingBackend LocalCache { get; }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="TwoLayerCachingBackendEnhancer"/> class.
     /// Initializes a new <see cref="TwoLayerCachingBackendEnhancer"/>.
     /// </summary>
     /// <param name="remoteCache">The remote <see cref="CachingBackend"/>.</param>
     /// <param name="memoryCache">A <see cref="MemoryCachingBackend"/>, or <c>null</c> to use a new default <see cref="MemoryCachingBackend"/>.</param>
-    public TwoLayerCachingBackendEnhancer( [Required] CachingBackend remoteCache, MemoryCachingBackend memoryCache = null ) : base( remoteCache )
+    public TwoLayerCachingBackendEnhancer( [Required] CachingBackend remoteCache, MemoryCachingBackend? memoryCache = null ) : base( remoteCache )
     {
         this.LocalCache = memoryCache ?? new MemoryCachingBackend();
     }
 
     /// <inheritdoc />
-    protected override void OnBackendDependencyInvalidated( object sender, CacheDependencyInvalidatedEventArgs args )
+    protected override void OnBackendDependencyInvalidated( object? sender, CacheDependencyInvalidatedEventArgs args )
     {
         if ( args.SourceId != this.UnderlyingBackend.Id )
         {
@@ -43,7 +46,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override void OnBackendItemRemoved( object sender, CacheItemRemovedEventArgs args )
+    protected override void OnBackendItemRemoved( object? sender, CacheItemRemovedEventArgs args )
     {
         if ( args.SourceId != this.UnderlyingBackend.Id )
         {
@@ -92,11 +95,12 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     {
         if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
+            // ReSharper disable once MethodHasAsyncOverloadWithCancellation
             return this.LocalCache.ContainsItem( key ) || await this.UnderlyingBackend.ContainsItemAsync( key, cancellationToken );
         }
         else
         {
-            return (await this.GetItemAsyncCore( key, false, cancellationToken )) != null;
+            return await this.GetItemAsyncCore( key, false, cancellationToken ) != null;
         }
     }
 
@@ -122,6 +126,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     {
         if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
+            // ReSharper disable once MethodHasAsyncOverloadWithCancellation
             return this.LocalCache.ContainsDependency( key ) || await this.UnderlyingBackend.ContainsDependencyAsync( key, cancellationToken );
         }
         else
@@ -135,7 +140,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override CacheValue GetItemCore( string key, bool includeDependencies )
+    protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
         var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
 
@@ -172,7 +177,9 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
                         }
                         else
                         {
-                            var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
+                            var multiLayerCacheValue = (TwoLayerCacheValue) (remoteCacheValue.Value
+                                                                             ?? throw new MetalamaPatternsCachingAssertionFailedException(
+                                                                                 "null not expected." ));
 
                             if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
                             {
@@ -194,9 +201,9 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         }
     }
 
-    private CacheValue GetValueFromUnderlyingBackend( string key )
+    private CacheValue? GetValueFromUnderlyingBackend( string key )
     {
-        var cacheValue = this.UnderlyingBackend.GetItem( key, true );
+        var cacheValue = this.UnderlyingBackend.GetItem( key );
 
         if ( cacheValue == null )
         {
@@ -206,7 +213,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         return cacheValue;
     }
 
-    private async Task<CacheValue> GetValueFromUnderlyingBackendAsync( string key, CancellationToken cancellationToken )
+    private async Task<CacheValue?> GetValueFromUnderlyingBackendAsync( string key, CancellationToken cancellationToken )
     {
         var cacheValue = await this.UnderlyingBackend.GetItemAsync( key, true, cancellationToken );
 
@@ -220,14 +227,16 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 
     private static CacheValue GetReturnValue( CacheValue storedCacheValue )
     {
-        var multiLayerCacheValue = (TwoLayerCacheValue) storedCacheValue.Value;
+        var multiLayerCacheValue = (TwoLayerCacheValue) (
+            storedCacheValue.Value ?? throw new MetalamaPatternsCachingAssertionFailedException( "null not expected." ));
 
         return new CacheValue( multiLayerCacheValue.Value, storedCacheValue.Dependencies );
     }
 
     private void SetMemoryCacheFromRemote( string key, CacheValue remoteCacheValue )
     {
-        var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
+        var multiLayerCacheValue =
+            (TwoLayerCacheValue) (remoteCacheValue.Value ?? throw new MetalamaPatternsCachingAssertionFailedException( "null not expected." ));
 
         var cacheItem = new CacheItem(
             multiLayerCacheValue.Value,
@@ -238,8 +247,9 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override async Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override async Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
+        // ReSharper disable once MethodHasAsyncOverloadWithCancellation
         var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
 
         if ( localCacheValue == null )
@@ -275,7 +285,9 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
                         }
                         else
                         {
-                            var multiLayerCacheValue = (TwoLayerCacheValue) remoteCacheValue.Value;
+                            var multiLayerCacheValue = (TwoLayerCacheValue) (remoteCacheValue.Value
+                                                                             ?? throw new MetalamaPatternsCachingAssertionFailedException(
+                                                                                 "null not expected." ));
 
                             if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
                             {
@@ -396,12 +408,14 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     {
         public Features( CachingBackendFeatures underlyingBackendFeatures ) : base( underlyingBackendFeatures ) { }
 
-        public override bool ContainsDependency => this.UnderlyingBackendFeatures.ContainsDependency && this.UnderlyingBackendFeatures.Blocking;
+        public override bool ContainsDependency => this.UnderlyingBackendFeatures is { ContainsDependency: true, Blocking: true };
     }
 
     private sealed class RemovedValue : MemoryCacheValue
     {
+#pragma warning disable SA1401
         public readonly long Timestamp = GetTimestamp();
+#pragma warning restore SA1401
 
         public RemovedValue() : base( null, null, new object() ) { }
     }
@@ -419,7 +433,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 #pragma warning restore CA1034 // Nested types should not be visible
     {
         /// <summary>
-        /// Initializes a new <see cref="TwoLayerCacheValue"/>.
+        /// Initializes a new instance of the <see cref="TwoLayerCacheValue"/> class.
         /// </summary>
         /// <param name="item">The original <see cref="CacheItem"/>.</param>
         public TwoLayerCacheValue( [Required] CacheItem item )
@@ -444,7 +458,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         /// Gets or sets the cached value.
         /// </summary>
         [DataMember]
-        public object Value { get; set; }
+        public object? Value { get; set; }
 
         /// <summary>
         /// Gets or sets the absolute expiration of the cache item.

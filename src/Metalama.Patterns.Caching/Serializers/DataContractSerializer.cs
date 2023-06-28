@@ -2,13 +2,15 @@
 
 #if NETFRAMEWORK
 #define NET_DATA_CONTRACT_SERIALIZER
-#endif
-
+#else
 using System.ComponentModel;
+#endif
+using JetBrains.Annotations;
 using System.Runtime.Serialization;
 
 namespace Metalama.Patterns.Caching.Serializers;
 
+// ReSharper disable once InvalidXmlDocComment
 /// <summary>
 /// An implementation of <see cref="ISerializer"/> that uses <see cref="NetDataContractSerializer"/>.
 /// You can derive this class to use a different <see cref="XmlObjectSerializer"/>.
@@ -17,10 +19,11 @@ namespace Metalama.Patterns.Caching.Serializers;
 #if !NET_DATA_CONTRACT_SERIALIZER
 [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
+[PublicAPI]
 public class DataContractSerializer : ISerializer
 {
     /// <summary>
-    /// Initializes a new <see cref="DataContractSerializer"/>.
+    /// Initializes a new instance of the <see cref="DataContractSerializer"/> class.
     /// </summary>
     public DataContractSerializer()
     {
@@ -51,17 +54,20 @@ public class DataContractSerializer : ISerializer
 #if !NET_DATA_CONTRACT_SERIALIZER
     [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
-    public byte[] Serialize( object value )
+    public byte[] Serialize( object? value )
     {
 #if NET_DATA_CONTRACT_SERIALIZER
         if ( value == null )
+        {
             return Array.Empty<byte>();
+        }
 
         var serializer = this.CreateSerializer();
 
         using ( var stream = new MemoryStream() )
         {
             serializer.WriteObject( stream, value );
+
             return stream.ToArray();
         }
 #else
@@ -73,11 +79,15 @@ public class DataContractSerializer : ISerializer
 #if !NET_DATA_CONTRACT_SERIALIZER
     [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
-    public object Deserialize( byte[] array )
+
+    // ReSharper disable once ReturnTypeCanBeNotNullable
+    public object? Deserialize( byte[]? array )
     {
 #if NET_DATA_CONTRACT_SERIALIZER
         if ( array == null || array.Length == 0 )
+        {
             return null;
+        }
 
         var serializer = this.CreateSerializer();
 

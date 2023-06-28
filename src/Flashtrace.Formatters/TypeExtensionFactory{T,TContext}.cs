@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Formatters;
@@ -10,13 +11,14 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// A TypeExtensionFactory for types deriving or implementing <typeparamref name="T"/>, where those types must have a constructor accepting a single argument of type <typeparamref name="TContext"/>.
 /// </summary>
+[PublicAPI] // TypeExtensionFactory<T> is public at least because Metalama.Patterns.Caching uses it. Making this type public too for consistency. 
 public class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
     where T : class
 {
     private readonly object?[] _contextArray;
 
     // ReSharper disable once MemberCanBeProtected.Global
-    public TypeExtensionFactory( Type genericInterfaceType, Type converterType, TContext? context )
+    public TypeExtensionFactory( Type genericInterfaceType, Type? converterType, TContext? context )
         : base( genericInterfaceType, converterType )
     {
         this._contextArray = new object?[] { context };
@@ -30,8 +32,8 @@ public class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
 
     public TypeExtensionInfo<T> GetTypeExtension(
         Type objectType,
-        TypeExtensionCacheUpdateCallback<T> cacheUpdateCallback,
-        Func<T> createDefault,
+        TypeExtensionCacheUpdateCallback<T>? cacheUpdateCallback = null,
+        Func<T?>? createDefault = null,
         Action<Exception>? onExceptionWhileCreatingTypeExtension = null )
         => this.GetTypeExtension(
             objectType,
