@@ -5,11 +5,11 @@
 
 
 
-using System;
-using System.Threading.Tasks;
-using Metalama.Patterns.Contracts;
-using Flashtrace;
 using static Flashtrace.SemanticMessageBuilder;
+
+// TODO: Working around #33422
+// using Metalama.Patterns.Contracts;
+using Required = Metalama.Patterns.Caching.FakeRequiredAttribute;
 
 namespace Metalama.Patterns.Caching
 {

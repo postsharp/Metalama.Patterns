@@ -18,3 +18,6 @@ public sealed class ImportSerializerAttribute : Attribute
 }
 
 public sealed class ProtectedAttribute : Attribute { }
+
+// TODO: Working around #33422
+public sealed class FakeRequiredAttribute : Attribute { }

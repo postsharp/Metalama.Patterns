@@ -7,11 +7,11 @@
 <#@ output extension=".cs" #>
 
 
-using System;
-using System.Threading.Tasks;
-using Metalama.Patterns.Contracts;
-using Flashtrace;
 using static Flashtrace.SemanticMessageBuilder;
+
+// TODO: Working around #33422
+// using Metalama.Patterns.Contracts;
+using Required = Metalama.Patterns.Caching.FakeRequiredAttribute;
 
 namespace Metalama.Patterns.Caching
 {
@@ -65,7 +65,7 @@ namespace Metalama.Patterns.Caching
 #>
 			public static TReturn Recache<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func< <#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
-				using ( var activity = defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+				using ( var activity = _defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -99,7 +99,7 @@ namespace Metalama.Patterns.Caching
 #>
 			public static async Task<TReturn> RecacheAsync<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, Task<TReturn>> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = _defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
