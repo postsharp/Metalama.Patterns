@@ -144,6 +144,8 @@ public sealed class MemoryCachingBackend : CachingBackend
             if ( backwardDependencies == null )
             {
                 HashSet<string> newHashSet = new();
+
+                // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract (only seen on via jb tool)
                 backwardDependencies = (HashSet<string>) this._cache.AddOrGetExisting( dependencyKey, newHashSet, _dependencyCacheItemPolicy ) ?? newHashSet;
             }
 
@@ -245,7 +247,7 @@ public sealed class MemoryCachingBackend : CachingBackend
         {
             if ( replacementValue == null )
             {
-                cacheValue = (MemoryCacheValue) this._cache.Remove( itemKey );
+                cacheValue = (MemoryCacheValue?) this._cache.Remove( itemKey );
 
                 if ( cacheValue == null )
                 {

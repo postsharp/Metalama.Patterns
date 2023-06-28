@@ -192,7 +192,7 @@ public sealed class MemoryCacheBackend : CachingBackend
         {
             var dependencyKey = GetDependencyKey( dependency );
 
-            var backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
+            var backwardDependencies = (HashSet<string>?) this._cache.Get( dependencyKey );
 
             if ( backwardDependencies == null )
             {
@@ -232,7 +232,7 @@ public sealed class MemoryCacheBackend : CachingBackend
     {
         var itemKey = GetItemKey( key );
         var lockTaken = false;
-        var previousValue = (MemoryCacheValue) this._cache.Get( itemKey );
+        var previousValue = (MemoryCacheValue?) this._cache.Get( itemKey );
         
         try
         {
@@ -276,7 +276,7 @@ public sealed class MemoryCacheBackend : CachingBackend
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key )
     {
-        var items = (HashSet<string>) this._cache.Get( GetDependencyKey( key ) );
+        var items = (HashSet<string>?) this._cache.Get( GetDependencyKey( key ) );
 
         if ( items != null )
         {
@@ -302,7 +302,7 @@ public sealed class MemoryCacheBackend : CachingBackend
     {
         var itemKey = GetItemKey( key );
 
-        var cacheValue = (MemoryCacheValue) this._cache.Get( itemKey );
+        var cacheValue = (MemoryCacheValue?) this._cache.Get( itemKey );
 
         if ( cacheValue == null )
         {
@@ -328,7 +328,7 @@ public sealed class MemoryCacheBackend : CachingBackend
         foreach ( var dependency in cacheValue.Dependencies )
         {
             var dependencyKey = GetDependencyKey( dependency );
-            var backwardDependencies = (HashSet<string>) this._cache.Get( dependencyKey );
+            var backwardDependencies = (HashSet<string>?) this._cache.Get( dependencyKey );
 
             if ( backwardDependencies == null )
             {

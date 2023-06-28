@@ -6,7 +6,9 @@ namespace Metalama.Patterns.Caching.Implementation;
 [ExplicitCrossPackageInternal]
 public interface ITestableCachingComponent : IDisposable
 {
+    // ReSharper disable once UnusedMemberInSuper.Global
     Task DisposeAsync( CancellationToken cancellationToken = default );
 
+    // ReSharper disable once UnusedMemberInSuper.Global
     int BackgroundTaskExceptions { get; }
 }

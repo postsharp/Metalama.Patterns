@@ -2,6 +2,8 @@
 
 namespace Metalama.Patterns.Caching.Implementation;
 
+// TODO: [Porting] Pending port of CacheAspect
+// ReSharper disable UnusedMember.Global
 internal interface ICacheAspect
 {
     CacheItemConfiguration BuildTimeConfiguration { get; }

@@ -2,6 +2,7 @@
 
 namespace Metalama.Patterns.Caching;
 
+// ReSharper disable UnusedType.Global
 [Obsolete( "Porting TODO" )]
 internal class CachingMessageSource
 {

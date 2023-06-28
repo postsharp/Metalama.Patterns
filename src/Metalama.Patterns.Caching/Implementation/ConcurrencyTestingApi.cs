@@ -9,6 +9,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 internal static class ConcurrencyTestingApi
 {
     // Field will be set by test harness.
+    // ReSharper disable once MemberCanBePrivate.Global
 #pragma warning disable CS0649
 #pragma warning disable SA1401
     public static ConcurrencyTestingApiImpl? Implementation;

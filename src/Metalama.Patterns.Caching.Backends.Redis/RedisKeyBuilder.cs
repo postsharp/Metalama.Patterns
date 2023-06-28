@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-internal class RedisKeyBuilder
+internal sealed class RedisKeyBuilder
 {
     public const string GarbageCollectionPrefix = "gc";
     public const string ValueKindPrefix = "value";
@@ -14,10 +14,15 @@ internal class RedisKeyBuilder
     public const string DependenciesKindPrefix = "dependencies";
 
 #pragma warning disable SA1401
+
+    // ReSharper disable NotAccessedField.Global
+    // ReSharper disable once MemberCanBePrivate.Global
     public readonly RedisKey HeartbeatKey;
     public readonly RedisChannel NotificationChannel;
     public readonly RedisChannel EventsChannel;
 #pragma warning restore SA1401
+    
+    // ReSharper restore NotAccessedField.Global
 
     public string KeyPrefix { get; }
 

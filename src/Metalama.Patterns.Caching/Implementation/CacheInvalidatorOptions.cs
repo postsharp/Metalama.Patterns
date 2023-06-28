@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
 /// Options for the <see cref="CacheInvalidator"/> class.
 /// </summary>
+[PublicAPI]
 public class CacheInvalidatorOptions
 {
     /// <summary>
