@@ -37,11 +37,11 @@ internal sealed class AutoReloadManager
         }
     }
 
-    internal void SubscribeAutoRefresh(
+    internal void SubscribeAutoRefresh<TValue>(
         string key,
         Type valueType,
         IRunTimeCacheItemConfiguration configuration,
-        Func<object?> valueProvider,
+        Func<TValue?> valueProvider,
         LogSource logger,
         bool isAsync )
     {
@@ -62,8 +62,8 @@ internal sealed class AutoReloadManager
                 {
                     this._backend.ItemRemoved += this.BeginAutoRefreshValue;
                 }
-
-                return new AutoRefreshInfo( configuration, valueType, valueProvider, logger, isAsync );
+                
+                return AutoRefreshInfo.Create( configuration, valueType, logger, isAsync, valueProvider );
             } );
 
         // NOTE: We never remove things from autoRefreshInfos. AutoRefresh keys are there forever, they are never evicted.
@@ -77,7 +77,7 @@ internal sealed class AutoReloadManager
             {
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    var value = info.ValueProvider.Invoke();
+                    var value = info.InvokeValueProvider();
 
                     CachingFrontend.SetItem( key, value, info.ReturnType, info.Configuration, context );
                 }
@@ -99,7 +99,7 @@ internal sealed class AutoReloadManager
             {
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    var invokeValueProviderTask = (Task<object?>?) info.ValueProvider.Invoke();
+                    var invokeValueProviderTask = (Task<object?>?) info.InvokeValueProvider();
                     var value = invokeValueProviderTask == null ? null : await invokeValueProviderTask;
 
                     await CachingFrontend.SetItemAsync( key, value, info.ReturnType, info.Configuration, context, cancellationToken );
@@ -116,5 +116,17 @@ internal sealed class AutoReloadManager
         }
     }
 
-    private sealed record AutoRefreshInfo( IRunTimeCacheItemConfiguration Configuration, Type ReturnType, Func<object?> ValueProvider, LogSource Logger, bool IsAsync ); 
+    private abstract record AutoRefreshInfo( IRunTimeCacheItemConfiguration Configuration, Type ReturnType, LogSource Logger, bool IsAsync )
+    {
+        public abstract object? InvokeValueProvider();
+
+        public static AutoRefreshInfo<T> Create<T>( IRunTimeCacheItemConfiguration configuration, Type returnType, LogSource logger, bool isAsync, Func<T> valueProvider )
+            => new AutoRefreshInfo<T>( configuration, returnType, logger, isAsync, valueProvider );
+    }
+
+    private sealed record AutoRefreshInfo<T>( IRunTimeCacheItemConfiguration Configuration, Type ReturnType, LogSource Logger, bool IsAsync, Func<T> ValueProvider) 
+        : AutoRefreshInfo( Configuration, ReturnType, Logger, IsAsync )
+    {
+        public override object? InvokeValueProvider() => this.ValueProvider();
+    }
 }

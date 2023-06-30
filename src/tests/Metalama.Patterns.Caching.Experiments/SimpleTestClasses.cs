@@ -9,6 +9,34 @@ using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Experiments;
 
+public sealed class StaticYieldingEnumerable
+{
+    [Cache]
+    public IEnumerable<int> TimesTwo( params int[] values )
+    {
+        foreach ( var value in values )
+        {
+            yield return value * 2;
+        }
+    }
+}
+
+public sealed class StaticYieldingEnumerable_Prototype1
+{    
+    public IEnumerable<int> TimesTwo( params int[] values )
+    {
+        return OriginalMethod();
+
+        IEnumerable<int> OriginalMethod()
+        {
+            foreach ( var value in values )
+            {
+                yield return value * 2;
+            }
+        }
+    }
+}
+
 public sealed class InstanceInt
 {
     [Cache]

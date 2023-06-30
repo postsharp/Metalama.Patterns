@@ -10,17 +10,19 @@ using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
+// TODO: [Porting] Can returned values be strongly-typed?
+
 [PublicAPI]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class CachingFrontend
 {
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static object? GetOrAdd(
+    public static object? GetOrAdd<T>(
         MethodInfo method,
         string key,
         Type valueType,
         IRunTimeCacheItemConfiguration configuration,
-        Func<object?> valueProvider,
+        Func<T?> valueProvider,
         LogSource logger )
     {
         ILockHandle? lockHandle = null;
@@ -136,12 +138,12 @@ public static class CachingFrontend
     }
 
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static async Task<object?> GetOrAddAsync(
+    public static async Task<object?> GetOrAddAsync<T>(
         MethodInfo method,
         string key,
         Type valueType,
         CacheItemConfiguration configuration,
-        Func<Task<object>> valueProvider,
+        Func<Task<T?>> valueProvider,
         LogSource logger,
         CancellationToken cancellationToken )
     {
