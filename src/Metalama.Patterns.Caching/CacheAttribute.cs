@@ -1,12 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace.Contexts;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Implementation;
-using System.Threading.Tasks;
 using static Flashtrace.FormattedMessageBuilder;
 namespace Metalama.Patterns.Caching;
 
@@ -62,7 +60,7 @@ public sealed class CacheAttribute : MethodAspect
 
         builder.MustNotHaveRefOrOutParameter();
         builder.ReturnType().MustSatisfy( t => t.SpecialType != SpecialType.Void, t => $"must not be void" );
-        builder.ReturnType().MustSatisfy( t => !t.Is( typeof( Task ) ), t => $"must not be non-generic Task" );
+        builder.ReturnType().MustSatisfy( t => !t.Is( typeof( Task ) ) || ((INamedType) t).IsGeneric, t => $"must not be non-generic Task" );
     }
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
@@ -89,19 +87,32 @@ public sealed class CacheAttribute : MethodAspect
             InitializerKind.BeforeTypeConstructor,
             args: new { method = builder.Target, field = registrationField.Declaration } );
 
+        /* Note: We use `OverrideMethod` explicitly as enumerableTemplate so we don't get .Buffer() added for enumerable methods. We don't
+         * want buffering here because caching infrastructure uses ValueAdaptors for this.
+         * 
+         * TODO: Review - do we still need the ValueAdaptor layer with Metalama?
+         */
         var templates = new MethodTemplateSelector( 
             nameof( this.OverrideMethod ),
-            nameof( this.OverrideMethodAsync ) );
+            nameof( this.OverrideMethodAsync ),
+            nameof( this.OverrideMethod ) );
 
         var taskResultType = builder.Target.MethodDefinition.IsAsync
             ? builder.Target.MethodDefinition.GetAsyncInfo().ResultType
             : null;
            
-        builder.Advice.Override( builder.Target, templates, args: new { TTaskResultType = taskResultType, TReturnType = meta.Target.Method.ReturnType, registrationField = registrationField.Declaration } );
+        builder.Advice.Override(
+            builder.Target,
+            templates,
+            args: new { 
+                TTaskResultType = taskResultType,
+                TReturnType = builder.Target.ReturnType,
+                taskResultType = taskResultType,
+                registrationField = registrationField.Declaration } );
     }
 
     [Template]
-    public dynamic? OverrideMethod<TReturnType>( IField registrationField )
+    public TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType taskResultType /* not used */, IType TTaskResultType /* not used */ )
     {
         var registration = registrationField.Value;
 
@@ -120,7 +131,7 @@ public sealed class CacheAttribute : MethodAspect
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    result = OriginalMethod();
+                    result = meta.Proceed();
                 }
                 else
                 {
@@ -136,7 +147,7 @@ public sealed class CacheAttribute : MethodAspect
                         methodKey,
                         registration.Method.ReturnType,
                         mergedConfiguration,
-                        (Func<TReturnType?>) OriginalMethod,
+                        (Func<TReturnType>) OriginalMethod,
                         logSource );
                 }
 
@@ -151,22 +162,26 @@ public sealed class CacheAttribute : MethodAspect
 
         if ( meta.Target.Method.ReturnType.IsReferenceType == true || meta.Target.Method.ReturnType.IsNullable == true )
         {
-            return meta.Cast( meta.Target.Method.ReturnType, result );
+            return (TReturnType) result;
         }
         else
         {
-            return result == null ? default : meta.Cast( meta.Target.Method.ReturnType, result );
+            return result == null ? default : (TReturnType) result;
         }
 
-        TReturnType? OriginalMethod()
+        // TODO: [Porting] Make this method static if meta.Target.Method.IsStatic. How?
+
+        TReturnType OriginalMethod()
         {
             return meta.Proceed();
         }
     }
 
     [Template]
-    public async Task<dynamic?> OverrideMethodAsync<TTaskResultType>( IField registrationField )
+    public async Task<TTaskResultType> OverrideMethodAsync<[CompileTime] TTaskResultType>( IField registrationField, IType taskResultType, IType TReturnType /* not used */ )
     {
+        // TODO: What about ConfigureAwait( false )?
+
         var registration = registrationField.Value;
 
         var logSource = registration.Logger;
@@ -176,7 +191,7 @@ public sealed class CacheAttribute : MethodAspect
         // TODO: PostSharp passes an otherwise uninitialzed CallerInfo with the CallerAttributes.IsAsync flag set.
 
         // TODO: [Porting] Discuss: We could do this string interpolation at build time, but obfuscation/IL-rewriting could change the method signature before runtime. Best practice?
-        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of method {Method}", registration.Method ) ) )
+        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", registration.Method ) ) )
         {
             try
             {
@@ -186,7 +201,27 @@ public sealed class CacheAttribute : MethodAspect
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    result = OriginalMethod();
+                    var task = meta.Proceed();
+
+                    if ( !task.IsCompleted )
+                    {
+                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
+                        // and the await instrumentation policy is not applied.
+                        activity.Suspend();
+                        try
+                        {
+                            result = await task;
+                        }
+                        finally
+                        {
+                            activity.Resume();
+                        }
+                    }
+                    else
+                    {
+                        // Don't wrap any exception.
+                        result = task.GetAwaiter().GetResult();
+                    }
                 }
                 else
                 {
@@ -197,7 +232,9 @@ public sealed class CacheAttribute : MethodAspect
 
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
-                    result = CachingFrontend.GetOrAddAsync(
+                    // TODO: Pass CancellationToken (note from original code)
+
+                    var task = CachingFrontend.GetOrAddAsync(
                         registration.Method,
                         methodKey,
                         registration.Method.ReturnType,
@@ -205,6 +242,26 @@ public sealed class CacheAttribute : MethodAspect
                         (Func<Task<TTaskResultType>>?) OriginalMethod,
                         logSource,
                         CancellationToken.None );
+
+                    if ( !task.IsCompleted )
+                    {
+                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
+                        // and the await instrumentation policy is not applied.
+                        activity.Suspend();
+                        try
+                        {
+                            result = await task;
+                        }
+                        finally
+                        {
+                            activity.Resume();
+                        }
+                    }
+                    else
+                    {
+                        // Don't wrap any exception.
+                        result = task.GetAwaiter().GetResult();
+                    }
                 }
 
                 activity.SetSuccess();
@@ -215,20 +272,23 @@ public sealed class CacheAttribute : MethodAspect
                 throw;
             }
         }
-
-        if ( meta.Target.Method.ReturnType.IsReferenceType == true || meta.Target.Method.ReturnType.IsNullable == true )
+        
+        if ( taskResultType.IsReferenceType == true || taskResultType.IsNullable == true )
         {
-            return meta.Cast( meta.Target.Method.ReturnType, result );
+            return (TTaskResultType?) result;
         }
         else
         {
-            return result == null ? default : meta.Cast( meta.Target.Method.ReturnType, result );
+            return result == null ? default : (TTaskResultType) result;
         }
+
+        // TODO: [Porting] Make this method static if meta.Target.Method.IsStatic. How?
 
         async Task<TTaskResultType> OriginalMethod()
         {
             return await meta.Proceed();
         }
+
     }
 
     [Template]

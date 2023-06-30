@@ -21,19 +21,12 @@ public sealed class StaticYieldingEnumerable
     }
 }
 
-public sealed class StaticYieldingEnumerable_Prototype1
-{    
-    public IEnumerable<int> TimesTwo( params int[] values )
+public sealed class StaticIntAsync
+{
+    [Cache]
+    public static async Task<int> TimesTwo( int x )
     {
-        return OriginalMethod();
-
-        IEnumerable<int> OriginalMethod()
-        {
-            foreach ( var value in values )
-            {
-                yield return value * 2;
-            }
-        }
+        return x * 2;
     }
 }
 

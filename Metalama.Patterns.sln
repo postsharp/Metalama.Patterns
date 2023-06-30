@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.Backends.Redis", "src\Metalama.Patterns.Caching.Backends.Redis\Metalama.Patterns.Caching.Backends.Redis.csproj", "{3152D01C-5F38-4A21-830E-613A17C4BC80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Caching.Experiments", "src\tests\Metalama.Patterns.Caching.Experiments\Metalama.Patterns.Caching.Experiments.csproj", "{0987952C-F219-43F5-9068-9C515F93CC08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.Experiments", "src\tests\Metalama.Patterns.Caching.Experiments\Metalama.Patterns.Caching.Experiments.csproj", "{0987952C-F219-43F5-9068-9C515F93CC08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -104,8 +104,8 @@ Global
 		{3152D01C-5F38-4A21-830E-613A17C4BC80}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0987952C-F219-43F5-9068-9C515F93CC08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0987952C-F219-43F5-9068-9C515F93CC08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0987952C-F219-43F5-9068-9C515F93CC08}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0987952C-F219-43F5-9068-9C515F93CC08}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{0987952C-F219-43F5-9068-9C515F93CC08}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
+		{0987952C-F219-43F5-9068-9C515F93CC08}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{0987952C-F219-43F5-9068-9C515F93CC08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0987952C-F219-43F5-9068-9C515F93CC08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

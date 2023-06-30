@@ -142,7 +142,7 @@ public static class CachingFrontend
         MethodInfo method,
         string key,
         Type valueType,
-        CacheItemConfiguration configuration,
+        IRunTimeCacheItemConfiguration configuration,
         Func<Task<T?>> valueProvider,
         LogSource logger,
         CancellationToken cancellationToken )
