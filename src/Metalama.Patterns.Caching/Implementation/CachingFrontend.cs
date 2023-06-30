@@ -1,22 +1,25 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Locking;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Reflection;
 using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-// TODO: [Porting] Was called from CacheAttribute. If CachingFrontend is retained, remove these disables.
-// ReSharper disable UnusedMember.Global
-internal static class CachingFrontend
+[PublicAPI]
+[EditorBrowsable(EditorBrowsableState.Never)]
+public static class CachingFrontend
 {
-    internal static object? GetOrAdd(
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    public static object? GetOrAdd(
         MethodInfo method,
         string key,
         Type valueType,
-        CacheItemConfiguration configuration,
+        IRunTimeCacheItemConfiguration configuration,
         Func<object?> valueProvider,
         LogSource logger )
     {
@@ -132,7 +135,8 @@ internal static class CachingFrontend
         }
     }
 
-    internal static async Task<object?> GetOrAddAsync(
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    public static async Task<object?> GetOrAddAsync(
         MethodInfo method,
         string key,
         Type valueType,
@@ -268,7 +272,7 @@ internal static class CachingFrontend
         }
     }
 
-    internal static object? SetItem( string key, object? value, Type valueType, CacheItemConfiguration configuration, CachingContext context )
+    internal static object? SetItem( string key, object? value, Type valueType, IRunTimeCacheItemConfiguration configuration, CachingContext context )
     {
         var exposedValue = value;
 
@@ -294,7 +298,7 @@ internal static class CachingFrontend
         string key,
         object? value,
         Type valueType,
-        CacheItemConfiguration configuration,
+        IRunTimeCacheItemConfiguration configuration,
         CachingContext context,
         CancellationToken cancellationToken )
     {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Aspects;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Locking;
 using Metalama.Patterns.Contracts;
@@ -12,7 +13,7 @@ namespace Metalama.Patterns.Caching;
 /// Allows for centralized and run-time configuration of several instances of the <see cref="CacheAttribute"/> aspect.
 /// </summary>
 [PublicAPI]
-public sealed class CachingProfile : ICacheItemConfiguration
+public sealed class CachingProfile : IRunTimeCacheItemConfiguration
 {
     /// <summary>
     /// The name of the default profile.
@@ -109,24 +110,24 @@ public sealed class CachingProfile : ICacheItemConfiguration
         }
     }
 
+    /// <inheritdoc />
+    bool? IRunTimeCacheItemConfiguration.IsEnabled => this._isEnabled;
+
     // We can't modify specify IgnoreThisParameter in a profile because this setting is used at build time.
     /// <inheritdoc />
-    bool? ICacheItemConfiguration.IgnoreThisParameter => null;
+    bool? IBuildTimeCacheItemConfiguration.IgnoreThisParameter => null;
 
     /// <inheritdoc />
-    bool? ICacheItemConfiguration.IsEnabled => this.IsEnabled;
+    TimeSpan? IBuildTimeCacheItemConfiguration.AbsoluteExpiration => this.AbsoluteExpiration;
 
     /// <inheritdoc />
-    TimeSpan? ICacheItemConfiguration.AbsoluteExpiration => this.AbsoluteExpiration;
+    TimeSpan? IBuildTimeCacheItemConfiguration.SlidingExpiration => this.SlidingExpiration;
 
     /// <inheritdoc />
-    TimeSpan? ICacheItemConfiguration.SlidingExpiration => this.SlidingExpiration;
+    bool? IBuildTimeCacheItemConfiguration.AutoReload => this.AutoReload;
 
     /// <inheritdoc />
-    bool? ICacheItemConfiguration.AutoReload => this.AutoReload;
-
-    /// <inheritdoc />
-    string ICacheItemConfiguration.ProfileName => this.Name;
+    string IBuildTimeCacheItemConfiguration.ProfileName => this.Name;
 
     /// <summary>
     /// Gets or sets the lock manager used to synchronize the execution of methods

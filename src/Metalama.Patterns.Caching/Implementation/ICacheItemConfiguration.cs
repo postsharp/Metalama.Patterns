@@ -1,21 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// Configuration of a cached method. This interface is implemented by several classes that allow to configure
+/// Configuration of a cached method at build time. This interface is implemented by several classes that allow to configure
 /// cached method.
 /// </summary>
-[PublicAPI] // TODO: [Porting] Does ICacheItemConfiguration need to be public? Might be a serialization artefact (see implementing types).
-public interface ICacheItemConfiguration
+[PublicAPI]
+public interface IBuildTimeCacheItemConfiguration
 {
-    /// <summary>
-    /// Gets a value indicating whether caching is enabled.
-    /// </summary>
-    bool? IsEnabled { get; }
-
     /// <summary>
     /// Gets the total duration during which the result of the cached methods  is stored in cache. The absolute
     /// expiration time is counted from the moment the method is evaluated and cached.
@@ -49,4 +45,17 @@ public interface ICacheItemConfiguration
     /// which means that by default the <c>this</c> instance is a part of the cache key.
     /// </summary>
     bool? IgnoreThisParameter { get; }
+}
+
+/// <summary>
+/// Configuration of a cached method. This interface is implemented by several classes that allow to configure
+/// cached method.
+/// </summary>
+[PublicAPI]
+public interface IRunTimeCacheItemConfiguration : IBuildTimeCacheItemConfiguration
+{
+    /// <summary>
+    /// Gets a value indicating whether caching is enabled.
+    /// </summary>
+    bool? IsEnabled { get; }
 }

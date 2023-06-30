@@ -9,8 +9,20 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// </summary>
 [PublicAPI] // TODO: [Porting] Does CacheItemConfiguration need to be public? Might be a serialization artefact. Regardless, review visibility of setters.
 [PSerializable]
-public sealed class CacheItemConfiguration : ICacheItemConfiguration
+public sealed class CacheItemConfiguration : IRunTimeCacheItemConfiguration
 {
+    public CacheItemConfiguration() { }
+
+    public CacheItemConfiguration( IBuildTimeCacheItemConfiguration buildTimeConfiguration )
+    {
+        this.AbsoluteExpiration = buildTimeConfiguration.AbsoluteExpiration;
+        this.AutoReload = buildTimeConfiguration.AutoReload;
+        this.IgnoreThisParameter = buildTimeConfiguration.IgnoreThisParameter;
+        this.Priority = buildTimeConfiguration.Priority;
+        this.ProfileName = buildTimeConfiguration.ProfileName;
+        this.SlidingExpiration = buildTimeConfiguration.SlidingExpiration;
+    }
+
     /// <inheritdoc />
     public bool? IsEnabled { get; set; }
 
@@ -32,7 +44,7 @@ public sealed class CacheItemConfiguration : ICacheItemConfiguration
     /// <inheritdoc />
     public bool? IgnoreThisParameter { get; set; }
 
-    internal void ApplyFallback( ICacheItemConfiguration fallback )
+    public void ApplyFallback( IRunTimeCacheItemConfiguration fallback )
     {
         this.AutoReload ??= fallback.AutoReload;
         this.AbsoluteExpiration ??= fallback.AbsoluteExpiration;

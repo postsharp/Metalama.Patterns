@@ -20,7 +20,7 @@ public sealed class CacheItem : IEquatable<CacheItem>
     /// <param name="value">The value to be cached (<c>null</c> is a valid value).</param>
     /// <param name="dependencies">A list of dependencies, or <c>null</c> if there is no dependency.</param>
     /// <param name="configuration">The configuration of the cache item, or <c>null</c> to use the default configuration.</param>
-    public CacheItem( object? value, IImmutableList<string>? dependencies = null, CacheItemConfiguration? configuration = null )
+    public CacheItem( object? value, IImmutableList<string>? dependencies = null, IRunTimeCacheItemConfiguration? configuration = null )
     {
         this.Value = value;
         this.Dependencies = dependencies;
@@ -42,7 +42,7 @@ public sealed class CacheItem : IEquatable<CacheItem>
     /// Gets the <see cref="CacheItemConfiguration"/> for the current item,
     /// or <c>null</c> to use the default configuration.
     /// </summary>
-    public CacheItemConfiguration? Configuration { get; }
+    public IRunTimeCacheItemConfiguration? Configuration { get; }
 
     internal CacheItem WithValue( object value ) => new( value, this.Dependencies, this.Configuration );
 

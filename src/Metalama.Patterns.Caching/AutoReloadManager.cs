@@ -40,7 +40,7 @@ internal sealed class AutoReloadManager
     internal void SubscribeAutoRefresh(
         string key,
         Type valueType,
-        CacheItemConfiguration configuration,
+        IRunTimeCacheItemConfiguration configuration,
         Func<object?> valueProvider,
         LogSource logger,
         bool isAsync )
@@ -116,5 +116,5 @@ internal sealed class AutoReloadManager
         }
     }
 
-    private sealed record AutoRefreshInfo( CacheItemConfiguration Configuration, Type ReturnType, Func<object?> ValueProvider, LogSource Logger, bool IsAsync ); 
+    private sealed record AutoRefreshInfo( IRunTimeCacheItemConfiguration Configuration, Type ReturnType, Func<object?> ValueProvider, LogSource Logger, bool IsAsync ); 
 }

@@ -13,9 +13,9 @@ namespace Metalama.Patterns.Caching;
 #pragma warning disable IDE0051
 internal static class BuildTimeCacheConfigurationManager
 {
-    public static ICacheItemConfiguration GetConfigurationFromAttributes( MemberInfo method )
+    public static IRunTimeCacheItemConfiguration GetConfigurationFromAttributes( MemberInfo method )
     {
-        List<ICacheItemConfiguration> configurations = new();
+        List<IRunTimeCacheItemConfiguration> configurations = new();
 
         PopulateConfigurations( method.DeclaringType!, configurations );
 
@@ -50,7 +50,7 @@ internal static class BuildTimeCacheConfigurationManager
         }
     }
 
-    private static void PopulateConfigurations( Type type, List<ICacheItemConfiguration> configurations )
+    private static void PopulateConfigurations( Type type, List<IRunTimeCacheItemConfiguration> configurations )
     {
         var configuration = GetConfigurationOnDeclaration( type );
 
@@ -72,7 +72,7 @@ internal static class BuildTimeCacheConfigurationManager
     // TODO: [Porting] Remove these disables if class is retained.
     // ReSharper disable once ReturnTypeCanBeNotNullable
     // ReSharper disable once UnusedParameter.Local
-    private static ICacheItemConfiguration? GetConfigurationOnDeclaration( ICustomAttributeProvider declaration )
+    private static IRunTimeCacheItemConfiguration? GetConfigurationOnDeclaration( ICustomAttributeProvider declaration )
     {
         throw new NotImplementedException( "Porting - PostSharpEnvironment.CurrentProject.StateStore" );
 #if TODO

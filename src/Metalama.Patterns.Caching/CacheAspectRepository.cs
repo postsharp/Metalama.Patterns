@@ -8,6 +8,7 @@ using System.Reflection;
 namespace Metalama.Patterns.Caching;
 
 // TODO: [Porting] Probably conceptually inapplicable - caches aspect instances at runtime?
+[Obsolete("Will remove.", true)]
 internal static class CacheAspectRepository
 {
     private static readonly ConcurrentDictionary<MethodInfo, ICacheAspect> _configurations = new();

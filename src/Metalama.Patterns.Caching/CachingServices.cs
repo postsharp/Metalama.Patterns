@@ -24,6 +24,11 @@ public static partial class CachingServices
     }
 
     /// <summary>
+    /// Gets the <see cref="Implementation.MethodRegistrationCache"/>.
+    /// </summary>
+    public static MethodRegistrationCache DefaultMethodRegistrationCache { get; } = new();
+
+    /// <summary>
     /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
     /// </summary>
     [AllowNull]

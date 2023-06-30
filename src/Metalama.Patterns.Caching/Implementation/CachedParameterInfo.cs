@@ -7,7 +7,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
 /// Encapsulates information about a parameter of a method
-/// being cached. Exposed by the <see cref="CachedMethodInfo"/> class.
+/// being cached. Exposed by the <see cref="CachedMethodRegistration"/> class.
 /// </summary>
 [PublicAPI] // TODO: [Porting] Does CachedParameterInfo need to be public? 
 public sealed class CachedParameterInfo

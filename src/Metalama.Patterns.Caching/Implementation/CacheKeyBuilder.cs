@@ -3,11 +3,8 @@
 using Flashtrace.Formatters;
 using JetBrains.Annotations;
 using Metalama.Patterns.Contracts;
-using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
@@ -17,7 +14,6 @@ namespace Metalama.Patterns.Caching.Implementation;
 [PublicAPI]
 public class CacheKeyBuilder : IDisposable
 {
-    private readonly ConcurrentDictionary<MethodInfo, CachedMethodInfo> _methodInfoCache = new();
     private readonly UnsafeStringBuilderPool _stringBuilderPool;
     private readonly IFormatterRepository _formatterRepository;
 
@@ -59,65 +55,18 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     public int MaxKeySize => this._stringBuilderPool.StringBuilderCapacity;
 
-    /// <summary>
-    /// Gets the <see cref="CachedMethodInfo"/> for a given <see cref="MethodInfo"/>.
-    /// </summary>
-    /// <param name="method">A <see cref="MethodInfo"/>.</param>
-    /// <returns>The <see cref="CachedMethodInfo"/> for <paramref name="method"/>, or <c>null</c> if no <see cref="CachedMethodInfo"/> was registered for <paramref name="method"/>.</returns>
-    protected CachedMethodInfo GetCachedMethodInfo( [Required] MethodInfo method )
-    {
-        if ( !this._methodInfoCache.TryGetValue( method, out var cachedMethodInfo ) )
-        {
-            cachedMethodInfo = GetCachedMethodInfoCore( method );
-
-            this._methodInfoCache.TryAdd( method, cachedMethodInfo );
-        }
-
-        return cachedMethodInfo;
-    }
-
-    private static CachedMethodInfo GetCachedMethodInfoCore( [Required] MethodInfo method )
-    {
-        var parameterInfos = method.GetParameters();
-        var cachedParameterInfos = new CachedParameterInfo[parameterInfos.Length];
-
-        for ( var i = 0; i < parameterInfos.Length; i++ )
-        {
-            var isIgnored = parameterInfos[i].IsDefined( typeof(NotCacheKeyAttribute) );
-
-            cachedParameterInfos[i] = new CachedParameterInfo( parameterInfos[0], isIgnored );
-        }
-
-        // It's okay to take the build-time configuration here because IgnoreThisParameter cannot be changed at run time.
-        var cacheAspect = CacheAspectRepository.Get( method );
-
-        if ( cacheAspect == null )
-        {
-            // The declaring type has not been initialized. Try to initialize it ourselves.
-            RuntimeHelpers.RunClassConstructor( method.DeclaringType!.TypeHandle );
-            cacheAspect = CacheAspectRepository.Get( method );
-        }
-
-        if ( cacheAspect == null )
-        {
-            throw new MetalamaPatternsCachingAssertionFailedException(
-                string.Format( CultureInfo.InvariantCulture, "Declaring type of '{0}' method has not been initialized.", method ) );
-        }
-
-        var isThisParameterIgnored = cacheAspect.BuildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault();
-
-        return new CachedMethodInfo( method, isThisParameterIgnored, cachedParameterInfos.ToImmutableArray() );
-    }
 
     /// <summary>
     /// Builds a cache key for a given method call.
     /// </summary>
-    /// <param name="method">The <see cref="MethodInfo"/> representing the method.</param>
+    /// <param name="registration">The <see cref="CachedMethodRegistration"/> representing the method.</param>
     /// <param name="arguments">The arguments passed to the <paramref name="method"/> call.</param>
     /// <param name="instance">The <c>this</c> instance of the <paramref name="method"/> call, or <c>null</c> if <paramref name="method"/> is static.</param>
     /// <returns>A string uniquely representing the method call.</returns>
-    public virtual string BuildMethodKey( [Required] MethodInfo method, [Required] IList<object?> arguments, object? instance = null )
+    public virtual string BuildMethodKey( [Required] CachedMethodRegistration registration, [Required] IList<object?> arguments, object? instance = null )
     {
+        var method = registration.Method;
+
         var parameters = method.GetParameters();
 
         if ( parameters.Length != arguments.Count )
@@ -142,8 +91,6 @@ public class CacheKeyBuilder : IDisposable
                     nameof(method) ) );
         }
 
-        var cachedMethodInfo = this.GetCachedMethodInfo( method );
-
         // Compute the caching key.
         var stringBuilder = this._stringBuilderPool.GetInstance();
 
@@ -152,7 +99,7 @@ public class CacheKeyBuilder : IDisposable
 
         var addComma = false;
 
-        if ( !method.IsStatic && !cachedMethodInfo.IsThisParameterIgnored )
+        if ( !method.IsStatic && !registration.IsThisParameterIgnored )
         {
             // We need a 'this' specifier to differentiate an instance method
             // from a static method whose first parameter is of the declaring type.
@@ -165,7 +112,7 @@ public class CacheKeyBuilder : IDisposable
         {
             var argument = arguments[i];
 
-            if ( cachedMethodInfo.Parameters[i].IsIgnored )
+            if ( registration.Parameters[i].IsIgnored )
             {
                 this.AppendArgument( stringBuilder, parameters[i].ParameterType, this.IgnoredParameterSentinel, ref addComma );
             }
