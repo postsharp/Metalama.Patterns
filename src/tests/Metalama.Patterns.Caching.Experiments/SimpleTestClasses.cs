@@ -1,10 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Caching.Experiments;
-
 // TODO: [Porting] Temporary, initial development only. Remove or adapt to proper tests.
 // ReSharper disable all
 #pragma warning disable
+
+// TODO: Work around #33441 : Some method calls in scope via `using static` are not transformed.
+using static Flashtrace.FormattedMessageBuilder;
+
+namespace Metalama.Patterns.Caching.Experiments;
 
 public sealed class InstanceInt
 {
