@@ -11,6 +11,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Contracts
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Contracts.AspectTests", "src\tests\Metalama.Patterns.Contracts.AspectTests\Metalama.Patterns.Contracts.AspectTests.csproj", "{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.Formatters", "src\Flashtrace.Formatters\Flashtrace.Formatters.csproj", "{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.Formatters.UnitTests", "src\tests\Flashtrace.Formatters.UnitTests\Flashtrace.Formatters.UnitTests.csproj", "{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace", "src\Flashtrace\Flashtrace.csproj", "{2F65B1B4-6FD2-40A9-A293-437FF620157E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.UnitTests", "src\tests\Flashtrace.UnitTests\Flashtrace.UnitTests.csproj", "{900FC057-DB84-486F-81C2-ED3F8D284E61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +44,30 @@ Global
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE1E2AA5-3AD6-4220-9473-8051B8EB774E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F65B1B4-6FD2-40A9-A293-437FF620157E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{900FC057-DB84-486F-81C2-ED3F8D284E61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{900FC057-DB84-486F-81C2-ED3F8D284E61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{900FC057-DB84-486F-81C2-ED3F8D284E61}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{900FC057-DB84-486F-81C2-ED3F8D284E61}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{900FC057-DB84-486F-81C2-ED3F8D284E61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{900FC057-DB84-486F-81C2-ED3F8D284E61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,6 +75,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C972CEEA-60FA-4DD4-BEEC-A5FDDF451D50} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{1AA4A67D-1A09-4E67-A1B5-4A34C1AAF7EB} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{B4DEDFF6-9BBC-4C2B-90BB-7A1C8473CDC0} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{900FC057-DB84-486F-81C2-ED3F8D284E61} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC2B6F6-5623-43F8-BBBB-ED8072670A80}

@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net471;net6.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+        <PackageReference Include="xunit" Version="$(xUnitVersion)" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
+        <PackageReference Include="Xunit.SkippableFact" Version="$(XunitSkippableFactVersion)" />
+    </ItemGroup>
+
+</Project>

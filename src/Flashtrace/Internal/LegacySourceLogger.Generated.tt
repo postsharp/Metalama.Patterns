@@ -1,0 +1,33 @@
+﻿// THIS FILE IS T4-GENERATED.
+// To edit, go to LegacySourceLogger.Generated.tt.
+// To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" LegacySourceLogger.Generated.tt
+
+<#@ Template debug="false" hostspecific="false" language="C#" #>
+<#@ Output extension=".cs" #>
+<#@ include file="..\Common.ttinclude" #>
+
+using Flashtrace.Contexts;
+using Flashtrace.Records;
+
+namespace Flashtrace.Internal
+{
+	partial class LegacySourceLogger
+	{
+<#
+    for (var i = 1; i <= 10; i++)
+    {
+#>
+
+	    void ILogger.Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind logRecordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception,  ref CallerInfo callerInfo )
+        {
+			if ( this.IsEnabled( level ) )
+			{
+              this.WriteFormatted( context, level, logRecordKind, text, new object[] {  <#= Repeat( "arg{0}", i ) #> }, exception );
+			}
+        }
+
+		<#
+    }
+#>
+	}    
+}
