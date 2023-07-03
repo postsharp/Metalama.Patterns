@@ -17,12 +17,14 @@ namespace Metalama.Patterns.Caching.Implementation;
 public static class CachingFrontend
 {
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static object? GetOrAdd<T>(
+    public static object? GetOrAdd(
         MethodInfo method,
         string key,
         Type valueType,
         IRunTimeCacheItemConfiguration configuration,
-        Func<T?> valueProvider,
+        Func<object?, object?[], object?> invokeOriginalMethod,
+        object? instance,
+        object?[] args,
         LogSource logger )
     {
         ILockHandle? lockHandle = null;
@@ -100,6 +102,7 @@ public static class CachingFrontend
                 // Cache miss.
                 if ( configuration.AutoReload.GetValueOrDefault() )
                 {
+                    var valueProvider = () => invokeOriginalMethod( instance, args );
                     backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, false );
                 }
 
@@ -107,7 +110,7 @@ public static class CachingFrontend
 
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    value = valueProvider.Invoke();
+                    value = invokeOriginalMethod( instance, args );
 
                     value = SetItem( key, value, valueType, configuration, context );
 
@@ -138,12 +141,14 @@ public static class CachingFrontend
     }
 
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static async Task<object?> GetOrAddAsync<T>(
+    public static async Task<object?> GetOrAddAsync(
         MethodInfo method,
         string key,
         Type valueType,
         IRunTimeCacheItemConfiguration configuration,
-        Func<Task<T?>> valueProvider,
+        Func<object?, object?[], Task<object?>> invokeOriginalMethod,
+        object? instance,
+        object?[] args,
         LogSource logger,
         CancellationToken cancellationToken )
     {
@@ -223,6 +228,7 @@ public static class CachingFrontend
 
                 if ( configuration.AutoReload.GetValueOrDefault() )
                 {
+                    var valueProvider = () => invokeOriginalMethod( instance, args );
                     backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, true );
                 }
 
@@ -230,7 +236,7 @@ public static class CachingFrontend
 
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    var invokeValueProviderTask = valueProvider.Invoke();
+                    var invokeValueProviderTask = invokeOriginalMethod( instance, args );
 
                     value = await invokeValueProviderTask;
 

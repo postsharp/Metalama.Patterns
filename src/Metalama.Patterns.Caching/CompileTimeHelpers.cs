@@ -106,6 +106,8 @@ internal static class CompileTimeHelpers
         var bytes = md5.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() + purpose ) );
 
         // TODO: use base62 or something else
-        return "_" + BitConverter.ToString( bytes ).Replace( "-", string.Empty );
+        return prefix + "_" + BitConverter.ToString( bytes ).Replace( "-", string.Empty );
     }
+
+    public static void ThrowAtCompileTime( this Exception e ) => throw e;
 }

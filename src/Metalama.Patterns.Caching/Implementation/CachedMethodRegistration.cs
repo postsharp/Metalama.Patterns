@@ -31,6 +31,16 @@ public sealed class CachedMethodRegistration
     public ImmutableArray<CachedParameterInfo> Parameters { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the return type of the method can be <see langword="null"/>.
+    /// </summary>
+    public bool ReturnValueCanBeNull { get; }
+
+    /// <summary>
+    /// Gets a delegate that can invoke the original uncached method.
+    /// </summary>
+    public Func<object?, object?[], object?> InvokeOriginalMethod { get; }
+
+    /// <summary>
     /// Gets the build time configuration that applies to the method.
     /// </summary>
     /// <remarks>
@@ -113,11 +123,15 @@ public sealed class CachedMethodRegistration
         MethodInfo method,
         ImmutableArray<CachedParameterInfo> parameters,
         bool isThisParameterIgnored,
-        IRunTimeCacheItemConfiguration buildTimeConfiguration )
+        Func<object?, object?[], object?> invokeOriginalMethod,
+        IRunTimeCacheItemConfiguration buildTimeConfiguration,
+        bool returnValueCanBeNull )
     {
         this.Method = method;
         this.Parameters = parameters;
         this.IsThisParameterIgnored = isThisParameterIgnored;
         this.BuildTimeConfiguration = buildTimeConfiguration;
+        this.ReturnValueCanBeNull = returnValueCanBeNull;
+        this.InvokeOriginalMethod = invokeOriginalMethod;
     }
 }

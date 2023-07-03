@@ -22,13 +22,17 @@ public sealed class MethodRegistrationCache
     [EditorBrowsable( EditorBrowsableState.Never )]
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
-        [Required] IRunTimeCacheItemConfiguration buildTimeConfiguration )
+        [Required] Func<object?, object?[], object?> invokeOriginalMethod,
+        [Required] IRunTimeCacheItemConfiguration buildTimeConfiguration,
+        bool returValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
             method,
             GetCachedParameterInfos( method ),
             buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
-            buildTimeConfiguration );
+            invokeOriginalMethod,
+            buildTimeConfiguration,
+            returValueCanBeNull );
 
         if ( !this._methodInfoCache.TryAdd( method, toAdd ) )
         {
