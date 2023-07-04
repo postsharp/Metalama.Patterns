@@ -22,6 +22,10 @@ public sealed class ValueAdapterFactory
         this.Register( new StreamAdapter() );
         this.Register( typeof(IEnumerable<>), typeof(EnumerableAdapter<>) );
         this.Register( typeof(IEnumerator<>), typeof(EnumeratorAdapter<>) );
+#if NETCOREAPP3_0_OR_GREATER
+        this.Register( typeof( IAsyncEnumerable<> ), typeof( AsyncEnumerableAdapter<> ) );
+        this.Register( typeof( IAsyncEnumerator<> ), typeof( AsyncEnumeratorAdapter<> ) );
+#endif
     }
 
     /// <summary>

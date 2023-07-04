@@ -22,7 +22,8 @@
         <SystemThreadingThreadPoolVersion>4.3.0</SystemThreadingThreadPoolVersion>
         <SystemThreadingThreadVersion>4.3.0</SystemThreadingThreadVersion>
         <SystemThreadingVersion>4.3.0</SystemThreadingVersion>
-        <SystemValueTupleVersion>4.5.0</SystemValueTupleVersion>
+		<SystemThreadingTasksExtensionsVersion>4.5.4</SystemThreadingTasksExtensionsVersion>
+		<SystemValueTupleVersion>4.5.0</SystemValueTupleVersion>
         <SystemXmlXmlSerializerVersion>4.3.0</SystemXmlXmlSerializerVersion>
         <WindowsAzureServiceBusVersion>4.1.2</WindowsAzureServiceBusVersion>
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>

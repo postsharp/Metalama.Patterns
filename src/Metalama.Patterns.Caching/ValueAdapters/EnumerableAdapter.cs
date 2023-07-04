@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.RunTime;
+
 namespace Metalama.Patterns.Caching.ValueAdapters;
 
 internal sealed class EnumerableAdapter<T> : ValueAdapter<IEnumerable<T>>
@@ -16,3 +18,7 @@ internal sealed class EnumerableAdapter<T> : ValueAdapter<IEnumerable<T>>
 
     public override IEnumerable<T>? GetExposedValue( object? storedValue ) => (IEnumerable<T>?) storedValue;
 }
+
+#if NETCOREAPP3_0_OR_GREATER
+
+#endif

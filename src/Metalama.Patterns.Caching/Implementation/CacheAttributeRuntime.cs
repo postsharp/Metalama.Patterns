@@ -70,10 +70,10 @@ public static class CacheAttributeRunTime
         }
     }
 
-    public static async Task<TTaskResultType?> OverrideMethodAsync<TTaskResultType>( CachedMethodRegistration registration, object? instance, object?[] args )
+    public static async Task<TTaskResultType?> OverrideMethodAsyncTask<TTaskResultType>( CachedMethodRegistration registration, object? instance, object?[] args )
     {
         Debug.Assert( registration != null, "registration must not be null." );
-        Debug.Assert( registration.InvokeOriginalMethodAsync != null, "registration.InvokeOriginalMethodAsync must not be null" );
+        Debug.Assert( registration.InvokeOriginalMethodAsyncTask != null, "registration.InvokeOriginalMethodAsyncTask must not be null" );
 
         // TODO: What about ConfigureAwait( false )?
 
@@ -94,7 +94,7 @@ public static class CacheAttributeRunTime
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    var task = registration.InvokeOriginalMethodAsync( instance, args );
+                    var task = registration.InvokeOriginalMethodAsyncTask( instance, args );
 
                     if ( !task.IsCompleted )
                     {
@@ -132,7 +132,115 @@ public static class CacheAttributeRunTime
                         methodKey,
                         registration.Method.ReturnType,
                         mergedConfiguration,
-                        registration.InvokeOriginalMethodAsync,
+                        registration.InvokeOriginalMethodAsyncTask,
+                        instance,
+                        args,
+                        logSource,
+                        CancellationToken.None );
+
+                    if ( !task.IsCompleted )
+                    {
+                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
+                        // and the await instrumentation policy is not applied.
+                        activity.Suspend();
+                        try
+                        {
+                            result = await task;
+                        }
+                        finally
+                        {
+                            activity.Resume();
+                        }
+                    }
+                    else
+                    {
+                        // Don't wrap any exception.
+                        result = task.GetAwaiter().GetResult();
+                    }
+                }
+
+                activity.SetSuccess();
+            }
+            catch ( Exception e )
+            {
+                activity.SetException( e );
+                throw;
+            }
+        }
+
+        if ( registration.ReturnValueCanBeNull )
+        {
+            return (TTaskResultType?) result;
+        }
+        else
+        {
+            return result == null ? default : (TTaskResultType) result;
+        }
+    }
+
+    public static async ValueTask<TTaskResultType?> OverrideMethodAsyncValueTask<TTaskResultType>( CachedMethodRegistration registration, object? instance, object?[] args )
+    {
+        Debug.Assert( registration != null, "registration must not be null." );
+        Debug.Assert( registration.InvokeOriginalMethodAsyncValueTask != null, "registration.InvokeOriginalMethodAsyncTask must not be null" );
+
+        // TODO: What about ConfigureAwait( false )?
+
+        var logSource = registration.Logger;
+
+        object? result;
+
+        // TODO: PostSharp passes an otherwise uninitialzed CallerInfo with the CallerAttributes.IsAsync flag set.
+
+        // TODO: [Porting] Discuss: We could do this string interpolation at build time, but obfuscation/IL-rewriting could change the method signature before runtime. Best practice?
+        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", registration.Method ) ) )
+        {
+            try
+            {
+                var mergedConfiguration = registration.MergedConfiguration;
+
+                if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
+                {
+                    logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
+
+                    var task = registration.InvokeOriginalMethodAsyncValueTask( instance, args );
+
+                    if ( !task.IsCompleted )
+                    {
+                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
+                        // and the await instrumentation policy is not applied.
+                        activity.Suspend();
+                        try
+                        {
+                            result = await task;
+                        }
+                        finally
+                        {
+                            activity.Resume();
+                        }
+                    }
+                    else
+                    {
+                        // Don't wrap any exception.
+                        result = task.GetAwaiter().GetResult();
+                    }
+                }
+                else
+                {
+                    var methodKey = CachingServices.DefaultKeyBuilder.BuildMethodKey(
+                        registration,
+                        args,
+                        instance );
+
+                    logSource.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
+
+                    // TODO: Pass CancellationToken (note from original code)
+
+                    var task = CachingFrontend.GetOrAddAsync(
+                        registration.Method,
+                        methodKey,
+                        registration.Method.ReturnType,
+                        mergedConfiguration,
+                        registration.InvokeOriginalMethodAsyncValueTask,
                         instance,
                         args,
                         logSource,

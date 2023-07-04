@@ -152,6 +152,8 @@ public static class CachingFrontend
         LogSource logger,
         CancellationToken cancellationToken )
     {
+        // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
+
         var backend = CachingServices.DefaultBackend;
         CacheValue? item = null;
         ILockHandle? lockHandle = null;
@@ -229,6 +231,139 @@ public static class CachingFrontend
                 if ( configuration.AutoReload.GetValueOrDefault() )
                 {
                     var valueProvider = () => invokeOriginalMethod( instance, args );
+                    backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, true );
+                }
+
+                logger.Debug.EnabledOrNull?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
+
+                using ( var context = CachingContext.OpenCacheContext( key ) )
+                {
+                    var invokeValueProviderTask = invokeOriginalMethod( instance, args );
+
+                    value = await invokeValueProviderTask;
+
+                    var invokeSetItemAsyncTask = SetItemAsync( key, value, valueType, configuration, context, cancellationToken );
+
+                    value = await invokeSetItemAsyncTask;
+
+                    context.AddDependenciesToParent( method );
+                }
+            }
+            else
+            {
+                // Cache hit.
+
+                logger.Debug.EnabledOrNull?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
+
+                AddCacheHitDependencies( key, item );
+
+                value = item.Value;
+            }
+
+            return value;
+        }
+        finally
+        {
+            if ( lockHandle != null )
+            {
+                await lockHandle.ReleaseAsync();
+                lockHandle.Dispose();
+            }
+        }
+    }
+
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    public static async Task<object?> GetOrAddAsync(
+        MethodInfo method,
+        string key,
+        Type valueType,
+        IRunTimeCacheItemConfiguration configuration,
+        Func<object?, object?[], ValueTask<object?>> invokeOriginalMethod,
+        object? instance,
+        object?[] args,
+        LogSource logger,
+        CancellationToken cancellationToken )
+    {
+        // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
+        // TODO: Ideally we'd avoid allocating Task here (ie, use ValueTask), at least in the cache hit path, but this is non-trivial given the extensible API which uses Task widely.       
+
+        var backend = CachingServices.DefaultBackend;
+        CacheValue? item = null;
+        ILockHandle? lockHandle = null;
+
+        var profile = CachingServices.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
+
+        try
+        {
+            if ( (CachingContext.Current.Kind & CachingContextKind.Recache) == 0 )
+            {
+                item = await backend.GetItemAsync( key, cancellationToken: cancellationToken );
+
+                if ( item == null )
+                {
+                    // The item was not found in the cache, so we have to acquire a lock.
+                    lockHandle = profile.LockManager.GetLock( key );
+
+                    if ( await lockHandle.AcquireAsync( TimeSpan.Zero, CancellationToken.None ) )
+                    {
+                        // The lock was acquired without waiting so we are sure to be the first reader and we don't need to
+                        // do a second cache lookup.
+                    }
+                    else if ( await lockHandle.AcquireAsync( profile.AcquireLockTimeout, CancellationToken.None ) )
+                    {
+                        // We had to wait to acquire the lock, so another reader may have put the item in the cache.
+                        // Do a second cache lookup.
+
+                        item = await backend.GetItemAsync( key, cancellationToken: cancellationToken );
+                    }
+                    else
+                    {
+                        // Time out condition.
+                        profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                    }
+                }
+
+                if ( item != null )
+                {
+                    var valueAdapter = backend.ValueAdapters.Get( valueType );
+
+                    if ( valueAdapter != null )
+                    {
+                        var unwrappedValue = valueAdapter.GetExposedValue( item.Value );
+                        item = item.WithValue( unwrappedValue );
+                    }
+                }
+            }
+            else
+            {
+                // When we recache, we have to acquire the lock without doing a cache lookup.
+                lockHandle = profile.LockManager.GetLock( key );
+
+                if ( !await lockHandle.AcquireAsync( profile.AcquireLockTimeout, CancellationToken.None ) )
+                {
+                    // Time out condition.
+                    profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                }
+            }
+
+            object? value;
+
+            if ( item == null )
+            {
+                // Cache miss.
+
+#if DEBUG
+
+                // At this point, we assume we own the lock.
+                if ( lockHandle == null )
+                {
+                    throw new MetalamaPatternsCachingAssertionFailedException();
+                }
+#endif
+
+                if ( configuration.AutoReload.GetValueOrDefault() )
+                {
+                    var valueProvider = () => invokeOriginalMethod( instance, args ).AsTask();
                     backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, true );
                 }
 

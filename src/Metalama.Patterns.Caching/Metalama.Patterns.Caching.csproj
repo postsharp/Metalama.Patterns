@@ -21,9 +21,11 @@
     <PackageReference Include="System.Threading.Thread" Version="$(SystemThreadingThreadVersion)" />
     <PackageReference Include="System.Threading.ThreadPool" Version="$(SystemThreadingThreadPoolVersion)" />
     <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressionsVersion)" />
+	<PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsVersion)" />
+  </ItemGroup>
 
-    <!--PackageReference Include="System.Xml.XmlSerializer" Version="$(SystemXmlXmlSerializerVersion)" />
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="$(SystemRuntimeSerializationPrimitivesVersion)" /-->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsVersion)" />
   </ItemGroup>
 
   <ItemGroup>

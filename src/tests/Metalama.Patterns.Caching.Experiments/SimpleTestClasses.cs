@@ -9,7 +9,47 @@ using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Experiments;
 
-public sealed class StaticYieldingEnumerable
+public static class S_Enumerator
+{
+    [Cache]
+    public static IEnumerator<int> TimesTwo( params int[] values )
+    {
+        return (IEnumerator<int>) values.GetEnumerator();
+    }
+}
+
+public static class S_AsyncEnumerable
+{
+    [Cache]
+    public static async IAsyncEnumerable<int> OneTwoThree()
+    {
+        await Task.Delay( 1 );
+        yield return 1;
+        await Task.Delay( 1 );
+        yield return 2;
+        await Task.Delay( 1 );
+        yield return 3;
+    }
+}
+
+public static class S_AsyncEnumerator
+{
+    [Cache]
+    public static IAsyncEnumerator<int> GetEnumerator()
+        => OneTwoThree().GetAsyncEnumerator();
+
+    private static async IAsyncEnumerable<int> OneTwoThree()
+    {
+        await Task.Delay( 1 );
+        yield return 1;
+        await Task.Delay( 1 );
+        yield return 2;
+        await Task.Delay( 1 );
+        yield return 3;
+    }
+}
+
+public sealed class I_S_YieldingEnumerable
 {
     [Cache]
     public IEnumerable<int> TimesTwo( params int[] values )
@@ -21,7 +61,7 @@ public sealed class StaticYieldingEnumerable
     }
 }
 
-public sealed class StaticIntAsync
+public sealed class I_S_IntAsyncTask
 {
     [Cache]
     public static async Task<int> TimesTwo( int x )
@@ -30,7 +70,16 @@ public sealed class StaticIntAsync
     }
 }
 
-public sealed class InstanceInt
+public sealed class I_S_IntAsyncValueTask
+{
+    [Cache]
+    public static async ValueTask<int> TimesTwo( int x )
+    {
+        return x * 2;
+    }
+}
+
+public sealed class I_I_Int
 {
     [Cache]
     public int TimesTwo( int x )
@@ -39,7 +88,7 @@ public sealed class InstanceInt
     }
 }
 
-public static class StaticInt
+public static class S_Int
 {
     [Cache]
     public static int TimesTwo( int x )
@@ -49,7 +98,7 @@ public static class StaticInt
     }
 }
 
-public sealed class InstanceString
+public sealed class I_I_String
 {
     [Cache]
     public string Reverse( string x )
@@ -58,7 +107,7 @@ public sealed class InstanceString
     }
 }
 
-public sealed class StaticString
+public sealed class I_S_String
 {
     [Cache]
     public static string Reverse( string x )
@@ -67,7 +116,7 @@ public sealed class StaticString
     }
 }
 
-public sealed class TwoCachedMethods
+public sealed class I_S_TwoCachedMethods
 {
     [Cache]
     public static int TimesTwo( int x )
@@ -75,11 +124,24 @@ public sealed class TwoCachedMethods
         return x * 2;
     }
 
-#if false
     [Cache]
     public static int TimesThree( int x )
     {
         return x * 3;
     }
-#endif
+}
+
+public sealed class I_S_TwoCachedMethodsSameName
+{
+    [Cache]
+    public static int TimesTwo( int x )
+    {
+        return x * 2;
+    }
+
+    [Cache]
+    public static double TimesTwo( double x )
+    {
+        return x * 3;
+    }
 }

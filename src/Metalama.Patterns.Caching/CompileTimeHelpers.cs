@@ -115,11 +115,97 @@ internal static class CompileTimeHelpers
     public static void ThrowAtCompileTime( this Exception e ) => throw e;
 
     /// <summary>
-    /// Determines if the current <see cref="IType"/> is <see cref="Task"/> or <see cref="ValueTask"/> (when <paramref name="withResult"/> is <see langword="false"/>),
-    /// or <see cref="Task{TResult}"/> or <see cref="ValueTask{TResult}"/> (when <paramref name="withResult"/> is <see langword="true"/>).
+    /// Determines if the current <see cref="IType"/> is <see cref="Task"/>, <see cref="Task{TResult}"/>, <see cref="ValueTask"/> or <see cref="ValueTask{TResult}"/>.
     /// </summary>
-    public static bool IsTaskOrValueTask( this IType type, bool withResult = false )
-        => withResult
-            ? type.SpecialType == SpecialType.Task_T || type.SpecialType == SpecialType.ValueTask_T
-            : type.SpecialType == SpecialType.Task || type.SpecialType == SpecialType.ValueTask;
+    /// <param name="type"></param>
+    /// <param name="hasResult">If <see langword="null"/>, matches types with our without <c>TResult</c>. If <see langword="false"/>, only matches
+    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <see cref="TResult"/>.</param>
+    public static bool IsTaskOrValueTask( this IType type, bool? hasResult = default )
+    {
+        var unboundType = (type as INamedType)?.GetOriginalDefinition();
+        
+        if ( unboundType == null )
+        {
+            return false;
+        }
+
+        var isWithValue = unboundType.SpecialType == SpecialType.Task_T || unboundType.SpecialType == SpecialType.ValueTask_T;
+        var isWithoutValue = unboundType.SpecialType == SpecialType.Task || unboundType.SpecialType == SpecialType.ValueTask;
+
+        return hasResult switch
+        {
+            true => isWithValue,
+            false => isWithoutValue,
+            _ => isWithValue || isWithoutValue
+        };
+    }
+
+    /// <summary>
+    /// Determines if the current <see cref="IType"/> is <see cref="Task"/> or <see cref="Task{TResult}"/>.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="withResult">If <see langword="null"/>, matches types with our without <c>TResult</c>. If <see langword="false"/>, only matches
+    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <see cref="TResult"/>.</param>
+    public static bool IsTask( this IType type, bool? withResult = default )
+    {
+        var unboundType = (type as INamedType)?.GetOriginalDefinition();
+
+        if ( unboundType == null )
+        {
+            return false;
+        }
+
+        var isWithValue = unboundType.SpecialType == SpecialType.Task_T;
+        var isWithoutValue = unboundType.SpecialType == SpecialType.Task;
+
+        return withResult switch
+        {
+            true => isWithValue,
+            false => isWithoutValue,
+            _ => isWithValue || isWithoutValue
+        };
+    }
+
+    /// <summary>
+    /// Determines if the current <see cref="IType"/> is <see cref="ValueTask"/> or <see cref="ValueTask{TResult}"/>.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="withResult">If <see langword="null"/>, matches types with our without <c>TResult</c>. If <see langword="false"/>, only matches
+    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <see cref="TResult"/>.</param>
+    public static bool IsValueTask( this IType type, bool? withResult = default )
+    {
+        var unboundType = (type as INamedType)?.GetOriginalDefinition();
+
+        if ( unboundType == null )
+        {
+            return false;
+        }
+
+        var isWithValue = unboundType.SpecialType == SpecialType.ValueTask_T;
+        var isWithoutValue = unboundType.SpecialType == SpecialType.ValueTask;
+
+        return withResult switch
+        {
+            true => isWithValue,
+            false => isWithoutValue,
+            _ => isWithValue || isWithoutValue
+        };
+    }
+
+    /// <summary>
+    /// Determines if the current <see cref="IType"/> is <see cref="System.Collections.IEnumerator"/>, <see cref="IEnumerator{T}"/> or <see cref="IAsyncEnumerator{T}"/>.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static bool IsEnumerator( this IType type )
+    {
+        var unboundType = (type as INamedType)?.GetOriginalDefinition();
+
+        if ( unboundType == null )
+        {
+            return false;
+        }
+
+        return unboundType.SpecialType is SpecialType.IEnumerator or SpecialType.IEnumerator_T or SpecialType.IAsyncEnumerator_T;
+    }
 }

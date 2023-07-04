@@ -9,13 +9,6 @@ using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching;
 
-/* Task/ValueTask strategy:
- * 
- * - don't convert to Task for cache hit.
- * - Allow conversion to Task for cache miss and auto reload.
- * 
- */
-
 public sealed class CacheAttribute : MethodAspect
 {
     private bool? _autoReload;
@@ -68,8 +61,8 @@ public sealed class CacheAttribute : MethodAspect
 
         builder.MustNotHaveRefOrOutParameter();
         builder.ReturnType().MustSatisfy( t => t.SpecialType != SpecialType.Void, t => $"must not be void" );
-        builder.ReturnType().MustSatisfy( t => !t.Is( typeof( Task ) ) || ((INamedType) t).IsGeneric, t => $"must not be non-generic Task" );
-        builder.ReturnType().MustSatisfy( t => !t.GetAsyncInfo().IsAwaitable || t.Is( typeof( Task ) ), t => $"must not be an awaitable type other than Task<TResult>" );
+        builder.ReturnType().MustSatisfy( t => !t.IsTaskOrValueTask( hasResult: false ), t => $"must not be a Task or ValueTask without a return value" );
+        builder.ReturnType().MustSatisfy( t => !t.GetAsyncInfo().IsAwaitable || t.IsTaskOrValueTask( hasResult: true ), t => $"must not be an awaitable type other than Task<TResult> or ValueTask<TResult>" );
     }
 
     /* Consider alternative implementation strategy:
@@ -83,6 +76,12 @@ public sealed class CacheAttribute : MethodAspect
         // TODO: [Porting] !!! Required, decide: Apply fallback configuration or deprecate [CacheConfiguration] and use Metalama options. See also BuildTimeCacheConfigurationManager.
 
         var asyncInfo = builder.Target.MethodDefinition.GetAsyncInfo();
+        var returnTypeIsTask = builder.Target.ReturnType.IsTask();
+
+        // looseReturnType is object, or if eligible awaitable, Task<object> or ValueTask<object>
+        //var looseReturnType = asyncInfo.IsAwaitable
+        //    ? TypeFactory.GetType( ((INamedType) builder.Target.ReturnType).GetOriginalDefinition().SpecialType ).WithTypeArguments( TypeFactory.GetType( SpecialType.Object ) ).ToNullableType()
+        //    : TypeFactory.GetType( SpecialType.Object ).ToNullableType();
 
         var registrationFieldName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{DC8C6993-4BD2-49BB-AACB-B628E69954CC}", $"_cacheRegistration_{builder.Target.Name}" );
 
@@ -103,9 +102,13 @@ public sealed class CacheAttribute : MethodAspect
          */
         var templates = new MethodTemplateSelector(
             nameof( this.OverrideMethod ),
-            nameof( this.OverrideMethodAsync ),
+            returnTypeIsTask ? nameof( this.OverrideMethodAsyncTask ) : nameof( this.OverrideMethodAsyncValueTask ),
             nameof( this.OverrideMethod ),
-            useAsyncTemplateForAnyAwaitable: true );
+            nameof( this.OverrideMethod ),
+            nameof( this.OverrideMethod ),
+            nameof( this.OverrideMethod ),            
+            useAsyncTemplateForAnyAwaitable: true ,
+            useEnumerableTemplateForAnyEnumerable: true );
 
         var taskResultType = asyncInfo.IsAwaitable
             ? asyncInfo.ResultType
@@ -118,15 +121,16 @@ public sealed class CacheAttribute : MethodAspect
             {
                 TTaskResultType = taskResultType,
                 TReturnType = builder.Target.ReturnType,
-                taskResultType = taskResultType,
                 registrationField = registrationField.Declaration
             } );
 
         var getInvokerMethodName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{FC85178F-3F0F-47E3-B5ED-25050804CF44}", $"GetInvoker_{builder.Target.Name}" );
 
-        var getInvokerTemplate = asyncInfo.IsAwaitable ? nameof( this.GetOriginalMethodInvokerAsync ) : nameof( this.GetOriginalMethodInvoker );
+        var getInvokerTemplate = asyncInfo.IsAwaitable 
+            ? returnTypeIsTask ? nameof( this.GetOriginalMethodInvokerForTask ) : nameof( this.GetOriginalMethodInvokerForValueTask )
+            : nameof( this.GetOriginalMethodInvoker );
 
-        var getOriginalMethodInvokerResult = builder.Advice.IntroduceMethod(            
+        var getOriginalMethodInvokerResult = builder.Advice.IntroduceMethod(
             builder.Target.DeclaringType,
             getInvokerTemplate,
             IntroductionScope.Static,
@@ -138,8 +142,8 @@ public sealed class CacheAttribute : MethodAspect
             },
             args: new
             {
-                // Invoking `method` needs to invoke the body of the original method, not the overridden one - otherwise we just get a circular call.
-                method = builder.Target
+                method = builder.Target,
+                TResult = TypeFactory.GetType( SpecialType.Object ) // TODO: For now. Might change for enumerables etc. If not, simplify.
             } );
 
         builder.Advice.AddInitializer(
@@ -155,80 +159,35 @@ public sealed class CacheAttribute : MethodAspect
     }
 
     [Template]
-    public Func<object?, object?[], object?> GetOriginalMethodInvoker( IMethod method )
+    public Func<object?, object?[], TResult?> GetOriginalMethodInvoker<[CompileTime] TResult>( IMethod method )
     {
         return Invoke;
 
-        object? Invoke( object? instance, object?[] args )
+        TResult? Invoke( object? instance, object?[] args )
         {
-            // In both cases, invoking `method` needs to invoke the body of the original method, not the overridden one - otherwise we just get a circular call.
-            if ( method.IsStatic )
-            {
-                /* I want to write:
-                 * 
-                 *  method.Invoke( args );
-                 * 
-                 * Which should emit, for the actual number of parameters in `method`:
-                 * 
-                 *  ActualNameOfMethod( (ActualParameter0Type)args[0], (ActualParameter1Type)args[1] )
-                 *  
-                 */
-                return method.With( InvokerOptions.Base ).Invoke( meta.Cast( method.Parameters[0].Type, args[0] ) );
-            }
-            else
-            {
-                /* I want to write:
-                 * 
-                 *  method.With( instance ).Invoke( args );
-                 * 
-                 * Which should emit, for the actual number of parameters in `method`:
-                 * 
-                 *  ((ActualDeclaringTypeOfMethod)instance).ActualNameOfMethod( (ActualParameter0Type)args[0], (ActualParameter1Type)args[1] )
-                 *  
-                 */
-                return method.With( InvokerOptions.Base ).With( instance ).Invoke( meta.Cast( method.Parameters[0].Type, args[0] ) );
-            }
+            return method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args );
+        }
+    }
+        
+    [Template]
+    public Func<object?, object?[], Task<object?>> GetOriginalMethodInvokerForTask( IMethod method, IType TResult /* not used */ )
+    {
+        return Invoke;
+        
+        async Task<object?> Invoke( object? instance, object?[] args )
+        {
+            return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args );
         }
     }
 
     [Template]
-    public Func<object?, object?[], Task<object?>> GetOriginalMethodInvokerAsync( IMethod method )
+    public Func<object?, object?[], ValueTask<object?>> GetOriginalMethodInvokerForValueTask( IMethod method, IType TResult /* not used */ )
     {
         return Invoke;
 
-        async Task<object?> Invoke( object? instance, object?[] args )
+        async ValueTask<object?> Invoke( object? instance, object?[] args )
         {
-            // In both cases, invoking `method` needs to invoke the body of the original method, not the overridden one - otherwise we just get a circular call.
-            if ( method.IsStatic )
-            {
-                /* I want to write:
-                 * 
-                 *  method.Invoke( args );
-                 * 
-                 * Which should emit, for the actual number of parameters in `method`:
-                 * 
-                 *  ActualNameOfMethod( (ActualParameter0Type)args[0], (ActualParameter1Type)args[1] )
-                 *  
-                 */
-                //return await method.Invoke( args );
-                meta.InsertComment( $"Would have called {method.Name} here." );
-                return null;
-            }
-            else
-            {
-                /* I want to write:
-                 * 
-                 *  method.With( instance ).Invoke( args );
-                 * 
-                 * Which should emit, for the actual number of parameters in `method`:
-                 * 
-                 *  ((ActualDeclaringTypeOfMethod)instance).ActualNameOfMethod( (ActualParameter0Type)args[0], (ActualParameter1Type)args[1] )
-                 *  
-                 */
-                //return await method.With( instance ).Invoke( args );
-                meta.InsertComment( $"Would have called {method.Name} here." );
-                return null;
-            }
+            return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args );
         }
     }
 
@@ -251,7 +210,7 @@ public sealed class CacheAttribute : MethodAspect
     }
 
     [Template]
-    public TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType taskResultType /* not used */, IType TTaskResultType /* not used */ )
+    public TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType TTaskResultType /* not used */ )
     {
         return CacheAttributeRunTime.OverrideMethod<TReturnType>(
             registrationField.Value,
@@ -260,9 +219,18 @@ public sealed class CacheAttribute : MethodAspect
     }
 
     [Template]
-    public Task<TTaskResultType> OverrideMethodAsync<[CompileTime] TTaskResultType>( IField registrationField, IType taskResultType, IType TReturnType /* not used */ )
+    public Task<TTaskResultType> OverrideMethodAsyncTask<[CompileTime] TTaskResultType>( IField registrationField, IType TReturnType /* not used */ )
     {
-        return CacheAttributeRunTime.OverrideMethodAsync<TTaskResultType>(
+        return CacheAttributeRunTime.OverrideMethodAsyncTask<TTaskResultType>(
+            registrationField.Value,
+            meta.Target.Method.IsStatic ? null : meta.This,
+            meta.Target.Method.Parameters.ToValueArray() );
+    }
+
+    [Template]
+    public ValueTask<TTaskResultType> OverrideMethodAsyncValueTask<[CompileTime] TTaskResultType>( IField registrationField, IType TReturnType /* not used */ )
+    {
+        return CacheAttributeRunTime.OverrideMethodAsyncValueTask<TTaskResultType>(
             registrationField.Value,
             meta.Target.Method.IsStatic ? null : meta.This,
             meta.Target.Method.Parameters.ToValueArray() );
