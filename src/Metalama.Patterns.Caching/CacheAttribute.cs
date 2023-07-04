@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.ValueAdapters;
 
 namespace Metalama.Patterns.Caching;
 
@@ -101,14 +102,14 @@ public sealed class CacheAttribute : MethodAspect
          * want buffering here because caching infrastructure uses ValueAdaptors for this.
          */
         var templates = new MethodTemplateSelector(
-            nameof( this.OverrideMethod ),
-            returnTypeIsTask ? nameof( this.OverrideMethodAsyncTask ) : nameof( this.OverrideMethodAsyncValueTask ),
-            nameof( this.OverrideMethod ),
-            nameof( this.OverrideMethod ),
-            nameof( this.OverrideMethod ),
-            nameof( this.OverrideMethod ),            
-            useAsyncTemplateForAnyAwaitable: true ,
-            useEnumerableTemplateForAnyEnumerable: true );
+            defaultTemplate: nameof( this.OverrideMethod ),
+            asyncTemplate: returnTypeIsTask ? nameof( this.OverrideMethodAsyncTask ) : nameof( this.OverrideMethodAsyncValueTask ),
+            enumerableTemplate: nameof( this.OverrideMethod ),
+            enumeratorTemplate: nameof( this.OverrideMethod ),
+            asyncEnumerableTemplate: "OverrideMethodAsyncEnumerable", // nameof( this.OverrideMethodAsyncEnumerable ),
+            asyncEnumeratorTemplate: nameof( this.OverrideMethod ),
+            useAsyncTemplateForAnyAwaitable: true,
+            useEnumerableTemplateForAnyEnumerable: false );
 
         var taskResultType = asyncInfo.IsAwaitable
             ? asyncInfo.ResultType
@@ -191,6 +192,23 @@ public sealed class CacheAttribute : MethodAspect
         }
     }
 
+#if NETCOREAPP3_0_OR_GREATER
+
+    [Template]
+    public Func<object?, object?[], Task<object?>> GetOriginalMethodInvokerForAsyncEnumerable( IMethod method, IType TResult /* not used */ )
+    {
+        return Invoke;
+
+        async Task<object?> Invoke( object? instance, object?[] args )
+        {
+            var enumerator = method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args ).GetEnumerator();
+            var moveNextResult = await enumerator.MoveNextAsync();
+            return AsyncEnumeratorExposedValue.Create( moveNextResult, enumerator );
+        }
+    }
+
+#endif
+
     [Template]
     public void CachedMethodRegistrationInitializer( IMethod method, IField field, IMethod getOriginalMethodInvoker )
     {
@@ -235,4 +253,18 @@ public sealed class CacheAttribute : MethodAspect
             meta.Target.Method.IsStatic ? null : meta.This,
             meta.Target.Method.Parameters.ToValueArray() );
     }
+
+#if NETCOREAPP3_0_OR_GREATER
+
+    [Template]
+    public IAsyncEnumerable<TTaskResultType> OverrideMethodAsyncEnumerable<[CompileTime] TTaskResultType>( IField registrationField, IType TReturnType /* not used */ )
+    {
+        return
+            CacheAttributeRunTime.OverrideMethodAsyncTask<AsyncEnumeratorExposedValue<TTaskResultType>>(
+                registrationField.Value,
+                meta.Target.Method.IsStatic ? null : meta.This,
+                meta.Target.Method.Parameters.ToValueArray() )
+            .Buffer;
+    }
+#endif
 }

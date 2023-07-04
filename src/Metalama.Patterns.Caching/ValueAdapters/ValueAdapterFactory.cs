@@ -23,8 +23,7 @@ public sealed class ValueAdapterFactory
         this.Register( typeof(IEnumerable<>), typeof(EnumerableAdapter<>) );
         this.Register( typeof(IEnumerator<>), typeof(EnumeratorAdapter<>) );
 #if NETCOREAPP3_0_OR_GREATER
-        this.Register( typeof( IAsyncEnumerable<> ), typeof( AsyncEnumerableAdapter<> ) );
-        this.Register( typeof( IAsyncEnumerator<> ), typeof( AsyncEnumeratorAdapter<> ) );
+        this.Register( typeof( AsyncEnumeratorExposedValue<> ), typeof( AsyncEnumeratorAdapter<> ) );
 #endif
     }
 
