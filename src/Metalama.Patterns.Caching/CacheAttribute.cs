@@ -3,9 +3,18 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Implementation;
+
 namespace Metalama.Patterns.Caching;
+
+/* Task/ValueTask strategy:
+ * 
+ * - don't convert to Task for cache hit.
+ * - Allow conversion to Task for cache miss and auto reload.
+ * 
+ */
 
 public sealed class CacheAttribute : MethodAspect
 {
@@ -60,6 +69,7 @@ public sealed class CacheAttribute : MethodAspect
         builder.MustNotHaveRefOrOutParameter();
         builder.ReturnType().MustSatisfy( t => t.SpecialType != SpecialType.Void, t => $"must not be void" );
         builder.ReturnType().MustSatisfy( t => !t.Is( typeof( Task ) ) || ((INamedType) t).IsGeneric, t => $"must not be non-generic Task" );
+        builder.ReturnType().MustSatisfy( t => !t.GetAsyncInfo().IsAwaitable || t.Is( typeof( Task ) ), t => $"must not be an awaitable type other than Task<TResult>" );
     }
 
     /* Consider alternative implementation strategy:
@@ -71,6 +81,8 @@ public sealed class CacheAttribute : MethodAspect
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
         // TODO: [Porting] !!! Required, decide: Apply fallback configuration or deprecate [CacheConfiguration] and use Metalama options. See also BuildTimeCacheConfigurationManager.
+
+        var asyncInfo = builder.Target.MethodDefinition.GetAsyncInfo();
 
         var registrationFieldName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{DC8C6993-4BD2-49BB-AACB-B628E69954CC}", $"_cacheRegistration_{builder.Target.Name}" );
 
@@ -88,16 +100,15 @@ public sealed class CacheAttribute : MethodAspect
 
         /* Note: We use `OverrideMethod` explicitly as enumerableTemplate so we don't get .Buffer() added for enumerable methods. We don't
          * want buffering here because caching infrastructure uses ValueAdaptors for this.
-         * 
-         * TODO: Review - do we still need the ValueAdaptor layer with Metalama?
          */
         var templates = new MethodTemplateSelector(
-            nameof( this.OverrideMethod ) ); //,
-            //nameof( this.OverrideMethodAsync ),
-            //nameof( this.OverrideMethod ) );
+            nameof( this.OverrideMethod ),
+            nameof( this.OverrideMethodAsync ),
+            nameof( this.OverrideMethod ),
+            useAsyncTemplateForAnyAwaitable: true );
 
-        var taskResultType = builder.Target.MethodDefinition.IsAsync
-            ? builder.Target.MethodDefinition.GetAsyncInfo().ResultType
+        var taskResultType = asyncInfo.IsAwaitable
+            ? asyncInfo.ResultType
             : null;
 
         var overrideMethodResult = builder.Advice.Override(
@@ -112,10 +123,12 @@ public sealed class CacheAttribute : MethodAspect
             } );
 
         var getInvokerMethodName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{FC85178F-3F0F-47E3-B5ED-25050804CF44}", $"GetInvoker_{builder.Target.Name}" );
-        
+
+        var getInvokerTemplate = asyncInfo.IsAwaitable ? nameof( this.GetOriginalMethodInvokerAsync ) : nameof( this.GetOriginalMethodInvoker );
+
         var getOriginalMethodInvokerResult = builder.Advice.IntroduceMethod(            
             builder.Target.DeclaringType,
-            nameof( this.GetOriginalMethodInvoker ),
+            getInvokerTemplate,
             IntroductionScope.Static,
             OverrideStrategy.Fail,
             b =>
@@ -160,7 +173,44 @@ public sealed class CacheAttribute : MethodAspect
                  *  ActualNameOfMethod( (ActualParameter0Type)args[0], (ActualParameter1Type)args[1] )
                  *  
                  */
-                //return method.Invoke( args );
+                return method.With( InvokerOptions.Base ).Invoke( meta.Cast( method.Parameters[0].Type, args[0] ) );
+            }
+            else
+            {
+                /* I want to write:
+                 * 
+                 *  method.With( instance ).Invoke( args );
+                 * 
+                 * Which should emit, for the actual number of parameters in `method`:
+                 * 
+                 *  ((ActualDeclaringTypeOfMethod)instance).ActualNameOfMethod( (ActualParameter0Type)args[0], (ActualParameter1Type)args[1] )
+                 *  
+                 */
+                return method.With( InvokerOptions.Base ).With( instance ).Invoke( meta.Cast( method.Parameters[0].Type, args[0] ) );
+            }
+        }
+    }
+
+    [Template]
+    public Func<object?, object?[], Task<object?>> GetOriginalMethodInvokerAsync( IMethod method )
+    {
+        return Invoke;
+
+        async Task<object?> Invoke( object? instance, object?[] args )
+        {
+            // In both cases, invoking `method` needs to invoke the body of the original method, not the overridden one - otherwise we just get a circular call.
+            if ( method.IsStatic )
+            {
+                /* I want to write:
+                 * 
+                 *  method.Invoke( args );
+                 * 
+                 * Which should emit, for the actual number of parameters in `method`:
+                 * 
+                 *  ActualNameOfMethod( (ActualParameter0Type)args[0], (ActualParameter1Type)args[1] )
+                 *  
+                 */
+                //return await method.Invoke( args );
                 meta.InsertComment( $"Would have called {method.Name} here." );
                 return null;
             }
@@ -175,7 +225,7 @@ public sealed class CacheAttribute : MethodAspect
                  *  ((ActualDeclaringTypeOfMethod)instance).ActualNameOfMethod( (ActualParameter0Type)args[0], (ActualParameter1Type)args[1] )
                  *  
                  */
-                //return method.With( instance ).Invoke( args );
+                //return await method.With( instance ).Invoke( args );
                 meta.InsertComment( $"Would have called {method.Name} here." );
                 return null;
             }
@@ -203,189 +253,18 @@ public sealed class CacheAttribute : MethodAspect
     [Template]
     public TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType taskResultType /* not used */, IType TTaskResultType /* not used */ )
     {
-        return CacheAttributeRuntime.OverrideMethod<TReturnType>(
+        return CacheAttributeRunTime.OverrideMethod<TReturnType>(
             registrationField.Value,
             meta.Target.Method.IsStatic ? null : meta.This,
             meta.Target.Method.Parameters.ToValueArray() );
-#if false
-        var logSource = registration.Logger;
-
-        object? result;
-
-        // TODO: [Porting] Discuss: We could do this string interpolation at build time, but obfuscation/IL-rewriting could change the method signature before runtime. Best practice?
-        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of method {Method}", registration.Method ) ) )
-        {
-            try
-            {
-                var mergedConfiguration = registration.MergedConfiguration;
-
-                if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
-                {
-                    logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
-
-                    result = meta.Proceed();
-                }
-                else
-                {
-                    var methodKey = CachingServices.DefaultKeyBuilder.BuildMethodKey(
-                        registration,
-                        meta.Target.Method.Parameters.ToValueArray(),
-                        meta.Target.Method.IsStatic || this.IgnoreThisParameter ? null : meta.This );
-
-                    logSource.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
-
-                    // TODO: [Porting] Use ( delegate, TArgs ) pattern to avoid delegate creation on each call.
-
-                    result = CachingFrontend.GetOrAdd(
-                        registration.Method,
-                        methodKey,
-                        registration.Method.ReturnType,
-                        mergedConfiguration,
-                        (Func<TReturnType>) OriginalMethod,
-                        logSource );
-                }
-
-                activity.SetSuccess();
-            }
-            catch ( Exception e )
-            {
-                activity.SetException( e );
-                throw;
-            }
-        }
-
-        if ( meta.Target.Method.ReturnType.IsReferenceType == true || meta.Target.Method.ReturnType.IsNullable == true )
-        {
-            return (TReturnType) result;
-        }
-        else
-        {
-            return result == null ? default : (TReturnType) result;
-        }
-
-        // TODO: [Porting] Make this method static if meta.Target.Method.IsStatic. How?
-
-        TReturnType OriginalMethod()
-        {
-            return meta.Proceed();
-        }
-#endif
     }
 
-#if false
     [Template]
-    public async Task<TTaskResultType> OverrideMethodAsync<[CompileTime] TTaskResultType>( IField registrationField, IType taskResultType, IType TReturnType /* not used */ )
+    public Task<TTaskResultType> OverrideMethodAsync<[CompileTime] TTaskResultType>( IField registrationField, IType taskResultType, IType TReturnType /* not used */ )
     {
-        // TODO: What about ConfigureAwait( false )?
-
-        var registration = registrationField.Value;
-
-        var logSource = registration.Logger;
-
-        object? result;
-        
-        // TODO: PostSharp passes an otherwise uninitialzed CallerInfo with the CallerAttributes.IsAsync flag set.
-
-        // TODO: [Porting] Discuss: We could do this string interpolation at build time, but obfuscation/IL-rewriting could change the method signature before runtime. Best practice?
-        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", registration.Method ) ) )
-        {
-            try
-            {
-                var mergedConfiguration = registration.MergedConfiguration;
-
-                if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
-                {
-                    logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
-
-                    var task = meta.Proceed();
-
-                    if ( !task.IsCompleted )
-                    {
-                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
-                        // and the await instrumentation policy is not applied.
-                        activity.Suspend();
-                        try
-                        {
-                            result = await task;
-                        }
-                        finally
-                        {
-                            activity.Resume();
-                        }
-                    }
-                    else
-                    {
-                        // Don't wrap any exception.
-                        result = task.GetAwaiter().GetResult();
-                    }
-                }
-                else
-                {
-                    var methodKey = CachingServices.DefaultKeyBuilder.BuildMethodKey(
-                        registration,
-                        meta.Target.Method.Parameters.ToValueArray(),
-                        meta.Target.Method.IsStatic || this.IgnoreThisParameter ? null : meta.This );
-
-                    logSource.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
-
-                    // TODO: Pass CancellationToken (note from original code)
-
-                    // TODO: [Porting] Use ( delegate, TArgs ) pattern to avoid delegate creation on each call.
-
-                    var task = CachingFrontend.GetOrAddAsync(
-                        registration.Method,
-                        methodKey,
-                        registration.Method.ReturnType,
-                        mergedConfiguration,
-                        (Func<Task<TTaskResultType>>?) OriginalMethod,
-                        logSource,
-                        CancellationToken.None );
-
-                    if ( !task.IsCompleted )
-                    {
-                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
-                        // and the await instrumentation policy is not applied.
-                        activity.Suspend();
-                        try
-                        {
-                            result = await task;
-                        }
-                        finally
-                        {
-                            activity.Resume();
-                        }
-                    }
-                    else
-                    {
-                        // Don't wrap any exception.
-                        result = task.GetAwaiter().GetResult();
-                    }
-                }
-
-                activity.SetSuccess();
-            }
-            catch ( Exception e )
-            {
-                activity.SetException( e );
-                throw;
-            }
-        }
-        
-        if ( taskResultType.IsReferenceType == true || taskResultType.IsNullable == true )
-        {
-            return (TTaskResultType?) result;
-        }
-        else
-        {
-            return result == null ? default : (TTaskResultType) result;
-        }
-
-        // TODO: [Porting] Make this method static if meta.Target.Method.IsStatic. How?
-
-        async Task<TTaskResultType> OriginalMethod()
-        {
-            return await meta.Proceed();
-        }
+        return CacheAttributeRunTime.OverrideMethodAsync<TTaskResultType>(
+            registrationField.Value,
+            meta.Target.Method.IsStatic ? null : meta.This,
+            meta.Target.Method.Parameters.ToValueArray() );
     }
-#endif
 }

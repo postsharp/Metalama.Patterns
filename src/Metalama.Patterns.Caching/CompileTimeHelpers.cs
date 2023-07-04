@@ -109,5 +109,17 @@ internal static class CompileTimeHelpers
         return prefix + "_" + BitConverter.ToString( bytes ).Replace( "-", string.Empty );
     }
 
+    /// <summary>
+    /// Throws the current exception at compile time.
+    /// </summary>    
     public static void ThrowAtCompileTime( this Exception e ) => throw e;
+
+    /// <summary>
+    /// Determines if the current <see cref="IType"/> is <see cref="Task"/> or <see cref="ValueTask"/> (when <paramref name="withResult"/> is <see langword="false"/>),
+    /// or <see cref="Task{TResult}"/> or <see cref="ValueTask{TResult}"/> (when <paramref name="withResult"/> is <see langword="true"/>).
+    /// </summary>
+    public static bool IsTaskOrValueTask( this IType type, bool withResult = false )
+        => withResult
+            ? type.SpecialType == SpecialType.Task_T || type.SpecialType == SpecialType.ValueTask_T
+            : type.SpecialType == SpecialType.Task || type.SpecialType == SpecialType.ValueTask;
 }

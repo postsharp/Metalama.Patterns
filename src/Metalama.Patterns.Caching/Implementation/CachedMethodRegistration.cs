@@ -38,7 +38,18 @@ public sealed class CachedMethodRegistration
     /// <summary>
     /// Gets a delegate that can invoke the original uncached method.
     /// </summary>
-    public Func<object?, object?[], object?> InvokeOriginalMethod { get; }
+    /// <remarks>
+    /// Only one of <see cref="InvokeOriginalMethod"/> and <see cref="InvokeOriginalMethodAsync"/> is initialized, the other will be <see langword="null"/>.
+    /// </remarks>
+    public Func<object?, object?[], object?>? InvokeOriginalMethod { get; }
+
+    /// <summary>
+    /// Gets a delegate that can invoke the original uncached async method.
+    /// </summary>
+    /// <remarks>
+    /// Only one of <see cref="InvokeOriginalMethod"/> and <see cref="InvokeOriginalMethodAsync"/> is initialized, the other will be <see langword="null"/>.
+    /// </remarks>
+    public Func<object?, object?[], Task<object?>>? InvokeOriginalMethodAsync { get; }
 
     /// <summary>
     /// Gets the build time configuration that applies to the method.
@@ -133,5 +144,21 @@ public sealed class CachedMethodRegistration
         this.BuildTimeConfiguration = buildTimeConfiguration;
         this.ReturnValueCanBeNull = returnValueCanBeNull;
         this.InvokeOriginalMethod = invokeOriginalMethod;
+    }
+
+    internal CachedMethodRegistration(
+        MethodInfo method,
+        ImmutableArray<CachedParameterInfo> parameters,
+        bool isThisParameterIgnored,
+        Func<object?, object?[], Task<object?>> invokeOriginalMethodAsync,
+        IRunTimeCacheItemConfiguration buildTimeConfiguration,
+        bool returnValueCanBeNull )
+    {
+        this.Method = method;
+        this.Parameters = parameters;
+        this.IsThisParameterIgnored = isThisParameterIgnored;
+        this.BuildTimeConfiguration = buildTimeConfiguration;
+        this.ReturnValueCanBeNull = returnValueCanBeNull;
+        this.InvokeOriginalMethodAsync = invokeOriginalMethodAsync;
     }
 }

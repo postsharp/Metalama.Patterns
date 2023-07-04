@@ -42,6 +42,29 @@ public sealed class MethodRegistrationCache
         return toAdd;
     }
 
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    public CachedMethodRegistration Register(
+        [Required] MethodInfo method,
+        [Required] Func<object?, object?[], Task<object?>> invokeOriginalMethodAsync,
+        [Required] IRunTimeCacheItemConfiguration buildTimeConfiguration,
+        bool returValueCanBeNull )
+    {
+        var toAdd = new CachedMethodRegistration(
+            method,
+            GetCachedParameterInfos( method ),
+            buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
+            invokeOriginalMethodAsync,
+            buildTimeConfiguration,
+            returValueCanBeNull );
+
+        if ( !this._methodInfoCache.TryAdd( method, toAdd ) )
+        {
+            throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method}' has already been registered." );
+        }
+
+        return toAdd;
+    }
+
     /// <summary>
     /// Gets the <see cref="CachedMethodRegistration"/> for a given <see cref="MethodInfo"/>, or <see langword="null"/> if no <see cref="CachedMethodRegistration"/> was registered for <paramref name="method"/>.
     /// </summary>

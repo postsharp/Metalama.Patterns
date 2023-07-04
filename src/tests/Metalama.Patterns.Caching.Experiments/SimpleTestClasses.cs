@@ -9,8 +9,6 @@ using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Experiments;
 
-#if false
-
 public sealed class StaticYieldingEnumerable
 {
     [Cache]
@@ -31,7 +29,6 @@ public sealed class StaticIntAsync
         return x * 2;
     }
 }
-#endif
 
 public sealed class InstanceInt
 {
@@ -47,6 +44,7 @@ public static class StaticInt
     [Cache]
     public static int TimesTwo( int x )
     {
+        Console.WriteLine( ">> {0}", System.Reflection.MethodBase.GetCurrentMethod().Name );
         return x * 2;
     }
 }
