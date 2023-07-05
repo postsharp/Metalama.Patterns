@@ -12,9 +12,22 @@ using static Metalama.Patterns.Caching.Experiments.InfoWriter;
 
 namespace Metalama.Patterns.Caching.Experiments;
 
-public sealed class TestAsyncGenericCachingClass<T>
+// Update: even simpler reproduction:
+
+public sealed class TestSyncGenericCachingClass<T>
 {
     [Cache]
+    public T GetValue()
+    {
+        return default;
+    }
+}
+
+// Original reproduction and hand-written DESIRED:
+
+public sealed class TestAsyncGenericCachingClass<T>
+{
+    //[Cache]
     public async Task<T> GetValueAsync()
     {
         await Task.Delay( 1 );
