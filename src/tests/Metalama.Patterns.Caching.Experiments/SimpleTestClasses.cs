@@ -39,7 +39,7 @@ public static class S_AsyncEnumerable_DESIRED
         _registration = CachingServices.DefaultMethodRegistrationCache.Register(
             typeof(S_AsyncEnumerable_DESIRED).GetMethod(nameof(OneTwoThree), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static ),
             GetOneTwoThreeSourceInvoker(),
-            new CacheItemConfiguration(),
+            new BuildTimeCacheItemConfiguration(),
             true );
     }
 
@@ -100,7 +100,7 @@ public static class S_AsyncEnumerator_DESIRED
         _registration = CachingServices.DefaultMethodRegistrationCache.Register(
             typeof( S_AsyncEnumerator_DESIRED ).GetMethod( nameof( GetEnumerator ), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static ),
             GetEnumeratorSourceInvoker(),
-            new CacheItemConfiguration(),
+            new BuildTimeCacheItemConfiguration(),
             false );
     }
 

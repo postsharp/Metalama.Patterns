@@ -23,8 +23,8 @@ public sealed class MethodRegistrationCache
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], object?> invokeOriginalMethod,
-        [Required] IRunTimeCacheItemConfiguration buildTimeConfiguration,
-        bool returValueCanBeNull )
+        [Required] IBuildTimeCacheItemConfiguration buildTimeConfiguration,
+        bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
             method,
@@ -32,7 +32,7 @@ public sealed class MethodRegistrationCache
             buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
             invokeOriginalMethod,
             buildTimeConfiguration,
-            returValueCanBeNull );
+            returnValueCanBeNull );
 
         if ( !this._methodInfoCache.TryAdd( method, toAdd ) )
         {
@@ -47,7 +47,7 @@ public sealed class MethodRegistrationCache
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], Task<object?>> invokeOriginalMethodAsync,
         [Required] IRunTimeCacheItemConfiguration buildTimeConfiguration,
-        bool returValueCanBeNull )
+        bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
             method,
@@ -55,7 +55,7 @@ public sealed class MethodRegistrationCache
             buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
             invokeOriginalMethodAsync,
             buildTimeConfiguration,
-            returValueCanBeNull );
+            returnValueCanBeNull );
 
         if ( !this._methodInfoCache.TryAdd( method, toAdd ) )
         {
@@ -69,8 +69,8 @@ public sealed class MethodRegistrationCache
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], ValueTask<object?>> invokeOriginalMethodAsync,
-        [Required] IRunTimeCacheItemConfiguration buildTimeConfiguration,
-        bool returValueCanBeNull )
+        [Required] IBuildTimeCacheItemConfiguration buildTimeConfiguration,
+        bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
             method,
@@ -78,7 +78,7 @@ public sealed class MethodRegistrationCache
             buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
             invokeOriginalMethodAsync,
             buildTimeConfiguration,
-            returValueCanBeNull );
+            returnValueCanBeNull );
 
         if ( !this._methodInfoCache.TryAdd( method, toAdd ) )
         {

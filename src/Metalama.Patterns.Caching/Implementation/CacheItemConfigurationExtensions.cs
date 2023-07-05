@@ -4,9 +4,9 @@ using Metalama.Patterns.Contracts;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-public static class CacheItemConfigurationExtensions
+internal static class CacheItemConfigurationExtensions
 {
-    public static CacheItemConfiguration CloneAsCacheItemConfiguration( [Required] this IRunTimeCacheItemConfiguration other )
+    public static CacheItemConfiguration CloneAsCacheItemConfiguration( [Required] this IBuildTimeCacheItemConfiguration other )
     {
         if ( other is CacheItemConfiguration cacheItemConfiguration )
         {
@@ -15,7 +15,6 @@ public static class CacheItemConfigurationExtensions
 
         return new CacheItemConfiguration()
         {
-            IsEnabled = other.IsEnabled,
             ProfileName = other.ProfileName,
             AutoReload = other.AutoReload,
             AbsoluteExpiration = other.AbsoluteExpiration,

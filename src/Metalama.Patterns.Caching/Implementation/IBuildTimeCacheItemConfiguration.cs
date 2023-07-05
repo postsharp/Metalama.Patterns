@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
@@ -25,7 +24,7 @@ public interface IBuildTimeCacheItemConfiguration
     bool? AutoReload { get; }
 
     /// <summary>
-    /// Gets priority of the cached methods.
+    /// Gets the priority of the cached method.
     /// </summary>
     CacheItemPriority? Priority { get; }
 
@@ -45,17 +44,4 @@ public interface IBuildTimeCacheItemConfiguration
     /// which means that by default the <c>this</c> instance is a part of the cache key.
     /// </summary>
     bool? IgnoreThisParameter { get; }
-}
-
-/// <summary>
-/// Configuration of a cached method. This interface is implemented by several classes that allow to configure
-/// cached method.
-/// </summary>
-[PublicAPI]
-public interface IRunTimeCacheItemConfiguration : IBuildTimeCacheItemConfiguration
-{
-    /// <summary>
-    /// Gets a value indicating whether caching is enabled.
-    /// </summary>
-    bool? IsEnabled { get; }
 }

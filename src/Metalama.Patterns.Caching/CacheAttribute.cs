@@ -30,38 +30,54 @@ public sealed class CacheAttribute : MethodAspect
     private CacheItemPriority? _priority;
     private bool? _ignoreThisParameter;
 
-    /// <inheritdoc cref="IBuildTimeCacheItemConfiguration" />
+    /// <summary>
+    /// Gets or sets the name of the <see cref="CachingProfile"/>  that contains the configuration of the cached methods.
+    /// </summary>
     public string? ProfileName { get; set; }
 
-    /// <inheritdoc cref="IBuildTimeCacheItemConfiguration" />
+    /// <summary>
+    /// Gets or sets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
+    /// when the cache item is removed from the cache.
+    /// </summary>
     public bool AutoReload
     {
         get => this._autoReload.GetValueOrDefault();
         set => this._autoReload = value;
     }
 
-    /// <inheritdoc cref="IBuildTimeCacheItemConfiguration" />
-    public TimeSpan AbsoluteExpiration
+    /// <summary>
+    /// Gets or sets the total duration, in minutes, during which the result of the current method is stored in cache. The absolute
+    /// expiration time is counted from the moment the method is evaluated and cached.
+    /// </summary>
+    public double AbsoluteExpiration
     {
-        get => this._absoluteExpiration.GetValueOrDefault();
-        set => this._absoluteExpiration = value;
+        get => this._absoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
+        set => this._absoluteExpiration = TimeSpan.FromMinutes( value );
     }
 
-    /// <inheritdoc cref="IBuildTimeCacheItemConfiguration" />
-    public TimeSpan SlidingExpiration
+    /// <summary>
+    /// Gets or sets the duration, in minutes, during which the result of the current method is stored in cache after it has been
+    /// added to or accessed from the cache. The expiration is extended every time the value is accessed from the cache.
+    /// </summary>
+    public double SlidingExpiration
     {
-        get => this._slidingExpiration.GetValueOrDefault();
-        set => this._slidingExpiration = value;
+        get => this._slidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
+        set => this._slidingExpiration = TimeSpan.FromMinutes( value );
     }
 
-    /// <inheritdoc cref="IBuildTimeCacheItemConfiguration" />
+    /// <summary>
+    /// Gets or sets the priority of the current method.
+    /// </summary>
     public CacheItemPriority Priority
     {
         get => this._priority.GetValueOrDefault();
         set => this._priority = value;
     }
 
-    /// <inheritdoc cref="IBuildTimeCacheItemConfiguration" />
+    /// <summary>
+    /// Gets or sets a value indicating whether the <c>this</c> instance should be a part of the cache key. The default value of this property is <c>false</c>,
+    /// which means that by default the <c>this</c> instance is a part of the cache key.
+    /// </summary>
     public bool IgnoreThisParameter
     {
         get => this._ignoreThisParameter.GetValueOrDefault();
@@ -218,7 +234,7 @@ public sealed class CacheAttribute : MethodAspect
         field.Value = CachingServices.DefaultMethodRegistrationCache.Register(
             method.ToMethodInfo(),
             getOriginalMethodInvoker.Invoke(),
-            new CacheItemConfiguration()
+            new BuildTimeCacheItemConfiguration()
             {
                 AbsoluteExpiration = this._absoluteExpiration,
                 AutoReload = this._autoReload,

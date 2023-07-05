@@ -1,15 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
-
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
 /// Configuration of a <see cref="CacheItem"/>.
 /// </summary>
-[PublicAPI] // TODO: [Porting] Does CacheItemConfiguration need to be public? Might be a serialization artefact. Regardless, review visibility of setters.
-[PSerializable]
-public sealed class CacheItemConfiguration : IRunTimeCacheItemConfiguration
+internal sealed class CacheItemConfiguration : IRunTimeCacheItemConfiguration
 {
     public CacheItemConfiguration() { }
 

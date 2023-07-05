@@ -23,7 +23,7 @@ namespace Metalama.Patterns.Caching;
     [LinesOfCodeAvoided(1)]
     [PSerializable]
 #endif
-public sealed class InvalidateCacheAttribute // : MethodInterceptionAspect
+public sealed class InvalidateCacheAttribute : Attribute // : MethodInterceptionAspect
 {
     [PNonSerialized]
     private Type _invalidatedMethodsDeclaringType;

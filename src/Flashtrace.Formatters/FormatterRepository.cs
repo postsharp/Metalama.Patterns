@@ -10,8 +10,17 @@ namespace Flashtrace.Formatters;
 /// Allows to get and register formatters for a specific type.
 /// </summary>
 [PublicAPI]
-public class FormatterRepository : IFormatterRepository
+public class FormatterRepository : IFormatterRepository, FormatterRepository.IUnitTesting
 {
+    internal interface IUnitTesting
+    {
+        /// <summary>
+        /// Clears formatters, but doesn't reset registrations.
+        /// </summary>
+        /// <remarks>Used by unit tests to clear standard formatters.</remarks>
+        void Reset();
+    }
+
     private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _formatterFactory;
     private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _dynamicFormatterFactory;
 
@@ -159,7 +168,17 @@ public class FormatterRepository : IFormatterRepository
 
         return formatter != null;
     }
-    
+
+    /// <summary>
+    /// Clears formatters, but doesn't reset registrations.
+    /// </summary>
+    /// <remarks>Used by unit tests to clear standard formatters.</remarks>
+    void IUnitTesting.Reset()
+    {
+        this._formatterFactory.Clear();
+        this.RegisterDefaultFormatters();
+    }
+
     private void UpdateFormatterCache( Type objectType, TypeExtensionInfo<IFormatter> newFormatterInfo )
     {
         while ( true )

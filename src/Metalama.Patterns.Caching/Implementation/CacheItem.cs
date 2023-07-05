@@ -39,7 +39,7 @@ public sealed class CacheItem : IEquatable<CacheItem>
     public IImmutableList<string>? Dependencies { get; }
 
     /// <summary>
-    /// Gets the <see cref="CacheItemConfiguration"/> for the current item,
+    /// Gets the <see cref="IRunTimeCacheItemConfiguration"/> for the current item,
     /// or <c>null</c> to use the default configuration.
     /// </summary>
     public IRunTimeCacheItemConfiguration? Configuration { get; }
