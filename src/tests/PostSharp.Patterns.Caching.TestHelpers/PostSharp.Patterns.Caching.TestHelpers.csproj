@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>PostSharp.Patterns.Caching.Tests.Helpers</RootNamespace>
+    <AssemblyName>PostSharp.Patterns.Caching.TestHelpers</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
+  <PropertyGroup Condition="'$(TFId)' == '.NETFramework' AND '$(TargetFramework)' != 'net471'">
+    <DefineConstants>$(DefineConstants);RUNTIME_CACHING</DefineConstants>
+  </PropertyGroup>
+
+  <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
+  <PropertyGroup Condition="'$(TFId)' == '.NETStandard'">
+    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING</DefineConstants>
+  </PropertyGroup>
+
+  <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net471'">
+    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
+  </PropertyGroup>
+
+  <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
+  <PropertyGroup>
+	<DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="$(MicrosoftExtensionsCachingMemoryVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" />
+    <ProjectReference Include="..\..\Common\PostSharp.Patterns.Common\PostSharp.Patterns.Common.csproj" />
+    <ProjectReference Include="..\PostSharp.Patterns.TestHelpers\PostSharp.Patterns.TestHelpers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
+    <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching.Backends.IMemoryCache\PostSharp.Patterns.Caching.Backends.IMemoryCache.csproj" />
+  </ItemGroup>
+
+</Project>

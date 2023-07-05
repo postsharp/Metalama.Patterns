@@ -1,0 +1,36 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <PropertyGroup>
+        <RedisServerUrl>https://github.com/MicrosoftArchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.zip</RedisServerUrl>
+        <RedisArchivePath>$(PostSharpBinDir)Temp\RedisServer.zip</RedisArchivePath>
+        <RedisServerDirectory>$(PostSharpBinDir)Temp\RedisServer\</RedisServerDirectory>
+        <RedisServerExecutable>$(RedisServerDirectory)redis-server.exe</RedisServerExecutable>
+    </PropertyGroup>
+
+    <Target Name="DownloadRedisServer">
+       
+        <ItemGroup>
+            <Statement Include="$ProgressPreference = 'SilentlyContinue'" />
+            <Statement Include="[Net.ServicePointManager]::SecurityProtocol = 'Tls12, Tls11, Tls, Ssl3'" Condition="!Exists($(RedisArchivePath))" />
+            <Statement Include="Invoke-WebRequest '$(RedisServerUrl)' -outf '$(RedisArchivePath)'" Condition="!Exists($(RedisArchivePath))" />
+            <Statement Include="Expand-Archive -Path '$(RedisArchivePath)' -DestinationPath '$(RedisServerDirectory)'" />
+        </ItemGroup>
+
+        <Exec Command="powershell -NonInteractive -Command &quot;@(Statement)&quot;" Condition="!Exists($(RedisServerExecutable))" ContinueOnError="True" />  
+    </Target>
+
+    <Target Name="PrepareRedisTestServer" DependsOnTargets="DownloadRedisServer">       
+        
+        <Copy SourceFiles="$(RedisServerExecutable)" DestinationFolder="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)\redis-server.exe')" />
+        <ItemGroup>
+            <EmbeddedResource Include="$(IntermediateOutputPath)\redis-server.exe">
+                <Link>Executables\redis-server.exe</Link>
+            </EmbeddedResource>
+        </ItemGroup> 
+        <OnError ExecuteTargets="PrintAdditionalErrorMessage" />
+    </Target>    
+    
+    <Target Name="PrintAdditionalErrorMessage">
+        <Error Text="Probably the powershell command downloading redis-server.exe failed. This sometimes happens. Run the build again." />
+    </Target>
+</Project>
