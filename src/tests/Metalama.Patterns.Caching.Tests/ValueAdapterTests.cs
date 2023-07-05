@@ -1,4 +1,6 @@
-﻿using Metalama.Patterns.Caching.TestHelpers;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Common.Tests.Helpers;
 using System;
 using System.Collections.Generic;
@@ -25,51 +27,50 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestStream()
         {
-            Stream s1 = this.MethodReturningStream();
-            byte[] buffer1 = new byte[512];
+            var s1 = this.MethodReturningStream();
+            var buffer1 = new byte[512];
             s1.Read( buffer1, 0, buffer1.Length );
 
             Assert.IsType<MemoryStream>( s1 );
 
-            Stream s2 = this.MethodReturningStream();
-            byte[] buffer2 = new byte[512];
-            s2.Read(buffer2, 0, buffer2.Length);
+            var s2 = this.MethodReturningStream();
+            var buffer2 = new byte[512];
+            s2.Read( buffer2, 0, buffer2.Length );
 
             CompareArrays( buffer1, buffer2 );
-            
         }
+
         [Fact]
         public async Task TestStreamAsync()
         {
-            Stream s1 = await this.MethodReturningStreamAsync();
-            byte[] buffer1 = new byte[512];
+            var s1 = await this.MethodReturningStreamAsync();
+            var buffer1 = new byte[512];
             s1.Read( buffer1, 0, buffer1.Length );
 
             Assert.IsType<MemoryStream>( s1 );
 
-            Stream s2 = await this.MethodReturningStreamAsync();
-            byte[] buffer2 = new byte[512];
-            s2.Read(buffer2, 0, buffer2.Length);
+            var s2 = await this.MethodReturningStreamAsync();
+            var buffer2 = new byte[512];
+            s2.Read( buffer2, 0, buffer2.Length );
 
             CompareArrays( buffer1, buffer2 );
-
         }
 
         [Fact]
         public void TestEnumerable()
         {
-            int[] a1 = this.MethodReturningEnumerable().ToArray();
-            int[] a2 = this.MethodReturningEnumerable().ToArray();
+            var a1 = this.MethodReturningEnumerable().ToArray();
+            var a2 = this.MethodReturningEnumerable().ToArray();
 
-            CompareArrays(a1, a2);
+            CompareArrays( a1, a2 );
         }
 
         [Fact]
         public void TestEnumerator()
         {
-            IEnumerator<int> e1 = this.MethodReturningEnumerator();
+            var e1 = this.MethodReturningEnumerator();
             e1.MoveNext();
-            IEnumerator<int> e2 = this.MethodReturningEnumerator();
+            var e2 = this.MethodReturningEnumerator();
             e2.MoveNext();
             Assert.Equal( e1.Current, e2.Current );
         }
@@ -77,7 +78,8 @@ namespace Metalama.Patterns.Caching.Tests
         private static void CompareArrays<T>( T[] buffer1, T[] buffer2 )
         {
             Assert.Equal( buffer1.Length, buffer2.Length );
-            for ( int i = 0; i < buffer1.Length; i++ )
+
+            for ( var i = 0; i < buffer1.Length; i++ )
             {
                 Assert.Equal( buffer1[i], buffer2[i] );
             }
@@ -93,6 +95,7 @@ namespace Metalama.Patterns.Caching.Tests
         private async Task<Stream> MethodReturningStreamAsync()
         {
             await Task.Yield();
+
             return File.OpenRead( this.GetType().Assembly.Location );
         }
 

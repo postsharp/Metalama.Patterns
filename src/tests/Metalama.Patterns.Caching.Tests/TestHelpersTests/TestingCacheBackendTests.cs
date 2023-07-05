@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Xunit;
 using Metalama.Patterns.Caching.Implementation;
@@ -26,21 +25,21 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
                 cache.ExpectedContainsKeyCount = 1;
                 bool keyContained = cache.ContainsItem( key );
                 cache.ResetTest( "When checkin existence of a non-existing key." );
-                
+
                 Assert.False( keyContained, "The cache does not return false on miss." );
 
-                CachedValueClass storedValue0 = new CachedValueClass(0);
-                CacheItem cacheItem0 = new CacheItem(storedValue0);
-                
+                CachedValueClass storedValue0 = new CachedValueClass( 0 );
+                var cacheItem0 = new CacheItem( storedValue0 );
+
                 cache.ExpectedSetCount = 1;
                 cache.SetItem( key, cacheItem0 );
-                cache.ResetTest("When setting the cache item");
+                cache.ResetTest( "When setting the cache item" );
 
                 cache.ExpectedContainsKeyCount = 1;
-                keyContained = cache.ContainsItem(key);
-                cache.ResetTest("When checkin existence of an existing key.");
+                keyContained = cache.ContainsItem( key );
+                cache.ResetTest( "When checkin existence of an existing key." );
 
-                Assert.True(keyContained, "The cache does not return true on hit.");
+                Assert.True( keyContained, "The cache does not return true on hit." );
 
                 TestableCachingComponentDisposer.Dispose( cache );
             }
@@ -70,7 +69,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
             {
                 CachedValueClass storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
-                CacheItem cacheItem0 = new CacheItem(storedValue0);
+                var cacheItem0 = new CacheItem( storedValue0 );
 
                 cache.ExpectedSetCount = 1;
                 cache.SetItem( key, cacheItem0 );
@@ -83,7 +82,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
                 AssertEx.Equal( cacheItem0.Value, retrievedItem.Value, "The retrieved item is not equal to the stored item." );
 
                 CachedValueClass storedValue1 = new CachedValueClass( 1 );
-                CacheItem cacheItem1 = new CacheItem(storedValue1);
+                var cacheItem1 = new CacheItem( storedValue1 );
 
                 cache.ExpectedSetCount = 1;
                 cache.SetItem( key, cacheItem1 );
@@ -96,7 +95,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
                 TestableCachingComponentDisposer.Dispose( cache );
             }
         }
-        
+
         [Fact]
         public void TestInvalidateObjectDependency()
         {
@@ -105,7 +104,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
                 const string dependencyKey = "0";
 
                 cache.ExpectedInvalidateCount = 1;
-                cache.InvalidateDependency( dependencyKey);
+                cache.InvalidateDependency( dependencyKey );
                 cache.ResetTest( "When invalidating dependency" );
 
                 TestableCachingComponentDisposer.Dispose( cache );

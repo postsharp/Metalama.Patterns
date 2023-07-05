@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.TestHelpers.Shared;
 using System.Runtime.Caching;
@@ -9,16 +8,17 @@ using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Common.Tests.Helpers;
 using Metalama.Patterns.Caching.Implementation;
 
-
 namespace Metalama.Patterns.Caching.TestHelpers
 {
     public static class TestProfileConfigurationFactory
     {
         public static void InitializeTestWithoutBackend()
         {
-            Assert.True( CachingServices.DefaultBackend is UninitializedCachingBackend
+            Assert.True(
+                CachingServices.DefaultBackend is UninitializedCachingBackend
                 || CachingServices.DefaultBackend is NullCachingBackend,
                 "Each test has to use the TestProfileConfigurationFactory." );
+
             CachingServices.DefaultKeyBuilder = null; // Ensure we use the default key builder.
         }
 
@@ -26,7 +26,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         {
             InitializeTestWithoutBackend();
 #if RUNTIME_CACHING
-            MemoryCachingBackend backend = new MemoryCachingBackend( new System.Runtime.Caching.MemoryCache( "test-" + name ) );
+            var backend = new MemoryCachingBackend( new MemoryCache( "test-" + name ) );
 #elif EXTENSIONS_CACHING
             MemoryCacheBackend backend = new MemoryCacheBackend(
                 new Microsoft.Extensions.Caching.Memory.MemoryCache( new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions() ) );
@@ -34,25 +34,25 @@ namespace Metalama.Patterns.Caching.TestHelpers
 #error You must define at least one of: RUNTIME_CACHING, EXTENSIONS_CACHING.
 #endif
             CachingServices.DefaultBackend = backend;
+
             return backend;
         }
 
         public static TestingCacheBackend InitializeTestWithTestingBackend( string name )
         {
             InitializeTestWithoutBackend();
-            TestingCacheBackend backend = new TestingCacheBackend( "test-" + name );
+            var backend = new TestingCacheBackend( "test-" + name );
             CachingServices.DefaultBackend = backend;
+
             return backend;
         }
 
         public static CachingProfile CreateProfile( string name )
         {
-            CachingProfile cacheProfile = new CachingProfile(name)
-                                                     {
-                                                         IsEnabled = true,
-                                                     };
+            var cacheProfile = new CachingProfile( name ) { IsEnabled = true };
 
             CachingServices.Profiles.Register( cacheProfile );
+
             return cacheProfile;
         }
 
@@ -66,7 +66,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public static async Task DisposeTestAsync()
         {
             CachingServices.Profiles.Reset();
-            await TestableCachingComponentDisposer.DisposeAsync(CachingServices.DefaultBackend);
+            await TestableCachingComponentDisposer.DisposeAsync( CachingServices.DefaultBackend );
             CachingServices.DefaultBackend = null;
         }
     }

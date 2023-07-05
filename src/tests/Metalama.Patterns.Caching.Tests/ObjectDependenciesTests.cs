@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Metalama.Patterns.Caching.TestHelpers;
@@ -30,10 +32,11 @@ namespace Metalama.Patterns.Caching.Tests
         {
             TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testOneDependencyProfileName );
             TestProfileConfigurationFactory.CreateProfile( testOneDependencyProfileName );
+
             try
             {
-                TestOneDependencyCachingClass cachingClass = new TestOneDependencyCachingClass();
-                int currentId = 0;
+                var cachingClass = new TestOneDependencyCachingClass();
+                var currentId = 0;
 
                 CachedValueClass value1 = cachingClass.GetValueAsDependency();
                 bool called = cachingClass.Reset();
@@ -43,8 +46,11 @@ namespace Metalama.Patterns.Caching.Tests
                 CachedValueClass value2 = cachingClass.GetValueAsDependency();
                 called = cachingClass.Reset();
                 Assert.False( called, "The method was called when its first return value should be cached." );
-                AssertEx.Equal( value1, value2,
-                                 "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
+
+                AssertEx.Equal(
+                    value1,
+                    value2,
+                    "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
 
                 CachingServices.Invalidation.Invalidate( value1 );
 
@@ -57,8 +63,11 @@ namespace Metalama.Patterns.Caching.Tests
                 CachedValueClass value4 = cachingClass.GetValueAsDependency();
                 called = cachingClass.Reset();
                 Assert.False( called, "The method was called when its second return value should be cached." );
-                AssertEx.Equal( value3, value4,
-                                 "The second value, which should be returned from the cache, is not the same as the one which should have been cached." );
+
+                AssertEx.Equal(
+                    value3,
+                    value4,
+                    "The second value, which should be returned from the cache, is not the same as the one which should have been cached." );
             }
             finally
             {
@@ -87,10 +96,11 @@ namespace Metalama.Patterns.Caching.Tests
         {
             TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testOneDependencyAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( testOneDependencyAsyncProfileName );
+
             try
             {
-                TestOneDependencyAsyncCachingClass cachingClass = new TestOneDependencyAsyncCachingClass();
-                int currentId = 0;
+                var cachingClass = new TestOneDependencyAsyncCachingClass();
+                var currentId = 0;
 
                 CachedValueClass value1 = await cachingClass.GetValueAsDependencyAsync();
                 bool called = cachingClass.Reset();
@@ -100,8 +110,11 @@ namespace Metalama.Patterns.Caching.Tests
                 CachedValueClass value2 = await cachingClass.GetValueAsDependencyAsync();
                 called = cachingClass.Reset();
                 Assert.False( called, "The method was called when its first return value should be cached." );
-                AssertEx.Equal( value1, value2,
-                                 "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
+
+                AssertEx.Equal(
+                    value1,
+                    value2,
+                    "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
 
                 await CachingServices.Invalidation.InvalidateAsync( value1 );
 
@@ -114,8 +127,11 @@ namespace Metalama.Patterns.Caching.Tests
                 CachedValueClass value4 = await cachingClass.GetValueAsDependencyAsync();
                 called = cachingClass.Reset();
                 Assert.False( called, "The method was called when its second return value should be cached." );
-                AssertEx.Equal( value3, value4,
-                                 "The second value, which should be returned from the cache, is not the same as the one which should have been cached." );
+
+                AssertEx.Equal(
+                    value3,
+                    value4,
+                    "The second value, which should be returned from the cache, is not the same as the one which should have been cached." );
             }
             finally
             {
@@ -129,13 +145,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string testNestedDependenciesProfileName = profileNamePrefix + "TestNestedDependencies";
 
-        private sealed class TestNestedDependenciesCachedValueClass1 : CachedValueClass
-        {
-        }
+        private sealed class TestNestedDependenciesCachedValueClass1 : CachedValueClass { }
 
-        private sealed class TestNestedDependenciesCachedValueClass2 : CachedValueClass
-        {
-        }
+        private sealed class TestNestedDependenciesCachedValueClass2 : CachedValueClass { }
 
         [CacheConfiguration( ProfileName = testNestedDependenciesProfileName )]
         private sealed class TestNestedDependenciesCachingClass1 : CachingClass<TestNestedDependenciesCachedValueClass1>
@@ -163,6 +175,7 @@ namespace Metalama.Patterns.Caching.Tests
             public override TestNestedDependenciesCachedValueClass2 GetValueAsDependency()
             {
                 this.Value1 = this.Class1.GetValueAsDependency();
+
                 return base.GetValueAsDependency();
             }
         }
@@ -172,10 +185,11 @@ namespace Metalama.Patterns.Caching.Tests
         {
             TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testNestedDependenciesProfileName );
             TestProfileConfigurationFactory.CreateProfile( testNestedDependenciesProfileName );
+
             try
             {
-                TestNestedDependenciesCachingClass2 cachingClass2 = new TestNestedDependenciesCachingClass2();
-                TestNestedDependenciesCachingClass1 cachingClass1 = cachingClass2.Class1;
+                var cachingClass2 = new TestNestedDependenciesCachingClass2();
+                var cachingClass1 = cachingClass2.Class1;
 
                 CachedValueClass value1 = cachingClass2.GetValueAsDependency();
                 cachingClass1.Reset();
@@ -199,13 +213,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string testNestedDependenciesAsyncProfileName = profileNamePrefix + "TestNestedDependenciesAsync";
 
-        private sealed class TestNestedDependenciesAsyncCachedValueClass1 : CachedValueClass
-        {
-        }
+        private sealed class TestNestedDependenciesAsyncCachedValueClass1 : CachedValueClass { }
 
-        private sealed class TestNestedDependenciesAsyncCachedValueClass2 : CachedValueClass
-        {
-        }
+        private sealed class TestNestedDependenciesAsyncCachedValueClass2 : CachedValueClass { }
 
         [CacheConfiguration( ProfileName = testNestedDependenciesAsyncProfileName )]
         private sealed class TestNestedDependenciesAsyncCachingClass1 : CachingClass<TestNestedDependenciesAsyncCachedValueClass1>
@@ -233,6 +243,7 @@ namespace Metalama.Patterns.Caching.Tests
             public override async Task<TestNestedDependenciesAsyncCachedValueClass2> GetValueAsDependencyAsync()
             {
                 this.Value1 = await this.Class1.GetValueAsDependencyAsync();
+
                 return await base.GetValueAsDependencyAsync();
             }
         }
@@ -242,10 +253,11 @@ namespace Metalama.Patterns.Caching.Tests
         {
             TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testNestedDependenciesAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( testNestedDependenciesAsyncProfileName );
+
             try
             {
-                TestNestedDependenciesAsyncCachingClass2 cachingClass2 = new TestNestedDependenciesAsyncCachingClass2();
-                TestNestedDependenciesAsyncCachingClass1 cachingClass1 = cachingClass2.Class1;
+                var cachingClass2 = new TestNestedDependenciesAsyncCachingClass2();
+                var cachingClass1 = cachingClass2.Class1;
 
                 CachedValueClass value1 = await cachingClass2.GetValueAsDependencyAsync();
                 cachingClass1.Reset();
@@ -269,25 +281,21 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string testNestedDependenciesWithEnumerableProfileName = profileNamePrefix + "TestNestedDependenciesWithEnumerable";
 
-        private sealed class TestNestedDependenciesWithEnumerableCachedValueClass : CachedValueClass
-        {
-        }
+        private sealed class TestNestedDependenciesWithEnumerableCachedValueClass : CachedValueClass { }
 
-        private sealed class TestNestedDependenciesWithEnumerableCachingClass1 : CachingClass<TestNestedDependenciesWithEnumerableCachedValueClass>
-        {
-        }
+        private sealed class TestNestedDependenciesWithEnumerableCachingClass1 : CachingClass<TestNestedDependenciesWithEnumerableCachedValueClass> { }
 
         [CacheConfiguration( ProfileName = testNestedDependenciesWithEnumerableProfileName )]
         private sealed class TestNestedDependenciesWithEnumerableCachingClass2
         {
             private int class1CallCount = 0;
 
-            private readonly TestNestedDependenciesWithEnumerableCachingClass1 class1 = new TestNestedDependenciesWithEnumerableCachingClass1();
+            private readonly TestNestedDependenciesWithEnumerableCachingClass1 class1 = new();
 
             [Cache]
             public IEnumerable<TestNestedDependenciesWithEnumerableCachedValueClass> GetTwoValuesAsDependencies()
             {
-                for ( int i = 0; i < 2; i++ )
+                for ( var i = 0; i < 2; i++ )
                 {
                     yield return this.class1.GetValueAsDependency();
 
@@ -300,8 +308,9 @@ namespace Metalama.Patterns.Caching.Tests
 
             public int Reset()
             {
-                int count = this.class1CallCount;
+                var count = this.class1CallCount;
                 this.class1CallCount = 0;
+
                 return count;
             }
         }
@@ -311,12 +320,13 @@ namespace Metalama.Patterns.Caching.Tests
         {
             TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testNestedDependenciesWithEnumerableProfileName );
             TestProfileConfigurationFactory.CreateProfile( testNestedDependenciesWithEnumerableProfileName );
+
             try
             {
-                TestNestedDependenciesWithEnumerableCachingClass2 cachingClass2 = new TestNestedDependenciesWithEnumerableCachingClass2();
+                var cachingClass2 = new TestNestedDependenciesWithEnumerableCachingClass2();
 
                 IList<TestNestedDependenciesWithEnumerableCachedValueClass> value1 = cachingClass2.GetTwoValuesAsDependencies().ToList();
-                int class1CallsCount = cachingClass2.Reset();
+                var class1CallsCount = cachingClass2.Reset();
                 AssertEx.Equal( value1.Count, class1CallsCount, "The method did not get called for the first time." );
 
                 CachingServices.Invalidation.Invalidate( value1[0] );

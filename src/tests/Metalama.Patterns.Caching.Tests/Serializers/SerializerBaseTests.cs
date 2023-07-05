@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Xunit;
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Caching.Serializers;
 using Metalama.Patterns.Common.Tests.Helpers;
@@ -13,17 +15,17 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
 {
     public abstract class SerializerBaseTests
     {
-        ISerializer serializer;
+        private ISerializer serializer;
 
         protected SerializerBaseTests( ISerializer serializer )
         {
             this.serializer = serializer;
         }
 
-        protected object RoundTrip(object cacheItem)
+        protected object RoundTrip( object cacheItem )
         {
-            byte[] serialization = this.serializer.Serialize( cacheItem );
-            object newCacheItem = this.serializer.Deserialize( serialization );
+            var serialization = this.serializer.Serialize( cacheItem );
+            var newCacheItem = this.serializer.Deserialize( serialization );
 
             return newCacheItem;
         }
@@ -31,9 +33,9 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
         [Fact]
         public void TestNullValue()
         {
-            object roundTrip = this.RoundTrip(null);
+            var roundTrip = this.RoundTrip( null );
 
-            Assert.Null(roundTrip);
+            Assert.Null( roundTrip );
         }
     }
 }

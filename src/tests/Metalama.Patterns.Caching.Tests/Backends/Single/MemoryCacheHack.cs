@@ -1,10 +1,10 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if RUNTIME_CACHING
 
 using System;
 using System.Reflection;
+using System.Runtime;
 using System.Runtime.Caching;
 using System.Runtime.InteropServices;
 
@@ -16,21 +16,22 @@ namespace Metalama.Patterns.Caching.Tests.Backends
 
         public static Version GetNetCoreVersion()
         {
-
-
             // https://github.com/dotnet/BenchmarkDotNet/issues/448
-            var assembly = typeof( System.Runtime.GCSettings ).GetTypeInfo().Assembly;
+            var assembly = typeof(GCSettings).GetTypeInfo().Assembly;
 
             // TODO: This will be needed to be solved for NET6.0+.
 #pragma warning disable SYSLIB0012 // Type or member is obsolete
             var assemblyPath = assembly.CodeBase.Split( new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries );
 #pragma warning restore SYSLIB0012 // Type or member is obsolete
-            int netCoreAppIndex = Array.IndexOf( assemblyPath, "Microsoft.NETCore.App" );
+            var netCoreAppIndex = Array.IndexOf( assemblyPath, "Microsoft.NETCore.App" );
+
             if ( netCoreAppIndex > 0 && netCoreAppIndex < assemblyPath.Length - 2 )
             {
-                Version.TryParse( assemblyPath[netCoreAppIndex + 1].Split('-')[0], out Version version );
+                Version.TryParse( assemblyPath[netCoreAppIndex + 1].Split( '-' )[0], out var version );
+
                 return version;
             }
+
             return null;
         }
 
@@ -51,6 +52,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
                 // The hack does not work in .NET Core 3.0 and above:
                 // System.FieldAccessException: Cannot set initonly static field '_tsPerBucket' after type 'System.Runtime.Caching.CacheExpires' is initialized.
                 hackMade = true;
+
                 return;
             }
 
@@ -61,7 +63,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
             var field = type.GetField( "_tsPerBucket", BindingFlags.Static | BindingFlags.NonPublic );
             field.SetValue( null, TimeSpan.FromSeconds( 0.1 ) );
 
-            type = typeof( MemoryCache );
+            type = typeof(MemoryCache);
             field = type.GetField( "s_defaultCache", BindingFlags.Static | BindingFlags.NonPublic );
             field.SetValue( null, null );
 

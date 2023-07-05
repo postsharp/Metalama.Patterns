@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System.Text;
 using Metalama.Patterns.Formatters;
 
 namespace Metalama.Patterns.Caching.TestHelpers
@@ -11,7 +13,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
         {
             this.key = key;
         }
-
 
         void IFormattable.Format( UnsafeStringBuilder stringBuilder, FormattingRole role )
         {

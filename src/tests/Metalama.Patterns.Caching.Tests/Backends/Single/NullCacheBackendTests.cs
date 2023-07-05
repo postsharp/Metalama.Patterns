@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
@@ -14,7 +13,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
         [Fact]
         public void TestMiss()
         {
-            using ( NullCachingBackend cache = new NullCachingBackend())
+            using ( var cache = new NullCachingBackend() )
             {
                 const string key = "0";
 
@@ -27,13 +26,13 @@ namespace Metalama.Patterns.Caching.Tests.Backends
         [Fact]
         public void TestSet()
         {
-            using ( NullCachingBackend cache = new NullCachingBackend())
+            using ( var cache = new NullCachingBackend() )
             {
                 CachedValueClass storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
-                CacheItem cacheItem0 = new CacheItem(storedValue0);
+                var cacheItem0 = new CacheItem( storedValue0 );
 
-                cache.SetItem( key, cacheItem0 ); 
+                cache.SetItem( key, cacheItem0 );
 
                 object retrievedItem = cache.GetItem( key );
 

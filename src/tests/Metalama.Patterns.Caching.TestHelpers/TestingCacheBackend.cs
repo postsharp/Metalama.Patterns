@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers.Shared;
@@ -80,16 +79,30 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         public void ResetTest( string locationDescription )
         {
-            AssertEx.Equal( this.ExpectedSetCount, this.actualSetCount,
-                             string.Format( "{0}: The set operation was not called as many times as expected.", locationDescription ) );
-            AssertEx.Equal( this.ExpectedContainsKeyCount, this.actualContainsKeyCount,
-                             string.Format( "{0}: The contains key operation was not called as many times as expected.", locationDescription ) );
-            AssertEx.Equal( this.ExpectedGetCount, this.actualGetCount,
-                             string.Format( "{0}: The get operation was not called as many times as expected.", locationDescription ) );
-            AssertEx.Equal( this.ExpectedRemoveCount, this.actualRemoveCount,
-                             string.Format( "{0}: The remove operation was not called as many times as expected.", locationDescription ) );
-            AssertEx.Equal( this.ExpectedInvalidateCount, this.actualInvalidateCount,
-                             string.Format( "{0}: The invalidate object operation was not called as many times as expected.", locationDescription ) );
+            AssertEx.Equal(
+                this.ExpectedSetCount,
+                this.actualSetCount,
+                string.Format( "{0}: The set operation was not called as many times as expected.", locationDescription ) );
+
+            AssertEx.Equal(
+                this.ExpectedContainsKeyCount,
+                this.actualContainsKeyCount,
+                string.Format( "{0}: The contains key operation was not called as many times as expected.", locationDescription ) );
+
+            AssertEx.Equal(
+                this.ExpectedGetCount,
+                this.actualGetCount,
+                string.Format( "{0}: The get operation was not called as many times as expected.", locationDescription ) );
+
+            AssertEx.Equal(
+                this.ExpectedRemoveCount,
+                this.actualRemoveCount,
+                string.Format( "{0}: The remove operation was not called as many times as expected.", locationDescription ) );
+
+            AssertEx.Equal(
+                this.ExpectedInvalidateCount,
+                this.actualInvalidateCount,
+                string.Format( "{0}: The invalidate object operation was not called as many times as expected.", locationDescription ) );
 
             this.actualSetCount = 0;
             this.actualContainsKeyCount = 0;
@@ -98,7 +111,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this.actualInvalidateCount = 0;
             this.ResetExpectations();
         }
-
 
         protected override void SetItemCore( string key, CacheItem item )
         {
@@ -121,24 +133,28 @@ namespace Metalama.Patterns.Caching.TestHelpers
         protected override bool ContainsItemCore( string key )
         {
             ++this.actualContainsKeyCount;
+
             return this.backend.ContainsItem( key );
         }
 
         protected override async Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
         {
             ++this.actualContainsKeyCount;
+
             return await this.backend.ContainsItemAsync( key, cancellationToken );
         }
 
         protected override CacheValue GetItemCore( string key, bool includeDependencies )
         {
             ++this.actualGetCount;
+
             return this.backend.GetItem( key, includeDependencies );
         }
 
         protected override async Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
         {
             ++this.actualGetCount;
+
             return await this.backend.GetItemAsync( key, includeDependencies, cancellationToken );
         }
 
@@ -164,7 +180,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return this.backend.ContainsDependencyAsync( key, cancellationToken );
         }
 
-        protected override void DisposeCore(bool disposing)
+        protected override void DisposeCore( bool disposing )
         {
             TestableCachingComponentDisposer.Dispose( this.backend );
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );

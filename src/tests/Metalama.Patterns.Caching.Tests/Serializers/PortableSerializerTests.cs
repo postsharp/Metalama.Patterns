@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System;
 using System.Linq;
 using Xunit;
 using Metalama.Patterns.Caching.Serializers;
@@ -9,28 +11,21 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
 {
     public class PortableSerializerTests : SerializerBaseTests
     {
-        public PortableSerializerTests() : base(new PortableSerializer())
-        {
-            
-        }
-
-
+        public PortableSerializerTests() : base( new PortableSerializer() ) { }
 
         [Fact]
         public void TestObject()
         {
-            MyObject o = new MyObject();
-            MyObject roundTripItem = (MyObject) this.RoundTrip(o);
-            Assert.Equal(o.Value, roundTripItem.Value);
-
+            var o = new MyObject();
+            var roundTripItem = (MyObject) this.RoundTrip( o );
+            Assert.Equal( o.Value, roundTripItem.Value );
         }
 
         [PSerializable]
-        class MyObject
+        private class MyObject
         {
             public static int NextValue = 10;
             public int Value = (NextValue++);
-
         }
     }
 }

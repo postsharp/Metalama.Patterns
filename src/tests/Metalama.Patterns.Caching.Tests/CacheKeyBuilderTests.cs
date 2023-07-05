@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,11 +14,9 @@ using Metalama.Patterns.Diagnostics;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-
-
     public class CacheKeyBuilderTests
     {
-        class MyCacheKeyBuilder : CacheKeyBuilder
+        private class MyCacheKeyBuilder : CacheKeyBuilder
         {
             public string LastMethodKey;
 
@@ -33,7 +33,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                MyCacheKeyBuilder keyBuilder = new MyCacheKeyBuilder();
+                var keyBuilder = new MyCacheKeyBuilder();
                 CachingServices.DefaultKeyBuilder = keyBuilder;
                 action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
@@ -52,7 +52,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                MyCacheKeyBuilder keyBuilder = new MyCacheKeyBuilder();
+                var keyBuilder = new MyCacheKeyBuilder();
                 CachingServices.DefaultKeyBuilder = keyBuilder;
                 await action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
@@ -95,6 +95,7 @@ namespace Metalama.Patterns.Caching.Tests
         private async Task<string> CachedInstanceMethodAsync()
         {
             await Task.Yield();
+
             return "";
         }
 
@@ -122,9 +123,10 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestStaticMethod()
         {
-            this.DoTestMethod( testStaticMethodProfileName,
-                               "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedStaticMethod()",
-                               CachedStaticMethod );
+            this.DoTestMethod(
+                testStaticMethodProfileName,
+                "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedStaticMethod()",
+                CachedStaticMethod );
         }
 
         #endregion TestStaticMethod
@@ -137,15 +139,17 @@ namespace Metalama.Patterns.Caching.Tests
         private static async Task<string> CachedStaticMethodAsync()
         {
             await Task.Yield();
+
             return "";
         }
 
         [Fact]
         public async Task TestStaticMethodAsync()
         {
-            await this.DoTestMethodAsync( testStaticMethodAsyncProfileName,
-                                          "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedStaticMethodAsync()",
-                                          CachedStaticMethodAsync );
+            await this.DoTestMethodAsync(
+                testStaticMethodAsyncProfileName,
+                "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedStaticMethodAsync()",
+                CachedStaticMethodAsync );
         }
 
         #endregion TestStaticMethodAsync
@@ -185,6 +189,7 @@ namespace Metalama.Patterns.Caching.Tests
         private async Task<string> CachedInstanceMethodWithParametersAsync( int intParam, string stringParam, object objectParam )
         {
             await Task.Yield();
+
             return "CachedInstanceMethodWithParametersAsync1";
         }
 
@@ -192,6 +197,7 @@ namespace Metalama.Patterns.Caching.Tests
         private async Task<string> CachedInstanceMethodWithParametersAsync( int intParam, object objectParam1, object objectParam2 )
         {
             await Task.Yield();
+
             return "CachedInstanceMethodWithParametersAsync2";
         }
 
@@ -235,6 +241,7 @@ namespace Metalama.Patterns.Caching.Tests
         private async Task<string> CachedInstanceMethodWithIgnoredParametersAsync( int intParam, object objectParam1, [NotCacheKey] int ignored )
         {
             await Task.Yield();
+
             return "CachedInstanceMethodWithIgnoredParametersAsync";
         }
 
@@ -254,7 +261,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string testMethodWithIgnoredThisParameterProfileName = profileNamePrefix + "TestMethodWithIgnoredThisParameter";
 
         [CacheConfiguration( ProfileName = testMethodWithIgnoredThisParameterProfileName, IgnoreThisParameter = true )]
-        class SomeClassWithIgnoredThisParameter
+        private class SomeClassWithIgnoredThisParameter
         {
             [Cache]
             public string SomeInstanceMethod()
@@ -279,12 +286,13 @@ namespace Metalama.Patterns.Caching.Tests
         private const string testMethodWithIgnoredThisParameterAsyncProfileName = profileNamePrefix + "TestMethodWithIgnoredThisParameterAsync";
 
         [CacheConfiguration( ProfileName = testMethodWithIgnoredThisParameterAsyncProfileName, IgnoreThisParameter = true )]
-        class SomeAsyncClassWithIgnoredThisParameter
+        private class SomeAsyncClassWithIgnoredThisParameter
         {
             [Cache]
             public async Task<string> SomeInstanceMethodAsync()
             {
                 await Task.Yield();
+
                 return "SomeInstanceMethod";
             }
         }
@@ -302,9 +310,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         private class TestClassForCollections
         {
-            public virtual string CachedInstatceMethodWithCollectionParameters( IEnumerable<int> intEnumerable, IEnumerable<object> objectEnumerable,
-                                                                                List<int> intList, List<object> objectList,
-                                                                                int[] intArray, object[] objectArray )
+            public virtual string CachedInstatceMethodWithCollectionParameters(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return "CachedInstatceMethodWithCollectionParameters";
             }
@@ -313,11 +325,15 @@ namespace Metalama.Patterns.Caching.Tests
         private class AsyncTestClassForCollections
         {
             public virtual async Task<string> CachedInstatceMethodWithCollectionParametersAsync(
-                IEnumerable<int> intEnumerable, IEnumerable<object> objectEnumerable,
-                List<int> intList, List<object> objectList,
-                int[] intArray, object[] objectArray )
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 await Task.Yield();
+
                 return "CachedInstatceMethodWithCollectionParameters";
             }
         }
@@ -329,9 +345,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class TestClassForNullCollectionParameters : TestClassForCollections
         {
             [Cache( ProfileName = testMethodWithNullCollectionParametersProfileName )]
-            public override string CachedInstatceMethodWithCollectionParameters( IEnumerable<int> intEnumerable, IEnumerable<object> objectEnumerable,
-                                                                                 List<int> intList, List<object> objectList, int[] intArray,
-                                                                                 object[] objectArray )
+            public override string CachedInstatceMethodWithCollectionParameters(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParameters( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -340,15 +360,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodWithNullCollectionParameters()
         {
-            TestClassForNullCollectionParameters testObject = new TestClassForNullCollectionParameters();
+            var testObject = new TestClassForNullCollectionParameters();
 
             this.DoTestMethod(
                 testMethodWithNullCollectionParametersProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForNullCollectionParameters.CachedInstatceMethodWithCollectionParameters(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForNullCollectionParameters}, (IEnumerable<int>) null, (IEnumerable<object>) null, (List<int>) null, (List<object>) null, (int[]) null, (object[]) null)",
                 () => testObject.CachedInstatceMethodWithCollectionParameters(
-                    null, null,
-                    null, null,
-                    null, null ) );
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null ) );
         }
 
         #endregion TestMethodWithNullCollectionParameters
@@ -360,10 +383,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class AsyncTestClassForNullCollectionParameters : AsyncTestClassForCollections
         {
             [Cache( ProfileName = testMethodWithNullCollectionParametersAsyncProfileName )]
-            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync( IEnumerable<int> intEnumerable,
-                                                                                            IEnumerable<object> objectEnumerable,
-                                                                                            List<int> intList, List<object> objectList, int[] intArray,
-                                                                                            object[] objectArray )
+            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParametersAsync( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -372,15 +398,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestMethodWithNullCollectionParametersAsync()
         {
-            AsyncTestClassForNullCollectionParameters testObject = new AsyncTestClassForNullCollectionParameters();
+            var testObject = new AsyncTestClassForNullCollectionParameters();
 
             await this.DoTestMethodAsync(
                 testMethodWithNullCollectionParametersAsyncProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForNullCollectionParameters.CachedInstatceMethodWithCollectionParametersAsync(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForNullCollectionParameters}, (IEnumerable<int>) null, (IEnumerable<object>) null, (List<int>) null, (List<object>) null, (int[]) null, (object[]) null)",
                 () => testObject.CachedInstatceMethodWithCollectionParametersAsync(
-                    null, null,
-                    null, null,
-                    null, null ) );
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null ) );
         }
 
         #endregion TestMethodWithNullCollectionParametersAsync
@@ -392,9 +421,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class TestClassForEmptyCollectionParameters : TestClassForCollections
         {
             [Cache( ProfileName = testMethodWithEmptyCollectionParametersProfileName )]
-            public override string CachedInstatceMethodWithCollectionParameters( IEnumerable<int> intEnumerable, IEnumerable<object> objectEnumerable,
-                                                                                 List<int> intList, List<object> objectList, int[] intArray,
-                                                                                 object[] objectArray )
+            public override string CachedInstatceMethodWithCollectionParameters(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParameters( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -403,15 +436,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodWithEmptyCollectionParameters()
         {
-            TestClassForEmptyCollectionParameters testObject = new TestClassForEmptyCollectionParameters();
+            var testObject = new TestClassForEmptyCollectionParameters();
 
             this.DoTestMethod(
                 testMethodWithEmptyCollectionParametersProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForEmptyCollectionParameters.CachedInstatceMethodWithCollectionParameters(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForEmptyCollectionParameters}, (IEnumerable<int>) [], (IEnumerable<object>) [], (List<int>) [], (List<object>) [], (int[]) [], (object[]) [])",
                 () => testObject.CachedInstatceMethodWithCollectionParameters(
-                    new List<int>(), new List<object>(),
-                    new List<int>(), new List<object>(),
-                    new int[] { }, new object[] { } ) );
+                    new List<int>(),
+                    new List<object>(),
+                    new List<int>(),
+                    new List<object>(),
+                    new int[] { },
+                    new object[] { } ) );
         }
 
         #endregion TestMethodWithEmptyCollectionParameters
@@ -423,10 +459,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class AsyncTestClassForEmptyCollectionParameters : AsyncTestClassForCollections
         {
             [Cache( ProfileName = testMethodWithEmptyCollectionParametersAsyncProfileName )]
-            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync( IEnumerable<int> intEnumerable,
-                                                                                            IEnumerable<object> objectEnumerable,
-                                                                                            List<int> intList, List<object> objectList, int[] intArray,
-                                                                                            object[] objectArray )
+            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParametersAsync( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -435,15 +474,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestMethodWithEmptyCollectionParametersAsync()
         {
-            AsyncTestClassForEmptyCollectionParameters testObject = new AsyncTestClassForEmptyCollectionParameters();
+            var testObject = new AsyncTestClassForEmptyCollectionParameters();
 
             await this.DoTestMethodAsync(
                 testMethodWithEmptyCollectionParametersAsyncProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForEmptyCollectionParameters.CachedInstatceMethodWithCollectionParametersAsync(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForEmptyCollectionParameters}, (IEnumerable<int>) [], (IEnumerable<object>) [], (List<int>) [], (List<object>) [], (int[]) [], (object[]) [])",
                 () => testObject.CachedInstatceMethodWithCollectionParametersAsync(
-                    new List<int>(), new List<object>(),
-                    new List<int>(), new List<object>(),
-                    new int[] { }, new object[] { } ) );
+                    new List<int>(),
+                    new List<object>(),
+                    new List<int>(),
+                    new List<object>(),
+                    new int[] { },
+                    new object[] { } ) );
         }
 
         #endregion TestMethodWithEmptyCollectionParametersAsync
@@ -455,9 +497,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class TestClassForOneCollectionParameters : TestClassForCollections
         {
             [Cache( ProfileName = testMethodWithOneItemCollectionParametersProfileName )]
-            public override string CachedInstatceMethodWithCollectionParameters( IEnumerable<int> intEnumerable, IEnumerable<object> objectEnumerable,
-                                                                                 List<int> intList, List<object> objectList, int[] intArray,
-                                                                                 object[] objectArray )
+            public override string CachedInstatceMethodWithCollectionParameters(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParameters( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -466,15 +512,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodWithOneItemCollectionParameters()
         {
-            TestClassForOneCollectionParameters testObject = new TestClassForOneCollectionParameters();
+            var testObject = new TestClassForOneCollectionParameters();
 
             this.DoTestMethod(
                 testMethodWithOneItemCollectionParametersProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForOneCollectionParameters.CachedInstatceMethodWithCollectionParameters(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForOneCollectionParameters}, (IEnumerable<int>) [ 1 ], (IEnumerable<object>) [ \"Object1\" ], (List<int>) [ 2 ], (List<object>) [ \"Object2\" ], (int[]) [ 3 ], (object[]) [ \"Object3\" ])",
                 () => testObject.CachedInstatceMethodWithCollectionParameters(
-                    new List<int>( new[] {1} ), new List<object>( new object[] {"Object1"} ),
-                    new List<int>( new[] {2} ), new List<object>( new object[] {"Object2"} ),
-                    new[] {3}, new object[] {"Object3"} ) );
+                    new List<int>( new[] { 1 } ),
+                    new List<object>( new object[] { "Object1" } ),
+                    new List<int>( new[] { 2 } ),
+                    new List<object>( new object[] { "Object2" } ),
+                    new[] { 3 },
+                    new object[] { "Object3" } ) );
         }
 
         #endregion TestMethodWithOneItemCollectionParameters
@@ -486,10 +535,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class AsyncTestClassForOneCollectionParameters : AsyncTestClassForCollections
         {
             [Cache( ProfileName = testMethodWithOneItemCollectionParametersAsyncProfileName )]
-            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync( IEnumerable<int> intEnumerable,
-                                                                                            IEnumerable<object> objectEnumerable,
-                                                                                            List<int> intList, List<object> objectList, int[] intArray,
-                                                                                            object[] objectArray )
+            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParametersAsync( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -498,15 +550,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestMethodWithOneItemCollectionParametersAsync()
         {
-            AsyncTestClassForOneCollectionParameters testObject = new AsyncTestClassForOneCollectionParameters();
+            var testObject = new AsyncTestClassForOneCollectionParameters();
 
             await this.DoTestMethodAsync(
                 testMethodWithOneItemCollectionParametersAsyncProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForOneCollectionParameters.CachedInstatceMethodWithCollectionParametersAsync(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForOneCollectionParameters}, (IEnumerable<int>) [ 1 ], (IEnumerable<object>) [ \"Object1\" ], (List<int>) [ 2 ], (List<object>) [ \"Object2\" ], (int[]) [ 3 ], (object[]) [ \"Object3\" ])",
                 () => testObject.CachedInstatceMethodWithCollectionParametersAsync(
-                    new List<int>( new[] {1} ), new List<object>( new object[] {"Object1"} ),
-                    new List<int>( new[] {2} ), new List<object>( new object[] {"Object2"} ),
-                    new[] {3}, new object[] {"Object3"} ) );
+                    new List<int>( new[] { 1 } ),
+                    new List<object>( new object[] { "Object1" } ),
+                    new List<int>( new[] { 2 } ),
+                    new List<object>( new object[] { "Object2" } ),
+                    new[] { 3 },
+                    new object[] { "Object3" } ) );
         }
 
         #endregion TestMethodWithOneItemCollectionParametersAsync
@@ -518,9 +573,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class TestClassForTwoCollectionParameters : TestClassForCollections
         {
             [Cache( ProfileName = testMethodWithTwoItemCollectionParametersProfileName )]
-            public override string CachedInstatceMethodWithCollectionParameters( IEnumerable<int> intEnumerable, IEnumerable<object> objectEnumerable,
-                                                                                 List<int> intList, List<object> objectList, int[] intArray,
-                                                                                 object[] objectArray )
+            public override string CachedInstatceMethodWithCollectionParameters(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParameters( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -529,15 +588,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodWithTwoItemCollectionParameters()
         {
-            TestClassForTwoCollectionParameters testObject = new TestClassForTwoCollectionParameters();
+            var testObject = new TestClassForTwoCollectionParameters();
 
             this.DoTestMethod(
                 testMethodWithTwoItemCollectionParametersProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForTwoCollectionParameters.CachedInstatceMethodWithCollectionParameters(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForTwoCollectionParameters}, (IEnumerable<int>) [ 1, 2 ], (IEnumerable<object>) [ \"Object1\", \"Object2\" ], (List<int>) [ 3, 4 ], (List<object>) [ \"Object3\", \"Object4\" ], (int[]) [ 5, 6 ], (object[]) [ \"Object5\", \"Object6\" ])",
                 () => testObject.CachedInstatceMethodWithCollectionParameters(
-                    new List<int>( new[] {1, 2} ), new List<object>( new object[] {"Object1", "Object2"} ),
-                    new List<int>( new[] {3, 4} ), new List<object>( new object[] {"Object3", "Object4"} ),
-                    new[] {5, 6}, new object[] {"Object5", "Object6"} ) );
+                    new List<int>( new[] { 1, 2 } ),
+                    new List<object>( new object[] { "Object1", "Object2" } ),
+                    new List<int>( new[] { 3, 4 } ),
+                    new List<object>( new object[] { "Object3", "Object4" } ),
+                    new[] { 5, 6 },
+                    new object[] { "Object5", "Object6" } ) );
         }
 
         #endregion TestMethodWithTwoItemCollectionParameters
@@ -549,10 +611,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class AsyncTestClassForTwoCollectionParameters : AsyncTestClassForCollections
         {
             [Cache( ProfileName = testMethodWithTwoItemCollectionParametersAsyncProfileName )]
-            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync( IEnumerable<int> intEnumerable,
-                                                                                            IEnumerable<object> objectEnumerable,
-                                                                                            List<int> intList, List<object> objectList, int[] intArray,
-                                                                                            object[] objectArray )
+            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParametersAsync( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -561,15 +626,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestMethodWithTwoItemCollectionParametersAsync()
         {
-            AsyncTestClassForTwoCollectionParameters testObject = new AsyncTestClassForTwoCollectionParameters();
+            var testObject = new AsyncTestClassForTwoCollectionParameters();
 
             await this.DoTestMethodAsync(
                 testMethodWithTwoItemCollectionParametersAsyncProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForTwoCollectionParameters.CachedInstatceMethodWithCollectionParametersAsync(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForTwoCollectionParameters}, (IEnumerable<int>) [ 1, 2 ], (IEnumerable<object>) [ \"Object1\", \"Object2\" ], (List<int>) [ 3, 4 ], (List<object>) [ \"Object3\", \"Object4\" ], (int[]) [ 5, 6 ], (object[]) [ \"Object5\", \"Object6\" ])",
                 () => testObject.CachedInstatceMethodWithCollectionParametersAsync(
-                    new List<int>( new[] {1, 2} ), new List<object>( new object[] {"Object1", "Object2"} ),
-                    new List<int>( new[] {3, 4} ), new List<object>( new object[] {"Object3", "Object4"} ),
-                    new[] {5, 6}, new object[] {"Object5", "Object6"} ) );
+                    new List<int>( new[] { 1, 2 } ),
+                    new List<object>( new object[] { "Object1", "Object2" } ),
+                    new List<int>( new[] { 3, 4 } ),
+                    new List<object>( new object[] { "Object3", "Object4" } ),
+                    new[] { 5, 6 },
+                    new object[] { "Object5", "Object6" } ) );
         }
 
         #endregion TestMethodWithTwoItemCollectionParametersAsync
@@ -581,9 +649,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class TestClassForThreeCollectionParameters : TestClassForCollections
         {
             [Cache( ProfileName = testMethodWithThreeItemCollectionParametersProfileName )]
-            public override string CachedInstatceMethodWithCollectionParameters( IEnumerable<int> intEnumerable, IEnumerable<object> objectEnumerable,
-                                                                                 List<int> intList, List<object> objectList, int[] intArray,
-                                                                                 object[] objectArray )
+            public override string CachedInstatceMethodWithCollectionParameters(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParameters( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -592,15 +664,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodWithThreeItemCollectionParameters()
         {
-            TestClassForThreeCollectionParameters testObject = new TestClassForThreeCollectionParameters();
+            var testObject = new TestClassForThreeCollectionParameters();
 
             this.DoTestMethod(
                 testMethodWithThreeItemCollectionParametersProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForThreeCollectionParameters.CachedInstatceMethodWithCollectionParameters(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForThreeCollectionParameters}, (IEnumerable<int>) [ 1, 2, 3 ], (IEnumerable<object>) [ \"Object1\", \"Object2\", \"Object3\" ], (List<int>) [ 4, 5, 6 ], (List<object>) [ \"Object4\", \"Object5\", \"Object6\" ], (int[]) [ 7, 8, 9 ], (object[]) [ \"Object7\", \"Object8\", \"Object9\" ])",
                 () => testObject.CachedInstatceMethodWithCollectionParameters(
-                    new List<int>( new[] {1, 2, 3} ), new List<object>( new object[] {"Object1", "Object2", "Object3"} ),
-                    new List<int>( new[] {4, 5, 6} ), new List<object>( new object[] {"Object4", "Object5", "Object6"} ),
-                    new[] {7, 8, 9}, new object[] {"Object7", "Object8", "Object9"} ) );
+                    new List<int>( new[] { 1, 2, 3 } ),
+                    new List<object>( new object[] { "Object1", "Object2", "Object3" } ),
+                    new List<int>( new[] { 4, 5, 6 } ),
+                    new List<object>( new object[] { "Object4", "Object5", "Object6" } ),
+                    new[] { 7, 8, 9 },
+                    new object[] { "Object7", "Object8", "Object9" } ) );
         }
 
         #endregion TestMethodWithThreeItemCollectionParameters
@@ -613,10 +688,13 @@ namespace Metalama.Patterns.Caching.Tests
         private class AsyncTestClassForThreeCollectionParameters : AsyncTestClassForCollections
         {
             [Cache( ProfileName = testMethodWithThreeItemCollectionParametersAsyncProfileName )]
-            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync( IEnumerable<int> intEnumerable,
-                                                                                            IEnumerable<object> objectEnumerable,
-                                                                                            List<int> intList, List<object> objectList, int[] intArray,
-                                                                                            object[] objectArray )
+            public override Task<string> CachedInstatceMethodWithCollectionParametersAsync(
+                IEnumerable<int> intEnumerable,
+                IEnumerable<object> objectEnumerable,
+                List<int> intList,
+                List<object> objectList,
+                int[] intArray,
+                object[] objectArray )
             {
                 return base.CachedInstatceMethodWithCollectionParametersAsync( intEnumerable, objectEnumerable, intList, objectList, intArray, objectArray );
             }
@@ -625,15 +703,18 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestMethodWithThreeItemCollectionParametersAsync()
         {
-            AsyncTestClassForThreeCollectionParameters testObject = new AsyncTestClassForThreeCollectionParameters();
+            var testObject = new AsyncTestClassForThreeCollectionParameters();
 
             await this.DoTestMethodAsync(
                 testMethodWithThreeItemCollectionParametersAsyncProfileName,
                 "PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForThreeCollectionParameters.CachedInstatceMethodWithCollectionParametersAsync(this={PostSharp.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForThreeCollectionParameters}, (IEnumerable<int>) [ 1, 2, 3 ], (IEnumerable<object>) [ \"Object1\", \"Object2\", \"Object3\" ], (List<int>) [ 4, 5, 6 ], (List<object>) [ \"Object4\", \"Object5\", \"Object6\" ], (int[]) [ 7, 8, 9 ], (object[]) [ \"Object7\", \"Object8\", \"Object9\" ])",
                 () => testObject.CachedInstatceMethodWithCollectionParametersAsync(
-                    new List<int>( new[] {1, 2, 3} ), new List<object>( new object[] {"Object1", "Object2", "Object3"} ),
-                    new List<int>( new[] {4, 5, 6} ), new List<object>( new object[] {"Object4", "Object5", "Object6"} ),
-                    new[] {7, 8, 9}, new object[] {"Object7", "Object8", "Object9"} ) );
+                    new List<int>( new[] { 1, 2, 3 } ),
+                    new List<object>( new object[] { "Object1", "Object2", "Object3" } ),
+                    new List<int>( new[] { 4, 5, 6 } ),
+                    new List<object>( new object[] { "Object4", "Object5", "Object6" } ),
+                    new[] { 7, 8, 9 },
+                    new object[] { "Object7", "Object8", "Object9" } ) );
         }
 
         #endregion TestMethodWithThreeItemCollectionParametersAsync

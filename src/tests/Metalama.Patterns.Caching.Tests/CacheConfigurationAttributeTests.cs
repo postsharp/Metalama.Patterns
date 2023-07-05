@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +32,7 @@ namespace Metalama.Patterns.Caching.Tests
                 public async Task<object> GetValueInnerBaseAsync()
                 {
                     await Task.Yield();
+
                     return null;
                 }
             }
@@ -44,6 +47,7 @@ namespace Metalama.Patterns.Caching.Tests
             public async Task<object> GetValueBaseAsync()
             {
                 await Task.Yield();
+
                 return null;
             }
         }
@@ -62,6 +66,7 @@ namespace Metalama.Patterns.Caching.Tests
                 public async Task<object> GetValueInnerChildAsync()
                 {
                     await Task.Yield();
+
                     return null;
                 }
             }
@@ -76,6 +81,7 @@ namespace Metalama.Patterns.Caching.Tests
             public async Task<object> GetValueChildAsync()
             {
                 await Task.Yield();
+
                 return null;
             }
         }
@@ -84,6 +90,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             TestingCacheBackend backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testCachingAttributeProfileName );
+
             TestProfileConfigurationFactory.CreateProfile( testCachingAttributeProfileName );
 
             try
@@ -95,8 +102,10 @@ namespace Metalama.Patterns.Caching.Tests
 
                 Assert.NotNull( backend.LastCachedKey );
                 Assert.NotNull( backend.LastCachedItem );
-                Assert.Equal( defaultProfile ? CachingProfile.DefaultName : testCachingAttributeProfileName,
-                                 backend.LastCachedItem.Configuration.ProfileName );
+
+                Assert.Equal(
+                    defaultProfile ? CachingProfile.DefaultName : testCachingAttributeProfileName,
+                    backend.LastCachedItem.Configuration.ProfileName );
             }
             finally
             {
@@ -108,6 +117,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             TestingCacheBackend backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testCachingAttributeProfileName );
+
             TestProfileConfigurationFactory.CreateProfile( testCachingAttributeProfileName );
 
             try
@@ -119,8 +129,10 @@ namespace Metalama.Patterns.Caching.Tests
 
                 Assert.NotNull( backend.LastCachedKey );
                 Assert.NotNull( backend.LastCachedItem );
-                Assert.Equal( defaultProfile ? CachingProfile.DefaultName : testCachingAttributeProfileName,
-                                 backend.LastCachedItem.Configuration.ProfileName );
+
+                Assert.Equal(
+                    defaultProfile ? CachingProfile.DefaultName : testCachingAttributeProfileName,
+                    backend.LastCachedItem.Configuration.ProfileName );
             }
             finally
             {
@@ -131,56 +143,56 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestCachingAttributeBase()
         {
-            ChildCachingClass cachingClass = new ChildCachingClass();
+            var cachingClass = new ChildCachingClass();
             DoCachingAttributeTest( cachingClass.GetValueBase, false );
         }
 
         [Fact]
         public async Task TestCachingAttributeBaseAsync()
         {
-            ChildCachingClass cachingClass = new ChildCachingClass();
+            var cachingClass = new ChildCachingClass();
             await DoCachingAttributeTestAsync( cachingClass.GetValueBaseAsync, false );
         }
 
         [Fact]
         public void TestCachingAttributeChild()
         {
-            ChildCachingClass cachingClass = new ChildCachingClass();
+            var cachingClass = new ChildCachingClass();
             DoCachingAttributeTest( cachingClass.GetValueChild, false );
         }
 
         [Fact]
         public async Task TestCachingAttributeChildAsync()
         {
-            ChildCachingClass cachingClass = new ChildCachingClass();
+            var cachingClass = new ChildCachingClass();
             await DoCachingAttributeTestAsync( cachingClass.GetValueChildAsync, false );
         }
 
         [Fact]
         public void TestCachingAttributeInnerInBase()
         {
-            BaseCachingClass.InnerCachingClassInBase cachingClass = new BaseCachingClass.InnerCachingClassInBase();
+            var cachingClass = new BaseCachingClass.InnerCachingClassInBase();
             DoCachingAttributeTest( cachingClass.GetValueInnerBase, true );
         }
 
         [Fact]
         public async Task TestCachingAttributeInnerInBaseAsync()
         {
-            BaseCachingClass.InnerCachingClassInBase cachingClass = new BaseCachingClass.InnerCachingClassInBase();
+            var cachingClass = new BaseCachingClass.InnerCachingClassInBase();
             await DoCachingAttributeTestAsync( cachingClass.GetValueInnerBaseAsync, true );
         }
 
         [Fact]
         public void TestCachingAttributeInnerInBaseChild()
         {
-            ChildCachingClass.InnerCachingClassInChild cachingClass = new ChildCachingClass.InnerCachingClassInChild();
+            var cachingClass = new ChildCachingClass.InnerCachingClassInChild();
             DoCachingAttributeTest( cachingClass.GetValueInnerChild, true );
         }
 
         [Fact]
         public async Task TestCachingAttributeInnerInBaseChildAsync()
         {
-            ChildCachingClass.InnerCachingClassInChild cachingClass = new ChildCachingClass.InnerCachingClassInChild();
+            var cachingClass = new ChildCachingClass.InnerCachingClassInChild();
             await DoCachingAttributeTestAsync( cachingClass.GetValueInnerChildAsync, true );
         }
     }

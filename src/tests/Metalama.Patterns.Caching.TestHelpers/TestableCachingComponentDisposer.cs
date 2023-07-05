@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -14,12 +16,12 @@ namespace Metalama.Patterns.Caching.TestHelpers.Shared
         public static void Dispose<ComponentT>( params ComponentT[] components )
             where ComponentT : ITestableCachingComponent
         {
-            foreach ( ComponentT component in components )
+            foreach ( var component in components )
             {
                 component.Dispose();
             }
 
-            foreach ( ComponentT component in components )
+            foreach ( var component in components )
             {
                 AssertEx.Equal( 0, component.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
             }
@@ -28,13 +30,12 @@ namespace Metalama.Patterns.Caching.TestHelpers.Shared
         public static async Task DisposeAsync<ComponentT>( params ComponentT[] components )
             where ComponentT : ITestableCachingComponent
         {
-            
-            foreach ( ComponentT component in components )
+            foreach ( var component in components )
             {
-                await component.DisposeAsync(new CancellationTokenSource(TimeSpan.FromSeconds( 10 )).Token);
+                await component.DisposeAsync( new CancellationTokenSource( TimeSpan.FromSeconds( 10 ) ).Token );
             }
 
-            foreach ( ComponentT component in components )
+            foreach ( var component in components )
             {
                 AssertEx.Equal( 0, component.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
             }

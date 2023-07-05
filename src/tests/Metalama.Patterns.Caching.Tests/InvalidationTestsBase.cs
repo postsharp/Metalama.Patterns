@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System;
 using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Common.Tests.Helpers;
@@ -13,11 +15,11 @@ namespace Metalama.Patterns.Caching.Tests
 
             public int this[ int i ] => this.counters[i];
 
-            public CallsCounters(int size)
+            public CallsCounters( int size )
             {
                 this.counters = new int[size];
 
-                for (int i = 0; i < this.counters.Length; i++)
+                for ( var i = 0; i < this.counters.Length; i++ )
                 {
                     this.counters[i] = 0;
                 }
@@ -36,8 +38,7 @@ namespace Metalama.Patterns.Caching.Tests
             string testDescription,
             bool firstShouldWork,
             bool othersShouldWork,
-            bool onlyPairsShouldWork = false
-        )
+            bool onlyPairsShouldWork = false )
         {
             TestProfileConfigurationFactory.InitializeTestWithCachingBackend( profileName );
             TestProfileConfigurationFactory.CreateProfile( profileName );
@@ -48,9 +49,9 @@ namespace Metalama.Patterns.Caching.Tests
 
                 CachedValueClass[] cachedMethodValuesBeforeInvalidation = new CachedValueClass[cachedMethods.Length];
 
-                for ( int testedPairIndex = 0; testedPairIndex < cachedMethods.Length; testedPairIndex++ )
+                for ( var testedPairIndex = 0; testedPairIndex < cachedMethods.Length; testedPairIndex++ )
                 {
-                    for ( int cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
+                    for ( var cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
                     {
                         cachedMethodValuesBeforeInvalidation[cachedMethodIndex] =
                             cachedMethods[cachedMethodIndex].Invoke();
@@ -60,10 +61,11 @@ namespace Metalama.Patterns.Caching.Tests
                         invalidatingMethods[testedPairIndex].Invoke();
 
                     AssertEx.Equal(
-                        cachedMethodValuesBeforeInvalidation[testedPairIndex], valueDuringInvalidation,
+                        cachedMethodValuesBeforeInvalidation[testedPairIndex],
+                        valueDuringInvalidation,
                         $"{testDescription}: The value during invalidation of the invalidated method #{testedPairIndex} is different than the cached one when invalidating by the method #{testedPairIndex}." );
 
-                    for ( int cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
+                    for ( var cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
                     {
                         CachedValueClass cachedMethodValueAfterInvalidation =
                             cachedMethods[cachedMethodIndex].Invoke();
@@ -86,13 +88,15 @@ namespace Metalama.Patterns.Caching.Tests
                         if ( shouldBeInvalidated )
                         {
                             AssertEx.NotEqual(
-                                cachedMethodValuesBeforeInvalidation[cachedMethodIndex], cachedMethodValueAfterInvalidation,
+                                cachedMethodValuesBeforeInvalidation[cachedMethodIndex],
+                                cachedMethodValueAfterInvalidation,
                                 $"{testDescription}: The value after invalidation of the invalidated method #{cachedMethodIndex} is the same as the cached one when invalidating by the method #{testedPairIndex}." );
                         }
                         else
                         {
                             AssertEx.Equal(
-                                cachedMethodValuesBeforeInvalidation[cachedMethodIndex], cachedMethodValueAfterInvalidation,
+                                cachedMethodValuesBeforeInvalidation[cachedMethodIndex],
+                                cachedMethodValueAfterInvalidation,
                                 $"{testDescription}: The value after invalidation of the not invalidated method #{cachedMethodIndex} is different than the cached one when invalidating by the method #{testedPairIndex}." );
                         }
                     }

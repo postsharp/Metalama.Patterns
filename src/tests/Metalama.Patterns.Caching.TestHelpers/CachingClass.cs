@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
 using System.Collections.Generic;
@@ -21,8 +20,9 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         public bool Reset()
         {
-            bool result = this.methodCalled;
+            var result = this.methodCalled;
             this.methodCalled = false;
+
             return result;
         }
 
@@ -36,7 +36,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
             this.methodCalled = true;
 
-            T value = new T() {Id = this.counter++};
+            var value = new T() { Id = this.counter++ };
             this.MethodCalled?.Invoke( this, value );
 
             return value;
@@ -44,21 +44,24 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         private async Task<T> CreateNextValueAsync()
         {
-            await Task.Delay(  1 );
+            await Task.Delay( 1 );
+
             return this.CreateNextValue();
         }
 
         private T CreateNextValueAsDependency()
         {
-            T value = this.CreateNextValue();
+            var value = this.CreateNextValue();
             CachingContext.Current.AddDependency( value );
+
             return value;
         }
 
         private async Task<T> CreateNextValueAsDependencyAsync()
         {
-            T value = await this.CreateNextValueAsync();
+            var value = await this.CreateNextValueAsync();
             CachingContext.Current.AddDependency( value );
+
             return value;
         }
 
@@ -88,7 +91,5 @@ namespace Metalama.Patterns.Caching.TestHelpers
         }
     }
 
-    public class CachingClass : CachingClass<CachedValueClass>
-    {
-    }
+    public class CachingClass : CachingClass<CachedValueClass> { }
 }
