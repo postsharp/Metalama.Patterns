@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Common.Tests.Helpers;
+
 using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests

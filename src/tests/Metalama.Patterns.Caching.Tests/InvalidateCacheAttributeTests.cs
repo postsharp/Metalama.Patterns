@@ -1,17 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.TestHelpers;
 using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Caching;
 using System.Threading.Tasks;
 using Xunit;
-using Metalama.Patterns.Common.Tests.Helpers;
-using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Threading.Primitives;
 
 namespace Metalama.Patterns.Caching.Tests
 {
@@ -1793,7 +1785,7 @@ namespace Metalama.Patterns.Caching.Tests
             [InvalidateCache( nameof(InnerMethodAsync) )]
             public async Task InvalidateInnerMethodAsync()
             {
-                await PortableThreadingApi.CompletedTask;
+                await Task.CompletedTask;
             }
         }
 

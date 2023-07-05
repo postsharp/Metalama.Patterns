@@ -1,10 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+// TODO: [Porting] Disabled: Logging in caching tests currently rely on TextLoggingBackend.
+#if false
+
 using Xunit;
-using Metalama.Aspects;
-using Metalama.Patterns.Common.Tests.Helpers;
-using Metalama.Patterns.Diagnostics;
-using Metalama.Patterns.Diagnostics.Backends.Console;
 
 namespace Metalama.Patterns.Caching.Tests
 {
@@ -30,3 +29,4 @@ namespace Metalama.Patterns.Caching.Tests
         }
     }
 }
+#endif

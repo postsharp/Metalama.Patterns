@@ -8,7 +8,7 @@
 
 using System.Threading.Tasks;
 
-namespace PostSharp.Patterns.Caching.TestHelpers
+namespace Metalama.Patterns.Caching.TestHelpers
 {
     public partial class CachingClass<T>
     {

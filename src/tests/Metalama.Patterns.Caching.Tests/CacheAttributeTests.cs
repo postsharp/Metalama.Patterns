@@ -1,14 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
-using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Caching.Tests.Backends;
-using Metalama.Patterns.Common.Tests.Helpers;
 using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
 namespace Metalama.Patterns.Caching.Tests

@@ -1,11 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Linq;
-using Xunit;
+// TODO: [Porting] Disabled: Do we still need PortableSerializer?
+#if false
 using Metalama.Patterns.Caching.Serializers;
-using Metalama.Patterns.Common.Tests.Helpers;
-using Metalama.Serialization;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests.Serializers
 {
@@ -29,3 +27,4 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
         }
     }
 }
+#endif

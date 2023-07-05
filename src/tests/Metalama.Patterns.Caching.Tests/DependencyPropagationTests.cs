@@ -7,7 +7,7 @@ using System.Linq;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Implementation;
 using System.Threading.Tasks;
-using Metalama.Patterns.Common.Tests.Helpers;
+
 
 namespace Metalama.Patterns.Caching.Tests
 {

@@ -1,17 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Common.Tests.Helpers;
 
-namespace Metalama.Patterns.Caching.TestHelpers.Shared
+namespace Metalama.Patterns.Caching.TestHelpers
 {
-    internal static class TestableCachingComponentDisposer
+    public static class TestableCachingComponentDisposer
     {
         public static void Dispose<ComponentT>( params ComponentT[] components )
             where ComponentT : ITestableCachingComponent

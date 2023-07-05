@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Common.Tests.Helpers;
+
 
 namespace Metalama.Patterns.Caching.Tests
 {

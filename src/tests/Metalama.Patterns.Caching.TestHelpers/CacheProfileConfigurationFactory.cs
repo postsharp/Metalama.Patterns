@@ -1,12 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.TestHelpers.Shared;
-using System.Runtime.Caching;
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Common.Tests.Helpers;
 using Metalama.Patterns.Caching.Implementation;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
@@ -25,14 +21,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public static CachingBackend InitializeTestWithCachingBackend( string name )
         {
             InitializeTestWithoutBackend();
-#if RUNTIME_CACHING
-            var backend = new MemoryCachingBackend( new MemoryCache( "test-" + name ) );
-#elif EXTENSIONS_CACHING
-            MemoryCacheBackend backend = new MemoryCacheBackend(
+
+#if NETFRAMEWORK
+            var backend = new MemoryCacheBackend(
                 new Microsoft.Extensions.Caching.Memory.MemoryCache( new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions() ) );
 #else
-#error You must define at least one of: RUNTIME_CACHING, EXTENSIONS_CACHING.
+            var backend = new MemoryCachingBackend( new System.Runtime.Caching.MemoryCache( "test-" + name ) );
 #endif
+
             CachingServices.DefaultBackend = backend;
 
             return backend;

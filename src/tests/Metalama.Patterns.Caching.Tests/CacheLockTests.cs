@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Metalama.Patterns.Caching.Locking;
-using Metalama.Patterns.Common.Tests.Helpers;
+
 using Metalama.Patterns.Caching.TestHelpers;
 
 namespace Metalama.Patterns.Caching.Tests

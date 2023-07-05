@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
-    <RootNamespace>PostSharp.Patterns.Caching.Tests.Helpers</RootNamespace>
-    <AssemblyName>PostSharp.Patterns.Caching.TestHelpers</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;LamaDebug</Configurations>
   </PropertyGroup>
 
 
-<!--
+  <!--
   <ItemGroup>
     <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" />
     <ProjectReference Include="..\..\Common\PostSharp.Patterns.Common\PostSharp.Patterns.Common.csproj" />
@@ -35,11 +35,13 @@
   -->
   <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
   <PropertyGroup>
-	<DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
+    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+    <PackageReference Include="xunit" Version="$(xUnitVersion)" />
+    <PackageReference Include="Xunit.SkippableFact" Version="$(XunitSkippableFactVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
@@ -47,6 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
     <ProjectReference Include="..\..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
   </ItemGroup>
 
@@ -54,4 +57,19 @@
     <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.IMemoryCache\Metalama.Patterns.Caching.Backends.IMemoryCache.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="CachingClass.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>CachingClass.Generated.cs</LastGenOutput>
+    </None>
+    <Compile Update="CachingClass.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CachingClass.Generated.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
 </Project>

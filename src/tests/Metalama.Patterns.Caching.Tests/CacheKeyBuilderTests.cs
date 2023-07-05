@@ -1,16 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Common.Tests.Helpers;
-using Metalama.Patterns.Diagnostics;
+using Metalama.Patterns.Contracts;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
@@ -20,9 +16,9 @@ namespace Metalama.Patterns.Caching.Tests
         {
             public string LastMethodKey;
 
-            public override string BuildMethodKey( MethodInfo method, IList<object> arguments, object instance = null )
+            public override string BuildMethodKey( [Required] CachedMethodRegistration registration, [Required] IList<object?> arguments, object? instance = null )
             {
-                return this.LastMethodKey = base.BuildMethodKey( method, arguments, instance );
+                return this.LastMethodKey = base.BuildMethodKey( registration, arguments, instance );
             }
         }
 

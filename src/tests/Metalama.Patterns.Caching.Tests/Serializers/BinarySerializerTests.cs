@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using Xunit;
 using Metalama.Patterns.Caching.Serializers;
-using Metalama.Patterns.Common.Tests.Helpers;
+
 
 namespace Metalama.Patterns.Caching.Tests.Serializers
 {

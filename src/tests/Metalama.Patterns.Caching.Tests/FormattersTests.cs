@@ -1,16 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
-using Metalama.Patterns.Formatters;
-using Metalama.Patterns.Caching;
+using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Implementation;
-using IFormattable = Metalama.Patterns.Formatters.IFormattable;
-using Metalama.Patterns.Common.Tests.Helpers;
+using Xunit;
+using IFormattable = Flashtrace.Formatters.IFormattable;
 
 namespace Metalama.Patterns.Caching.Tests
 {
@@ -19,8 +12,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClass()
         {
-            CachingServices.Formatters.Reset();
-            CachingServices.Formatters.Register( new DogFormatter() );
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
+            CachingServices.Formatters.Instance.Register( new DogFormatter( CachingServices.Formatters.Instance ) );
 
             this.AssertKey( "FormattedDog", new Dog() );
         }
@@ -36,9 +29,9 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClassOverwritingFormatter()
         {
-            CachingServices.Formatters.Reset();
-            CachingServices.Formatters.Register( new AnimalFormatter() );
-            CachingServices.Formatters.Register( new DogFormatter() );
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
+            CachingServices.Formatters.Instance.Register( new AnimalFormatter( CachingServices.Formatters.Instance ) );
+            CachingServices.Formatters.Instance.Register( new DogFormatter( CachingServices.Formatters.Instance ) );
 
             this.AssertKey( "FormattedDog", new Dog() );
         }
@@ -46,16 +39,16 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestDerivedClass()
         {
-            CachingServices.Formatters.Reset();
-            CachingServices.Formatters.Register( new DogFormatter() );
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
+            CachingServices.Formatters.Instance.Register( new DogFormatter( CachingServices.Formatters.Instance ) );
             this.AssertKey( "FormattedDog", new Chihuahua() );
         }
 
         [Fact]
         public void TestInterface()
         {
-            CachingServices.Formatters.Reset();
-            CachingServices.Formatters.Register( new AnimalFormatter() );
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
+            CachingServices.Formatters.Instance.Register( new AnimalFormatter( CachingServices.Formatters.Instance ) );
 
             this.AssertKey( "FormattedAnimal", new Cat() );
         }
@@ -63,7 +56,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestManuallyFormatted()
         {
-            CachingServices.Formatters.Reset();
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
 
             this.AssertKey( "ManuallyFormatted:Caching", new ManuallyFormatted() );
         }
@@ -78,6 +71,10 @@ namespace Metalama.Patterns.Caching.Tests
 
         private class AnimalFormatter : Formatter<IAnimal>
         {
+            public AnimalFormatter( IFormatterRepository repository ) : base( repository )
+            {
+            }
+
             public override void Write( UnsafeStringBuilder stringBuilder, IAnimal value )
             {
                 stringBuilder.Append( "FormattedAnimal" );
@@ -86,6 +83,10 @@ namespace Metalama.Patterns.Caching.Tests
 
         private class DogFormatter : Formatter<Dog>
         {
+            public DogFormatter( IFormatterRepository repository ) : base( repository )
+            {
+            }
+
             public override void Write( UnsafeStringBuilder stringBuilder, Dog value )
             {
                 stringBuilder.Append( "FormattedDog" );
@@ -94,9 +95,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         private class ManuallyFormatted : IFormattable
         {
-            void IFormattable.Format( UnsafeStringBuilder stringBuilder, FormattingRole role )
+            void IFormattable.Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
             {
-                stringBuilder.Append( "ManuallyFormatted:" + role.Name );
+                stringBuilder.Append( "ManuallyFormatted:" + formatterRepository.Role.Name );
             }
         }
     }

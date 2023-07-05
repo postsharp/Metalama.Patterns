@@ -5,7 +5,7 @@ using System.Linq;
 using Xunit;
 using Metalama.Patterns.Caching.Serializers;
 using System.Runtime.Serialization;
-using Metalama.Patterns.Common.Tests.Helpers;
+
 
 namespace Metalama.Patterns.Caching.Tests.Serializers
 {

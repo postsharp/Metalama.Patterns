@@ -1,19 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Caching.TestHelpers.Shared;
-using System;
-using System.Collections;
-using System.Threading;
-using Xunit;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.TestHelpers;
+using System.Collections;
 using System.Collections.Immutable;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using Metalama.Patterns.Threading.Primitives;
-using Metalama.Patterns.Common.Tests.Helpers;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests.Backends
 {
@@ -1164,7 +1155,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
 
             public Task DisposeAsync( CancellationToken cancellationToken = default )
             {
-                return PortableThreadingApi.CompletedTask;
+                return Task.CompletedTask;
             }
         }
     }

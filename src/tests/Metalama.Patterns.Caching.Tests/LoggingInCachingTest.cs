@@ -1,12 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Xunit;
-using System;
+// TODO: [Porting] Disabled: Logging in caching tests currently rely on TextLoggingBackend.
+#if false
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Diagnostics;
-using Metalama.Patterns.Diagnostics.Backends;
-using Metalama.Patterns.Diagnostics.RecordBuilders;
-using Metalama.Patterns.Formatters;
+using System;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
@@ -16,6 +14,7 @@ namespace Metalama.Patterns.Caching.Tests
         public void TestLoggingOutput()
         {
             var selfLoggingBackend = new SelfLoggingBackend();
+            Flashtrace.
             LoggingServices.DefaultBackend = selfLoggingBackend;
             TestProfileConfigurationFactory.InitializeTestWithCachingBackend( "LoggingInCachingTest" );
 
@@ -92,3 +91,4 @@ namespace Metalama.Patterns.Caching.Tests
         }
     }
 }
+#endif

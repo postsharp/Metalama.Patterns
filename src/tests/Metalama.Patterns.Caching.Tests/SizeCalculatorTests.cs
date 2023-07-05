@@ -8,7 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Common.Tests.Helpers;
+
 using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
 namespace Metalama.Patterns.Caching.Tests
