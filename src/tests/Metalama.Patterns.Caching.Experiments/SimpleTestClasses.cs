@@ -4,9 +4,8 @@
 // ReSharper disable all
 #pragma warning disable
 
-#define PARAMS_IS_BROKEN
-
 // TODO: Work around #33441 : Some method calls in scope via `using static` are not transformed.
+using Metalama.Patterns.Caching.Implementation;
 using System.Runtime.CompilerServices;
 using static Flashtrace.FormattedMessageBuilder;
 using static Metalama.Patterns.Caching.Experiments.InfoWriter;
@@ -21,7 +20,6 @@ internal static class InfoWriter
     }
 }
 
-#if !PARAMS_IS_BROKEN
 public static class S_Enumerator
 {
     [Cache]
@@ -31,7 +29,52 @@ public static class S_Enumerator
         return (IEnumerator<int>) values.GetEnumerator();
     }
 }
-#endif
+
+public static class S_AsyncEnumerable_DESIRED
+{
+    private static readonly CachedMethodRegistration _registration;
+
+    static S_AsyncEnumerable_DESIRED()
+    {
+        _registration = CachingServices.DefaultMethodRegistrationCache.Register(
+            typeof(S_AsyncEnumerable_DESIRED).GetMethod(nameof(OneTwoThree), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static ),
+            GetOneTwoThreeSourceInvoker(),
+            new CacheItemConfiguration(),
+            true );
+    }
+
+    public static IAsyncEnumerable<int> OneTwoThree()
+    {
+        var task = CacheAttributeRunTime.OverrideMethodAsyncValueTask<IAsyncEnumerable<int>>(
+            _registration,
+            null,
+            Array.Empty<object?>() );
+
+        return task.AsAsyncEnumerable();
+    }
+
+    private static Func<object?, object?[], ValueTask<object?>> GetOneTwoThreeSourceInvoker()
+    {
+        return Invoke;
+
+        ValueTask<object?> Invoke( object? instance, object?[] args )
+        {
+            return new ValueTask<object?>( OneTwoThree_Source() );
+        }
+    }
+
+    //[Cache]
+    private static async IAsyncEnumerable<int> OneTwoThree_Source()
+    {
+        Enter();
+        await Task.Delay( 1 );
+        yield return 1;
+        await Task.Delay( 1 );
+        yield return 2;
+        await Task.Delay( 1 );
+        yield return 3;
+    }
+}
 
 public static class S_AsyncEnumerable
 {
@@ -48,7 +91,57 @@ public static class S_AsyncEnumerable
     }
 }
 
-#if false
+public static class S_AsyncEnumerator_DESIRED
+{
+    private static readonly CachedMethodRegistration _registration;
+
+    static S_AsyncEnumerator_DESIRED()
+    {
+        _registration = CachingServices.DefaultMethodRegistrationCache.Register(
+            typeof( S_AsyncEnumerator_DESIRED ).GetMethod( nameof( GetEnumerator ), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static ),
+            GetEnumeratorSourceInvoker(),
+            new CacheItemConfiguration(),
+            false );
+    }
+
+    public static IAsyncEnumerator<int> GetEnumerator()
+    {
+        var task = CacheAttributeRunTime.OverrideMethodAsyncValueTask<IAsyncEnumerator<int>>(
+            _registration,
+            null,
+            Array.Empty<object?>() );
+
+        return task.AsAsyncEnumerator();
+    }
+
+    private static Func<object?, object?[], ValueTask<object?>> GetEnumeratorSourceInvoker()
+    {
+        return Invoke;
+
+        ValueTask<object?> Invoke( object? instance, object?[] args )
+        {
+            return new ValueTask<object?>( GetEnumerator_Source() );
+        }
+    }
+
+    //[Cache]
+    public static IAsyncEnumerator<int> GetEnumerator_Source()
+    {
+        Enter();
+        return OneTwoThree().GetAsyncEnumerator();
+    }
+
+    private static async IAsyncEnumerable<int> OneTwoThree()
+    {
+        await Task.Delay( 1 );
+        yield return 1;
+        await Task.Delay( 1 );
+        yield return 2;
+        await Task.Delay( 1 );
+        yield return 3;
+    }
+}
+
 public static class S_AsyncEnumerator
 {
     [Cache]
@@ -68,9 +161,7 @@ public static class S_AsyncEnumerator
         yield return 3;
     }
 }
-#endif
 
-#if !PARAMS_IS_BROKEN
 public sealed class I_S_YieldingEnumerable
 {
     [Cache]
@@ -83,7 +174,6 @@ public sealed class I_S_YieldingEnumerable
         }
     }
 }
-#endif
 
 public sealed class I_S_IntAsyncTask
 {
