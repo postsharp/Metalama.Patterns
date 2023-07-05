@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFrameworks>net471;netcoreapp3.1;net6.0</TargetFrameworks>
+    <TestProjectFlags>TimeSensitive</TestProjectFlags>
+  </PropertyGroup>
+
+  <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
+  <!--
+  <PropertyGroup Condition="'$(TFId)' == '.NETFramework' AND '$(TargetFramework)' != 'net471'">
+    <DefineConstants>$(DefineConstants);RUNTIME_CACHING</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TFId)' == '.NETStandard'">
+    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TFId)' == '.NETCoreApp' OR '$(TargetFramework)' == 'net471'">
+    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
+  </PropertyGroup>
+
+-->
+<PropertyGroup>
+	<DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
+</PropertyGroup>
+
+	<ItemGroup>
+	<PackageReference Include="xunit" Version="$(XunitVersion)" />
+	<PackageReference Include="xunit.extensibility.execution" Version="$(XunitVersion)" />
+	<PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)" />
+	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkVersion)" />
+
+	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="$(MicrosoftExtensionsCachingMemoryVersion)" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.Azure\Metalama.Patterns.Caching.Backends.Azure.csproj" />
+    <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.IMemoryCache\Metalama.Patterns.Caching.Backends.IMemoryCache.csproj" />
+  </ItemGroup>
+
+</Project>
