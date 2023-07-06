@@ -135,7 +135,7 @@ public static class CacheAttributeRunTime
                     var task = CachingFrontend.GetOrAddAsync(
                         registration.Method,
                         methodKey,
-                        registration.Method.ReturnType,
+                        registration.AwaitableResultType,
                         mergedConfiguration,
                         registration.InvokeOriginalMethodAsyncTask,
                         instance,
@@ -244,7 +244,7 @@ public static class CacheAttributeRunTime
                     var task = CachingFrontend.GetOrAddAsync(
                         registration.Method,
                         methodKey,
-                        registration.Method.ReturnType,
+                        registration.AwaitableResultType,
                         mergedConfiguration,
                         registration.InvokeOriginalMethodAsyncValueTask,
                         instance,

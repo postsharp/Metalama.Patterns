@@ -17,18 +17,18 @@ public sealed class CachedMethodRegistration
     /// <summary>
     /// Gets the <see cref="MethodInfo"/> of the method.
     /// </summary>
-    public MethodInfo Method { get; }
+    internal MethodInfo Method { get; }
 
     /// <summary>
     /// Gets a value indicating whether the value of the <c>this</c> parameter
     /// (for non-static methods) should be included in the cache key.
     /// </summary>
-    public bool IsThisParameterIgnored { get; }
+    internal bool IsThisParameterIgnored { get; }
 
     /// <summary>
     /// Gets an array of <see cref="CachedParameterInfo"/>.
     /// </summary>
-    public ImmutableArray<CachedParameterInfo> Parameters { get; }
+    internal ImmutableArray<CachedParameterInfo> Parameters { get; }
 
     /// <summary>
     /// Gets a value indicating whether the return type of the method can be <see langword="null"/>.
@@ -38,7 +38,7 @@ public sealed class CachedMethodRegistration
     /// by <see langword="null"/>. For example, primitives like <see cref="int"/> and other non-nullable structs cannot
     /// be represented by <see langword="null"/>.
     /// </remarks>
-    public bool ReturnValueCanBeNull { get; }
+    internal bool ReturnValueCanBeNull { get; }
 
     /// <summary>
     /// Gets a delegate that can invoke the original uncached method.
@@ -73,7 +73,15 @@ public sealed class CachedMethodRegistration
     /// <remarks>
     /// This already takes account of the any <see cref="CacheConfigurationAttribute"/> instances applied to parent classes and the assembly.
     /// </remarks>
-    public ICompileTimeCacheItemConfiguration BuildTimeConfiguration { get; }
+    internal ICompileTimeCacheItemConfiguration BuildTimeConfiguration { get; }
+
+    /// <summary>
+    /// Gets the awaitable result type for awaitable (eg, async) methods, or <see langword="null"/> where not applicable.
+    /// </summary>
+    /// <remarks>
+    /// For example, for a method returning <see cref="Task{TResult}"/>, this would be the generic argument corresponding to <c>TResult</c>.
+    /// </remarks>
+    internal Type? AwaitableResultType { get; }
 
     private static readonly CachingProfile _disabledProfile = new( "Disabled" ) { IsEnabled = false };
     private CachingProfile? _profile;
@@ -175,6 +183,7 @@ public sealed class CachedMethodRegistration
     internal CachedMethodRegistration(
         MethodInfo method,
         ImmutableArray<CachedParameterInfo> parameters,
+        Type awaitableResultType,
         bool isThisParameterIgnored,
         Func<object?, object?[], Task<object?>> invokeOriginalMethodAsyncTask,
         ICompileTimeCacheItemConfiguration buildTimeConfiguration,
@@ -182,11 +191,13 @@ public sealed class CachedMethodRegistration
         : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
     {
         this.InvokeOriginalMethodAsyncTask = invokeOriginalMethodAsyncTask;
+        this.AwaitableResultType = awaitableResultType;
     }
 
     internal CachedMethodRegistration(
         MethodInfo method,
         ImmutableArray<CachedParameterInfo> parameters,
+        Type awaitableResultType,
         bool isThisParameterIgnored,
         Func<object?, object?[], ValueTask<object?>> invokeOriginalMethodAsyncValueTask,
         ICompileTimeCacheItemConfiguration buildTimeConfiguration,
@@ -194,5 +205,6 @@ public sealed class CachedMethodRegistration
         : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
     {
         this.InvokeOriginalMethodAsyncValueTask = invokeOriginalMethodAsyncValueTask;
+        this.AwaitableResultType = awaitableResultType;
     }
 }

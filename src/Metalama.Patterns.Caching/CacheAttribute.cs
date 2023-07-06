@@ -166,7 +166,12 @@ public sealed class CacheAttribute : MethodAspect
                 method = builder.Target
             } );
 
-        // TODO: When subtemplates are supported, consider folding getInvokerTemplate into CachedMethodRegistrationInitializer.
+        var awaitableResultType = unboundReturnSpecialType switch
+        {
+            SpecialType.Task_T or SpecialType.ValueTask_T => ((INamedType) builder.Target.ReturnType).TypeArguments[0],
+            SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T => (INamedType) builder.Target.ReturnType,
+            _ => null
+        };
 
         builder.Advice.AddInitializer(
             builder.Target.DeclaringType,
@@ -176,7 +181,8 @@ public sealed class CacheAttribute : MethodAspect
             {
                 method = builder.Target,
                 field = registrationField.Declaration,
-                getOriginalMethodInvoker = getOriginalMethodInvokerResult.Declaration
+                getOriginalMethodInvoker = getOriginalMethodInvokerResult.Declaration,
+                awaitableResultType = awaitableResultType
             } );
     }
 
@@ -229,13 +235,14 @@ public sealed class CacheAttribute : MethodAspect
 #endif
 
     [Template]
-    public void CachedMethodRegistrationInitializer( IMethod method, IField field, IMethod getOriginalMethodInvoker )
+    public void CachedMethodRegistrationInitializer( IMethod method, IField field, IMethod getOriginalMethodInvoker, INamedType? awaitableResultType )
     {
         var effectiveConfiguration = this.GetEffectiveConfiguration( method );
 
         field.Value = CachingServices.DefaultMethodRegistrationCache.Register(
             method.ToMethodInfo(),
             getOriginalMethodInvoker.Invoke(),
+            awaitableResultType == null ? null : awaitableResultType.ToTypeOfExpression().Value,
             new CacheAttributeProperties()
             {
                 AbsoluteExpiration = effectiveConfiguration.AbsoluteExpiration,

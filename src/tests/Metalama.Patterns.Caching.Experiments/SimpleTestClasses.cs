@@ -30,6 +30,7 @@ public static class S_Enumerator
     }
 }
 
+#if false
 public static class S_AsyncEnumerable_DESIRED
 {
     private static readonly CachedMethodRegistration _registration;
@@ -75,6 +76,7 @@ public static class S_AsyncEnumerable_DESIRED
         yield return 3;
     }
 }
+#endif
 
 public static class S_AsyncEnumerable
 {
@@ -91,6 +93,7 @@ public static class S_AsyncEnumerable
     }
 }
 
+#if false
 public static class S_AsyncEnumerator_DESIRED
 {
     private static readonly CachedMethodRegistration _registration;
@@ -141,6 +144,7 @@ public static class S_AsyncEnumerator_DESIRED
         yield return 3;
     }
 }
+#endif
 
 public static class S_AsyncEnumerator
 {

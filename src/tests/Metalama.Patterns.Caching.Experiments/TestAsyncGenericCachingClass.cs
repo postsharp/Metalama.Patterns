@@ -35,6 +35,7 @@ public sealed class TestAsyncGenericCachingClass<T>
     }
 }
 
+#if false
 public sealed class TestAsyncGenericCachingClass_DESIRED<T>
 {
     static readonly CachedMethodRegistration _registration;
@@ -75,3 +76,4 @@ public sealed class TestAsyncGenericCachingClass_DESIRED<T>
         return default;
     }
 }
+#endif

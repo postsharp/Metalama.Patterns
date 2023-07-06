@@ -5,6 +5,7 @@ using Metalama.Patterns.Caching.Experiments;
 using System.Text;
 
 CachingServices.DefaultBackend = new Metalama.Patterns.Caching.Backends.MemoryCachingBackend();
+#if false
 Console.WriteLine( $"Invoke1 #1 got {await Invoke1()}" );
 Console.WriteLine( $"Invoke1 #2 got {await Invoke1()}" );
 Console.WriteLine( $"Invoke1 #3 got {await Invoke1()}" );
@@ -13,6 +14,7 @@ Console.WriteLine( $"Invoke2 #1 got {await Invoke2()}" );
 Console.WriteLine( $"Invoke2 #2 got {await Invoke2()}" );
 Console.WriteLine( $"Invoke2 #3 got {await Invoke2()}" );
 Console.WriteLine();
+#endif
 Console.WriteLine( $"Invoke3 #1 got {await Invoke3()}" );
 Console.WriteLine( $"Invoke3 #2 got {await Invoke3()}" );
 Console.WriteLine( $"Invoke3 #3 got {await Invoke3()}" );
@@ -21,6 +23,7 @@ Console.WriteLine( $"Invoke4 #1 got {await Invoke4()}" );
 Console.WriteLine( $"Invoke4 #2 got {await Invoke4()}" );
 Console.WriteLine( $"Invoke4 #3 got {await Invoke4()}" );
 
+#if false
 static async Task<string> Invoke1()
 {
     var sb = new StringBuilder();
@@ -46,7 +49,7 @@ static async Task<string> Invoke2()
 
     return sb.ToString();
 }
-
+#endif
 static async Task<string> Invoke3()
 {
     var sb = new StringBuilder();

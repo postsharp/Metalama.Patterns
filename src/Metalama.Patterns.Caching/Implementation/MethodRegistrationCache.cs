@@ -23,6 +23,7 @@ public sealed class MethodRegistrationCache
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], object?> invokeOriginalMethod,
+        Type? ignoredAwaitableResultType,
         [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
@@ -46,12 +47,14 @@ public sealed class MethodRegistrationCache
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], Task<object?>> invokeOriginalMethodAsync,
+        [Required] Type awaitableResultType,
         [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
             method,
             GetCachedParameterInfos( method ),
+            awaitableResultType,
             buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
             invokeOriginalMethodAsync,
             buildTimeConfiguration,
@@ -69,12 +72,14 @@ public sealed class MethodRegistrationCache
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], ValueTask<object?>> invokeOriginalMethodAsync,
+        [Required] Type awaitableResultType,
         [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
             method,
             GetCachedParameterInfos( method ),
+            awaitableResultType,
             buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
             invokeOriginalMethodAsync,
             buildTimeConfiguration,
