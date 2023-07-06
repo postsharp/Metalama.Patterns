@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System.Runtime.Serialization;
 
 namespace Metalama.Patterns.Caching;
@@ -12,6 +13,7 @@ namespace Metalama.Patterns.Caching;
 /// assert methods so that the compiler can track execution flow.
 /// </remarks>
 [Serializable]
+[RunTimeOrCompileTime]
 internal sealed class MetalamaPatternsCachingAssertionFailedException
     : ApplicationException
 {

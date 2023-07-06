@@ -1,5 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
@@ -8,16 +11,6 @@ namespace Metalama.Patterns.Caching.Implementation;
 internal sealed class CacheItemConfiguration : IRunTimeCacheItemConfiguration
 {
     public CacheItemConfiguration() { }
-
-    public CacheItemConfiguration( IBuildTimeCacheItemConfiguration buildTimeConfiguration )
-    {
-        this.AbsoluteExpiration = buildTimeConfiguration.AbsoluteExpiration;
-        this.AutoReload = buildTimeConfiguration.AutoReload;
-        this.IgnoreThisParameter = buildTimeConfiguration.IgnoreThisParameter;
-        this.Priority = buildTimeConfiguration.Priority;
-        this.ProfileName = buildTimeConfiguration.ProfileName;
-        this.SlidingExpiration = buildTimeConfiguration.SlidingExpiration;
-    }
 
     /// <inheritdoc />
     public bool? IsEnabled { get; set; }

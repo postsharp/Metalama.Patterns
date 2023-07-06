@@ -70,7 +70,7 @@ public sealed class CacheAttribute : MethodAspect
     /// </summary>
     public CacheItemPriority Priority
     {
-        get => this._priority.GetValueOrDefault();
+        get => this._priority.GetValueOrDefault( CacheItemPriority.Default );
         set => this._priority = value;
     }
 
@@ -231,17 +231,19 @@ public sealed class CacheAttribute : MethodAspect
     [Template]
     public void CachedMethodRegistrationInitializer( IMethod method, IField field, IMethod getOriginalMethodInvoker )
     {
+        var effectiveConfiguration = this.GetEffectiveConfiguration( method );
+
         field.Value = CachingServices.DefaultMethodRegistrationCache.Register(
             method.ToMethodInfo(),
             getOriginalMethodInvoker.Invoke(),
             new BuildTimeCacheItemConfiguration()
             {
-                AbsoluteExpiration = this._absoluteExpiration,
-                AutoReload = this._autoReload,
-                IgnoreThisParameter = this._ignoreThisParameter,
-                Priority = this._priority,
-                ProfileName = this.ProfileName,
-                SlidingExpiration = this._slidingExpiration,
+                AbsoluteExpiration = effectiveConfiguration.AbsoluteExpiration,
+                AutoReload = effectiveConfiguration.AutoReload,
+                IgnoreThisParameter = effectiveConfiguration.IgnoreThisParameter,
+                Priority = effectiveConfiguration.Priority,
+                ProfileName = effectiveConfiguration.ProfileName,
+                SlidingExpiration = effectiveConfiguration.SlidingExpiration
             },
             method.ReturnType.IsReferenceType == true || method.ReturnType.IsNullable == true );
     }
@@ -298,4 +300,51 @@ public sealed class CacheAttribute : MethodAspect
     }
 
 #endif
+
+    /// <summary>
+    /// Gets the effective configuration of the method by applying fallback configuration from <see cref="CacheConfigurationAttribute"/>
+    /// attributes on ancestor types and the declaring assembly.
+    /// </summary>
+    [CompileTime]
+    private CompileTimeCacheItemConfiguration GetEffectiveConfiguration( IMethod method )
+    {
+        // TODO: Consider reinstating cache of [CacheConfiguration] lookups.
+        // PostSharp built a cache of search results so that subsequent lookups would avoid repeating the same work.
+        // This requires the feature "user design-time caching" which is not yet implemented in Metalama. This
+        // kind of caching might be better implemented at framework level.
+        // See BuildTimeCacheConfigurationManager in the PostSharp codebase.
+        var mergedConfiguration = new CompileTimeCacheItemConfiguration() 
+        {  
+            AbsoluteExpiration = this._absoluteExpiration, 
+            AutoReload = this._autoReload,
+            IgnoreThisParameter = this._ignoreThisParameter,
+            Priority = this._priority,
+            ProfileName = this.ProfileName,
+            SlidingExpiration = this._slidingExpiration
+        };
+
+        var attributeType = (INamedType) TypeFactory.GetType( typeof( CacheConfigurationAttribute ) );
+        var declaringType = method.DeclaringType;
+
+        while ( declaringType != null )
+        {
+            var attr = declaringType.Attributes.OfAttributeType( attributeType ).SingleOrDefault();
+            
+            if ( attr != null)
+            {
+                mergedConfiguration.ApplyFallback( new CompileTimeCacheItemConfiguration( attr ) );
+            }
+
+            declaringType = declaringType.DeclaringType;
+        }
+
+        var assemblyAttr = method.DeclaringType.DeclaringAssembly.Attributes.OfAttributeType( attributeType ).SingleOrDefault();
+
+        if ( assemblyAttr != null )
+        {
+            mergedConfiguration.ApplyFallback( new CompileTimeCacheItemConfiguration( assemblyAttr ) );
+        }
+
+        return mergedConfiguration;
+    }
 }

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="BuildTimeCacheConfigurationManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />
     <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
@@ -49,6 +53,10 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Metalama.Patterns.Caching.TestHelpers" />
     <InternalsVisibleTo Include="Metalama.Patterns.Caching.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="BuildTimeCacheConfigurationManager.cs" />
   </ItemGroup>
 
   <ItemGroup>
