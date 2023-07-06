@@ -8,9 +8,9 @@
 
 using System.Threading.Tasks;
 using Xunit;
-using PostSharp.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.TestHelpers;
 
-namespace PostSharp.Patterns.Caching.Tests
+namespace Metalama.Patterns.Caching.Tests
 {
 	public sealed partial class ImperativeInvalidationTests
     {
