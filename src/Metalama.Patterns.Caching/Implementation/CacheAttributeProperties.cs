@@ -5,7 +5,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 #pragma warning disable SA1625 // Element documentation should not be copied and pasted
 
 /// <summary>
-/// Configuration of a cached method at build time.
+/// The properties of a <see cref="CacheAttribute"/>.
 /// </summary>
 /// <param name="ProfileName"><inheritdoc/></param>
 /// <param name="AutoReload"><inheritdoc/></param>
@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <param name="SlidingExpiration"><inheritdoc/></param>
 /// <param name="Priority"><inheritdoc/></param>
 /// <param name="IgnoreThisParameter"></param>
-public sealed record BuildTimeCacheItemConfiguration(
+public sealed record CacheAttributeProperties(
 #pragma warning restore SA1625 // Element documentation should not be copied and pasted
     string? ProfileName = null,
     bool? AutoReload = null,
@@ -21,4 +21,4 @@ public sealed record BuildTimeCacheItemConfiguration(
     TimeSpan? SlidingExpiration = null,
     CacheItemPriority? Priority = null,
     bool? IgnoreThisParameter = null )
-    : IBuildTimeCacheItemConfiguration;
+    : ICompileTimeCacheItemConfiguration;

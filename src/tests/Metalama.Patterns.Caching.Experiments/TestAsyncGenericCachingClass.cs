@@ -46,7 +46,7 @@ public sealed class TestAsyncGenericCachingClass_DESIRED<T>
                 "GetValueAsync",
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance ),
             GetInvoker(),
-            new BuildTimeCacheItemConfiguration(),
+            new CacheAttributeProperties(),
             true );
     }
 

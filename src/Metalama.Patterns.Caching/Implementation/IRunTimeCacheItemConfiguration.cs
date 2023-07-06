@@ -5,11 +5,10 @@ using JetBrains.Annotations;
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// Configuration of a cached method. This interface is implemented by several classes that allow to configure
-/// cached method.
+/// Configuration of a cached method deterimed at runtime.
 /// </summary>
 [PublicAPI]
-public interface IRunTimeCacheItemConfiguration : IBuildTimeCacheItemConfiguration
+public interface IRunTimeCacheItemConfiguration : ICompileTimeCacheItemConfiguration
 {
     /// <summary>
     /// Gets a value indicating whether caching is enabled.

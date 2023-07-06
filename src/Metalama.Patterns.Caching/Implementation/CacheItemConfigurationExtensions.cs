@@ -6,7 +6,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 
 internal static class CacheItemConfigurationExtensions
 {
-    public static CacheItemConfiguration CloneAsCacheItemConfiguration( [Required] this IBuildTimeCacheItemConfiguration other )
+    public static CacheItemConfiguration CloneAsCacheItemConfiguration( [Required] this ICompileTimeCacheItemConfiguration other )
     {
         if ( other is CacheItemConfiguration cacheItemConfiguration )
         {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>net471;net6.0</TargetFrameworks>
+	  <TargetFrameworks>net471</TargetFrameworks> <!--;net6.0-->
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
@@ -25,6 +25,7 @@
 -->
 <PropertyGroup>
 	<DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
+  <DefineConstants Condition=" '$(Configuration)' == 'LAMADEBUG' ">$(DefineConstants);DEBUG</DefineConstants>
 </PropertyGroup>
 
 	<ItemGroup>

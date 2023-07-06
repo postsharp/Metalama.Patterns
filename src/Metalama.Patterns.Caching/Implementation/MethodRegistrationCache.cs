@@ -23,7 +23,7 @@ public sealed class MethodRegistrationCache
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], object?> invokeOriginalMethod,
-        [Required] IBuildTimeCacheItemConfiguration buildTimeConfiguration,
+        [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
@@ -46,7 +46,7 @@ public sealed class MethodRegistrationCache
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], Task<object?>> invokeOriginalMethodAsync,
-        [Required] IRunTimeCacheItemConfiguration buildTimeConfiguration,
+        [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
@@ -69,7 +69,7 @@ public sealed class MethodRegistrationCache
     public CachedMethodRegistration Register(
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], ValueTask<object?>> invokeOriginalMethodAsync,
-        [Required] IBuildTimeCacheItemConfiguration buildTimeConfiguration,
+        [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(

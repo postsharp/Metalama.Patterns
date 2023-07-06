@@ -236,7 +236,7 @@ public sealed class CacheAttribute : MethodAspect
         field.Value = CachingServices.DefaultMethodRegistrationCache.Register(
             method.ToMethodInfo(),
             getOriginalMethodInvoker.Invoke(),
-            new BuildTimeCacheItemConfiguration()
+            new CacheAttributeProperties()
             {
                 AbsoluteExpiration = effectiveConfiguration.AbsoluteExpiration,
                 AutoReload = effectiveConfiguration.AutoReload,
@@ -323,27 +323,8 @@ public sealed class CacheAttribute : MethodAspect
             SlidingExpiration = this._slidingExpiration
         };
 
-        var attributeType = (INamedType) TypeFactory.GetType( typeof( CacheConfigurationAttribute ) );
-        var declaringType = method.DeclaringType;
-
-        while ( declaringType != null )
-        {
-            var attr = declaringType.Attributes.OfAttributeType( attributeType ).SingleOrDefault();
-            
-            if ( attr != null)
-            {
-                mergedConfiguration.ApplyFallback( new CompileTimeCacheItemConfiguration( attr ) );
-            }
-
-            declaringType = declaringType.DeclaringType;
-        }
-
-        var assemblyAttr = method.DeclaringType.DeclaringAssembly.Attributes.OfAttributeType( attributeType ).SingleOrDefault();
-
-        if ( assemblyAttr != null )
-        {
-            mergedConfiguration.ApplyFallback( new CompileTimeCacheItemConfiguration( assemblyAttr ) );
-        }
+        var configurationFromAttributes = CompileTimeCacheConfigurationHelper.GetConfigurationFromAttributes( method );
+        mergedConfiguration.ApplyFallback( configurationFromAttributes );
 
         return mergedConfiguration;
     }

@@ -5,11 +5,10 @@ using JetBrains.Annotations;
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// Configuration of a cached method at build time. This interface is implemented by several classes that allow to configure
-/// cached method.
+/// Configuration of a cached method determined at compile time.
 /// </summary>
 [PublicAPI]
-public interface IBuildTimeCacheItemConfiguration
+public interface ICompileTimeCacheItemConfiguration
 {
     /// <summary>
     /// Gets the total duration during which the result of the cached methods  is stored in cache. The absolute

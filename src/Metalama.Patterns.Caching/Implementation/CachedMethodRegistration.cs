@@ -73,7 +73,7 @@ public sealed class CachedMethodRegistration
     /// <remarks>
     /// This already takes account of the any <see cref="CacheConfigurationAttribute"/> instances applied to parent classes and the assembly.
     /// </remarks>
-    public IBuildTimeCacheItemConfiguration BuildTimeConfiguration { get; }
+    public ICompileTimeCacheItemConfiguration BuildTimeConfiguration { get; }
 
     private static readonly CachingProfile _disabledProfile = new( "Disabled" ) { IsEnabled = false };
     private CachingProfile? _profile;
@@ -150,7 +150,7 @@ public sealed class CachedMethodRegistration
         MethodInfo method,
         ImmutableArray<CachedParameterInfo> parameters,
         bool isThisParameterIgnored,
-        IBuildTimeCacheItemConfiguration buildTimeConfiguration,
+        ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         this.Method = method;
@@ -165,7 +165,7 @@ public sealed class CachedMethodRegistration
         ImmutableArray<CachedParameterInfo> parameters,
         bool isThisParameterIgnored,
         Func<object?, object?[], object?> invokeOriginalMethod,
-        IBuildTimeCacheItemConfiguration buildTimeConfiguration,
+        ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
         : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
     {
@@ -177,7 +177,7 @@ public sealed class CachedMethodRegistration
         ImmutableArray<CachedParameterInfo> parameters,
         bool isThisParameterIgnored,
         Func<object?, object?[], Task<object?>> invokeOriginalMethodAsyncTask,
-        IBuildTimeCacheItemConfiguration buildTimeConfiguration,
+        ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
         : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
     {
@@ -189,7 +189,7 @@ public sealed class CachedMethodRegistration
         ImmutableArray<CachedParameterInfo> parameters,
         bool isThisParameterIgnored,
         Func<object?, object?[], ValueTask<object?>> invokeOriginalMethodAsyncValueTask,
-        IBuildTimeCacheItemConfiguration buildTimeConfiguration,
+        ICompileTimeCacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
         : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
     {

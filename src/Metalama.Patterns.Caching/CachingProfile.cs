@@ -114,19 +114,19 @@ public sealed class CachingProfile : IRunTimeCacheItemConfiguration
 
     // We can't modify specify IgnoreThisParameter in a profile because this setting is used at build time.
     /// <inheritdoc />
-    bool? IBuildTimeCacheItemConfiguration.IgnoreThisParameter => null;
+    bool? ICompileTimeCacheItemConfiguration.IgnoreThisParameter => null;
 
     /// <inheritdoc />
-    TimeSpan? IBuildTimeCacheItemConfiguration.AbsoluteExpiration => this.AbsoluteExpiration;
+    TimeSpan? ICompileTimeCacheItemConfiguration.AbsoluteExpiration => this.AbsoluteExpiration;
 
     /// <inheritdoc />
-    TimeSpan? IBuildTimeCacheItemConfiguration.SlidingExpiration => this.SlidingExpiration;
+    TimeSpan? ICompileTimeCacheItemConfiguration.SlidingExpiration => this.SlidingExpiration;
 
     /// <inheritdoc />
-    bool? IBuildTimeCacheItemConfiguration.AutoReload => this.AutoReload;
+    bool? ICompileTimeCacheItemConfiguration.AutoReload => this.AutoReload;
 
     /// <inheritdoc />
-    string IBuildTimeCacheItemConfiguration.ProfileName => this.Name;
+    string ICompileTimeCacheItemConfiguration.ProfileName => this.Name;
 
     /// <summary>
     /// Gets or sets the lock manager used to synchronize the execution of methods
