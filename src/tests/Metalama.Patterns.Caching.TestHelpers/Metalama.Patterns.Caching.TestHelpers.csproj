@@ -5,8 +5,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
+  <!-- $(IsTestProject)=false and remove @(ProjectCapability) 'TestContainer' stop VS from seeing
+  this as a test project. -->
+  <ItemGroup>
+    <ProjectCapability Remove="TestContainer"/>
+  </ItemGroup>
 
   <!--
   <ItemGroup>
@@ -41,7 +47,6 @@
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
-    <PackageReference Include="Xunit.SkippableFact" Version="$(XunitSkippableFactVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
