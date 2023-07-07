@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+#define AVOID_METHODINFO_ARRAY
+
 using Flashtrace;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
@@ -87,7 +89,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         // TODO: [Porting] Discuss idea of common purposes, exposing etc.
         var logSourceFieldName = builder.Target.DeclaringType.ToSerializableId().MakeAssociatedIdentifier( "Metalama.Patterns/StaticLogSourceForType", "_logSource" );
 
-        var logSourceField = builder.Advice.IntroduceField(
+        var logSourceFieldAdviceResult = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
             nameof( _logSource ),
             IntroductionScope.Static,
@@ -98,10 +100,18 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 type = builder.Target.DeclaringType 
             } );
 
+        // TODO: !!! ML - should set Declaration when already exists.
+        // Remove this when fixed:
+        var logSourceField = logSourceFieldAdviceResult.Outcome == AdviceOutcome.Ignore
+            ? builder.Target.DeclaringType.Fields.Single( f => f.Name == logSourceFieldName )
+            : logSourceFieldAdviceResult.Declaration;
+
+#if !AVOID_METHODINFO_ARRAY
+
         var arrayBuilder = new ArrayBuilder( typeof( MethodInfo ) );
         foreach ( var method in invalidatedMethods.Keys )
         {
-            arrayBuilder.Add( method ); //.ToMethodInfo() );
+            arrayBuilder.Add( method.ToMethodInfo() );
         }        
 
         var methodsInvalidatedByFieldName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{3AB07EE4-9AB7-423C-810A-994D9BC620CA}", $"_methodsInvalidatedBy_{builder.Target.Name}" );
@@ -130,6 +140,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 methodInfoArray = arrayBuilder.ToExpression() 
             } );
 #endif
+#endif
         var templates = new MethodTemplateSelector( nameof( this.OverrideMethod ) );
 
         builder.Advice.Override(
@@ -137,8 +148,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             templates,
             args: new
             {
-                logSourceField = logSourceField.Declaration,
+                TReturn = builder.Target.ReturnType,
+                logSourceField = logSourceField,
+#if !AVOID_METHODINFO_ARRAY
                 methodsInvalidatedByField = methodsInvalidatedByField.Declaration,
+#endif
                 invalidatedMethods = invalidatedMethods.Values
             } );
     }
@@ -150,21 +164,32 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     //private static readonly MethodInfo[] _methodsInvalidatedBy = ((IExpression) meta.Tags["methodInfoArray"]!).Value;
 
     [Template]
-    private static void OverrideMethod( IField logSourceField, IField methodsInvalidatedByField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods )
+    private TReturn OverrideMethod<[CompileTime] TReturn>( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
+#if !AVOID_METHODINFO_ARRAY
+        , IField methodsInvalidatedByField
+#endif        
+        )
     {
+        TReturn result;
+
         using ( var activity = logSourceField.Value.Default.OpenActivity( 
             FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
         {
             try
-            {
-                meta.Proceed();
+            {                
+                result = meta.Proceed();
 
                 var index = meta.CompileTime( 0 );
 
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
                     CachingServices.Invalidation.Invalidate(
+#if AVOID_METHODINFO_ARRAY
+                        // TODO: !!! Remove when array of ToMethodInfo() is working.
+                        invalidatedMethod.Method.ToMethodInfo(),
+#else
                         methodsInvalidatedByField.Value![index],
+#endif
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
 
@@ -172,13 +197,15 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 }
 
                 activity.SetSuccess();
+
+                return result;
             }
             catch ( Exception e )
             {
                 activity.SetException( e );
                 throw;
             }
-        }
+        }        
     }
 
     private static IExpression MapArguments( InvalidatedMethodInfo invalidatedMethod )
@@ -267,7 +294,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
             // Check that the 'this' parameter is compatible.
             if ( !invalidatedMethod.IsStatic && !cacheAspectConfiguration.IgnoreThisParameter.GetValueOrDefault() &&
-                 (invalidatingMethod.IsStatic || !invalidatedMethod.DeclaringType.DerivesFrom( invalidatingMethod.DeclaringType ) ) )
+                 (invalidatingMethod.IsStatic || !(invalidatingMethod.DeclaringType == invalidatedMethod.DeclaringType || invalidatingMethod.DeclaringType.DerivesFrom( invalidatedMethod.DeclaringType ))) )
             {
                 matchingErrorsDictionary.Add(
                     invalidatedMethod.Name,
