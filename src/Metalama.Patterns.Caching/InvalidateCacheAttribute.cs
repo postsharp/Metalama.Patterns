@@ -164,7 +164,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     //private static readonly MethodInfo[] _methodsInvalidatedBy = ((IExpression) meta.Tags["methodInfoArray"]!).Value;
 
     [Template]
-    private TReturn OverrideMethod<[CompileTime] TReturn>( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
+    public TReturn OverrideMethod<[CompileTime] TReturn>( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
 #if !AVOID_METHODINFO_ARRAY
         , IField methodsInvalidatedByField
 #endif        
@@ -437,7 +437,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
 
     [CompileTime]
-    private class InvalidatedMethodInfo
+    public class InvalidatedMethodInfo
     {
         public InvalidatedMethodInfo( IMethod method )
         {
