@@ -313,13 +313,10 @@ public sealed class CacheAttribute : MethodAspect
     /// attributes on ancestor types and the declaring assembly.
     /// </summary>
     [CompileTime]
-    private CompileTimeCacheItemConfiguration GetEffectiveConfiguration( IMethod method )
+    internal CompileTimeCacheItemConfiguration GetEffectiveConfiguration( IMethod method )
     {
-        // TODO: Consider reinstating cache of [CacheConfiguration] lookups.
-        // PostSharp built a cache of search results so that subsequent lookups would avoid repeating the same work.
-        // This requires the feature "user design-time caching" which is not yet implemented in Metalama. This
-        // kind of caching might be better implemented at framework level.
-        // See BuildTimeCacheConfigurationManager in the PostSharp codebase.
+        // TODO: [Porting] Repeated work between two aspects, cache when supported.
+
         var mergedConfiguration = new CompileTimeCacheItemConfiguration() 
         {  
             AbsoluteExpiration = this._absoluteExpiration, 

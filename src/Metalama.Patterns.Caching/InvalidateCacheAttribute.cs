@@ -1,65 +1,50 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Diagnostics;
+using Metalama.Patterns.Caching;
+using System.Collections;
 using System.Reflection;
+using static Metalama.Patterns.Caching.CachingDiagnosticDescriptors.InvalidateCache;
+
+[assembly:AspectOrder(typeof(InvalidateCacheAttribute), typeof(CacheAttribute))]
 
 namespace Metalama.Patterns.Caching;
-
-// TODO: [Porting] Pending rewrite. Remove disables when done.
-// ReSharper disable all
-#pragma warning disable
 
 /// <summary>
 /// Custom attribute that, when applied on a method, causes an invocation of this method to remove from
 /// the cache the result of invocations of other given methods with the same parameter values. 
 /// </summary>
-#if TODO
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
-    [MulticastAttributeUsage( MulticastTargets.Method, AllowMultiple = true )]
-    [Metric("UsedFeatures", "Patterns.Caching.InvalidateCache")]
-    [ProvideAspectRole( "CacheInvalidation" )]
-    [AspectRoleDependency(AspectDependencyAction.Order, AspectDependencyPosition.After, StandardRoles.Validation)]
-    [AspectRoleDependency(AspectDependencyAction.Order, AspectDependencyPosition.After, StandardRoles.Tracing)]
-    [LinesOfCodeAvoided(1)]
-    [PSerializable]
-#endif
-public sealed class InvalidateCacheAttribute : Attribute // : MethodInterceptionAspect
+[AttributeUsage( AttributeTargets.Method, AllowMultiple = true )]
+public sealed class InvalidateCacheAttribute : MethodAspect
 {
-    [PNonSerialized]
-    private Type _invalidatedMethodsDeclaringType;
 
-    [PNonSerialized]
+    private readonly Type? _invalidatedMethodsDeclaringType;
+
     private readonly string[] _invalidatedMethodNames;
 
-    [PNonSerialized]
-    private MethodInfo _targetMethod;
-
-    [PNonSerialized]
-    private LogSource _logger;
-
-#if TODO
-        // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private List<InvalidatedMethodInfo> invalidatedMethods = new List<InvalidatedMethodInfo>();
-#endif
-
     /// <summary>
-    /// Determines whether the current <see cref="InvalidateCacheAttribute"/> can match several overloads of the methods.
-    /// The default value is <c>false</c>, which means that an error will be emitted if the current <see cref="InvalidateCacheAttribute"/> matches
+    /// Gets or sets a value indicating whether the current <see cref="InvalidateCacheAttribute"/> can match several overloads of the methods.
+    /// The default value is <c>false</c>, which means that an diagnostic will be emitted if the current <see cref="InvalidateCacheAttribute"/> matches
     /// several methods of the same name.
     /// </summary>
     public bool AllowMultipleOverloads { get; set; }
 
     /// <summary>
-    /// Initializes a new <see cref="InvalidateCacheAttribute"/> that invalidates method of the same type as the
+    /// Initializes a new instance of the <see cref="InvalidateCacheAttribute"/> class that invalidates method of the same type as the
     /// type to which the current <see cref="InvalidateCacheAttribute"/> aspect is being applied.
     /// </summary>
     /// <param name="methodNames">A list of names of methods to invalidate. All parameters of these methods (except those marked 
     /// with <see cref="NotCacheKeyAttribute"/>) must have a parameter of the same name and compatible type in the target
     /// method of the current <see cref="InvalidateCacheAttribute"/> aspect.</param>
-    public InvalidateCacheAttribute( params string[] methodNames ) : this( null, methodNames ) { }
+    public InvalidateCacheAttribute( params string[] methodNames ) : this( null!, methodNames ) { }
 
     /// <summary>
-    /// Initializes a new <see cref="InvalidateCacheAttribute"/> that invalidates method of a different type than the
+    /// Initializes a new instance of the <see cref="InvalidateCacheAttribute"/> class  that invalidates method of a different type than the
     /// type to which the current <see cref="InvalidateCacheAttribute"/> aspect is being applied.
     /// </summary>
     /// <param name="declaringType">The type containing the methods to invalidate.</param>
@@ -72,392 +57,359 @@ public sealed class InvalidateCacheAttribute : Attribute // : MethodInterception
         this._invalidatedMethodNames = methodNames;
     }
 
-#if TODO
-        /// <exclude/>
-        public override bool CompileTimeValidate( MethodBase method )
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
+    {
+        // For each attribute:
+        // - Validate attribute properties.
+        // - Determine and validate
+
+        var invalidatedMethods = new Dictionary<IMethod, InvalidatedMethodInfo>();
+
+        var isValid = true;
+
+        isValid &= Validate( builder, builder.AspectInstance, this, invalidatedMethods );
+
+        foreach ( var secondaryInstance in builder.AspectInstance.SecondaryInstances )
         {
-            if ( this.invalidatedMethodNames == null || this.invalidatedMethodNames.Length == 0 )
-            {
-                CachingMessageSource.Instance.Write( method, SeverityType.Error, "CAC007", method );
-            }
-
-            IAspectRepositoryService aspectRepositoryService = PostSharpEnvironment.CurrentProject.GetService<IAspectRepositoryService>();
-            IWeavingSymbolsService weavingSymbolService = PostSharpEnvironment.CurrentProject.GetService<IWeavingSymbolsService>();
-            IFormattingService formattingService = PostSharpEnvironment.CurrentProject.GetService<IFormattingService>();
-
-            // We need to initialize ourselves after all aspects have been discovered and after CacheAspect has been initialized.
-            aspectRepositoryService.AspectDiscoveryCompleted +=
-                ( sender, args ) => this.PostInitialization( (MethodInfo) method,
-                                                             aspectRepositoryService, weavingSymbolService, formattingService );
-
-            return true;
+            isValid &= Validate( builder, secondaryInstance, (InvalidateCacheAttribute) secondaryInstance.Aspect, invalidatedMethods );
         }
 
-        private void PostInitialization( MethodInfo invalidatingMethod,
-                                         IAspectRepositoryService aspectRepositoryService,
-                                         IWeavingSymbolsService weavingSymbolService,
-                                         IFormattingService formattingService )
+        if ( !isValid )
         {
-            if ( this.invalidatedMethodsDeclaringType == null )
-            {
-                this.invalidatedMethodsDeclaringType = invalidatingMethod.DeclaringType;
-            }
+            return;
+        }
 
-            foreach ( string methodName in this.invalidatedMethodNames )
+        if ( invalidatedMethods.Count == 0 )
+        {
+            throw new MetalamaPatternsCachingAssertionFailedException( "invalidatedMethods.Count == 0 not expected." );
+        }
+
+        // TODO: [Porting] Discuss idea of common purposes, exposing etc.
+        var logSourceFieldName = builder.Target.DeclaringType.ToSerializableId().MakeAssociatedIdentifier( "Metalama.Patterns/StaticLogSourceForType", "_logSource" );
+
+        var logSourceField = builder.Advice.IntroduceField(
+            builder.Target.DeclaringType,
+            nameof( _logSource ),
+            IntroductionScope.Static,
+            OverrideStrategy.Ignore,
+            b => b.Name = logSourceFieldName,
+            tags: new 
+            { 
+                type = builder.Target.DeclaringType 
+            } );
+
+        var arrayBuilder = new ArrayBuilder( typeof( MethodInfo ) );
+        foreach ( var method in invalidatedMethods.Keys )
+        {
+            arrayBuilder.Add( method.ToMethodInfo() );
+        }
+
+        var methodsInvalidatedByFieldName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{3AB07EE4-9AB7-423C-810A-994D9BC620CA}", $"_methodsInvalidatedBy_{builder.Target.Name}" );
+
+        var methodsInvalidatedByField = builder.Advice.IntroduceField(
+            builder.Target.DeclaringType,
+            nameof( _methodsInvalidatedBy ),
+            IntroductionScope.Static,
+            OverrideStrategy.Ignore,
+            b => b.Name = methodsInvalidatedByFieldName,
+            tags: new 
             {
-                if ( string.IsNullOrEmpty( methodName ) )
+                methodInfoArray = arrayBuilder.ToExpression() 
+            } );
+
+        var templates = new MethodTemplateSelector( nameof( this.OverrideMethod ) );
+
+        builder.Advice.Override(
+            builder.Target,
+            templates,
+            args: new
+            {
+                logSourceField = logSourceField.Declaration,
+                methodsInvalidatedByField = methodsInvalidatedByField.Declaration,
+                invalidatedMethods = invalidatedMethods.Values
+            } );
+    }
+
+    [Template]
+    private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
+
+    [Template]
+    private static readonly MethodInfo[] _methodsInvalidatedBy = ((IExpression) meta.Tags["methodInfoArray"]!).Value;
+
+    [Template]
+    private static void OverrideMethod( IField logSourceField, IField methodsInvalidatedByField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods )
+    {
+        using ( var activity = logSourceField.Value.Default.OpenActivity( 
+            FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+        {
+            try
+            {
+                meta.Proceed();
+
+                var index = meta.CompileTime( 0 );
+
+                foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    CachingMessageSource.Instance.Write( invalidatingMethod, SeverityType.Error, "CAC006", invalidatingMethod );
-                    return;
+                    CachingServices.Invalidation.Invalidate(
+                        methodsInvalidatedByField.Value![index],
+                        invalidatedMethod.Method.IsStatic ? null : meta.This,
+                        MapArguments( invalidatedMethod ).Value );
+
+                    ++index;
                 }
+
+                activity.SetSuccess();
+            }
+            catch ( Exception e )
+            {
+                activity.SetException( e );
+                throw;
+            }
+        }
+    }
+
+    private static IExpression MapArguments( InvalidatedMethodInfo invalidatedMethod )
+    {
+        var arrayBuilder = new ArrayBuilder();
+
+        for ( var i = 0; i < invalidatedMethod.ParameterMap.Length; i++ )
+        {
+            var mappedArgumentPosition = invalidatedMethod.ParameterMap[i];
+            
+            arrayBuilder.Add(
+                mappedArgumentPosition >= 0
+                    ? invalidatedMethod.Method.Parameters[mappedArgumentPosition]
+                    : 0 );
+        }
+
+        return arrayBuilder.ToExpression();
+    }
+
+    /// <summary>
+    /// Validates the given aspect attribute. If valid, adds details of the invalidated methods to <paramref name="invalidatedMethods"/>.
+    /// </summary>
+    /// <returns><see langword="false"/> if any <see cref="Severity.Error"/> severity diagnostics are reported; otherwise, <see langword="false"/>.</returns>
+    private static bool Validate(
+        IAspectBuilder<IMethod> builder,
+        IAspectInstance aspect,
+        InvalidateCacheAttribute attribute,
+        Dictionary<IMethod, InvalidatedMethodInfo> invalidatedMethods )
+    {
+        if ( attribute._invalidatedMethodNames == null || attribute._invalidatedMethodNames.Length == 0 )
+        {
+            builder.Diagnostics.Report( ErrorInvalidAspectConstructorNoMethodName.WithArguments( builder.Target ) );
+            return false;
+        }
+
+        if ( attribute._invalidatedMethodNames.Any( s => string.IsNullOrEmpty( s ) ) )
+        {
+            builder.Diagnostics.Report( ErrorInvalidAspectConstructorNullOrEmptyString.WithArguments( builder.Target ) );
+            return false;
+        }
+
+        var invalidatingMethod = builder.Target;
+        var invalidatedMethodsDeclaringType = attribute._invalidatedMethodsDeclaringType == null
+            ? invalidatingMethod.DeclaringType
+            : (INamedType) TypeFactory.GetType( attribute._invalidatedMethodsDeclaringType );
+
+        var invalidatingMethodParameters = invalidatingMethod.Parameters;
+
+        var candidateInvalidatedMethods = invalidatedMethodsDeclaringType.AllMethods;
+
+        DictionaryOfLists<string, IDiagnostic> matchingErrorsDictionary = new();
+
+        DictionaryOfLists<string, InvalidatedMethodInfo?> invalidatedMethodsDictionary = new();
+
+        ; // TODO: Do we see ctors/property methods?
+
+        var isValid = true;
+
+        foreach ( var invalidatedMethod in candidateInvalidatedMethods )
+        {
+            if ( Array.IndexOf( attribute._invalidatedMethodNames, invalidatedMethod.Name ) == -1 )
+            {
+                continue;
             }
 
-            ParameterInfo[] invalidatingMethodParameters = invalidatingMethod.GetParameters();
-
-            MethodInfo[] methods = this.invalidatedMethodsDeclaringType.GetMethods(
-                BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public );
-
-            DictionaryOfLists<string, MethodMatchingError> matchingErrorsDictionary = new DictionaryOfLists<string, MethodMatchingError>();
-
-            DictionaryOfLists<string, InvalidatedMethodInfo> invalidatedMethodsDictionary =
-                new DictionaryOfLists<string, InvalidatedMethodInfo>();
-
-            foreach ( MethodInfo invalidatedMethod in methods )
+            if ( invalidatedMethods.ContainsKey( invalidatedMethod ))
             {
-                if ( Array.IndexOf( this.invalidatedMethodNames, invalidatedMethod.Name ) < 0 )
+                // Already processed: add null so that the later checks based on list count are handled correctly.
+                invalidatedMethodsDictionary.Add( invalidatedMethod.Name, null );
+                continue;
+            }
+
+            // Ensure the method is actually cached.
+            var cacheAspect = invalidatedMethod.Enhancements().GetAspects<CacheAttribute>().SingleOrDefault();
+
+            if ( cacheAspect == null )
+            {
+                matchingErrorsDictionary.Add(
+                    invalidatedMethod.Name,
+                    ErrorMethodIsNotCached.WithArguments( (builder.Target, invalidatedMethod) ) );
+
+                continue;
+            }
+
+            var cacheAspectConfiguration = cacheAspect.GetEffectiveConfiguration( invalidatedMethod );
+
+            // Check that the 'this' parameter is compatible.
+            if ( !invalidatedMethod.IsStatic && !cacheAspectConfiguration.IgnoreThisParameter.GetValueOrDefault() &&
+                 (invalidatingMethod.IsStatic || !invalidatedMethod.DeclaringType.DerivesFrom( invalidatingMethod.DeclaringType ) ) )
+            {
+                matchingErrorsDictionary.Add(
+                    invalidatedMethod.Name,
+                    ErrorThisParameterCannotBeMapped.WithArguments( (invalidatingMethod, invalidatedMethod, invalidatingMethod.DeclaringType, invalidatedMethod.DeclaringType) ) );
+
+                continue;
+            }
+
+            // Match parameters.
+            var invalidatedMethodParameters = invalidatedMethod.Parameters;
+
+            var invalidatedMethodInfo = new InvalidatedMethodInfo( invalidatedMethod );
+
+            var allParametersMatching = true;
+
+            for ( var i = 0; i < invalidatedMethodParameters.Count; i++ )
+            {
+                var invalidatedMethodParameter = invalidatedMethodParameters[i];
+                
+                if ( invalidatedMethodParameter.Attributes.Any( typeof( NotCacheKeyAttribute ) ) )
                 {
                     continue;
                 }
 
-                // Ensure the method is actually cached.
-                ICacheAspect cacheAspect = (ICacheAspect)
-                    aspectRepositoryService.GetAspectInstances( invalidatedMethod )
-                                           .SingleOrDefault( aspectInstance => aspectInstance.Aspect is ICacheAspect )?.Aspect;
-                if ( cacheAspect == null )
+                // Match parameter by name.
+                var invalidatingMethodParameter =
+                    invalidatingMethodParameters.SingleOrDefault( p => p.Name == invalidatedMethodParameter.Name );
+
+                if ( invalidatingMethodParameter == null )
                 {
                     matchingErrorsDictionary.Add(
                         invalidatedMethod.Name,
-                        new MethodMatchingError( invalidatingMethod,
-                                                 "CAC002",
-                                                 invalidatingMethod,
-                                                 invalidatedMethod ) );
+                        ErrorMissingParameterInInvalidatingMethod.WithArguments( (invalidatedMethod, invalidatedMethod, invalidatedMethodParameter.Name) ) );
 
+                    allParametersMatching = false;
                     continue;
                 }
 
-                // Check that the 'this' parameter is compatible.
-                if ( !invalidatedMethod.IsStatic && !cacheAspect.BuildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault() &&
-                     (invalidatingMethod.IsStatic || !invalidatedMethod.DeclaringType.IsAssignableFrom( invalidatingMethod.DeclaringType )) )
+                // Check that the type is compatible.
+                if ( !invalidatedMethodParameter.Type.Is( invalidatingMethodParameter.Type ) )
                 {
                     matchingErrorsDictionary.Add(
                         invalidatedMethod.Name,
-                        new MethodMatchingError( invalidatingMethod, "CAC003",
-                                                 invalidatingMethod,
-                                                 invalidatedMethod,
-                                                 invalidatedMethod.DeclaringType,
-                                                 invalidatingMethod.DeclaringType ) );
+                        ErrorParameterTypeIsNotCompatible.WithArguments( (invalidatingMethod, invalidatedMethod, invalidatedMethodParameter.Name) ) );
 
+                    allParametersMatching = false;
                     continue;
                 }
 
-                // Match parameters.
-                ParameterInfo[] invalidatedMethodParameters = invalidatedMethod.GetParameters();
-
-                InvalidatedMethodInfo invalidatedMethodInfo = new InvalidatedMethodInfo( invalidatedMethod );
-
-                bool allParametersMatching = true;
-
-                for ( int i = 0; i < invalidatedMethodParameters.Length; i++ )
-                {
-                    ParameterInfo invalidatedMethodsParameter = invalidatedMethodParameters[i];
-                    if ( invalidatedMethodsParameter.IsDefined( typeof(NotCacheKeyAttribute) ) )
-                    {
-                        continue;
-                    }
-
-                    // Match parameter by name.
-                    ParameterInfo invalidatingMethodParameter =
-                        invalidatingMethodParameters.SingleOrDefault( p => p.Name == invalidatedMethodsParameter.Name );
-
-                    if ( invalidatingMethodParameter == null )
-                    {
-                        matchingErrorsDictionary.Add(
-                            invalidatedMethod.Name,
-                            new MethodMatchingError( invalidatingMethod,
-                                                     "CAC004",
-                                                     invalidatingMethod,
-                                                     invalidatedMethod,
-                                                     invalidatedMethodsParameter.Name ) );
-                        allParametersMatching = false;
-                        continue;
-                    }
-
-                    // Check that the type is compatible.
-                    if ( !invalidatedMethodsParameter.ParameterType.IsAssignableFrom( invalidatingMethodParameter.ParameterType ) )
-                    {
-                        matchingErrorsDictionary.Add(
-                            invalidatedMethod.Name,
-                            new MethodMatchingError( invalidatingMethod,
-                                                     "CAC005",
-                                                     invalidatingMethod,
-                                                     invalidatedMethod,
-                                                     invalidatedMethodsParameter.Name ) );
-                        allParametersMatching = false;
-                        continue;
-                    }
-
-                    invalidatedMethodInfo.ParameterMap[i] = invalidatingMethodParameter.Position;
-                }
-
-                if ( !allParametersMatching )
-                {
-                    continue;
-                }
-
-                invalidatedMethodsDictionary.Add( invalidatedMethod.Name, invalidatedMethodInfo );
+                invalidatedMethodInfo.ParameterMap[i] = invalidatingMethodParameter.Index;
             }
 
-            foreach ( string invalidatedMethodName in this.invalidatedMethodNames )
+            if ( !allParametersMatching )
             {
-                List<InvalidatedMethodInfo> invalidatedOverloads;
-
-                if ( !invalidatedMethodsDictionary.TryGetList( invalidatedMethodName, out invalidatedOverloads ) || invalidatedOverloads.Count == 0 )
-                {
-                    List<MethodMatchingError> errors;
-
-                    if ( matchingErrorsDictionary.TryGetList( invalidatedMethodName, out errors ) )
-                    {
-                        // There were errors, but the method of the given name exists
-                        foreach ( MethodMatchingError error in errors )
-                        {
-                            error.Write();
-                        }
-                    }
-                    else
-                    {
-                        // The method of the given name does not exist
-                        CachingMessageSource.Instance.Write( invalidatingMethod, SeverityType.Error, "CAC008",
-                                                             invalidatingMethod,
-                                                             invalidatedMethodName,
-                                                             this.invalidatedMethodsDeclaringType );
-                    }
-
-                    continue;
-                }
-
-                if ( !this.AllowMultipleOverloads && invalidatedOverloads.Count > 1 )
-                {
-                    CachingMessageSource.Instance.Write( invalidatingMethod, SeverityType.Error, "CAC009",
-                                                         invalidatingMethod,
-                                                         invalidatedMethodName,
-                                                         this.invalidatedMethodsDeclaringType );
-
-                    continue;
-                }
-
-                foreach ( InvalidatedMethodInfo invalidatedMethodInfo in invalidatedOverloads )
-                {
-                    weavingSymbolService.PushAnnotation( invalidatedMethodInfo.Method,
-                                                         description: formattingService.Format( CultureInfo.InvariantCulture, "The method is invalidated by {0}.", invalidatingMethod ) );
-
-                    weavingSymbolService.PushAnnotation( invalidatingMethod,
-                                                         description: formattingService.Format(CultureInfo.InvariantCulture, "The method invalidates {0}.", invalidatedMethodInfo.Method ) );
-                }
-
-                this.invalidatedMethods.AddRange( invalidatedOverloads );
+                continue;
             }
+
+            invalidatedMethodsDictionary.Add( invalidatedMethod.Name, invalidatedMethodInfo );
         }
 
-        /// <exclude />
-        public override void RuntimeInitialize( MethodBase method )
+        foreach ( var invalidatedMethodName in attribute._invalidatedMethodNames )
         {
-            this.targetMethod = (MethodInfo) method;
-        }
-
-        private LogSource GetLogger()
-        {
-            return this.logger ?? (this.logger = LogSourceFactory.ForRole3( LoggingRoles.Caching ).GetLogSource( this.targetMethod.DeclaringType ));
-        }
-
-        /// <exclude/>
-        public override void OnInvoke( MethodInterceptionArgs args )
-        {
-            using ( var activity =
- this.GetLogger().Default.OpenActivity( FormattedMessageBuilder.Formatted( "Processing invalidation by method {Method}", this.targetMethod ) ) )
+            if ( !invalidatedMethodsDictionary.TryGetList( invalidatedMethodName, out var invalidatedOverloads ) || invalidatedOverloads.Count == 0 )
             {
-                try
-                {
-                    base.OnInvoke( args );
+                List<IDiagnostic> diagnostics;
 
-                    foreach ( InvalidatedMethodInfo invalidatedMethod in this.invalidatedMethods )
+                if ( matchingErrorsDictionary.TryGetList( invalidatedMethodName, out diagnostics ) )
+                {
+                    // There were diagnostics, but the method of the given name exists
+                    foreach ( var diagnostic in diagnostics )
                     {
-                        object[] mappedArguments = MapArguments( invalidatedMethod, args.Arguments );
-                        object instance = MapInstance( invalidatedMethod, args.Instance );
-
-                        CachingServices.Invalidation.Invalidate( invalidatedMethod.Method, instance, mappedArguments );
-                    }
-
-                    activity.SetSuccess();
+                        builder.Diagnostics.Report( diagnostic );
+                    }                    
                 }
-                catch ( Exception e )
+                else
                 {
-                    activity.SetException( e );
-                    throw;
+                    // The method of the given name does not exist
+                    builder.Diagnostics.Report( ErrorCachedMethodNotFound.WithArguments( (invalidatingMethod, invalidatedMethodName, invalidatedMethodsDeclaringType) ) );
                 }
-            }
-        }
 
-        /// <exclude/>
-        public override async Task OnInvokeAsync( MethodInterceptionArgs args )
-        {
-            using ( var activity =
- this.GetLogger().Default.OpenActivity(  FormattedMessageBuilder.Formatted( "Processing invalidation by async method {Method}", this.targetMethod ) ) )
+                isValid = false;
+                continue;
+            }
+
+            if ( !attribute.AllowMultipleOverloads && invalidatedOverloads.Count > 1 )
             {
-                try
+                builder.Diagnostics.Report( ErrorMultipleOverloadsFound.WithArguments( (invalidatingMethod, invalidatedMethodName) ) );
+
+                isValid = false;
+                continue;
+            }
+
+            foreach ( var invalidatedMethodInfo in invalidatedOverloads )
+            {
+                // null indicates already processed (eg, via another aspect instance on the current target method)
+                if ( invalidatedMethodInfo != null )
                 {
-
-                    Task t = base.OnInvokeAsync( args );
-
-                    if ( !t.IsCompleted )
-                    {
-                        activity.Suspend();
-                        try
-                        {
-                            await t;
-                        }
-                        finally
-                        {
-                            activity.Resume();
-                        }
-                    }
-
-                    List<Task> tasks = new List<Task>( this.invalidatedMethods.Count );
-                    foreach ( InvalidatedMethodInfo invalidatedMethod in this.invalidatedMethods )
-                    {
-                        object[] mappedArguments = MapArguments( invalidatedMethod, args.Arguments );
-                        object instance = MapInstance( invalidatedMethod, args.Instance );
-
-                        tasks.Add( CachingServices.Invalidation.InvalidateAsync( invalidatedMethod.Method, instance, mappedArguments ) );
-                    }
-
-                    t = Task.WhenAll( tasks );
-
-                    if ( !t.IsCompleted )
-                    {
-                        activity.Suspend();
-                        try
-                        {
-                            await t;
-                        }
-                        finally
-                        {
-                            activity.Resume();
-                        }
-                    }
-
-                    activity.SetSuccess();
-                }
-                catch ( Exception e )
-                {
-                    activity.SetException( e );
-                    throw;
+                    builder.Diagnostics.Report( InfoMethodIsInvalidatedBy.WithArguments( invalidatingMethod ), invalidatedMethodInfo.Method );
+                    builder.Diagnostics.Report( InfoMethodInvalidates.WithArguments( invalidatedMethodInfo.Method ), invalidatingMethod );
+                    
+                    invalidatedMethods.Add( invalidatedMethodInfo.Method, invalidatedMethodInfo );
                 }
             }
         }
 
-        private static object MapInstance( InvalidatedMethodInfo invalidatedMethod, object instance )
+        return isValid;
+    }
+
+    [CompileTime]
+    private class DictionaryOfLists<TKey, TValue> : IEnumerable<KeyValuePair<TKey, List<TValue>>>
+        where TKey : notnull
+    {
+        private readonly Dictionary<TKey, List<TValue>> _collectionsDictionary = new();
+
+        public void Add( TKey methodName, TValue value )
         {
-            return invalidatedMethod.Method.IsStatic ? null : instance;
+            List<TValue> list;
+
+            if ( !this._collectionsDictionary.TryGetValue( methodName, out list ) )
+            {
+                list = new List<TValue>();
+                this._collectionsDictionary.Add( methodName, list );
+            }
+
+            list.Add( value );
         }
 
-        private static object[] MapArguments( InvalidatedMethodInfo invalidatedMethod, Arguments arguments )
+        public bool TryGetList( TKey key, out List<TValue> list )
         {
-            object[] mappedArguments = new object[invalidatedMethod.ParameterMap.Length];
-
-            for ( int i = 0; i < mappedArguments.Length; i++ )
-            {
-                int mappedArgumentPosition = invalidatedMethod.ParameterMap[i];
-                if ( mappedArgumentPosition >= 0 )
-                {
-                    mappedArguments[i] = arguments[mappedArgumentPosition];
-                }
-            }
-
-            return mappedArguments;
+            return this._collectionsDictionary.TryGetValue( key, out list );
         }
 
-        private class MethodMatchingError
+        public IEnumerator<KeyValuePair<TKey, List<TValue>>> GetEnumerator()
         {
-            public MethodInfo Method { get; }
-
-            public string Code { get; }
-
-            public object[] Arguments { get; }
-
-            public MethodMatchingError(MethodInfo method, string code, params object[] arguments)
-            {
-                this.Method = method;
-                this.Code = code;
-                this.Arguments = arguments;
-            }
-
-            public void Write()
-            {
-                CachingMessageSource.Instance.Write( this.Method, SeverityType.Error, this.Code, this.Arguments );
-            }
+            return this._collectionsDictionary.GetEnumerator();
         }
 
-        private class DictionaryOfLists<TKey, TValue> : IEnumerable<KeyValuePair<TKey, List<TValue>>>
+        IEnumerator IEnumerable.GetEnumerator()
+            => this.GetEnumerator();
+    }
+
+    [CompileTime]
+    private class InvalidatedMethodInfo
+    {
+        public InvalidatedMethodInfo( IMethod method )
         {
-            private readonly Dictionary<TKey, List<TValue>> collectionsDictionary = new Dictionary<TKey, List<TValue>>();
-
-            public void Add(TKey methodName, TValue value)
+            this.Method = method;
+            this.ParameterMap = new int[method.Parameters.Count];
+            for ( var i = 0; i < this.ParameterMap.Length; i++ )
             {
-                List<TValue> list;
-
-                if (!this.collectionsDictionary.TryGetValue(methodName, out list))
-                {
-                    list = new List<TValue>();
-                    this.collectionsDictionary.Add(methodName, list);
-                }
-
-                list.Add(value);
-            }
-
-            public bool TryGetList(TKey key, out List<TValue> list)
-            {
-                return this.collectionsDictionary.TryGetValue(key, out list);
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
-
-            public IEnumerator<KeyValuePair<TKey, List<TValue>>> GetEnumerator()
-            {
-                return this.collectionsDictionary.GetEnumerator();
+                this.ParameterMap[i] = -1;
             }
         }
 
-
-        [PSerializable]
-        private class InvalidatedMethodInfo
-        {
-            public InvalidatedMethodInfo( MethodInfo method )
-            {
-                this.Method = method;
-                this.ParameterMap = new int[method.GetParameters().Length];
-                for ( int i = 0; i < this.ParameterMap.Length; i++ )
-                {
-                    this.ParameterMap[i] = -1;
-                }
-            }
-
-            // ReSharper disable FieldCanBeMadeReadOnly.Local
-            public MethodInfo Method;            
-            public int[] ParameterMap;
-            // ReSharper restore FieldCanBeMadeReadOnly.Local
-        }
-#endif
+        public readonly IMethod Method;
+        public readonly int[] ParameterMap;
+    }
 }
