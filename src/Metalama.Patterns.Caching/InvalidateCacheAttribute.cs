@@ -101,11 +101,24 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         var arrayBuilder = new ArrayBuilder( typeof( MethodInfo ) );
         foreach ( var method in invalidatedMethods.Keys )
         {
-            arrayBuilder.Add( method.ToMethodInfo() );
-        }
+            arrayBuilder.Add( method ); //.ToMethodInfo() );
+        }        
 
         var methodsInvalidatedByFieldName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{3AB07EE4-9AB7-423C-810A-994D9BC620CA}", $"_methodsInvalidatedBy_{builder.Target.Name}" );
 
+        var methodsInvalidatedByField = builder.Advice.IntroduceField(
+            builder.Target.DeclaringType,
+            methodsInvalidatedByFieldName,
+            typeof( MethodInfo[] ),
+            IntroductionScope.Static,
+            OverrideStrategy.Fail,
+            b =>
+            {
+                b.Name = methodsInvalidatedByFieldName;
+                b.InitializerExpression = arrayBuilder.ToExpression();
+            } );
+
+#if false
         var methodsInvalidatedByField = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
             nameof( _methodsInvalidatedBy ),
@@ -116,7 +129,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             {
                 methodInfoArray = arrayBuilder.ToExpression() 
             } );
-
+#endif
         var templates = new MethodTemplateSelector( nameof( this.OverrideMethod ) );
 
         builder.Advice.Override(
@@ -133,8 +146,8 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     [Template]
     private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
 
-    [Template]
-    private static readonly MethodInfo[] _methodsInvalidatedBy = ((IExpression) meta.Tags["methodInfoArray"]!).Value;
+    //[Template]
+    //private static readonly MethodInfo[] _methodsInvalidatedBy = ((IExpression) meta.Tags["methodInfoArray"]!).Value;
 
     [Template]
     private static void OverrideMethod( IField logSourceField, IField methodsInvalidatedByField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods )
