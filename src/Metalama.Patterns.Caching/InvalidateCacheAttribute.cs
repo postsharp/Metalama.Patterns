@@ -8,6 +8,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching;
 using System.Collections;
 using System.Reflection;
@@ -57,6 +58,13 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     {
         this._invalidatedMethodsDeclaringType = declaringType;
         this._invalidatedMethodNames = methodNames;
+    }
+
+    public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
+    {
+        base.BuildEligibility( builder );
+
+        builder.MustSatisfy( m => !m.ReturnType.GetAsyncInfo().IsAwaitable || m.ReturnType.IsTask(), m => $"awaitable types other than Task and Task<T> are not supported." );
     }
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
@@ -141,14 +149,20 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             } );
 #endif
 #endif
-        var templates = new MethodTemplateSelector( nameof( this.OverrideMethod ) );
+
+        var asyncInfo = builder.Target.GetAsyncInfo();
+
+        var templates = new MethodTemplateSelector(
+            nameof( this.OverrideMethod ),
+            builder.Target.ReturnType.IsTask( withResult: false ) ? nameof( this.OverrideMethodAsyncTask ) : nameof( this.OverrideMethodAsyncTaskOfT ),
+            useAsyncTemplateForAnyAwaitable: true );
 
         builder.Advice.Override(
             builder.Target,
             templates,
             args: new
             {
-                TReturn = builder.Target.ReturnType,
+                TReturn = asyncInfo.IsAwaitable ? asyncInfo.ResultType : builder.Target.ReturnType,
                 logSourceField = logSourceField,
 #if !AVOID_METHODINFO_ARRAY
                 methodsInvalidatedByField = methodsInvalidatedByField.Declaration,
@@ -208,6 +222,174 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         }        
     }
 
+    [Template]
+    public async Task<TReturn> OverrideMethodAsyncTaskOfT<[CompileTime] TReturn>( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
+#if !AVOID_METHODINFO_ARRAY
+        , IField methodsInvalidatedByField
+#endif
+        )
+    {
+        // TODO: Abstract to RunTime helper where possible.
+
+        // TODO: Automagically accept CancellationToken parameter?
+
+        TReturn result;
+
+        using ( var activity = logSourceField.Value.Default.OpenActivity(
+            FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+        {
+            try
+            {
+                var task = meta.Proceed();
+
+                if ( !task.IsCompleted )
+                {
+                    // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
+                    // and the await instrumentation policy is not applied.
+                    activity.Suspend();
+                    try
+                    {
+                        result = await task;
+                    }
+                    finally
+                    {
+                        activity.Resume();
+                    }
+                }
+                else
+                {
+                    // Don't wrap any exception.
+                    result = task.GetAwaiter().GetResult();
+                }
+
+                var index = meta.CompileTime( 0 );
+
+                Task task2;
+
+                foreach ( var invalidatedMethod in invalidatedMethods )
+                {
+                    task2 = CachingServices.Invalidation.InvalidateAsync(
+#if AVOID_METHODINFO_ARRAY
+                        // TODO: !!! Remove when array of ToMethodInfo() is working.
+                        invalidatedMethod.Method.ToMethodInfo(),
+#else
+                        methodsInvalidatedByField.Value![index],
+#endif
+                        invalidatedMethod.Method.IsStatic ? null : meta.This,
+                        MapArguments( invalidatedMethod ).Value );
+
+                    if ( !task2.IsCompleted )
+                    {
+                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
+                        // and the await instrumentation policy is not applied.
+                        activity.Suspend();
+                        try
+                        {
+                            await task;
+                        }
+                        finally
+                        {
+                            activity.Resume();
+                        }
+                    }
+
+                    ++index;
+                }
+
+                activity.SetSuccess();
+
+                return result;
+            }
+            catch ( Exception e )
+            {
+                activity.SetException( e );
+                throw;
+            }
+        }
+    }
+
+    [Template]
+    public async Task OverrideMethodAsyncTask( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods, IType TReturn /* not used */
+#if !AVOID_METHODINFO_ARRAY
+        , IField methodsInvalidatedByField
+#endif
+    )
+    {
+        // TODO: Abstract to RunTime helper where possible.
+
+        // TODO: Automagically accept CancellationToken parameter?
+
+        using ( var activity = logSourceField.Value.Default.OpenActivity(
+            FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+        {
+            try
+            {
+                var task = meta.Proceed();
+
+                if ( !task.IsCompleted )
+                {
+                    // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
+                    // and the await instrumentation policy is not applied.
+                    activity.Suspend();
+                    try
+                    {
+                        await task;
+                    }
+                    finally
+                    {
+                        activity.Resume();
+                    }
+                }
+                else
+                {
+                    // Don't wrap any exception.
+                    task.GetAwaiter().GetResult();
+                }
+
+                var index = meta.CompileTime( 0 );
+
+                Task task2;
+
+                foreach ( var invalidatedMethod in invalidatedMethods )
+                {
+                    task2 = CachingServices.Invalidation.InvalidateAsync(
+#if AVOID_METHODINFO_ARRAY
+                        // TODO: !!! Remove when array of ToMethodInfo() is working.
+                        invalidatedMethod.Method.ToMethodInfo(),
+#else
+                        methodsInvalidatedByField.Value![index],
+#endif
+                        invalidatedMethod.Method.IsStatic ? null : meta.This,
+                        MapArguments( invalidatedMethod ).Value );
+
+                    if ( !task2.IsCompleted )
+                    {
+                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
+                        // and the await instrumentation policy is not applied.
+                        activity.Suspend();
+                        try
+                        {
+                            await task;
+                        }
+                        finally
+                        {
+                            activity.Resume();
+                        }
+                    }
+
+                    ++index;
+                }
+
+                activity.SetSuccess();
+            }
+            catch ( Exception e )
+            {
+                activity.SetException( e );
+                throw;
+            }
+        }
+    }
+
     private static IExpression MapArguments( InvalidatedMethodInfo invalidatedMethod )
     {
         var arrayBuilder = new ArrayBuilder();
@@ -240,7 +422,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             builder.Diagnostics.Report( ErrorInvalidAspectConstructorNoMethodName.WithArguments( builder.Target ) );
             return false;
         }
-
+        
         if ( attribute._invalidatedMethodNames.Any( s => string.IsNullOrEmpty( s ) ) )
         {
             builder.Diagnostics.Report( ErrorInvalidAspectConstructorNullOrEmptyString.WithArguments( builder.Target ) );
@@ -321,7 +503,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 // Match parameter by name.
                 var invalidatingMethodParameter =
-                    invalidatingMethodParameters.SingleOrDefault( p => p.Name == invalidatedMethodParameter.Name );
+                    invalidatingMethodParameters.FirstOrDefault( p => p.Name == invalidatedMethodParameter.Name );
 
                 if ( invalidatingMethodParameter == null )
                 {
@@ -334,7 +516,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 }
 
                 // Check that the type is compatible.
-                if ( !invalidatedMethodParameter.Type.Is( invalidatingMethodParameter.Type ) )
+                if ( !invalidatingMethodParameter.Type.Is( invalidatedMethodParameter.Type ) )
                 {
                     matchingErrorsDictionary.Add(
                         invalidatedMethod.Name,

@@ -95,7 +95,6 @@ internal static class CachingDiagnosticDescriptors
                 "[InvalidateCache] must contain at least one method name.",
                 _cagtegory );
 
-
         /// <summary>
         /// Was PS CAC008:
         /// Invalid [InvalidateCache] aspect on {0}: there is no method named {1} in type {2}.
@@ -108,7 +107,6 @@ internal static class CachingDiagnosticDescriptors
                 "Cached method not found.",
                 _cagtegory );
 
-
         /// <summary>
         /// Was PS CAC009:
         /// Invalid [InvalidateCache] aspect on {0}: there are several suitable overloads of the {1} method. Set the AllowMultipleOverloads property to \"true\" to allow invalidation of all of them.
@@ -120,6 +118,8 @@ internal static class CachingDiagnosticDescriptors
                 "Invalid [InvalidateCache] aspect on {0}: there are several suitable overloads of the {1} method. Set the AllowMultipleOverloads property to \"true\" to allow invalidation of all of them.",
                 "Multiple suitable overloads found.",
                 _cagtegory );
+
+        // TODO: [Porting] This is probably not the best way to annotate - it shows up as "Messages" in VS.
 
         public static readonly DiagnosticDefinition<IMethod> InfoMethodIsInvalidatedBy =
             new(
