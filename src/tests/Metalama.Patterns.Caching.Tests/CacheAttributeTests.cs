@@ -1,13 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// TODO: [Porting] !!! Resolve GENERIC_BUG_IS_FIXED
-// #define GENERIC_BUG_IS_FIXED
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
+using Xunit;
 using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
 namespace Metalama.Patterns.Caching.Tests
@@ -238,7 +232,7 @@ namespace Metalama.Patterns.Caching.Tests
         #endregion
 
         #region TestSyncGeneric
-#if GENERIC_BUG_IS_FIXED
+
         private const string testSyncGenericProfileName = profileNamePrefix + "TestSyncGeneric";
 
         [CacheConfiguration( ProfileName = testSyncGenericProfileName )]
@@ -282,7 +276,7 @@ namespace Metalama.Patterns.Caching.Tests
                 TestProfileConfigurationFactory.DisposeTest();
             }
         }
-#endif
+
         #endregion TestSyncGeneric
 
         #region TestAsync
@@ -344,8 +338,8 @@ namespace Metalama.Patterns.Caching.Tests
         #endregion TestAsync
 
         #region TestAsyncGeneric
+
         private const string testAsyncGenericProfileName = profileNamePrefix + "TestAsyncGeneric";
-#if GENERIC_BUG_IS_FIXED
 
         [CacheConfiguration( ProfileName = testAsyncGenericProfileName )]
         private sealed class TestAsyncGenericCachingClass<T> : CachingClass<T>
@@ -375,7 +369,7 @@ namespace Metalama.Patterns.Caching.Tests
                 await TestProfileConfigurationFactory.DisposeTestAsync();
             }
         }
-#endif
+
         #endregion TestAsyncGeneric
 
         #region TestDisabled
