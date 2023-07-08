@@ -1,14 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if EXTENSIONS_CACHING
-
-using System;
-using System.Threading;
-using Microsoft.Extensions.Caching.Memory;
-using Xunit;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
-
+using Microsoft.Extensions.Caching.Memory;
+using Xunit;
 using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
 namespace Metalama.Patterns.Caching.Tests
@@ -91,5 +86,3 @@ namespace Metalama.Patterns.Caching.Tests
         }
     }
 }
-
-#endif

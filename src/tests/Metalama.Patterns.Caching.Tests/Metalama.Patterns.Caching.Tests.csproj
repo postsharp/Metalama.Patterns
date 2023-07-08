@@ -1,43 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>net471</TargetFrameworks> <!--;net6.0-->
+    <TargetFrameworks>net471;net6.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <TestProjectFlags>TimeSensitive</TestProjectFlags>
   </PropertyGroup>
 
-  <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
-  <!--
-  <PropertyGroup Condition="'$(TFId)' == '.NETFramework' AND '$(TargetFramework)' != 'net471'">
-    <DefineConstants>$(DefineConstants);RUNTIME_CACHING</DefineConstants>
+  <PropertyGroup>
+    <DefineConstants Condition=" '$(Configuration)' == 'LAMADEBUG' ">$(DefineConstants);DEBUG</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TFId)' == '.NETStandard'">
-    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TFId)' == '.NETCoreApp' OR '$(TargetFramework)' == 'net471'">
-    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
-  </PropertyGroup>
-
--->
-<PropertyGroup>
-	<DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
-  <DefineConstants Condition=" '$(Configuration)' == 'LAMADEBUG' ">$(DefineConstants);DEBUG</DefineConstants>
-</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="xunit" Version="$(xUnitVersion)" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-		<PackageReference Include="Xunit.SkippableFact" Version="$(XunitSkippableFactVersion)" />
-	<PackageReference Include="xunit.extensibility.execution" Version="$(XunitVersion)" />
-	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkVersion)" />
-
-	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="$(MicrosoftExtensionsCachingMemoryVersion)" />
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="$(xUnitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
+    <PackageReference Include="Xunit.SkippableFact" Version="$(XunitSkippableFactVersion)" />
+    <PackageReference Include="xunit.extensibility.execution" Version="$(XunitVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="$(MicrosoftExtensionsCachingMemoryVersion)" />
   </ItemGroup>
-	
+
   <ItemGroup>
     <ProjectReference Include="..\..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
     <ProjectReference Include="..\..\Flashtrace\Flashtrace.csproj" />

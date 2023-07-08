@@ -4,6 +4,7 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using System.Collections;
 using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests.Backends
@@ -233,7 +234,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestAbsoluteExpirationDependencyCollectedAsync()
         {
-            if ( !this.TestDependencies || !this.RunningOnWindows )
+            if ( !this.TestDependencies || !RunningOnWindows )
             {
                 AssertEx.Inconclusive();
 
@@ -304,18 +305,13 @@ namespace Metalama.Patterns.Caching.Tests.Backends
         /// Returns true if the test is run on Windows. We don't run some tests on Linux because, for some reason, the event that an item expired from the cache
         /// arrives up to 20 minutes later on Linux, and I don't know why. So we're just no longer testing this on Linux.
         /// </summary>
-        private bool RunningOnWindows
-            => runningOnWindows ?? (runningOnWindows =
-#if RUNTIME_INFORMATION
-                RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
-#else
-                Environment.OSVersion.Platform == PlatformID.Win32NT).Value;
-#endif
+        private static bool RunningOnWindows
+            => runningOnWindows ?? (runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
 
         [Fact( Timeout = Timeout )]
         public void TestAbsoluteExpirationDependencyCollected()
         {
-            if ( !this.TestDependencies || !this.RunningOnWindows )
+            if ( !this.TestDependencies || !RunningOnWindows )
             {
                 AssertEx.Inconclusive();
 
@@ -377,7 +373,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
         [Fact( Timeout = Timeout )]
         public void TestSlidingExpiration()
         {
-            if ( !this.RunningOnWindows )
+            if ( !RunningOnWindows )
             {
                 AssertEx.Inconclusive();
 
@@ -440,7 +436,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestSlidingExpirationAsync()
         {
-            if ( !this.RunningOnWindows )
+            if ( !RunningOnWindows )
             {
                 AssertEx.Inconclusive();
 

@@ -21,14 +21,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public static CachingBackend InitializeTestWithCachingBackend( string name )
         {
             InitializeTestWithoutBackend();
-
-#if NETFRAMEWORK
-            var backend = new MemoryCacheBackend(
-                new Microsoft.Extensions.Caching.Memory.MemoryCache( new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions() ) );
-#else
             var backend = new MemoryCachingBackend( new System.Runtime.Caching.MemoryCache( "test-" + name ) );
-#endif
-
             CachingServices.DefaultBackend = backend;
 
             return backend;

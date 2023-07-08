@@ -1,14 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if RUNTIME_CACHING
-
-using System;
-using System.Runtime.Caching;
-using Xunit;
-using Metalama.Patterns.Caching.TestHelpers;
-using System.Threading;
-using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Implementation;
+using System.Runtime.Caching;
 
 namespace Metalama.Patterns.Caching.Tests.Backends
 {
@@ -41,5 +35,3 @@ namespace Metalama.Patterns.Caching.Tests.Backends
         }
     }
 }
-
-#endif

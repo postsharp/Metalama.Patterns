@@ -40,14 +40,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public TestingCacheBackend( string name )
         {
             this.ResetExpectations();
-#if RUNTIME_CACHING
             this.backend = new MemoryCachingBackend( new MemoryCache( name ) );
-#elif EXTENSIONS_CACHING
-            this.backend = new MemoryCacheBackend(
-                new Microsoft.Extensions.Caching.Memory.MemoryCache( new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions() ) );
-#else
-#error You must define at least one of: RUNTIME_CACHING, EXTENSIONS_CACHING.
-#endif
             this.backend.ItemRemoved += this.OnItemRemoved;
             this.backend.DependencyInvalidated += this.OnDependencyInvalidated;
         }

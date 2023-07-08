@@ -8,41 +8,9 @@
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
-  <!-- $(IsTestProject)=false and remove @(ProjectCapability) 'TestContainer' stop VS from seeing
-  this as a test project. -->
   <ItemGroup>
     <ProjectCapability Remove="TestContainer"/>
   </ItemGroup>
-
-  <!--
-  <ItemGroup>
-    <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" />
-    <ProjectReference Include="..\..\Common\PostSharp.Patterns.Common\PostSharp.Patterns.Common.csproj" />
-    <ProjectReference Include="..\PostSharp.Patterns.TestHelpers\PostSharp.Patterns.TestHelpers.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
-    <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching.Backends.IMemoryCache\PostSharp.Patterns.Caching.Backends.IMemoryCache.csproj" />
-  </ItemGroup>
--->
-  <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
-  <!--
-  <PropertyGroup Condition="'$(TFId)' == '.NETFramework' AND '$(TargetFramework)' != 'net471'">
-    <DefineConstants>$(DefineConstants);RUNTIME_CACHING</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TFId)' == '.NETStandard'">
-    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net471'">
-    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
-  </PropertyGroup>
-  -->
-  <!-- TODO: Replace with .NET SDK constants and remove it from here. -->
-  <PropertyGroup>
-    <DefineConstants>$(DefineConstants);EXTENSIONS_CACHING;RUNTIME_CACHING</DefineConstants>
-  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />

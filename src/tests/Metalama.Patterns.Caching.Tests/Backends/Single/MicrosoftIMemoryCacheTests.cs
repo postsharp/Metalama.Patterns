@@ -1,12 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if EXTENSIONS_CACHING
-
-using System;
-using Microsoft.Extensions.Caching.Memory;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Tests.Backends;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Metalama.Patterns.Caching.Tests
 {
@@ -20,5 +17,3 @@ namespace Metalama.Patterns.Caching.Tests
         }
     }
 }
-
-#endif
