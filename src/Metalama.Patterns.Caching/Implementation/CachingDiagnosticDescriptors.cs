@@ -75,12 +75,12 @@ internal static class CachingDiagnosticDescriptors
         /// Was PS CAC006:
         /// Invalid [InvalidateCache] aspect on {0}: the constructor parameters cannot contain a null or empty string.
         /// </summary>
-        public static readonly DiagnosticDefinition<IMethod> ErrorInvalidAspectConstructorNullOrEmptyString =
+        public static readonly DiagnosticDefinition<IMethod> ErrorInvalidAspectConstructorNullOrWhitespaceString =
             new(
                 "LAMA5104",
                 Error,
-                "Invalid [InvalidateCache] aspect on {0}: the constructor parameters cannot contain a null or empty string.",
-                "[InvalidateCache] parameters cannot contain a null or empty string.",
+                "Invalid [InvalidateCache] aspect on {0}: the constructor parameters cannot contain a null, empty or whitespace-only string.",
+                "[InvalidateCache] parameters cannot contain a null, empty or whitespace string.",
                 _cagtegory );
 
         /// <summary>

@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.UnitTests", "src\tests\Metalama.Patterns.Caching.UnitTests\Metalama.Patterns.Caching.UnitTests.csproj", "{6897EC23-D34B-4FC8-AAA0-9B0D9F9EC00A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.AspectTests", "src\tests\Metalama.Patterns.Caching.AspectTests\Metalama.Patterns.Caching.AspectTests.csproj", "{00C90E9E-93A3-490D-9BC4-D738F922811C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -124,6 +126,12 @@ Global
 		{6897EC23-D34B-4FC8-AAA0-9B0D9F9EC00A}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{6897EC23-D34B-4FC8-AAA0-9B0D9F9EC00A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6897EC23-D34B-4FC8-AAA0-9B0D9F9EC00A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00C90E9E-93A3-490D-9BC4-D738F922811C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00C90E9E-93A3-490D-9BC4-D738F922811C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00C90E9E-93A3-490D-9BC4-D738F922811C}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
+		{00C90E9E-93A3-490D-9BC4-D738F922811C}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
+		{00C90E9E-93A3-490D-9BC4-D738F922811C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00C90E9E-93A3-490D-9BC4-D738F922811C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -136,6 +144,7 @@ Global
 		{0987952C-F219-43F5-9068-9C515F93CC08} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{97CE6AEE-F92D-4C54-A4CF-5C965D39BC9E} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{6897EC23-D34B-4FC8-AAA0-9B0D9F9EC00A} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{00C90E9E-93A3-490D-9BC4-D738F922811C} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC2B6F6-5623-43F8-BBBB-ED8072670A80}

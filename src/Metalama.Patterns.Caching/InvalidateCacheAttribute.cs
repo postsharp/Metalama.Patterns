@@ -423,9 +423,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             return false;
         }
         
-        if ( attribute._invalidatedMethodNames.Any( s => string.IsNullOrEmpty( s ) ) )
+        if ( attribute._invalidatedMethodNames.Any( s => string.IsNullOrWhiteSpace( s ) ) )
         {
-            builder.Diagnostics.Report( ErrorInvalidAspectConstructorNullOrEmptyString.WithArguments( builder.Target ) );
+            builder.Diagnostics.Report( ErrorInvalidAspectConstructorNullOrWhitespaceString.WithArguments( builder.Target ) );
             return false;
         }
 
