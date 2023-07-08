@@ -96,8 +96,6 @@ public sealed class CacheAttribute : MethodAspect
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        // TODO: [Porting] !!! Required, decide: Apply fallback configuration or deprecate [CacheConfiguration] and use Metalama options. See also BuildTimeCacheConfigurationManager.
-
         var asyncInfo = builder.Target.MethodDefinition.GetAsyncInfo();
         var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.GetOriginalDefinition().SpecialType ?? SpecialType.None;
 
@@ -235,7 +233,7 @@ public sealed class CacheAttribute : MethodAspect
 #endif
 
     [Template]
-    public void CachedMethodRegistrationInitializer( IMethod method, IField field, IMethod getOriginalMethodInvoker, INamedType? awaitableResultType )
+    public void CachedMethodRegistrationInitializer( IMethod method, IField field, IMethod getOriginalMethodInvoker, IType? awaitableResultType )
     {
         var effectiveConfiguration = this.GetEffectiveConfiguration( method );
 

@@ -27,7 +27,7 @@ public sealed class TestSyncGenericCachingClass<T>
 
 public sealed class TestAsyncGenericCachingClass<T>
 {
-    //[Cache]
+    [Cache]
     public async Task<T> GetValueAsync()
     {
         await Task.Delay( 1 );
