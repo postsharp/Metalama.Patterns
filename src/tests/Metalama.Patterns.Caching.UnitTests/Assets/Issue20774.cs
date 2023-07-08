@@ -1,0 +1,21 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+namespace Metalama.Patterns.Caching.Tests.Assets.Issue20774
+{
+    public class CachedClass
+    {
+        [Cache( IgnoreThisParameter = true )]
+        public int GetValue()
+        {
+            return 0;
+        }
+    }
+
+    public class InvalidatingClass
+    {
+        [InvalidateCache( typeof( CachedClass ), "GetValue" )]
+        public void Invalidate()
+        {
+        }
+    }
+}
