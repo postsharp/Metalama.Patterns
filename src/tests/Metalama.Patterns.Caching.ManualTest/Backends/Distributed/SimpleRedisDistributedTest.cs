@@ -1,30 +1,31 @@
-﻿#if POSTSHARP_CACHING_REDIS
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using PostSharp.Patterns.Caching.Backends.Redis;
 using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Caching.Tests.Backends.Distributed;
 using StackExchange.Redis;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends
+namespace PostSharp.Patterns.Caching.Tests.Backends.Distributed
 {
-    public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests
+    public class SimpleRedisDistributedTest : BaseDistributedCacheTests
     {
-        public RedisDistributedCachingBackendTests( TestContext testContext ) : base( testContext )
+        public SimpleRedisDistributedTest( TestContext testContext ) : base( testContext )
         {
         }
+
+        protected override bool TestDependencies { get; } = false;
 
         protected override async Task<CachingBackend[]> CreateBackendsAsync()
         {
             string prefix = Guid.NewGuid().ToString();
-
+            
             return new[]
                    {
-                       await RedisFactory.CreateBackendAsync( this.TestContext, prefix, supportsDependencies:true ),
-                       await RedisFactory.CreateBackendAsync( this.TestContext, prefix, supportsDependencies:true ),
+                       await RedisFactory.CreateBackendAsync( TestContext, prefix ),
+                       await RedisFactory.CreateBackendAsync( TestContext, prefix ),
                    };
 
         }
@@ -35,8 +36,8 @@ namespace PostSharp.Patterns.Caching.Tests.Backends
 
             return new[]
                    {
-                       RedisFactory.CreateBackend( this.TestContext, prefix, supportsDependencies:true ),
-                       RedisFactory.CreateBackend( this.TestContext, prefix, supportsDependencies:true ),
+                       RedisFactory.CreateBackend( TestContext, prefix ),
+                       RedisFactory.CreateBackend( TestContext, prefix ),
                    };
         }
 
@@ -47,5 +48,3 @@ namespace PostSharp.Patterns.Caching.Tests.Backends
         }
     }
 }
-
-#endif

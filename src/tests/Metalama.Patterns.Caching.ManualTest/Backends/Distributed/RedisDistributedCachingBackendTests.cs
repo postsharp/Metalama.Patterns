@@ -1,33 +1,28 @@
-﻿#if POSTSHARP_CACHING_REDIS
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using PostSharp.Patterns.Caching.Backends.Redis;
 using PostSharp.Patterns.Caching.Implementation;
+using PostSharp.Patterns.Caching.Tests.Backends.Distributed;
 using StackExchange.Redis;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends.Distributed
+namespace PostSharp.Patterns.Caching.Tests.Backends
 {
-    public class SimpleRedisDistributedTest : BaseDistributedCacheTests
+    public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests
     {
-        public SimpleRedisDistributedTest( TestContext testContext ) : base( testContext )
+        public RedisDistributedCachingBackendTests( TestContext testContext ) : base( testContext )
         {
         }
-
-        protected override bool TestDependencies { get; } = false;
 
         protected override async Task<CachingBackend[]> CreateBackendsAsync()
         {
             string prefix = Guid.NewGuid().ToString();
-            
+
             return new[]
                    {
-                       await RedisFactory.CreateBackendAsync( TestContext, prefix ),
-                       await RedisFactory.CreateBackendAsync( TestContext, prefix ),
+                       await RedisFactory.CreateBackendAsync( this.TestContext, prefix, supportsDependencies:true ),
+                       await RedisFactory.CreateBackendAsync( this.TestContext, prefix, supportsDependencies:true ),
                    };
 
         }
@@ -38,8 +33,8 @@ namespace PostSharp.Patterns.Caching.Tests.Backends.Distributed
 
             return new[]
                    {
-                       RedisFactory.CreateBackend( TestContext, prefix ),
-                       RedisFactory.CreateBackend( TestContext, prefix ),
+                       RedisFactory.CreateBackend( this.TestContext, prefix, supportsDependencies:true ),
+                       RedisFactory.CreateBackend( this.TestContext, prefix, supportsDependencies:true ),
                    };
         }
 
@@ -50,5 +45,3 @@ namespace PostSharp.Patterns.Caching.Tests.Backends.Distributed
         }
     }
 }
-
-#endif

@@ -5,8 +5,6 @@ using Xunit;
 using PostSharp.Patterns.Caching.Backends.Azure;
 using PostSharp.Patterns.Caching.Implementation;
 
-#if WINDOWS_AZURE_LEGACY_API
-#else
 namespace PostSharp.Patterns.Caching.Tests.Backends.Distributed
 {
     public class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
@@ -42,4 +40,3 @@ namespace PostSharp.Patterns.Caching.Tests.Backends.Distributed
         }
     }
 }
-#endif

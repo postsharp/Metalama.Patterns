@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <RedisServerUrl>https://github.com/MicrosoftArchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.zip</RedisServerUrl>
-        <RedisArchivePath>$(PostSharpBinDir)Temp\RedisServer.zip</RedisArchivePath>
-        <RedisServerDirectory>$(PostSharpBinDir)Temp\RedisServer\</RedisServerDirectory>
+        <RedisArchivePath>$(MSBuildThisFileDirectory).temp\RedisServer.zip</RedisArchivePath>
+        <RedisServerDirectory>$(MSBuildThisFileDirectory).temp\RedisServer\</RedisServerDirectory>
         <RedisServerExecutable>$(RedisServerDirectory)redis-server.exe</RedisServerExecutable>
     </PropertyGroup>
 
@@ -16,18 +16,34 @@
             <Statement Include="Expand-Archive -Path '$(RedisArchivePath)' -DestinationPath '$(RedisServerDirectory)'" />
         </ItemGroup>
 
-        <Exec Command="powershell -NonInteractive -Command &quot;@(Statement)&quot;" Condition="!Exists($(RedisServerExecutable))" ContinueOnError="True" />  
+        <Exec Command="powershell -NonInteractive -Command &quot;@(Statement)&quot;" Condition="!Exists($(RedisServerExecutable))" />
+
+        <OnError ExecuteTargets="PrintAdditionalErrorMessage" />
     </Target>
 
-    <Target Name="PrepareRedisTestServer" DependsOnTargets="DownloadRedisServer">       
-        
+    <Target 
+        Name="PrepareRedisTestServer"
+        DependsOnTargets="DownloadRedisServer"
+        BeforeTargets="Build"
+        Inputs="$(RedisArchivePath)" 
+        Outputs="$(RedisServerExecutable)">
+
+        <ItemGroup>
+            <EmbeddedResource Include="$(RedisServerExecutable)">
+                <Link>Executables\redis-server.exe</Link>
+            </EmbeddedResource>
+        </ItemGroup> 
+
+        <!-- Why bother?
         <Copy SourceFiles="$(RedisServerExecutable)" DestinationFolder="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)\redis-server.exe')" />
+
         <ItemGroup>
             <EmbeddedResource Include="$(IntermediateOutputPath)\redis-server.exe">
                 <Link>Executables\redis-server.exe</Link>
             </EmbeddedResource>
         </ItemGroup> 
         <OnError ExecuteTargets="PrintAdditionalErrorMessage" />
+        -->        
     </Target>    
     
     <Target Name="PrintAdditionalErrorMessage">

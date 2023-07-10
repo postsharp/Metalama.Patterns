@@ -1,6 +1,4 @@
-﻿#if POSTSHARP_CACHING_REDIS
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,5 +40,3 @@ namespace PostSharp.Patterns.Caching.Tests.Backends
         }
     }
 }
-
-#endif

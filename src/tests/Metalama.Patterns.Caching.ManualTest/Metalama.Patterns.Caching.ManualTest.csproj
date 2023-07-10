@@ -1,23 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net471;net6.0</TargetFrameworks>
-	<RootNamespace>PostSharp.Patterns.Caching.ManualTest</RootNamespace>
-    <AssemblyName>PostSharp.Patterns.Caching.ManualTest</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <TargetFrameworks>net471;net6.0</TargetFrameworks>
     <TestProjectFlags>Excluded</TestProjectFlags>
-	<!-- TODO: Automatic testing disabled because this is a manual test. -->
-	<IsTestProject>false</IsTestProject>
+    <!-- TODO: Automatic testing disabled because this is a manual test. -->
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
   
   <ItemGroup>
-	<PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" />
-	<PackageReference Include="xunit" Version="$(XunitVersion)" />
-	<PackageReference Include="xunit.extensibility.execution" Version="$(XunitVersion)" />
-	<PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)" />
-	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.extensibility.execution" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkVersion)" />
   </ItemGroup>
+
+  <Import Project="RedisTestServer.targets" />
   
+<!--  
   <ItemGroup>
     <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" />
     <ProjectReference Include="..\..\Common\PostSharp.Patterns.Common\PostSharp.Patterns.Common.csproj" />
@@ -31,5 +30,5 @@
     <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching.Backends.IMemoryCache\PostSharp.Patterns.Caching.Backends.IMemoryCache.csproj" />
 	<ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching.Backends.Redis\PostSharp.Patterns.Caching.Backends.Redis.csproj" />
   </ItemGroup>
-  
+  -->
 </Project>

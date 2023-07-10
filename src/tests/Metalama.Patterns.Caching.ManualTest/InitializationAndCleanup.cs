@@ -6,7 +6,6 @@ using System.Diagnostics;
 
 namespace PostSharp.Patterns.Caching.Tests
 {
-#if POSTSHARP_CACHING_REDIS
     public class RedisSetup
     {
         // TODO: use AssemblyFixture when it's fixed.
@@ -36,5 +35,4 @@ namespace PostSharp.Patterns.Caching.Tests
             }
         }
     }
-#endif
 }

@@ -39,7 +39,6 @@ namespace PostSharp.Patterns.Caching.Tests
             Stream executableStream;
             string extension;
 
-#if RUNTIME_INFORMATION
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 executableStream = typeof(ExecutablesResourceTarget).Assembly.GetManifestResourceStream(typeof(ExecutablesResourceTarget), "redis-server.exe");
@@ -50,11 +49,6 @@ namespace PostSharp.Patterns.Caching.Tests
                 executableStream = File.OpenRead("/usr/bin/redis-server");
                 extension = "";
             }
-#else
-            executableStream = typeof(ExecutablesResourceTarget).Assembly.GetManifestResourceStream( typeof(ExecutablesResourceTarget), "redis-server.exe" );
-            extension = "exe";
-#endif
-
 
             this.executable = new TemporaryFile( executableStream, "redis-test-", extension );
 
@@ -252,10 +246,8 @@ namespace PostSharp.Patterns.Caching.Tests
             using (var destination = _fileInfo.OpenWrite())
                 stream.CopyTo(destination);
 
-#if RUNTIME_INFORMATION
             if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
                 chmod( this._fileInfo.FullName, Convert.ToInt32("777", 8));
-#endif
         }
 
         public FileInfo Info

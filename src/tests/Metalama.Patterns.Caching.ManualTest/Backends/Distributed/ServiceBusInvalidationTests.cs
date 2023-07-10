@@ -1,4 +1,6 @@
-﻿#if WINDOWS_AZURE_LEGACY_API
+﻿// TODO: #if WINDOWS_AZURE_LEGACY_API
+
+#if WINDOWS_AZURE_LEGACY_API
 using System;
 using System.Collections.Generic;
 using System.Linq;
