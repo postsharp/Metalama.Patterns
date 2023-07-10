@@ -1,4 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using System;
@@ -8,52 +8,53 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Common.Tests.Helpers;
 using StackExchange.Redis;
 
-namespace Metalama.Patterns.Caching.Tests
+namespace Metalama.Patterns.Caching.Tests;
+
+public class BrokenRedisTests
 {
-    public class BrokenRedisTests
+    [Fact( Timeout = 20000 )]
+    public void TestWeAbortConnection()
     {
-        [Xunit.Fact(Timeout = 20000)]
-        public void TestWeAbortConnection()
-        {
-            AssertEx.Throws<TimeoutException>( () =>
+        AssertEx.Throws<TimeoutException>(
+            () =>
             {
-                 RedisCachingBackendConfiguration configuration =
-                     new RedisCachingBackendConfiguration
-                     {
-                         KeyPrefix = Guid.NewGuid().ToString(),
-                         OwnsConnection = true,
-                         SupportsDependencies = false,
-                         IsLocallyCached = false,
-                         ConnectionTimeout = TimeSpan.FromMilliseconds( 10 )
-                     };
+                RedisCachingBackendConfiguration configuration =
+                    new RedisCachingBackendConfiguration
+                    {
+                        KeyPrefix = Guid.NewGuid().ToString(),
+                        OwnsConnection = true,
+                        SupportsDependencies = false,
+                        IsLocallyCached = false,
+                        ConnectionTimeout = TimeSpan.FromMilliseconds( 10 )
+                    };
 
-                 IConnectionMultiplexer connection = CreateConnection( false );
-                 RedisCachingBackend.Create( connection, configuration );
-             } );
-        }
-
-        [Fact(Timeout = 20000 )]
-        public void TestRedisAbortsConnection()
-        {
-            AssertEx.Throws<RedisConnectionException>( () =>
-            {
-                IConnectionMultiplexer connection = CreateConnection( true );
+                IConnectionMultiplexer connection = this.CreateConnection( false );
+                RedisCachingBackend.Create( connection, configuration );
             } );
-        }
+    }
 
-        private IConnectionMultiplexer CreateConnection( bool redisAborts )
-        {
-              SocketManager socketManager = new SocketManager( "BrokenTest" );
-            
-            ConfigurationOptions redisConfigurationOptions = new ConfigurationOptions();
-            redisConfigurationOptions.EndPoints.Add( "192.168.45.127:12345" );
-            redisConfigurationOptions.AbortOnConnectFail = redisAborts;
-            redisConfigurationOptions.ConnectTimeout = 10;
-            redisConfigurationOptions.SocketManager = socketManager;
+    [Fact( Timeout = 20000 )]
+    public void TestRedisAbortsConnection()
+    {
+        AssertEx.Throws<RedisConnectionException>(
+            () =>
+            {
+                IConnectionMultiplexer connection = this.CreateConnection( true );
+            } );
+    }
 
-            ConnectionMultiplexer connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
+    private IConnectionMultiplexer CreateConnection( bool redisAborts )
+    {
+        SocketManager socketManager = new SocketManager( "BrokenTest" );
 
-            return new DisposingConnectionMultiplexer( connection, socketManager );
-        }
+        ConfigurationOptions redisConfigurationOptions = new ConfigurationOptions();
+        redisConfigurationOptions.EndPoints.Add( "192.168.45.127:12345" );
+        redisConfigurationOptions.AbortOnConnectFail = redisAborts;
+        redisConfigurationOptions.ConnectTimeout = 10;
+        redisConfigurationOptions.SocketManager = socketManager;
+
+        ConnectionMultiplexer connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
+
+        return new DisposingConnectionMultiplexer( connection, socketManager );
     }
 }

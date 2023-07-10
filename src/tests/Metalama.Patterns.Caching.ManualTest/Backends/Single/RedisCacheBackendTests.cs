@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using System;
@@ -15,328 +14,328 @@ using Metalama.Patterns.Caching.TestHelpers.Shared;
 using Metalama.Patterns.Common.Tests.Helpers;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends;
+
+public class RedisCacheBackendTests : BaseCacheBackendTests
 {
-    public class RedisCacheBackendTests : BaseCacheBackendTests
+    private readonly ITestOutputHelper testOutputHelper;
+
+    public RedisCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext )
     {
-        private readonly ITestOutputHelper testOutputHelper;
+        this.testOutputHelper = testOutputHelper;
+    }
 
-        public RedisCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext )
+    protected override void Cleanup()
+    {
+        base.Cleanup();
+        AssertEx.Equal( 0, RedisNotificationQueue.NotificationProcessingThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
+    }
+
+    protected override CachingBackend CreateBackend()
+    {
+        return this.CreateBackend( null );
+    }
+
+    protected override async Task<CachingBackend> CreateBackendAsync()
+    {
+        return await this.CreateBackendAsync( null );
+    }
+
+    internal override ITestableCachingComponent CreateCollector( CachingBackend backend )
+    {
+        return RedisCacheDependencyGarbageCollector.Create( ((DisposingRedisCachingBackend) backend).UnderlyingBackend );
+    }
+
+    internal override async Task<ITestableCachingComponent> CreateCollectorAsync( CachingBackend backend )
+    {
+        return await RedisCacheDependencyGarbageCollector.CreateAsync( ((DisposingRedisCachingBackend) backend).UnderlyingBackend );
+    }
+
+    private DisposingRedisCachingBackend CreateBackend( string keyPrefix )
+    {
+        return RedisFactory.CreateBackend( this.TestContext, keyPrefix, supportsDependencies: true );
+    }
+
+    private async Task<DisposingRedisCachingBackend> CreateBackendAsync( string keyPrefix )
+    {
+        return await RedisFactory.CreateBackendAsync( this.TestContext, keyPrefix, supportsDependencies: true );
+    }
+
+    private string GeneratePrefix()
+    {
+        var keyPrefix = Guid.NewGuid().ToString();
+
+        return keyPrefix;
+    }
+
+    [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
+    public async Task TestGarbageCollectionAsync()
+    {
+        var prefix = this.GeneratePrefix();
+
+        var redisTestInstance = RedisPersistentInstance.GetOrLaunchRedisInstance();
+        this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+
+        Assert.Equal( 0, this.GetAllKeys( prefix ).Count );
+
+        using ( var cache = await RedisFactory.CreateBackendAsync( this.TestContext, prefix: prefix, supportsDependencies: true ) )
+        using ( RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
         {
-            this.testOutputHelper = testOutputHelper;
+            cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+            cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+            cache.SetItem( "i3", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+
+            Assert.True( this.GetAllKeys( prefix ).Count > 0 );
+
+            await cache.InvalidateDependencyAsync( "d1" );
+
+            await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
         }
 
-        protected override void Cleanup()
+        // Make sure we dispose the back-end so that the GC key gets removed too.
+
+        IList<string> keys = this.GetAllKeys( prefix );
+
+        this.testOutputHelper.WriteLine( "Remaining keys:" + string.Join( ", ", keys ) );
+
+        Assert.Equal( 0, keys.Count );
+    }
+
+    [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
+    public async Task TestGarbageCollectionByExpiration()
+    {
+        var keyPrefix = this.GeneratePrefix();
+
+        using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
+        using ( RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.UnderlyingBackend ) )
         {
-            base.Cleanup();
-            AssertEx.Equal( 0, RedisNotificationQueue.NotificationProcessingThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
-        }
+            const string valueSmallKey = "i";
+            const string dependencySmallKey = "d";
+            TimeSpan offset = this.GetExpirationTolerance();
 
-        protected override CachingBackend CreateBackend()
-        {
-            return this.CreateBackend( null );
-        }
+            RedisKeyBuilder keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
 
-        protected override async Task<CachingBackend> CreateBackendAsync()
-        {
-            return await this.CreateBackendAsync( null );
-        }
+            string valueKey = keyBuilder.GetValueKey( valueSmallKey );
+            string dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
+            string dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
 
-        internal override ITestableCachingComponent CreateCollector(CachingBackend backend)
-        {
-            return  RedisCacheDependencyGarbageCollector.Create(((DisposingRedisCachingBackend)backend).UnderlyingBackend);
-        }
+            collector.NotificationQueue.SuspendProcessing();
 
-        internal override async Task<ITestableCachingComponent> CreateCollectorAsync( CachingBackend backend )
-        {
-            return await RedisCacheDependencyGarbageCollector.CreateAsync(((DisposingRedisCachingBackend)backend).UnderlyingBackend);
-        }
+            var itemExpiredEvent = new TaskCompletionSource<bool>();
 
-
-        private DisposingRedisCachingBackend CreateBackend( string keyPrefix )
-        {
-            return RedisFactory.CreateBackend( this.TestContext, keyPrefix, supportsDependencies: true );
-        }
-
-        private async Task<DisposingRedisCachingBackend> CreateBackendAsync( string keyPrefix )
-        {
-            return await RedisFactory.CreateBackendAsync(this.TestContext, keyPrefix, supportsDependencies: true);
-        }
-
-        private string GeneratePrefix()
-        {
-            string keyPrefix = Guid.NewGuid().ToString();
-
-            return keyPrefix;
-        }
-
-        [Fact(Timeout = Timeout, Skip = "Ignore Redis" )]
-        public async Task TestGarbageCollectionAsync()
-        {
-            string prefix = this.GeneratePrefix();
-
-            RedisTestInstance redisTestInstance = RedisPersistentInstance.GetOrLaunchRedisInstance();
-            this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
-
-            Assert.Equal( 0, this.GetAllKeys( prefix ).Count );
-
-            using ( DisposingRedisCachingBackend cache = await RedisFactory.CreateBackendAsync( this.TestContext, prefix: prefix, supportsDependencies: true ) )
-            using ( RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
+            cache.ItemRemoved += ( sender, args ) =>
             {
+                Assert.Equal( valueSmallKey, args.Key );
+                Assert.Equal( CacheItemRemovedReason.Expired, args.RemovedReason );
+                Assert.False( itemExpiredEvent.Task.IsCompleted );
+                itemExpiredEvent.SetResult( true );
+            };
 
-                cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-                cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-                cache.SetItem( "i3", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+            CacheItem cacheItem = new CacheItem(
+                "v",
+                ImmutableList.Create( dependencySmallKey ),
+                new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
-                Assert.True( this.GetAllKeys( prefix ).Count > 0 );
+            await cache.SetItemAsync( valueSmallKey, cacheItem );
 
-                await cache.InvalidateDependencyAsync( "d1" );
+            Assert.True( await cache.Database.KeyExistsAsync( valueKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
 
-                await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
-            }
+            collector.NotificationQueue.ResumeProcessing();
 
-            // Make sure we dispose the back-end so that the GC key gets removed too.
+            Assert.True( await itemExpiredEvent.Task.WithTimeout( TimeoutTimeSpan ) );
 
-            IList<string> keys = this.GetAllKeys( prefix );
+            await Task.Delay( this.GetExpirationTolerance( 2 ) );
 
-            testOutputHelper.WriteLine( "Remaining keys:" + string.Join( ", ", keys ) );
+            Assert.False( await cache.Database.KeyExistsAsync( valueKey ) );
+            Assert.False( await cache.Database.KeyExistsAsync( dependenciesKey ) );
+            Assert.False( await cache.Database.KeyExistsAsync( dependencyKey ) );
 
-            Assert.Equal( 0, keys.Count );
+            await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
         }
+    }
 
+    [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
+    public async Task TestSetBeforeGarbageCollectionByExpiration()
+    {
+        var keyPrefix = this.GeneratePrefix();
 
-
-        [Fact(Timeout = Timeout, Skip = "Ignore Redis" )]
-        public async Task TestGarbageCollectionByExpiration()
+        using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
+        using ( RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
         {
-            string keyPrefix = this.GeneratePrefix();
+            const string valueSmallKey = "i";
+            const string dependencySmallKey = "d";
+            TimeSpan offset = this.GetExpirationTolerance();
 
-            using (DisposingRedisCachingBackend cache = await this.CreateBackendAsync(keyPrefix))
-            using (RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync(cache.UnderlyingBackend))
-            {
-                const string valueSmallKey = "i";
-                const string dependencySmallKey = "d";
-                TimeSpan offset = this.GetExpirationTolerance();
+            RedisKeyBuilder keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
 
-                RedisKeyBuilder keyBuilder = new RedisKeyBuilder(cache.Database, cache.Configuration);
+            string valueKey = keyBuilder.GetValueKey( valueSmallKey );
+            string dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
+            string dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
 
-                string valueKey = keyBuilder.GetValueKey(valueSmallKey);
-                string dependenciesKey = keyBuilder.GetDependenciesKey(valueSmallKey);
-                string dependencyKey = keyBuilder.GetDependencyKey(dependencySmallKey);
+            collector.NotificationQueue.SuspendProcessing();
 
-                collector.NotificationQueue.SuspendProcessing();
+            CacheItem expiringCacheItem = new CacheItem(
+                "v",
+                ImmutableList.Create( dependencySmallKey ),
+                new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
-                TaskCompletionSource<bool> itemExpiredEvent = new TaskCompletionSource<bool>();
-                cache.ItemRemoved += (sender, args) =>
-                                     {
-                                         Assert.Equal(valueSmallKey, args.Key);
-                                         Assert.Equal(CacheItemRemovedReason.Expired, args.RemovedReason);
-                                         Assert.False(itemExpiredEvent.Task.IsCompleted);
-                                         itemExpiredEvent.SetResult(true);
-                                     };
+            CacheItem nonExpiringCacheItem = new CacheItem(
+                "v",
+                ImmutableList.Create( dependencySmallKey ) );
 
-                CacheItem cacheItem = new CacheItem("v",
-                                                      ImmutableList.Create(dependencySmallKey),
-                                                      new CacheItemConfiguration { AbsoluteExpiration = offset });
+            await cache.SetItemAsync( valueSmallKey, expiringCacheItem );
 
-                await cache.SetItemAsync(valueSmallKey, cacheItem);
+            Assert.True( await cache.Database.KeyExistsAsync( valueKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
 
-                Assert.True(await cache.Database.KeyExistsAsync(valueKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependenciesKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependencyKey));
+            await Task.Delay( this.GetExpirationTolerance( 2 ) );
 
-                collector.NotificationQueue.ResumeProcessing();
+            Assert.False( await cache.Database.KeyExistsAsync( valueKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
 
-                Assert.True( await itemExpiredEvent.Task.WithTimeout( TimeoutTimeSpan ));
+            await cache.SetItemAsync( valueSmallKey, nonExpiringCacheItem );
 
-                await Task.Delay(this.GetExpirationTolerance(2));
+            Assert.True( await cache.Database.KeyExistsAsync( valueKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
 
-                Assert.False(await cache.Database.KeyExistsAsync(valueKey));
-                Assert.False(await cache.Database.KeyExistsAsync(dependenciesKey));
-                Assert.False(await cache.Database.KeyExistsAsync(dependencyKey));
+            collector.NotificationQueue.ResumeProcessing();
 
-                await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
-            }
+            Assert.True( await cache.Database.KeyExistsAsync( valueKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
+            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
+
+            await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
         }
+    }
 
-        [Fact(Timeout = Timeout, Skip = "Ignore Redis" )]
-        public async Task TestSetBeforeGarbageCollectionByExpiration()
+    [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
+    public async Task TestCleanUp()
+    {
+        var keyPrefix = this.GeneratePrefix();
+
+        using ( var redisCachingBackend = this.CreateBackend( keyPrefix ) )
+        using ( DependenciesRedisCachingBackend cache = (DependenciesRedisCachingBackend) redisCachingBackend.UnderlyingBackend )
         {
-            string keyPrefix = this.GeneratePrefix();
+            cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+            cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+            cache.SetItem( "i3", new CacheItem( "value" ) );
 
-            using (DisposingRedisCachingBackend cache = await this.CreateBackendAsync(keyPrefix))
-            using (RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync(cache.Connection, null))
-            {
-                const string valueSmallKey = "i";
-                const string dependencySmallKey = "d";
-                TimeSpan offset = this.GetExpirationTolerance();
+            cache.Database.ListRightPush( GetValueKey( cache, "lonely-value-key" ), new RedisValue[] { Guid.NewGuid().ToString(), "value" } );
+            cache.Database.StringSet( GetDependenciesKey( cache, "lonely-dependencies-key1" ), "non-existing-value-key1" );
+            cache.Database.StringSet( GetDependenciesKey( cache, "lonely-dependencies-key2" ), "" );
+            cache.Database.SetAdd( GetDependencyKey( cache, "lonely-dependency-key" ), "non-existing-value-key2" );
 
-                RedisKeyBuilder keyBuilder = new RedisKeyBuilder(cache.Database, cache.Configuration);
+            cache.Database.ListRightPush(
+                GetValueKey( cache, "non-corresponding-version-key" ),
+                new RedisValue[] { "non-corresponding-version1", "value" } );
 
-                string valueKey = keyBuilder.GetValueKey(valueSmallKey);
-                string dependenciesKey = keyBuilder.GetDependenciesKey(valueSmallKey);
-                string dependencyKey = keyBuilder.GetDependencyKey(dependencySmallKey);
+            cache.Database.StringSet(
+                GetDependenciesKey( cache, "non-corresponding-version-key" ),
+                "non-corresponding-version2\nnon-corresponding-version-dependency-key" );
 
+            cache.Database.SetAdd( GetDependencyKey( cache, "non-corresponding-version-dependency-key" ), "non-corresponding-version-key" );
 
+            Assert.True( ValueSmallKeyExists( cache, "i1" ) );
+            Assert.True( DependenciesSmallKeyExists( cache, "i1" ) );
+            Assert.True( ValueSmallKeyExists( cache, "i2" ) );
+            Assert.True( DependenciesSmallKeyExists( cache, "i2" ) );
+            Assert.True( ValueSmallKeyExists( cache, "i3" ) );
+            Assert.False( DependenciesSmallKeyExists( cache, "i3" ) );
 
-                collector.NotificationQueue.SuspendProcessing();
+            Assert.True( ValueSmallKeyExists( cache, "lonely-value-key" ) );
+            Assert.True( DependenciesSmallKeyExists( cache, "lonely-dependencies-key1" ) );
+            Assert.True( DependenciesSmallKeyExists( cache, "lonely-dependencies-key2" ) );
+            Assert.False( ValueSmallKeyExists( cache, "non-existing-value-key1" ) );
+            Assert.False( ValueSmallKeyExists( cache, "non-existing-value-key2" ) );
 
-                
-                CacheItem expiringCacheItem = new CacheItem("v",
-                                                             ImmutableList.Create(dependencySmallKey),
-                                                             new CacheItemConfiguration { AbsoluteExpiration = offset });
+            Assert.True( ValueSmallKeyExists( cache, "non-corresponding-version-key" ) );
+            Assert.True( DependenciesSmallKeyExists( cache, "non-corresponding-version-key" ) );
 
-                CacheItem nonExpiringCacheItem = new CacheItem("v",
-                                                                ImmutableList.Create(dependencySmallKey));
+            Assert.True( DependencySmallKeyExists( cache, "d1" ) );
+            Assert.True( DependencySmallKeyExists( cache, "d2" ) );
+            Assert.True( DependencySmallKeyExists( cache, "d3" ) );
 
-                await cache.SetItemAsync(valueSmallKey, expiringCacheItem);
+            Assert.True( DependencySmallKeyExists( cache, "lonely-dependency-key" ) );
 
-                Assert.True(await cache.Database.KeyExistsAsync(valueKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependenciesKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependencyKey));
+            Assert.True( DependencySmallKeyExists( cache, "non-corresponding-version-dependency-key" ) );
 
-                await Task.Delay(this.GetExpirationTolerance(2));
+            await cache.CleanUpAsync();
 
-                Assert.False(await cache.Database.KeyExistsAsync(valueKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependenciesKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependencyKey));
+            Assert.NotNull( cache.GetItem( "i1" ) );
+            Assert.NotNull( cache.GetItem( "i2" ) );
+            Assert.NotNull( cache.GetItem( "i3" ) );
 
-                await cache.SetItemAsync(valueSmallKey, nonExpiringCacheItem);
+            Assert.True( ValueSmallKeyExists( cache, "i1" ) );
+            Assert.True( DependenciesSmallKeyExists( cache, "i1" ) );
+            Assert.True( ValueSmallKeyExists( cache, "i2" ) );
+            Assert.True( DependenciesSmallKeyExists( cache, "i2" ) );
+            Assert.True( ValueSmallKeyExists( cache, "i3" ) );
+            Assert.False( DependenciesSmallKeyExists( cache, "i3" ) );
 
-                Assert.True(await cache.Database.KeyExistsAsync(valueKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependenciesKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependencyKey));
+            Assert.False( ValueSmallKeyExists( cache, "lonely-value-key" ) );
+            Assert.False( DependenciesSmallKeyExists( cache, "lonely-dependencies-key1" ) );
+            Assert.False( DependenciesSmallKeyExists( cache, "lonely-dependencies-key2" ) );
+            Assert.False( ValueSmallKeyExists( cache, "non-existing-value-key1" ) );
+            Assert.False( ValueSmallKeyExists( cache, "non-existing-value-key2" ) );
 
-                collector.NotificationQueue.ResumeProcessing();
-                
-                Assert.True(await cache.Database.KeyExistsAsync(valueKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependenciesKey));
-                Assert.True(await cache.Database.KeyExistsAsync(dependencyKey));
+            Assert.False( ValueSmallKeyExists( cache, "non-corresponding-version-key" ) );
+            Assert.False( DependenciesSmallKeyExists( cache, "non-corresponding-version-key" ) );
 
-                await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
-            }
+            Assert.True( DependencySmallKeyExists( cache, "d1" ) );
+            Assert.True( DependencySmallKeyExists( cache, "d2" ) );
+            Assert.True( DependencySmallKeyExists( cache, "d3" ) );
+
+            Assert.False( DependencySmallKeyExists( cache, "lonely-dependency-key" ) );
+
+            Assert.False( DependencySmallKeyExists( cache, "non-corresponding-version-dependency-key" ) );
+
+            await TestableCachingComponentDisposer.DisposeAsync( cache );
         }
+    }
 
-        [Fact(Timeout = Timeout, Skip = "Ignore Redis" )]
-        public async Task TestCleanUp()
+    private static string GetValueKey( DependenciesRedisCachingBackend cache, string smallKey )
+    {
+        return cache.Configuration.KeyPrefix + ":value:" + smallKey;
+    }
+
+    private static string GetDependenciesKey( DependenciesRedisCachingBackend cache, string smallKey )
+    {
+        return cache.Configuration.KeyPrefix + ":dependencies:" + smallKey;
+    }
+
+    private static string GetDependencyKey( DependenciesRedisCachingBackend cache, string smallKey )
+    {
+        return cache.Configuration.KeyPrefix + ":dependency:" + smallKey;
+    }
+
+    private static bool ValueSmallKeyExists( DependenciesRedisCachingBackend cache, string valueSmallKey )
+    {
+        return cache.Database.KeyExists( GetValueKey( cache, valueSmallKey ) );
+    }
+
+    private static bool DependenciesSmallKeyExists( DependenciesRedisCachingBackend cache, string valueSmallKey )
+    {
+        return cache.Database.KeyExists( GetDependenciesKey( cache, valueSmallKey ) );
+    }
+
+    private static bool DependencySmallKeyExists( DependenciesRedisCachingBackend cache, string valueSmallKey )
+    {
+        return cache.Database.KeyExists( GetDependencyKey( cache, valueSmallKey ) );
+    }
+
+    private IList<string> GetAllKeys( string prefix )
+    {
+        using ( var connection = RedisFactory.CreateConnection( this.TestContext ) )
         {
-            string keyPrefix = this.GeneratePrefix();
+            List<IServer> servers = connection.Inner.GetEndPoints().Select( endpoint => connection.Inner.GetServer( endpoint ) ).ToList();
+            List<RedisKey> keys = servers.SelectMany( server => server.Keys( pattern: prefix + ":*" ) ).ToList();
 
-            using ( DisposingRedisCachingBackend redisCachingBackend = this.CreateBackend(keyPrefix))
-            using ( DependenciesRedisCachingBackend cache = (DependenciesRedisCachingBackend)redisCachingBackend.UnderlyingBackend )
-            {
-                cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-                cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-                cache.SetItem( "i3", new CacheItem( "value" ) );
-
-                cache.Database.ListRightPush( GetValueKey( cache, "lonely-value-key" ), new RedisValue[] {Guid.NewGuid().ToString(), "value"} );
-                cache.Database.StringSet( GetDependenciesKey( cache, "lonely-dependencies-key1" ), "non-existing-value-key1" );
-                cache.Database.StringSet( GetDependenciesKey( cache, "lonely-dependencies-key2" ), "" );
-                cache.Database.SetAdd( GetDependencyKey( cache, "lonely-dependency-key" ), "non-existing-value-key2" );
-
-                cache.Database.ListRightPush( GetValueKey( cache, "non-corresponding-version-key" ), new RedisValue[] {"non-corresponding-version1", "value"} );
-                cache.Database.StringSet( GetDependenciesKey( cache, "non-corresponding-version-key" ),
-                                          "non-corresponding-version2\nnon-corresponding-version-dependency-key" );
-                cache.Database.SetAdd( GetDependencyKey( cache, "non-corresponding-version-dependency-key" ), "non-corresponding-version-key" );
-
-                Assert.True( ValueSmallKeyExists( cache, "i1" ) );
-                Assert.True( DependenciesSmallKeyExists( cache, "i1" ) );
-                Assert.True( ValueSmallKeyExists( cache, "i2" ) );
-                Assert.True( DependenciesSmallKeyExists( cache, "i2" ) );
-                Assert.True( ValueSmallKeyExists( cache, "i3" ) );
-                Assert.False( DependenciesSmallKeyExists( cache, "i3" ) );
-
-                Assert.True( ValueSmallKeyExists( cache, "lonely-value-key" ) );
-                Assert.True( DependenciesSmallKeyExists( cache, "lonely-dependencies-key1" ) );
-                Assert.True( DependenciesSmallKeyExists( cache, "lonely-dependencies-key2" ) );
-                Assert.False( ValueSmallKeyExists( cache, "non-existing-value-key1" ) );
-                Assert.False( ValueSmallKeyExists( cache, "non-existing-value-key2" ) );
-                
-                Assert.True( ValueSmallKeyExists( cache, "non-corresponding-version-key") );
-                Assert.True( DependenciesSmallKeyExists( cache, "non-corresponding-version-key" ) );
-
-                Assert.True( DependencySmallKeyExists( cache, "d1" ) );
-                Assert.True( DependencySmallKeyExists( cache, "d2" ) );
-                Assert.True( DependencySmallKeyExists( cache, "d3" ) );
-
-                Assert.True( DependencySmallKeyExists( cache, "lonely-dependency-key" ) );
-
-                Assert.True( DependencySmallKeyExists( cache, "non-corresponding-version-dependency-key" ) );
-
-                await cache.CleanUpAsync();
-
-                Assert.NotNull( cache.GetItem( "i1" ) );
-                Assert.NotNull( cache.GetItem( "i2" ) );
-                Assert.NotNull( cache.GetItem( "i3" ) );
-
-                Assert.True( ValueSmallKeyExists( cache, "i1" ) );
-                Assert.True( DependenciesSmallKeyExists( cache, "i1" ) );
-                Assert.True( ValueSmallKeyExists( cache, "i2" ) );
-                Assert.True( DependenciesSmallKeyExists( cache, "i2" ) );
-                Assert.True( ValueSmallKeyExists( cache, "i3" ) );
-                Assert.False( DependenciesSmallKeyExists( cache, "i3" ) );
-
-                Assert.False( ValueSmallKeyExists( cache, "lonely-value-key" ) );
-                Assert.False( DependenciesSmallKeyExists( cache, "lonely-dependencies-key1" ) );
-                Assert.False( DependenciesSmallKeyExists( cache, "lonely-dependencies-key2" ) );
-                Assert.False( ValueSmallKeyExists( cache, "non-existing-value-key1" ) );
-                Assert.False( ValueSmallKeyExists( cache, "non-existing-value-key2" ) );
-
-                Assert.False( ValueSmallKeyExists( cache, "non-corresponding-version-key" ) );
-                Assert.False( DependenciesSmallKeyExists( cache, "non-corresponding-version-key" ) );
-
-                Assert.True( DependencySmallKeyExists( cache, "d1" ) );
-                Assert.True( DependencySmallKeyExists( cache, "d2" ) );
-                Assert.True( DependencySmallKeyExists( cache, "d3" ) );
-
-                Assert.False( DependencySmallKeyExists( cache, "lonely-dependency-key" ) );
-
-                Assert.False( DependencySmallKeyExists( cache, "non-corresponding-version-dependency-key" ) );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
-            }
+            return keys.Select( k => k.ToString() ).Where( k => !k.Contains( ":gc:" ) ).ToList();
         }
-
-        private static string GetValueKey( DependenciesRedisCachingBackend cache, string smallKey )
-        {
-            return cache.Configuration.KeyPrefix + ":value:" + smallKey;
-        }
-
-        private static string GetDependenciesKey( DependenciesRedisCachingBackend cache, string smallKey )
-        {
-            return cache.Configuration.KeyPrefix + ":dependencies:" + smallKey;
-        }
-
-        private static string GetDependencyKey( DependenciesRedisCachingBackend cache, string smallKey )
-        {
-            return cache.Configuration.KeyPrefix + ":dependency:" + smallKey;
-        }
-
-        private static bool ValueSmallKeyExists( DependenciesRedisCachingBackend cache, string valueSmallKey )
-        {
-            return cache.Database.KeyExists( GetValueKey( cache, valueSmallKey ) );
-        }
-
-        private static bool DependenciesSmallKeyExists( DependenciesRedisCachingBackend cache, string valueSmallKey )
-        {
-            return cache.Database.KeyExists( GetDependenciesKey( cache, valueSmallKey ) );
-        }
-
-        private static bool DependencySmallKeyExists( DependenciesRedisCachingBackend cache, string valueSmallKey )
-        {
-            return cache.Database.KeyExists( GetDependencyKey( cache, valueSmallKey ) );
-        }
-
-        private IList<string> GetAllKeys( string prefix )
-        {
-            using ( DisposingConnectionMultiplexer connection = RedisFactory.CreateConnection(this.TestContext) )
-            {
-                List<IServer> servers = connection.Inner.GetEndPoints().Select(endpoint => connection.Inner.GetServer(endpoint)).ToList();
-                List<RedisKey> keys = servers.SelectMany(server => server.Keys(pattern: prefix + ":*")).ToList();
-                return keys.Select(k => k.ToString()).Where(k => !k.Contains(":gc:")).ToList();
-
-            }
-        }
-
     }
 }

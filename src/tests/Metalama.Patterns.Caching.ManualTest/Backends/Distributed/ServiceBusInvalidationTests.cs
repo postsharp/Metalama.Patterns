@@ -1,4 +1,6 @@
-﻿// TODO: #if WINDOWS_AZURE_LEGACY_API
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+// TODO: #if WINDOWS_AZURE_LEGACY_API
 
 #if WINDOWS_AZURE_LEGACY_API
 using System;

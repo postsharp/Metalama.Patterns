@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Xunit;
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Caching.Implementation;
 using System;
@@ -11,41 +13,37 @@ using System.Threading;
 using System.Threading.Tasks;
 using Metalama.Patterns.Caching.Backends;
 
-namespace Metalama.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends;
+
+public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
 {
-    public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
+    protected BaseInvalidationBrokerTests( TestContext testContext ) : base( testContext ) { }
+
+    protected abstract Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix );
+
+    protected abstract CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix );
+
+    protected override async Task<CachingBackend[]> CreateBackendsAsync()
     {
-        protected BaseInvalidationBrokerTests( TestContext testContext ) : base( testContext )
+        var testId = Guid.NewGuid().ToString();
+
+        return new[]
         {
-        }
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_1" ) ), testId ),
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_2" ) ), testId ),
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_3" ) ), testId )
+        };
+    }
 
-        protected abstract Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix );
-        protected abstract CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix );
+    protected override CachingBackend[] CreateBackends()
+    {
+        var testId = Guid.NewGuid().ToString();
 
-        protected override async Task<CachingBackend[]> CreateBackendsAsync()
+        return new[]
         {
-            string testId = Guid.NewGuid().ToString();
-
-
-            return new[]
-                   {
-                       await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_1" ) ), testId ),
-                       await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_2" ) ), testId ),
-                       await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_3" ) ), testId )
-                   };
-        }
-
-        protected override CachingBackend[] CreateBackends()
-        {
-            string testId = Guid.NewGuid().ToString();
-
-
-            return new[]
-                   {
-                        this.CreateInvalidationBroker( new MemoryCachingBackend( new MemoryCache( "_1" ) ), testId ),
-                       this.CreateInvalidationBroker( new MemoryCachingBackend( new MemoryCache( "_2" ) ), testId ),
-                       this.CreateInvalidationBroker( new MemoryCachingBackend( new MemoryCache( "_3" ) ), testId )
-                   };
-        }
+            this.CreateInvalidationBroker( new MemoryCachingBackend( new MemoryCache( "_1" ) ), testId ),
+            this.CreateInvalidationBroker( new MemoryCachingBackend( new MemoryCache( "_2" ) ), testId ),
+            this.CreateInvalidationBroker( new MemoryCachingBackend( new MemoryCache( "_3" ) ), testId )
+        };
     }
 }

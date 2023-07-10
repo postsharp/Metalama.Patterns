@@ -1,4 +1,6 @@
-﻿using Metalama.Patterns.Caching.Tests.Backends.Distributed;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,33 +12,30 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using StackExchange.Redis;
 using Metalama.Patterns.Caching.Backends;
 
-namespace Metalama.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends;
+
+public class RedisInvalidationTests : BaseInvalidationBrokerTests
 {
-    public class RedisInvalidationTests : BaseInvalidationBrokerTests
+    public RedisInvalidationTests( TestContext testContext ) : base( testContext ) { }
+
+    protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
     {
-        public RedisInvalidationTests( TestContext testContext ) : base( testContext )
-        {
-        }
+        return await RedisCacheInvalidator.CreateAsync(
+            backend,
+            RedisFactory.CreateConnection( this.TestContext ),
+            new RedisCacheInvalidatorOptions { Prefix = prefix, OwnsConnection = true } );
+    }
 
-        protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
-        {
-            return await RedisCacheInvalidator.CreateAsync(
-                backend,
-                RedisFactory.CreateConnection( this.TestContext ),
-                new RedisCacheInvalidatorOptions {Prefix = prefix, OwnsConnection = true} );
-        }
+    protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
+    {
+        return RedisCacheInvalidator.Create(
+            backend,
+            RedisFactory.CreateConnection( this.TestContext ),
+            new RedisCacheInvalidatorOptions { Prefix = prefix, OwnsConnection = true } );
+    }
 
-        protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
-        {
-            return RedisCacheInvalidator.Create(
-                backend,
-                RedisFactory.CreateConnection( this.TestContext ),
-                new RedisCacheInvalidatorOptions {Prefix = prefix, OwnsConnection = true} );
-        }
-
-        protected override void ConnectToRedisIfRequired()
-        {
-            RedisFactory.CreateTestInstance( this.TestContext );
-        }
+    protected override void ConnectToRedisIfRequired()
+    {
+        RedisFactory.CreateTestInstance( this.TestContext );
     }
 }
