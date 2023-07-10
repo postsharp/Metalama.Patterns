@@ -116,6 +116,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         var arrayBuilder = new ArrayBuilder( typeof( MethodInfo ) );
         foreach ( var method in invalidatedMethods.Keys )
         {
+            // TODO: Use ThrowIfMissing.
             arrayBuilder.Add( method.ToMethodInfo() );
         }
 
@@ -154,7 +155,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
     [Template]
     private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
-
+    
     [Template]
     public dynamic OverrideMethod( 
         IField logSourceField, 
