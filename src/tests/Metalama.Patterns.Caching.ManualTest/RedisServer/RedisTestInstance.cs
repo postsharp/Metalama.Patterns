@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Tests.Executables;
+using Metalama.Patterns.Caching.ManualTest.Executables;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Patterns.Caching.Tests;
+namespace Metalama.Patterns.Caching.ManualTest;
 
 #region Taken from github.com/poulfoged/redis-inside (no strong name in the distributed package).
 

@@ -10,7 +10,7 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 
-namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
 public class SimpleRedisDistributedTest : BaseDistributedCacheTests
 {

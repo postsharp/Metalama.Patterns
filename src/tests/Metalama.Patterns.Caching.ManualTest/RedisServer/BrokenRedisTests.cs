@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using System;
 using System.Net;
 using Xunit;
 using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Common.Tests.Helpers;
 using StackExchange.Redis;
 
-namespace Metalama.Patterns.Caching.Tests;
+namespace Metalama.Patterns.Caching.ManualTest;
 
 public class BrokenRedisTests
 {

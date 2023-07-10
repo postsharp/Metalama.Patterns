@@ -13,7 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Metalama.Patterns.Caching.Backends;
 
-namespace Metalama.Patterns.Caching.Tests.Backends;
+namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
 public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
 {

@@ -5,7 +5,7 @@ using Xunit;
 using Metalama.Patterns.Caching.Backends.Azure;
 using Metalama.Patterns.Caching.Implementation;
 
-namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
 public class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
 {

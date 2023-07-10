@@ -6,7 +6,7 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 
-namespace Metalama.Patterns.Caching.Tests;
+namespace Metalama.Patterns.Caching.ManualTest;
 
 public class RedisSetup
 {

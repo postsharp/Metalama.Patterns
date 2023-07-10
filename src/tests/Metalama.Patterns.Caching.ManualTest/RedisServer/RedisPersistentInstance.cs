@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Metalama.Patterns.Caching.Tests;
+namespace Metalama.Patterns.Caching.ManualTest;
 
 /// <summary>
 /// Maintains a single instance of a Redis server that's disposed only when all tests finish executing. That way, we don't spend time starting the server

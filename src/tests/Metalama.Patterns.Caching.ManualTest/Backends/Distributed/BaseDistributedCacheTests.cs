@@ -11,7 +11,7 @@ using Metalama.Patterns.Caching.TestHelpers.Shared;
 using Metalama.Patterns.Common.Tests.Helpers;
 using Metalama.Patterns.Diagnostics;
 
-namespace Metalama.Patterns.Caching.Tests.Backends;
+namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
 public abstract class BaseDistributedCacheTests
 {

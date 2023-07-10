@@ -6,6 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Metalama.Patterns.Caching.Tests.Executables;
+namespace Metalama.Patterns.Caching.ManualTest.Executables;
 
 internal interface ExecutablesResourceTarget { }

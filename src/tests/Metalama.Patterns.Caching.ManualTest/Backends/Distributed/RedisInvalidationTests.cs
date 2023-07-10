@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +10,9 @@ using Xunit;
 using Metalama.Patterns.Caching.Backends.Redis;
 using StackExchange.Redis;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
-namespace Metalama.Patterns.Caching.Tests.Backends;
+namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
 public class RedisInvalidationTests : BaseInvalidationBrokerTests
 {

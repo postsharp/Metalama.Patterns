@@ -16,7 +16,7 @@ using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 using StackExchange.Redis.Profiling;
 
-namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
 internal static class RedisFactory
 {
