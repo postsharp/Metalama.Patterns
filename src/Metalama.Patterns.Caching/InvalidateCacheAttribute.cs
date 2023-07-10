@@ -11,7 +11,6 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching;
 using System.Collections;
-using System.Reflection;
 using static Metalama.Patterns.Caching.CachingDiagnosticDescriptors.InvalidateCache;
 
 [assembly:AspectOrder(typeof(InvalidateCacheAttribute), typeof(CacheAttribute))]
@@ -120,7 +119,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         foreach ( var method in invalidatedMethods.Keys )
         {
             arrayBuilder.Add( method.ToMethodInfo() );
-        }        
+        }
 
         var methodsInvalidatedByFieldName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{3AB07EE4-9AB7-423C-810A-994D9BC620CA}", $"_methodsInvalidatedBy_{builder.Target.Name}" );
 
@@ -178,20 +177,19 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     //private static readonly MethodInfo[] _methodsInvalidatedBy = ((IExpression) meta.Tags["methodInfoArray"]!).Value;
 
     [Template]
-    public TReturn OverrideMethod<[CompileTime] TReturn>( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
+    public dynamic OverrideMethod( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
 #if !AVOID_METHODINFO_ARRAY
         , IField methodsInvalidatedByField
 #endif        
+        , IType TReturn /* not used */
         )
     {
-        TReturn result;
-
         using ( var activity = logSourceField.Value.Default.OpenActivity( 
             FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
         {
             try
             {                
-                result = meta.Proceed();
+                dynamic result = meta.Proceed();
 
                 var index = meta.CompileTime( 0 );
 
@@ -223,21 +221,22 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
 
     [Template]
-    public async Task<TReturn> OverrideMethodAsyncTaskOfT<[CompileTime] TReturn>( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
+    public async Task<dynamic> OverrideMethodAsyncTaskOfT( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
 #if !AVOID_METHODINFO_ARRAY
         , IField methodsInvalidatedByField
 #endif
+        , IType TReturn
         )
     {
         // TODO: Abstract to RunTime helper where possible.
 
         // TODO: Automagically accept CancellationToken parameter?
 
-        TReturn result;
-
         using ( var activity = logSourceField.Value.Default.OpenActivity(
             FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
         {
+            dynamic? result = TReturn.DefaultValue();
+
             try
             {
                 var task = meta.Proceed();
