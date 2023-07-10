@@ -1,9 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Threading.Tasks;
-using Xunit;
+#if NETSTANDARD || NETCOREAPP
+
 using Metalama.Patterns.Caching.Backends.Azure;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.TestHelpers;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
@@ -28,7 +31,7 @@ public class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
 
     private AzureCacheInvalidatorOptions2 CreateOptions()
     {
-        return new AzureCacheInvalidatorOptions2(
+        return new AzureCacheInvalidatorOptions2.NewSubscription(
             connectionString,
             clientId,
             secret,
@@ -44,3 +47,5 @@ public class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
         return AzureCacheInvalidator2.Create( backend, this.CreateOptions() );
     }
 }
+
+#endif

@@ -1,27 +1,25 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using Xunit;
-using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
+using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.TestHelpers.Backends;
 using StackExchange.Redis;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Metalama.Patterns.Caching.TestHelpers.Shared;
-using Metalama.Patterns.Common.Tests.Helpers;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
 public class RedisCacheBackendTests : BaseCacheBackendTests
 {
+    private readonly RedisSetupFixture _redisSetupFixture;
     private readonly ITestOutputHelper testOutputHelper;
 
-    public RedisCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext )
+    public RedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base( testContext )
     {
+        this._redisSetupFixture = redisSetupFixture;
         this.testOutputHelper = testOutputHelper;
     }
 
@@ -40,25 +38,25 @@ public class RedisCacheBackendTests : BaseCacheBackendTests
     {
         return await this.CreateBackendAsync( null );
     }
-
-    internal override ITestableCachingComponent CreateCollector( CachingBackend backend )
+    
+    protected override ITestableCachingComponent CreateCollector( CachingBackend backend )
     {
         return RedisCacheDependencyGarbageCollector.Create( ((DisposingRedisCachingBackend) backend).UnderlyingBackend );
     }
 
-    internal override async Task<ITestableCachingComponent> CreateCollectorAsync( CachingBackend backend )
+    protected override async Task<ITestableCachingComponent> CreateCollectorAsync( CachingBackend backend )
     {
         return await RedisCacheDependencyGarbageCollector.CreateAsync( ((DisposingRedisCachingBackend) backend).UnderlyingBackend );
     }
 
     private DisposingRedisCachingBackend CreateBackend( string keyPrefix )
     {
-        return RedisFactory.CreateBackend( this.TestContext, keyPrefix, supportsDependencies: true );
+        return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, keyPrefix, supportsDependencies: true );
     }
 
     private async Task<DisposingRedisCachingBackend> CreateBackendAsync( string keyPrefix )
     {
-        return await RedisFactory.CreateBackendAsync( this.TestContext, keyPrefix, supportsDependencies: true );
+        return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, keyPrefix, supportsDependencies: true );
     }
 
     private string GeneratePrefix()
@@ -73,12 +71,12 @@ public class RedisCacheBackendTests : BaseCacheBackendTests
     {
         var prefix = this.GeneratePrefix();
 
-        var redisTestInstance = RedisPersistentInstance.GetOrLaunchRedisInstance();
+        var redisTestInstance = _redisSetupFixture.TestInstance;
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
         Assert.Equal( 0, this.GetAllKeys( prefix ).Count );
 
-        using ( var cache = await RedisFactory.CreateBackendAsync( this.TestContext, prefix: prefix, supportsDependencies: true ) )
+        using ( var cache = await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix: prefix, supportsDependencies: true ) )
         using ( RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
         {
             cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );

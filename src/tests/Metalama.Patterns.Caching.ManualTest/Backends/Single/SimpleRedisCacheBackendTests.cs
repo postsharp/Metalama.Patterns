@@ -1,24 +1,23 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using Xunit;
-using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
-using StackExchange.Redis;
-using System.Threading;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Collections.Generic;
+using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.TestHelpers.Backends;
+using System;
 using System.Threading.Tasks;
-using Metalama.Patterns.Caching.ManualTest;
-using Metalama.Patterns.Common.Tests.Helpers;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
 public class SimpleRedisCacheBackendTests : BaseCacheBackendTests
 {
-    public SimpleRedisCacheBackendTests( TestContext testContext ) : base( testContext ) { }
+    private readonly RedisSetupFixture _redisSetupFixture;
+
+    public SimpleRedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture ) : base( testContext )
+    {
+        this._redisSetupFixture = redisSetupFixture;
+    }
 
     protected override void Cleanup()
     {
@@ -45,12 +44,12 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests
 
     private CachingBackend CreateBackend( string keyPrefix )
     {
-        return RedisFactory.CreateBackend( this.TestContext, keyPrefix );
+        return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, keyPrefix );
     }
 
     private async Task<CachingBackend> CreateBackendAsync( string keyPrefix )
     {
-        return await RedisFactory.CreateBackendAsync( this.TestContext, keyPrefix );
+        return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, keyPrefix );
     }
 
     private string GeneratePrefix()

@@ -1,19 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// TODO: #if WINDOWS_AZURE_LEGACY_API
+#if NETFRAMEWORK
 
-#if WINDOWS_AZURE_LEGACY_API
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Implementation;
-using Xunit;
-using PostSharp.Patterns.Caching.Backends;
-using PostSharp.Patterns.Caching.Backends.Azure;
+using Metalama.Patterns.Caching.Backends.Azure;
+using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.TestHelpers;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.ManualTest.Backends
 {
     public class ServiceBusInvalidationTests : BaseInvalidationBrokerTests
     {
@@ -26,21 +19,20 @@ namespace PostSharp.Patterns.Caching.Tests.Backends
 
         protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
         {
-            return await AzureCacheInvalidator.CreateAsync( backend, new AzureCacheInvalidatorOptions
+            return await AzureCacheInvalidator.CreateAsync( backend, new AzureCacheInvalidatorOptions( connectionString )
                                                        {
-                                                           ConnectionString = connectionString,
                                                            Prefix = prefix
                                                        } );
         }
 
         protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
         {
-            return AzureCacheInvalidator.Create( backend, new AzureCacheInvalidatorOptions
+            return AzureCacheInvalidator.Create( backend, new AzureCacheInvalidatorOptions( connectionString )
                                                                      {
-                                                                         ConnectionString = connectionString,
                                                                          Prefix = prefix
                                                                      } );
         }
     }
 }
+
 #endif

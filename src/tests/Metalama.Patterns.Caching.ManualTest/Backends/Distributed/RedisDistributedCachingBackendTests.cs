@@ -1,19 +1,20 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
-using StackExchange.Redis;
+using Metalama.Patterns.Caching.TestHelpers;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
-public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests
+public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IAssemblyFixture<RedisSetupFixture>
 {
-    public RedisDistributedCachingBackendTests( TestContext testContext ) : base( testContext ) { }
+    private readonly RedisSetupFixture _redisSetupFixture;
+
+    public RedisDistributedCachingBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture ) : base( testContext ) 
+    {
+        this._redisSetupFixture = redisSetupFixture;
+    }
 
     protected override async Task<CachingBackend[]> CreateBackendsAsync()
     {
@@ -21,8 +22,8 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests
 
         return new[]
         {
-            await RedisFactory.CreateBackendAsync( this.TestContext, prefix, supportsDependencies: true ),
-            await RedisFactory.CreateBackendAsync( this.TestContext, prefix, supportsDependencies: true )
+            await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true ),
+            await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true )
         };
     }
 
@@ -32,14 +33,14 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests
 
         return new[]
         {
-            RedisFactory.CreateBackend( this.TestContext, prefix, supportsDependencies: true ),
-            RedisFactory.CreateBackend( this.TestContext, prefix, supportsDependencies: true )
+            RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true ),
+            RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true )
         };
     }
 
     protected override void ConnectToRedisIfRequired()
     {
-        var redisTestInstance = RedisPersistentInstance.GetOrLaunchRedisInstance();
+        var redisTestInstance = this._redisSetupFixture.TestInstance;
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
     }
 }

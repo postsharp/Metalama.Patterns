@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectCapability Remove="TestContainer"/>
+    <ProjectCapability Remove="TestContainer" />
   </ItemGroup>
 
   <ItemGroup>

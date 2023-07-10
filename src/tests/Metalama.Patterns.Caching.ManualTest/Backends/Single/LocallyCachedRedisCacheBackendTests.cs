@@ -1,22 +1,23 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Threading.Tasks;
-using Xunit;
-using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Caching.Backends.Redis;
-using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Caching.TestHelpers.Shared;
-using StackExchange.Redis;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
-using Metalama.Patterns.Common.Tests.Helpers;
+using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.TestHelpers.Backends;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
 public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests
 {
-    public LocallyCachedRedisCacheBackendTests( TestContext testContext ) : base( testContext ) { }
+    private readonly RedisSetupFixture _redisSetupFixture;
+
+    public LocallyCachedRedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture ) : base( testContext )
+    {
+        this._redisSetupFixture = redisSetupFixture;
+    }
 
     protected override void Cleanup()
     {
@@ -31,15 +32,15 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests
 
     protected override CachingBackend CreateBackend()
     {
-        return RedisFactory.CreateBackend( this.TestContext, supportsDependencies: true, locallyCached: true );
+        return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
     }
 
     protected override async Task<CachingBackend> CreateBackendAsync()
     {
-        return await RedisFactory.CreateBackendAsync( this.TestContext, supportsDependencies: true, locallyCached: true );
+        return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
     }
-
-    internal override ITestableCachingComponent CreateCollector( CachingBackend backend )
+    
+    protected override ITestableCachingComponent CreateCollector( CachingBackend backend )
     {
         return RedisCacheDependencyGarbageCollector.Create( backend );
     }
@@ -67,11 +68,11 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests
         TestProfileConfigurationFactory.InitializeTestWithoutBackend();
 
         CachedValueClass setValue;
-        var redisTestInstance = RedisPersistentInstance.GetOrLaunchRedisInstance();
+        var redisTestInstance = this._redisSetupFixture.TestInstance;
 
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend( this.TestContext, prefix: redisKeyPrefix, locallyCached: false ) )
+        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix: redisKeyPrefix, locallyCached: false ) )
         {
             try
             {
@@ -84,7 +85,7 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests
             }
         }
 
-        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend( this.TestContext, prefix: redisKeyPrefix, locallyCached: true ) )
+        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix: redisKeyPrefix, locallyCached: true ) )
         {
             try
             {

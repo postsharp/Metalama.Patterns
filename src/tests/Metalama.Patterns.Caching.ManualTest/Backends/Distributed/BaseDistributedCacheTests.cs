@@ -1,15 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Caching.TestHelpers.Shared;
-using Metalama.Patterns.Common.Tests.Helpers;
-using Metalama.Patterns.Diagnostics;
+using Metalama.Patterns.Caching.TestHelpers;
+using System.Collections.Immutable;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 

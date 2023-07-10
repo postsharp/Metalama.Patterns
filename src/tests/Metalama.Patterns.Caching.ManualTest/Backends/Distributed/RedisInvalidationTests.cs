@@ -1,22 +1,21 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Metalama.Patterns.Caching.Implementation;
-using Xunit;
 using Metalama.Patterns.Caching.Backends.Redis;
-using StackExchange.Redis;
-using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
+using Metalama.Patterns.Caching.TestHelpers;
+using System.Threading.Tasks;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
 public class RedisInvalidationTests : BaseInvalidationBrokerTests
 {
-    public RedisInvalidationTests( TestContext testContext ) : base( testContext ) { }
+    private readonly RedisSetupFixture _redisSetupFixture;
+
+    public RedisInvalidationTests( TestContext testContext, RedisSetupFixture redisSetupFixture ) : base( testContext )
+    {
+        this._redisSetupFixture = redisSetupFixture;
+    }
 
     protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
     {
@@ -36,6 +35,6 @@ public class RedisInvalidationTests : BaseInvalidationBrokerTests
 
     protected override void ConnectToRedisIfRequired()
     {
-        RedisFactory.CreateTestInstance( this.TestContext );
+        RedisFactory.CreateTestInstance( this.TestContext, this._redisSetupFixture );
     }
 }

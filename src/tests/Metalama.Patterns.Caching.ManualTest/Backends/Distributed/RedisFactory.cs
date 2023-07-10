@@ -1,32 +1,23 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.TestHelpers;
 using StackExchange.Redis;
 using StackExchange.Redis.Profiling;
+using System.Net;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
 internal static class RedisFactory
 {
-    public static RedisTestInstance CreateTestInstance( TestContext testContext )
+    public static RedisTestInstance CreateTestInstance( TestContext testContext, RedisSetupFixture redisSetupFixture )
     {
         RedisTestInstance redisTestInstance = null;
 
         if ( !testContext.Properties.Contains( "RedisEndpoint" ) )
         {
-            redisTestInstance = RedisPersistentInstance.GetOrLaunchRedisInstance();
+            redisTestInstance = redisSetupFixture.TestInstance;
             testContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
         }
 
@@ -35,11 +26,12 @@ internal static class RedisFactory
 
     public static DisposingRedisCachingBackend CreateBackend(
         TestContext testContext,
+        RedisSetupFixture redisSetupFixture,
         string prefix = null,
         bool supportsDependencies = false,
         bool locallyCached = false )
     {
-        var redisTestInstance = CreateTestInstance( testContext );
+        var redisTestInstance = CreateTestInstance( testContext, redisSetupFixture );
 
         RedisCachingBackendConfiguration configuration =
             new RedisCachingBackendConfiguration
@@ -71,6 +63,7 @@ internal static class RedisFactory
 
     public static async Task<DisposingRedisCachingBackend> CreateBackendAsync(
         TestContext testContext,
+        RedisSetupFixture redisSetupFixture,
         string prefix = null,
         bool supportsDependencies = false,
         bool locallyCached = false )
@@ -79,7 +72,7 @@ internal static class RedisFactory
 
         if ( !testContext.Properties.Contains( "RedisEndpoint" ) )
         {
-            redisTestInstance = RedisPersistentInstance.GetOrLaunchRedisInstance();
+            redisTestInstance = redisSetupFixture.TestInstance;
             testContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
         }
 

@@ -24,7 +24,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     private readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(RedisCacheDependencyGarbageCollector) );
     private RedisKeyBuilder _keyBuilder = null!; // "Guaranteed" to be initialized via Init et al.
 
-    private RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
+    internal RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
 
     private readonly bool _ownsBackend;
     private readonly DependenciesRedisCachingBackend _backend;

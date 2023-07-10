@@ -35,13 +35,13 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
 
         protected virtual void GiveChanceToResetLocalCache( CachingBackend backend ) { }
 
-        internal virtual ITestableCachingComponent CreateCollector( CachingBackend backend )
+        protected virtual ITestableCachingComponent CreateCollector( CachingBackend backend )
         {
             // Return anything disposable.
             return new NullTestableCachingComponent();
         }
 
-        internal virtual Task<ITestableCachingComponent> CreateCollectorAsync( CachingBackend backend )
+        protected virtual Task<ITestableCachingComponent> CreateCollectorAsync( CachingBackend backend )
         {
             // Return anything disposable.
             return Task.FromResult( this.CreateCollector( backend ) );
