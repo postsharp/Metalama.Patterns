@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Patterns.Caching.Implementation;
 

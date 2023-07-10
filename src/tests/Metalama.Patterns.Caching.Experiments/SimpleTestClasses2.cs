@@ -25,4 +25,10 @@ public static class S_Int_WithInvalidator
     public static void Invalidate( int x )
     {
     }
+
+    [InvalidateCache( nameof( TimesTwo ) )]
+    public static string Invalidate( int x, string msg )
+    {
+        return msg;
+    }
 }

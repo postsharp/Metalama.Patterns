@@ -9,6 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TaskDuckTemplating.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TaskDuckTemplating.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
   </ItemGroup>
 

@@ -1,7 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#define AVOID_METHODINFO_ARRAY
-
 using Flashtrace;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
@@ -10,7 +8,9 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching;
+using Metalama.Patterns.Caching.Implementation;
 using System.Collections;
+using System.Reflection;
 using static Metalama.Patterns.Caching.CachingDiagnosticDescriptors.InvalidateCache;
 
 [assembly:AspectOrder(typeof(InvalidateCacheAttribute), typeof(CacheAttribute))]
@@ -113,8 +113,6 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             ? builder.Target.DeclaringType.Fields.Single( f => f.Name == logSourceFieldName )
             : logSourceFieldAdviceResult.Declaration;
 
-#if !AVOID_METHODINFO_ARRAY
-
         var arrayBuilder = new ArrayBuilder( typeof( MethodInfo ) );
         foreach ( var method in invalidatedMethods.Keys )
         {
@@ -135,20 +133,6 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 b.InitializerExpression = arrayBuilder.ToExpression();
             } );
 
-#if false
-        var methodsInvalidatedByField = builder.Advice.IntroduceField(
-            builder.Target.DeclaringType,
-            nameof( _methodsInvalidatedBy ),
-            IntroductionScope.Static,
-            OverrideStrategy.Ignore,
-            b => b.Name = methodsInvalidatedByFieldName,
-            tags: new 
-            {
-                methodInfoArray = arrayBuilder.ToExpression() 
-            } );
-#endif
-#endif
-
         var asyncInfo = builder.Target.GetAsyncInfo();
 
         var templates = new MethodTemplateSelector(
@@ -163,9 +147,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             {
                 TReturn = asyncInfo.IsAwaitable ? asyncInfo.ResultType : builder.Target.ReturnType,
                 logSourceField = logSourceField,
-#if !AVOID_METHODINFO_ARRAY
                 methodsInvalidatedByField = methodsInvalidatedByField.Declaration,
-#endif
                 invalidatedMethods = invalidatedMethods.Values
             } );
     }
@@ -173,16 +155,12 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     [Template]
     private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
 
-    //[Template]
-    //private static readonly MethodInfo[] _methodsInvalidatedBy = ((IExpression) meta.Tags["methodInfoArray"]!).Value;
-
     [Template]
-    public dynamic OverrideMethod( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
-#if !AVOID_METHODINFO_ARRAY
-        , IField methodsInvalidatedByField
-#endif        
-        , IType TReturn /* not used */
-        )
+    public dynamic OverrideMethod( 
+        IField logSourceField, 
+        IEnumerable<InvalidatedMethodInfo> invalidatedMethods, 
+        IField methodsInvalidatedByField,
+        IType TReturn /* not used */ )
     {
         using ( var activity = logSourceField.Value.Default.OpenActivity( 
             FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
@@ -196,12 +174,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
                     CachingServices.Invalidation.Invalidate(
-#if AVOID_METHODINFO_ARRAY
-                        // TODO: !!! Remove when array of ToMethodInfo() is working.
-                        invalidatedMethod.Method.ToMethodInfo(),
-#else
-                        methodsInvalidatedByField.Value![index],
-#endif
+                        methodsInvalidatedByField.Value[index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
 
@@ -221,12 +194,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
 
     [Template]
-    public async Task<dynamic> OverrideMethodAsyncTaskOfT( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods
-#if !AVOID_METHODINFO_ARRAY
-        , IField methodsInvalidatedByField
-#endif
-        , IType TReturn
-        )
+    public async Task<dynamic> OverrideMethodAsyncTaskOfT(
+        IField logSourceField,
+        IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
+        IField methodsInvalidatedByField,
+        IType TReturn )
     {
         // TODO: Abstract to RunTime helper where possible.
 
@@ -268,12 +240,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
                     task2 = CachingServices.Invalidation.InvalidateAsync(
-#if AVOID_METHODINFO_ARRAY
-                        // TODO: !!! Remove when array of ToMethodInfo() is working.
-                        invalidatedMethod.Method.ToMethodInfo(),
-#else
-                        methodsInvalidatedByField.Value![index],
-#endif
+                        methodsInvalidatedByField.Value[index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
 
@@ -308,11 +275,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
 
     [Template]
-    public async Task OverrideMethodAsyncTask( IField logSourceField, IEnumerable<InvalidatedMethodInfo> invalidatedMethods, IType TReturn /* not used */
-#if !AVOID_METHODINFO_ARRAY
-        , IField methodsInvalidatedByField
-#endif
-    )
+    public async Task OverrideMethodAsyncTask( 
+        IField logSourceField, 
+        IEnumerable<InvalidatedMethodInfo> invalidatedMethods, 
+        IField methodsInvalidatedByField, 
+        IType TReturn /* not used */ )
     {
         // TODO: Abstract to RunTime helper where possible.
 
@@ -352,12 +319,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
                     task2 = CachingServices.Invalidation.InvalidateAsync(
-#if AVOID_METHODINFO_ARRAY
-                        // TODO: !!! Remove when array of ToMethodInfo() is working.
-                        invalidatedMethod.Method.ToMethodInfo(),
-#else
-                        methodsInvalidatedByField.Value![index],
-#endif
+                        methodsInvalidatedByField.Value[index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
 
