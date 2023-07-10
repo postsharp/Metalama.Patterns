@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using Xunit;
 
-namespace Metalama.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.TestHelpers.Backends
 {
     public abstract class BaseCacheBackendTests : IDisposable, IClassFixture<TestContext>
     {

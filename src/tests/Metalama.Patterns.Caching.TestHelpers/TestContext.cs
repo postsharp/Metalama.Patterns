@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Metalama.Patterns.Caching.Tests
+namespace Metalama.Patterns.Caching.TestHelpers
 {
     public class TestContext
     {

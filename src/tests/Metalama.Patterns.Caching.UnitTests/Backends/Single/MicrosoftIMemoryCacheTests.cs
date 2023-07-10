@@ -2,7 +2,8 @@
 
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Caching.Tests.Backends;
+using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.TestHelpers.Backends;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Metalama.Patterns.Caching.Tests
