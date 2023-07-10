@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
-public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests
+public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 

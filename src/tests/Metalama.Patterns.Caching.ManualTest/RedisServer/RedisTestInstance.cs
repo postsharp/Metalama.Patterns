@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -17,6 +18,7 @@ namespace Metalama.Patterns.Caching.ManualTest;
 /// </summary>
 public class RedisTestInstance : IDisposable
 {
+    static int _instanceCounter;
     public static readonly ConcurrentBag<WeakReference<RedisTestInstance>> Instances = new();
     private readonly Process process;
     private readonly TemporaryFile executable;
@@ -26,9 +28,10 @@ public class RedisTestInstance : IDisposable
 
     public bool IsDisposed { get; private set; }
 
-    public RedisTestInstance( string name = null )
+    public RedisTestInstance( [CallerMemberName] string name = null )
     {
-        this.Name = name;
+        var counter = Interlocked.Increment( ref _instanceCounter );
+        this.Name = $"{counter}:{name}";
 
         Instances.Add( new WeakReference<RedisTestInstance>( this ) );
 

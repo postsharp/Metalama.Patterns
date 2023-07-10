@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
-public class RedisCacheBackendTests : BaseCacheBackendTests
+public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
     private readonly ITestOutputHelper testOutputHelper;

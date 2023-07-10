@@ -1,40 +1,34 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-    <PropertyGroup>
-        <RedisServerUrl>https://github.com/MicrosoftArchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.zip</RedisServerUrl>
-        <RedisArchivePath>$(MSBuildThisFileDirectory).temp\RedisServer.zip</RedisArchivePath>
-        <RedisServerDirectory>$(MSBuildThisFileDirectory).temp\RedisServer\</RedisServerDirectory>
-        <RedisServerExecutable>$(RedisServerDirectory)redis-server.exe</RedisServerExecutable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <RedisServerUrl>https://github.com/MicrosoftArchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.zip</RedisServerUrl>
+    <RedisArchivePath>$(MSBuildThisFileDirectory).temp\RedisServer.zip</RedisArchivePath>
+    <RedisServerDirectory>$(MSBuildThisFileDirectory).temp\RedisServer\</RedisServerDirectory>
+    <RedisServerExecutable>$(RedisServerDirectory)redis-server.exe</RedisServerExecutable>
+  </PropertyGroup>
 
-    <Target Name="DownloadRedisServer">
-       
-        <ItemGroup>
-            <Statement Include="$ProgressPreference = 'SilentlyContinue'" />
-            <Statement Include="[Net.ServicePointManager]::SecurityProtocol = 'Tls12, Tls11, Tls, Ssl3'" Condition="!Exists($(RedisArchivePath))" />
-            <Statement Include="Invoke-WebRequest '$(RedisServerUrl)' -outf '$(RedisArchivePath)'" Condition="!Exists($(RedisArchivePath))" />
-            <Statement Include="Expand-Archive -Path '$(RedisArchivePath)' -DestinationPath '$(RedisServerDirectory)'" />
-        </ItemGroup>
+  <Target Name="DownloadRedisServer">
 
-        <Exec Command="powershell -NonInteractive -Command &quot;@(Statement)&quot;" Condition="!Exists($(RedisServerExecutable))" />
+    <ItemGroup>
+      <Statement Include="$ProgressPreference = 'SilentlyContinue'" />
+      <Statement Include="[Net.ServicePointManager]::SecurityProtocol = 'Tls12, Tls11, Tls, Ssl3'" Condition="!Exists($(RedisArchivePath))" />
+      <Statement Include="Invoke-WebRequest '$(RedisServerUrl)' -outf '$(RedisArchivePath)'" Condition="!Exists($(RedisArchivePath))" />
+      <Statement Include="Expand-Archive -Path '$(RedisArchivePath)' -DestinationPath '$(RedisServerDirectory)'" />
+    </ItemGroup>
 
-        <OnError ExecuteTargets="PrintAdditionalErrorMessage" />
-    </Target>
+    <Exec Command="powershell -NonInteractive -Command &quot;@(Statement)&quot;" Condition="!Exists($(RedisServerExecutable))" />
 
-    <Target 
-        Name="PrepareRedisTestServer"
-        DependsOnTargets="DownloadRedisServer"
-        BeforeTargets="Build"
-        Inputs="$(RedisArchivePath)" 
-        Outputs="$(RedisServerExecutable)">
+    <OnError ExecuteTargets="PrintAdditionalErrorMessage" />
+  </Target>
 
-        <ItemGroup>
-            <EmbeddedResource Include="$(RedisServerExecutable)">
-                <Link>Executables\redis-server.exe</Link>
-            </EmbeddedResource>
-        </ItemGroup> 
+  <Target
+      Name="PrepareRedisTestServer"
+      DependsOnTargets="DownloadRedisServer"
+      BeforeTargets="Build"
+      Inputs="$(RedisArchivePath)"
+      Outputs="$(RedisServerExecutable)">
 
-        <!-- Why bother?
+    <!-- Why bother?
         <Copy SourceFiles="$(RedisServerExecutable)" DestinationFolder="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)\redis-server.exe')" />
 
         <ItemGroup>
@@ -43,10 +37,17 @@
             </EmbeddedResource>
         </ItemGroup> 
         <OnError ExecuteTargets="PrintAdditionalErrorMessage" />
-        -->        
-    </Target>    
-    
-    <Target Name="PrintAdditionalErrorMessage">
-        <Error Text="Probably the powershell command downloading redis-server.exe failed. This sometimes happens. Run the build again." />
-    </Target>
+        -->
+  </Target>
+
+  <Target Name="PrintAdditionalErrorMessage">
+    <Error Text="Probably the powershell command downloading redis-server.exe failed. This sometimes happens. Run the build again." />
+  </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(RedisServerExecutable)">
+      <Link>Executables\redis-server.exe</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  
 </Project>

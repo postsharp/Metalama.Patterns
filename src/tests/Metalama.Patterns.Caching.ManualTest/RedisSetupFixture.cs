@@ -14,6 +14,7 @@ public sealed class RedisSetupFixture : IDisposable
 
     void IDisposable.Dispose() => this.RedisCleanup();
 
+    private readonly object _lock = new object();
     private RedisTestInstance? _testInstance;
 
     /// <summary>
@@ -23,7 +24,14 @@ public sealed class RedisSetupFixture : IDisposable
     {
         get
         {
-            this._testInstance ??= new RedisTestInstance();
+            lock ( this._lock )
+            {
+                this._testInstance ??= new RedisTestInstance( nameof( RedisSetupFixture ) );
+                if ( this._testInstance.IsDisposed )
+                {
+                    throw new ObjectDisposedException( nameof( RedisSetupFixture ) + "." + nameof( this.TestInstance ) );
+                }
+            }
             return this._testInstance;
         }
     }
@@ -33,10 +41,12 @@ public sealed class RedisSetupFixture : IDisposable
     /// </summary>
     private void RedisCleanup()
     {
-        if ( this._testInstance != null && !this._testInstance.IsDisposed )
+        lock ( this._lock )
         {
-            this._testInstance.Dispose();
-            this._testInstance = null;
+            if ( this._testInstance != null && !this._testInstance.IsDisposed )
+            {
+                this._testInstance.Dispose();
+            }
         }
 
         foreach ( var instanceWR in RedisTestInstance.Instances )
@@ -45,7 +55,7 @@ public sealed class RedisSetupFixture : IDisposable
             {
                 // The exception is silently ignored when the tests are run with Rider's Live Test Runner.
                 // If that's not the expected behavior, we should probably report it...
-                throw new Exception( $"RedisTestInstance {instance.Name} was not disposed." );
+                throw new Exception( $"RedisTestInstance '{instance.Name}' was not disposed." );
             }
         }
     }

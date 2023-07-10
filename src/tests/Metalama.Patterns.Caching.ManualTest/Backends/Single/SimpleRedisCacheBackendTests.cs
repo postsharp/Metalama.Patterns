@@ -7,10 +7,11 @@ using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.TestHelpers.Backends;
 using System;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
-public class SimpleRedisCacheBackendTests : BaseCacheBackendTests
+public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 

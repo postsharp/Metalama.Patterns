@@ -5,12 +5,15 @@
 using Metalama.Patterns.Caching.Backends.Azure;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
-public class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
+#if ENABLE_AZURE_TESTS
+public
+#else
+internal
+#endif
+class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
 {
     private const string connectionString =
         "Endpoint=sb://petrservicebusstandard.servicebus.windows.net/;SharedAccessKeyName=PetrSAS;SharedAccessKey=3C+I8BExn5AMRaxXJk4kTINM0f2uXCPWKtWAdmGgpQI=;EntityPath=petrtopic";

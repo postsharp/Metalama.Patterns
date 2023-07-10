@@ -5,10 +5,11 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
-public class RedisInvalidationTests : BaseInvalidationBrokerTests
+public class RedisInvalidationTests : BaseInvalidationBrokerTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 

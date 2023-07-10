@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends;
 
-public abstract class BaseDistributedCacheTests
+public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
 {
     private const int timeout = 120000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
     private static readonly TimeSpan timeouTimeSpan = TimeSpan.FromMilliseconds( timeout * 0.8 );

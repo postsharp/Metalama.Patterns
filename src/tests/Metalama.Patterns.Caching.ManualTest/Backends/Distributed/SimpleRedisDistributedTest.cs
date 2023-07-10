@@ -2,10 +2,11 @@
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
-public class SimpleRedisDistributedTest : BaseDistributedCacheTests
+public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFixture<RedisSetupFixture>
 {
     private RedisSetupFixture _redisSetupFixture;
 
