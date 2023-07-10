@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using PostSharp.Patterns.Caching.Backends.Redis;
-using PostSharp.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends.Distributed
+namespace Metalama.Patterns.Caching.Tests.Backends.Distributed
 {
     public class SimpleRedisDistributedTest : BaseDistributedCacheTests
     {

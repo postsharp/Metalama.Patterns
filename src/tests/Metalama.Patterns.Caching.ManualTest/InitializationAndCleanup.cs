@@ -1,10 +1,10 @@
-﻿using PostSharp.Aspects;
-using PostSharp.Aspects.Advices;
+﻿using Metalama.Aspects;
+using Metalama.Aspects.Advices;
 using System;
 using System.Collections;
 using System.Diagnostics;
 
-namespace PostSharp.Patterns.Caching.Tests
+namespace Metalama.Patterns.Caching.Tests
 {
     public class RedisSetup
     {

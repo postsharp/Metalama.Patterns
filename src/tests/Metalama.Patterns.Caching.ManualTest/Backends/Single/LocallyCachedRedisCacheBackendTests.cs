@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
 // source-available license. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using System;
 using System.Threading.Tasks;
 using Xunit;
-using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Caching.Backends.Redis;
-using PostSharp.Patterns.Caching.TestHelpers;
-using PostSharp.Patterns.Caching.TestHelpers.Shared;
-using PostSharp.Patterns.Caching.Tests.Backends.Distributed;
+using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.TestHelpers.Shared;
 using StackExchange.Redis;
-using PostSharp.Patterns.Caching.Backends;
-using PostSharp.Patterns.Common.Tests.Helpers;
+using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Common.Tests.Helpers;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends
 {
     public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests
     {

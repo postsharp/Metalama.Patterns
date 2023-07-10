@@ -1,13 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial source-available license. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using System;
 using System.Net;
 using Xunit;
-using PostSharp.Patterns.Caching.Backends.Redis;
-using PostSharp.Patterns.Caching.Tests.Backends.Distributed;
-using PostSharp.Patterns.Common.Tests.Helpers;
+using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Common.Tests.Helpers;
 using StackExchange.Redis;
 
-namespace PostSharp.Patterns.Caching.Tests
+namespace Metalama.Patterns.Caching.Tests
 {
     public class BrokenRedisTests
     {

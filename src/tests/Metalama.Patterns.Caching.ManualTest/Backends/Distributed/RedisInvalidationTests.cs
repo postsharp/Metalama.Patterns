@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Metalama.Patterns.Caching.Tests.Backends.Distributed;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Implementation;
 using Xunit;
-using PostSharp.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.Backends.Redis;
 using StackExchange.Redis;
-using PostSharp.Patterns.Caching.Backends;
-using PostSharp.Patterns.Caching.Tests.Backends.Distributed;
+using Metalama.Patterns.Caching.Backends;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends
 {
     public class RedisInvalidationTests : BaseInvalidationBrokerTests
     {

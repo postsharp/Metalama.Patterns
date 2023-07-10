@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Metalama.Patterns.Caching.Tests.Backends.Distributed;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using PostSharp.Patterns.Caching.Backends.Redis;
-using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Caching.Tests.Backends.Distributed;
+using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends
 {
     public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests
     {

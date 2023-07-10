@@ -3,7 +3,7 @@
 
 using System;
 
-namespace PostSharp.Patterns.Caching.Tests
+namespace Metalama.Patterns.Caching.Tests
 {
     /// <summary>
     /// Maintains a single instance of a Redis server that's disposed only when all tests finish executing. That way, we don't spend time starting the server

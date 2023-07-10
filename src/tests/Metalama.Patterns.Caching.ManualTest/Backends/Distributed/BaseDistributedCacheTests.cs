@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Caching.TestHelpers.Shared;
-using PostSharp.Patterns.Common.Tests.Helpers;
-using PostSharp.Patterns.Diagnostics;
+using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.TestHelpers.Shared;
+using Metalama.Patterns.Common.Tests.Helpers;
+using Metalama.Patterns.Diagnostics;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends
 {
     public abstract class BaseDistributedCacheTests
     {

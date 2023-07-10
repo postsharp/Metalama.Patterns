@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Metalama.Patterns.Caching.Tests.Executables;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,9 +12,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Tests.Executables;
 
-namespace PostSharp.Patterns.Caching.Tests
+namespace Metalama.Patterns.Caching.Tests
 {
     #region Taken from github.com/poulfoged/redis-inside (no strong name in the distributed package).
 

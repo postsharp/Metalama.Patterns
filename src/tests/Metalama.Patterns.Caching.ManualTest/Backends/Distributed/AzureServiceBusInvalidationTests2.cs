@@ -2,10 +2,10 @@
 
 using System.Threading.Tasks;
 using Xunit;
-using PostSharp.Patterns.Caching.Backends.Azure;
-using PostSharp.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Backends.Azure;
+using Metalama.Patterns.Caching.Implementation;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends.Distributed
+namespace Metalama.Patterns.Caching.Tests.Backends.Distributed
 {
     public class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
     {

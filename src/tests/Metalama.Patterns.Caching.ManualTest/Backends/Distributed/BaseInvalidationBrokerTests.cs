@@ -1,6 +1,6 @@
 ﻿using Xunit;
-using PostSharp.Patterns.Caching.Dependencies;
-using PostSharp.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Dependencies;
+using Metalama.Patterns.Caching.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,9 +9,9 @@ using System.Runtime.Caching;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Backends;
 
-namespace PostSharp.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends
 {
     public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PostSharp.Patterns.Caching.Tests.Executables
+namespace Metalama.Patterns.Caching.Tests.Executables
 {
     internal interface ExecutablesResourceTarget
     {
