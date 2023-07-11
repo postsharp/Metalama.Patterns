@@ -406,6 +406,8 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         ; // TODO: Do we see ctors/property methods?
 
+        var cacheAttributeType = (INamedType) TypeFactory.GetType( typeof( CacheAttribute ) );
+
         var isValid = true;
 
         foreach ( var invalidatedMethod in candidateInvalidatedMethods )
@@ -423,9 +425,12 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             }
 
             // Ensure the method is actually cached.
-            var cacheAspect = invalidatedMethod.Enhancements().GetAspects<CacheAttribute>().SingleOrDefault();
+            var cacheAspectConfiguration =
+                invalidatedMethod.BelongsToCurrentProject
+                    ? invalidatedMethod.Enhancements().GetAspects<CacheAttribute>().SingleOrDefault()?.ToCompileTimeCacheItemConfiguration()
+                    : invalidatedMethod.Attributes.OfAttributeType( cacheAttributeType ).SingleOrDefault()?.ToCompileTimeCacheItemConfiguration();
 
-            if ( cacheAspect == null )
+            if ( cacheAspectConfiguration == null )
             {
                 matchingErrorsDictionary.Add(
                     invalidatedMethod.Name,
@@ -434,7 +439,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 continue;
             }
 
-            var cacheAspectConfiguration = cacheAspect.GetEffectiveConfiguration( invalidatedMethod );
+            cacheAspectConfiguration.ApplyEffectiveConfiguration( invalidatedMethod );
 
             // Check that the 'this' parameter is compatible.
             if ( !invalidatedMethod.IsStatic && !cacheAspectConfiguration.IgnoreThisParameter.GetValueOrDefault() &&

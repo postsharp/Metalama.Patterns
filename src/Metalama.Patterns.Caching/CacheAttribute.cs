@@ -3,9 +3,11 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Implementation;
+using System.ComponentModel;
 
 namespace Metalama.Patterns.Caching;
 
@@ -84,6 +86,19 @@ public sealed class CacheAttribute : MethodAspect
         set => this._ignoreThisParameter = value;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether this attribute instance was generated automatically.
+    /// </summary>
+#pragma warning disable SA1623 // Property summary documentation should match accessors
+    public bool AttributeIsGeneratedCode
+#pragma warning restore SA1623 // Property summary documentation should match accessors
+    {
+        get;
+
+        [EditorBrowsable( EditorBrowsableState.Never )]
+        set;
+    }
+
     public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
     {
         base.BuildEligibility( builder );
@@ -96,6 +111,13 @@ public sealed class CacheAttribute : MethodAspect
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
+        // TODO: [Porting] Discuss - is this the correct way to enforce "allow multiple = false"? Is there a simpler OOTB mechanism?
+        if ( builder.AspectInstance.SecondaryInstances.Length > 0 )
+        {
+            builder.Diagnostics.Report( CachingDiagnosticDescriptors.Cache.ErrorMultipleInstancesOfCachedAttribute );
+            return;
+        }
+
         var asyncInfo = builder.Target.MethodDefinition.GetAsyncInfo();
         var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.GetOriginalDefinition().SpecialType ?? SpecialType.None;
 
@@ -182,6 +204,14 @@ public sealed class CacheAttribute : MethodAspect
                 getOriginalMethodInvoker = getOriginalMethodInvokerResult.Declaration,
                 awaitableResultType = awaitableResultType
             } );
+
+        if ( !builder.Target.Attributes.Any( typeof( CacheAttribute ) ) )
+        {
+            // This instance of the CacheAttribute aspect was applied at compile time (eg, by a fabric).
+            // We must introduce an actual CacheAttribute attribute to support cache invalidation in an assembly
+            // which later consumes the assembly currently being compiled.
+            builder.Advice.IntroduceAttribute( builder.Target, this.ToAttributeConstruction() );
+        }
     }
 
     [Template]
@@ -194,12 +224,12 @@ public sealed class CacheAttribute : MethodAspect
             return method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args );
         }
     }
-        
+
     [Template]
     public Func<object?, object?[], Task<object?>> GetOriginalMethodInvokerForTask( IMethod method )
     {
         return Invoke;
-        
+
         async Task<object?> Invoke( object? instance, object?[] args )
         {
             return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args );
@@ -281,7 +311,7 @@ public sealed class CacheAttribute : MethodAspect
     }
 
 #if NETCOREAPP3_0_OR_GREATER
-    
+
     [Template]
     public IAsyncEnumerable<TValue> OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
@@ -313,21 +343,65 @@ public sealed class CacheAttribute : MethodAspect
     [CompileTime]
     internal CompileTimeCacheItemConfiguration GetEffectiveConfiguration( IMethod method )
     {
-        // TODO: [Porting] Repeated work between two aspects, cache when supported.
+        var mergedConfiguration = this.ToCompileTimeCacheItemConfiguration();
+        mergedConfiguration.ApplyEffectiveConfiguration( method );
+        return mergedConfiguration;
+    }
 
-        var mergedConfiguration = new CompileTimeCacheItemConfiguration() 
-        {  
-            AbsoluteExpiration = this._absoluteExpiration, 
+    [CompileTime]
+    internal CompileTimeCacheItemConfiguration ToCompileTimeCacheItemConfiguration()
+    {
+        return new CompileTimeCacheItemConfiguration()
+        {
+            AbsoluteExpiration = this._absoluteExpiration,
             AutoReload = this._autoReload,
             IgnoreThisParameter = this._ignoreThisParameter,
             Priority = this._priority,
             ProfileName = this.ProfileName,
             SlidingExpiration = this._slidingExpiration
         };
+    }
 
-        var configurationFromAttributes = CompileTimeCacheConfigurationHelper.GetConfigurationFromAttributes( method );
-        mergedConfiguration.ApplyFallback( configurationFromAttributes );
+    [CompileTime]
+    private AttributeConstruction ToAttributeConstruction( bool attributeIsGeneratedCode = true )
+    {
+        var args = new Dictionary<string, object?>();
 
-        return mergedConfiguration;
+        if ( this._absoluteExpiration.HasValue )
+        {
+            args[nameof( this.AbsoluteExpiration )] = this.AbsoluteExpiration;
+        }
+
+        if ( this._autoReload.HasValue )
+        {
+            args[nameof( this.AutoReload )] = this.AutoReload;
+        }
+
+        if ( this._ignoreThisParameter.HasValue )
+        {
+            args[nameof( this.IgnoreThisParameter )] = this.IgnoreThisParameter;
+        }
+
+        if ( this._priority.HasValue )
+        {
+            args[nameof( this.Priority )] = this.Priority;
+        }
+
+        if ( this._slidingExpiration.HasValue )
+        {
+            args[nameof( this.SlidingExpiration )] = this.SlidingExpiration;
+        }
+
+        if ( this.ProfileName != null )
+        {
+            args[nameof( this.ProfileName )] = this.ProfileName;
+        }
+
+        if ( attributeIsGeneratedCode )
+        {
+            args[nameof( this.AttributeIsGeneratedCode )] = true;
+        }
+
+        return AttributeConstruction.Create( typeof( CacheAttribute ), namedArguments: args.ToList() );
     }
 }

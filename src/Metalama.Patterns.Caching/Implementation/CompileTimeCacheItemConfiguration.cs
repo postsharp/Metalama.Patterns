@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System.Collections.Specialized;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
@@ -39,17 +40,33 @@ internal sealed class CompileTimeCacheItemConfiguration
         this.IgnoreThisParameter ??= fallback.IgnoreThisParameter;
     }
 
+    /// <summary>
+    /// Applies the effective configuration of the method by applying fallback configuration from <see cref="CacheConfigurationAttribute"/>
+    /// attributes on ancestor types and the declaring assembly.
+    /// </summary>
+    public void ApplyEffectiveConfiguration( IMethod method )
+    {
+        var configurationFromAttributes = CompileTimeCacheConfigurationHelper.GetConfigurationFromAttributes( method );
+        this.ApplyFallback( configurationFromAttributes );
+    }
+
     internal CompileTimeCacheItemConfiguration Clone() => (CompileTimeCacheItemConfiguration) this.MemberwiseClone();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CompileTimeCacheItemConfiguration"/> class from the given
-    /// custom attribute which must have construction semantics equivalent to <see cref="CacheConfigurationAttribute"/>.
+    /// custom attribute which must have construction semantics equivalent to <see cref="CacheConfigurationAttribute"/>
+    /// and <see cref="CacheAttribute"/> (which both have the same construction semantics).
     /// </summary>
-    internal CompileTimeCacheItemConfiguration( IAttribute attribute )
+    public CompileTimeCacheItemConfiguration( IAttribute attribute )
     {
         if ( attribute == null )
         {
             throw new ArgumentNullException( nameof( attribute ) );
+        }
+
+        if ( !(attribute.Type.Is( typeof( CacheAttribute ) ) || attribute.Type.Is( typeof( CacheConfigurationAttribute ) )) )
+        {
+            throw new ArgumentOutOfRangeException( nameof( attribute ), "Must be a " + nameof( CacheAttribute ) + " or a " + nameof( CacheConfigurationAttribute ) + "." );
         }
 
         try
@@ -86,9 +103,7 @@ internal sealed class CompileTimeCacheItemConfiguration
         }
         catch ( Exception e )
         {
-            throw new MetalamaPatternsCachingAssertionFailedException(
-                "The construction semantics of the attribute do not match those of " + nameof( CacheConfigurationAttribute ) + ".",
-                e );
+            throw new MetalamaPatternsCachingAssertionFailedException( "The construction semantics of the attribute are not as expected.", e );
         }
     }
 }

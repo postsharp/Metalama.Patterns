@@ -8,6 +8,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 [CompileTime]
 internal static class CompileTimeCacheConfigurationHelper
 {
+    // TODO: Consider caching this method at compile time once compile-time user caching is supported by the framework.
     public static CompileTimeCacheItemConfiguration GetConfigurationFromAttributes( IMethod method )
     {
         var configurations = new List<CompileTimeCacheItemConfiguration>();

@@ -133,8 +133,23 @@ internal static class CachingDiagnosticDescriptors
             new(
                 "LAMA5109",
                 Info,
-                "This method is invalidates {0}.",
+                "This method invalidates {0}.",
                 "Invalidates a [Cache] method.",
+                _cagtegory );
+
+    }
+
+    public static class Cache
+    {
+        /// <summary>
+        /// The [Cache] aspect can be applied at most once to a method.
+        /// </summary>
+        public static readonly DiagnosticDefinition ErrorMultipleInstancesOfCachedAttribute =
+            new(
+                "LAMA5110",
+                Error,
+                "The [Cache] aspect can be applied at most once to a method.",
+                "[Cache] aspect applied more than once.",
                 _cagtegory );
     }
 }
