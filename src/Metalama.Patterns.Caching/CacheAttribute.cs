@@ -111,7 +111,7 @@ public sealed class CacheAttribute : MethodAspect
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        // TODO: [Porting] Discuss - is this the correct way to enforce "allow multiple = false"? Is there a simpler OOTB mechanism?
+        // TODO: [Porting] Discuss prohbiting multiple instances. Also how to give the user useful info so they can fix the problem - eg, the origin of aspect instances.
         if ( builder.AspectInstance.SecondaryInstances.Length > 0 )
         {
             builder.Diagnostics.Report( CachingDiagnosticDescriptors.Cache.ErrorMultipleInstancesOfCachedAttribute );

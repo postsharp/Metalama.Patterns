@@ -5,6 +5,17 @@
         <Configurations>Debug;Release;LamaDebug</Configurations>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="CacheAttributeTests\Diagnostics\OutParameter - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="CacheAttributeTests\Diagnostics\MultipleInstances.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>MultipleInstances.cs</DependentUpon>
+      </None>
+    </ItemGroup>
+
     <ItemGroup>        
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
