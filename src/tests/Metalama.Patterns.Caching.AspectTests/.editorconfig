@@ -16,6 +16,9 @@ dotnet_diagnostic.SA1124.severity = none
 # CA1822: Mark members as static
 dotnet_diagnostic.CA1822.severity = none
 
+# SA1649: File name should match first type name
+dotnet_diagnostic.SA1649.severity = none
+
 # IDE0044: Add readonly modifier
 dotnet_diagnostic.IDE0044.severity = none
 
