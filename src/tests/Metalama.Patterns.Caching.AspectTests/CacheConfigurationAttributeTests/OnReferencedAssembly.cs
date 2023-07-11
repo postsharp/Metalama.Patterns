@@ -2,6 +2,7 @@
 
 // @Include(_CacheConfigurationAttributeTest.cs)
 // @RemoveOutputCode
+// @MainMethod(TestMain)
 
 using Metalama.Patterns.Caching.TestHelpers;
 using System;
