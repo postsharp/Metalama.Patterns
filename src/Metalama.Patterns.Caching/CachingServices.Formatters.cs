@@ -11,7 +11,7 @@ public partial class CachingServices
     /// <summary>
     /// Allows to get and register formatters used to generate caching keys.
     /// </summary>
-    [PublicAPI] // TODO: [Porting] Does CachingServices.Formatters need to be public?
+    [PublicAPI]
     public sealed class Formatters : FormatterRepository
     {
         public static Formatters Instance { get; } = new( CachingFormattingRole.Instance );

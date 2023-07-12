@@ -914,8 +914,7 @@ public abstract class CachingBackend : ITestableCachingComponent
         }
     }
 
-    // TODO: [Porting] Used by Redis backend. Making protected for now.
-    [ExplicitCrossPackageInternal]
+    // Was [ExplicitCrossPackageInternal]. Used by Redis backend. Making protected for now.
     protected virtual int BackgroundTaskExceptions => 0;
 
     int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;

@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// TODO: [Porting] Disabled: Logging in caching tests currently rely on TextLoggingBackend.
+// TODO: !!! [Porting] Disabled: Logging in caching tests currently rely on TextLoggingBackend.
 #if false
 using Metalama.Patterns.Caching.TestHelpers;
 using System;

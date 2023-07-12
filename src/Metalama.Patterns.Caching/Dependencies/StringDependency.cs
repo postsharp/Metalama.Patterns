@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Caching.Dependencies;
 /// <summary>
 /// A cache dependency that is already represented as a string.
 /// </summary>
-[PublicAPI] // TODO: Does StringDependency need to be public?
+[PublicAPI]
 public sealed class StringDependency : ICacheDependency
 {
     private readonly string _key;

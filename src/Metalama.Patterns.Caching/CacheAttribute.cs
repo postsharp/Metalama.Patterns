@@ -7,7 +7,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Implementation;
-using System.ComponentModel;
 
 namespace Metalama.Patterns.Caching;
 
@@ -86,19 +85,6 @@ public sealed class CacheAttribute : MethodAspect
         set => this._ignoreThisParameter = value;
     }
 
-    /// <summary>
-    /// Gets a value indicating whether this attribute instance was generated automatically.
-    /// </summary>
-#pragma warning disable SA1623 // Property summary documentation should match accessors
-    public bool AttributeIsGeneratedCode
-#pragma warning restore SA1623 // Property summary documentation should match accessors
-    {
-        get;
-
-        [EditorBrowsable( EditorBrowsableState.Never )]
-        set;
-    }
-
     public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
     {
         base.BuildEligibility( builder );
@@ -111,7 +97,6 @@ public sealed class CacheAttribute : MethodAspect
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        // TODO: [Porting] Discuss prohbiting multiple instances. Also how to give the user useful info so they can fix the problem - eg, the origin of aspect instances.
         if ( builder.AspectInstance.SecondaryInstances.Length > 0 )
         {
             builder.Diagnostics.Report( CachingDiagnosticDescriptors.Cache.ErrorMultipleInstancesOfCachedAttribute );
@@ -207,19 +192,14 @@ public sealed class CacheAttribute : MethodAspect
 
         var effectiveConfiguration = this.GetEffectiveConfiguration( builder.Target );
 
-        builder.Advice.RemoveAttributes( builder.Target, typeof( CacheAttribute ) );
-        builder.Advice.IntroduceAttribute( builder.Target, effectiveConfiguration.ToAttributeConstruction() );
+        // Here we replace (or add, if this aspect was applied eg by fabric) the [Cache]
+        // attribute with a [Cache] attribute initialized with the effective configuration
+        // taking into account [CacheConfiguration]. This "attaches" the effective
+        // configuration to the method itself, which is more robust with respect to
+        // linker trimming, obfuscation, assembly merging and so on. For fabric-applied aspects,
+        // this is how aspect configuration is persisted.
 
-        // TODO: Cleanup
-#if false
-        if ( !builder.Target.Attributes.Any( typeof( CacheAttribute ) ) )
-        {
-            // This instance of the CacheAttribute aspect was applied at compile time (eg, by a fabric).
-            // We must introduce an actual CacheAttribute attribute to support cache invalidation in an assembly
-            // which later consumes the assembly currently being compiled.
-            builder.Advice.IntroduceAttribute( builder.Target, this.ToAttributeConstruction() );
-        }
-#endif
+        builder.Advice.IntroduceAttribute( builder.Target, effectiveConfiguration.ToAttributeConstruction(), OverrideStrategy.Override );
     }
 
     [Template]
@@ -371,7 +351,7 @@ public sealed class CacheAttribute : MethodAspect
     }
 
     [CompileTime]
-    private AttributeConstruction ToAttributeConstruction( bool attributeIsGeneratedCode = true )
+    private AttributeConstruction ToAttributeConstruction()
     {
         var args = new Dictionary<string, object?>();
 
@@ -403,11 +383,6 @@ public sealed class CacheAttribute : MethodAspect
         if ( this.ProfileName != null )
         {
             args[nameof( this.ProfileName )] = this.ProfileName;
-        }
-
-        if ( attributeIsGeneratedCode )
-        {
-            args[nameof( this.AttributeIsGeneratedCode )] = true;
         }
 
         return AttributeConstruction.Create( typeof( CacheAttribute ), namedArguments: args.ToList() );

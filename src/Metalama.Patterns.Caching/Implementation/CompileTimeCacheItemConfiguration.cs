@@ -108,7 +108,7 @@ internal sealed class CompileTimeCacheItemConfiguration
         }
     }
 
-    public AttributeConstruction ToAttributeConstruction( bool? attributeIsGeneratedCode = null )
+    public AttributeConstruction ToAttributeConstruction()
     {
         var args = new Dictionary<string, object?>();
 
@@ -140,11 +140,6 @@ internal sealed class CompileTimeCacheItemConfiguration
         if ( this.ProfileName != null )
         {
             args[nameof( CacheConfigurationAttribute.ProfileName )] = this.ProfileName;
-        }
-
-        if ( attributeIsGeneratedCode.HasValue )
-        {
-            args[nameof( CacheAttribute.AttributeIsGeneratedCode )] = attributeIsGeneratedCode.Value;
         }
 
         return AttributeConstruction.Create( typeof( CacheAttribute ), namedArguments: args.ToList() );

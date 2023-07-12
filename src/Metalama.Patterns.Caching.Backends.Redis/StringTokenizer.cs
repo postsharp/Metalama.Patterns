@@ -4,13 +4,10 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 
 // TODO: [Porting] Outdated?
 // TODO: [Porting] Consider using Microsoft.Toolkit.HighPerformance.Extensions.StringExtensions (now called CommunityToolkit)?
-// ReSharper disable CommentTypo
-// https://learn.microsoft.com/en-us/dotnet/api/microsoft.toolkit.highperformance.extensions.stringextensions.tokenize?view=win-comm-toolkit-dotnet-6.1#microsoft-toolkit-highperformance-extensions-stringextensions-tokenize(system-string-system-char)
-// ReSharper restore CommentTypo
 
 // NB: Also used by Redis backend, copied local for now.
 // Ported from PostSharp.Patterns.Common/Utilities
-[ExplicitCrossPackageInternal]
+// Was [ExplicitCrossPackageInternal]
 internal struct StringTokenizer
 {
     private readonly string _s;

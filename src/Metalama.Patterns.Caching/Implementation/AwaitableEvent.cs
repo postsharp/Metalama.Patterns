@@ -17,7 +17,6 @@ namespace Metalama.Patterns.Caching.Implementation;
 #pragma  warning disable
 
 // Ported from PostSharp.Patterns.Common/Threading/Primitives
-[ExplicitCrossPackageInternal]
 internal sealed class AwaitableEvent
 {
     private static readonly TimeSpan _infiniteTimeSpan = TimeSpan.FromMilliseconds( -1 );

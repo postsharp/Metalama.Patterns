@@ -119,8 +119,8 @@ internal static class CachingDiagnosticDescriptors
                 "Multiple suitable overloads found.",
                 _cagtegory );
 
-        // TODO: [Porting] This is probably not the best way to annotate - it shows up as "Messages" in VS.
-
+        // TODO: Reinstate equivalent annotations when supported by the Metalama framework.
+#if false
         public static readonly DiagnosticDefinition<IMethod> InfoMethodIsInvalidatedBy =
             new(
                 "LAMA5108",
@@ -136,7 +136,7 @@ internal static class CachingDiagnosticDescriptors
                 "This method invalidates {0}.",
                 "Invalidates a [Cache] method.",
                 _cagtegory );
-
+#endif
     }
 
     public static class Cache

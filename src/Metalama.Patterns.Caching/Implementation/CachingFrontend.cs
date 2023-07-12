@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
-using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Locking;
 using System.Collections.Immutable;
 using System.ComponentModel;
@@ -10,13 +9,9 @@ using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-// TODO: [Porting] Can returned values be strongly-typed?
-
-[PublicAPI]
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class CachingFrontend
+internal static class CachingFrontend
 {
-    [EditorBrowsable( EditorBrowsableState.Never )]
     public static object? GetOrAdd(
         MethodInfo method,
         string key,
@@ -140,7 +135,6 @@ public static class CachingFrontend
         }
     }
 
-    [EditorBrowsable( EditorBrowsableState.Never )]
     public static async Task<object?> GetOrAddAsync(
         MethodInfo method,
         string key,
@@ -272,7 +266,6 @@ public static class CachingFrontend
         }
     }
 
-    [EditorBrowsable( EditorBrowsableState.Never )]
     public static async Task<object?> GetOrAddAsync(
         MethodInfo method,
         string key,
@@ -415,7 +408,7 @@ public static class CachingFrontend
         }
     }
 
-    internal static object? SetItem( string key, object? value, Type valueType, IRunTimeCacheItemConfiguration configuration, CachingContext context )
+    public static object? SetItem( string key, object? value, Type valueType, IRunTimeCacheItemConfiguration configuration, CachingContext context )
     {
         var exposedValue = value;
 
@@ -437,7 +430,7 @@ public static class CachingFrontend
         return exposedValue;
     }
 
-    internal static async Task<object?> SetItemAsync(
+    public static async Task<object?> SetItemAsync(
         string key,
         object? value,
         Type valueType,

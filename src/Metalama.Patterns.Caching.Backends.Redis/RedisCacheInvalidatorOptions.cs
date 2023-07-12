@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// <summary>
 /// Options for <see cref="RedisCacheInvalidator"/>.
 /// </summary>
-[PublicAPI] // TODO: [Porting] RedisCacheInvalidatorOptions is used with RedisCacheInvalidator, see TODO there.
+[PublicAPI]
 public class RedisCacheInvalidatorOptions : CacheInvalidatorOptions
 {
     /// <summary>

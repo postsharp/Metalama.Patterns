@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Patterns.Caching.ValueAdapters;
 
-// TODO: [Porting] ValueAdapterFactory uses TypeExtensionFactory et al, requires them to be public in FT.Formatters.
 /// <summary>
 /// Registers and provides value adapters (<see cref="IValueAdapter"/>), which allow for instance to cache things like <see cref="System.IO.Stream"/> or <see cref="System.Collections.IEnumerable"/>,
 /// which could not be otherwise cached.

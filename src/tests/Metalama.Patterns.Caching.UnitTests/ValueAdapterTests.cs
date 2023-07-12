@@ -12,8 +12,6 @@ using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    // TODO: [Porting] Add tests for AsyncEnumerable and AsyncEnumerator.
-
     public class ValueAdapterTests : IDisposable
     {
         public ValueAdapterTests()

@@ -2,79 +2,15 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 using System.Security.Cryptography;
 using System.Text;
-namespace Metalama.Patterns.Caching;
 
+namespace Metalama.Patterns.Caching.Implementation;
+
+// TODO: Consider moving CompileTimeHelpers to common project and/or Metalama.Extensions
 [CompileTime]
 internal static class CompileTimeHelpers
 {
-    public static void Append( this ExpressionBuilder builder, bool condition, Action<ExpressionBuilder> build )
-    {
-        if ( condition )
-        {
-            build( builder );
-        }
-    }
-
-    public static void AppendVerbatim( this ExpressionBuilder builder, bool condition, string rawCode )
-    {
-        if ( condition )
-        {
-            builder.AppendVerbatim( rawCode );
-        }
-    }
-
-    public static void AppendList( this ExpressionBuilder builder, string separator, params (bool Condition, Action<ExpressionBuilder> Build)[] items )
-    {
-        bool isFirst = true;
-        AppendList( builder, ref isFirst, separator, items );
-    }
-
-    public static void AppendList( this ExpressionBuilder builder, ref bool isFirst, string separator, params (bool Condition, Action<ExpressionBuilder> Build)[] items )
-    {
-        foreach ( var item in items )
-        {
-            if ( item.Condition )
-            {
-                if ( !isFirst && !string.IsNullOrEmpty( separator ) )
-                {
-                    builder.AppendVerbatim( separator );
-                }
-
-                item.Build( builder );
-
-                isFirst = false;
-            }
-        }
-    }
-
-#if false
-    public static void AppendVerbatimListItem( this ExpressionBuilder builder, bool condition, string rawCode )
-    {
-        if ( condition )
-        {
-            builder.AppendVerbatim( rawCode );
-        }
-    }
-
-    public static void AppendVerbatimListItem( this ExpressionBuilder builder, bool condition, string rawCode, ref bool prependComma )
-    {
-        if ( condition )
-        {
-            if ( prependComma )
-            {
-                builder.AppendVerbatim( ", " );
-            }
-
-            builder.AppendVerbatim( rawCode );
-
-            prependComma = true;
-        }
-    }
-#endif
-
     /// <summary>
     /// Gets a string that can be used as a C# identifier based on a stable hash of the given <see cref="SerializableDeclarationId"/>
     /// with an optional prefix.
@@ -99,13 +35,14 @@ internal static class CompileTimeHelpers
             throw new ArgumentNullException( nameof( purpose ) );
         }
 
+        // TODO: !!! Don't use MD5, will throw on some platforms.
         // Not used for cryptographic purposes.
 #pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms
         var md5 = MD5.Create();
 #pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
         var bytes = md5.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() + purpose ) );
 
-        // TODO: use base62 or something else
+        // TODO: use base62 or something else more compact than hex.
         return prefix + "_" + BitConverter.ToString( bytes ).Replace( "-", string.Empty );
     }
 

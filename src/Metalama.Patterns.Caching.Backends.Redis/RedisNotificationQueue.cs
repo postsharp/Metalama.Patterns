@@ -271,19 +271,13 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         }
     }
 
-    // TODO: [Porting] Check if used by unit tests, otherwise remove.
-    // ReSharper disable once UnusedMember.Global
     internal static int NotificationProcessingThreads => _notificationProcessingThreads;
 
-    // TODO: [Porting] Check if used by unit tests, otherwise remove.
-    // ReSharper disable once UnusedMember.Global
     internal void SuspendProcessing()
     {
         this._notificationProcessingLock.Reset();
     }
 
-    // TODO: [Porting] Check if used by unit tests, otherwise remove.
-    // ReSharper disable once UnusedMember.Global
     internal void ResumeProcessing()
     {
         this._notificationProcessingLock.Set();

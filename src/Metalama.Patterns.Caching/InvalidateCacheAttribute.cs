@@ -107,7 +107,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 type = builder.Target.DeclaringType 
             } );
 
-        // TODO: !!! ML - should set Declaration when already exists.
+        // TODO: Update when #33489 fixed.
         // Remove this when fixed:
         var logSourceField = logSourceFieldAdviceResult.Outcome == AdviceOutcome.Ignore
             ? builder.Target.DeclaringType.Fields.Single( f => f.Name == logSourceFieldName )
@@ -116,7 +116,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         var arrayBuilder = new ArrayBuilder( typeof( MethodInfo ) );
         foreach ( var method in invalidatedMethods.Keys )
         {
-            // TODO: Use ThrowIfMissing.
+            // TODO: !!! Use ThrowIfMissing.
             arrayBuilder.Add( method.ToMethodInfo() );
         }
 
@@ -397,17 +397,12 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             : (INamedType) TypeFactory.GetType( attribute._invalidatedMethodsDeclaringType );
 
         var invalidatingMethodParameters = invalidatingMethod.Parameters;
-
         var candidateInvalidatedMethods = invalidatedMethodsDeclaringType.AllMethods;
 
         DictionaryOfLists<string, IDiagnostic> matchingErrorsDictionary = new();
-
         DictionaryOfLists<string, InvalidatedMethodInfo?> invalidatedMethodsDictionary = new();
 
-        ; // TODO: Do we see ctors/property methods?
-
         var cacheAttributeType = (INamedType) TypeFactory.GetType( typeof( CacheAttribute ) );
-
         var isValid = true;
 
         foreach ( var invalidatedMethod in candidateInvalidatedMethods )
@@ -541,8 +536,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 // null indicates already processed (eg, via another aspect instance on the current target method)
                 if ( invalidatedMethodInfo != null )
                 {
+                    // TODO: Reinstate equivalent annotations when supported by the Metalama framework.
+#if false
                     builder.Diagnostics.Report( InfoMethodIsInvalidatedBy.WithArguments( invalidatingMethod ), invalidatedMethodInfo.Method );
                     builder.Diagnostics.Report( InfoMethodInvalidates.WithArguments( invalidatedMethodInfo.Method ), invalidatingMethod );
+#endif
                     
                     invalidatedMethods.Add( invalidatedMethodInfo.Method, invalidatedMethodInfo );
                 }

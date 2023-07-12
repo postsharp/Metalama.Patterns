@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// An implementation of <see cref="CacheInvalidator"/>  that uses Redis publish/subscribe channels to invalidate several
 /// instances of local caches.
 /// </summary>
-[PublicAPI] // TODO: [Porting] Where would RedisCacheInvalidator be used (nothing is PS conceptual docs)? Can it be removed?
+[PublicAPI]
 public sealed class RedisCacheInvalidator : CacheInvalidator
 {
     private readonly bool _ownsConnection;

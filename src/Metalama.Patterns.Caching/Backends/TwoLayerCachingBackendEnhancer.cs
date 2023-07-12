@@ -423,7 +423,6 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     /// <summary>
     /// The object stored in the remote class.
     /// </summary>
-    [PSerializable]
     [Serializable]
     [DataContract]
 

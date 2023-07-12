@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Caching.Dependencies;
 /// Wraps an <see cref="object"/> into an <see cref="ObjectDependency"/>. The <see cref="GetCacheKey"/>
 /// relies on the <see cref="CachingServices.DefaultKeyBuilder"/> to create the cache key of the wrapped object.
 /// </summary>
-[PublicAPI] // TODO: [Porting] Does ObjectDependency need to be public? 
+[PublicAPI]
 public sealed class ObjectDependency : ICacheDependency
 {
     /// <summary>

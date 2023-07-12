@@ -22,7 +22,6 @@ public static class CacheAttributeRunTime
 
         object? result;
 
-        // TODO: [Porting] Discuss: We could do this string interpolation at build time, but obfuscation/IL-rewriting could change the method signature before runtime. Best practice?
         using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of method {Method}", registration.Method ) ) )
         {
             try
@@ -88,7 +87,6 @@ public static class CacheAttributeRunTime
 
         // TODO: PostSharp passes an otherwise uninitialzed CallerInfo with the CallerAttributes.IsAsync flag set.
 
-        // TODO: [Porting] Discuss: We could do this string interpolation at build time, but obfuscation/IL-rewriting could change the method signature before runtime. Best practice?
         using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", registration.Method ) ) )
         {
             try
@@ -197,7 +195,6 @@ public static class CacheAttributeRunTime
 
         // TODO: PostSharp passes an otherwise uninitialzed CallerInfo with the CallerAttributes.IsAsync flag set.
 
-        // TODO: [Porting] Discuss: We could do this string interpolation at build time, but obfuscation/IL-rewriting could change the method signature before runtime. Best practice?
         using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", registration.Method ) ) )
         {
             try

@@ -4,7 +4,6 @@ using System.Runtime.Serialization;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-[PSerializable]
 [Serializable]
 [DataContract]
 internal class RedisCacheValue

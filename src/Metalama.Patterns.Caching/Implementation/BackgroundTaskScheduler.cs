@@ -9,9 +9,8 @@ using System.Globalization;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-// TODO: [Porting] Used by Redis backend. Making public for now. Consider removing [PublicApi].
+// TODO: [Porting] BackgroundTaskScheduler was [ExplicitCrossPackageInternal]. Used by Redis backend so making public for now.
 [PublicAPI]
-[ExplicitCrossPackageInternal]
 public sealed class BackgroundTaskScheduler
 {
     private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource();

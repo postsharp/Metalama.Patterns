@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
-    // TODO: Why do we need the PSerializable now after introducing the caching of generic methods?
-    [PSerializable]
     public partial class CachingClass<T>
         where T : CachedValueClass, new()
     {

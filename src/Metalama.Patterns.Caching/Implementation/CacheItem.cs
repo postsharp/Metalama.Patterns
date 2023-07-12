@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Patterns.Caching.Serializers;
 using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -9,9 +8,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <summary>
 /// Represents an item being added to the cache.
 /// </summary>
-[PSerializable]
-[ImportSerializer( typeof(ImmutableList<>), typeof(ImmutableListPortableSerializer<>) )]
-[PublicAPI] // TODO: Does CacheItem need to be public? Might be a consequence of serialization?
+[PublicAPI]
 public sealed class CacheItem : IEquatable<CacheItem>
 {
     /// <summary>

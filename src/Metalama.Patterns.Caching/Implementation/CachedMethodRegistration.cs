@@ -11,6 +11,11 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <summary>
 /// Encapsulates information about a method being cached.
 /// </summary>
+/// <remarks>
+/// For each cached method, an instance of <see cref="CachedMethodRegistration"/> obtained via <see cref="CachingServices.DefaultMethodRegistrationCache.Register"/>
+/// is assigned to an introduced static readonly field on the declaring type of the cached method. The implementation of <see cref="CachedMethodRegistration"/>
+/// is intentionally opaque (ie, internal) as it should be used only by the caching framework runtime.
+/// </remarks>
 [PublicAPI]
 public sealed class CachedMethodRegistration
 {
@@ -93,14 +98,14 @@ public sealed class CachedMethodRegistration
     /// <summary>
     /// Gets the logger for the current registration.
     /// </summary>
-    public LogSource Logger
+    internal LogSource Logger
         => this._logSource ??= LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.Method.DeclaringType! );
 
     /// <summary>
     /// Gets the effective configuration which is determined by merging the build-time configuration with any applicable 
     /// profile-based configuration. This property always reflects any runtime changes to profile configuration.
     /// </summary>
-    public IRunTimeCacheItemConfiguration MergedConfiguration
+    internal IRunTimeCacheItemConfiguration MergedConfiguration
     {
         get
         {
