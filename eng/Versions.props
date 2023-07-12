@@ -29,7 +29,6 @@
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
         <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' != 'net471' " >2.2.0</xUnitAssemblyFixtureVersion>
         <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' == 'net471' " >2.0.3</xUnitAssemblyFixtureVersion>
-        <xUnitRunnerVisualStudioVersion>2.4.3</xUnitRunnerVisualStudioVersion>
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
         <xUnitVersion>2.4.2</xUnitVersion>
     </PropertyGroup>
