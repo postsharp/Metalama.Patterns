@@ -205,6 +205,13 @@ public sealed class CacheAttribute : MethodAspect
                 awaitableResultType = awaitableResultType
             } );
 
+        var effectiveConfiguration = this.GetEffectiveConfiguration( builder.Target );
+
+        builder.Advice.RemoveAttributes( builder.Target, typeof( CacheAttribute ) );
+        builder.Advice.IntroduceAttribute( builder.Target, effectiveConfiguration.ToAttributeConstruction() );
+
+        // TODO: Cleanup
+#if false
         if ( !builder.Target.Attributes.Any( typeof( CacheAttribute ) ) )
         {
             // This instance of the CacheAttribute aspect was applied at compile time (eg, by a fabric).
@@ -212,6 +219,7 @@ public sealed class CacheAttribute : MethodAspect
             // which later consumes the assembly currently being compiled.
             builder.Advice.IntroduceAttribute( builder.Target, this.ToAttributeConstruction() );
         }
+#endif
     }
 
     [Template]

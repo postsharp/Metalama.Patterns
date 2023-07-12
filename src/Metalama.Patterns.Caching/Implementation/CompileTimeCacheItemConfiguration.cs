@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using System.Collections.Specialized;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -105,5 +106,47 @@ internal sealed class CompileTimeCacheItemConfiguration
         {
             throw new MetalamaPatternsCachingAssertionFailedException( "The construction semantics of the attribute are not as expected.", e );
         }
+    }
+
+    public AttributeConstruction ToAttributeConstruction( bool? attributeIsGeneratedCode = null )
+    {
+        var args = new Dictionary<string, object?>();
+
+        if ( this.AbsoluteExpiration.HasValue )
+        {
+            args[nameof( CacheConfigurationAttribute.AbsoluteExpiration )] = this.AbsoluteExpiration.Value.TotalMinutes;
+        }
+
+        if ( this.AutoReload.HasValue )
+        {
+            args[nameof( CacheConfigurationAttribute.AutoReload )] = this.AutoReload;
+        }
+
+        if ( this.IgnoreThisParameter.HasValue )
+        {
+            args[nameof( CacheConfigurationAttribute.IgnoreThisParameter )] = this.IgnoreThisParameter;
+        }
+
+        if ( this.Priority.HasValue )
+        {
+            args[nameof( CacheConfigurationAttribute.Priority )] = this.Priority;
+        }
+
+        if ( this.SlidingExpiration.HasValue )
+        {
+            args[nameof( CacheConfigurationAttribute.SlidingExpiration )] = this.SlidingExpiration.Value.TotalMinutes;
+        }
+
+        if ( this.ProfileName != null )
+        {
+            args[nameof( CacheConfigurationAttribute.ProfileName )] = this.ProfileName;
+        }
+
+        if ( attributeIsGeneratedCode.HasValue )
+        {
+            args[nameof( CacheAttribute.AttributeIsGeneratedCode )] = attributeIsGeneratedCode.Value;
+        }
+
+        return AttributeConstruction.Create( typeof( CacheAttribute ), namedArguments: args.ToList() );
     }
 }
