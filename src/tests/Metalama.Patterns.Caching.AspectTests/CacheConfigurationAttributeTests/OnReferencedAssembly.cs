@@ -15,7 +15,8 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
         {
             public static void TestMain()
             {
-                Console.WriteLine( "Hello!" );
+                Console.WriteLine( "Test started." );
+
                 TestingCacheBackend backend =
                     TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestValues.cacheConfigurationAttributeProfileName1 );
                 TestProfileConfigurationFactory.CreateProfile( TestValues.cacheConfigurationAttributeProfileName1 );
@@ -112,6 +113,8 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
                         "overridden local inner child", backend, ref previousCachedKey,
                         TestValues.defaultProfileName );
+
+                    Console.WriteLine( "Test completed." );
                 }
                 finally
                 {
