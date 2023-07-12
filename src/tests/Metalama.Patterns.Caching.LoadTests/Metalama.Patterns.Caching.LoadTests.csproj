@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net471;net6.0</TargetFrameworks>
-    <RootNamespace>PostSharp.Patterns.Caching.Tests.LoadTests</RootNamespace>
-    <AssemblyName>PostSharp.Patterns.Caching.Tests.LoadTests</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <TargetFrameworks>net471;net6.0</TargetFrameworks>
   </PropertyGroup>  
     
+    <!--
   <ItemGroup>
-	<PackageReference Include="System.Net.NameResolution" Version="$(SystemNetNameResolutionVersion)" />
+	  <PackageReference Include="System.Net.NameResolution" Version="$(SystemNetNameResolutionVersion)" />
   </ItemGroup>
   
   <ItemGroup>
@@ -22,5 +20,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching.Backends.IMemoryCache\PostSharp.Patterns.Caching.Backends.IMemoryCache.csproj" />
   </ItemGroup>
-  
+  -->
 </Project>
