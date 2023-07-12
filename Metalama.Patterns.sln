@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.ManualTest", "src\tests\Metalama.Patterns.Caching.ManualTest\Metalama.Patterns.Caching.ManualTest.csproj", "{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.LoadTests", "src\tests\Metalama.Patterns.Caching.LoadTests\Metalama.Patterns.Caching.LoadTests.csproj", "{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +139,12 @@ Global
 		{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -151,6 +159,7 @@ Global
 		{6897EC23-D34B-4FC8-AAA0-9B0D9F9EC00A} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{00C90E9E-93A3-490D-9BC4-D738F922811C} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC2B6F6-5623-43F8-BBBB-ED8072670A80}

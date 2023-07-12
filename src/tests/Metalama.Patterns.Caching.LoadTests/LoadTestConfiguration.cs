@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PostSharp.Patterns.Caching.Tests.LoadTests
+namespace Metalama.Patterns.Caching.LoadTests
 {
     public class LoadTestConfiguration
     {

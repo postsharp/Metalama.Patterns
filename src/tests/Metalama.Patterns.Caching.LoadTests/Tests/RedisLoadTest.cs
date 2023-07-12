@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Backends.Redis;
-using PostSharp.Patterns.Caching.Implementation;
+﻿using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace PostSharp.Patterns.Caching.Tests.LoadTests.Tests
+namespace Metalama.Patterns.Caching.LoadTests.Tests
 {
     class RedisLoadTestConfiguration : LoadTestConfiguration
     {

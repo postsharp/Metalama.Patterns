@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Metalama.Patterns.Caching.Implementation;
+using System;
 using System.Threading;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Implementation;
 
-namespace PostSharp.Patterns.Caching.Tests.LoadTests.Tests
+namespace Metalama.Patterns.Caching.LoadTests.Tests
 {
     abstract class BaseTestClass<LoadTestConfigurationT>
         where LoadTestConfigurationT : LoadTestConfiguration

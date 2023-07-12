@@ -1,24 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
 	  <TargetFrameworks>net471;net6.0</TargetFrameworks>
-  </PropertyGroup>  
-    
-    <!--
-  <ItemGroup>
-	  <PackageReference Include="System.Net.NameResolution" Version="$(SystemNetNameResolutionVersion)" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching\PostSharp.Patterns.Caching.csproj" />
-    <ProjectReference Include="..\..\Common\PostSharp.Patterns.Common\PostSharp.Patterns.Common.csproj" />
-    <ProjectReference Include="..\..\Diagnostics\PostSharp.Patterns.Diagnostics\PostSharp.Patterns.Diagnostics.csproj" />
-    <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching.Backends.Azure\PostSharp.Patterns.Caching.Backends.Azure.csproj" />
-    <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching.Backends.Redis\PostSharp.Patterns.Caching.Backends.Redis.csproj" />
-  </ItemGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Caching\PostSharp.Patterns.Caching.Backends.IMemoryCache\PostSharp.Patterns.Caching.Backends.IMemoryCache.csproj" />
-  </ItemGroup>
-  -->
+    <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.Redis\Metalama.Patterns.Caching.Backends.Redis.csproj" />
+    <ProjectReference Include="..\..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
+  </ItemGroup>  
+
 </Project>

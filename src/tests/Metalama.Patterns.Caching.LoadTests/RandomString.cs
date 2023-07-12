@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PostSharp.Patterns.Caching.Tests.LoadTests
+namespace Metalama.Patterns.Caching.LoadTests
 {
     // These strings would be less random when using multithreaded
     public static class RandomString

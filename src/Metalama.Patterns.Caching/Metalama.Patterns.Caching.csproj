@@ -50,6 +50,7 @@
     <InternalsVisibleTo Include="Metalama.Patterns.Caching.TestHelpers" />
     <InternalsVisibleTo Include="Metalama.Patterns.Caching.UnitTests" />
     <InternalsVisibleTo Include="Metalama.Patterns.Caching.ManualTest" />
+    <InternalsVisibleTo Include="Metalama.Patterns.Caching.LoadTests" />
   </ItemGroup>
 
   <ItemGroup>

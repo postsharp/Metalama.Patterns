@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using Metalama.Patterns.Caching.Implementation;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.Specialized;
-using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Implementation;
 
-namespace PostSharp.Patterns.Caching.Tests.LoadTests
+namespace Metalama.Patterns.Caching.LoadTests
 {
     public struct Interval
     {

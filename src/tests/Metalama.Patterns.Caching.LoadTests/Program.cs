@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using PostSharp.Patterns.Caching.Backends;
-using PostSharp.Patterns.Caching.Implementation;
-using PostSharp.Patterns.Caching.Tests.LoadTests.Tests;
-using PostSharp.Patterns.Utilities;
+﻿using Metalama.Patterns.Caching.LoadTests.Tests;
+using System;
 
-namespace PostSharp.Patterns.Caching.Tests.LoadTests
+namespace Metalama.Patterns.Caching.LoadTests
 {
     class Program
     { 

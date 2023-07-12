@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PostSharp.Patterns.Caching.Tests.LoadTests
+namespace Metalama.Patterns.Caching.LoadTests
 {
     public class StringCounter
     {
