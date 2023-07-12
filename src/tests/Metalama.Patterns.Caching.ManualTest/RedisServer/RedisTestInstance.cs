@@ -18,7 +18,7 @@ namespace Metalama.Patterns.Caching.ManualTest;
 /// </summary>
 public class RedisTestInstance : IDisposable
 {
-    static int _instanceCounter;
+    private static int _instanceCounter;
     public static readonly ConcurrentBag<WeakReference<RedisTestInstance>> Instances = new();
     private readonly Process process;
     private readonly TemporaryFile executable;

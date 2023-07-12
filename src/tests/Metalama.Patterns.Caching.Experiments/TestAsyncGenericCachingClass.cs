@@ -2,6 +2,7 @@
 
 // TODO: [Porting] Temporary, initial development only. Remove or adapt to proper tests.
 // ReSharper disable all
+
 #pragma warning disable
 
 // TODO: Work around #33441 : Some method calls in scope via `using static` are not transformed.
@@ -31,6 +32,7 @@ public sealed class TestAsyncGenericCachingClass<T>
     public async Task<T> GetValueAsync()
     {
         await Task.Delay( 1 );
+
         return default;
     }
 }

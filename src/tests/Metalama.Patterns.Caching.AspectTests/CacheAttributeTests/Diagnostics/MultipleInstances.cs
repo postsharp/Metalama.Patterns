@@ -23,18 +23,18 @@ public class MultipleInstances
             // Attribute plus aspect:
             amender
                 .Outbound
-                .Select( t => t.Methods.Single( m => m.Name == nameof( MethodWithAttribute ) ) )
+                .Select( t => t.Methods.Single( m => m.Name == nameof(MethodWithAttribute) ) )
                 .AddAspect( m => new CacheAttribute() );
 
             // Two aspects:
             amender
                 .Outbound
-                .Select( t => t.Methods.Single( m => m.Name == nameof( MethodWithoutAttribute ) ) )
+                .Select( t => t.Methods.Single( m => m.Name == nameof(MethodWithoutAttribute) ) )
                 .AddAspect( m => new CacheAttribute() );
 
             amender
                 .Outbound
-                .Select( t => t.Methods.Single( m => m.Name == nameof( MethodWithoutAttribute ) ) )
+                .Select( t => t.Methods.Single( m => m.Name == nameof(MethodWithoutAttribute) ) )
                 .AddAspect( m => new CacheAttribute() );
         }
     }

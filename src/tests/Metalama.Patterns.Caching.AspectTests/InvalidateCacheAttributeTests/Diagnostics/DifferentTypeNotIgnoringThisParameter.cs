@@ -17,9 +17,7 @@ public static class DifferentTypeNotIgnoringThisParameter
 
     public class InvalidatingClass
     {
-        [InvalidateCache( typeof(CachingClass), nameof( CachingClass.DoAction ) )]
-        public void Invalidate()
-        {
-        }
+        [InvalidateCache( typeof(CachingClass), nameof(CachingClass.DoAction) )]
+        public void Invalidate() { }
     }
 }

@@ -16,7 +16,10 @@ namespace Metalama.Patterns.Caching.Tests
         {
             public string LastMethodKey;
 
-            public override string BuildMethodKey( [Required] CachedMethodRegistration registration, [Required] IList<object?> arguments, object? instance = null )
+            public override string BuildMethodKey(
+                [Required] CachedMethodRegistration registration,
+                [Required] IList<object?> arguments,
+                object? instance = null )
             {
                 return this.LastMethodKey = base.BuildMethodKey( registration, arguments, instance );
             }

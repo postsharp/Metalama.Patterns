@@ -13,7 +13,7 @@ public
 #else
 internal
 #endif
-class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
+    class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
 {
     private const string connectionString =
         "Endpoint=sb://petrservicebusstandard.servicebus.windows.net/;SharedAccessKeyName=PetrSAS;SharedAccessKey=3C+I8BExn5AMRaxXJk4kTINM0f2uXCPWKtWAdmGgpQI=;EntityPath=petrtopic";

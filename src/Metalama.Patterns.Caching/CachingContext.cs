@@ -43,9 +43,9 @@ internal sealed class CachingContext : IDisposable, ICachingContext
             {
                 lock ( this._dependenciesSync )
                 {
-                    this._immutableDependencies = 
-                        this._dependencies == null 
-                            ? ImmutableHashSet<string>.Empty 
+                    this._immutableDependencies =
+                        this._dependencies == null
+                            ? ImmutableHashSet<string>.Empty
                             : this._dependencies.ToImmutableHashSet();
                 }
             }
@@ -100,7 +100,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
             this._dependencies.Add( dependency.GetCacheKey() );
         }
     }
-    
+
     [MemberNotNull( nameof(_dependencies) )]
     private void PrepareAddDependency()
     {

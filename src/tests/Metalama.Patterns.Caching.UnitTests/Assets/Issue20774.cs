@@ -13,9 +13,7 @@ namespace Metalama.Patterns.Caching.Tests.Assets.Issue20774
 
     public class InvalidatingClass
     {
-        [InvalidateCache( typeof( CachedClass ), "GetValue" )]
-        public void Invalidate()
-        {
-        }
+        [InvalidateCache( typeof(CachedClass), "GetValue" )]
+        public void Invalidate() { }
     }
 }

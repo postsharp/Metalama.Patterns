@@ -17,27 +17,32 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
             {
                 Console.WriteLine( "Test started." );
 
-                TestingCacheBackend backend =
+                var backend =
                     TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestValues.cacheConfigurationAttributeProfileName1 );
+
                 TestProfileConfigurationFactory.CreateProfile( TestValues.cacheConfigurationAttributeProfileName1 );
                 TestProfileConfigurationFactory.CreateProfile( TestValues.cacheConfigurationAttributeProfileName2 );
 
-                LocalChildCachingClass cachingClass = new LocalChildCachingClass();
+                var cachingClass = new LocalChildCachingClass();
 
-                LocalChildCachingClassOverridden cachingClassOverridden = new LocalChildCachingClassOverridden();
+                var cachingClassOverridden = new LocalChildCachingClassOverridden();
 
-                ReferencedParentCachingClass.ReferencedInnerCachingClassInBase referencedInnerCachingClassInBase
+                var referencedInnerCachingClassInBase
                     = new ReferencedParentCachingClass.ReferencedInnerCachingClassInBase();
-                ReferencedChildCachingClass.ReferencedInnerCachingClassInChild referencedInnerCachingClassInChild
+
+                var referencedInnerCachingClassInChild
                     = new ReferencedChildCachingClass.ReferencedInnerCachingClassInChild();
-                LocalChildCachingClass.LocalInnerCachingClassInChild localInnerCachingClassInChild
+
+                var localInnerCachingClassInChild
                     = new LocalChildCachingClass.LocalInnerCachingClassInChild();
 
-                ReferencedParentCachingClassOverridden.ReferencedInnerCachingClassInBaseOverridden referencedInnerCachingClassInBaseOverridden
+                var referencedInnerCachingClassInBaseOverridden
                     = new ReferencedParentCachingClassOverridden.ReferencedInnerCachingClassInBaseOverridden();
-                ReferencedChildCachingClassOverridden.ReferencedInnerCachingClassInChildOverridden referencedInnerCachingClassInChildOverridden
+
+                var referencedInnerCachingClassInChildOverridden
                     = new ReferencedChildCachingClassOverridden.ReferencedInnerCachingClassInChildOverridden();
-                LocalChildCachingClassOverridden.LocalInnerCachingClassInChildOverridden localInnerCachingClassInChildOverridden
+
+                var localInnerCachingClassInChildOverridden
                     = new LocalChildCachingClassOverridden.LocalInnerCachingClassInChildOverridden();
 
                 try
@@ -55,63 +60,99 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
                     }
 
                     cachingClass.GetValueReferencedBase();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "referenced base", backend, ref previousCachedKey,
+                        "referenced base",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName1 );
 
                     cachingClass.GetValueReferencedChild();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "referenced child", backend, ref previousCachedKey,
+                        "referenced child",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName1 );
 
                     cachingClass.GetValueLocalChild();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "local child", backend, ref previousCachedKey,
+                        "local child",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.defaultProfileName );
 
                     cachingClassOverridden.GetValueReferencedBase();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "overridden referenced base", backend, ref previousCachedKey,
+                        "overridden referenced base",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName2 );
 
                     cachingClassOverridden.GetValueReferencedChild();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "overridden referenced child", backend, ref previousCachedKey,
+                        "overridden referenced child",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName2 );
 
                     cachingClassOverridden.GetValueLocalChild();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "overridden local child", backend, ref previousCachedKey,
+                        "overridden local child",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName2 );
 
                     referencedInnerCachingClassInBase.GetValueReferencedInnerBase();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "referenced inner base", backend, ref previousCachedKey,
+                        "referenced inner base",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName1 );
 
                     referencedInnerCachingClassInChild.GetValueReferencedInnerChild();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "referenced inner child", backend, ref previousCachedKey,
+                        "referenced inner child",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName1 );
 
                     localInnerCachingClassInChild.GetValueLocalInnerChild();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "local inner child", backend, ref previousCachedKey,
+                        "local inner child",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.defaultProfileName );
 
                     referencedInnerCachingClassInBaseOverridden.GetValueReferencedInnerBase();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "overridden referenced inner base", backend, ref previousCachedKey,
+                        "overridden referenced inner base",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName1 );
 
                     referencedInnerCachingClassInChildOverridden.GetValueReferencedInnerChild();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "overridden referenced inner child", backend, ref previousCachedKey,
+                        "overridden referenced inner child",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.cacheConfigurationAttributeProfileName1 );
 
                     localInnerCachingClassInChildOverridden.GetValueLocalInnerChild();
+
                     CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                        "overridden local inner child", backend, ref previousCachedKey,
+                        "overridden local inner child",
+                        backend,
+                        ref previousCachedKey,
                         TestValues.defaultProfileName );
 
                     Console.WriteLine( "Test completed." );

@@ -11,7 +11,7 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IA
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
-    public RedisDistributedCachingBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture ) : base( testContext ) 
+    public RedisDistributedCachingBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture ) : base( testContext )
     {
         this._redisSetupFixture = redisSetupFixture;
     }

@@ -27,7 +27,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
         {
             using ( var cache = new NullCachingBackend() )
             {
-                CachedValueClass storedValue0 = new CachedValueClass( 0 );
+                var storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
                 var cacheItem0 = new CacheItem( storedValue0 );
 

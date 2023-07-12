@@ -6,7 +6,6 @@ using Xunit;
 using Metalama.Patterns.Caching.Serializers;
 using System.Runtime.Serialization;
 
-
 namespace Metalama.Patterns.Caching.Tests.Serializers
 {
 #if NET_DATA_CONTRACT_SERIALIZER

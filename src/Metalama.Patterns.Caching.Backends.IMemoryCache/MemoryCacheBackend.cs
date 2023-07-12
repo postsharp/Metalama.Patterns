@@ -233,7 +233,7 @@ public sealed class MemoryCacheBackend : CachingBackend
         var itemKey = GetItemKey( key );
         var lockTaken = false;
         var previousValue = (MemoryCacheValue?) this._cache.Get( itemKey );
-        
+
         try
         {
             if ( previousValue != null )

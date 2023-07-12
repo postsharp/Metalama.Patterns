@@ -8,13 +8,11 @@ namespace Metalama.Patterns.Caching.ManualTest;
 /// </summary>
 public sealed class RedisSetupFixture : IDisposable
 {
-    public RedisSetupFixture()
-    { 
-    }
+    public RedisSetupFixture() { }
 
     void IDisposable.Dispose() => this.RedisCleanup();
 
-    private readonly object _lock = new object();
+    private readonly object _lock = new();
     private RedisTestInstance? _testInstance;
 
     /// <summary>
@@ -26,12 +24,14 @@ public sealed class RedisSetupFixture : IDisposable
         {
             lock ( this._lock )
             {
-                this._testInstance ??= new RedisTestInstance( nameof( RedisSetupFixture ) );
+                this._testInstance ??= new RedisTestInstance( nameof(RedisSetupFixture) );
+
                 if ( this._testInstance.IsDisposed )
                 {
-                    throw new ObjectDisposedException( nameof( RedisSetupFixture ) + "." + nameof( this.TestInstance ) );
+                    throw new ObjectDisposedException( nameof(RedisSetupFixture) + "." + nameof(this.TestInstance) );
                 }
             }
+
             return this._testInstance;
         }
     }

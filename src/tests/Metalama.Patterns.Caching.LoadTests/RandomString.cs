@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System;
 
 namespace Metalama.Patterns.Caching.LoadTests
 {
@@ -11,7 +13,8 @@ namespace Metalama.Patterns.Caching.LoadTests
 
         public static char[] AllowedChars =
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#&@{}:;".ToCharArray();
-            //"abc".ToCharArray();
+
+        //"abc".ToCharArray();
 
         public static string New( int minLength, int maxLength )
         {
@@ -20,26 +23,26 @@ namespace Metalama.Patterns.Caching.LoadTests
                 random = new Random();
             }
 
-            int length = random.Next( minLength, maxLength + 1 );
+            var length = random.Next( minLength, maxLength + 1 );
 
             return New( length );
         }
 
         public static string New( int length )
         {
-            if (random == null)
+            if ( random == null )
             {
                 random = new Random();
             }
 
-            char[] chars = new char[length];
+            var chars = new char[length];
 
-            for (int i = 0; i < length; i++)
+            for ( var i = 0; i < length; i++ )
             {
-                chars[i] = AllowedChars[random.Next(0, AllowedChars.Length)];
+                chars[i] = AllowedChars[random.Next( 0, AllowedChars.Length )];
             }
 
-            return new string(chars);
+            return new string( chars );
         }
     }
 }

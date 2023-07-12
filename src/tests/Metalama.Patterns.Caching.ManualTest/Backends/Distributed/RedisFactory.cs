@@ -33,7 +33,7 @@ internal static class RedisFactory
     {
         var redisTestInstance = CreateTestInstance( testContext, redisSetupFixture );
 
-        RedisCachingBackendConfiguration configuration =
+        var configuration =
             new RedisCachingBackendConfiguration
             {
                 KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
@@ -49,14 +49,14 @@ internal static class RedisFactory
 
     public static DisposingConnectionMultiplexer CreateConnection( TestContext testContext )
     {
-        SocketManager socketManager = new SocketManager();
+        var socketManager = new SocketManager();
 
-        ConfigurationOptions redisConfigurationOptions = new ConfigurationOptions();
+        var redisConfigurationOptions = new ConfigurationOptions();
         redisConfigurationOptions.EndPoints.Add( (EndPoint) testContext.Properties["RedisEndpoint"] );
         redisConfigurationOptions.AbortOnConnectFail = false;
         redisConfigurationOptions.SocketManager = socketManager;
 
-        ConnectionMultiplexer connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
+        var connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
 
         return new DisposingConnectionMultiplexer( connection, socketManager );
     }
@@ -76,7 +76,7 @@ internal static class RedisFactory
             testContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
         }
 
-        RedisCachingBackendConfiguration configuration = new RedisCachingBackendConfiguration
+        var configuration = new RedisCachingBackendConfiguration
         {
             KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
             OwnsConnection = true,
@@ -258,8 +258,7 @@ internal class DisposingConnectionMultiplexer : IConnectionMultiplexer, IDisposa
 
     Task<long> IConnectionMultiplexer.PublishReconfigureAsync( CommandFlags flags ) => this.inner.PublishReconfigureAsync( flags );
 
-    void IConnectionMultiplexer.RegisterProfiler( Func<ProfilingSession> profilingSessionProvider )
-        => this.inner.RegisterProfiler( profilingSessionProvider );
+    void IConnectionMultiplexer.RegisterProfiler( Func<ProfilingSession> profilingSessionProvider ) => this.inner.RegisterProfiler( profilingSessionProvider );
 
     void IConnectionMultiplexer.ResetStormLog() => this.inner.ResetStormLog();
 
@@ -315,14 +314,14 @@ internal class DisposingRedisCachingBackend : CachingBackendEnhancer
 
     private static RedisCachingBackend GetRedisCachingBackend( CachingBackend cachingBackend )
     {
-        CachingBackendEnhancer enhancer = cachingBackend as CachingBackendEnhancer;
+        var enhancer = cachingBackend as CachingBackendEnhancer;
 
         if ( enhancer != null )
         {
             return GetRedisCachingBackend( enhancer.UnderlyingBackend );
         }
 
-        RedisCachingBackend redisCachingBackend = cachingBackend as RedisCachingBackend;
+        var redisCachingBackend = cachingBackend as RedisCachingBackend;
 
         if ( redisCachingBackend != null )
         {

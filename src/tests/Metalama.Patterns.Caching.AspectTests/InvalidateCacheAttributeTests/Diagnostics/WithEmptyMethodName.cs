@@ -14,8 +14,7 @@ public static class WithEmptyMethodName
             return null;
         }
 
-        [InvalidateCache("")]
-        public void Invalidate()
-        { }
+        [InvalidateCache( "" )]
+        public void Invalidate() { }
     }
 }

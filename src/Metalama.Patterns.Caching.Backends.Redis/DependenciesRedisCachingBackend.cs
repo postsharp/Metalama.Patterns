@@ -43,8 +43,8 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         string dependencies = this.Database.StringGet( dependenciesKey );
 
         transaction?.AddCondition(
-            dependencies == null 
-                ? Condition.KeyNotExists( dependenciesKey ) 
+            dependencies == null
+                ? Condition.KeyNotExists( dependenciesKey )
                 : Condition.StringEqual( dependenciesKey, dependencies ) );
 
         return dependencies?.Split( _dependenciesSeparator );
@@ -56,8 +56,8 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         string dependencies = await this.Database.StringGetAsync( dependenciesKey );
 
         transaction?.AddCondition(
-            dependencies == null 
-                ? Condition.KeyNotExists( dependenciesKey ) 
+            dependencies == null
+                ? Condition.KeyNotExists( dependenciesKey )
                 : Condition.StringEqual( dependenciesKey, dependencies ) );
 
         return dependencies?.Split( _dependenciesSeparator );

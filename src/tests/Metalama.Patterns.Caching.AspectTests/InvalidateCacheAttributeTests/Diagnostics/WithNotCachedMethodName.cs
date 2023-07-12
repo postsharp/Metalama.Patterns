@@ -13,8 +13,7 @@ public static class WithNotCachedMethodName
             return null;
         }
 
-        [InvalidateCache(nameof(DoAction))]
-        public void Invalidate()
-        { }
+        [InvalidateCache( nameof(DoAction) )]
+        public void Invalidate() { }
     }
 }

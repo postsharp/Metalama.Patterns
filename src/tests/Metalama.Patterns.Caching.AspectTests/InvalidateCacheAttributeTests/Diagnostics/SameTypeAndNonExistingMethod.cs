@@ -15,8 +15,6 @@ public static class SameTypeAndNonExistingMethod
         }
 
         [InvalidateCache( "NonExistingMethod" )]
-        public void Invalidate()
-        {
-        }
+        public void Invalidate() { }
     }
 }

@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.In
          * the InvalidateCacheAttribute aspect must look at the Attributes collection on the dependency 
          * method to determine if it has been cached. This test verifies that behaviour.
          */
-        [InvalidateCache(typeof(DependencyClass), nameof(DependencyClass.CachedUsingAttribute))]
+        [InvalidateCache( typeof(DependencyClass), nameof(DependencyClass.CachedUsingAttribute) )]
         public void InvalidateMethodCachedUsingAttribute() { }
 
         /* When the CacheAttrbute aspect is applied by a fabric purely as an aspect, the Metalama framework
@@ -22,7 +22,7 @@ namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.In
          * explicitly introduces a corresponding [Cache] attribute to its target if it does not have one
          * already. This test verifies that behaviour.
          */
-        [InvalidateCache(typeof(DependencyClass), nameof(DependencyClass.CachedUsingFabric))]
+        [InvalidateCache( typeof(DependencyClass), nameof(DependencyClass.CachedUsingFabric) )]
         public void InvalidateMethodCachedUsingFabric() { }
     }
 }

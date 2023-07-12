@@ -165,8 +165,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         return this;
     }
 
-    private void InitCommon( RedisCachingBackendConfiguration configuration ) 
-        => this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
+    private void InitCommon( RedisCachingBackendConfiguration configuration ) => this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
     /// <summary>
     /// Gets the Redis <see cref="IDatabase"/> used by the current object.

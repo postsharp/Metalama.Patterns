@@ -23,7 +23,8 @@ public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFi
 
         return new[]
         {
-            await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix ), await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix )
+            await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix ),
+            await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix )
         };
     }
 
@@ -31,7 +32,11 @@ public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFi
     {
         var prefix = Guid.NewGuid().ToString();
 
-        return new[] { RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix ), RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix ) };
+        return new[]
+        {
+            RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix ),
+            RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix )
+        };
     }
 
     protected override void ConnectToRedisIfRequired()

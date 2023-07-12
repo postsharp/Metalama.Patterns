@@ -83,7 +83,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
             var kind = tokenizer.GetNext();
             var backendIdStr = tokenizer.GetNext();
             var key = tokenizer.GetRest();
-            
+
             if ( !Guid.TryParse( backendIdStr, out var sourceId ) )
             {
                 activity.SetOutcome(

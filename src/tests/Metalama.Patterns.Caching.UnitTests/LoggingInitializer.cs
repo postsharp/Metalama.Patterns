@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 // TODO: !!! [Porting] Disabled: Logging in caching tests currently rely on TextLoggingBackend.
-#if false
 
+#if false
 using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests

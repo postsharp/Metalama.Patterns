@@ -13,7 +13,7 @@ using System.Collections;
 using System.Reflection;
 using static Metalama.Patterns.Caching.CachingDiagnosticDescriptors.InvalidateCache;
 
-[assembly:AspectOrder(typeof(InvalidateCacheAttribute), typeof(CacheAttribute))]
+[assembly: AspectOrder( typeof(InvalidateCacheAttribute), typeof(CacheAttribute) )]
 
 namespace Metalama.Patterns.Caching;
 
@@ -24,7 +24,6 @@ namespace Metalama.Patterns.Caching;
 [AttributeUsage( AttributeTargets.Method, AllowMultiple = true )]
 public sealed class InvalidateCacheAttribute : MethodAspect
 {
-
     private readonly Type? _invalidatedMethodsDeclaringType;
 
     private readonly string[] _invalidatedMethodNames;
@@ -63,7 +62,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     {
         base.BuildEligibility( builder );
 
-        builder.MustSatisfy( m => !m.ReturnType.GetAsyncInfo().IsAwaitable || m.ReturnType.IsTask(), m => $"awaitable types other than Task and Task<T> are not supported." );
+        builder.MustSatisfy(
+            m => !m.ReturnType.GetAsyncInfo().IsAwaitable || m.ReturnType.IsTask(),
+            m => $"awaitable types other than Task and Task<T> are not supported." );
     }
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
@@ -94,18 +95,16 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         }
 
         // TODO: [Porting] Discuss idea of common purposes, exposing etc.
-        var logSourceFieldName = builder.Target.DeclaringType.ToSerializableId().MakeAssociatedIdentifier( "Metalama.Patterns/StaticLogSourceForType", "_logSource" );
+        var logSourceFieldName = builder.Target.DeclaringType.ToSerializableId()
+            .MakeAssociatedIdentifier( "Metalama.Patterns/StaticLogSourceForType", "_logSource" );
 
         var logSourceFieldAdviceResult = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
-            nameof( _logSource ),
+            nameof(_logSource),
             IntroductionScope.Static,
             OverrideStrategy.Ignore,
             b => b.Name = logSourceFieldName,
-            tags: new 
-            { 
-                type = builder.Target.DeclaringType 
-            } );
+            tags: new { type = builder.Target.DeclaringType } );
 
         // TODO: Update when #33489 fixed.
         // Remove this when fixed:
@@ -113,19 +112,21 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             ? builder.Target.DeclaringType.Fields.Single( f => f.Name == logSourceFieldName )
             : logSourceFieldAdviceResult.Declaration;
 
-        var arrayBuilder = new ArrayBuilder( typeof( MethodInfo ) );
+        var arrayBuilder = new ArrayBuilder( typeof(MethodInfo) );
+
         foreach ( var method in invalidatedMethods.Keys )
         {
             // TODO: !!! Use ThrowIfMissing.
             arrayBuilder.Add( method.ToMethodInfo() );
         }
 
-        var methodsInvalidatedByFieldName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{3AB07EE4-9AB7-423C-810A-994D9BC620CA}", $"_methodsInvalidatedBy_{builder.Target.Name}" );
+        var methodsInvalidatedByFieldName = builder.Target.ToSerializableId()
+            .MakeAssociatedIdentifier( "{3AB07EE4-9AB7-423C-810A-994D9BC620CA}", $"_methodsInvalidatedBy_{builder.Target.Name}" );
 
         var methodsInvalidatedByField = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
             methodsInvalidatedByFieldName,
-            typeof( MethodInfo[] ),
+            typeof(MethodInfo[]),
             IntroductionScope.Static,
             OverrideStrategy.Fail,
             b =>
@@ -137,8 +138,8 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         var asyncInfo = builder.Target.GetAsyncInfo();
 
         var templates = new MethodTemplateSelector(
-            nameof( this.OverrideMethod ),
-            builder.Target.ReturnType.IsTask( withResult: false ) ? nameof( this.OverrideMethodAsyncTask ) : nameof( this.OverrideMethodAsyncTaskOfT ),
+            nameof(this.OverrideMethod),
+            builder.Target.ReturnType.IsTask( withResult: false ) ? nameof(this.OverrideMethodAsyncTask) : nameof(this.OverrideMethodAsyncTaskOfT),
             useAsyncTemplateForAnyAwaitable: true );
 
         builder.Advice.Override(
@@ -155,20 +156,20 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
     [Template]
     private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
-    
+
     [Template]
-    public dynamic OverrideMethod( 
-        IField logSourceField, 
-        IEnumerable<InvalidatedMethodInfo> invalidatedMethods, 
+    public dynamic OverrideMethod(
+        IField logSourceField,
+        IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
         IType TReturn /* not used */ )
     {
-        using ( var activity = logSourceField.Value.Default.OpenActivity( 
-            FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+        using ( var activity = logSourceField.Value.Default.OpenActivity(
+                   FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
         {
             try
-            {                
-                dynamic result = meta.Proceed();
+            {
+                var result = meta.Proceed();
 
                 var index = meta.CompileTime( 0 );
 
@@ -189,9 +190,10 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             catch ( Exception e )
             {
                 activity.SetException( e );
+
                 throw;
             }
-        }        
+        }
     }
 
     [Template]
@@ -206,9 +208,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         // TODO: Automagically accept CancellationToken parameter?
 
         using ( var activity = logSourceField.Value.Default.OpenActivity(
-            FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+                   FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
         {
-            dynamic? result = TReturn.DefaultValue();
+            var result = TReturn.DefaultValue();
 
             try
             {
@@ -219,6 +221,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                     // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                     // and the await instrumentation policy is not applied.
                     activity.Suspend();
+
                     try
                     {
                         result = await task;
@@ -250,6 +253,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                         // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                         // and the await instrumentation policy is not applied.
                         activity.Suspend();
+
                         try
                         {
                             await task;
@@ -270,16 +274,17 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             catch ( Exception e )
             {
                 activity.SetException( e );
+
                 throw;
             }
         }
     }
 
     [Template]
-    public async Task OverrideMethodAsyncTask( 
-        IField logSourceField, 
-        IEnumerable<InvalidatedMethodInfo> invalidatedMethods, 
-        IField methodsInvalidatedByField, 
+    public async Task OverrideMethodAsyncTask(
+        IField logSourceField,
+        IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
+        IField methodsInvalidatedByField,
         IType TReturn /* not used */ )
     {
         // TODO: Abstract to RunTime helper where possible.
@@ -287,7 +292,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         // TODO: Automagically accept CancellationToken parameter?
 
         using ( var activity = logSourceField.Value.Default.OpenActivity(
-            FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+                   FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
         {
             try
             {
@@ -298,6 +303,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                     // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                     // and the await instrumentation policy is not applied.
                     activity.Suspend();
+
                     try
                     {
                         await task;
@@ -329,6 +335,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                         // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                         // and the await instrumentation policy is not applied.
                         activity.Suspend();
+
                         try
                         {
                             await task;
@@ -347,6 +354,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             catch ( Exception e )
             {
                 activity.SetException( e );
+
                 throw;
             }
         }
@@ -359,7 +367,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         for ( var i = 0; i < invalidatedMethod.ParameterMap.Length; i++ )
         {
             var mappedArgumentPosition = invalidatedMethod.ParameterMap[i];
-            
+
             arrayBuilder.Add(
                 mappedArgumentPosition >= 0
                     ? invalidatedMethod.Method.Parameters[mappedArgumentPosition]
@@ -382,16 +390,19 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         if ( attribute._invalidatedMethodNames == null || attribute._invalidatedMethodNames.Length == 0 )
         {
             builder.Diagnostics.Report( ErrorInvalidAspectConstructorNoMethodName.WithArguments( builder.Target ) );
+
             return false;
         }
-        
+
         if ( attribute._invalidatedMethodNames.Any( s => string.IsNullOrWhiteSpace( s ) ) )
         {
             builder.Diagnostics.Report( ErrorInvalidAspectConstructorNullOrWhitespaceString.WithArguments( builder.Target ) );
+
             return false;
         }
 
         var invalidatingMethod = builder.Target;
+
         var invalidatedMethodsDeclaringType = attribute._invalidatedMethodsDeclaringType == null
             ? invalidatingMethod.DeclaringType
             : (INamedType) TypeFactory.GetType( attribute._invalidatedMethodsDeclaringType );
@@ -402,7 +413,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         DictionaryOfLists<string, IDiagnostic> matchingErrorsDictionary = new();
         DictionaryOfLists<string, InvalidatedMethodInfo?> invalidatedMethodsDictionary = new();
 
-        var cacheAttributeType = (INamedType) TypeFactory.GetType( typeof( CacheAttribute ) );
+        var cacheAttributeType = (INamedType) TypeFactory.GetType( typeof(CacheAttribute) );
         var isValid = true;
 
         foreach ( var invalidatedMethod in candidateInvalidatedMethods )
@@ -412,10 +423,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 continue;
             }
 
-            if ( invalidatedMethods.ContainsKey( invalidatedMethod ))
+            if ( invalidatedMethods.ContainsKey( invalidatedMethod ) )
             {
                 // Already processed: add null so that the later checks based on list count are handled correctly.
                 invalidatedMethodsDictionary.Add( invalidatedMethod.Name, null );
+
                 continue;
             }
 
@@ -438,11 +450,13 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
             // Check that the 'this' parameter is compatible.
             if ( !invalidatedMethod.IsStatic && !cacheAspectConfiguration.IgnoreThisParameter.GetValueOrDefault() &&
-                 (invalidatingMethod.IsStatic || !(invalidatingMethod.DeclaringType == invalidatedMethod.DeclaringType || invalidatingMethod.DeclaringType.DerivesFrom( invalidatedMethod.DeclaringType ))) )
+                 (invalidatingMethod.IsStatic || !(invalidatingMethod.DeclaringType == invalidatedMethod.DeclaringType
+                                                   || invalidatingMethod.DeclaringType.DerivesFrom( invalidatedMethod.DeclaringType ))) )
             {
                 matchingErrorsDictionary.Add(
                     invalidatedMethod.Name,
-                    ErrorThisParameterCannotBeMapped.WithArguments( (invalidatingMethod, invalidatedMethod, invalidatingMethod.DeclaringType, invalidatedMethod.DeclaringType) ) );
+                    ErrorThisParameterCannotBeMapped.WithArguments(
+                        (invalidatingMethod, invalidatedMethod, invalidatingMethod.DeclaringType, invalidatedMethod.DeclaringType) ) );
 
                 continue;
             }
@@ -457,8 +471,8 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             for ( var i = 0; i < invalidatedMethodParameters.Count; i++ )
             {
                 var invalidatedMethodParameter = invalidatedMethodParameters[i];
-                
-                if ( invalidatedMethodParameter.Attributes.Any( typeof( NotCacheKeyAttribute ) ) )
+
+                if ( invalidatedMethodParameter.Attributes.Any( typeof(NotCacheKeyAttribute) ) )
                 {
                     continue;
                 }
@@ -474,6 +488,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                         ErrorMissingParameterInInvalidatingMethod.WithArguments( (invalidatedMethod, invalidatedMethod, invalidatedMethodParameter.Name) ) );
 
                     allParametersMatching = false;
+
                     continue;
                 }
 
@@ -485,6 +500,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                         ErrorParameterTypeIsNotCompatible.WithArguments( (invalidatingMethod, invalidatedMethod, invalidatedMethodParameter.Name) ) );
 
                     allParametersMatching = false;
+
                     continue;
                 }
 
@@ -511,15 +527,17 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                     foreach ( var diagnostic in diagnostics )
                     {
                         builder.Diagnostics.Report( diagnostic );
-                    }                    
+                    }
                 }
                 else
                 {
                     // The method of the given name does not exist
-                    builder.Diagnostics.Report( ErrorCachedMethodNotFound.WithArguments( (invalidatingMethod, invalidatedMethodName, invalidatedMethodsDeclaringType) ) );
+                    builder.Diagnostics.Report(
+                        ErrorCachedMethodNotFound.WithArguments( (invalidatingMethod, invalidatedMethodName, invalidatedMethodsDeclaringType) ) );
                 }
 
                 isValid = false;
+
                 continue;
             }
 
@@ -528,6 +546,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 builder.Diagnostics.Report( ErrorMultipleOverloadsFound.WithArguments( (invalidatingMethod, invalidatedMethodName) ) );
 
                 isValid = false;
+
                 continue;
             }
 
@@ -541,7 +560,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                     builder.Diagnostics.Report( InfoMethodIsInvalidatedBy.WithArguments( invalidatingMethod ), invalidatedMethodInfo.Method );
                     builder.Diagnostics.Report( InfoMethodInvalidates.WithArguments( invalidatedMethodInfo.Method ), invalidatingMethod );
 #endif
-                    
+
                     invalidatedMethods.Add( invalidatedMethodInfo.Method, invalidatedMethodInfo );
                 }
             }
@@ -579,8 +598,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             return this._collectionsDictionary.GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-            => this.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 
     [CompileTime]
@@ -590,6 +608,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         {
             this.Method = method;
             this.ParameterMap = new int[method.Parameters.Count];
+
             for ( var i = 0; i < this.ParameterMap.Length; i++ )
             {
                 this.ParameterMap[i] = -1;

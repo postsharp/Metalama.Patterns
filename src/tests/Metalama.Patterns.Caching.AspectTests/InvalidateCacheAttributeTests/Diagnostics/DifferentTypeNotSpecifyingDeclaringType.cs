@@ -17,8 +17,7 @@ public static class DifferentTypeNotSpecifyingDeclaringType
 
     public class InvalidatingClass
     {
-        [InvalidateCache(nameof(CachingClass.DoAction))]
-        public void Invalidate()
-        { }
+        [InvalidateCache( nameof(CachingClass.DoAction) )]
+        public void Invalidate() { }
     }
 }

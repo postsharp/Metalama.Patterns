@@ -116,5 +116,10 @@ internal sealed class AutoReloadManager
         }
     }
 
-    private sealed record AutoRefreshInfo( IRunTimeCacheItemConfiguration Configuration, Type ReturnType, Func<object?> ValueProvider, LogSource Logger, bool IsAsync ); 
+    private sealed record AutoRefreshInfo(
+        IRunTimeCacheItemConfiguration Configuration,
+        Type ReturnType,
+        Func<object?> ValueProvider,
+        LogSource Logger,
+        bool IsAsync );
 }

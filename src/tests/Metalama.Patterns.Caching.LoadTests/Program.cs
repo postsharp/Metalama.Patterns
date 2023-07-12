@@ -1,15 +1,17 @@
-﻿using Metalama.Patterns.Caching.LoadTests.Tests;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Patterns.Caching.LoadTests.Tests;
 using System;
 
 namespace Metalama.Patterns.Caching.LoadTests
 {
-    class Program
-    { 
-        static void Main( string[] args )
+    internal class Program
+    {
+        private static void Main( string[] args )
         {
             Console.WriteLine( "create" );
 
-            RedisLoadTestConfiguration configuration =
+            var configuration =
                 new RedisLoadTestConfiguration()
                 {
                     CollectorsCount = 2,
@@ -25,9 +27,9 @@ namespace Metalama.Patterns.Caching.LoadTests
                 };
 
             //TimeSpan testDuration = TimeSpan.FromHours( 1 );
-            TimeSpan duration = TimeSpan.FromSeconds( 30 );
+            var duration = TimeSpan.FromSeconds( 30 );
 
-            RedisLoadTest test = new RedisLoadTest();
+            var test = new RedisLoadTest();
 
             test.Test( configuration, duration );
         }

@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 // for now, just suppress all the warnings.
 
 // Resharper disable All
-#pragma  warning disable
+#pragma warning disable
 
 // Ported from PostSharp.Patterns.Common/Threading/Primitives
 internal sealed class AwaitableEvent

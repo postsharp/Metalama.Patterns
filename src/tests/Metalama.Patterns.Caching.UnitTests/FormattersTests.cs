@@ -71,9 +71,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private class AnimalFormatter : Formatter<IAnimal>
         {
-            public AnimalFormatter( IFormatterRepository repository ) : base( repository )
-            {
-            }
+            public AnimalFormatter( IFormatterRepository repository ) : base( repository ) { }
 
             public override void Write( UnsafeStringBuilder stringBuilder, IAnimal value )
             {
@@ -83,9 +81,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private class DogFormatter : Formatter<Dog>
         {
-            public DogFormatter( IFormatterRepository repository ) : base( repository )
-            {
-            }
+            public DogFormatter( IFormatterRepository repository ) : base( repository ) { }
 
             public override void Write( UnsafeStringBuilder stringBuilder, Dog value )
             {

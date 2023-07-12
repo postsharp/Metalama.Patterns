@@ -1,4 +1,6 @@
-﻿using Metalama.Patterns.Caching.Implementation;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Patterns.Caching.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -37,7 +39,7 @@ namespace Metalama.Patterns.Caching.LoadTests
             private readonly CachingBackend backend;
             private Thread thread;
             private CancellationTokenSource cancellationTokenSource;
-            private readonly Random random = new Random();
+            private readonly Random random = new();
             private const int randomnessMultiplier = 1000;
 
             private BigInteger setItemCount = BigInteger.Zero;
@@ -46,7 +48,7 @@ namespace Metalama.Patterns.Caching.LoadTests
             private BigInteger invalidateDependencyCount = BigInteger.Zero;
             private BigInteger removeItemCount = BigInteger.Zero;
             private BigInteger invalidatedDependenciesCount = BigInteger.Zero;
-            private readonly object invalidatedDependenciesCountLock = new object();
+            private readonly object invalidatedDependenciesCountLock = new();
             private BigInteger evictedRemovedItemsCount = BigInteger.Zero;
             private BigInteger expiredRemovedItemsCount = BigInteger.Zero;
             private BigInteger invalidatedRemovedItemsCount = BigInteger.Zero;
@@ -54,8 +56,8 @@ namespace Metalama.Patterns.Caching.LoadTests
             private BigInteger otherRemovedItemsCount = BigInteger.Zero;
             private BigInteger unknownRemovedItemsCount = BigInteger.Zero;
             private BigInteger sharedDependencies = BigInteger.Zero;
-            private readonly object removedItemsCountLock = new object();
-            private readonly StringCounter errorsCounters = new StringCounter();
+            private readonly object removedItemsCountLock = new();
+            private readonly StringCounter errorsCounters = new();
 
             public TestClient( LoadTest loadTest, Func<CachingBackend> cachingBackendFactory )
             {
@@ -63,46 +65,51 @@ namespace Metalama.Patterns.Caching.LoadTests
                 this.backend = cachingBackendFactory.Invoke();
 
                 this.backend.DependencyInvalidated += ( sender, args ) =>
-                                                      {
-                                                          lock ( this.invalidatedDependenciesCountLock )
-                                                          {
-                                                              this.invalidatedDependenciesCount++;
-                                                          }
-                                                      };
+                {
+                    lock ( this.invalidatedDependenciesCountLock )
+                    {
+                        this.invalidatedDependenciesCount++;
+                    }
+                };
 
                 this.backend.ItemRemoved += ( sender, args ) =>
-                                            {
-                                                lock ( this.removedItemsCountLock )
-                                                {
-                                                    switch ( args.RemovedReason )
-                                                    {
-                                                        case CacheItemRemovedReason.Evicted:
-                                                            this.evictedRemovedItemsCount++;
-                                                            break;
+                {
+                    lock ( this.removedItemsCountLock )
+                    {
+                        switch ( args.RemovedReason )
+                        {
+                            case CacheItemRemovedReason.Evicted:
+                                this.evictedRemovedItemsCount++;
 
-                                                        case CacheItemRemovedReason.Expired:
-                                                            this.expiredRemovedItemsCount++;
-                                                            break;
+                                break;
 
-                                                        case CacheItemRemovedReason.Invalidated:
-                                                            this.invalidatedRemovedItemsCount++;
-                                                            break;
+                            case CacheItemRemovedReason.Expired:
+                                this.expiredRemovedItemsCount++;
 
-                                                        case CacheItemRemovedReason.Removed:
-                                                            this.removedItemsCount++;
-                                                            break;
+                                break;
 
-                                                        case CacheItemRemovedReason.Other:
-                                                            this.otherRemovedItemsCount++;
-                                                            break;
+                            case CacheItemRemovedReason.Invalidated:
+                                this.invalidatedRemovedItemsCount++;
 
-                                                        default:
-                                                            this.unknownRemovedItemsCount++;
-                                                            break;
+                                break;
 
-                                                    }
-                                                }
-                                            };
+                            case CacheItemRemovedReason.Removed:
+                                this.removedItemsCount++;
+
+                                break;
+
+                            case CacheItemRemovedReason.Other:
+                                this.otherRemovedItemsCount++;
+
+                                break;
+
+                            default:
+                                this.unknownRemovedItemsCount++;
+
+                                break;
+                        }
+                    }
+                };
             }
 
             public void Start()
@@ -121,24 +128,28 @@ namespace Metalama.Patterns.Caching.LoadTests
             {
                 while ( !this.cancellationTokenSource.IsCancellationRequested )
                 {
-                    int nextAction = this.GetNextRandomNumber( 4 );
+                    var nextAction = this.GetNextRandomNumber( 4 );
 
                     switch ( nextAction )
                     {
                         case 0:
                             this.SetItem();
+
                             break;
 
                         case 1:
                             this.GetItem();
+
                             break;
 
                         case 2:
                             this.RemoveItem();
+
                             break;
 
                         case 3:
                             this.InvalidateDependency();
+
                             break;
 
                         default:
@@ -159,31 +170,34 @@ namespace Metalama.Patterns.Caching.LoadTests
 
             private int GetNextRandomNumber( int minValue, int maxValue )
             {
-                int range = maxValue - minValue;
+                var range = maxValue - minValue;
+
                 return this.random.Next( 0, range * randomnessMultiplier ) % range + minValue;
             }
 
             private string GetRandomValueKey()
             {
-                int index = this.GetNextRandomNumber( this.loadTest.valueKeys.Length );
+                var index = this.GetNextRandomNumber( this.loadTest.valueKeys.Length );
+
                 return this.loadTest.valueKeys[index];
             }
 
             private string GetRandomDependencyKey()
             {
-                int index = this.GetNextRandomNumber( this.loadTest.dependencyKeys.Length );
+                var index = this.GetNextRandomNumber( this.loadTest.dependencyKeys.Length );
+
                 return this.loadTest.dependencyKeys[index];
             }
 
             private void SetItem( string sharedDependency = null )
             {
-                string key = this.GetRandomValueKey();
+                var key = this.GetRandomValueKey();
 
-                Payload payload = new Payload();
+                var payload = new Payload();
 
                 payload.Value = new string( 'a', this.GetNextRandomNumber( this.loadTest.configuration.ValueLength ) );
 
-                int dependenciesCount = this.GetNextRandomNumber( this.loadTest.configuration.DependenciesPerValueCount );
+                var dependenciesCount = this.GetNextRandomNumber( this.loadTest.configuration.DependenciesPerValueCount );
 
                 if ( sharedDependency != null )
                 {
@@ -192,11 +206,11 @@ namespace Metalama.Patterns.Caching.LoadTests
 
                 CacheItem item;
 
-                CacheItemConfiguration configuration = new CacheItemConfiguration()
-                                                       {
-                                                           SlidingExpiration =
-                                                               TimeSpan.FromSeconds( this.GetNextRandomNumber( this.loadTest.configuration.ValueKeyExpiry ) )
-                                                       };
+                var configuration = new CacheItemConfiguration()
+                {
+                    SlidingExpiration =
+                        TimeSpan.FromSeconds( this.GetNextRandomNumber( this.loadTest.configuration.ValueKeyExpiry ) )
+                };
 
                 string dependencyToShare = null;
 
@@ -208,7 +222,7 @@ namespace Metalama.Patterns.Caching.LoadTests
                 {
                     string[] dependencies = new string[dependenciesCount];
 
-                    for ( int i = sharedDependency == null ? 0 : 1; i < dependencies.Length; i++ )
+                    for ( var i = sharedDependency == null ? 0 : 1; i < dependencies.Length; i++ )
                     {
                         dependencies[i] = this.GetRandomDependencyKey();
                     }
@@ -234,9 +248,9 @@ namespace Metalama.Patterns.Caching.LoadTests
                 {
                     this.sharedDependencies++;
 
-                    int valuesSharingDependency = this.GetNextRandomNumber( this.loadTest.configuration.ValuesPerSharedDependency );
+                    var valuesSharingDependency = this.GetNextRandomNumber( this.loadTest.configuration.ValuesPerSharedDependency );
 
-                    for ( int i = 0; i < valuesSharingDependency; i++ )
+                    for ( var i = 0; i < valuesSharingDependency; i++ )
                     {
                         this.SetItem( dependencyToShare );
                     }
@@ -245,29 +259,32 @@ namespace Metalama.Patterns.Caching.LoadTests
 
             private void GetItem()
             {
-                string key = this.GetRandomValueKey();
-                CacheValue value = this.backend.GetItem( key );
+                var key = this.GetRandomValueKey();
+                var value = this.backend.GetItem( key );
 
                 if ( value == null )
                 {
                     this.cacheMissCount++;
+
                     return;
                 }
 
                 this.cacheHitCount++;
 
-                Payload payload = value.Value as Payload;
+                var payload = value.Value as Payload;
 
                 if ( payload == null )
                 {
-                    this.errorsCounters.Increment( "Corrupted payload type.",
-                                                   value.Value == null
-                                                       ? "payload is null"
-                                                       : value.Value.GetType().FullName + ", " + value.Value.ToString() );
+                    this.errorsCounters.Increment(
+                        "Corrupted payload type.",
+                        value.Value == null
+                            ? "payload is null"
+                            : value.Value.GetType().FullName + ", " + value.Value.ToString() );
+
                     return;
                 }
 
-                IImmutableList<string> retrievedDependenciesList = value.Dependencies ?? ImmutableList<string>.Empty;
+                var retrievedDependenciesList = value.Dependencies ?? ImmutableList<string>.Empty;
 
                 if ( payload.Dependencies == null && retrievedDependenciesList.Count == 0 )
                 {
@@ -282,26 +299,32 @@ namespace Metalama.Patterns.Caching.LoadTests
 
                 if ( payload.Dependencies == null && retrievedDependenciesList.Count > 0 )
                 {
-                    this.errorsCounters.Increment( "Corrupted dependencies - dependencies not expected but retrieved.",
-                                                   $"Retrieved: {string.Join( " ", retrievedDependenciesList )}" );
+                    this.errorsCounters.Increment(
+                        "Corrupted dependencies - dependencies not expected but retrieved.",
+                        $"Retrieved: {string.Join( " ", retrievedDependenciesList )}" );
+
                     return;
                 }
 
                 if ( payload.Dependencies != null && payload.Dependencies.Length != retrievedDependenciesList.Count )
                 {
-                    this.errorsCounters.Increment( "Corrupted dependencies - different number of expected and retrieved dependencies.",
-                                                   $"Expected: {string.Join( " ", retrievedDependenciesList )} Retrieved: {string.Join( " ", payload.Dependencies )}" );
+                    this.errorsCounters.Increment(
+                        "Corrupted dependencies - different number of expected and retrieved dependencies.",
+                        $"Expected: {string.Join( " ", retrievedDependenciesList )} Retrieved: {string.Join( " ", payload.Dependencies )}" );
+
                     return;
                 }
 
-                HashSet<string> retrievedDependencies = new HashSet<string>( retrievedDependenciesList );
+                HashSet<string> retrievedDependencies = new( retrievedDependenciesList );
 
-                foreach ( string expectedDependency in payload.Dependencies )
+                foreach ( var expectedDependency in payload.Dependencies )
                 {
                     if ( !retrievedDependencies.Contains( expectedDependency ) )
                     {
-                        this.errorsCounters.Increment( "Expected dependency not present.",
-                                                       $"Expected: {string.Join( " ", retrievedDependenciesList )} Retrieved: {string.Join( " ", payload.Dependencies )}" );
+                        this.errorsCounters.Increment(
+                            "Expected dependency not present.",
+                            $"Expected: {string.Join( " ", retrievedDependenciesList )} Retrieved: {string.Join( " ", payload.Dependencies )}" );
+
                         return;
                     }
                 }
@@ -309,14 +332,14 @@ namespace Metalama.Patterns.Caching.LoadTests
 
             private void RemoveItem()
             {
-                string key = this.GetRandomValueKey();
+                var key = this.GetRandomValueKey();
                 this.backend.RemoveItem( key );
                 this.removeItemCount++;
             }
 
             private void InvalidateDependency()
             {
-                string dependency = this.GetRandomDependencyKey();
+                var dependency = this.GetRandomDependencyKey();
                 this.backend.InvalidateDependency( dependency );
                 this.invalidateDependencyCount++;
             }
@@ -357,7 +380,7 @@ namespace Metalama.Patterns.Caching.LoadTests
 
                         if ( this.errorsCounters.Details.TryGetValue( error.Key, out details ) )
                         {
-                            foreach ( string detail in details )
+                            foreach ( var detail in details )
                             {
                                 Console.WriteLine( detail );
                             }
@@ -395,7 +418,7 @@ namespace Metalama.Patterns.Caching.LoadTests
             this.dependencyKeys = GenerateKeys( this.configuration.DependencyKeysCount, this.configuration.DependencyKeyLenght );
             this.clients = new TestClient[this.configuration.ClientsCount];
 
-            for ( int i = 0; i < this.configuration.ClientsCount; i++ )
+            for ( var i = 0; i < this.configuration.ClientsCount; i++ )
             {
                 this.clients[i] = new TestClient( this, backendFactory );
             }
@@ -405,7 +428,7 @@ namespace Metalama.Patterns.Caching.LoadTests
         {
             string[] keys = new string[count];
 
-            for ( int i = 0; i < count; i++ )
+            for ( var i = 0; i < count; i++ )
             {
                 keys[i] = RandomString.New( length.Min, length.Max );
             }
@@ -417,9 +440,9 @@ namespace Metalama.Patterns.Caching.LoadTests
         {
             Task[] startTasks = new Task[this.configuration.ClientsCount];
 
-            for ( int i = 0; i < this.configuration.ClientsCount; i++ )
+            for ( var i = 0; i < this.configuration.ClientsCount; i++ )
             {
-                TestClient client = this.clients[i];
+                var client = this.clients[i];
                 startTasks[i] = Task.Run( () => client.Start() );
             }
 
@@ -430,9 +453,9 @@ namespace Metalama.Patterns.Caching.LoadTests
         {
             Task[] stopTasks = new Task[this.configuration.ClientsCount];
 
-            for ( int i = 0; i < this.configuration.ClientsCount; i++ )
+            for ( var i = 0; i < this.configuration.ClientsCount; i++ )
             {
-                TestClient client = this.clients[i];
+                var client = this.clients[i];
                 stopTasks[i] = Task.Run( () => client.Stop() );
             }
 
@@ -441,7 +464,7 @@ namespace Metalama.Patterns.Caching.LoadTests
 
         public void Report()
         {
-            for ( int i = 0; i < this.clients.Length; i++ )
+            for ( var i = 0; i < this.clients.Length; i++ )
             {
                 Console.WriteLine( $"Client {i + 1}" );
                 this.clients[i].Report();
@@ -453,9 +476,9 @@ namespace Metalama.Patterns.Caching.LoadTests
         {
             Task[] disposeTasks = new Task[this.configuration.ClientsCount];
 
-            for ( int i = 0; i < this.configuration.ClientsCount; i++ )
+            for ( var i = 0; i < this.configuration.ClientsCount; i++ )
             {
-                TestClient client = this.clients[i];
+                var client = this.clients[i];
                 disposeTasks[i] = Task.Run( () => client.Dispose() );
             }
 

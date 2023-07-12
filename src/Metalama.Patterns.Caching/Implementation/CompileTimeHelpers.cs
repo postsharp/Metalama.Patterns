@@ -27,12 +27,12 @@ internal static class CompileTimeHelpers
     {
         if ( id == null )
         {
-            throw new ArgumentNullException( nameof( id ) );
-        }    
+            throw new ArgumentNullException( nameof(id) );
+        }
 
         if ( purpose == null )
         {
-            throw new ArgumentNullException( nameof( purpose ) );
+            throw new ArgumentNullException( nameof(purpose) );
         }
 
         // TODO: !!! Don't use MD5, will throw on some platforms.
@@ -60,7 +60,7 @@ internal static class CompileTimeHelpers
     public static bool IsTaskOrValueTask( this IType type, bool? hasResult = default )
     {
         var unboundType = (type as INamedType)?.GetOriginalDefinition();
-        
+
         if ( unboundType == null )
         {
             return false;

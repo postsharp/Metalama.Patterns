@@ -3,7 +3,6 @@
 using Xunit;
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Caching.Serializers;
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

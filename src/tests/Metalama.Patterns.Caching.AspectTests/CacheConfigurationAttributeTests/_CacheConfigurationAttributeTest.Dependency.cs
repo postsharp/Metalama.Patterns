@@ -1,6 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-[assembly: Metalama.Patterns.Caching.CacheConfiguration( ProfileName = Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests.TestValues.cacheConfigurationAttributeProfileName1 )]
+using Metalama.Patterns.Caching;
+using Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
+
+[assembly: CacheConfiguration( ProfileName = TestValues.cacheConfigurationAttributeProfileName1 )]
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
 {
@@ -15,14 +18,14 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
     {
         public class ReferencedInnerCachingClassInBase
         {
-            [Caching.Cache]
+            [Cache]
             public object GetValueReferencedInnerBase()
             {
                 return null;
             }
         }
 
-        [Caching.Cache]
+        [Cache]
         public object GetValueReferencedBase()
         {
             return null;
@@ -33,33 +36,33 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
     {
         public class ReferencedInnerCachingClassInChild
         {
-            [Caching.Cache]
+            [Cache]
             public object GetValueReferencedInnerChild()
             {
                 return null;
             }
         }
 
-        [Caching.Cache]
+        [Cache]
         public object GetValueReferencedChild()
         {
             return null;
         }
     }
 
-    [Caching.CacheConfiguration( ProfileName = TestValues.cacheConfigurationAttributeProfileName2 )]
+    [CacheConfiguration( ProfileName = TestValues.cacheConfigurationAttributeProfileName2 )]
     public class ReferencedParentCachingClassOverridden
     {
         public class ReferencedInnerCachingClassInBaseOverridden
         {
-            [Caching.Cache]
+            [Cache]
             public object GetValueReferencedInnerBase()
             {
                 return null;
             }
         }
 
-        [Caching.Cache]
+        [Cache]
         public object GetValueReferencedBase()
         {
             return null;
@@ -70,14 +73,14 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
     {
         public class ReferencedInnerCachingClassInChildOverridden
         {
-            [Caching.Cache]
+            [Cache]
             public object GetValueReferencedInnerChild()
             {
                 return null;
             }
         }
 
-        [Caching.Cache]
+        [Cache]
         public object GetValueReferencedChild()
         {
             return null;

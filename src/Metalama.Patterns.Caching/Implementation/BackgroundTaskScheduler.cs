@@ -86,7 +86,7 @@ public sealed class BackgroundTaskScheduler
 
 // Suppress warnings to allow adding extra parameter if DEBUG
 #pragma warning disable SA1113
-#pragma warning disable SA1115 
+#pragma warning disable SA1115
 #pragma warning disable SA1111
 
                 var createdTask = Task.Run(
@@ -98,7 +98,7 @@ public sealed class BackgroundTaskScheduler
                         pendingTask
 #endif
                     ) );
-                
+
                 this._lastTask = createdTask;
             }
         }

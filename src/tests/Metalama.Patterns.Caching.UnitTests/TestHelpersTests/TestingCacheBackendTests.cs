@@ -16,17 +16,17 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestContainsKey()
         {
-            using ( TestingCacheBackend cache = new TestingCacheBackend( namePrefix + "TestContainsKey" ) )
+            using ( var cache = new TestingCacheBackend( namePrefix + "TestContainsKey" ) )
             {
                 const string key = "0";
 
                 cache.ExpectedContainsKeyCount = 1;
-                bool keyContained = cache.ContainsItem( key );
+                var keyContained = cache.ContainsItem( key );
                 cache.ResetTest( "When checkin existence of a non-existing key." );
 
                 Assert.False( keyContained, "The cache does not return false on miss." );
 
-                CachedValueClass storedValue0 = new CachedValueClass( 0 );
+                var storedValue0 = new CachedValueClass( 0 );
                 var cacheItem0 = new CacheItem( storedValue0 );
 
                 cache.ExpectedSetCount = 1;
@@ -46,7 +46,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestGet()
         {
-            using ( TestingCacheBackend cache = new TestingCacheBackend( namePrefix + "TestGet" ) )
+            using ( var cache = new TestingCacheBackend( namePrefix + "TestGet" ) )
             {
                 const string key = "0";
 
@@ -63,9 +63,9 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestSet()
         {
-            using ( TestingCacheBackend cache = new TestingCacheBackend( namePrefix + "TestSet" ) )
+            using ( var cache = new TestingCacheBackend( namePrefix + "TestSet" ) )
             {
-                CachedValueClass storedValue0 = new CachedValueClass( 0 );
+                var storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
                 var cacheItem0 = new CacheItem( storedValue0 );
 
@@ -74,12 +74,12 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
                 cache.ResetTest( "When setting the cache item" );
 
                 cache.ExpectedGetCount = 1;
-                CacheValue retrievedItem = cache.GetItem( key );
+                var retrievedItem = cache.GetItem( key );
                 cache.ResetTest( "When getting the cache item" );
                 AssertEx.NotNull( retrievedItem, "The item has not been stored in the cache." );
                 AssertEx.Equal( cacheItem0.Value, retrievedItem.Value, "The retrieved item is not equal to the stored item." );
 
-                CachedValueClass storedValue1 = new CachedValueClass( 1 );
+                var storedValue1 = new CachedValueClass( 1 );
                 var cacheItem1 = new CacheItem( storedValue1 );
 
                 cache.ExpectedSetCount = 1;
@@ -97,7 +97,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestInvalidateObjectDependency()
         {
-            using ( TestingCacheBackend cache = new TestingCacheBackend( namePrefix + "TestInvalidateObjectDependency" ) )
+            using ( var cache = new TestingCacheBackend( namePrefix + "TestInvalidateObjectDependency" ) )
             {
                 const string dependencyKey = "0";
 

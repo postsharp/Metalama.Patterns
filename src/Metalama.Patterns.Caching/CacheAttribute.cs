@@ -92,7 +92,11 @@ public sealed class CacheAttribute : MethodAspect
         builder.MustNotHaveRefOrOutParameter();
         builder.ReturnType().MustSatisfy( t => t.SpecialType != SpecialType.Void, t => $"must not be void" );
         builder.ReturnType().MustSatisfy( t => !t.IsTaskOrValueTask( hasResult: false ), t => $"must not be a Task or ValueTask without a return value" );
-        builder.ReturnType().MustSatisfy( t => !t.GetAsyncInfo().IsAwaitable || t.IsTaskOrValueTask( hasResult: true ), t => $"must not be an awaitable type other than Task<TResult> or ValueTask<TResult>" );
+
+        builder.ReturnType()
+            .MustSatisfy(
+                t => !t.GetAsyncInfo().IsAwaitable || t.IsTaskOrValueTask( hasResult: true ),
+                t => $"must not be an awaitable type other than Task<TResult> or ValueTask<TResult>" );
     }
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
@@ -100,6 +104,7 @@ public sealed class CacheAttribute : MethodAspect
         if ( builder.AspectInstance.SecondaryInstances.Length > 0 )
         {
             builder.Diagnostics.Report( CachingDiagnosticDescriptors.Cache.ErrorMultipleInstancesOfCachedAttribute );
+
             return;
         }
 
@@ -108,12 +113,13 @@ public sealed class CacheAttribute : MethodAspect
 
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
 
-        var registrationFieldName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{DC8C6993-4BD2-49BB-AACB-B628E69954CC}", $"_cacheRegistration_{builder.Target.Name}" );
+        var registrationFieldName = builder.Target.ToSerializableId()
+            .MakeAssociatedIdentifier( "{DC8C6993-4BD2-49BB-AACB-B628E69954CC}", $"_cacheRegistration_{builder.Target.Name}" );
 
         var registrationField = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
             registrationFieldName,
-            typeof( CachedMethodRegistration ),
+            typeof(CachedMethodRegistration),
             IntroductionScope.Static,
             OverrideStrategy.Fail,
             b =>
@@ -123,37 +129,34 @@ public sealed class CacheAttribute : MethodAspect
             } );
 
         var templates = new MethodTemplateSelector(
-            defaultTemplate: nameof( this.OverrideMethod ),
-            asyncTemplate: returnTypeIsTask ? nameof( this.OverrideMethodAsyncTask ) : nameof( this.OverrideMethodAsyncValueTask ),
-            enumerableTemplate: nameof( this.OverrideMethod ),
-            enumeratorTemplate: nameof( this.OverrideMethod ),
+            defaultTemplate: nameof(this.OverrideMethod),
+            asyncTemplate: returnTypeIsTask ? nameof(this.OverrideMethodAsyncTask) : nameof(this.OverrideMethodAsyncValueTask),
+            enumerableTemplate: nameof(this.OverrideMethod),
+            enumeratorTemplate: nameof(this.OverrideMethod),
             asyncEnumerableTemplate: "OverrideMethodAsyncEnumerable",
             asyncEnumeratorTemplate: "OverrideMethodAsyncEnumerator",
             useAsyncTemplateForAnyAwaitable: true,
             useEnumerableTemplateForAnyEnumerable: true );
 
-        var genericValueType = unboundReturnSpecialType is SpecialType.Task_T or SpecialType.ValueTask_T or SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T
-            ? ((INamedType) builder.Target.ReturnType).TypeArguments[0]
-            : null;
+        var genericValueType =
+            unboundReturnSpecialType is SpecialType.Task_T or SpecialType.ValueTask_T or SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T
+                ? ((INamedType) builder.Target.ReturnType).TypeArguments[0]
+                : null;
 
         var overrideMethodResult = builder.Advice.Override(
             builder.Target,
             templates,
-            args: new
-            {
-                TValue = genericValueType,
-                TReturnType = builder.Target.ReturnType,
-                registrationField = registrationField.Declaration
-            } );
+            args: new { TValue = genericValueType, TReturnType = builder.Target.ReturnType, registrationField = registrationField.Declaration } );
 
-        var getInvokerMethodName = builder.Target.ToSerializableId().MakeAssociatedIdentifier( "{FC85178F-3F0F-47E3-B5ED-25050804CF44}", $"GetInvoker_{builder.Target.Name}" );
+        var getInvokerMethodName = builder.Target.ToSerializableId()
+            .MakeAssociatedIdentifier( "{FC85178F-3F0F-47E3-B5ED-25050804CF44}", $"GetInvoker_{builder.Target.Name}" );
 
         var getInvokerTemplate = unboundReturnSpecialType switch
         {
-            SpecialType.Task_T => nameof( this.GetOriginalMethodInvokerForTask ),
-            SpecialType.ValueTask_T => nameof( this.GetOriginalMethodInvokerForValueTask ),
+            SpecialType.Task_T => nameof(this.GetOriginalMethodInvokerForTask),
+            SpecialType.ValueTask_T => nameof(this.GetOriginalMethodInvokerForValueTask),
             SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T => "GetOriginalMethodInvokerForAsyncEnumerableOrEnumerator",
-            _ => nameof( this.GetOriginalMethodInvoker )
+            _ => nameof(this.GetOriginalMethodInvoker)
         };
 
         var getOriginalMethodInvokerResult = builder.Advice.IntroduceMethod(
@@ -166,10 +169,7 @@ public sealed class CacheAttribute : MethodAspect
                 b.Accessibility = Accessibility.Private;
                 b.Name = getInvokerMethodName;
             },
-            args: new
-            {
-                method = builder.Target
-            } );
+            args: new { method = builder.Target } );
 
         var awaitableResultType = unboundReturnSpecialType switch
         {
@@ -180,7 +180,7 @@ public sealed class CacheAttribute : MethodAspect
 
         builder.Advice.AddInitializer(
             builder.Target.DeclaringType,
-            nameof( this.CachedMethodRegistrationInitializer ),
+            nameof(this.CachedMethodRegistrationInitializer),
             InitializerKind.BeforeTypeConstructor,
             args: new
             {
@@ -304,9 +304,9 @@ public sealed class CacheAttribute : MethodAspect
     public IAsyncEnumerable<TValue> OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
         var task = CacheAttributeRunTime.OverrideMethodAsyncValueTask<IAsyncEnumerable<TValue>>(
-                registrationField.Value,
-                meta.Target.Method.IsStatic ? null : meta.This,
-                meta.Target.Method.Parameters.ToValueArray() );
+            registrationField.Value,
+            meta.Target.Method.IsStatic ? null : meta.This,
+            meta.Target.Method.Parameters.ToValueArray() );
 
         return task.AsAsyncEnumerable();
     }
@@ -315,9 +315,9 @@ public sealed class CacheAttribute : MethodAspect
     public IAsyncEnumerator<TValue> OverrideMethodAsyncEnumerator<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
         var task = CacheAttributeRunTime.OverrideMethodAsyncValueTask<IAsyncEnumerator<TValue>>(
-                registrationField.Value,
-                meta.Target.Method.IsStatic ? null : meta.This,
-                meta.Target.Method.Parameters.ToValueArray() );
+            registrationField.Value,
+            meta.Target.Method.IsStatic ? null : meta.This,
+            meta.Target.Method.Parameters.ToValueArray() );
 
         return task.AsAsyncEnumerator();
     }
@@ -333,6 +333,7 @@ public sealed class CacheAttribute : MethodAspect
     {
         var mergedConfiguration = this.ToCompileTimeCacheItemConfiguration();
         mergedConfiguration.ApplyEffectiveConfiguration( method );
+
         return mergedConfiguration;
     }
 
@@ -357,34 +358,34 @@ public sealed class CacheAttribute : MethodAspect
 
         if ( this._absoluteExpiration.HasValue )
         {
-            args[nameof( this.AbsoluteExpiration )] = this.AbsoluteExpiration;
+            args[nameof(this.AbsoluteExpiration)] = this.AbsoluteExpiration;
         }
 
         if ( this._autoReload.HasValue )
         {
-            args[nameof( this.AutoReload )] = this.AutoReload;
+            args[nameof(this.AutoReload)] = this.AutoReload;
         }
 
         if ( this._ignoreThisParameter.HasValue )
         {
-            args[nameof( this.IgnoreThisParameter )] = this.IgnoreThisParameter;
+            args[nameof(this.IgnoreThisParameter)] = this.IgnoreThisParameter;
         }
 
         if ( this._priority.HasValue )
         {
-            args[nameof( this.Priority )] = this.Priority;
+            args[nameof(this.Priority)] = this.Priority;
         }
 
         if ( this._slidingExpiration.HasValue )
         {
-            args[nameof( this.SlidingExpiration )] = this.SlidingExpiration;
+            args[nameof(this.SlidingExpiration)] = this.SlidingExpiration;
         }
 
         if ( this.ProfileName != null )
         {
-            args[nameof( this.ProfileName )] = this.ProfileName;
+            args[nameof(this.ProfileName)] = this.ProfileName;
         }
 
-        return AttributeConstruction.Create( typeof( CacheAttribute ), namedArguments: args.ToList() );
+        return AttributeConstruction.Create( typeof(CacheAttribute), namedArguments: args.ToList() );
     }
 }

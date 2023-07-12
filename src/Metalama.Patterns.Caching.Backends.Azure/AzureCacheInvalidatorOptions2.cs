@@ -17,7 +17,7 @@ public abstract class AzureCacheInvalidatorOptions2 : CacheInvalidatorOptions
     /// Gets the connection string for the Azure Service Bus topic. The connection string must include the topic name.
     /// </summary>
     public string? ConnectionString { get; }
-    
+
     /// <summary>
     /// Options that determine the mode of operation of an <see cref="AzureCacheInvalidator2"/> instance when using an existing subscription.
     /// </summary>
@@ -35,13 +35,13 @@ public abstract class AzureCacheInvalidatorOptions2 : CacheInvalidatorOptions
         {
             this.SubscriptionName = subscriptionName;
         }
-        
+
         /// <summary>
         /// Gets the subscription name. See the constructor for details.
         /// </summary>
         public string SubscriptionName { get; }
     }
-    
+
     /// <summary>
     /// Options that determine the mode of operation of an <see cref="AzureCacheInvalidator2"/> instance when creating a new subscription.
     /// </summary>
@@ -78,7 +78,7 @@ public abstract class AzureCacheInvalidatorOptions2 : CacheInvalidatorOptions
             this.TopicName = topicName;
             this.AzureSubscriptionId = azureSubscriptionId;
         }
-        
+
         /// <summary>
         /// Gets the client ID. See the constructor for details.
         /// </summary>
@@ -88,7 +88,7 @@ public abstract class AzureCacheInvalidatorOptions2 : CacheInvalidatorOptions
         /// Gets the client secret. See the constructor for details.
         /// </summary>
         public string ClientSecret { get; }
-        
+
         /// <summary>
         /// Gets the tenant ID. See the constructor for details.
         /// </summary>
@@ -113,7 +113,7 @@ public abstract class AzureCacheInvalidatorOptions2 : CacheInvalidatorOptions
         /// Gets the azure subscription ID. See the constructor for details.
         /// </summary>
         public string? AzureSubscriptionId { get; }
-        
+
         /// <summary>
         /// Gets or sets the URL that hosts the Azure login service which authenticates Azure tokens. This is normally
         /// <c>https://login.microsoftonline.com/</c> which is also the default value. You do not need to change this unless you use
@@ -123,7 +123,7 @@ public abstract class AzureCacheInvalidatorOptions2 : CacheInvalidatorOptions
         [Required]
         public string AzureLoginAuthority { get; set; } = "https://login.microsoftonline.com/";
     }
-    
+
     protected AzureCacheInvalidatorOptions2( string? connectionString )
     {
         this.ConnectionString = connectionString;

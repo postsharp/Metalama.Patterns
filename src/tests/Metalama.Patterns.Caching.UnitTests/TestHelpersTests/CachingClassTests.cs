@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
 
-
 namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 {
     public sealed class CachingClassTests
@@ -12,9 +11,9 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestReset()
         {
-            CachingClass cachingClass = new CachingClass();
+            var cachingClass = new CachingClass();
 
-            bool called = cachingClass.Reset();
+            var called = cachingClass.Reset();
             Assert.False( called, "It is indicated the method has been called on a fresh instance." );
 
             cachingClass.GetValue();
@@ -28,10 +27,10 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public async Task TestAsyncReset()
         {
-            CachingClass cachingClass = new CachingClass();
+            var cachingClass = new CachingClass();
 
             Task<CachedValueClass> valueTask = cachingClass.GetValueAsync();
-            bool called = cachingClass.Reset();
+            var called = cachingClass.Reset();
             Assert.False( called, "The caching method was called before awaiting the first value." );
             await valueTask;
             called = cachingClass.Reset();
@@ -44,11 +43,11 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestCounter()
         {
-            CachingClass cachingClass = new CachingClass();
+            var cachingClass = new CachingClass();
 
-            CachedValueClass value0 = cachingClass.GetValue();
+            var value0 = cachingClass.GetValue();
             cachingClass.Reset();
-            CachedValueClass value1 = cachingClass.GetValue();
+            var value1 = cachingClass.GetValue();
 
             AssertEx.NotEqual( value0, value1, "The method returned the same objects twice." );
         }
@@ -56,14 +55,14 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public async Task TestAsyncCounter()
         {
-            CachingClass cachingClass = new CachingClass();
+            var cachingClass = new CachingClass();
 
             Task<CachedValueClass> valueTask = cachingClass.GetValueAsync();
-            CachedValueClass value0 = await valueTask;
+            var value0 = await valueTask;
             cachingClass.Reset();
 
             valueTask = cachingClass.GetValueAsync();
-            CachedValueClass value1 = await valueTask;
+            var value1 = await valueTask;
 
             AssertEx.NotEqual( value0, value1, "The method returned the same objects twice." );
         }

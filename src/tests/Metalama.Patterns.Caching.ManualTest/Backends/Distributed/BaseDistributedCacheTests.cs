@@ -61,13 +61,13 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
 
             for ( var j = 0; j < backends.Length; j++ )
             {
-                CachingBackend backend1 = backends[j];
+                var backend1 = backends[j];
                 Console.WriteLine( $"Testing with master backend #{j}: {backend1}" );
 
                 for ( var i = 0; i < backends.Length; i++ )
                 {
                     itemRemovedEvents[i] = new TaskCompletionSource<bool>();
-                    CachingBackend backend2 = backends[i];
+                    var backend2 = backends[i];
                     await backend2.SetItemAsync( itemKey, new CacheItem( "Hello, world.", ImmutableList.Create( dependencyKey ) ) );
                 }
 
@@ -121,13 +121,13 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
 
             for ( var j = 0; j < 1; j++ )
             {
-                CachingBackend backend1 = backends[j];
+                var backend1 = backends[j];
                 Console.WriteLine( $"Testing with master backend #{j}: {backend1}" );
 
                 for ( var i = 0; i < backends.Length; i++ )
                 {
                     itemRemovedEvents[i] = new ManualResetEventSlim( false );
-                    CachingBackend backend2 = backends[i];
+                    var backend2 = backends[i];
                     backend2.SetItem( itemKey, new CacheItem( "Hello, world.", ImmutableList.Create( dependencyKey ) ) );
                 }
 
@@ -176,12 +176,12 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
 
             for ( var j = 0; j < backends.Length; j++ )
             {
-                CachingBackend backend1 = backends[j];
+                var backend1 = backends[j];
                 Console.WriteLine( $"Testing with master backend #{j}: {backend1}" );
 
                 for ( var i = 0; i < backends.Length; i++ )
                 {
-                    CachingBackend backend2 = backends[i];
+                    var backend2 = backends[i];
 
                     itemRemovedEvents[i] = new TaskCompletionSource<bool>();
 
@@ -251,13 +251,13 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
 
             for ( var j = 0; j < backends.Length; j++ )
             {
-                CachingBackend backend1 = backends[j];
+                var backend1 = backends[j];
 
                 Console.WriteLine( $"Testing with master backend #{j}: {backend1}" );
 
                 for ( var i = 0; i < backends.Length; i++ )
                 {
-                    CachingBackend backend2 = backends[i];
+                    var backend2 = backends[i];
                     await backend2.SetItemAsync( string.Format( "i{0}", i ), new CacheItem( "Hello, world.", ImmutableList.Create( dependencyKey ) ) );
                     itemRemovedEvents[i] = new TaskCompletionSource<bool>();
                 }
@@ -308,7 +308,7 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
 
             for ( var j = 0; j < backends.Length; j++ )
             {
-                CachingBackend backend1 = backends[j];
+                var backend1 = backends[j];
 
                 Console.WriteLine( $"Testing with master backend #{j}: {backend1}" );
 
@@ -316,7 +316,7 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
                 {
                     itemRemovedEvents[i] = new TaskCompletionSource<bool>();
 
-                    CachingBackend backend2 = backends[i];
+                    var backend2 = backends[i];
                     CacheItem cacheItem;
 
                     if ( this.TestDependencies )

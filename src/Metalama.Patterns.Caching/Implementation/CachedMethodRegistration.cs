@@ -98,8 +98,7 @@ public sealed class CachedMethodRegistration
     /// <summary>
     /// Gets the logger for the current registration.
     /// </summary>
-    internal LogSource Logger
-        => this._logSource ??= LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.Method.DeclaringType! );
+    internal LogSource Logger => this._logSource ??= LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.Method.DeclaringType! );
 
     /// <summary>
     /// Gets the effective configuration which is determined by merging the build-time configuration with any applicable 

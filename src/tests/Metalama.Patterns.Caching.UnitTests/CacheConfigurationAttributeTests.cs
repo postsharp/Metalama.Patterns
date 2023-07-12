@@ -84,7 +84,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private static void DoCachingAttributeTest( Func<object> getValueAction, bool defaultProfile )
         {
-            TestingCacheBackend backend =
+            var backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testCachingAttributeProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( testCachingAttributeProfileName );
@@ -111,7 +111,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private static async Task DoCachingAttributeTestAsync( Func<Task<object>> getValueAction, bool defaultProfile )
         {
-            TestingCacheBackend backend =
+            var backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testCachingAttributeProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( testCachingAttributeProfileName );

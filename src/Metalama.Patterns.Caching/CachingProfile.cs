@@ -53,7 +53,7 @@ public sealed class CachingProfile : IRunTimeCacheItemConfiguration
             this._isEnabled = value;
         }
     }
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
     /// when the cache item is removed from the cache.

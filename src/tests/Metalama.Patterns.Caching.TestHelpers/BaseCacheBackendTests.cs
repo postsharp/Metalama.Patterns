@@ -305,8 +305,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         /// Returns true if the test is run on Windows. We don't run some tests on Linux because, for some reason, the event that an item expired from the cache
         /// arrives up to 20 minutes later on Linux, and I don't know why. So we're just no longer testing this on Linux.
         /// </summary>
-        private static bool RunningOnWindows
-            => runningOnWindows ?? (runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
+        private static bool RunningOnWindows => runningOnWindows ?? (runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
 
         [Fact( Timeout = Timeout )]
         public void TestAbsoluteExpirationDependencyCollected()

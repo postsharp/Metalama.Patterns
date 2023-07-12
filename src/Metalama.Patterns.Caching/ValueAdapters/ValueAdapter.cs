@@ -18,7 +18,8 @@ public abstract class ValueAdapter<T> : IValueAdapter<T>
     object? IValueAdapter.GetStoredValue( object? value ) => this.GetStoredValue( (T?) value );
 
     /// <inheritdoc />
-    Task<object?> IValueAdapter.GetStoredValueAsync( object? value, CancellationToken cancellationToken ) => this.GetStoredValueAsync( (T?) value, cancellationToken );
+    Task<object?> IValueAdapter.GetStoredValueAsync( object? value, CancellationToken cancellationToken )
+        => this.GetStoredValueAsync( (T?) value, cancellationToken );
 
     /// <inheritdoc />
     public abstract T? GetExposedValue( object? storedValue );

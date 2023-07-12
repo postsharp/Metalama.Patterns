@@ -7,19 +7,19 @@ namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.In
 
 public sealed class DependencyClass
 {
-    [Cache(IgnoreThisParameter = true)]
+    [Cache( IgnoreThisParameter = true )]
     public int CachedUsingAttribute() => 42;
 
     public int CachedUsingFabric() => 42;
 
     private sealed class Fabric : TypeFabric
     {
-        public override void AmendType(ITypeAmender amender)
+        public override void AmendType( ITypeAmender amender )
         {
             amender
                 .Outbound
-                .Select(t => t.Methods.Single(m => m.Name == nameof(DependencyClass.CachedUsingFabric)))
-                .AddAspect(m => new CacheAttribute() { IgnoreThisParameter = true });
+                .Select( t => t.Methods.Single( m => m.Name == nameof(CachedUsingFabric) ) )
+                .AddAspect( m => new CacheAttribute() { IgnoreThisParameter = true } );
         }
     }
 }

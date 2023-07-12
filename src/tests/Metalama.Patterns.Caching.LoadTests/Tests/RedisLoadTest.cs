@@ -1,4 +1,6 @@
-﻿using Metalama.Patterns.Caching.Backends.Redis;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 using System;
@@ -7,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Metalama.Patterns.Caching.LoadTests.Tests
 {
-    class RedisLoadTestConfiguration : LoadTestConfiguration
+    internal class RedisLoadTestConfiguration : LoadTestConfiguration
     {
         public int CollectorsCount { get; set; }
     }
 
-    class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
+    internal class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
     {
         private readonly string keyPrefix = Guid.NewGuid().ToString();
 
@@ -24,15 +26,11 @@ namespace Metalama.Patterns.Caching.LoadTests.Tests
 
             try
             {
-                for ( int i = 0; i < collectors.Length; i++ )
+                for ( var i = 0; i < collectors.Length; i++ )
                 {
-                    RedisCachingBackendConfiguration collectorConfiguration = new RedisCachingBackendConfiguration()
-                                                                              {
-                                                                                  KeyPrefix = this.keyPrefix,
-                                                                                  OwnsConnection = true
-                                                                              };
+                    var collectorConfiguration = new RedisCachingBackendConfiguration() { KeyPrefix = this.keyPrefix, OwnsConnection = true };
 
-                    IConnectionMultiplexer collectorConnection = CreateConnection();
+                    var collectorConnection = CreateConnection();
 
                     collectors[i] = RedisCacheDependencyGarbageCollector.Create( collectorConnection, collectorConfiguration );
                 }
@@ -47,24 +45,19 @@ namespace Metalama.Patterns.Caching.LoadTests.Tests
 
         private static IConnectionMultiplexer CreateConnection()
         {
-            string connectionString =
+            var connectionString =
                 "postsharp-test.redis.cache.windows.net:6380,password=zVXBseSX6KMMKaMJ13iyWwCWUIIUqrqIoKAlm882CzE=,ssl=True,abortConnect=False";
 
-            ConnectionMultiplexer connection = ConnectionMultiplexer.Connect( connectionString );
+            var connection = ConnectionMultiplexer.Connect( connectionString );
 
             return connection;
         }
 
         protected override CachingBackend CreateCachingBackend()
         {
-            IConnectionMultiplexer connection = CreateConnection();
+            var connection = CreateConnection();
 
-            RedisCachingBackendConfiguration configuration = new RedisCachingBackendConfiguration()
-                                                             {
-                                                                 KeyPrefix = this.keyPrefix,
-                                                                 OwnsConnection = true,
-                                                                 SupportsDependencies = true
-                                                             };
+            var configuration = new RedisCachingBackendConfiguration() { KeyPrefix = this.keyPrefix, OwnsConnection = true, SupportsDependencies = true };
 
             return RedisCachingBackend.Create( connection, configuration );
         }

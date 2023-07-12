@@ -10,6 +10,7 @@ public class OutParameter
     public int Test( out int a )
     {
         a = 8;
+
         return 42;
     }
 }

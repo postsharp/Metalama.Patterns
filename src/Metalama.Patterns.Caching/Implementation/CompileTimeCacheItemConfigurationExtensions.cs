@@ -8,6 +8,5 @@ namespace Metalama.Patterns.Caching.Implementation;
 [CompileTime]
 internal static class CompileTimeCacheItemConfigurationExtensions
 {
-    public static CompileTimeCacheItemConfiguration ToCompileTimeCacheItemConfiguration( this IAttribute attribute )
-     => new CompileTimeCacheItemConfiguration( attribute );
+    public static CompileTimeCacheItemConfiguration ToCompileTimeCacheItemConfiguration( this IAttribute attribute ) => new( attribute );
 }

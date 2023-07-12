@@ -15,7 +15,6 @@ public static class WithNoCachingMethodName
         }
 
         [InvalidateCache]
-        public void Invalidate()
-        { }
+        public void Invalidate() { }
     }
 }

@@ -55,7 +55,6 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     public int MaxKeySize => this._stringBuilderPool.StringBuilderCapacity;
 
-
     /// <summary>
     /// Builds a cache key for a given method call.
     /// </summary>
@@ -104,7 +103,7 @@ public class CacheKeyBuilder : IDisposable
             // We need a 'this' specifier to differentiate an instance method
             // from a static method whose first parameter is of the declaring type.
             stringBuilder.Append( "this=" );
-            this.AppendObject( stringBuilder, instance! );    
+            this.AppendObject( stringBuilder, instance! );
             addComma = true;
         }
 
@@ -206,7 +205,8 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="type">A <see cref="Type"/>.</param>
-    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, [Required] Type type ) => this._formatterRepository.Get<Type>().Write( stringBuilder, type );
+    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, [Required] Type type )
+        => this._formatterRepository.Get<Type>().Write( stringBuilder, type );
 
     /// <summary>
     /// Appends a string representing an <see cref="object"/> to an <see cref="UnsafeStringBuilder"/>.

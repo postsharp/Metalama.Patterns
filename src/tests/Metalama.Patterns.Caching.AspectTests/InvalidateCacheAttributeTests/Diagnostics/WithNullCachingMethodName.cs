@@ -14,8 +14,7 @@ public static class WithNullCachingMethodName
             return null;
         }
 
-        [InvalidateCache((string)null)]
-        public void Invalidate()
-        { }
+        [InvalidateCache( (string) null )]
+        public void Invalidate() { }
     }
 }

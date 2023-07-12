@@ -93,8 +93,8 @@ namespace Metalama.Patterns.Caching.Tests
             var invalidatingClass =
                 new TestFromDifferentTypeIgnoringThisParameterInvalidatingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -230,8 +230,8 @@ namespace Metalama.Patterns.Caching.Tests
             var invalidatingClass =
                 new TestFromDifferentTypeIgnoringThisParameterAsyncInvalidatingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -358,8 +358,8 @@ namespace Metalama.Patterns.Caching.Tests
             var invalidatingAndCachingClass =
                 new TestFromDerivedTypeNotIgnoringThisParameterInvalidatingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -492,8 +492,8 @@ namespace Metalama.Patterns.Caching.Tests
             var invalidatingAndCachingClass =
                 new TestFromDerivedTypeNotIgnoringThisParameterAsyncInvalidatingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -621,8 +621,8 @@ namespace Metalama.Patterns.Caching.Tests
             var invalidatingClass =
                 new TestFromDifferentTypeInstanceMethodOnStaticMethodInvalidatingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -755,8 +755,8 @@ namespace Metalama.Patterns.Caching.Tests
             var invalidatingClass =
                 new TestFromDifferentTypeInstanceMethodOnStaticMethodAsyncInvalidatingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -881,8 +881,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestFromDifferentTypeStaticMethodOnStaticMethod()
         {
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -1012,8 +1012,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestFromDifferentTypeStaticMethodOnStaticMethodAsync()
         {
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -1147,8 +1147,8 @@ namespace Metalama.Patterns.Caching.Tests
             var testClass2 =
                 new TestFromTheSameTypeIgnoringThisParameterInvalidatingAndCachingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -1309,8 +1309,8 @@ namespace Metalama.Patterns.Caching.Tests
             var testClass2 =
                 new TestFromTheSameTypeIgnoringThisParameterAsyncInvalidatingAndCachingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -1466,8 +1466,8 @@ namespace Metalama.Patterns.Caching.Tests
             var testClass2 =
                 new TestFromTheSameTypeNotIgnoringThisParameterInvalidatingAndCachingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -1628,8 +1628,8 @@ namespace Metalama.Patterns.Caching.Tests
             var testClass2 =
                 new TestFromTheSameTypeNotIgnoringThisParameterAsyncInvalidatingAndCachingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]

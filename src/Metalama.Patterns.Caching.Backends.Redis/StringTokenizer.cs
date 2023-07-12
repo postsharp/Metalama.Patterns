@@ -13,7 +13,7 @@ internal struct StringTokenizer
     private readonly string _s;
     private readonly char _separator;
     private int _position;
-    
+
     public StringTokenizer( string s, char separator = ':' )
     {
         this._s = s ?? throw new ArgumentNullException( nameof(s) );

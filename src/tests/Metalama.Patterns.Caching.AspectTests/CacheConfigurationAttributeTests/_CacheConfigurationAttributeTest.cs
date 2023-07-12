@@ -7,18 +7,21 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
 {
     public static class CacheConfigurationAttributeTest
     {
-        public static void CheckAfterCachedMethodCall(string calledMethod, TestingCacheBackend backend, ref string previousCacheKey,
-                                                        string expectedProfileName)
+        public static void CheckAfterCachedMethodCall(
+            string calledMethod,
+            TestingCacheBackend backend,
+            ref string previousCacheKey,
+            string expectedProfileName )
         {
-            if (backend.LastCachedKey == previousCacheKey)
+            if ( backend.LastCachedKey == previousCacheKey )
             {
-                throw new Exception($"{calledMethod}: backend.LastCachedKey '{backend.LastCachedKey}' == previousCacheKey '{previousCacheKey}'");
+                throw new Exception( $"{calledMethod}: backend.LastCachedKey '{backend.LastCachedKey}' == previousCacheKey '{previousCacheKey}'" );
             }
 
-            if (backend.LastCachedItem.Configuration.ProfileName != expectedProfileName)
+            if ( backend.LastCachedItem.Configuration.ProfileName != expectedProfileName )
             {
                 throw new Exception(
-                    $"{calledMethod}: backend.LastCachedItem.Configuration.ProfileName '{backend.LastCachedItem.Configuration.ProfileName}' != expectedProfileName '{expectedProfileName}'");
+                    $"{calledMethod}: backend.LastCachedItem.Configuration.ProfileName '{backend.LastCachedItem.Configuration.ProfileName}' != expectedProfileName '{expectedProfileName}'" );
             }
 
             previousCacheKey = backend.LastCachedKey;
@@ -29,14 +32,14 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
     {
         public class LocalInnerCachingClassInChild
         {
-            [Caching.Cache]
+            [Cache]
             public object GetValueLocalInnerChild()
             {
                 return null;
             }
         }
 
-        [Caching.Cache]
+        [Cache]
         public object GetValueLocalChild()
         {
             return null;
@@ -47,14 +50,14 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
     {
         public class LocalInnerCachingClassInChildOverridden
         {
-            [Caching.Cache]
+            [Cache]
             public object GetValueLocalInnerChild()
             {
                 return null;
             }
         }
 
-        [Caching.Cache]
+        [Cache]
         public object GetValueLocalChild()
         {
             return null;

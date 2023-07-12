@@ -18,7 +18,6 @@ internal static class CachingDiagnosticDescriptors
 
     public static class InvalidateCache
     {
-        
         /// <summary>
         /// Was PS CAC002:
         /// The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: this method is not cached by the [Cache] aspect.
@@ -35,41 +34,46 @@ internal static class CachingDiagnosticDescriptors
         /// Was PS CAC003:
         /// The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the 'this' parameter cannot be mapped because (a) this is an instance method, (b) the method, class or assembly is not annotated with the [CacheConfiguration( IgnoreThisParameter = true )]] attribute and (c) the type {2} is not derived from {3}.
         /// </summary>
-        public static readonly DiagnosticDefinition<(IMethod InvalidatingMethod, IMethod CachedMethod, IType InvalidatingMethodDeclaringType, IType CachedMethodDeclaringType)> ErrorThisParameterCannotBeMapped =
-            new(
-                "LAMA5101",
-                Error,
-                "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the 'this' parameter cannot be mapped because " +
+        public static readonly
+            DiagnosticDefinition<(IMethod InvalidatingMethod, IMethod CachedMethod, IType InvalidatingMethodDeclaringType, IType CachedMethodDeclaringType)>
+            ErrorThisParameterCannotBeMapped =
+                new(
+                    "LAMA5101",
+                    Error,
+                    "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the 'this' parameter cannot be mapped because " +
                     "(a) this is an instance method, (b) the method, class or assembly is not annotated with the " +
                     "[CacheConfiguration( IgnoreThisParameter = true )]] attribute and (c) the type {2} is not derived from {3}.",
-                "'this' parameter cannot be mapped.",
-                _cagtegory );
+                    "'this' parameter cannot be mapped.",
+                    _cagtegory );
 
         /// <summary>
         /// Was PS CAC004:
         /// The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the cached method does not contain a parameter named '{2}'. Make sure {0} contains a parameter named '{2}' or add the [NotCachedKey] attribute to the '{2}' parameter in {1}.
         /// </summary>
-        public static readonly DiagnosticDefinition<(IMethod InvalidatingMethod, IMethod CachedMethod, string ParameterName)> ErrorMissingParameterInInvalidatingMethod =
-            new(
-                "LAMA5102",
-                Error,
-                "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the invalidating method does not contain a parameter named '{2}'. " +
+        public static readonly DiagnosticDefinition<(IMethod InvalidatingMethod, IMethod CachedMethod, string ParameterName)>
+            ErrorMissingParameterInInvalidatingMethod =
+                new(
+                    "LAMA5102",
+                    Error,
+                    "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the invalidating method does not contain a parameter named '{2}'. " +
                     "Make sure {0} contains a parameter named '{2}' or add the [NotCachedKey] attribute to the '{2}' parameter in {1}.",
-                "No matching parameter in invalidating method.",
-                _cagtegory );
+                    "No matching parameter in invalidating method.",
+                    _cagtegory );
 
         /// <summary>
         /// Was PS CAC005:
         /// The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the type of the '{2}' parameter of the cached is not compatible with the type of the '{2}' parameter in the invalidating method.
         /// </summary>
-        public static readonly DiagnosticDefinition<(IMethod InvalidatingMethod, IMethod CachedMethod, string ParameterName)> ErrorParameterTypeIsNotCompatible =
-            new(
-                "LAMA5103",
-                Error,
-                "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the type of the '{2}' parameter of the cached method is not compatible " +
+        public static readonly DiagnosticDefinition<(IMethod InvalidatingMethod, IMethod CachedMethod, string ParameterName)>
+            ErrorParameterTypeIsNotCompatible =
+                new(
+                    "LAMA5103",
+                    Error,
+                    "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the type of the '{2}' parameter of the cached method is not compatible "
+                    +
                     "with the type of the '{2}' parameter in the invalidating method.",
-                "Parameter type is not compatible.",
-                _cagtegory );
+                    "Parameter type is not compatible.",
+                    _cagtegory );
 
         /// <summary>
         /// Was PS CAC006:
@@ -99,13 +103,14 @@ internal static class CachingDiagnosticDescriptors
         /// Was PS CAC008:
         /// Invalid [InvalidateCache] aspect on {0}: there is no method named {1} in type {2}.
         /// </summary>
-        public static readonly DiagnosticDefinition<(IMethod InvalidatingMethod, string MethodName, IType CachedMethodDeclaringType)> ErrorCachedMethodNotFound =
-            new(
-                "LAMA5106",
-                Error,
-                "Invalid [InvalidateCache] aspect on {0}: there is no method named {1} in type {2}.",
-                "Cached method not found.",
-                _cagtegory );
+        public static readonly DiagnosticDefinition<(IMethod InvalidatingMethod, string MethodName, IType CachedMethodDeclaringType)>
+            ErrorCachedMethodNotFound =
+                new(
+                    "LAMA5106",
+                    Error,
+                    "Invalid [InvalidateCache] aspect on {0}: there is no method named {1} in type {2}.",
+                    "Cached method not found.",
+                    _cagtegory );
 
         /// <summary>
         /// Was PS CAC009:

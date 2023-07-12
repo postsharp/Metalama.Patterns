@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
 
-
 namespace Metalama.Patterns.Caching.Tests
 {
     public sealed partial class ImperativeInvalidationTests : InvalidationTestsBase
@@ -28,7 +27,7 @@ namespace Metalama.Patterns.Caching.Tests
 
                 invalidatingMethodProxies[i] = () =>
                 {
-                    CachedValueClass cachedValue = cachedMethods[localIndex].Invoke();
+                    var cachedValue = cachedMethods[localIndex].Invoke();
                     invalidatingMethods[localIndex].Invoke();
 
                     return cachedValue;
@@ -79,24 +78,24 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                CachedValueClass initialValue = cachedMethod();
+                var initialValue = cachedMethod();
                 Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
 
-                CachedValueClass cachedValueBeforeInvalidation = cachedMethod();
+                var cachedValueBeforeInvalidation = cachedMethod();
                 Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
 
                 AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
 
-                CachedValueClass recachedValue = invalidatingOrRecachingMethod();
+                var recachedValue = invalidatingOrRecachingMethod();
 
                 if ( recachedValue == NullCachedValueClass.Instance )
                 {
                     // Just invalidating (not recaching)
 
-                    CachedValueClass valueAfterInvalidation = cachedMethod();
+                    var valueAfterInvalidation = cachedMethod();
                     Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
 
-                    CachedValueClass cachedValueAfterInvalidation = cachedMethod();
+                    var cachedValueAfterInvalidation = cachedMethod();
                     Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
 
                     AssertEx.Equal(
@@ -110,7 +109,7 @@ namespace Metalama.Patterns.Caching.Tests
 
                     Assert.True( resetMethod(), "The cached method has not been called during recaching." );
 
-                    CachedValueClass valueAfterRecaching = cachedMethod();
+                    var valueAfterRecaching = cachedMethod();
                     Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
 
                     AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
@@ -149,24 +148,24 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                CachedValueClass initialValue = await cachedMethod();
+                var initialValue = await cachedMethod();
                 Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
 
-                CachedValueClass cachedValueBeforeInvalidation = await cachedMethod();
+                var cachedValueBeforeInvalidation = await cachedMethod();
                 Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
 
                 AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
 
-                CachedValueClass recachedValue = await invalidatingOrRecachingMethod();
+                var recachedValue = await invalidatingOrRecachingMethod();
 
                 if ( recachedValue == NullCachedValueClass.Instance )
                 {
                     // Just invalidating (not recaching)
 
-                    CachedValueClass valueAfterInvalidation = await cachedMethod();
+                    var valueAfterInvalidation = await cachedMethod();
                     Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
 
-                    CachedValueClass cachedValueAfterInvalidation = await cachedMethod();
+                    var cachedValueAfterInvalidation = await cachedMethod();
                     Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
 
                     AssertEx.Equal(
@@ -180,7 +179,7 @@ namespace Metalama.Patterns.Caching.Tests
 
                     Assert.True( resetMethod(), "The cached method has not been called during recaching." );
 
-                    CachedValueClass valueAfterRecaching = await cachedMethod();
+                    var valueAfterRecaching = await cachedMethod();
                     Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
 
                     AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
@@ -242,8 +241,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachingClass =
                 new TestImperativeInvalidationCachingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -361,8 +360,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachingClass =
                 new TestImperativeInvalidationAsyncCachingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -480,8 +479,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachingClass =
                 new TestRecachingCachingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]
@@ -599,8 +598,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachingClass =
                 new TestRecachingAsyncCachingClass();
 
-            CachedValueChildClass cachedValue0 = new CachedValueChildClass( 0 );
-            CachedValueChildClass cachedValue2 = new CachedValueChildClass( 2 );
+            var cachedValue0 = new CachedValueChildClass( 0 );
+            var cachedValue2 = new CachedValueChildClass( 2 );
 
             Func<CachedValueClass>[] cachedMethods =
                 new Func<CachedValueClass>[]

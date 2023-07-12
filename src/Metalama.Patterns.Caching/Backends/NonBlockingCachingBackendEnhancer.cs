@@ -30,7 +30,8 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     protected override void ClearCore() => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync() );
 
     /// <inheritdoc />
-    protected override void InvalidateDependencyCore( string key ) => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.InvalidateDependencyAsync( key ) );
+    protected override void InvalidateDependencyCore( string key )
+        => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.InvalidateDependencyAsync( key ) );
 
     /// <inheritdoc />
     protected override void SetItemCore( string key, CacheItem item ) => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.SetItemAsync( key, item ) );

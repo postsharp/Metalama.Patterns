@@ -1,10 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Experiments;
 using System.Text;
 
-CachingServices.DefaultBackend = new Metalama.Patterns.Caching.Backends.MemoryCachingBackend();
+CachingServices.DefaultBackend = new MemoryCachingBackend();
 #if false
 Console.WriteLine( $"Invoke1 #1 got {await Invoke1()}" );
 Console.WriteLine( $"Invoke1 #2 got {await Invoke1()}" );

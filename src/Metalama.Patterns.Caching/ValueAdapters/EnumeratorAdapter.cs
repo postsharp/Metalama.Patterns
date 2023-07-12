@@ -13,7 +13,7 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
         {
             return null;
         }
-        
+
         List<T> list = new();
 
         while ( value.MoveNext() )
@@ -50,7 +50,7 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
         }
 
 #nullable disable // Duplicate behaviour from IEnumerator<T>.
-        object IEnumerator.Current 
+        object IEnumerator.Current
 #nullable restore
             => this.Current;
 

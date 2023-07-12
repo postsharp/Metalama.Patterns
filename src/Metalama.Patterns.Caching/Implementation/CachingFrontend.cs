@@ -9,7 +9,7 @@ using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-[EditorBrowsable(EditorBrowsableState.Never)]
+[EditorBrowsable( EditorBrowsableState.Never )]
 internal static class CachingFrontend
 {
     public static object? GetOrAdd(

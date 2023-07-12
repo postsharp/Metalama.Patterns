@@ -35,7 +35,7 @@ public sealed class StringDependency : ICacheDependency
     {
         if ( other is StringDependency otherStringDependency )
         {
-            return string.Equals( this.GetCacheKey(), otherStringDependency.GetCacheKey(), StringComparison.Ordinal );    
+            return string.Equals( this.GetCacheKey(), otherStringDependency.GetCacheKey(), StringComparison.Ordinal );
         }
         else
         {

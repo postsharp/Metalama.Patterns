@@ -8,7 +8,7 @@ public static class MultipleMatchingOverloads
 {
     public class CachingClass
     {
-        [Cache(IgnoreThisParameter = true)]
+        [Cache( IgnoreThisParameter = true )]
         public object DoAction()
         {
             return null;
@@ -23,9 +23,7 @@ public static class MultipleMatchingOverloads
 
     public class InvalidatingClass
     {
-        [InvalidateCache( typeof(CachingClass), nameof( CachingClass.DoAction ) )]
-        public void Invalidate( int param )
-        {
-        }
+        [InvalidateCache( typeof(CachingClass), nameof(CachingClass.DoAction) )]
+        public void Invalidate( int param ) { }
     }
 }

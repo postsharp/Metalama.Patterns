@@ -104,7 +104,7 @@ public sealed class MethodRegistrationCache
     /// </remarks>
     public CachedMethodRegistration? Get( [Required] MethodInfo method )
     {
-        if ( !this._methodInfoCache.TryGetValue(method, out var cachedMethodInfo) )
+        if ( !this._methodInfoCache.TryGetValue( method, out var cachedMethodInfo ) )
         {
             // Perhaps the declaring type has not been initialized. Try to initialize it ourselves.
             RuntimeHelpers.RunClassConstructor( method.DeclaringType!.TypeHandle );
@@ -128,7 +128,7 @@ public sealed class MethodRegistrationCache
 
         for ( var i = 0; i < parameterInfos.Length; i++ )
         {
-            var isIgnored = parameterInfos[i].IsDefined( typeof( NotCacheKeyAttribute ) );
+            var isIgnored = parameterInfos[i].IsDefined( typeof(NotCacheKeyAttribute) );
 
             cachedParameterInfos[i] = new CachedParameterInfo( parameterInfos[0], isIgnored );
         }

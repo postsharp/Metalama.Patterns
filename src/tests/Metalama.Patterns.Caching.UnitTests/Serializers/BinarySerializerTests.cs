@@ -5,7 +5,6 @@ using System.Linq;
 using Xunit;
 using Metalama.Patterns.Caching.Serializers;
 
-
 namespace Metalama.Patterns.Caching.Tests.Serializers
 {
     public class BinarySerializerTests : SerializerBaseTests

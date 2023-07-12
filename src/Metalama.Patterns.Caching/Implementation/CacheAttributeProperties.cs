@@ -15,10 +15,10 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <param name="IgnoreThisParameter"></param>
 public sealed record CacheAttributeProperties(
 #pragma warning restore SA1625 // Element documentation should not be copied and pasted
-    string? ProfileName = null,
-    bool? AutoReload = null,
-    TimeSpan? AbsoluteExpiration = null,
-    TimeSpan? SlidingExpiration = null,
-    CacheItemPriority? Priority = null,
-    bool? IgnoreThisParameter = null )
+        string? ProfileName = null,
+        bool? AutoReload = null,
+        TimeSpan? AbsoluteExpiration = null,
+        TimeSpan? SlidingExpiration = null,
+        CacheItemPriority? Priority = null,
+        bool? IgnoreThisParameter = null )
     : ICompileTimeCacheItemConfiguration;

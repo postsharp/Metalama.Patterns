@@ -37,7 +37,7 @@ public sealed class ObjectDependency : ICacheDependency
     {
         // [Porting] NB: 'other' was [Required] but this did not make much sense, especially given the impl of Equals( object? obj ),
         // and it broke nullable.
-        
+
         if ( other is ObjectDependency otherObjectDependency )
         {
             return Equals( this.Object, otherObjectDependency.Object );

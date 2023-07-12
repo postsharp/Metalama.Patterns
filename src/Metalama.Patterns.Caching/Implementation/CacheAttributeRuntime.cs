@@ -59,6 +59,7 @@ public static class CacheAttributeRunTime
             catch ( Exception e )
             {
                 activity.SetException( e );
+
                 throw;
             }
         }
@@ -74,7 +75,10 @@ public static class CacheAttributeRunTime
     }
 
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static async Task<TTaskResultType?> OverrideMethodAsyncTask<TTaskResultType>( CachedMethodRegistration registration, object? instance, object?[] args )
+    public static async Task<TTaskResultType?> OverrideMethodAsyncTask<TTaskResultType>(
+        CachedMethodRegistration registration,
+        object? instance,
+        object?[] args )
     {
         Debug.Assert( registration != null, "registration must not be null." );
         Debug.Assert( registration.InvokeOriginalMethodAsyncTask != null, "registration.InvokeOriginalMethodAsyncTask must not be null" );
@@ -104,6 +108,7 @@ public static class CacheAttributeRunTime
                         // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                         // and the await instrumentation policy is not applied.
                         activity.Suspend();
+
                         try
                         {
                             result = await task;
@@ -146,6 +151,7 @@ public static class CacheAttributeRunTime
                         // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                         // and the await instrumentation policy is not applied.
                         activity.Suspend();
+
                         try
                         {
                             result = await task;
@@ -167,6 +173,7 @@ public static class CacheAttributeRunTime
             catch ( Exception e )
             {
                 activity.SetException( e );
+
                 throw;
             }
         }
@@ -182,7 +189,10 @@ public static class CacheAttributeRunTime
     }
 
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static async ValueTask<TTaskResultType?> OverrideMethodAsyncValueTask<TTaskResultType>( CachedMethodRegistration registration, object? instance, object?[] args )
+    public static async ValueTask<TTaskResultType?> OverrideMethodAsyncValueTask<TTaskResultType>(
+        CachedMethodRegistration registration,
+        object? instance,
+        object?[] args )
     {
         Debug.Assert( registration != null, "registration must not be null." );
         Debug.Assert( registration.InvokeOriginalMethodAsyncValueTask != null, "registration.InvokeOriginalMethodAsyncTask must not be null" );
@@ -212,6 +222,7 @@ public static class CacheAttributeRunTime
                         // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                         // and the await instrumentation policy is not applied.
                         activity.Suspend();
+
                         try
                         {
                             result = await task;
@@ -254,6 +265,7 @@ public static class CacheAttributeRunTime
                         // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                         // and the await instrumentation policy is not applied.
                         activity.Suspend();
+
                         try
                         {
                             result = await task;
@@ -275,6 +287,7 @@ public static class CacheAttributeRunTime
             catch ( Exception e )
             {
                 activity.SetException( e );
+
                 throw;
             }
         }

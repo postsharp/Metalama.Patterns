@@ -233,7 +233,7 @@ public sealed class MemoryCachingBackend : CachingBackend
             throw new ArgumentException(
                 "If " + nameof(replacementValue) + " is specified, " + nameof(replacementValueExpiration) + " must also be specified." );
         }
-        
+
         var itemKey = GetItemKey( key );
 
         var cacheValue = (MemoryCacheValue?) this._cache.Get( itemKey );

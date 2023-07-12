@@ -4,7 +4,6 @@ using System;
 using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
 
-
 namespace Metalama.Patterns.Caching.Tests
 {
     public abstract class InvalidationTestsBase
@@ -57,7 +56,7 @@ namespace Metalama.Patterns.Caching.Tests
                             cachedMethods[cachedMethodIndex].Invoke();
                     }
 
-                    CachedValueClass valueDuringInvalidation =
+                    var valueDuringInvalidation =
                         invalidatingMethods[testedPairIndex].Invoke();
 
                     AssertEx.Equal(
@@ -67,7 +66,7 @@ namespace Metalama.Patterns.Caching.Tests
 
                     for ( var cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
                     {
-                        CachedValueClass cachedMethodValueAfterInvalidation =
+                        var cachedMethodValueAfterInvalidation =
                             cachedMethods[cachedMethodIndex].Invoke();
 
                         bool shouldBeInvalidated;

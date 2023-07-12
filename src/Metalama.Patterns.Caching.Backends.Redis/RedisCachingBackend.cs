@@ -27,7 +27,7 @@ public class RedisCachingBackend : CachingBackend
     private protected readonly RedisKeyBuilder _keyBuilder;
 #pragma warning restore SA1401
 
-#pragma warning disable CA2213                                  // We're doing DisposeAsync.
+#pragma warning disable CA2213 // We're doing DisposeAsync.
     private RedisNotificationQueue? _notificationQueue;
 #pragma warning restore CA2213
 
@@ -36,7 +36,7 @@ public class RedisCachingBackend : CachingBackend
     /// </summary>
     private RedisNotificationQueue NotificationQueue
         => this._notificationQueue ?? throw new RedisCachingBackendAssertionFailedException( nameof(this._notificationQueue) + " has not been initialized." );
-    
+
     /// <summary>
     /// Gets the Redis database used by the current <see cref="RedisCachingBackend"/>.
     /// </summary>
@@ -80,11 +80,11 @@ public class RedisCachingBackend : CachingBackend
         this._keyBuilder = keyBuilder;
         this.Configuration = configuration ?? new RedisCachingBackendConfiguration();
         this._ownsConnection = false;
-        
+
         // [Porting] This line added to fix _createSerializerFunc being possible null. Might cause change of behaviour. 
         this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new BinarySerializer());
     }
-    
+
     /// <summary>
     /// Initializes the current <see cref="RedisCachingBackend"/>.
     /// </summary>
@@ -180,8 +180,8 @@ public class RedisCachingBackend : CachingBackend
     {
         configuration.Freeze();
 
-        var backend = configuration.SupportsDependencies 
-            ? new DependenciesRedisCachingBackend( connection, configuration ) 
+        var backend = configuration.SupportsDependencies
+            ? new DependenciesRedisCachingBackend( connection, configuration )
             : new RedisCachingBackend( connection, configuration );
 
         await backend.InitAsync( cancellationToken );
@@ -201,7 +201,7 @@ public class RedisCachingBackend : CachingBackend
 
         return enhancer;
     }
-    
+
     /// <inheritdoc />
     protected override CachingBackendFeatures CreateFeatures() => new RedisCachingBackendFeatures( this );
 

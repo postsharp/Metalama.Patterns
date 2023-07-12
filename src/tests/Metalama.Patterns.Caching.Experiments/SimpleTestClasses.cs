@@ -2,6 +2,7 @@
 
 // TODO: [Porting] Temporary, initial development only. Remove or adapt to proper tests.
 // ReSharper disable all
+
 #pragma warning disable
 
 // TODO: Work around #33441 : Some method calls in scope via `using static` are not transformed.
@@ -26,6 +27,7 @@ public static class S_Enumerator
     public static IEnumerator<int> TimesTwo( params int[] values )
     {
         Enter();
+
         return (IEnumerator<int>) values.GetEnumerator();
     }
 }
@@ -85,10 +87,15 @@ public static class S_AsyncEnumerable
     {
         Enter();
         await Task.Delay( 1 );
+
         yield return 1;
+
         await Task.Delay( 1 );
+
         yield return 2;
+
         await Task.Delay( 1 );
+
         yield return 3;
     }
 }
@@ -152,16 +159,22 @@ public static class S_AsyncEnumerator
     public static IAsyncEnumerator<int> GetEnumerator()
     {
         Enter();
+
         return OneTwoThree().GetAsyncEnumerator();
     }
 
     private static async IAsyncEnumerable<int> OneTwoThree()
     {
         await Task.Delay( 1 );
+
         yield return 1;
+
         await Task.Delay( 1 );
+
         yield return 2;
+
         await Task.Delay( 1 );
+
         yield return 3;
     }
 }
@@ -172,6 +185,7 @@ public sealed class I_S_YieldingEnumerable
     public IEnumerable<int> TimesTwo( params int[] values )
     {
         Enter();
+
         foreach ( var value in values )
         {
             yield return value * 2;
@@ -185,6 +199,7 @@ public sealed class I_S_IntAsyncTask
     public static async Task<int> TimesTwo( int x )
     {
         Enter();
+
         return x * 2;
     }
 }
@@ -195,6 +210,7 @@ public sealed class I_S_IntAsyncValueTask
     public static async ValueTask<int> TimesTwo( int x )
     {
         Enter();
+
         return x * 2;
     }
 }
@@ -205,6 +221,7 @@ public sealed class I_I_Int
     public int TimesTwo( int x )
     {
         Enter();
+
         return x * 2;
     }
 }
@@ -215,6 +232,7 @@ public static class S_Int
     public static int TimesTwo( int x )
     {
         Enter();
+
         return x * 2;
     }
 }
@@ -225,6 +243,7 @@ public sealed class I_I_String
     public string Reverse( string x )
     {
         Enter();
+
         return new string( x.Reverse().ToArray() );
     }
 }
@@ -235,6 +254,7 @@ public sealed class I_S_String
     public static string Reverse( string x )
     {
         Enter();
+
         return new string( x.Reverse().ToArray() );
     }
 }
@@ -245,6 +265,7 @@ public sealed class I_S_TwoCachedMethods
     public static int TimesTwo( int x )
     {
         Enter();
+
         return x * 2;
     }
 
@@ -252,6 +273,7 @@ public sealed class I_S_TwoCachedMethods
     public static int TimesThree( int x )
     {
         Enter();
+
         return x * 3;
     }
 }
@@ -262,6 +284,7 @@ public sealed class I_S_TwoCachedMethodsSameName
     public static int TimesTwo( int x )
     {
         Enter();
+
         return x * 2;
     }
 
@@ -269,6 +292,7 @@ public sealed class I_S_TwoCachedMethodsSameName
     public static double TimesTwo( double x )
     {
         Enter();
+
         return x * 3;
     }
 }

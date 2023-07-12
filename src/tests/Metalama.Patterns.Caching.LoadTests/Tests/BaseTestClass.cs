@@ -1,19 +1,21 @@
-﻿using Metalama.Patterns.Caching.Implementation;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Patterns.Caching.Implementation;
 using System;
 using System.Threading;
 
 namespace Metalama.Patterns.Caching.LoadTests.Tests
 {
-    abstract class BaseTestClass<LoadTestConfigurationT>
+    internal abstract class BaseTestClass<LoadTestConfigurationT>
         where LoadTestConfigurationT : LoadTestConfiguration
     {
         public virtual void Test( LoadTestConfigurationT configuration, TimeSpan duration )
         {
-            using ( LoadTest test = new LoadTest( configuration ) )
+            using ( var test = new LoadTest( configuration ) )
             {
                 Console.WriteLine( "test init" );
 
-                test.Initialize( CreateCachingBackend );
+                test.Initialize( this.CreateCachingBackend );
 
                 Console.WriteLine( "start" );
 

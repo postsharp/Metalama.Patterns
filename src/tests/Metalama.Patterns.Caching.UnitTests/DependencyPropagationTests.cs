@@ -8,7 +8,6 @@ using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Implementation;
 using System.Threading.Tasks;
 
-
 namespace Metalama.Patterns.Caching.Tests
 {
     public sealed class DependencyPropagationTests
@@ -56,7 +55,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestDependencyPropagation()
         {
-            TestingCacheBackend backend =
+            var backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testDependencyPropagationProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( testDependencyPropagationProfileName );
@@ -131,7 +130,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDependencyPropagationAsync()
         {
-            TestingCacheBackend backend =
+            var backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testDependencyPropagationAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( testDependencyPropagationAsyncProfileName );
@@ -210,7 +209,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDisposedContextAsync()
         {
-            TestingCacheBackend backend =
+            var backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testDisposedContextAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( testDisposedContextAsyncProfileName );
@@ -286,7 +285,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSuspendedDependencyPropagation()
         {
-            TestingCacheBackend backend =
+            var backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testSuspendedDependencyPropagationProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( testSuspendedDependencyPropagationProfileName );
@@ -368,7 +367,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestSuspendedDependencyPropagationAsync()
         {
-            TestingCacheBackend backend =
+            var backend =
                 TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testSuspendedDependencyPropagationAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( testSuspendedDependencyPropagationAsyncProfileName );

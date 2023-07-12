@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Metalama.Patterns.Caching.TestHelpers;
-
 using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
@@ -38,12 +37,12 @@ namespace Metalama.Patterns.Caching.Tests
                 var cachingClass = new TestOneDependencyCachingClass();
                 var currentId = 0;
 
-                CachedValueClass value1 = cachingClass.GetValueAsDependency();
-                bool called = cachingClass.Reset();
+                var value1 = cachingClass.GetValueAsDependency();
+                var called = cachingClass.Reset();
                 Assert.True( called, "The method was not called when the cache should be empty." );
                 AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
 
-                CachedValueClass value2 = cachingClass.GetValueAsDependency();
+                var value2 = cachingClass.GetValueAsDependency();
                 called = cachingClass.Reset();
                 Assert.False( called, "The method was called when its first return value should be cached." );
 
@@ -55,12 +54,12 @@ namespace Metalama.Patterns.Caching.Tests
                 CachingServices.Invalidation.Invalidate( value1 );
 
                 ++currentId;
-                CachedValueClass value3 = cachingClass.GetValueAsDependency();
+                var value3 = cachingClass.GetValueAsDependency();
                 called = cachingClass.Reset();
                 Assert.True( called, "The method was not called when the cache item should be invalidated." );
                 AssertEx.Equal( currentId, value3.Id, "The second given value has unexpected ID." );
 
-                CachedValueClass value4 = cachingClass.GetValueAsDependency();
+                var value4 = cachingClass.GetValueAsDependency();
                 called = cachingClass.Reset();
                 Assert.False( called, "The method was called when its second return value should be cached." );
 
@@ -102,12 +101,12 @@ namespace Metalama.Patterns.Caching.Tests
                 var cachingClass = new TestOneDependencyAsyncCachingClass();
                 var currentId = 0;
 
-                CachedValueClass value1 = await cachingClass.GetValueAsDependencyAsync();
-                bool called = cachingClass.Reset();
+                var value1 = await cachingClass.GetValueAsDependencyAsync();
+                var called = cachingClass.Reset();
                 Assert.True( called, "The method was not called when the cache should be empty." );
                 AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
 
-                CachedValueClass value2 = await cachingClass.GetValueAsDependencyAsync();
+                var value2 = await cachingClass.GetValueAsDependencyAsync();
                 called = cachingClass.Reset();
                 Assert.False( called, "The method was called when its first return value should be cached." );
 
@@ -119,12 +118,12 @@ namespace Metalama.Patterns.Caching.Tests
                 await CachingServices.Invalidation.InvalidateAsync( value1 );
 
                 ++currentId;
-                CachedValueClass value3 = await cachingClass.GetValueAsDependencyAsync();
+                var value3 = await cachingClass.GetValueAsDependencyAsync();
                 called = cachingClass.Reset();
                 Assert.True( called, "The method was not called when the cache item should be invalidated." );
                 AssertEx.Equal( currentId, value3.Id, "The second given value has unexpected ID." );
 
-                CachedValueClass value4 = await cachingClass.GetValueAsDependencyAsync();
+                var value4 = await cachingClass.GetValueAsDependencyAsync();
                 called = cachingClass.Reset();
                 Assert.False( called, "The method was called when its second return value should be cached." );
 
@@ -198,7 +197,7 @@ namespace Metalama.Patterns.Caching.Tests
                 CachingServices.Invalidation.Invalidate( value1 );
 
                 cachingClass2.GetValueAsDependency();
-                bool called = cachingClass1.Reset();
+                var called = cachingClass1.Reset();
                 Assert.True( called, "The method result did not get invalidated by the automatic dependency." );
             }
             finally
@@ -266,7 +265,7 @@ namespace Metalama.Patterns.Caching.Tests
                 await CachingServices.Invalidation.InvalidateAsync( value1 );
 
                 await cachingClass2.GetValueAsDependencyAsync();
-                bool called = cachingClass1.Reset();
+                var called = cachingClass1.Reset();
                 Assert.True( called, "The method result did not get invalidated by the automatic dependency." );
             }
             finally

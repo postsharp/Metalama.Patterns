@@ -62,42 +62,44 @@ internal sealed class CompileTimeCacheItemConfiguration
     {
         if ( attribute == null )
         {
-            throw new ArgumentNullException( nameof( attribute ) );
+            throw new ArgumentNullException( nameof(attribute) );
         }
 
-        if ( !(attribute.Type.Is( typeof( CacheAttribute ) ) || attribute.Type.Is( typeof( CacheConfigurationAttribute ) )) )
+        if ( !(attribute.Type.Is( typeof(CacheAttribute) ) || attribute.Type.Is( typeof(CacheConfigurationAttribute) )) )
         {
-            throw new ArgumentOutOfRangeException( nameof( attribute ), "Must be a " + nameof( CacheAttribute ) + " or a " + nameof( CacheConfigurationAttribute ) + "." );
+            throw new ArgumentOutOfRangeException(
+                nameof(attribute),
+                "Must be a " + nameof(CacheAttribute) + " or a " + nameof(CacheConfigurationAttribute) + "." );
         }
 
         try
         {
-            if ( attribute.TryGetNamedArgument( nameof( CacheConfigurationAttribute.ProfileName ), out var profileName ) )
+            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.ProfileName), out var profileName ) )
             {
                 this.ProfileName = (string?) profileName.Value;
             }
 
-            if ( attribute.TryGetNamedArgument( nameof( CacheConfigurationAttribute.AutoReload ), out var autoReload ) )
+            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.AutoReload), out var autoReload ) )
             {
                 this.AutoReload = (bool) autoReload.Value!;
             }
 
-            if ( attribute.TryGetNamedArgument( nameof( CacheConfigurationAttribute.AbsoluteExpiration ), out var absoluteExpiration ) )
+            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.AbsoluteExpiration), out var absoluteExpiration ) )
             {
                 this.AbsoluteExpiration = TimeSpan.FromMinutes( (double) absoluteExpiration.Value! );
             }
 
-            if ( attribute.TryGetNamedArgument( nameof( CacheConfigurationAttribute.SlidingExpiration ), out var slidingExpiration ) )
+            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.SlidingExpiration), out var slidingExpiration ) )
             {
                 this.SlidingExpiration = TimeSpan.FromMinutes( (double) slidingExpiration.Value! );
             }
 
-            if ( attribute.TryGetNamedArgument( nameof( CacheConfigurationAttribute.Priority ), out var priority ) )
+            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.Priority), out var priority ) )
             {
                 this.Priority = (CacheItemPriority) priority.Value!;
             }
 
-            if ( attribute.TryGetNamedArgument( nameof( CacheConfigurationAttribute.IgnoreThisParameter ), out var ignoreThisParameter ) )
+            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.IgnoreThisParameter), out var ignoreThisParameter ) )
             {
                 this.IgnoreThisParameter = (bool) ignoreThisParameter.Value!;
             }
@@ -114,34 +116,34 @@ internal sealed class CompileTimeCacheItemConfiguration
 
         if ( this.AbsoluteExpiration.HasValue )
         {
-            args[nameof( CacheConfigurationAttribute.AbsoluteExpiration )] = this.AbsoluteExpiration.Value.TotalMinutes;
+            args[nameof(CacheConfigurationAttribute.AbsoluteExpiration)] = this.AbsoluteExpiration.Value.TotalMinutes;
         }
 
         if ( this.AutoReload.HasValue )
         {
-            args[nameof( CacheConfigurationAttribute.AutoReload )] = this.AutoReload;
+            args[nameof(CacheConfigurationAttribute.AutoReload)] = this.AutoReload;
         }
 
         if ( this.IgnoreThisParameter.HasValue )
         {
-            args[nameof( CacheConfigurationAttribute.IgnoreThisParameter )] = this.IgnoreThisParameter;
+            args[nameof(CacheConfigurationAttribute.IgnoreThisParameter)] = this.IgnoreThisParameter;
         }
 
         if ( this.Priority.HasValue )
         {
-            args[nameof( CacheConfigurationAttribute.Priority )] = this.Priority;
+            args[nameof(CacheConfigurationAttribute.Priority)] = this.Priority;
         }
 
         if ( this.SlidingExpiration.HasValue )
         {
-            args[nameof( CacheConfigurationAttribute.SlidingExpiration )] = this.SlidingExpiration.Value.TotalMinutes;
+            args[nameof(CacheConfigurationAttribute.SlidingExpiration)] = this.SlidingExpiration.Value.TotalMinutes;
         }
 
         if ( this.ProfileName != null )
         {
-            args[nameof( CacheConfigurationAttribute.ProfileName )] = this.ProfileName;
+            args[nameof(CacheConfigurationAttribute.ProfileName)] = this.ProfileName;
         }
 
-        return AttributeConstruction.Create( typeof( CacheAttribute ), namedArguments: args.ToList() );
+        return AttributeConstruction.Create( typeof(CacheAttribute), namedArguments: args.ToList() );
     }
 }

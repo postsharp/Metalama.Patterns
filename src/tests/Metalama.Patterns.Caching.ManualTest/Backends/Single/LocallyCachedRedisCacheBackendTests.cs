@@ -39,7 +39,7 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
     {
         return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
     }
-    
+
     protected override ITestableCachingComponent CreateCollector( CachingBackend backend )
     {
         return RedisCacheDependencyGarbageCollector.Create( backend );
@@ -72,7 +72,11 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
 
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix: redisKeyPrefix, locallyCached: false ) )
+        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend(
+                   this.TestContext,
+                   this._redisSetupFixture,
+                   prefix: redisKeyPrefix,
+                   locallyCached: false ) )
         {
             try
             {
@@ -85,11 +89,15 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
             }
         }
 
-        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix: redisKeyPrefix, locallyCached: true ) )
+        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend(
+                   this.TestContext,
+                   this._redisSetupFixture,
+                   prefix: redisKeyPrefix,
+                   locallyCached: true ) )
         {
             try
             {
-                CachedValueClass retrievedValue = testObject.GetValue();
+                var retrievedValue = testObject.GetValue();
                 Assert.True( testObject.Reset() );
                 Assert.NotEqual( setValue, retrievedValue );
             }

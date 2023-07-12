@@ -200,7 +200,8 @@ public static partial class CachingServices
                 try
                 {
                     var key = DefaultKeyBuilder.BuildMethodKey(
-                        DefaultMethodRegistrationCache.Get( method ) ?? throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method}' is not registered." ),
+                        DefaultMethodRegistrationCache.Get( method )
+                        ?? throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method}' is not registered." ),
                         args,
                         instance );
 
@@ -245,7 +246,8 @@ public static partial class CachingServices
                 try
                 {
                     var key = DefaultKeyBuilder.BuildMethodKey(
-                        DefaultMethodRegistrationCache.Get( method ) ?? throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method}' is not registered." ),
+                        DefaultMethodRegistrationCache.Get( method )
+                        ?? throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method}' is not registered." ),
                         args,
                         instance );
 
@@ -299,7 +301,8 @@ public static partial class CachingServices
         private static CachingContext OpenRecacheContext( Delegate method, params object[] args )
         {
             var key = DefaultKeyBuilder.BuildMethodKey(
-                DefaultMethodRegistrationCache.Get( method.Method ) ?? throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method.Method}' is not registered." ),
+                DefaultMethodRegistrationCache.Get( method.Method )
+                ?? throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method.Method}' is not registered." ),
                 args,
                 method.Target );
 

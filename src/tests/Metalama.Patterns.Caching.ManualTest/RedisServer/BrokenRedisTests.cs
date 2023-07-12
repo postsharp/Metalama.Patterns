@@ -17,7 +17,7 @@ public class BrokenRedisTests
         AssertEx.Throws<TimeoutException>(
             () =>
             {
-                RedisCachingBackendConfiguration configuration =
+                var configuration =
                     new RedisCachingBackendConfiguration
                     {
                         KeyPrefix = Guid.NewGuid().ToString(),
@@ -27,7 +27,7 @@ public class BrokenRedisTests
                         ConnectionTimeout = TimeSpan.FromMilliseconds( 10 )
                     };
 
-                IConnectionMultiplexer connection = this.CreateConnection( false );
+                var connection = this.CreateConnection( false );
                 RedisCachingBackend.Create( connection, configuration );
             } );
     }
@@ -38,21 +38,21 @@ public class BrokenRedisTests
         AssertEx.Throws<RedisConnectionException>(
             () =>
             {
-                IConnectionMultiplexer connection = this.CreateConnection( true );
+                var connection = this.CreateConnection( true );
             } );
     }
 
     private IConnectionMultiplexer CreateConnection( bool redisAborts )
     {
-        SocketManager socketManager = new SocketManager( "BrokenTest" );
+        var socketManager = new SocketManager( "BrokenTest" );
 
-        ConfigurationOptions redisConfigurationOptions = new ConfigurationOptions();
+        var redisConfigurationOptions = new ConfigurationOptions();
         redisConfigurationOptions.EndPoints.Add( "192.168.45.127:12345" );
         redisConfigurationOptions.AbortOnConnectFail = redisAborts;
         redisConfigurationOptions.ConnectTimeout = 10;
         redisConfigurationOptions.SocketManager = socketManager;
 
-        ConnectionMultiplexer connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
+        var connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
 
         return new DisposingConnectionMultiplexer( connection, socketManager );
     }

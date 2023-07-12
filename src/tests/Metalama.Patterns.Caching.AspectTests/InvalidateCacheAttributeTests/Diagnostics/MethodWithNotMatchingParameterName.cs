@@ -17,9 +17,7 @@ public static class MethodWithNotMatchingParameterName
 
     public class InvalidatingClass
     {
-        [InvalidateCache( typeof(CachingClass), nameof( CachingClass.DoAction ) )]
-        public void Invalidate( int param )
-        {
-        }
+        [InvalidateCache( typeof(CachingClass), nameof(CachingClass.DoAction) )]
+        public void Invalidate( int param ) { }
     }
 }

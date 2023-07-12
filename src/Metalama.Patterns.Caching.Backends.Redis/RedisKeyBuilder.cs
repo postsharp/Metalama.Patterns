@@ -21,7 +21,7 @@ internal sealed class RedisKeyBuilder
     public readonly RedisChannel NotificationChannel;
     public readonly RedisChannel EventsChannel;
 #pragma warning restore SA1401
-    
+
     // ReSharper restore NotAccessedField.Global
 
     public string KeyPrefix { get; }

@@ -38,7 +38,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     {
         return await this.CreateBackendAsync( null );
     }
-    
+
     protected override ITestableCachingComponent CreateCollector( CachingBackend backend )
     {
         return RedisCacheDependencyGarbageCollector.Create( ((DisposingRedisCachingBackend) backend).UnderlyingBackend );
@@ -71,13 +71,13 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     {
         var prefix = this.GeneratePrefix();
 
-        var redisTestInstance = _redisSetupFixture.TestInstance;
+        var redisTestInstance = this._redisSetupFixture.TestInstance;
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
         Assert.Equal( 0, this.GetAllKeys( prefix ).Count );
 
         using ( var cache = await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix: prefix, supportsDependencies: true ) )
-        using ( RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
+        using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
         {
             cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
@@ -105,13 +105,13 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         var keyPrefix = this.GeneratePrefix();
 
         using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
-        using ( RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.UnderlyingBackend ) )
+        using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.UnderlyingBackend ) )
         {
             const string valueSmallKey = "i";
             const string dependencySmallKey = "d";
-            TimeSpan offset = this.GetExpirationTolerance();
+            var offset = this.GetExpirationTolerance();
 
-            RedisKeyBuilder keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
+            var keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
 
             string valueKey = keyBuilder.GetValueKey( valueSmallKey );
             string dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
@@ -129,7 +129,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
                 itemExpiredEvent.SetResult( true );
             };
 
-            CacheItem cacheItem = new CacheItem(
+            var cacheItem = new CacheItem(
                 "v",
                 ImmutableList.Create( dependencySmallKey ),
                 new CacheItemConfiguration { AbsoluteExpiration = offset } );
@@ -160,13 +160,13 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         var keyPrefix = this.GeneratePrefix();
 
         using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
-        using ( RedisCacheDependencyGarbageCollector collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
+        using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
         {
             const string valueSmallKey = "i";
             const string dependencySmallKey = "d";
-            TimeSpan offset = this.GetExpirationTolerance();
+            var offset = this.GetExpirationTolerance();
 
-            RedisKeyBuilder keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
+            var keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
 
             string valueKey = keyBuilder.GetValueKey( valueSmallKey );
             string dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
@@ -174,12 +174,12 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
             collector.NotificationQueue.SuspendProcessing();
 
-            CacheItem expiringCacheItem = new CacheItem(
+            var expiringCacheItem = new CacheItem(
                 "v",
                 ImmutableList.Create( dependencySmallKey ),
                 new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
-            CacheItem nonExpiringCacheItem = new CacheItem(
+            var nonExpiringCacheItem = new CacheItem(
                 "v",
                 ImmutableList.Create( dependencySmallKey ) );
 
@@ -217,7 +217,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         var keyPrefix = this.GeneratePrefix();
 
         using ( var redisCachingBackend = this.CreateBackend( keyPrefix ) )
-        using ( DependenciesRedisCachingBackend cache = (DependenciesRedisCachingBackend) redisCachingBackend.UnderlyingBackend )
+        using ( var cache = (DependenciesRedisCachingBackend) redisCachingBackend.UnderlyingBackend )
         {
             cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
@@ -331,7 +331,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         using ( var connection = RedisFactory.CreateConnection( this.TestContext ) )
         {
             List<IServer> servers = connection.Inner.GetEndPoints().Select( endpoint => connection.Inner.GetServer( endpoint ) ).ToList();
-            List<RedisKey> keys = servers.SelectMany( server => server.Keys( pattern: prefix + ":*" ) ).ToList();
+            var keys = servers.SelectMany( server => server.Keys( pattern: prefix + ":*" ) ).ToList();
 
             return keys.Select( k => k.ToString() ).Where( k => !k.Contains( ":gc:" ) ).ToList();
         }

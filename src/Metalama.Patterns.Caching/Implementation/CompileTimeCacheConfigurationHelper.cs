@@ -16,6 +16,7 @@ internal static class CompileTimeCacheConfigurationHelper
         PopulateConfigurations( method.DeclaringType, configurations );
 
         var assemblyConfiguration = GetConfigurationOnDeclaration( method.DeclaringType.DeclaringAssembly );
+
         if ( assemblyConfiguration != null )
         {
             configurations.Add( assemblyConfiguration );
@@ -50,8 +51,9 @@ internal static class CompileTimeCacheConfigurationHelper
 
     private static CompileTimeCacheItemConfiguration? GetConfigurationOnDeclaration( IDeclaration declaration )
     {
-        var attributeType = (INamedType) TypeFactory.GetType( typeof( CacheConfigurationAttribute ) );
+        var attributeType = (INamedType) TypeFactory.GetType( typeof(CacheConfigurationAttribute) );
         var attr = declaration.Attributes.OfAttributeType( attributeType ).SingleOrDefault();
+
         return attr == null ? null : new CompileTimeCacheItemConfiguration( attr );
     }
 }

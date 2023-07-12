@@ -19,7 +19,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
     private static readonly Task<bool> _falseTaskResult = Task.FromResult( false );
     private static readonly Task<bool> _trueTaskResult = Task.FromResult( true );
-    
+
     private readonly TaskCompletionSource<bool> _disposeTask = new();
 
     private CachingBackendFeatures? _features;
@@ -64,7 +64,7 @@ public abstract class CachingBackend : ITestableCachingComponent
                 string.Format( CultureInfo.InvariantCulture, "Feature \"{0}\" is not supported by {1}.", featureName, this.GetType().Name ) );
         }
     }
-    
+
     /// <summary>
     /// Sets a cache item. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -219,7 +219,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-    
+
     /// <summary>
     /// Gets a cache item given its key. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -335,7 +335,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-    
+
     /// <summary>
     /// Removes a cache item from the cache given its key. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -406,7 +406,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-    
+
     /// <summary>
     /// Removes from the cache all items that have a specific dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -481,7 +481,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-    
+
     /// <summary>
     /// Determines whether the cache contains a given dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
@@ -564,7 +564,7 @@ public abstract class CachingBackend : ITestableCachingComponent
             }
         }
     }
-    
+
     /// <summary>
     /// Clears the cache. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. 
     /// </summary>
@@ -634,7 +634,8 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     public CachingBackendStatus Status => (CachingBackendStatus) this._status;
 
-    private bool TryChangeStatus( CachingBackendStatus expectedStatus, CachingBackendStatus newStatus ) => Interlocked.CompareExchange( ref this._status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
+    private bool TryChangeStatus( CachingBackendStatus expectedStatus, CachingBackendStatus newStatus )
+        => Interlocked.CompareExchange( ref this._status, (int) newStatus, (int) expectedStatus ) == (int) expectedStatus;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CachingBackend"/> class.

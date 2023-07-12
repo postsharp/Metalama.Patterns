@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void InvalidateBeforeCachedClassHasBeenTouched()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( nameof( Issue20774Tests ) );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( nameof(Issue20774Tests) );
 
             try
             {

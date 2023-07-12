@@ -17,7 +17,7 @@ public static class AsyncEnumerableHelper
     {
         if ( task == null )
         {
-            throw new ArgumentNullException( nameof( task ) );
+            throw new ArgumentNullException( nameof(task) );
         }
 
         if ( task.IsCompleted )
@@ -37,7 +37,7 @@ public static class AsyncEnumerableHelper
     {
         if ( task == null )
         {
-            throw new ArgumentNullException( nameof( task ) );
+            throw new ArgumentNullException( nameof(task) );
         }
 
         if ( task.IsCompleted )
@@ -89,6 +89,7 @@ public static class AsyncEnumerableHelper
             public async ValueTask<bool> MoveNextAsync()
             {
                 this._enumerator ??= (await this._task).GetAsyncEnumerator( this._cancellationToken );
+
                 return await this._enumerator.MoveNextAsync();
             }
         }
@@ -133,6 +134,7 @@ public static class AsyncEnumerableHelper
             public async ValueTask<bool> MoveNextAsync()
             {
                 this._enumerator ??= (await this._task).GetAsyncEnumerator( this._cancellationToken );
+
                 return await this._enumerator.MoveNextAsync();
             }
         }
@@ -147,7 +149,7 @@ public static class AsyncEnumerableHelper
     {
         if ( task == null )
         {
-            throw new ArgumentNullException( nameof( task ) );
+            throw new ArgumentNullException( nameof(task) );
         }
 
         if ( task.IsCompleted )
@@ -167,7 +169,7 @@ public static class AsyncEnumerableHelper
     {
         if ( task == null )
         {
-            throw new ArgumentNullException( nameof( task ) );
+            throw new ArgumentNullException( nameof(task) );
         }
 
         if ( task.IsCompleted )
@@ -203,6 +205,7 @@ public static class AsyncEnumerableHelper
         public async ValueTask<bool> MoveNextAsync()
         {
             this._enumerator ??= await this._task;
+
             return await this._enumerator.MoveNextAsync();
         }
     }
@@ -230,6 +233,7 @@ public static class AsyncEnumerableHelper
         public async ValueTask<bool> MoveNextAsync()
         {
             this._enumerator ??= await this._task;
+
             return await this._enumerator.MoveNextAsync();
         }
     }
