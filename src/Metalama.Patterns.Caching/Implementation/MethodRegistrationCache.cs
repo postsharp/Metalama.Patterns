@@ -100,7 +100,7 @@ public sealed class MethodRegistrationCache
     /// <returns>The <see cref="CachedMethodRegistration"/> for <paramref name="method"/>, or <c>null</c> if no <see cref="CachedMethodRegistration"/> was registered for <paramref name="method"/>.</returns>
     /// <remarks>
     /// If no <see cref="CachedMethodRegistration"/> has been registered for the given <paramref name="method"/>, this method will run the class constructor
-    /// of the delcaring type of the method then lookup the registration again.
+    /// of the declaring type of the method then lookup the registration again.
     /// </remarks>
     public CachedMethodRegistration? Get( [Required] MethodInfo method )
     {

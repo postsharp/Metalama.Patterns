@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using System.Collections.Specialized;
 
 namespace Metalama.Patterns.Caching.Implementation;
 

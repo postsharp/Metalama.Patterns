@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+#if NETCOREAPP3_0_OR_GREATER
 using Metalama.Framework.RunTime;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-#if NETCOREAPP3_0_OR_GREATER
-
-public static class AsyncEnumerableHelper
+internal static class AsyncEnumerableHelper
 {
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// If <paramref name="task"/> is already completed, returns the result of the task; otherwise, returns an
     /// instance of <see cref="IAsyncEnumerable{T}"/> which awaits the <paramref name="task"/> in
@@ -28,6 +28,7 @@ public static class AsyncEnumerableHelper
         return new EnumerableFromTask<T>( task );
     }
 
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// If <paramref name="task"/> is already completed, returns the result of the task; otherwise, returns an
     /// instance of <see cref="IAsyncEnumerable{T}"/> which awaits the <paramref name="task"/> in
@@ -140,6 +141,7 @@ public static class AsyncEnumerableHelper
         }
     }
 
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// If <paramref name="task"/> is already completed, returns the result of the task; otherwise, returns an
     /// instance of <see cref="IAsyncEnumerator{T}"/> which awaits the <paramref name="task"/> in
@@ -160,6 +162,7 @@ public static class AsyncEnumerableHelper
         return new EnumeratorFromTask<T>( task );
     }
 
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// If <paramref name="task"/> is already completed, returns the result of the task; otherwise, returns an
     /// instance of <see cref="IAsyncEnumerator{T}"/> which awaits the <paramref name="task"/> in
@@ -245,6 +248,7 @@ public static class AsyncEnumerableHelper
     ///  The intended side effect of this method is to completely evaluate the input enumerator.
     /// </summary>
     /// <param name="enumerator">An enumerator.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <typeparam name="T"></typeparam>
     /// <returns>An <see cref="AsyncEnumerableList{T}"/> made from the items of <paramref name="enumerator"/>.</returns>
     public static async ValueTask<AsyncEnumerableList<T>> BufferToListAsync<T>(
@@ -254,6 +258,7 @@ public static class AsyncEnumerableHelper
     {
         // TODO: [Porting] Reinstate this optimization. Requires framework change.
 #if false
+        // ReSharper disable CommentTypo
         // Reinstate the following as the second line of <summary>:
         // If the enumerable is already an enumerator of a <see cref="AsyncEnumerableList{T}"/>, returns the input enumerator.
         // And use this for <returns>:
@@ -265,6 +270,7 @@ public static class AsyncEnumerableHelper
             return typedEnumerator.Parent; // TODO: Would need to add Parent property to AsyncEnumerableList<T>.AsyncEnumerator
         }
         else
+        // ReSharper restore CommentTypo
 #endif
         {
             var list = new AsyncEnumerableList<T>();

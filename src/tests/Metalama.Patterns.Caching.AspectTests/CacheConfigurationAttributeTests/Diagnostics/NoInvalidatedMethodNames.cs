@@ -6,6 +6,6 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
 
 public class NoInvalidatedMethodNames
 {
-    [InvalidateCache()]
+    [InvalidateCache]
     public int Test( int a ) => 42;
 }

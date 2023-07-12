@@ -72,7 +72,7 @@ public sealed partial class LogEventDataTests
 
         var expressionModel = data.GetExpressionModel<TestExpressionModel>();
         Assert.NotNull( expressionModel );
-        Assert.Same( rawData, expressionModel!.Data );
+        Assert.Same( rawData, expressionModel.Data );
     }
 
     [Fact]

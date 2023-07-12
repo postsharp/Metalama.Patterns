@@ -414,7 +414,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 #if NETCOREAPP
                     await
 #endif
-                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                    using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                     {
                         // All messages are processed at this point.
                         await this._notificationProcessingThreadCompleted.Task;

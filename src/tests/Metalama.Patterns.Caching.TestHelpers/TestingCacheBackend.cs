@@ -29,9 +29,9 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         public int ExpectedInvalidateCount { get; set; }
 
-        public string LastCachedKey { get; set; }
+        public string? LastCachedKey { get; set; }
 
-        public CacheItem LastCachedItem { get; set; }
+        public CacheItem? LastCachedItem { get; set; }
 
         public event CacheItemSetEventHandler ItemSet;
 

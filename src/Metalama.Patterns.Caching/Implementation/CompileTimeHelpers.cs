@@ -16,12 +16,12 @@ internal static class CompileTimeHelpers
     /// with an optional prefix.
     /// </summary>
     /// <param name="id">The ID.</param>
-    /// <param name="prefix">An optional prefix for the identifier.</param>
     /// <param name="purpose">
     /// Typically a unique hard-coded GUID corresponding to the purpose for which an identifier associated with the
     /// given ID is required. This is to avoid collisions, for example when multiple unrelated aspects introduce members associated
     /// with the same ID. Alternatively, related aspects could use a common value for <paramref name="purpose"/> if desired.
     /// </param>
+    /// <param name="prefix">An optional prefix for the identifier.</param>
     /// <returns></returns>
     public static string MakeAssociatedIdentifier( this SerializableDeclarationId id, string purpose, string? prefix = null )
     {
@@ -42,12 +42,13 @@ internal static class CompileTimeHelpers
 #pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
         var bytes = md5.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() + purpose ) );
 
-        // TODO: use base62 or something else more compact than hex.
+        // TODO: !!! use base62 or something else more compact than hex.
         return prefix + "_" + BitConverter.ToString( bytes ).Replace( "-", string.Empty );
     }
 
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
-    /// Throws the current exception at compile time.
+    /// Throws the current exception at compile time. Useful when called from a template.
     /// </summary>    
     public static void ThrowAtCompileTime( this Exception e ) => throw e;
 
@@ -56,7 +57,7 @@ internal static class CompileTimeHelpers
     /// </summary>
     /// <param name="type"></param>
     /// <param name="hasResult">If <see langword="null"/>, matches types with our without <c>TResult</c>. If <see langword="false"/>, only matches
-    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <see cref="TResult"/>.</param>
+    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <c>TResult</c>.</param>
     public static bool IsTaskOrValueTask( this IType type, bool? hasResult = default )
     {
         var unboundType = (type as INamedType)?.GetOriginalDefinition();
@@ -66,8 +67,8 @@ internal static class CompileTimeHelpers
             return false;
         }
 
-        var isWithValue = unboundType.SpecialType == SpecialType.Task_T || unboundType.SpecialType == SpecialType.ValueTask_T;
-        var isWithoutValue = unboundType.SpecialType == SpecialType.Task || unboundType.SpecialType == SpecialType.ValueTask;
+        var isWithValue = unboundType.SpecialType is SpecialType.Task_T or SpecialType.ValueTask_T;
+        var isWithoutValue = unboundType.SpecialType is SpecialType.Task or SpecialType.ValueTask;
 
         return hasResult switch
         {
@@ -82,7 +83,7 @@ internal static class CompileTimeHelpers
     /// </summary>
     /// <param name="type"></param>
     /// <param name="withResult">If <see langword="null"/>, matches types with our without <c>TResult</c>. If <see langword="false"/>, only matches
-    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <see cref="TResult"/>.</param>
+    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <c>TResult</c>.</param>
     public static bool IsTask( this IType type, bool? withResult = default )
     {
         var unboundType = (type as INamedType)?.GetOriginalDefinition();
@@ -103,12 +104,13 @@ internal static class CompileTimeHelpers
         };
     }
 
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// Determines if the current <see cref="IType"/> is <see cref="ValueTask"/> or <see cref="ValueTask{TResult}"/>.
     /// </summary>
     /// <param name="type"></param>
     /// <param name="withResult">If <see langword="null"/>, matches types with our without <c>TResult</c>. If <see langword="false"/>, only matches
-    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <see cref="TResult"/>.</param>
+    /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <c>TResult</c>.</param>
     public static bool IsValueTask( this IType type, bool? withResult = default )
     {
         var unboundType = (type as INamedType)?.GetOriginalDefinition();
@@ -129,8 +131,9 @@ internal static class CompileTimeHelpers
         };
     }
 
+    // ReSharper disable once UnusedMember.Global
     /// <summary>
-    /// Determines if the current <see cref="IType"/> is <see cref="System.Collections.IEnumerator"/>, <see cref="IEnumerator{T}"/> or <see cref="IAsyncEnumerator{T}"/>.
+    /// Determines if the current <see cref="IType"/> is <see cref="System.Collections.IEnumerator"/>, <see cref="IEnumerator{T}"/> or <c>IAsyncEnumerator{T}</c>.
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>

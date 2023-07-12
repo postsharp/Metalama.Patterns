@@ -5,12 +5,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using static Metalama.Framework.Diagnostics.Severity;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Implementation;
 
 [CompileTime]
 internal static class CachingDiagnosticDescriptors
 {
-    private const string _cagtegory = "Metalama.Patterns.Caching";
+    private const string _category = "Metalama.Patterns.Caching";
 
     // Reserved range 5100-5120
 
@@ -28,7 +28,7 @@ internal static class CachingDiagnosticDescriptors
                 Error,
                 "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: this method is not cached by the [Cache] aspect.",
                 "Method is not cached.",
-                _cagtegory );
+                _category );
 
         /// <summary>
         /// Was PS CAC003:
@@ -44,7 +44,7 @@ internal static class CachingDiagnosticDescriptors
                     "(a) this is an instance method, (b) the method, class or assembly is not annotated with the " +
                     "[CacheConfiguration( IgnoreThisParameter = true )]] attribute and (c) the type {2} is not derived from {3}.",
                     "'this' parameter cannot be mapped.",
-                    _cagtegory );
+                    _category );
 
         /// <summary>
         /// Was PS CAC004:
@@ -58,7 +58,7 @@ internal static class CachingDiagnosticDescriptors
                     "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the invalidating method does not contain a parameter named '{2}'. " +
                     "Make sure {0} contains a parameter named '{2}' or add the [NotCachedKey] attribute to the '{2}' parameter in {1}.",
                     "No matching parameter in invalidating method.",
-                    _cagtegory );
+                    _category );
 
         /// <summary>
         /// Was PS CAC005:
@@ -73,7 +73,7 @@ internal static class CachingDiagnosticDescriptors
                     +
                     "with the type of the '{2}' parameter in the invalidating method.",
                     "Parameter type is not compatible.",
-                    _cagtegory );
+                    _category );
 
         /// <summary>
         /// Was PS CAC006:
@@ -85,7 +85,7 @@ internal static class CachingDiagnosticDescriptors
                 Error,
                 "Invalid [InvalidateCache] aspect on {0}: the constructor parameters cannot contain a null, empty or whitespace-only string.",
                 "[InvalidateCache] parameters cannot contain a null, empty or whitespace string.",
-                _cagtegory );
+                _category );
 
         /// <summary>
         /// Was PS CAC007:
@@ -97,7 +97,7 @@ internal static class CachingDiagnosticDescriptors
                 Error,
                 "Invalid [InvalidateCache] aspect on {0}: the constructor parameters must contain at least one method name.",
                 "[InvalidateCache] must contain at least one method name.",
-                _cagtegory );
+                _category );
 
         /// <summary>
         /// Was PS CAC008:
@@ -110,7 +110,7 @@ internal static class CachingDiagnosticDescriptors
                     Error,
                     "Invalid [InvalidateCache] aspect on {0}: there is no method named {1} in type {2}.",
                     "Cached method not found.",
-                    _cagtegory );
+                    _category );
 
         /// <summary>
         /// Was PS CAC009:
@@ -122,7 +122,7 @@ internal static class CachingDiagnosticDescriptors
                 Error,
                 "Invalid [InvalidateCache] aspect on {0}: there are several suitable overloads of the {1} method. Set the AllowMultipleOverloads property to \"true\" to allow invalidation of all of them.",
                 "Multiple suitable overloads found.",
-                _cagtegory );
+                _category );
 
         // TODO: Reinstate equivalent annotations when supported by the Metalama framework.
 #if false
@@ -155,6 +155,6 @@ internal static class CachingDiagnosticDescriptors
                 Error,
                 "The [Cache] aspect can be applied at most once to a method.",
                 "[Cache] aspect applied more than once.",
-                _cagtegory );
+                _category );
     }
 }

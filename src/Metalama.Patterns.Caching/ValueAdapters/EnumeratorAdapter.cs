@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.RunTime;
 using System.Collections;
 
 namespace Metalama.Patterns.Caching.ValueAdapters;
@@ -66,7 +65,3 @@ internal sealed class EnumeratorAdapter<T> : ValueAdapter<IEnumerator<T>>
         public void Reset() => throw new NotSupportedException( "Cannot reset a cached enumerator." );
     }
 }
-
-#if NETCOREAPP3_0_OR_GREATER
-
-#endif

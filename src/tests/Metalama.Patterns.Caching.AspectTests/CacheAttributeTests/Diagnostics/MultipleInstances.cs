@@ -3,7 +3,6 @@
 // @RemoveOutputCode
 
 using Metalama.Framework.Fabrics;
-using System.Linq;
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheAttributeTests.Diagnostics;
 

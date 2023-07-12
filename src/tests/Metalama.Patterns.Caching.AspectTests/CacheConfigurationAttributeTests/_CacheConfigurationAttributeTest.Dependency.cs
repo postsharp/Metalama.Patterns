@@ -3,87 +3,90 @@
 using Metalama.Patterns.Caching;
 using Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
-[assembly: CacheConfiguration( ProfileName = TestValues.cacheConfigurationAttributeProfileName1 )]
+[assembly: CacheConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName1 )]
 
-namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
+namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
+
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable ClassCanBeSealed.Global
+// ReSharper disable MemberCanBeMadeStatic.Global
+// ReSharper disable UnusedMethodReturnValue.Global
+public static class TestValues
 {
-    public static class TestValues
-    {
-        public const string defaultProfileName = CachingProfile.DefaultName;
-        public const string cacheConfigurationAttributeProfileName1 = "[A]";
-        public const string cacheConfigurationAttributeProfileName2 = "[B]";
-    }
+    public const string DefaultProfileName = CachingProfile.DefaultName;
+    public const string CacheConfigurationAttributeProfileName1 = "[A]";
+    public const string CacheConfigurationAttributeProfileName2 = "[B]";
+}
 
-    public class ReferencedParentCachingClass
+public class ReferencedParentCachingClass
+{
+    public class ReferencedInnerCachingClassInBase
     {
-        public class ReferencedInnerCachingClassInBase
-        {
-            [Cache]
-            public object GetValueReferencedInnerBase()
-            {
-                return null;
-            }
-        }
-
         [Cache]
-        public object GetValueReferencedBase()
+        public object GetValueReferencedInnerBase()
         {
-            return null;
+            return null!;
         }
     }
 
-    public class ReferencedChildCachingClass : ReferencedParentCachingClass
+    [Cache]
+    public object GetValueReferencedBase()
     {
-        public class ReferencedInnerCachingClassInChild
-        {
-            [Cache]
-            public object GetValueReferencedInnerChild()
-            {
-                return null;
-            }
-        }
+        return null!;
+    }
+}
 
+public class ReferencedChildCachingClass : ReferencedParentCachingClass
+{
+    public class ReferencedInnerCachingClassInChild
+    {
         [Cache]
-        public object GetValueReferencedChild()
+        public object GetValueReferencedInnerChild()
         {
-            return null;
+            return null!;
         }
     }
 
-    [CacheConfiguration( ProfileName = TestValues.cacheConfigurationAttributeProfileName2 )]
-    public class ReferencedParentCachingClassOverridden
+    [Cache]
+    public object GetValueReferencedChild()
     {
-        public class ReferencedInnerCachingClassInBaseOverridden
-        {
-            [Cache]
-            public object GetValueReferencedInnerBase()
-            {
-                return null;
-            }
-        }
+        return null!;
+    }
+}
 
+[CacheConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName2 )]
+public class ReferencedParentCachingClassOverridden
+{
+    public class ReferencedInnerCachingClassInBaseOverridden
+    {
         [Cache]
-        public object GetValueReferencedBase()
+        public object GetValueReferencedInnerBase()
         {
-            return null;
+            return null!;
         }
     }
 
-    public class ReferencedChildCachingClassOverridden : ReferencedParentCachingClassOverridden
+    [Cache]
+    public object GetValueReferencedBase()
     {
-        public class ReferencedInnerCachingClassInChildOverridden
-        {
-            [Cache]
-            public object GetValueReferencedInnerChild()
-            {
-                return null;
-            }
-        }
+        return null!;
+    }
+}
 
+public class ReferencedChildCachingClassOverridden : ReferencedParentCachingClassOverridden
+{
+    public class ReferencedInnerCachingClassInChildOverridden
+    {
         [Cache]
-        public object GetValueReferencedChild()
+        public object GetValueReferencedInnerChild()
         {
-            return null;
+            return null!;
         }
+    }
+
+    [Cache]
+    public object GetValueReferencedChild()
+    {
+        return null!;
     }
 }

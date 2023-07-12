@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// Configuration of a cached method deterimed at runtime.
+/// Configuration of a cached method determined at runtime.
 /// </summary>
 [PublicAPI]
 public interface IRunTimeCacheItemConfiguration : ICompileTimeCacheItemConfiguration

@@ -59,8 +59,8 @@ public class CacheKeyBuilder : IDisposable
     /// Builds a cache key for a given method call.
     /// </summary>
     /// <param name="registration">The <see cref="CachedMethodRegistration"/> representing the method.</param>
-    /// <param name="arguments">The arguments passed to the <paramref name="method"/> call.</param>
-    /// <param name="instance">The <c>this</c> instance of the <paramref name="method"/> call, or <c>null</c> if <paramref name="method"/> is static.</param>
+    /// <param name="arguments">The arguments passed to the method call.</param>
+    /// <param name="instance">The <c>this</c> instance of the method call, or <c>null</c> if the method is static.</param>
     /// <returns>A string uniquely representing the method call.</returns>
     public virtual string BuildMethodKey( [Required] CachedMethodRegistration registration, [Required] IList<object?> arguments, object? instance = null )
     {

@@ -3,20 +3,19 @@
 using Flashtrace;
 using JetBrains.Annotations;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Reflection;
-using static Flashtrace.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// Encapsulates information about a method being cached.
+/// Encapsulates information about a method being cached. This class should only be used by the caching framework and the code it generates.
 /// </summary>
 /// <remarks>
-/// For each cached method, an instance of <see cref="CachedMethodRegistration"/> obtained via <see cref="CachingServices.DefaultMethodRegistrationCache.Register"/>
-/// is assigned to an introduced static readonly field on the declaring type of the cached method. The implementation of <see cref="CachedMethodRegistration"/>
-/// is intentionally opaque (ie, internal) as it should be used only by the caching framework runtime.
+/// The implementation of <see cref="CachedMethodRegistration"/> is intentionally opaque (ie, internal) as it should be used only by the caching framework runtime.
 /// </remarks>
 [PublicAPI]
+[EditorBrowsable( EditorBrowsableState.Never )]
 public sealed class CachedMethodRegistration
 {
     /// <summary>
@@ -88,7 +87,6 @@ public sealed class CachedMethodRegistration
     /// </remarks>
     internal Type? AwaitableResultType { get; }
 
-    private static readonly CachingProfile _disabledProfile = new( "Disabled" ) { IsEnabled = false };
     private CachingProfile? _profile;
     private int _profileRevision;
     private CacheItemConfiguration? _mergedConfiguration;
@@ -121,20 +119,7 @@ public sealed class CachedMethodRegistration
                         var profileName = this.BuildTimeConfiguration.ProfileName ?? CachingProfile.DefaultName;
 
                         var localProfile = CachingServices.Profiles[profileName];
-
-                        if ( localProfile == null )
-                        {
-                            localProfile = _disabledProfile;
-                            this._profile = _disabledProfile;
-
-                            this.Logger
-                                .Warning.Write(
-                                    Formatted(
-                                        "The cache is incorrectly configured for method {Method}: there is no profile named {Profile}.",
-                                        this.Method,
-                                        profileName ) );
-                        }
-
+                        
                         this._mergedConfiguration = this.BuildTimeConfiguration.CloneAsCacheItemConfiguration();
                         this._mergedConfiguration.ApplyFallback( localProfile );
 

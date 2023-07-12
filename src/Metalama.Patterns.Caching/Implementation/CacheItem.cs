@@ -76,7 +76,7 @@ public sealed class CacheItem : IEquatable<CacheItem>
     /// <param name="first">The first <see cref="CacheItem"/>.</param>
     /// <param name="second">The second <see cref="CacheItem"/>.</param>
     /// <returns><c>true</c> if <paramref name="first"/> is different to <paramref name="second"/>, otherwise <c>false</c>.</returns>
-    public static bool operator !=( CacheItem first, CacheItem second ) => !(first == second);
+    public static bool operator !=( CacheItem? first, CacheItem? second ) => !(first == second);
 
     /// <summary>
     /// Determines whether the current <see cref="CacheItem"/> is structurally equal to another <see cref="CacheItem"/>.

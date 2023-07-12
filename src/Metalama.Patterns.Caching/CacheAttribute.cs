@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Implementation;
@@ -23,6 +23,7 @@ namespace Metalama.Patterns.Caching;
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
 /// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingServices.Invalidation"/>.</para>
 /// </remarks>
+[PublicAPI]
 public sealed class CacheAttribute : MethodAspect
 {
     private bool? _autoReload;
@@ -90,13 +91,13 @@ public sealed class CacheAttribute : MethodAspect
         base.BuildEligibility( builder );
 
         builder.MustNotHaveRefOrOutParameter();
-        builder.ReturnType().MustSatisfy( t => t.SpecialType != SpecialType.Void, t => $"must not be void" );
-        builder.ReturnType().MustSatisfy( t => !t.IsTaskOrValueTask( hasResult: false ), t => $"must not be a Task or ValueTask without a return value" );
+        builder.ReturnType().MustSatisfy( t => t.SpecialType != SpecialType.Void, _ => $"the return type must not be void" );
+        builder.ReturnType().MustSatisfy( t => !t.IsTaskOrValueTask( hasResult: false ), _ => $"the return type must not be a Task or ValueTask without a return value" );
 
         builder.ReturnType()
             .MustSatisfy(
                 t => !t.GetAsyncInfo().IsAwaitable || t.IsTaskOrValueTask( hasResult: true ),
-                t => $"must not be an awaitable type other than Task<TResult> or ValueTask<TResult>" );
+                _ => $"the return type must not be an awaitable type other than Task<TResult> or ValueTask<TResult>" );
     }
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
@@ -108,7 +109,6 @@ public sealed class CacheAttribute : MethodAspect
             return;
         }
 
-        var asyncInfo = builder.Target.MethodDefinition.GetAsyncInfo();
         var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.GetOriginalDefinition().SpecialType ?? SpecialType.None;
 
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
@@ -143,7 +143,7 @@ public sealed class CacheAttribute : MethodAspect
                 ? ((INamedType) builder.Target.ReturnType).TypeArguments[0]
                 : null;
 
-        var overrideMethodResult = builder.Advice.Override(
+        builder.Advice.Override(
             builder.Target,
             templates,
             args: new { TValue = genericValueType, TReturnType = builder.Target.ReturnType, registrationField = registrationField.Declaration } );
@@ -187,7 +187,7 @@ public sealed class CacheAttribute : MethodAspect
                 method = builder.Target,
                 field = registrationField.Declaration,
                 getOriginalMethodInvoker = getOriginalMethodInvokerResult.Declaration,
-                awaitableResultType = awaitableResultType
+                awaitableResultType
             } );
 
         var effectiveConfiguration = this.GetEffectiveConfiguration( builder.Target );
@@ -220,7 +220,7 @@ public sealed class CacheAttribute : MethodAspect
 
         async Task<object?> Invoke( object? instance, object?[] args )
         {
-            return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args );
+            return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args )!;
         }
     }
 
@@ -231,12 +231,14 @@ public sealed class CacheAttribute : MethodAspect
 
         async ValueTask<object?> Invoke( object? instance, object?[] args )
         {
-            return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args );
+            return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args )!;
         }
     }
 
+    // ReSharper disable once RedundantBlankLines
 #if NETCOREAPP3_0_OR_GREATER
 
+    // ReSharper disable once UnusedMember.Global
     [Template]
     public Func<object?, object?[], ValueTask<object?>> GetOriginalMethodInvokerForAsyncEnumerableOrEnumerator( IMethod method )
     {
@@ -247,9 +249,10 @@ public sealed class CacheAttribute : MethodAspect
             return new ValueTask<object?>( method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args ) );
         }
     }
-
 #endif
 
+    // ReSharper disable once MergeConditionalExpression
+#pragma warning disable IDE0031
     [Template]
     public void CachedMethodRegistrationInitializer( IMethod method, IField field, IMethod getOriginalMethodInvoker, IType? awaitableResultType )
     {
@@ -270,9 +273,14 @@ public sealed class CacheAttribute : MethodAspect
             },
             method.ReturnType.IsReferenceType == true || method.ReturnType.IsNullable == true );
     }
-
+#pragma warning restore IDE0031
+    
+    // ReSharper disable InconsistentNaming
+    // ReSharper disable UnusedParameter.Global
+#pragma warning disable SA1313
+    
     [Template]
-    public TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType TValue /* not used */ )
+    public static TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType TValue /* not used */ )
     {
         return CacheAttributeRunTime.OverrideMethod<TReturnType>(
             registrationField.Value,
@@ -281,7 +289,7 @@ public sealed class CacheAttribute : MethodAspect
     }
 
     [Template]
-    public Task<TValue> OverrideMethodAsyncTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
+    public static Task<TValue> OverrideMethodAsyncTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
         return CacheAttributeRunTime.OverrideMethodAsyncTask<TValue>(
             registrationField.Value,
@@ -290,7 +298,7 @@ public sealed class CacheAttribute : MethodAspect
     }
 
     [Template]
-    public ValueTask<TValue> OverrideMethodAsyncValueTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
+    public static ValueTask<TValue> OverrideMethodAsyncValueTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
         return CacheAttributeRunTime.OverrideMethodAsyncValueTask<TValue>(
             registrationField.Value,
@@ -298,10 +306,12 @@ public sealed class CacheAttribute : MethodAspect
             meta.Target.Method.Parameters.ToValueArray() );
     }
 
+    // ReSharper disable once RedundantBlankLines
 #if NETCOREAPP3_0_OR_GREATER
 
+    // ReSharper disable once UnusedMember.Global
     [Template]
-    public IAsyncEnumerable<TValue> OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
+    public static IAsyncEnumerable<TValue> OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
         var task = CacheAttributeRunTime.OverrideMethodAsyncValueTask<IAsyncEnumerable<TValue>>(
             registrationField.Value,
@@ -311,8 +321,9 @@ public sealed class CacheAttribute : MethodAspect
         return task.AsAsyncEnumerable();
     }
 
+    // ReSharper disable once UnusedMember.Global
     [Template]
-    public IAsyncEnumerator<TValue> OverrideMethodAsyncEnumerator<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
+    public static IAsyncEnumerator<TValue> OverrideMethodAsyncEnumerator<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
         var task = CacheAttributeRunTime.OverrideMethodAsyncValueTask<IAsyncEnumerator<TValue>>(
             registrationField.Value,
@@ -324,12 +335,16 @@ public sealed class CacheAttribute : MethodAspect
 
 #endif
 
+    // ReSharper restore InconsistentNaming
+    // ReSharper restore UnusedParameter.Global
+#pragma warning restore SA1313
+    
     /// <summary>
     /// Gets the effective configuration of the method by applying fallback configuration from <see cref="CacheConfigurationAttribute"/>
     /// attributes on ancestor types and the declaring assembly.
     /// </summary>
     [CompileTime]
-    internal CompileTimeCacheItemConfiguration GetEffectiveConfiguration( IMethod method )
+    private CompileTimeCacheItemConfiguration GetEffectiveConfiguration( IMethod method )
     {
         var mergedConfiguration = this.ToCompileTimeCacheItemConfiguration();
         mergedConfiguration.ApplyEffectiveConfiguration( method );
@@ -339,8 +354,7 @@ public sealed class CacheAttribute : MethodAspect
 
     [CompileTime]
     internal CompileTimeCacheItemConfiguration ToCompileTimeCacheItemConfiguration()
-    {
-        return new CompileTimeCacheItemConfiguration()
+        => new()
         {
             AbsoluteExpiration = this._absoluteExpiration,
             AutoReload = this._autoReload,
@@ -349,43 +363,4 @@ public sealed class CacheAttribute : MethodAspect
             ProfileName = this.ProfileName,
             SlidingExpiration = this._slidingExpiration
         };
-    }
-
-    [CompileTime]
-    private AttributeConstruction ToAttributeConstruction()
-    {
-        var args = new Dictionary<string, object?>();
-
-        if ( this._absoluteExpiration.HasValue )
-        {
-            args[nameof(this.AbsoluteExpiration)] = this.AbsoluteExpiration;
-        }
-
-        if ( this._autoReload.HasValue )
-        {
-            args[nameof(this.AutoReload)] = this.AutoReload;
-        }
-
-        if ( this._ignoreThisParameter.HasValue )
-        {
-            args[nameof(this.IgnoreThisParameter)] = this.IgnoreThisParameter;
-        }
-
-        if ( this._priority.HasValue )
-        {
-            args[nameof(this.Priority)] = this.Priority;
-        }
-
-        if ( this._slidingExpiration.HasValue )
-        {
-            args[nameof(this.SlidingExpiration)] = this.SlidingExpiration;
-        }
-
-        if ( this.ProfileName != null )
-        {
-            args[nameof(this.ProfileName)] = this.ProfileName;
-        }
-
-        return AttributeConstruction.Create( typeof(CacheAttribute), namedArguments: args.ToList() );
-    }
 }

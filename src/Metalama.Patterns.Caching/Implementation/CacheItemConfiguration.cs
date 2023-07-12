@@ -7,10 +7,8 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// </summary>
 internal sealed class CacheItemConfiguration : IRunTimeCacheItemConfiguration
 {
-    public CacheItemConfiguration() { }
-
     /// <inheritdoc />
-    public bool? IsEnabled { get; set; }
+    public bool? IsEnabled { get; private set; }
 
     /// <inheritdoc />
     public string? ProfileName { get; set; }
