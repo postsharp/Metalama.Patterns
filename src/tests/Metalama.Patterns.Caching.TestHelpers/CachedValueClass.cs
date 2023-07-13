@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-
 namespace Metalama.Patterns.Caching.TestHelpers
 {
     [Serializable]
@@ -11,7 +9,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         public int Id
         {
-            get { return this._id.Value; }
+            get => this._id!.Value;
 
             set
             {
@@ -31,26 +29,17 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this._id = id;
         }
 
-        public override int GetHashCode()
-        {
-            return this.Id.GetHashCode();
-        }
+        public override int GetHashCode() => this.Id.GetHashCode();
 
-        public override bool Equals( object obj )
+        public override bool Equals( object? obj )
         {
             var value = obj as CachedValueClass;
 
             return value != null && this.Equals( value );
         }
 
-        public bool Equals( CachedValueClass other )
-        {
-            return other != null && this.Id.Equals( other.Id );
-        }
+        public bool Equals( CachedValueClass? other ) => other != null && this.Id.Equals( other.Id );
 
-        public override string ToString()
-        {
-            return $"Value #{this.Id}";
-        }
+        public override string ToString() => $"Value #{this.Id}";
     }
 }

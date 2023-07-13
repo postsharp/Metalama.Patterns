@@ -6,7 +6,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
     {
         public static async Task<bool> WithTimeout( this Task task, TimeSpan delay )
         {
-            return (await Task.WhenAny( task, Task.Delay( delay ) )) == task;
+            return await Task.WhenAny( task, Task.Delay( delay ) ) == task;
         }
     }
 }

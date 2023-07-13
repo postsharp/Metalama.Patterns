@@ -6,11 +6,9 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests;
 
-public class AsyncEnumerableTests : AsyncEnumTestsBase
+public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
 {
-    public AsyncEnumerableTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
-    {
-    }
+    public AsyncEnumerableTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
     [Fact]
     public void DoesNotIterateOnUnawaitedMethod()
@@ -75,7 +73,11 @@ public class AsyncEnumerableTests : AsyncEnumTestsBase
     public async void IteratesExpectedSequence3()
     {
         var seq = this.Instance.CachedEnumerable();
+        
+        // ReSharper disable once PossibleMultipleEnumeration
         await this.Iterate( seq.GetAsyncEnumerator() );
+        
+        // ReSharper disable once PossibleMultipleEnumeration
         await this.Iterate( seq.GetAsyncEnumerator() );
 
         Assert.Equal( "E1.I1.E2.E3.E4.I2[42].I2[99].I3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );

@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using System.Runtime.Caching;
-using Metalama.Patterns.Caching.Backends;
 using CacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
 
 namespace Metalama.Patterns.Caching.TestHelpers
@@ -13,11 +13,11 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         // TODO: This pattern might be in a separate class
 
-        private int _actualSetCount = 0;
-        private int _actualContainsKeyCount = 0;
-        private int _actualGetCount = 0;
-        private int _actualRemoveCount = 0;
-        private int _actualInvalidateCount = 0;
+        private int _actualSetCount;
+        private int _actualContainsKeyCount;
+        private int _actualGetCount;
+        private int _actualRemoveCount;
+        private int _actualInvalidateCount;
 
         public int ExpectedSetCount { get; set; }
 
@@ -33,7 +33,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         public CacheItem? LastCachedItem { get; set; }
 
-        public event CacheItemSetEventHandler ItemSet;
+        public event CacheItemSetEventHandler? ItemSet;
 
         protected override CachingBackendFeatures CreateFeatures() => this._backend.SupportedFeatures;
 
@@ -45,15 +45,9 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this._backend.DependencyInvalidated += this.OnDependencyInvalidated;
         }
 
-        private void OnDependencyInvalidated( object sender, CacheDependencyInvalidatedEventArgs args )
-        {
-            base.OnDependencyInvalidated( args );
-        }
+        private void OnDependencyInvalidated( object? sender, CacheDependencyInvalidatedEventArgs args ) => this.OnDependencyInvalidated( args );
 
-        private void OnItemRemoved( object sender, CacheItemRemovedEventArgs args )
-        {
-            base.OnItemRemoved( args );
-        }
+        private void OnItemRemoved( object? sender, CacheItemRemovedEventArgs args ) => this.OnItemRemoved( args );
 
         private void ResetExpectations()
         {
@@ -69,27 +63,27 @@ namespace Metalama.Patterns.Caching.TestHelpers
             AssertEx.Equal(
                 this.ExpectedSetCount,
                 this._actualSetCount,
-                string.Format( "{0}: The set operation was not called as many times as expected.", locationDescription ) );
+                $"{locationDescription}: The set operation was not called as many times as expected." );
 
             AssertEx.Equal(
                 this.ExpectedContainsKeyCount,
                 this._actualContainsKeyCount,
-                string.Format( "{0}: The contains key operation was not called as many times as expected.", locationDescription ) );
+                $"{locationDescription}: The contains key operation was not called as many times as expected." );
 
             AssertEx.Equal(
                 this.ExpectedGetCount,
                 this._actualGetCount,
-                string.Format( "{0}: The get operation was not called as many times as expected.", locationDescription ) );
+                $"{locationDescription}: The get operation was not called as many times as expected." );
 
             AssertEx.Equal(
                 this.ExpectedRemoveCount,
                 this._actualRemoveCount,
-                string.Format( "{0}: The remove operation was not called as many times as expected.", locationDescription ) );
+                $"{locationDescription}: The remove operation was not called as many times as expected." );
 
             AssertEx.Equal(
                 this.ExpectedInvalidateCount,
                 this._actualInvalidateCount,
-                string.Format( "{0}: The invalidate object operation was not called as many times as expected.", locationDescription ) );
+                $"{locationDescription}: The invalidate object operation was not called as many times as expected." );
 
             this._actualSetCount = 0;
             this._actualContainsKeyCount = 0;
@@ -131,14 +125,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return await this._backend.ContainsItemAsync( key, cancellationToken );
         }
 
-        protected override CacheValue GetItemCore( string key, bool includeDependencies )
+        protected override CacheValue? GetItemCore( string key, bool includeDependencies )
         {
             ++this._actualGetCount;
 
             return this._backend.GetItem( key, includeDependencies );
         }
 
-        protected override async Task<CacheValue> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+        protected override async Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
         {
             ++this._actualGetCount;
 

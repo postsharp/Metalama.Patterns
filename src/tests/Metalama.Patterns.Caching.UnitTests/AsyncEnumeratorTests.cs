@@ -8,9 +8,7 @@ namespace Metalama.Patterns.Caching.Tests;
 
 public class AsyncEnumeratorTests : AsyncEnumTestsBase
 {
-    public AsyncEnumeratorTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
-    {
-    }
+    public AsyncEnumeratorTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
     [Fact]
     public void DoesNotIterateOnUnawaitedMethod()

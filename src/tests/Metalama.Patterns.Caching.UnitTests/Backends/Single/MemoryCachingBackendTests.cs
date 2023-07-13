@@ -4,12 +4,13 @@ using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using System.Runtime.Caching;
+using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends.Single
 {
     public sealed class MemoryCachingBackendTests : BaseCacheBackendTests
     {
-        public MemoryCachingBackendTests( TestContext testContext ) : base( testContext ) { }
+        public MemoryCachingBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
 
         protected override CachingBackend CreateBackend()
         {

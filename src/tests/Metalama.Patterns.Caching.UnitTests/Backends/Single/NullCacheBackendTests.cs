@@ -5,7 +5,7 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
 
-namespace Metalama.Patterns.Caching.Tests.Backends
+namespace Metalama.Patterns.Caching.Tests.Backends.Single
 {
     public sealed class NullCacheBackendTests
     {
@@ -16,7 +16,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
             {
                 const string key = "0";
 
-                object retrievedItem = cache.GetItem( key );
+                var retrievedItem = cache.GetItem( key );
 
                 AssertEx.Null( retrievedItem, "The cache does not return null on miss." );
             }
@@ -33,7 +33,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends
 
                 cache.SetItem( key, cacheItem0 );
 
-                object retrievedItem = cache.GetItem( key );
+                var retrievedItem = cache.GetItem( key );
 
                 AssertEx.Null( retrievedItem, "The item has been stored in the cache." );
             }

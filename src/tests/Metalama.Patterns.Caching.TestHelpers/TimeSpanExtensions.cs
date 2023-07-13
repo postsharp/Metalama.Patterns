@@ -2,7 +2,7 @@
 
 namespace Metalama.Patterns.Caching.TestHelpers;
 
-internal static class TimeSpanExtensions
+public static class TimeSpanExtensions
 {
     public static TimeSpan Multiply( this TimeSpan t, double m )
     {

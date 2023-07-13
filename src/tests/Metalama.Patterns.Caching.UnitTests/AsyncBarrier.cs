@@ -1,40 +1,37 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Metalama.Patterns.Caching.Tests
 {
     public class AsyncBarrier
     {
-        private readonly int m_participantCount;
-        private int m_remainingParticipants;
-        private ConcurrentStack<TaskCompletionSource<bool>> m_waiters;
+        private readonly int _participantCount;
+        private int _remainingParticipants;
+        private ConcurrentStack<TaskCompletionSource<bool>> _waiters;
 
         public AsyncBarrier( int participantCount )
         {
             if ( participantCount <= 0 )
             {
-                throw new ArgumentOutOfRangeException( "participantCount" );
+                throw new ArgumentOutOfRangeException( nameof(participantCount) );
             }
 
-            this.m_remainingParticipants = this.m_participantCount = participantCount;
-            this.m_waiters = new ConcurrentStack<TaskCompletionSource<bool>>();
+            this._remainingParticipants = this._participantCount = participantCount;
+            this._waiters = new ConcurrentStack<TaskCompletionSource<bool>>();
         }
 
         public Task SignalAndWait()
         {
             Console.WriteLine( "SignalAndWait" );
             var tcs = new TaskCompletionSource<bool>();
-            this.m_waiters.Push( tcs );
+            this._waiters.Push( tcs );
 
-            if ( Interlocked.Decrement( ref this.m_remainingParticipants ) == 0 )
+            if ( Interlocked.Decrement( ref this._remainingParticipants ) == 0 )
             {
-                this.m_remainingParticipants = this.m_participantCount;
-                var waiters = this.m_waiters;
-                this.m_waiters = new ConcurrentStack<TaskCompletionSource<bool>>();
+                this._remainingParticipants = this._participantCount;
+                var waiters = this._waiters;
+                this._waiters = new ConcurrentStack<TaskCompletionSource<bool>>();
                 Parallel.ForEach( waiters, w => w.SetResult( true ) );
             }
 
@@ -43,7 +40,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         public override string ToString()
         {
-            return $"{this.m_remainingParticipants}/{this.m_participantCount}";
+            return $"{this._remainingParticipants}/{this._participantCount}";
         }
     }
 }

@@ -9,19 +9,20 @@ namespace Metalama.Patterns.Caching.Tests;
 
 public abstract class AsyncEnumTestsBase : IDisposable
 {
+    // ReSharper disable once MemberCanBePrivate.Global
     protected ITestOutputHelper TestOutputHelper { get; }
 
     protected StringBuilder StringBuilder { get; }
 
     protected TestClass Instance { get; }
 
-    public AsyncEnumTestsBase( ITestOutputHelper testOutputHelper )
+    protected AsyncEnumTestsBase( ITestOutputHelper testOutputHelper )
     {
         this.TestOutputHelper = testOutputHelper;
         this.StringBuilder = new();
         this.Instance = new TestClass( this.Log );
 
-        TestProfileConfigurationFactory.InitializeTestWithCachingBackend( nameof( AsyncEnumerableTests ) );
+        TestProfileConfigurationFactory.InitializeTestWithCachingBackend( nameof(AsyncEnumerableTests) );
     }
 
     public void Dispose()
@@ -30,26 +31,30 @@ public abstract class AsyncEnumTestsBase : IDisposable
         this.TestOutputHelper.WriteLine( this.StringBuilder.ToString() );
     }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     protected void Log( string message )
     {
         if ( this.StringBuilder.Length > 0 )
         {
             this.StringBuilder.Append( "." );
         }
+
         this.StringBuilder.Append( message );
     }
 
     protected async Task Iterate( IAsyncEnumerator<int> iterator )
     {
         this.Log( "I1" );
+
         while ( await iterator.MoveNextAsync() )
         {
             this.Log( $"I2[{iterator.Current}]" );
         }
+
         this.Log( "I3" );
     }
 
-    public sealed class TestClass
+    protected sealed class TestClass
     {
         private readonly Action<string> _log;
 
@@ -64,9 +69,13 @@ public abstract class AsyncEnumTestsBase : IDisposable
             this._log( "E1" );
             await Task.Delay( 1 );
             this._log( "E2" );
+
             yield return 42;
+
             this._log( "E3" );
+
             yield return 99;
+
             this._log( "E4" );
         }
 
@@ -76,9 +85,13 @@ public abstract class AsyncEnumTestsBase : IDisposable
             this._log( "E1" );
             await Task.Delay( 1 );
             this._log( "E2" );
+
             yield return 42;
+            
             this._log( "E3" );
+            
             yield return 99;
+            
             this._log( "E4" );
         }
     }

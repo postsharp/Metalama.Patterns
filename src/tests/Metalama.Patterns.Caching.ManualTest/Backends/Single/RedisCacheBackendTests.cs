@@ -15,16 +15,9 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 {
     private readonly RedisSetupFixture _redisSetupFixture;
     
-    // Used in currently-commented-out code.
-    // ReSharper disable once NotAccessedField.Local
-#pragma warning disable IDE0052
-    private readonly ITestOutputHelper _testOutputHelper;
-#pragma warning restore IDE0052
-
-    public RedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base( testContext )
+    public RedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
-        this._testOutputHelper = testOutputHelper;
     }
 
     protected override void Cleanup()
