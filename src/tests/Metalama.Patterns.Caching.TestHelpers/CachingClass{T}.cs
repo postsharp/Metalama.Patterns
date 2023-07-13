@@ -9,6 +9,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         private bool _methodCalled;
 
+        // ReSharper disable once EventNeverSubscribedTo.Global
         public event EventHandler<T>? MethodCalled;
 
         public bool Reset()
@@ -78,6 +79,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return await this.CreateNextValueAsDependencyAsync();
         }
 
+        // ReSharper disable once VirtualMemberNeverOverridden.Global
         public virtual IEnumerable<T> GetValues()
         {
             yield return this.CreateNextValue();

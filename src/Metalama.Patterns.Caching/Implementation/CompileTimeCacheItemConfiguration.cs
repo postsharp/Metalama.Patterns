@@ -50,6 +50,7 @@ internal sealed class CompileTimeCacheItemConfiguration
         this.ApplyFallback( configurationFromAttributes );
     }
 
+    // ReSharper disable once UnusedMember.Global
     internal CompileTimeCacheItemConfiguration Clone() => (CompileTimeCacheItemConfiguration) this.MemberwiseClone();
 
     /// <summary>

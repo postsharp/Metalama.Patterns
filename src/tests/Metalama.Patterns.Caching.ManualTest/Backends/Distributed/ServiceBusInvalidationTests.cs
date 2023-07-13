@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed
 {
+    // ReSharper disable once UnusedType.Global
     public class ServiceBusInvalidationTests : BaseInvalidationBrokerTests
     {
         private const string _connectionString =

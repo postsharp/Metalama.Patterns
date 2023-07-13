@@ -229,6 +229,7 @@ public abstract class TypeExtensionFactoryBase<T>
     }
 
     // ReSharper disable once UnusedMember.Global
+    // ReSharper disable once MemberCanBeInternal
     public void Clear()
     {
         lock ( this._instances )

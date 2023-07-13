@@ -14,6 +14,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         protected const int Timeout = 120000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
         protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout * 0.8 );
         
+        // ReSharper disable once MemberCanBePrivate.Global
         protected ITestOutputHelper TestOutputHelper { get; }
         
         protected BaseCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper )
@@ -24,7 +25,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         protected virtual bool TestDependencies { get; } = true;
 
-        protected TestContext TestContext { get; private set; }
+        protected TestContext TestContext { get; }
 
         protected abstract CachingBackend CreateBackend();
 
@@ -47,7 +48,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return Task.FromResult( this.CreateCollector( backend ) );
         }
 
-        public virtual TimeSpan GetExpirationTolerance( double multiplier = 1 )
+        protected virtual TimeSpan GetExpirationTolerance( double multiplier = 1 )
         {
             return TimeSpan.FromSeconds( 0.1 * multiplier );
         }

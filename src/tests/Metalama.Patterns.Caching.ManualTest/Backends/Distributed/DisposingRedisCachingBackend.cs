@@ -14,6 +14,7 @@ internal sealed class DisposingRedisCachingBackend : CachingBackendEnhancer
 {
     private readonly IDisposable[] _disposables;
 
+    // ReSharper disable once UnusedMember.Global
     public IConnectionMultiplexer Connection => this.RedisBackend.Connection;
 
     public IDatabase Database => this.RedisBackend.Database;

@@ -13,6 +13,7 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
     private const int _timeout = 120000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
     private static readonly TimeSpan _timeoutTimeSpan = TimeSpan.FromMilliseconds( _timeout * 0.8 );
 
+    // ReSharper disable once MemberCanBePrivate.Global
     protected ITestOutputHelper TestOutputHelper { get; }
     
     protected virtual bool TestDependencies { get; } = true;
@@ -35,7 +36,7 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
     /// </summary>
     protected virtual void ConnectToRedisIfRequired() { }
 
-    protected TestContext TestContext { get; private set; }
+    protected TestContext TestContext { get; }
 
     [Fact( Timeout = _timeout )]
     public async Task TestInvalidateDependencyIdenticalItemsAsync()

@@ -4,6 +4,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 
 #pragma warning disable SA1625 // Element documentation should not be copied and pasted
 
+// ReSharper disable once MemberCanBeInternal
 /// <summary>
 /// The properties of a <see cref="CacheAttribute"/>.
 /// </summary>

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
 
-public class BrokenRedisTests
+public sealed class BrokenRedisTests
 {
     [Fact( Timeout = 20000 )]
     public void TestWeAbortConnection()

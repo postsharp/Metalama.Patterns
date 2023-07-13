@@ -16,22 +16,24 @@ namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
 // ReSharper disable once CommentTypo
 // Originally taken from github.com/poulfoged/redis-inside (no strong name in the distributed package).
 
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
 /// <summary>
 /// Run integration-tests against Redis.
 /// </summary>
 public class RedisTestInstance : IDisposable
 {
     private static int _instanceCounter;
-    public static readonly ConcurrentBag<WeakReference<RedisTestInstance>> Instances = new();
+    internal static readonly ConcurrentBag<WeakReference<RedisTestInstance>> Instances = new();
     private readonly Process _process;
     private readonly TemporaryFile _executable;
     private readonly Config _config;
 
     public string Name { get; }
 
-    public bool IsDisposed { get; private set; }
+    internal bool IsDisposed { get; private set; }
 
-    public RedisTestInstance( [CallerMemberName] string? name = null )
+    internal RedisTestInstance( [CallerMemberName] string? name = null )
     {
         var counter = Interlocked.Increment( ref _instanceCounter );
         this.Name = $"{counter}:{name}";
@@ -168,7 +170,7 @@ public class RedisTestInstance : IDisposable
         }
     }
 
-    public EndPoint Endpoint => new IPEndPoint( IPAddress.Loopback, this._config.Port );
+    internal EndPoint Endpoint => new IPEndPoint( IPAddress.Loopback, this._config.Port );
 
     protected virtual void Dispose( bool disposing )
     {

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -21,6 +22,7 @@ namespace Metalama.Patterns.Caching;
 /// Custom attribute that, when applied on a method, causes an invocation of this method to remove from
 /// the cache the result of invocations of other given methods with the same parameter values. 
 /// </summary>
+[PublicAPI]
 [AttributeUsage( AttributeTargets.Method, AllowMultiple = true )]
 public sealed class InvalidateCacheAttribute : MethodAspect
 {

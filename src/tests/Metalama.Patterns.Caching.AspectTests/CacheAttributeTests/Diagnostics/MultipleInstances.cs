@@ -6,6 +6,7 @@ using Metalama.Framework.Fabrics;
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheAttributeTests.Diagnostics;
 
+// ReSharper disable ArrangeThisQualifier
 #pragma warning disable SA1101 // Prefix local calls with this
 
 public class MultipleInstances

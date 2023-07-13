@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Single;
 
+// ReSharper disable once UnusedType.Global
 public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
