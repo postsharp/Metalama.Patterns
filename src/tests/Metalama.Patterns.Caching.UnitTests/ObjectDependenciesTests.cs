@@ -1,8 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
 
@@ -10,13 +7,13 @@ namespace Metalama.Patterns.Caching.Tests
 {
     public sealed class ObjectDependenciesTests
     {
-        private const string profileNamePrefix = "Caching.Tests.ObjectDependenciesTests_";
+        private const string _profileNamePrefix = "Caching.Tests.ObjectDependenciesTests_";
 
         #region TestOneDependency
 
-        private const string testOneDependencyProfileName = profileNamePrefix + "TestOneDependency";
+        private const string _testOneDependencyProfileName = _profileNamePrefix + "TestOneDependency";
 
-        [CacheConfiguration( ProfileName = testOneDependencyProfileName )]
+        [CacheConfiguration( ProfileName = _testOneDependencyProfileName )]
         private sealed class TestOneDependencyCachingClass : CachingClass
         {
             [Cache]
@@ -29,8 +26,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestOneDependency()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testOneDependencyProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testOneDependencyProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testOneDependencyProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testOneDependencyProfileName );
 
             try
             {
@@ -78,9 +75,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestOneDependencyAsync
 
-        private const string testOneDependencyAsyncProfileName = profileNamePrefix + "TestOneDependencyAsync";
+        private const string _testOneDependencyAsyncProfileName = _profileNamePrefix + "TestOneDependencyAsync";
 
-        [CacheConfiguration( ProfileName = testOneDependencyAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testOneDependencyAsyncProfileName )]
         private sealed class TestOneDependencyAsyncCachingClass : CachingClass
         {
             [Cache]
@@ -93,8 +90,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestOneDependencyAsync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testOneDependencyAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testOneDependencyAsyncProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testOneDependencyAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testOneDependencyAsyncProfileName );
 
             try
             {
@@ -142,13 +139,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestNestedDependencies
 
-        private const string testNestedDependenciesProfileName = profileNamePrefix + "TestNestedDependencies";
+        private const string _testNestedDependenciesProfileName = _profileNamePrefix + "TestNestedDependencies";
 
         private sealed class TestNestedDependenciesCachedValueClass1 : CachedValueClass { }
 
         private sealed class TestNestedDependenciesCachedValueClass2 : CachedValueClass { }
 
-        [CacheConfiguration( ProfileName = testNestedDependenciesProfileName )]
+        [CacheConfiguration( ProfileName = _testNestedDependenciesProfileName )]
         private sealed class TestNestedDependenciesCachingClass1 : CachingClass<TestNestedDependenciesCachedValueClass1>
         {
             [Cache]
@@ -158,12 +155,13 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        [CacheConfiguration( ProfileName = testNestedDependenciesProfileName )]
+        [CacheConfiguration( ProfileName = _testNestedDependenciesProfileName )]
         private sealed class TestNestedDependenciesCachingClass2 : CachingClass<TestNestedDependenciesCachedValueClass2>
         {
-            public TestNestedDependenciesCachingClass1 Class1 { get; private set; }
+            public TestNestedDependenciesCachingClass1 Class1 { get; }
 
-            public TestNestedDependenciesCachedValueClass1 Value1 { get; private set; }
+            // ReSharper disable once UnusedAutoPropertyAccessor.Local
+            public TestNestedDependenciesCachedValueClass1 Value1 { get; private set; } = null!;
 
             public TestNestedDependenciesCachingClass2()
             {
@@ -182,8 +180,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedDependencies()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testNestedDependenciesProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testNestedDependenciesProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testNestedDependenciesProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesProfileName );
 
             try
             {
@@ -210,13 +208,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestNestedDependenciesAsync
 
-        private const string testNestedDependenciesAsyncProfileName = profileNamePrefix + "TestNestedDependenciesAsync";
+        private const string _testNestedDependenciesAsyncProfileName = _profileNamePrefix + "TestNestedDependenciesAsync";
 
         private sealed class TestNestedDependenciesAsyncCachedValueClass1 : CachedValueClass { }
 
         private sealed class TestNestedDependenciesAsyncCachedValueClass2 : CachedValueClass { }
 
-        [CacheConfiguration( ProfileName = testNestedDependenciesAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testNestedDependenciesAsyncProfileName )]
         private sealed class TestNestedDependenciesAsyncCachingClass1 : CachingClass<TestNestedDependenciesAsyncCachedValueClass1>
         {
             [Cache]
@@ -226,12 +224,13 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        [CacheConfiguration( ProfileName = testNestedDependenciesAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testNestedDependenciesAsyncProfileName )]
         private sealed class TestNestedDependenciesAsyncCachingClass2 : CachingClass<TestNestedDependenciesAsyncCachedValueClass2>
         {
-            public TestNestedDependenciesAsyncCachingClass1 Class1 { get; private set; }
+            public TestNestedDependenciesAsyncCachingClass1 Class1 { get; }
 
-            public TestNestedDependenciesAsyncCachedValueClass1 Value1 { get; private set; }
+            // ReSharper disable once UnusedAutoPropertyAccessor.Local
+            public TestNestedDependenciesAsyncCachedValueClass1 Value1 { get; private set; } = null!;
 
             public TestNestedDependenciesAsyncCachingClass2()
             {
@@ -250,8 +249,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestNestedDependenciesAsync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testNestedDependenciesAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testNestedDependenciesAsyncProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testNestedDependenciesAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesAsyncProfileName );
 
             try
             {
@@ -278,37 +277,37 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestNestedDependenciesWithEnumerable
 
-        private const string testNestedDependenciesWithEnumerableProfileName = profileNamePrefix + "TestNestedDependenciesWithEnumerable";
+        private const string _testNestedDependenciesWithEnumerableProfileName = _profileNamePrefix + "TestNestedDependenciesWithEnumerable";
 
         private sealed class TestNestedDependenciesWithEnumerableCachedValueClass : CachedValueClass { }
 
         private sealed class TestNestedDependenciesWithEnumerableCachingClass1 : CachingClass<TestNestedDependenciesWithEnumerableCachedValueClass> { }
 
-        [CacheConfiguration( ProfileName = testNestedDependenciesWithEnumerableProfileName )]
+        [CacheConfiguration( ProfileName = _testNestedDependenciesWithEnumerableProfileName )]
         private sealed class TestNestedDependenciesWithEnumerableCachingClass2
         {
-            private int class1CallCount = 0;
+            private readonly TestNestedDependenciesWithEnumerableCachingClass1 _class1 = new();
 
-            private readonly TestNestedDependenciesWithEnumerableCachingClass1 class1 = new();
-
+            private int _class1CallCount;
+            
             [Cache]
             public IEnumerable<TestNestedDependenciesWithEnumerableCachedValueClass> GetTwoValuesAsDependencies()
             {
                 for ( var i = 0; i < 2; i++ )
                 {
-                    yield return this.class1.GetValueAsDependency();
+                    yield return this._class1.GetValueAsDependency();
 
-                    if ( this.class1.Reset() )
+                    if ( this._class1.Reset() )
                     {
-                        ++this.class1CallCount;
+                        ++this._class1CallCount;
                     }
                 }
             }
 
             public int Reset()
             {
-                var count = this.class1CallCount;
-                this.class1CallCount = 0;
+                var count = this._class1CallCount;
+                this._class1CallCount = 0;
 
                 return count;
             }
@@ -317,8 +316,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedDependenciesWithEnumerable()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testNestedDependenciesWithEnumerableProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testNestedDependenciesWithEnumerableProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testNestedDependenciesWithEnumerableProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesWithEnumerableProfileName );
 
             try
             {

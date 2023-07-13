@@ -1,8 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 {
@@ -29,7 +28,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         {
             var cachingClass = new CachingClass();
 
-            Task<CachedValueClass> valueTask = cachingClass.GetValueAsync();
+            var valueTask = cachingClass.GetValueAsync();
             var called = cachingClass.Reset();
             Assert.False( called, "The caching method was called before awaiting the first value." );
             await valueTask;
@@ -57,7 +56,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         {
             var cachingClass = new CachingClass();
 
-            Task<CachedValueClass> valueTask = cachingClass.GetValueAsync();
+            var valueTask = cachingClass.GetValueAsync();
             var value0 = await valueTask;
             cachingClass.Reset();
 

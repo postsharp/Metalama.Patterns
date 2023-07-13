@@ -1,17 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.Locking;
 using Metalama.Patterns.Caching.TestHelpers;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public class CacheLockTests : IDisposable
+    public sealed class CacheLockTests : IDisposable
     {
-        private int counter;
+        private int _counter;
 
         public CacheLockTests()
         {
@@ -72,13 +69,19 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 t1.Wait();
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             try
             {
                 t2.Wait();
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             this.CachedMethod();
         }
@@ -92,7 +95,7 @@ namespace Metalama.Patterns.Caching.Tests
             Task t1 = Task.Run( async () => await this.CachedMethodAsync( 100, barrier ) );
 
             Task t2 = Task.Run(
-                async delegate
+                async () =>
                 {
                     await barrier.SignalAndWait();
 
@@ -103,7 +106,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 await Task.WhenAll( t1, t2 );
 
-                Assert.Equal( 0, this.counter );
+                Assert.Equal( 0, this._counter );
                 AssertEx.Fail( "An exception was expected" );
             }
             catch ( TimeoutException ) { }
@@ -115,18 +118,24 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 await t1;
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             try
             {
                 await t2;
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             await this.CachedMethodAsync();
         }
 
-        private static TimeSpan globalTimeout = TimeSpan.FromSeconds( 10 );
+        private static readonly TimeSpan _globalTimeout = TimeSpan.FromSeconds( 10 );
 
         [Fact]
         public void TestSyncLockTimeoutIgnoreLock()
@@ -137,8 +146,8 @@ namespace Metalama.Patterns.Caching.Tests
             Task t1 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
             Task t2 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
 
-            Assert.True( t1.Wait( globalTimeout ), "Timeout" );
-            Assert.True( t2.Wait( globalTimeout ), "Timeout" );
+            Assert.True( t1.Wait( _globalTimeout ), "Timeout" );
+            Assert.True( t2.Wait( _globalTimeout ), "Timeout" );
 
             CachingServices.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
             CachingServices.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
@@ -176,12 +185,12 @@ namespace Metalama.Patterns.Caching.Tests
                     t2State = 3;
                 } );
 
-            var delay = Task.Delay( globalTimeout );
+            var delay = Task.Delay( _globalTimeout );
             var t = await Task.WhenAny( Task.WhenAll( t1, t2 ), delay );
 
             AssertEx.NotSame( delay, t, $"Timeout. t1={t1.Status}, t1State={t1State}, t2={t2.Status}, t2State={t2State}, barrier={barrier}." );
 
-            Assert.Equal( 0, this.counter );
+            Assert.Equal( 0, this._counter );
 
             CachingServices.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
             CachingServices.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
@@ -194,16 +203,16 @@ namespace Metalama.Patterns.Caching.Tests
             for ( var i = 0; i < 1000; i++ )
             {
                 this.CachedMethod( 0 );
-                CachingServices.Invalidation.Invalidate( this.CachedMethod, 0, (Barrier) null, true );
+                CachingServices.Invalidation.Invalidate( this.CachedMethod, 0, (Barrier?) null, true );
             }
         }
 
         [Cache( ProfileName = "LocalLock" )]
-        private int CachedMethod( [NotCacheKey] int sleepTime = 1, [NotCacheKey] Barrier barrier = null, [NotCacheKey] bool assert = true )
+        private int CachedMethod( [NotCacheKey] int sleepTime = 1, [NotCacheKey] Barrier? barrier = null, [NotCacheKey] bool assert = true )
         {
             if ( assert )
             {
-                Assert.Equal( 1, Interlocked.Increment( ref this.counter ) );
+                Assert.Equal( 1, Interlocked.Increment( ref this._counter ) );
             }
 
             barrier?.SignalAndWait();
@@ -212,7 +221,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             if ( assert )
             {
-                Assert.Equal( 0, Interlocked.Decrement( ref this.counter ) );
+                Assert.Equal( 0, Interlocked.Decrement( ref this._counter ) );
             }
 
             return 1;
@@ -223,19 +232,19 @@ namespace Metalama.Patterns.Caching.Tests
             for ( var i = 0; i < 1000; i++ )
             {
                 await this.CachedMethodAsync( 0 );
-                await CachingServices.Invalidation.InvalidateAsync( this.CachedMethodAsync, 0, (AsyncBarrier) null, true );
+                await CachingServices.Invalidation.InvalidateAsync( this.CachedMethodAsync, 0, (AsyncBarrier?) null, true );
             }
         }
 
         [Cache( ProfileName = "LocalLock" )]
         private async Task<int> CachedMethodAsync(
             [NotCacheKey] int sleepTime = 1,
-            [NotCacheKey] AsyncBarrier barrier = null,
+            [NotCacheKey] AsyncBarrier? barrier = null,
             [NotCacheKey] bool assert = true )
         {
             if ( assert )
             {
-                Assert.Equal( 1, Interlocked.Increment( ref this.counter ) );
+                Assert.Equal( 1, Interlocked.Increment( ref this._counter ) );
             }
 
             if ( barrier != null )
@@ -247,15 +256,10 @@ namespace Metalama.Patterns.Caching.Tests
 
             if ( assert )
             {
-                Assert.Equal( 0, Interlocked.Decrement( ref this.counter ) );
+                Assert.Equal( 0, Interlocked.Decrement( ref this._counter ) );
             }
 
             return 1;
         }
-    }
-
-    public class IgnoreLockStrategy : IAcquireLockTimeoutStrategy
-    {
-        public void OnTimeout( string key ) { }
     }
 }

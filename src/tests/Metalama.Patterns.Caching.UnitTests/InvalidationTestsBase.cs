@@ -1,8 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
@@ -10,23 +9,23 @@ namespace Metalama.Patterns.Caching.Tests
     {
         protected sealed class CallsCounters
         {
-            private readonly int[] counters;
+            private readonly int[] _counters;
 
-            public int this[ int i ] => this.counters[i];
+            public int this[ int i ] => this._counters[i];
 
             public CallsCounters( int size )
             {
-                this.counters = new int[size];
+                this._counters = new int[size];
 
-                for ( var i = 0; i < this.counters.Length; i++ )
+                for ( var i = 0; i < this._counters.Length; i++ )
                 {
-                    this.counters[i] = 0;
+                    this._counters[i] = 0;
                 }
             }
 
             public void Increment( int i )
             {
-                this.counters[i]++;
+                this._counters[i]++;
             }
         }
 
@@ -46,7 +45,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 Assert.Equal( cachedMethods.Length, invalidatingMethods.Length );
 
-                CachedValueClass[] cachedMethodValuesBeforeInvalidation = new CachedValueClass[cachedMethods.Length];
+                var cachedMethodValuesBeforeInvalidation = new CachedValueClass[cachedMethods.Length];
 
                 for ( var testedPairIndex = 0; testedPairIndex < cachedMethods.Length; testedPairIndex++ )
                 {

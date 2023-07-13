@@ -1,27 +1,28 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.TestHelpers;
-using System;
-using System.Threading.Tasks;
 using Xunit;
+
+// ReSharper disable MemberCanBeMadeStatic.Local
+#pragma warning disable CA1822
 
 namespace Metalama.Patterns.Caching.Tests
 {
     public sealed class CacheConfigurationAttributeTests
     {
-        private const string profileNamePrefix = "Caching.Tests.CacheConfigurationAttributeTests_";
+        private const string _profileNamePrefix = "Caching.Tests.CacheConfigurationAttributeTests_";
 
-        private const string testCachingAttributeProfileName = profileNamePrefix + "TestCachingAttribute";
+        private const string _testCachingAttributeProfileName = _profileNamePrefix + "TestCachingAttribute";
 
-        [CacheConfiguration( ProfileName = testCachingAttributeProfileName )]
+        [CacheConfiguration( ProfileName = _testCachingAttributeProfileName )]
         private class BaseCachingClass
         {
-            public class InnerCachingClassInBase
+            public sealed class InnerCachingClassInBase
             {
                 [Cache]
                 public object GetValueInnerBase()
                 {
-                    return null;
+                    return null!;
                 }
 
                 [Cache]
@@ -29,14 +30,14 @@ namespace Metalama.Patterns.Caching.Tests
                 {
                     await Task.Yield();
 
-                    return null;
+                    return null!;
                 }
             }
 
             [Cache]
             public object GetValueBase()
             {
-                return null;
+                return null!;
             }
 
             [Cache]
@@ -44,18 +45,18 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 await Task.Yield();
 
-                return null;
+                return null!;
             }
         }
 
-        private class ChildCachingClass : BaseCachingClass
+        private sealed class ChildCachingClass : BaseCachingClass
         {
-            public class InnerCachingClassInChild
+            public sealed class InnerCachingClassInChild
             {
                 [Cache]
                 public object GetValueInnerChild()
                 {
-                    return null;
+                    return null!;
                 }
 
                 [Cache]
@@ -63,14 +64,14 @@ namespace Metalama.Patterns.Caching.Tests
                 {
                     await Task.Yield();
 
-                    return null;
+                    return null!;
                 }
             }
 
             [Cache]
             public object GetValueChild()
             {
-                return null;
+                return null!;
             }
 
             [Cache]
@@ -78,16 +79,16 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 await Task.Yield();
 
-                return null;
+                return null!;
             }
         }
 
         private static void DoCachingAttributeTest( Func<object> getValueAction, bool defaultProfile )
         {
             var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testCachingAttributeProfileName );
+                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( testCachingAttributeProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testCachingAttributeProfileName );
 
             try
             {
@@ -100,8 +101,8 @@ namespace Metalama.Patterns.Caching.Tests
                 Assert.NotNull( backend.LastCachedItem );
 
                 Assert.Equal(
-                    defaultProfile ? CachingProfile.DefaultName : testCachingAttributeProfileName,
-                    backend.LastCachedItem.Configuration.ProfileName );
+                    defaultProfile ? CachingProfile.DefaultName : _testCachingAttributeProfileName,
+                    backend.LastCachedItem!.Configuration!.ProfileName );
             }
             finally
             {
@@ -112,9 +113,9 @@ namespace Metalama.Patterns.Caching.Tests
         private static async Task DoCachingAttributeTestAsync( Func<Task<object>> getValueAction, bool defaultProfile )
         {
             var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testCachingAttributeProfileName );
+                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( testCachingAttributeProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testCachingAttributeProfileName );
 
             try
             {
@@ -127,8 +128,8 @@ namespace Metalama.Patterns.Caching.Tests
                 Assert.NotNull( backend.LastCachedItem );
 
                 Assert.Equal(
-                    defaultProfile ? CachingProfile.DefaultName : testCachingAttributeProfileName,
-                    backend.LastCachedItem.Configuration.ProfileName );
+                    defaultProfile ? CachingProfile.DefaultName : _testCachingAttributeProfileName,
+                    backend.LastCachedItem!.Configuration!.ProfileName );
             }
             finally
             {

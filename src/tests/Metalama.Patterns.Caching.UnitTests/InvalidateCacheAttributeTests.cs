@@ -1,47 +1,53 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.TestHelpers;
-using System;
-using System.Threading.Tasks;
 using Xunit;
+
+// ReSharper disable UnusedMethodReturnValue.Local
+// ReSharper disable MemberCanBeMadeStatic.Local
+// ReSharper disable MemberCanBeMadeStatic.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable MemberCanBeInternal
+// #pragma warning disable SA1203
+#pragma warning disable CA1822
 
 namespace Metalama.Patterns.Caching.Tests
 {
     public sealed class InvalidateCacheAttributeTests : InvalidationTestsBase
     {
-        private const string profileNamePrefix = "Caching.Tests.InvalidateCacheAttributeTests_";
+        private const string _profileNamePrefix = "Caching.Tests.InvalidateCacheAttributeTests_";
 
         #region TestFromDifferentTypeIgnoringThisParameter
 
-        private const string testFromDifferentTypeIgnoringThisParameterProfileName = profileNamePrefix + nameof(TestFromDifferentTypeIgnoringThisParameter);
+        private const string _testFromDifferentTypeIgnoringThisParameterProfileName = _profileNamePrefix + nameof(TestFromDifferentTypeIgnoringThisParameter);
 
-        [CacheConfiguration( ProfileName = testFromDifferentTypeIgnoringThisParameterProfileName )]
+        [CacheConfiguration( ProfileName = _testFromDifferentTypeIgnoringThisParameterProfileName )]
         private sealed class TestFromDifferentTypeIgnoringThisParameterCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache( IgnoreThisParameter = true )]
             public CachedValueClass GetValue()
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public CachedValueClass GetValue( int param1 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public CachedValueClass GetValue( int param1, CachedValueClass param2 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public CachedValueClass GetValue( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
         }
 
@@ -96,8 +102,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     cachingClass.GetValue,
                     () => cachingClass.GetValue( 1 ),
@@ -105,8 +111,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => cachingClass.GetValue( 1, cachedValue2, 3, 4 )
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => invalidatingClass.Invalidate( cachedMethods[0] ),
                     () => invalidatingClass.Invalidate( 1, cachedMethods[1] ),
@@ -115,7 +121,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeIgnoringThisParameterProfileName,
+                _testFromDifferentTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -123,7 +129,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => invalidatingClass.Invalidate( cachedMethods[0] ),
                     () => invalidatingClass.Invalidate( 0, cachedMethods[1] ),
@@ -132,7 +138,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeIgnoringThisParameterProfileName,
+                _testFromDifferentTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -144,36 +150,36 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromDifferentTypeIgnoringThisParameterAsync
 
-        private const string testFromDifferentTypeIgnoringThisParameterAsyncProfileName =
-            profileNamePrefix + nameof(TestFromDifferentTypeIgnoringThisParameterAsync);
+        private const string _testFromDifferentTypeIgnoringThisParameterAsyncProfileName =
+            _profileNamePrefix + nameof(TestFromDifferentTypeIgnoringThisParameterAsync);
 
-        [CacheConfiguration( ProfileName = testFromDifferentTypeIgnoringThisParameterAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testFromDifferentTypeIgnoringThisParameterAsyncProfileName )]
         private sealed class TestFromDifferentTypeIgnoringThisParameterAsyncCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache( IgnoreThisParameter = true )]
             public async Task<CachedValueClass> GetValueAsync()
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public async Task<CachedValueClass> GetValueAsync( int param1 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
         }
 
@@ -233,8 +239,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     () => cachingClass.GetValueAsync().GetAwaiter().GetResult(),
                     () => cachingClass.GetValueAsync( 1 ).GetAwaiter().GetResult(),
@@ -242,8 +248,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => cachingClass.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => invalidatingClass.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => invalidatingClass.InvalidateAsync( 1, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -252,7 +258,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeIgnoringThisParameterAsyncProfileName,
+                _testFromDifferentTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -260,7 +266,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => invalidatingClass.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => invalidatingClass.InvalidateAsync( 0, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -269,7 +275,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeIgnoringThisParameterAsyncProfileName,
+                _testFromDifferentTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -281,35 +287,35 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromDerivedTypeNotIgnoringThisParameter
 
-        private const string testFromDerivedTypeNotIgnoringThisParameterProfileName = profileNamePrefix + nameof(TestFromDerivedTypeNotIgnoringThisParameter);
+        private const string _testFromDerivedTypeNotIgnoringThisParameterProfileName = _profileNamePrefix + nameof(TestFromDerivedTypeNotIgnoringThisParameter);
 
-        [CacheConfiguration( ProfileName = testFromDerivedTypeNotIgnoringThisParameterProfileName )]
+        [CacheConfiguration( ProfileName = _testFromDerivedTypeNotIgnoringThisParameterProfileName )]
         private class TestFromDerivedTypeNotIgnoringThisParameterCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache]
             public CachedValueClass GetValue()
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public CachedValueClass GetValue( int param1 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public CachedValueClass GetValue( int param1, CachedValueClass param2 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public CachedValueClass GetValue( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
         }
 
@@ -361,8 +367,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     invalidatingAndCachingClass.GetValue,
                     () => invalidatingAndCachingClass.GetValue( 1 ),
@@ -370,8 +376,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingAndCachingClass.GetValue( 1, cachedValue2, 3, 4 )
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => invalidatingAndCachingClass.Invalidate( cachedMethods[0] ),
                     () => invalidatingAndCachingClass.Invalidate( 1, cachedMethods[1] ),
@@ -380,7 +386,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDerivedTypeNotIgnoringThisParameterProfileName,
+                _testFromDerivedTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -388,7 +394,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => invalidatingAndCachingClass.Invalidate( cachedMethods[0] ),
                     () => invalidatingAndCachingClass.Invalidate( 0, cachedMethods[1] ),
@@ -397,7 +403,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDerivedTypeNotIgnoringThisParameterProfileName,
+                _testFromDerivedTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -409,36 +415,36 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromDerivedTypeNotIgnoringThisParameterAsync
 
-        private const string testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName =
-            profileNamePrefix + nameof(TestFromDerivedTypeNotIgnoringThisParameterAsync);
+        private const string _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName =
+            _profileNamePrefix + nameof(TestFromDerivedTypeNotIgnoringThisParameterAsync);
 
-        [CacheConfiguration( ProfileName = testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName )]
         private class TestFromDerivedTypeNotIgnoringThisParameterAsyncCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync()
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync( int param1 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
         }
 
@@ -495,8 +501,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     () => invalidatingAndCachingClass.GetValueAsync().GetAwaiter().GetResult(),
                     () => invalidatingAndCachingClass.GetValueAsync( 1 ).GetAwaiter().GetResult(),
@@ -504,8 +510,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingAndCachingClass.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => invalidatingAndCachingClass.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => invalidatingAndCachingClass.InvalidateAsync( 1, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -514,7 +520,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName,
+                _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -522,7 +528,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => invalidatingAndCachingClass.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => invalidatingAndCachingClass.InvalidateAsync( 0, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -531,7 +537,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName,
+                _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -543,36 +549,36 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromDifferentTypeInstanceMethodOnStaticMethod
 
-        private const string testFromDifferentTypeInstanceMethodOnStaticMethodProfileName =
-            profileNamePrefix + nameof(TestFromDifferentTypeInstanceMethodOnStaticMethod);
+        private const string _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName =
+            _profileNamePrefix + nameof(TestFromDifferentTypeInstanceMethodOnStaticMethod);
 
-        [CacheConfiguration( ProfileName = testFromDifferentTypeInstanceMethodOnStaticMethodProfileName )]
+        [CacheConfiguration( ProfileName = _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName )]
         private sealed class TestFromDifferentTypeInstanceMethodOnStaticMethodCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache]
             public static CachedValueClass GetValue()
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public static CachedValueClass GetValue( int param1 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public static CachedValueClass GetValue( int param1, CachedValueClass param2 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public static CachedValueClass GetValue( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
         }
 
@@ -624,8 +630,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     TestFromDifferentTypeInstanceMethodOnStaticMethodCachingClass.GetValue,
                     () => TestFromDifferentTypeInstanceMethodOnStaticMethodCachingClass.GetValue( 1 ),
@@ -633,8 +639,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => TestFromDifferentTypeInstanceMethodOnStaticMethodCachingClass.GetValue( 1, cachedValue2, 3, 4 )
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => invalidatingClass.Invalidate( cachedMethods[0] ),
                     () => invalidatingClass.Invalidate( 1, cachedMethods[1] ),
@@ -643,7 +649,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeInstanceMethodOnStaticMethodProfileName,
+                _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -651,7 +657,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => invalidatingClass.Invalidate( cachedMethods[0] ),
                     () => invalidatingClass.Invalidate( 0, cachedMethods[1] ),
@@ -660,7 +666,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeInstanceMethodOnStaticMethodProfileName,
+                _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -672,36 +678,36 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromDifferentTypeInstanceMethodOnStaticMethodAsync
 
-        private const string testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName =
-            profileNamePrefix + nameof(TestFromDifferentTypeInstanceMethodOnStaticMethodAsync);
+        private const string _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName =
+            _profileNamePrefix + nameof(TestFromDifferentTypeInstanceMethodOnStaticMethodAsync);
 
-        [CacheConfiguration( ProfileName = testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName )]
         private sealed class TestFromDifferentTypeInstanceMethodOnStaticMethodAsyncCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache]
             public static async Task<CachedValueClass> GetValueAsync()
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public static async Task<CachedValueClass> GetValueAsync( int param1 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public static async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public static async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
         }
 
@@ -758,8 +764,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     () => TestFromDifferentTypeInstanceMethodOnStaticMethodAsyncCachingClass.GetValueAsync().GetAwaiter().GetResult(),
                     () => TestFromDifferentTypeInstanceMethodOnStaticMethodAsyncCachingClass.GetValueAsync( 1 ).GetAwaiter().GetResult(),
@@ -767,8 +773,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => TestFromDifferentTypeInstanceMethodOnStaticMethodAsyncCachingClass.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => invalidatingClass.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => invalidatingClass.InvalidateAsync( 1, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -777,7 +783,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName,
+                _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -785,7 +791,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => invalidatingClass.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => invalidatingClass.InvalidateAsync( 0, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -794,7 +800,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName,
+                _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -806,39 +812,40 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromDifferentTypeStaticMethodOnStaticMethod
 
-        private const string testFromDifferentTypeStaticMethodOnStaticMethodProfileName =
-            profileNamePrefix + nameof(TestFromDifferentTypeStaticMethodOnStaticMethod);
+        private const string _testFromDifferentTypeStaticMethodOnStaticMethodProfileName =
+            _profileNamePrefix + nameof(TestFromDifferentTypeStaticMethodOnStaticMethod);
 
-        [CacheConfiguration( ProfileName = testFromDifferentTypeStaticMethodOnStaticMethodProfileName )]
+        [CacheConfiguration( ProfileName = _testFromDifferentTypeStaticMethodOnStaticMethodProfileName )]
         private sealed class TestFromDifferentTypeStaticMethodOnStaticMethodCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache]
             public static CachedValueClass GetValue()
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public static CachedValueClass GetValue( int param1 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public static CachedValueClass GetValue( int param1, CachedValueClass param2 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public static CachedValueClass GetValue( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
         }
 
+        // ReSharper disable once ClassNeverInstantiated.Local
         private sealed class TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass
         {
             [InvalidateCache(
@@ -884,8 +891,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     TestFromDifferentTypeStaticMethodOnStaticMethodCachingClass.GetValue,
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodCachingClass.GetValue( 1 ),
@@ -893,8 +900,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodCachingClass.GetValue( 1, cachedValue2, 3, 4 )
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( cachedMethods[0] ),
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 1, cachedMethods[1] ),
@@ -903,7 +910,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeStaticMethodOnStaticMethodProfileName,
+                _testFromDifferentTypeStaticMethodOnStaticMethodProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -911,7 +918,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( cachedMethods[0] ),
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 0, cachedMethods[1] ),
@@ -920,7 +927,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeStaticMethodOnStaticMethodProfileName,
+                _testFromDifferentTypeStaticMethodOnStaticMethodProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -932,39 +939,40 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromDifferentTypeStaticMethodOnStaticMethodAsync
 
-        private const string testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName =
-            profileNamePrefix + nameof(TestFromDifferentTypeStaticMethodOnStaticMethodAsync);
+        private const string _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName =
+            _profileNamePrefix + nameof(TestFromDifferentTypeStaticMethodOnStaticMethodAsync);
 
-        [CacheConfiguration( ProfileName = testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName )]
         private sealed class TestFromDifferentTypeStaticMethodOnStaticMethodAsyncCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache]
             public static async Task<CachedValueClass> GetValueAsync()
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public static async Task<CachedValueClass> GetValueAsync( int param1 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public static async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public static async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
         }
 
+        // ReSharper disable once ClassNeverInstantiated.Local
         private sealed class TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass
         {
             [InvalidateCache(
@@ -1015,8 +1023,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncCachingClass.GetValueAsync().GetAwaiter().GetResult(),
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncCachingClass.GetValueAsync( 1 ).GetAwaiter().GetResult(),
@@ -1024,8 +1032,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncCachingClass.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass.InvalidateAsync( 1, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1040,7 +1048,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName,
+                _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -1048,7 +1056,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass.InvalidateAsync( 0, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1063,7 +1071,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName,
+                _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -1075,36 +1083,36 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromTheSameTypeIgnoringThisParameter
 
-        private const string testFromTheSameTypeIgnoringThisParameterProfileName =
-            profileNamePrefix + nameof(TestFromTheSameTypeIgnoringThisParameter);
+        private const string _testFromTheSameTypeIgnoringThisParameterProfileName =
+            _profileNamePrefix + nameof(TestFromTheSameTypeIgnoringThisParameter);
 
-        [CacheConfiguration( ProfileName = testFromTheSameTypeIgnoringThisParameterProfileName )]
+        [CacheConfiguration( ProfileName = _testFromTheSameTypeIgnoringThisParameterProfileName )]
         private sealed class TestFromTheSameTypeIgnoringThisParameterInvalidatingAndCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache( IgnoreThisParameter = true )]
             public CachedValueClass GetValue()
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public CachedValueClass GetValue( int param1 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public CachedValueClass GetValue( int param1, CachedValueClass param2 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public CachedValueClass GetValue( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [InvalidateCache( nameof(GetValue), AllowMultipleOverloads = true )]
@@ -1150,8 +1158,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     testClass1.GetValue,
                     () => testClass1.GetValue( 1 ),
@@ -1159,8 +1167,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.GetValue( 1, cachedValue2, 3, 4 )
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => testClass1.Invalidate( cachedMethods[0] ),
                     () => testClass1.Invalidate( 1, cachedMethods[1] ),
@@ -1169,7 +1177,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeIgnoringThisParameterProfileName,
+                _testFromTheSameTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -1177,7 +1185,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass1.Invalidate( cachedMethods[0] ),
                     () => testClass1.Invalidate( 0, cachedMethods[1] ),
@@ -1186,7 +1194,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeIgnoringThisParameterProfileName,
+                _testFromTheSameTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching parameter values with matching this value test",
@@ -1194,7 +1202,7 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass2.Invalidate( cachedMethods[0] ),
                     () => testClass2.Invalidate( 1, cachedMethods[1] ),
@@ -1203,7 +1211,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeIgnoringThisParameterProfileName,
+                _testFromTheSameTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching parameter values with not matching this value test",
@@ -1211,7 +1219,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass2.Invalidate( cachedMethods[0] ),
                     () => testClass2.Invalidate( 0, cachedMethods[1] ),
@@ -1220,7 +1228,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeIgnoringThisParameterProfileName,
+                _testFromTheSameTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching parameter values with not matching this value test",
@@ -1232,36 +1240,36 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromTheSameTypeIgnoringThisParameterAsync
 
-        private const string testFromTheSameTypeIgnoringThisParameterAsyncProfileName =
-            profileNamePrefix + nameof(TestFromTheSameTypeIgnoringThisParameterAsync);
+        private const string _testFromTheSameTypeIgnoringThisParameterAsyncProfileName =
+            _profileNamePrefix + nameof(TestFromTheSameTypeIgnoringThisParameterAsync);
 
-        [CacheConfiguration( ProfileName = testFromTheSameTypeIgnoringThisParameterAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testFromTheSameTypeIgnoringThisParameterAsyncProfileName )]
         private sealed class TestFromTheSameTypeIgnoringThisParameterAsyncInvalidatingAndCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache( IgnoreThisParameter = true )]
             public async Task<CachedValueClass> GetValueAsync()
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public async Task<CachedValueClass> GetValueAsync( int param1 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache( IgnoreThisParameter = true )]
             public async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [InvalidateCache( nameof(GetValueAsync), AllowMultipleOverloads = true )]
@@ -1312,8 +1320,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     () => testClass1.GetValueAsync().GetAwaiter().GetResult(),
                     () => testClass1.GetValueAsync( 1 ).GetAwaiter().GetResult(),
@@ -1321,8 +1329,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => testClass1.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => testClass1.InvalidateAsync( 1, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1331,7 +1339,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
+                _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -1339,7 +1347,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass1.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => testClass1.InvalidateAsync( 0, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1348,7 +1356,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
+                _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching parameter values with matching this value test",
@@ -1356,7 +1364,7 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass2.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => testClass2.InvalidateAsync( 1, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1365,7 +1373,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
+                _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching parameter values with not matching this value test",
@@ -1373,7 +1381,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass2.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => testClass2.InvalidateAsync( 0, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1382,7 +1390,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
+                _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching parameter values with not matching this value test",
@@ -1394,36 +1402,36 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromTheSameTypeNotIgnoringThisParameter
 
-        private const string testFromTheSameTypeNotIgnoringThisParameterProfileName =
-            profileNamePrefix + nameof(TestFromTheSameTypeNotIgnoringThisParameter);
+        private const string _testFromTheSameTypeNotIgnoringThisParameterProfileName =
+            _profileNamePrefix + nameof(TestFromTheSameTypeNotIgnoringThisParameter);
 
-        [CacheConfiguration( ProfileName = testFromTheSameTypeNotIgnoringThisParameterProfileName )]
+        [CacheConfiguration( ProfileName = _testFromTheSameTypeNotIgnoringThisParameterProfileName )]
         private sealed class TestFromTheSameTypeNotIgnoringThisParameterInvalidatingAndCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache]
             public CachedValueClass GetValue()
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public CachedValueClass GetValue( int param1 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public CachedValueClass GetValue( int param1, CachedValueClass param2 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
             public CachedValueClass GetValue( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [InvalidateCache( nameof(GetValue), AllowMultipleOverloads = true )]
@@ -1469,8 +1477,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     testClass1.GetValue,
                     () => testClass1.GetValue( 1 ),
@@ -1478,8 +1486,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.GetValue( 1, cachedValue2, 3, 4 )
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => testClass1.Invalidate( cachedMethods[0] ),
                     () => testClass1.Invalidate( 1, cachedMethods[1] ),
@@ -1488,7 +1496,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeNotIgnoringThisParameterProfileName,
+                _testFromTheSameTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -1496,7 +1504,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass1.Invalidate( cachedMethods[0] ),
                     () => testClass1.Invalidate( 0, cachedMethods[1] ),
@@ -1505,7 +1513,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeNotIgnoringThisParameterProfileName,
+                _testFromTheSameTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching parameter values with matching this value test",
@@ -1513,7 +1521,7 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass2.Invalidate( cachedMethods[0] ),
                     () => testClass2.Invalidate( 1, cachedMethods[1] ),
@@ -1522,7 +1530,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeNotIgnoringThisParameterProfileName,
+                _testFromTheSameTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching parameter values with not matching this value test",
@@ -1530,7 +1538,7 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass2.Invalidate( cachedMethods[0] ),
                     () => testClass2.Invalidate( 0, cachedMethods[1] ),
@@ -1539,7 +1547,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeNotIgnoringThisParameterProfileName,
+                _testFromTheSameTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching parameter values with not matching this value test",
@@ -1551,36 +1559,36 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestFromTheSameTypeNotIgnoringThisParameterAsync
 
-        private const string testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName =
-            profileNamePrefix + nameof(TestFromTheSameTypeNotIgnoringThisParameterAsync);
+        private const string _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName =
+            _profileNamePrefix + nameof(TestFromTheSameTypeNotIgnoringThisParameterAsync);
 
-        [CacheConfiguration( ProfileName = testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName )]
         private sealed class TestFromTheSameTypeNotIgnoringThisParameterAsyncInvalidatingAndCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync()
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync( int param1 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync( int param1, CachedValueClass param2, int param3, [NotCacheKey] int param4 )
             {
-                return await Task.FromResult( new CachedValueClass( counter++ ) );
+                return await Task.FromResult( new CachedValueClass( _counter++ ) );
             }
 
             [InvalidateCache( nameof(GetValueAsync), AllowMultipleOverloads = true )]
@@ -1631,8 +1639,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     () => testClass1.GetValueAsync().GetAwaiter().GetResult(),
                     () => testClass1.GetValueAsync( 1 ).GetAwaiter().GetResult(),
@@ -1640,8 +1648,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
                 };
 
-            Func<CachedValueClass>[] invalidatingMethods =
-                new Func<CachedValueClass>[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => testClass1.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => testClass1.InvalidateAsync( 1, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1650,7 +1658,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
+                _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching values test",
@@ -1658,7 +1666,7 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass1.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => testClass1.InvalidateAsync( 0, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1667,7 +1675,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
+                _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching parameter values with matching this value test",
@@ -1675,7 +1683,7 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass2.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => testClass2.InvalidateAsync( 1, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1684,7 +1692,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
+                _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Matching parameter values with not matching this value test",
@@ -1692,7 +1700,7 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new Func<CachedValueClass>[]
+                new[]
                 {
                     () => testClass2.InvalidateAsync( cachedMethods[0] ).GetAwaiter().GetResult(),
                     () => testClass2.InvalidateAsync( 0, cachedMethods[1] ).GetAwaiter().GetResult(),
@@ -1701,7 +1709,7 @@ namespace Metalama.Patterns.Caching.Tests
                 };
 
             DoInvalidateCacheAttributeTest(
-                testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
+                _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching parameter values with not matching this value test",
@@ -1713,13 +1721,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestNestedContexts
 
-        private const string testNestedContextsProfileName =
-            profileNamePrefix + nameof(TestNestedContexts);
+        private const string _testNestedContextsProfileName =
+            _profileNamePrefix + nameof(TestNestedContexts);
 
-        [CacheConfiguration( ProfileName = testNestedContextsProfileName )]
+        [CacheConfiguration( ProfileName = _testNestedContextsProfileName )]
         public sealed class TestNestedContextsClass
         {
-            private int invocations;
+            private int _invocations;
 
             [Cache]
             public int OuterMethod()
@@ -1730,7 +1738,7 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public int InnerMethod()
             {
-                return this.invocations++;
+                return this._invocations++;
             }
 
             [InvalidateCache( nameof(InnerMethod) )]
@@ -1740,8 +1748,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedContexts()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testNestedContextsProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testNestedContextsProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testNestedContextsProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testNestedContextsProfileName );
 
             try
             {
@@ -1762,13 +1770,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestNestedContextsAsync
 
-        private const string testNestedContextsAsyncProfileName =
-            profileNamePrefix + nameof(TestNestedContextsAsync);
+        private const string _testNestedContextsAsyncProfileName =
+            _profileNamePrefix + nameof(TestNestedContextsAsync);
 
-        [CacheConfiguration( ProfileName = testNestedContextsAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testNestedContextsAsyncProfileName )]
         public sealed class TestNestedContextsAsyncClass
         {
-            private int invocations;
+            private int _invocations;
 
             [Cache]
             public async Task<int> OuterMethodAsync()
@@ -1779,7 +1787,7 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public async Task<int> InnerMethodAsync()
             {
-                return await Task.FromResult( this.invocations++ );
+                return await Task.FromResult( this._invocations++ );
             }
 
             [InvalidateCache( nameof(InnerMethodAsync) )]
@@ -1792,8 +1800,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestNestedContextsAsync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testNestedContextsAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testNestedContextsAsyncProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testNestedContextsAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testNestedContextsAsyncProfileName );
 
             try
             {

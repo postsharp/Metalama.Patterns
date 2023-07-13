@@ -1,39 +1,36 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Linq;
-using Xunit;
-using Metalama.Patterns.Caching.Serializers;
+#if NETFRAMEWORK
 using System.Runtime.Serialization;
+using Xunit;
 
-namespace Metalama.Patterns.Caching.Tests.Serializers
+namespace Metalama.Patterns.Caching.Tests.Serializers;
+
+public sealed class DataContractSerializerTests : SerializerBaseTests
 {
-#if NET_DATA_CONTRACT_SERIALIZER
-    public class DataContractSerializerTests : SerializerBaseTests
+    public DataContractSerializerTests() : base( new Caching.Serializers.DataContractSerializer() ) { }
+
+    [Fact]
+    public void TestObject()
     {
-        public DataContractSerializerTests() : base(new Caching.Serializers.DataContractSerializer())
-        {
-
-        }
-
-        [Fact]
-        public void TestObject()
-        {
-            MyObject o = new MyObject();
-            MyObject roundTripItem = (MyObject) this.RoundTrip(o);
-            Assert.Equal(o.Value, roundTripItem.Value);
-
-        }
-
-        [DataContract]
-        class MyObject
-        {
-            public static int NextValue = 10;
-
-            [DataMember]
-            public int Value = (NextValue++);
-
-        }
+        var o = new MyObject();
+        var roundTripItem = (MyObject?) this.RoundTrip( o );
+        Assert.Equal( o.Value, roundTripItem!.Value );
     }
-#endif
+
+    [DataContract]
+    private sealed class MyObject
+    {
+        // ReSharper disable once MemberCanBePrivate.Local
+#pragma warning disable SA1401
+        public static int NextValue = 10;
+#pragma warning restore SA1401
+
+        [DataMember]
+#pragma warning disable SA1401
+        public int Value = NextValue++;
+#pragma warning restore SA1401
+    }
 }
+
+#endif

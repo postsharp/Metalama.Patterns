@@ -1,17 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.TestHelpers;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public class ValueAdapterTests : IDisposable
+    public sealed class ValueAdapterTests : IDisposable
     {
         public ValueAdapterTests()
         {
@@ -28,13 +22,13 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var s1 = this.MethodReturningStream();
             var buffer1 = new byte[512];
-            s1.Read( buffer1, 0, buffer1.Length );
+            _ = s1.Read( buffer1, 0, buffer1.Length );
 
             Assert.IsType<MemoryStream>( s1 );
 
             var s2 = this.MethodReturningStream();
             var buffer2 = new byte[512];
-            s2.Read( buffer2, 0, buffer2.Length );
+            _ = s2.Read( buffer2, 0, buffer2.Length );
 
             CompareArrays( buffer1, buffer2 );
         }
@@ -44,13 +38,19 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var s1 = await this.MethodReturningStreamAsync();
             var buffer1 = new byte[512];
-            s1.Read( buffer1, 0, buffer1.Length );
+            
+            // [Porting] Won't fix, can't be certain of original intent.
+            // ReSharper disable once MethodHasAsyncOverload
+            _ = s1.Read( buffer1, 0, buffer1.Length );
 
             Assert.IsType<MemoryStream>( s1 );
 
             var s2 = await this.MethodReturningStreamAsync();
             var buffer2 = new byte[512];
-            s2.Read( buffer2, 0, buffer2.Length );
+            
+            // [Porting] Won't fix, can't be certain of original intent.
+            // ReSharper disable once MethodHasAsyncOverload
+            _ = s2.Read( buffer2, 0, buffer2.Length );
 
             CompareArrays( buffer1, buffer2 );
         }
@@ -98,6 +98,9 @@ namespace Metalama.Patterns.Caching.Tests
             return File.OpenRead( this.GetType().Assembly.Location );
         }
 
+        // ReSharper disable MemberCanBeMadeStatic.Local
+#pragma warning disable CA1822
+
         [Cache]
         private IEnumerable<int> MethodReturningEnumerable()
         {
@@ -113,5 +116,8 @@ namespace Metalama.Patterns.Caching.Tests
             yield return 2;
             yield return 3;
         }
+
+        // ReSharper restore MemberCanBeMadeStatic.Local
+#pragma warning restore CA1822
     }
 }

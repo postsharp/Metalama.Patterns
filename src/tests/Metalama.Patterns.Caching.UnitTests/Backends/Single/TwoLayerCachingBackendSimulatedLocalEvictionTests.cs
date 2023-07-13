@@ -8,18 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single
 {
-    public class TwoLayerCachingBackendTests : BaseCacheBackendTests
-    {
-        public TwoLayerCachingBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
-
-        protected override CachingBackend CreateBackend()
-        {
-            MemoryCacheHack.MakeExpirationChecksMoreFrequently();
-
-            return new TwoLayerCachingBackendEnhancer( new MemoryCachingBackend( new MemoryCache( "1" ) ), new MemoryCachingBackend( new MemoryCache( "2" ) ) );
-        }
-    }
-
+    // ReSharper disable once UnusedType.Global
     public sealed class TwoLayerCachingBackendSimulatedLocalEvictionTests : TwoLayerCachingBackendTests
     {
         public TwoLayerCachingBackendSimulatedLocalEvictionTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }

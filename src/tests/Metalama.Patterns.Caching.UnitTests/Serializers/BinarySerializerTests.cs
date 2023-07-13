@@ -1,13 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Linq;
-using Xunit;
 using Metalama.Patterns.Caching.Serializers;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests.Serializers
 {
-    public class BinarySerializerTests : SerializerBaseTests
+    public sealed class BinarySerializerTests : SerializerBaseTests
     {
         public BinarySerializerTests() : base( new BinarySerializer() ) { }
 
@@ -23,8 +21,10 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
         [Serializable]
         private class MyObject
         {
+#pragma warning disable SA1401
             public static int NextValue = 10;
-            public int Value = (NextValue++);
+            public int Value = NextValue++;
+#pragma warning restore SA1401
         }
     }
 }

@@ -1,24 +1,27 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Xunit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Caching.Implementation;
-using System.Threading.Tasks;
+using Xunit;
+
+// ReSharper disable UnusedMethodReturnValue.Local
+// ReSharper disable MemberCanBeMadeStatic.Local
+// ReSharper disable MemberCanBePrivate.Local
+// ReSharper disable UnusedMember.Local
+// ReSharper disable UnusedParameter.Global
+#pragma warning disable IDE0060 // Remove unused parameter
+#pragma warning disable IDE0051 // Remove unused private members
 
 namespace Metalama.Patterns.Caching.Tests
 {
     public sealed class DependencyPropagationTests
     {
-        private const string profileNamePrefix = "Caching.Tests.DependencyPropagationTests_";
+        private const string _profileNamePrefix = "Caching.Tests.DependencyPropagationTests_";
 
         #region TestDependencyPropagation
 
-        private const string testDependencyPropagationProfileName = profileNamePrefix + "DependencyPropagation";
+        private const string _testDependencyPropagationProfileName = _profileNamePrefix + "DependencyPropagation";
 
-        [CacheConfiguration( ProfileName = testDependencyPropagationProfileName )]
+        [CacheConfiguration( ProfileName = _testDependencyPropagationProfileName )]
         private sealed class TestDependencyPropagationCachingClass
         {
             public bool WasGetValueCalled { get; set; }
@@ -55,10 +58,9 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestDependencyPropagation()
         {
-            var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testDependencyPropagationProfileName );
+            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testDependencyPropagationProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( testDependencyPropagationProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testDependencyPropagationProfileName );
 
             try
             {
@@ -88,9 +90,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestDependencyPropagationAsync
 
-        private const string testDependencyPropagationAsyncProfileName = profileNamePrefix + "DependencyPropagationAsync";
+        private const string _testDependencyPropagationAsyncProfileName = _profileNamePrefix + "DependencyPropagationAsync";
 
-        [CacheConfiguration( ProfileName = testDependencyPropagationAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testDependencyPropagationAsyncProfileName )]
         private sealed class TestDependencyPropagationAsyncCachingClass
         {
             public bool WasGetValueCalled { get; set; }
@@ -130,10 +132,9 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDependencyPropagationAsync()
         {
-            var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testDependencyPropagationAsyncProfileName );
+            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testDependencyPropagationAsyncProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( testDependencyPropagationAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testDependencyPropagationAsyncProfileName );
 
             try
             {
@@ -155,6 +156,8 @@ namespace Metalama.Patterns.Caching.Tests
             }
             finally
             {
+                // [Porting] Won't fix, can't be certain of original intent.
+                // ReSharper disable once MethodHasAsyncOverload
                 TestProfileConfigurationFactory.DisposeTest();
             }
         }
@@ -163,25 +166,28 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestDisposedContextAsync
 
-        private const string testDisposedContextAsyncProfileName = profileNamePrefix + "DisposedContextAsync";
+        private const string _testDisposedContextAsyncProfileName = _profileNamePrefix + "DisposedContextAsync";
 
-        [CacheConfiguration( ProfileName = testDisposedContextAsyncProfileName )]
+        // [Porting] Won't fix, can't be certain of original intent.
+#pragma warning disable CA1001 
+        [CacheConfiguration( ProfileName = _testDisposedContextAsyncProfileName )]
         private sealed class TestDisposedContextAsyncCachingClass
+#pragma warning restore CA1001
         {
             public bool WasGetValueCalled { get; set; }
 
             public bool WasGetValueDependencyCalled { get; set; }
 
-            private volatile Task syncTask;
+            private volatile Task? _syncTask;
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync()
             {
                 this.WasGetValueCalled = true;
                 await Task.Yield();
-                this.syncTask = new Task( () => { } );
-                Task<CachedValueClass> dependencyTask = await this.GetValueIntermediateAsync();
-                this.syncTask.Start();
+                this._syncTask = new Task( () => { } );
+                var dependencyTask = await this.GetValueIntermediateAsync();
+                this._syncTask.Start();
 
                 return await dependencyTask;
             }
@@ -200,7 +206,7 @@ namespace Metalama.Patterns.Caching.Tests
             public async Task<CachedValueClass> GetValueDependencyAsync()
             {
                 this.WasGetValueDependencyCalled = true;
-                await this.syncTask;
+                await this._syncTask!;
 
                 return new CachedValueClass();
             }
@@ -209,10 +215,9 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDisposedContextAsync()
         {
-            var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testDisposedContextAsyncProfileName );
+            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testDisposedContextAsyncProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( testDisposedContextAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testDisposedContextAsyncProfileName );
 
             try
             {
@@ -235,6 +240,8 @@ namespace Metalama.Patterns.Caching.Tests
             }
             finally
             {
+                // [Porting] Won't fix, can't be certain of original intent.
+                // ReSharper disable once MethodHasAsyncOverload
                 TestProfileConfigurationFactory.DisposeTest();
             }
         }
@@ -243,9 +250,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestSuspendedDependencyPropagation
 
-        private const string testSuspendedDependencyPropagationProfileName = profileNamePrefix + "SuspendedDependencyPropagation";
+        private const string _testSuspendedDependencyPropagationProfileName = _profileNamePrefix + "SuspendedDependencyPropagation";
 
-        [CacheConfiguration( ProfileName = testSuspendedDependencyPropagationProfileName )]
+        [CacheConfiguration( ProfileName = _testSuspendedDependencyPropagationProfileName )]
         private sealed class TestSuspendedDependencyPropagationCachingClass
         {
             public bool WasGetValueCalled { get; set; }
@@ -285,10 +292,9 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSuspendedDependencyPropagation()
         {
-            var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testSuspendedDependencyPropagationProfileName );
+            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( testSuspendedDependencyPropagationProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testSuspendedDependencyPropagationProfileName );
 
             try
             {
@@ -322,9 +328,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestSuspendedDependencyPropagationAsync
 
-        private const string testSuspendedDependencyPropagationAsyncProfileName = profileNamePrefix + "SuspendedDependencyPropagationAsync";
+        private const string _testSuspendedDependencyPropagationAsyncProfileName = _profileNamePrefix + "SuspendedDependencyPropagationAsync";
 
-        [CacheConfiguration( ProfileName = testSuspendedDependencyPropagationAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testSuspendedDependencyPropagationAsyncProfileName )]
         private sealed class TestSuspendedDependencyPropagationAsyncCachingClass
         {
             public bool WasGetValueCalled { get; set; }
@@ -367,10 +373,9 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestSuspendedDependencyPropagationAsync()
         {
-            var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( testSuspendedDependencyPropagationAsyncProfileName );
+            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationAsyncProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( testSuspendedDependencyPropagationAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testSuspendedDependencyPropagationAsyncProfileName );
 
             try
             {
@@ -396,6 +401,8 @@ namespace Metalama.Patterns.Caching.Tests
             }
             finally
             {
+                // [Porting] Won't fix, can't be certain of original intent.
+                // ReSharper disable once MethodHasAsyncOverload
                 TestProfileConfigurationFactory.DisposeTest();
             }
         }

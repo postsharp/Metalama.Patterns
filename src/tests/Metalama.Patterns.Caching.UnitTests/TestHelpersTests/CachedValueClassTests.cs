@@ -1,13 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
+using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 {
-    /// <summary>
-    /// Summary description for CachedValueClassTests
-    /// </summary>
     public sealed class CachedValueClassTests
     {
         [Fact]

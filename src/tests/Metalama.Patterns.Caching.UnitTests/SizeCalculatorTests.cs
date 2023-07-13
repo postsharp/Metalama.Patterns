@@ -8,7 +8,7 @@ using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPrio
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public class SizeCalculatorTests
+    public sealed class SizeCalculatorTests
     {
         [Fact( Timeout = 5000 )]
         public void TestSizeCalculator()
@@ -19,7 +19,9 @@ namespace Metalama.Patterns.Caching.Tests
                     {
                         SizeLimit = 5, CompactionPercentage = 1 // compact full cache
                     } ),
+#pragma warning disable CS8605
                 ( cItem ) => (int) cItem.Value );
+#pragma warning restore CS8605
 
             backend.SetItem( "A", new CacheItem( 2 ) );
             backend.SetItem( "B", new CacheItem( 2 ) );

@@ -16,7 +16,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith1Parameters
 
         private const string testSimpleImperativeInvalidationWith1ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith1Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith1Parameters);
 
         class TestSimpleImperativeInvalidationWith1ParametersCachingClass : CachingClass
         {
@@ -43,7 +43,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith1ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith1ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith1ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith1ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith1ParametersAsyncCachingClass : CachingClass
         {
@@ -71,7 +71,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith1Parameters
 
         private const string testSimpleImperativeRecachingWith1ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith1Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith1Parameters);
 
         class TestSimpleImperativeRecachingWith1ParametersCachingClass : CachingClass
         {
@@ -98,7 +98,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith1ParametersAsync
 
         private const string testSimpleImperativeRecachingWith1ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith1ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith1ParametersAsync);
 
         class TestSimpleImperativeRecachingWith1ParametersAsyncCachingClass : CachingClass
         {
@@ -126,7 +126,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith2Parameters
 
         private const string testSimpleImperativeInvalidationWith2ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith2Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith2Parameters);
 
         class TestSimpleImperativeInvalidationWith2ParametersCachingClass : CachingClass
         {
@@ -153,7 +153,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith2ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith2ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith2ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith2ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith2ParametersAsyncCachingClass : CachingClass
         {
@@ -181,7 +181,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith2Parameters
 
         private const string testSimpleImperativeRecachingWith2ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith2Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith2Parameters);
 
         class TestSimpleImperativeRecachingWith2ParametersCachingClass : CachingClass
         {
@@ -208,7 +208,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith2ParametersAsync
 
         private const string testSimpleImperativeRecachingWith2ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith2ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith2ParametersAsync);
 
         class TestSimpleImperativeRecachingWith2ParametersAsyncCachingClass : CachingClass
         {
@@ -236,7 +236,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith3Parameters
 
         private const string testSimpleImperativeInvalidationWith3ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith3Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith3Parameters);
 
         class TestSimpleImperativeInvalidationWith3ParametersCachingClass : CachingClass
         {
@@ -263,7 +263,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith3ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith3ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith3ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith3ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith3ParametersAsyncCachingClass : CachingClass
         {
@@ -291,7 +291,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith3Parameters
 
         private const string testSimpleImperativeRecachingWith3ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith3Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith3Parameters);
 
         class TestSimpleImperativeRecachingWith3ParametersCachingClass : CachingClass
         {
@@ -318,7 +318,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith3ParametersAsync
 
         private const string testSimpleImperativeRecachingWith3ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith3ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith3ParametersAsync);
 
         class TestSimpleImperativeRecachingWith3ParametersAsyncCachingClass : CachingClass
         {
@@ -346,7 +346,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith4Parameters
 
         private const string testSimpleImperativeInvalidationWith4ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith4Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith4Parameters);
 
         class TestSimpleImperativeInvalidationWith4ParametersCachingClass : CachingClass
         {
@@ -373,7 +373,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith4ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith4ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith4ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith4ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith4ParametersAsyncCachingClass : CachingClass
         {
@@ -401,7 +401,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith4Parameters
 
         private const string testSimpleImperativeRecachingWith4ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith4Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith4Parameters);
 
         class TestSimpleImperativeRecachingWith4ParametersCachingClass : CachingClass
         {
@@ -428,7 +428,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith4ParametersAsync
 
         private const string testSimpleImperativeRecachingWith4ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith4ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith4ParametersAsync);
 
         class TestSimpleImperativeRecachingWith4ParametersAsyncCachingClass : CachingClass
         {
@@ -456,7 +456,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith5Parameters
 
         private const string testSimpleImperativeInvalidationWith5ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith5Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith5Parameters);
 
         class TestSimpleImperativeInvalidationWith5ParametersCachingClass : CachingClass
         {
@@ -483,7 +483,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith5ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith5ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith5ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith5ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith5ParametersAsyncCachingClass : CachingClass
         {
@@ -511,7 +511,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith5Parameters
 
         private const string testSimpleImperativeRecachingWith5ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith5Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith5Parameters);
 
         class TestSimpleImperativeRecachingWith5ParametersCachingClass : CachingClass
         {
@@ -538,7 +538,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith5ParametersAsync
 
         private const string testSimpleImperativeRecachingWith5ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith5ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith5ParametersAsync);
 
         class TestSimpleImperativeRecachingWith5ParametersAsyncCachingClass : CachingClass
         {
@@ -566,7 +566,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith6Parameters
 
         private const string testSimpleImperativeInvalidationWith6ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith6Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith6Parameters);
 
         class TestSimpleImperativeInvalidationWith6ParametersCachingClass : CachingClass
         {
@@ -593,7 +593,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith6ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith6ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith6ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith6ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith6ParametersAsyncCachingClass : CachingClass
         {
@@ -621,7 +621,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith6Parameters
 
         private const string testSimpleImperativeRecachingWith6ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith6Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith6Parameters);
 
         class TestSimpleImperativeRecachingWith6ParametersCachingClass : CachingClass
         {
@@ -648,7 +648,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith6ParametersAsync
 
         private const string testSimpleImperativeRecachingWith6ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith6ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith6ParametersAsync);
 
         class TestSimpleImperativeRecachingWith6ParametersAsyncCachingClass : CachingClass
         {
@@ -676,7 +676,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith7Parameters
 
         private const string testSimpleImperativeInvalidationWith7ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith7Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith7Parameters);
 
         class TestSimpleImperativeInvalidationWith7ParametersCachingClass : CachingClass
         {
@@ -703,7 +703,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith7ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith7ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith7ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith7ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith7ParametersAsyncCachingClass : CachingClass
         {
@@ -731,7 +731,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith7Parameters
 
         private const string testSimpleImperativeRecachingWith7ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith7Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith7Parameters);
 
         class TestSimpleImperativeRecachingWith7ParametersCachingClass : CachingClass
         {
@@ -758,7 +758,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith7ParametersAsync
 
         private const string testSimpleImperativeRecachingWith7ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith7ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith7ParametersAsync);
 
         class TestSimpleImperativeRecachingWith7ParametersAsyncCachingClass : CachingClass
         {
@@ -786,7 +786,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith8Parameters
 
         private const string testSimpleImperativeInvalidationWith8ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith8Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith8Parameters);
 
         class TestSimpleImperativeInvalidationWith8ParametersCachingClass : CachingClass
         {
@@ -813,7 +813,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith8ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith8ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith8ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith8ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith8ParametersAsyncCachingClass : CachingClass
         {
@@ -841,7 +841,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith8Parameters
 
         private const string testSimpleImperativeRecachingWith8ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith8Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith8Parameters);
 
         class TestSimpleImperativeRecachingWith8ParametersCachingClass : CachingClass
         {
@@ -868,7 +868,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith8ParametersAsync
 
         private const string testSimpleImperativeRecachingWith8ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith8ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith8ParametersAsync);
 
         class TestSimpleImperativeRecachingWith8ParametersAsyncCachingClass : CachingClass
         {
@@ -896,7 +896,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith9Parameters
 
         private const string testSimpleImperativeInvalidationWith9ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith9Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith9Parameters);
 
         class TestSimpleImperativeInvalidationWith9ParametersCachingClass : CachingClass
         {
@@ -923,7 +923,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith9ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith9ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith9ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith9ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith9ParametersAsyncCachingClass : CachingClass
         {
@@ -951,7 +951,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith9Parameters
 
         private const string testSimpleImperativeRecachingWith9ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith9Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith9Parameters);
 
         class TestSimpleImperativeRecachingWith9ParametersCachingClass : CachingClass
         {
@@ -978,7 +978,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith9ParametersAsync
 
         private const string testSimpleImperativeRecachingWith9ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith9ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith9ParametersAsync);
 
         class TestSimpleImperativeRecachingWith9ParametersAsyncCachingClass : CachingClass
         {
@@ -1006,7 +1006,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith10Parameters
 
         private const string testSimpleImperativeInvalidationWith10ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith10Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith10Parameters);
 
         class TestSimpleImperativeInvalidationWith10ParametersCachingClass : CachingClass
         {
@@ -1033,7 +1033,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeInvalidationWith10ParametersAsync
 
         private const string testSimpleImperativeInvalidationWith10ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith10ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith10ParametersAsync);
 
         class TestSimpleImperativeInvalidationWith10ParametersAsyncCachingClass : CachingClass
         {
@@ -1061,7 +1061,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith10Parameters
 
         private const string testSimpleImperativeRecachingWith10ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith10Parameters);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith10Parameters);
 
         class TestSimpleImperativeRecachingWith10ParametersCachingClass : CachingClass
         {
@@ -1088,7 +1088,7 @@ namespace Metalama.Patterns.Caching.Tests
 		#region TestSimpleImperativeRecachingWith10ParametersAsync
 
         private const string testSimpleImperativeRecachingWith10ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith10ParametersAsync);
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith10ParametersAsync);
 
         class TestSimpleImperativeRecachingWith10ParametersAsyncCachingClass : CachingClass
         {

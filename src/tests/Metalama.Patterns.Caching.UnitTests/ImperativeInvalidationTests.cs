@@ -1,15 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-using System.Threading.Tasks;
-using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
+using Xunit;
+
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Metalama.Patterns.Caching.Tests
 {
     public sealed partial class ImperativeInvalidationTests : InvalidationTestsBase
     {
-        private const string profileNamePrefix = "Caching.Tests.ImperativeInvalidationTests_";
+        private const string _profileNamePrefix = "Caching.Tests.ImperativeInvalidationTests_";
 
         private static void DoInvalidateCacheAttributeTest(
             string profileName,
@@ -19,7 +20,7 @@ namespace Metalama.Patterns.Caching.Tests
             bool firstPairShouldWork,
             bool otherPairsShouldWork )
         {
-            Func<CachedValueClass>[] invalidatingMethodProxies = new Func<CachedValueClass>[invalidatingMethods.Length];
+            var invalidatingMethodProxies = new Func<CachedValueClass>[invalidatingMethods.Length];
 
             for ( var i = 0; i < invalidatingMethods.Length; i++ )
             {
@@ -57,14 +58,14 @@ namespace Metalama.Patterns.Caching.Tests
             Action invalidatingMethod,
             Func<bool> resetMethod )
         {
-            Func<CachedValueClass> invalidatingMethodProxy = () =>
+            CachedValueClass InvalidatingMethodProxy()
             {
                 invalidatingMethod();
 
                 return NullCachedValueClass.Instance;
-            };
+            }
 
-            DoTestSimpleImperativeInvalidation( profileName, cachedMethod, invalidatingMethodProxy, resetMethod );
+            DoTestSimpleImperativeInvalidation( profileName, cachedMethod, InvalidatingMethodProxy, resetMethod );
         }
 
         private static void DoTestSimpleImperativeInvalidation(
@@ -88,6 +89,7 @@ namespace Metalama.Patterns.Caching.Tests
 
                 var recachedValue = invalidatingOrRecachingMethod();
 
+                // ReSharper disable once PossibleUnintendedReferenceComparison
                 if ( recachedValue == NullCachedValueClass.Instance )
                 {
                     // Just invalidating (not recaching)
@@ -127,14 +129,14 @@ namespace Metalama.Patterns.Caching.Tests
             Func<Task> invalidatingMethod,
             Func<bool> resetMethod )
         {
-            Func<Task<CachedValueClass>> invalidatingMethodProxy = async () =>
+            async Task<CachedValueClass> InvalidatingMethodProxy()
             {
                 await invalidatingMethod();
 
                 return NullCachedValueClass.Instance;
-            };
+            }
 
-            await DoTestSimpleImperativeInvalidationAsync( profileName, cachedMethod, invalidatingMethodProxy, resetMethod );
+            await DoTestSimpleImperativeInvalidationAsync( profileName, cachedMethod, InvalidatingMethodProxy, resetMethod );
         }
 
         private static async Task DoTestSimpleImperativeInvalidationAsync(
@@ -158,6 +160,7 @@ namespace Metalama.Patterns.Caching.Tests
 
                 var recachedValue = await invalidatingOrRecachingMethod();
 
+                // ReSharper disable once PossibleUnintendedReferenceComparison
                 if ( recachedValue == NullCachedValueClass.Instance )
                 {
                     // Just invalidating (not recaching)
@@ -193,21 +196,21 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestImperativeInvalidation
 
-        private const string testImperativeInvalidationProfileName = profileNamePrefix + nameof(TestImperativeInvalidation);
+        private const string _testImperativeInvalidationProfileName = _profileNamePrefix + nameof(TestImperativeInvalidation);
 
-        [CacheConfiguration( ProfileName = testImperativeInvalidationProfileName )]
+        [CacheConfiguration( ProfileName = _testImperativeInvalidationProfileName )]
         private sealed class TestImperativeInvalidationCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
-            public readonly CallsCounters CallsCounters = new( 4 );
+            public CallsCounters CallsCounters { get; } = new( 4 );
 
             [Cache]
             public CachedValueClass GetValue()
             {
                 this.CallsCounters.Increment( 0 );
 
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
@@ -215,7 +218,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 1 );
 
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
@@ -223,7 +226,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 2 );
 
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
@@ -231,7 +234,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 3 );
 
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
         }
 
@@ -244,8 +247,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     cachingClass.GetValue,
                     () => cachingClass.GetValue( 1 ),
@@ -253,8 +256,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => cachingClass.GetValue( 1, cachedValue2, 3, 4 )
                 };
 
-            Action[] invalidatingMethods =
-                new Action[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => CachingServices.Invalidation.Invalidate( cachingClass.GetValue ),
                     () => CachingServices.Invalidation.Invalidate( cachingClass.GetValue, 1 ),
@@ -265,7 +268,7 @@ namespace Metalama.Patterns.Caching.Tests
             var testName = "Matching values test";
 
             DoInvalidateCacheAttributeTest(
-                testImperativeInvalidationProfileName,
+                _testImperativeInvalidationProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
@@ -281,7 +284,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
 
             invalidatingMethods =
-                new Action[]
+                new[]
                 {
                     () => CachingServices.Invalidation.Invalidate( cachingClass.GetValue ),
                     () => CachingServices.Invalidation.Invalidate( cachingClass.GetValue, 0 ),
@@ -292,7 +295,7 @@ namespace Metalama.Patterns.Caching.Tests
             testName = "Not matching values test";
 
             DoInvalidateCacheAttributeTest(
-                testImperativeInvalidationProfileName,
+                _testImperativeInvalidationProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
@@ -312,21 +315,21 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestImperativeInvalidationAsync
 
-        private const string testImperativeInvalidationAsyncProfileName = profileNamePrefix + nameof(TestImperativeInvalidationAsync);
+        private const string _testImperativeInvalidationAsyncProfileName = _profileNamePrefix + nameof(TestImperativeInvalidationAsync);
 
-        [CacheConfiguration( ProfileName = testImperativeInvalidationAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testImperativeInvalidationAsyncProfileName )]
         private sealed class TestImperativeInvalidationAsyncCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
-            public readonly CallsCounters CallsCounters = new( 4 );
+            public CallsCounters CallsCounters { get; } = new( 4 );
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync()
             {
                 this.CallsCounters.Increment( 0 );
 
-                return await Task.Run( () => new CachedValueClass( counter++ ) );
+                return await Task.Run( () => new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
@@ -334,7 +337,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 1 );
 
-                return await Task.Run( () => new CachedValueClass( counter++ ) );
+                return await Task.Run( () => new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
@@ -342,7 +345,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 2 );
 
-                return await Task.Run( () => new CachedValueClass( counter++ ) );
+                return await Task.Run( () => new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
@@ -350,7 +353,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 3 );
 
-                return await Task.Run( () => new CachedValueClass( counter++ ) );
+                return await Task.Run( () => new CachedValueClass( _counter++ ) );
             }
         }
 
@@ -363,8 +366,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     () => cachingClass.GetValueAsync().GetAwaiter().GetResult(),
                     () => cachingClass.GetValueAsync( 1 ).GetAwaiter().GetResult(),
@@ -372,8 +375,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => cachingClass.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
                 };
 
-            Action[] invalidatingMethods =
-                new Action[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => CachingServices.Invalidation.InvalidateAsync( cachingClass.GetValueAsync ).Wait(),
                     () => CachingServices.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1 ).Wait(),
@@ -384,7 +387,7 @@ namespace Metalama.Patterns.Caching.Tests
             var testName = "Matching values test";
 
             DoInvalidateCacheAttributeTest(
-                testImperativeInvalidationAsyncProfileName,
+                _testImperativeInvalidationAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
@@ -400,7 +403,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
 
             invalidatingMethods =
-                new Action[]
+                new[]
                 {
                     () => CachingServices.Invalidation.InvalidateAsync( cachingClass.GetValueAsync ).Wait(),
                     () => CachingServices.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 0 ).Wait(),
@@ -411,7 +414,7 @@ namespace Metalama.Patterns.Caching.Tests
             testName = "Not matching values test";
 
             DoInvalidateCacheAttributeTest(
-                testImperativeInvalidationAsyncProfileName,
+                _testImperativeInvalidationAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
@@ -431,21 +434,21 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestRecaching
 
-        private const string testRecachingProfileName = profileNamePrefix + nameof(TestRecaching);
+        private const string _testRecachingProfileName = _profileNamePrefix + nameof(TestRecaching);
 
-        [CacheConfiguration( ProfileName = testRecachingProfileName )]
+        [CacheConfiguration( ProfileName = _testRecachingProfileName )]
         private sealed class TestRecachingCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
-            public readonly CallsCounters CallsCounters = new( 4 );
+            public CallsCounters CallsCounters { get; } = new( 4 );
 
             [Cache]
             public CachedValueClass GetValue()
             {
                 this.CallsCounters.Increment( 0 );
 
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
@@ -453,7 +456,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 1 );
 
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
@@ -461,7 +464,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 2 );
 
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
 
             [Cache]
@@ -469,7 +472,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 3 );
 
-                return new CachedValueClass( counter++ );
+                return new CachedValueClass( _counter++ );
             }
         }
 
@@ -482,8 +485,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     cachingClass.GetValue,
                     () => cachingClass.GetValue( 1 ),
@@ -491,7 +494,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => cachingClass.GetValue( 1, cachedValue2, 3, 4 )
                 };
 
-            Action[] invalidatingMethods =
+            var invalidatingMethods =
                 new Action[]
                 {
                     () => CachingServices.Invalidation.Recache( cachingClass.GetValue ),
@@ -503,7 +506,7 @@ namespace Metalama.Patterns.Caching.Tests
             var testName = "Matching values test";
 
             DoInvalidateCacheAttributeTest(
-                testRecachingProfileName,
+                _testRecachingProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
@@ -530,7 +533,7 @@ namespace Metalama.Patterns.Caching.Tests
             testName = "Not matching values test";
 
             DoInvalidateCacheAttributeTest(
-                testRecachingProfileName,
+                _testRecachingProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -550,21 +553,21 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestRecachingAsync
 
-        private const string testRecachingAsyncProfileName = profileNamePrefix + nameof(TestRecachingAsync);
+        private const string _testRecachingAsyncProfileName = _profileNamePrefix + nameof(TestRecachingAsync);
 
-        [CacheConfiguration( ProfileName = testRecachingAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testRecachingAsyncProfileName )]
         private sealed class TestRecachingAsyncCachingClass
         {
-            private static int counter = 0;
+            private static int _counter;
 
-            public readonly CallsCounters CallsCounters = new( 4 );
+            public CallsCounters CallsCounters { get; } = new( 4 );
 
             [Cache]
             public async Task<CachedValueClass> GetValueAsync()
             {
                 this.CallsCounters.Increment( 0 );
 
-                return await Task.Run( () => new CachedValueClass( counter++ ) );
+                return await Task.Run( () => new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
@@ -572,7 +575,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 1 );
 
-                return await Task.Run( () => new CachedValueClass( counter++ ) );
+                return await Task.Run( () => new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
@@ -580,7 +583,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 2 );
 
-                return await Task.Run( () => new CachedValueClass( counter++ ) );
+                return await Task.Run( () => new CachedValueClass( _counter++ ) );
             }
 
             [Cache]
@@ -588,7 +591,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.CallsCounters.Increment( 3 );
 
-                return await Task.Run( () => new CachedValueClass( counter++ ) );
+                return await Task.Run( () => new CachedValueClass( _counter++ ) );
             }
         }
 
@@ -601,8 +604,8 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedValue0 = new CachedValueChildClass( 0 );
             var cachedValue2 = new CachedValueChildClass( 2 );
 
-            Func<CachedValueClass>[] cachedMethods =
-                new Func<CachedValueClass>[]
+            var cachedMethods =
+                new[]
                 {
                     () => cachingClass.GetValueAsync().GetAwaiter().GetResult(),
                     () => cachingClass.GetValueAsync( 1 ).GetAwaiter().GetResult(),
@@ -610,8 +613,8 @@ namespace Metalama.Patterns.Caching.Tests
                     () => cachingClass.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
                 };
 
-            Action[] invalidatingMethods =
-                new Action[]
+            var invalidatingMethods =
+                new[]
                 {
                     () => CachingServices.Invalidation.RecacheAsync( cachingClass.GetValueAsync ).Wait(),
                     () => CachingServices.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1 ).Wait(),
@@ -622,7 +625,7 @@ namespace Metalama.Patterns.Caching.Tests
             var testName = "Matching values test";
 
             DoInvalidateCacheAttributeTest(
-                testRecachingAsyncProfileName,
+                _testRecachingAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
@@ -638,7 +641,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
 
             invalidatingMethods =
-                new Action[]
+                new[]
                 {
                     () => CachingServices.Invalidation.RecacheAsync( cachingClass.GetValueAsync ).Wait(),
                     () => CachingServices.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 0 ).Wait(),
@@ -649,7 +652,7 @@ namespace Metalama.Patterns.Caching.Tests
             testName = "Not matching values test";
 
             DoInvalidateCacheAttributeTest(
-                testRecachingAsyncProfileName,
+                _testRecachingAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
@@ -669,13 +672,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestImperativeInvalidationWithNestedContexts
 
-        private const string testImperativeInvalidationWithNestedContextsProfileName =
-            profileNamePrefix + nameof(TestImperativeInvalidationWithNestedContexts);
+        private const string _testImperativeInvalidationWithNestedContextsProfileName =
+            _profileNamePrefix + nameof(TestImperativeInvalidationWithNestedContexts);
 
-        [CacheConfiguration( ProfileName = testImperativeInvalidationWithNestedContextsProfileName )]
+        [CacheConfiguration( ProfileName = _testImperativeInvalidationWithNestedContextsProfileName )]
         public sealed class TestImperativeInvalidationWithNestedContextsClass
         {
-            private int invocations;
+            private int _invocations;
 
             [Cache]
             public int OuterMethod()
@@ -686,15 +689,15 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public int InnerMethod()
             {
-                return this.invocations++;
+                return this._invocations++;
             }
         }
 
         [Fact]
         public void TestImperativeInvalidationWithNestedContexts()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testImperativeInvalidationWithNestedContextsProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testImperativeInvalidationWithNestedContextsProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testImperativeInvalidationWithNestedContextsProfileName );
 
             try
             {
@@ -715,13 +718,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestImperativeInvalidationWithNestedContextsAsync
 
-        private const string testImperativeInvalidationWithNestedContextsAsyncProfileName =
-            profileNamePrefix + nameof(TestImperativeInvalidationWithNestedContextsAsync);
+        private const string _testImperativeInvalidationWithNestedContextsAsyncProfileName =
+            _profileNamePrefix + nameof(TestImperativeInvalidationWithNestedContextsAsync);
 
-        [CacheConfiguration( ProfileName = testImperativeInvalidationWithNestedContextsAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testImperativeInvalidationWithNestedContextsAsyncProfileName )]
         public sealed class TestImperativeInvalidationWithNestedContextsAsyncClass
         {
-            private int invocations;
+            private int _invocations;
 
             [Cache]
             public async Task<int> OuterMethodAsync()
@@ -732,15 +735,15 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public async Task<int> InnerMethodAsync()
             {
-                return await Task.FromResult( this.invocations++ );
+                return await Task.FromResult( this._invocations++ );
             }
         }
 
         [Fact]
         public async Task TestImperativeInvalidationWithNestedContextsAsync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testImperativeInvalidationWithNestedContextsAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testImperativeInvalidationWithNestedContextsAsyncProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
 
             try
             {
@@ -761,13 +764,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestRecachingOfInnerMethod
 
-        private const string testRecachingOfInnerMethodProfileName =
-            profileNamePrefix + nameof(TestRecachingOfInnerMethod);
+        private const string _testRecachingOfInnerMethodProfileName =
+            _profileNamePrefix + nameof(TestRecachingOfInnerMethod);
 
-        [CacheConfiguration( ProfileName = testRecachingOfInnerMethodProfileName )]
+        [CacheConfiguration( ProfileName = _testRecachingOfInnerMethodProfileName )]
         public sealed class TestRecachingOfInnerMethodClass
         {
-            private int invocations;
+            private int _invocations;
 
             [Cache]
             public int OuterMethod()
@@ -778,15 +781,15 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public int InnerMethod()
             {
-                return this.invocations++;
+                return this._invocations++;
             }
         }
 
         [Fact]
         public void TestRecachingOfInnerMethod()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testRecachingOfInnerMethodProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testRecachingOfInnerMethodProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfInnerMethodProfileName );
 
             try
             {
@@ -808,13 +811,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestRecachingOfInnerMethodAsync
 
-        private const string testRecachingOfInnerMethodAsyncProfileName =
-            profileNamePrefix + nameof(TestRecachingOfInnerMethodAsync);
+        private const string _testRecachingOfInnerMethodAsyncProfileName =
+            _profileNamePrefix + nameof(TestRecachingOfInnerMethodAsync);
 
-        [CacheConfiguration( ProfileName = testRecachingOfInnerMethodAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testRecachingOfInnerMethodAsyncProfileName )]
         public sealed class TestRecachingOfInnerMethodAsyncClass
         {
-            private int invocations;
+            private int _invocations;
 
             [Cache]
             public async Task<int> OuterMethodAsync()
@@ -825,15 +828,15 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public async Task<int> InnerMethodAsync()
             {
-                return await Task.FromResult( this.invocations++ );
+                return await Task.FromResult( this._invocations++ );
             }
         }
 
         [Fact]
         public async Task TestRecachingOfInnerMethodAsync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testRecachingOfInnerMethodAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testRecachingOfInnerMethodAsyncProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfInnerMethodAsyncProfileName );
 
             try
             {
@@ -855,13 +858,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestRecachingOfOuterMethod
 
-        private const string testRecachingOfOuterMethodProfileName =
-            profileNamePrefix + nameof(TestRecachingOfOuterMethod);
+        private const string _testRecachingOfOuterMethodProfileName =
+            _profileNamePrefix + nameof(TestRecachingOfOuterMethod);
 
-        [CacheConfiguration( ProfileName = testRecachingOfOuterMethodProfileName )]
+        [CacheConfiguration( ProfileName = _testRecachingOfOuterMethodProfileName )]
         public sealed class TestRecachingOfOuterMethodClass
         {
-            private int invocations;
+            private int _invocations;
 
             [Cache]
             public int OuterMethod()
@@ -872,15 +875,15 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public int InnerMethod()
             {
-                return this.invocations++;
+                return this._invocations++;
             }
         }
 
         [Fact]
         public void TestRecachingOfOuterMethod()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testRecachingOfOuterMethodProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testRecachingOfOuterMethodProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfOuterMethodProfileName );
 
             try
             {
@@ -902,13 +905,13 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestRecachingOfOuterMethodAsync
 
-        private const string testRecachingOfOuterMethodAsyncProfileName =
-            profileNamePrefix + nameof(TestRecachingOfOuterMethodAsync);
+        private const string _testRecachingOfOuterMethodAsyncProfileName =
+            _profileNamePrefix + nameof(TestRecachingOfOuterMethodAsync);
 
-        [CacheConfiguration( ProfileName = testRecachingOfOuterMethodAsyncProfileName )]
+        [CacheConfiguration( ProfileName = _testRecachingOfOuterMethodAsyncProfileName )]
         public sealed class TestRecachingOfOuterMethodAsyncClass
         {
-            private int invocations;
+            private int _invocations;
 
             [Cache]
             public async Task<int> OuterMethodAsync()
@@ -919,15 +922,15 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public async Task<int> InnerMethodAsync()
             {
-                return await Task.FromResult( this.invocations++ );
+                return await Task.FromResult( this._invocations++ );
             }
         }
 
         [Fact]
         public async Task TestRecachingOfOuterMethodAsync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( testRecachingOfOuterMethodAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( testRecachingOfOuterMethodAsyncProfileName );
+            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodAsyncProfileName );
+            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfOuterMethodAsyncProfileName );
 
             try
             {
@@ -949,12 +952,12 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestSimpleImperativeInvalidationWith0Parameters
 
-        private const string testSimpleImperativeInvalidationWith0ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith0Parameters);
+        private const string _testSimpleImperativeInvalidationWith0ParametersProfileName =
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith0Parameters);
 
-        private class TestSimpleImperativeInvalidationWith0ParametersCachingClass : CachingClass
+        private sealed class TestSimpleImperativeInvalidationWith0ParametersCachingClass : CachingClass
         {
-            [Cache( ProfileName = testSimpleImperativeInvalidationWith0ParametersProfileName )]
+            [Cache( ProfileName = _testSimpleImperativeInvalidationWith0ParametersProfileName )]
             public override CachedValueClass GetValue()
             {
                 return base.GetValue();
@@ -967,7 +970,7 @@ namespace Metalama.Patterns.Caching.Tests
             var cachingClass = new TestSimpleImperativeInvalidationWith0ParametersCachingClass();
 
             DoTestSimpleImperativeInvalidation(
-                testSimpleImperativeInvalidationWith0ParametersProfileName,
+                _testSimpleImperativeInvalidationWith0ParametersProfileName,
                 cachingClass.GetValue,
                 () => CachingServices.Invalidation.Invalidate( cachingClass.GetValue ),
                 cachingClass.Reset );
@@ -977,12 +980,12 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestSimpleImperativeInvalidationWith0ParametersAsync
 
-        private const string testSimpleImperativeInvalidationWith0ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith0ParametersAsync);
+        private const string _testSimpleImperativeInvalidationWith0ParametersAsyncProfileName =
+            _profileNamePrefix + nameof(TestSimpleImperativeInvalidationWith0ParametersAsync);
 
-        private class TestSimpleImperativeInvalidationWith0ParametersAsyncCachingClass : CachingClass
+        private sealed class TestSimpleImperativeInvalidationWith0ParametersAsyncCachingClass : CachingClass
         {
-            [Cache( ProfileName = testSimpleImperativeInvalidationWith0ParametersAsyncProfileName )]
+            [Cache( ProfileName = _testSimpleImperativeInvalidationWith0ParametersAsyncProfileName )]
             public override async Task<CachedValueClass> GetValueAsync()
             {
                 return await base.GetValueAsync();
@@ -996,7 +999,7 @@ namespace Metalama.Patterns.Caching.Tests
                 new TestSimpleImperativeInvalidationWith0ParametersAsyncCachingClass();
 
             await DoTestSimpleImperativeInvalidationAsync(
-                testSimpleImperativeInvalidationWith0ParametersAsyncProfileName,
+                _testSimpleImperativeInvalidationWith0ParametersAsyncProfileName,
                 cachingClass.GetValueAsync,
                 () => CachingServices.Invalidation.InvalidateAsync( cachingClass.GetValueAsync ),
                 cachingClass.Reset );
@@ -1006,12 +1009,12 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestSimpleImperativeRecachingWith0Parameters
 
-        private const string testSimpleImperativeRecachingWith0ParametersProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith0Parameters);
+        private const string _testSimpleImperativeRecachingWith0ParametersProfileName =
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith0Parameters);
 
-        private class TestSimpleImperativeRecachingWith0ParametersCachingClass : CachingClass
+        private sealed class TestSimpleImperativeRecachingWith0ParametersCachingClass : CachingClass
         {
-            [Cache( ProfileName = testSimpleImperativeRecachingWith0ParametersProfileName )]
+            [Cache( ProfileName = _testSimpleImperativeRecachingWith0ParametersProfileName )]
             public override CachedValueClass GetValue()
             {
                 return base.GetValue();
@@ -1024,7 +1027,7 @@ namespace Metalama.Patterns.Caching.Tests
             var cachingClass = new TestSimpleImperativeRecachingWith0ParametersCachingClass();
 
             DoTestSimpleImperativeInvalidation(
-                testSimpleImperativeRecachingWith0ParametersProfileName,
+                _testSimpleImperativeRecachingWith0ParametersProfileName,
                 cachingClass.GetValue,
                 () => CachingServices.Invalidation.Recache( cachingClass.GetValue ),
                 cachingClass.Reset );
@@ -1034,12 +1037,12 @@ namespace Metalama.Patterns.Caching.Tests
 
         #region TestSimpleImperativeRecachingWith0ParametersAsync
 
-        private const string testSimpleImperativeRecachingWith0ParametersAsyncProfileName =
-            profileNamePrefix + nameof(TestSimpleImperativeRecachingWith0ParametersAsync);
+        private const string _testSimpleImperativeRecachingWith0ParametersAsyncProfileName =
+            _profileNamePrefix + nameof(TestSimpleImperativeRecachingWith0ParametersAsync);
 
-        private class TestSimpleImperativeRecachingWith0ParametersAsyncCachingClass : CachingClass
+        private sealed class TestSimpleImperativeRecachingWith0ParametersAsyncCachingClass : CachingClass
         {
-            [Cache( ProfileName = testSimpleImperativeRecachingWith0ParametersAsyncProfileName )]
+            [Cache( ProfileName = _testSimpleImperativeRecachingWith0ParametersAsyncProfileName )]
             public override async Task<CachedValueClass> GetValueAsync()
             {
                 return await base.GetValueAsync();
@@ -1052,7 +1055,7 @@ namespace Metalama.Patterns.Caching.Tests
             var cachingClass = new TestSimpleImperativeRecachingWith0ParametersAsyncCachingClass();
 
             await DoTestSimpleImperativeInvalidationAsync(
-                testSimpleImperativeRecachingWith0ParametersAsyncProfileName,
+                _testSimpleImperativeRecachingWith0ParametersAsyncProfileName,
                 cachingClass.GetValueAsync,
                 () => CachingServices.Invalidation.RecacheAsync( cachingClass.GetValueAsync ),
                 cachingClass.Reset );

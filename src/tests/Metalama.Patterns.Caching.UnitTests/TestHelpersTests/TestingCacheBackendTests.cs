@@ -11,12 +11,12 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 
     public sealed class TestingCacheBackendTests
     {
-        private const string namePrefix = "Caching.Tests.Backends.TestingCacheBackendTests_";
+        private const string _namePrefix = "Caching.Tests.Backends.TestingCacheBackendTests_";
 
         [Fact]
         public void TestContainsKey()
         {
-            using ( var cache = new TestingCacheBackend( namePrefix + "TestContainsKey" ) )
+            using ( var cache = new TestingCacheBackend( _namePrefix + "TestContainsKey" ) )
             {
                 const string key = "0";
 
@@ -46,12 +46,12 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestGet()
         {
-            using ( var cache = new TestingCacheBackend( namePrefix + "TestGet" ) )
+            using ( var cache = new TestingCacheBackend( _namePrefix + "TestGet" ) )
             {
                 const string key = "0";
 
                 cache.ExpectedGetCount = 1;
-                object retrievedValue = cache.GetItem( key );
+                var retrievedValue = cache.GetItem( key );
                 cache.ResetTest( "When getting the cached value" );
 
                 AssertEx.Null( retrievedValue, "The cache does not return null on miss." );
@@ -63,7 +63,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestSet()
         {
-            using ( var cache = new TestingCacheBackend( namePrefix + "TestSet" ) )
+            using ( var cache = new TestingCacheBackend( _namePrefix + "TestSet" ) )
             {
                 var storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
@@ -97,7 +97,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestInvalidateObjectDependency()
         {
-            using ( var cache = new TestingCacheBackend( namePrefix + "TestInvalidateObjectDependency" ) )
+            using ( var cache = new TestingCacheBackend( _namePrefix + "TestInvalidateObjectDependency" ) )
             {
                 const string dependencyKey = "0";
 
