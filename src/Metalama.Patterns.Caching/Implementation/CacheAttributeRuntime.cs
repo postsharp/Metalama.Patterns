@@ -41,7 +41,7 @@ public static class CacheAttributeRunTime
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    result = registration.InvokeOriginalMethod( instance, args );
+                    result = registration.InvokeOriginalMethod!( instance, args );
                 }
                 else
                 {
@@ -57,7 +57,7 @@ public static class CacheAttributeRunTime
                         methodKey,
                         registration.Method.ReturnType,
                         mergedConfiguration,
-                        registration.InvokeOriginalMethod,
+                        registration.InvokeOriginalMethod!,
                         instance,
                         args,
                         logSource );
@@ -119,7 +119,7 @@ public static class CacheAttributeRunTime
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    var task = registration.InvokeOriginalMethodAsyncTask( instance, args );
+                    var task = registration.InvokeOriginalMethodAsyncTask!( instance, args );
 
                     if ( !task.IsCompleted )
                     {
@@ -158,7 +158,7 @@ public static class CacheAttributeRunTime
                         methodKey,
                         registration.AwaitableResultType!,
                         mergedConfiguration,
-                        registration.InvokeOriginalMethodAsyncTask,
+                        registration.InvokeOriginalMethodAsyncTask!,
                         instance,
                         args,
                         logSource,
@@ -242,7 +242,7 @@ public static class CacheAttributeRunTime
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    var task = registration.InvokeOriginalMethodAsyncValueTask( instance, args );
+                    var task = registration.InvokeOriginalMethodAsyncValueTask!( instance, args );
 
                     if ( !task.IsCompleted )
                     {
@@ -281,7 +281,7 @@ public static class CacheAttributeRunTime
                         methodKey,
                         registration.AwaitableResultType!,
                         mergedConfiguration,
-                        registration.InvokeOriginalMethodAsyncValueTask,
+                        registration.InvokeOriginalMethodAsyncValueTask!,
                         instance,
                         args,
                         logSource,

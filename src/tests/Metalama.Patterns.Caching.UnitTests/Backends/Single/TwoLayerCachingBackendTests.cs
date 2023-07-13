@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 
 public class TwoLayerCachingBackendTests : BaseCacheBackendTests
 {
-    protected TwoLayerCachingBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
+    public TwoLayerCachingBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
 
     protected override CachingBackend CreateBackend()
     {

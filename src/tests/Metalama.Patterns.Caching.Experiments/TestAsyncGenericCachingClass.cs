@@ -20,7 +20,7 @@ public sealed class TestSyncGenericCachingClass<T>
     [Cache]
     public T GetValue()
     {
-        return default;
+        return default!;
     }
 }
 
@@ -33,7 +33,7 @@ public sealed class TestAsyncGenericCachingClass<T>
     {
         await Task.Delay( 1 );
 
-        return default;
+        return default!;
     }
 }
 
