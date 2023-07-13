@@ -1,9 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Fabrics;
-using System.Linq;
 
+// ReSharper disable once CheckNamespace
 namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.InvalidateDependencyMethod;
+#pragma warning disable SA1101
 
 public sealed class DependencyClass
 {

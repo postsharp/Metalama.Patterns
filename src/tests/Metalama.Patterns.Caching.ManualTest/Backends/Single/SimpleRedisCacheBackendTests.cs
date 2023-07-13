@@ -4,12 +4,9 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Caching.TestHelpers.Backends;
-using System;
-using System.Threading.Tasks;
 using Xunit;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends;
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Single;
 
 public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
@@ -26,7 +23,7 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
         AssertEx.Equal( 0, RedisNotificationQueue.NotificationProcessingThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
     }
 
-    protected override bool TestDependencies { get; } = false;
+    protected override bool TestDependencies => false;
 
     protected override CachingBackend CreateBackend()
     {
@@ -38,28 +35,13 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
         return await this.CreateBackendAsync( null );
     }
 
-    private DisposingConnectionMultiplexer CreateConnection()
-    {
-        return RedisFactory.CreateConnection( this.TestContext );
-    }
-
-    private CachingBackend CreateBackend( string keyPrefix )
+    private CachingBackend CreateBackend( string? keyPrefix )
     {
         return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, keyPrefix );
     }
 
-    private async Task<CachingBackend> CreateBackendAsync( string keyPrefix )
+    private async Task<CachingBackend> CreateBackendAsync( string? keyPrefix )
     {
         return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, keyPrefix );
-    }
-
-    private string GeneratePrefix()
-    {
-        var keyPrefix = Guid.NewGuid().ToString();
-
-        //Assert.False( this.connection.GetEndPoints().Select( endpoint => this.connection.GetServer( endpoint ) ).Any(
-        //                    server => server.Keys( pattern: keyPrefix + ":*" ).Any() ) );
-
-        return keyPrefix;
     }
 }

@@ -6,18 +6,18 @@ namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.Di
 
 public static class MultipleMatchingOverloads
 {
-    public class CachingClass
+    public sealed class CachingClass
     {
         [Cache( IgnoreThisParameter = true )]
         public object DoAction()
         {
-            return null;
+            return null!;
         }
 
         [Cache( IgnoreThisParameter = true )]
         public object DoAction( int param )
         {
-            return null;
+            return null!;
         }
     }
 

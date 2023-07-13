@@ -7,16 +7,16 @@ namespace Metalama.Patterns.Caching.TestHelpers
 {
     public class DependencyClass : IFormattable
     {
-        private readonly string key;
+        private readonly string _key;
 
         public DependencyClass( string key )
         {
-            this.key = key;
+            this._key = key;
         }
 
         void IFormattable.Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
         {
-            stringBuilder.Append( this.key );
+            stringBuilder.Append( this._key );
         }
     }
 }

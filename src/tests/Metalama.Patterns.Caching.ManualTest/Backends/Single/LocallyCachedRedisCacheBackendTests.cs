@@ -5,12 +5,14 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Caching.TestHelpers.Backends;
 using Xunit;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends;
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Single;
 
-public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
+#pragma warning disable SA1124
+#pragma warning disable LAMA0048
+
+public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
@@ -25,7 +27,7 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
         AssertEx.Equal( 0, RedisNotificationQueue.NotificationProcessingThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
     }
 
-    public override TimeSpan GetExpirationTolerance( double multiplier )
+    public override TimeSpan GetExpirationTolerance( double multiplier = 1 )
     {
         return TimeSpan.FromSeconds( 0.1 * multiplier );
     }
@@ -47,11 +49,13 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
 
     #region TestIssue15680
 
-    private const string testIssue15680 = "Issue15680";
+#pragma warning disable SA1203
+    private const string _testIssue15680 = "Issue15680";
+#pragma warning restore SA1203
 
-    private class Issue15680CachingClass : CachingClass
+    private sealed class Issue15680CachingClass : CachingClass
     {
-        [Cache( ProfileName = testIssue15680 )]
+        [Cache( ProfileName = _testIssue15680 )]
         public override CachedValueClass GetValue()
         {
             return base.GetValue();
@@ -61,7 +65,7 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
     [Fact]
     public void TestIssue15680()
     {
-        var redisKeyPrefix = testIssue15680 + Guid.NewGuid();
+        var redisKeyPrefix = _testIssue15680 + Guid.NewGuid();
 
         var testObject = new Issue15680CachingClass();
 

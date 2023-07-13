@@ -3,15 +3,14 @@
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using System;
 using System.Runtime.Caching;
-using System.Threading.Tasks;
+using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends;
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
 public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
 {
-    protected BaseInvalidationBrokerTests( TestContext testContext ) : base( testContext ) { }
+    protected BaseInvalidationBrokerTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
 
     protected abstract Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix );
 
@@ -21,7 +20,7 @@ public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
     {
         var testId = Guid.NewGuid().ToString();
 
-        return new[]
+        return new CachingBackend[]
         {
             await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_1" ) ), testId ),
             await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_2" ) ), testId ),
@@ -33,7 +32,7 @@ public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
     {
         var testId = Guid.NewGuid().ToString();
 
-        return new[]
+        return new CachingBackend[]
         {
             this.CreateInvalidationBroker( new MemoryCachingBackend( new MemoryCache( "_1" ) ), testId ),
             this.CreateInvalidationBroker( new MemoryCachingBackend( new MemoryCache( "_2" ) ), testId ),

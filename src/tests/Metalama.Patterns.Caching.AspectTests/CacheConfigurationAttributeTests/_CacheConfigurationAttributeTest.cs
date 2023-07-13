@@ -6,9 +6,6 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests
 
 #pragma warning disable CA2201
 
-// ReSharper disable MemberCanBeInternal
-// ReSharper disable MemberCanBeMadeStatic.Global
-// ReSharper disable UnusedMethodReturnValue.Global
 public static class CacheConfigurationAttributeTest
 {
     public static void CheckAfterCachedMethodCall(

@@ -1,42 +1,39 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
-using System;
-using System.Threading;
 
-namespace Metalama.Patterns.Caching.LoadTests.Tests
+namespace Metalama.Patterns.Caching.LoadTests.Tests;
+
+internal abstract class BaseTestClass<TLoadTestConfigurationT>
+    where TLoadTestConfigurationT : LoadTestConfiguration
 {
-    internal abstract class BaseTestClass<LoadTestConfigurationT>
-        where LoadTestConfigurationT : LoadTestConfiguration
+    public virtual void Test( TLoadTestConfigurationT configuration, TimeSpan duration )
     {
-        public virtual void Test( LoadTestConfigurationT configuration, TimeSpan duration )
+        using ( var test = new LoadTest( configuration ) )
         {
-            using ( var test = new LoadTest( configuration ) )
-            {
-                Console.WriteLine( "test init" );
+            Console.WriteLine( "test init" );
 
-                test.Initialize( this.CreateCachingBackend );
+            test.Initialize( this.CreateCachingBackend );
 
-                Console.WriteLine( "start" );
+            Console.WriteLine( "start" );
 
-                test.Start();
+            test.Start();
 
-                Console.WriteLine( "run" );
+            Console.WriteLine( "run" );
 
-                Thread.Sleep( duration );
+            Thread.Sleep( duration );
 
-                Console.WriteLine( "stop" );
+            Console.WriteLine( "stop" );
 
-                test.Stop();
+            test.Stop();
 
-                test.Report();
+            test.Report();
 
-                Console.WriteLine( "dispose" );
-            }
-
-            Console.WriteLine( "end" );
+            Console.WriteLine( "dispose" );
         }
 
-        protected abstract CachingBackend CreateCachingBackend();
+        Console.WriteLine( "end" );
     }
+
+    protected abstract CachingBackend CreateCachingBackend();
 }

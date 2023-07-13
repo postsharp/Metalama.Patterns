@@ -1,17 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends;
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
 public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
-    public RedisDistributedCachingBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture ) : base( testContext )
+    public RedisDistributedCachingBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
     }
@@ -20,7 +20,7 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IA
     {
         var prefix = Guid.NewGuid().ToString();
 
-        return new[]
+        return new CachingBackend[]
         {
             await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true ),
             await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true )
@@ -31,7 +31,7 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IA
     {
         var prefix = Guid.NewGuid().ToString();
 
-        return new[]
+        return new CachingBackend[]
         {
             RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true ),
             RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true )

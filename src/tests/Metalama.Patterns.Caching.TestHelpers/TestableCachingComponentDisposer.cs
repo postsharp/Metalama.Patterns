@@ -6,8 +6,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
 {
     public static class TestableCachingComponentDisposer
     {
-        public static void Dispose<ComponentT>( params ComponentT[] components )
-            where ComponentT : ITestableCachingComponent
+        public static void Dispose<TComponentT>( params TComponentT[] components )
+            where TComponentT : ITestableCachingComponent
         {
             foreach ( var component in components )
             {
@@ -20,8 +20,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
             }
         }
 
-        public static async Task DisposeAsync<ComponentT>( params ComponentT[] components )
-            where ComponentT : ITestableCachingComponent
+        public static async Task DisposeAsync<TComponentT>( params TComponentT[] components )
+            where TComponentT : ITestableCachingComponent
         {
             foreach ( var component in components )
             {

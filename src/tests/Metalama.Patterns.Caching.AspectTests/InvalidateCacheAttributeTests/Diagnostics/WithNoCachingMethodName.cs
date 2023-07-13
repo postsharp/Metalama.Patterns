@@ -11,7 +11,7 @@ public static class WithNoCachingMethodName
         [Cache]
         public object DoAction()
         {
-            return null;
+            return null!;
         }
 
         [InvalidateCache]

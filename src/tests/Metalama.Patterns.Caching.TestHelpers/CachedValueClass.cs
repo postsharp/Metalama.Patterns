@@ -7,20 +7,20 @@ namespace Metalama.Patterns.Caching.TestHelpers
     [Serializable]
     public class CachedValueClass
     {
-        private int? id;
+        private int? _id;
 
         public int Id
         {
-            get { return this.id.Value; }
+            get { return this._id.Value; }
 
             set
             {
-                if ( this.id.HasValue )
+                if ( this._id.HasValue )
                 {
                     throw new InvalidOperationException( "The id can (and has to be) set exactly once." );
                 }
 
-                this.id = value;
+                this._id = value;
             }
         }
 
@@ -28,7 +28,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         public CachedValueClass( int id )
         {
-            this.id = id;
+            this._id = id;
         }
 
         public override int GetHashCode()

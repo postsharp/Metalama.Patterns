@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
@@ -10,19 +11,19 @@ public static class AssertEx
 {
     // NOTE: Xunit doesn't support assert messages by design (except for True and False methods).
 
-    public static void NotNull( object expected, string message ) => Assert.NotNull( expected );
+    public static void NotNull( [NotNull] object? expected, string message ) => Assert.NotNull( expected );
 
-    public static void Null( object expectedNull, string message ) => Assert.Null( expectedNull );
+    public static void Null( object? expectedNull, string message ) => Assert.Null( expectedNull );
 
-    public static void NotEqual( object notExpected, object actual, string message ) => Assert.NotEqual( notExpected, actual );
+    public static void NotEqual( object? notExpected, object? actual, string message ) => Assert.NotEqual( notExpected, actual );
 
-    public static void Equal( object expected, object actual, string message ) => Assert.Equal( expected, actual );
+    public static void Equal( object? expected, object? actual, string message ) => Assert.Equal( expected, actual );
 
     public static void Equal( long expected, long actual, string message ) => Assert.Equal( expected, actual );
 
     public static void Equal( int expected, int actual, string message ) => Assert.Equal( expected, actual );
 
-    public static void NotSame( object notExpected, object actual, string message ) => Assert.NotSame( notExpected, actual );
+    public static void NotSame( object? notExpected, object? actual, string message ) => Assert.NotSame( notExpected, actual );
 
     public static void Inconclusive()
         =>

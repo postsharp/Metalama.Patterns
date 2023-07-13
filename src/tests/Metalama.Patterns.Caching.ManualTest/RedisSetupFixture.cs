@@ -1,6 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.ManualTest.RedisServer;
+
 namespace Metalama.Patterns.Caching.ManualTest;
+
+#pragma warning disable CA2201
 
 /// <summary>
 /// Maintains a single instance of a Redis server that's disposed only when all tests finish executing. That way, we don't spend time starting the server
@@ -8,8 +12,6 @@ namespace Metalama.Patterns.Caching.ManualTest;
 /// </summary>
 public sealed class RedisSetupFixture : IDisposable
 {
-    public RedisSetupFixture() { }
-
     void IDisposable.Dispose() => this.RedisCleanup();
 
     private readonly object _lock = new();
@@ -32,6 +34,8 @@ public sealed class RedisSetupFixture : IDisposable
                 }
             }
 
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable once InconsistentlySynchronizedField
             return this._testInstance;
         }
     }
@@ -43,15 +47,15 @@ public sealed class RedisSetupFixture : IDisposable
     {
         lock ( this._lock )
         {
-            if ( this._testInstance != null && !this._testInstance.IsDisposed )
+            if ( this._testInstance is { IsDisposed: false } )
             {
                 this._testInstance.Dispose();
             }
         }
 
-        foreach ( var instanceWR in RedisTestInstance.Instances )
+        foreach ( var instanceWr in RedisTestInstance.Instances )
         {
-            if ( instanceWR.TryGetTarget( out var instance ) && !instance.IsDisposed )
+            if ( instanceWr.TryGetTarget( out var instance ) && !instance.IsDisposed )
             {
                 // The exception is silently ignored when the tests are run with Rider's Live Test Runner.
                 // If that's not the expected behavior, we should probably report it...

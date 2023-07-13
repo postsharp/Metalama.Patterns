@@ -6,12 +6,13 @@ namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.Di
 
 public static class MethodWithNotMatchingParameterName
 {
-    public class CachingClass
+    // ReSharper disable once MemberCanBePrivate.Global
+    public sealed class CachingClass
     {
         [Cache( IgnoreThisParameter = true )]
         public object DoAction( int notMatchingParameter )
         {
-            return null;
+            return null!;
         }
     }
 

@@ -10,7 +10,7 @@ public static class WithNotCachedMethodName
     {
         public object DoAction()
         {
-            return null;
+            return null!;
         }
 
         [InvalidateCache( nameof(DoAction) )]

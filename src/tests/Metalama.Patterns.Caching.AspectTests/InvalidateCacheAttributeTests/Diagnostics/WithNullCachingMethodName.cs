@@ -11,10 +11,10 @@ public static class WithNullCachingMethodName
         [Cache]
         public object DoAction()
         {
-            return null;
+            return null!;
         }
 
-        [InvalidateCache( (string) null )]
+        [InvalidateCache( (string) null! )]
         public void Invalidate() { }
     }
 }

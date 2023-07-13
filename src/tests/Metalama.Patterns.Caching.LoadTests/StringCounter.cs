@@ -1,47 +1,41 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Collections.Generic;
 using System.Numerics;
 
-namespace Metalama.Patterns.Caching.LoadTests
+namespace Metalama.Patterns.Caching.LoadTests;
+
+internal sealed class StringCounter
 {
-    public class StringCounter
+    private readonly Dictionary<string, BigInteger> _counters = new();
+
+    private readonly Dictionary<string, List<string>> _details = new();
+
+    public IReadOnlyDictionary<string, BigInteger> Counters => this._counters;
+
+    public IReadOnlyDictionary<string, List<string>> Details => this._details;
+
+    public void Increment( string name, string? detail = null )
     {
-        private readonly Dictionary<string, BigInteger> counters = new();
-
-        private readonly Dictionary<string, List<string>> details = new();
-
-        public IReadOnlyDictionary<string, BigInteger> Counters => this.counters;
-
-        public IReadOnlyDictionary<string, List<string>> Details => this.details;
-
-        public void Increment( string name, string detail = null )
+        if ( !this._counters.TryGetValue( name, out var count ) )
         {
-            BigInteger count;
-
-            if ( !this.counters.TryGetValue( name, out count ) )
-            {
-                this.counters.Add( name, 1 );
-            }
-            else
-            {
-                this.counters[name] = count + 1;
-            }
-
-            if ( detail == null )
-            {
-                return;
-            }
-
-            List<string> thisDetails;
-
-            if ( !this.details.TryGetValue( name, out thisDetails ) )
-            {
-                thisDetails = new List<string>();
-                this.details.Add( name, thisDetails );
-            }
-
-            thisDetails.Add( detail );
+            this._counters.Add( name, 1 );
         }
+        else
+        {
+            this._counters[name] = count + 1;
+        }
+
+        if ( detail == null )
+        {
+            return;
+        }
+
+        if ( !this._details.TryGetValue( name, out var thisDetails ) )
+        {
+            thisDetails = new List<string>();
+            this._details.Add( name, thisDetails );
+        }
+
+        thisDetails.Add( detail );
     }
 }

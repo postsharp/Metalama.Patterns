@@ -4,23 +4,27 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Caching.TestHelpers.Backends;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends;
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Single;
 
-public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
+public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
-    private readonly ITestOutputHelper testOutputHelper;
+    
+    // Used in currently-commented-out code.
+    // ReSharper disable once NotAccessedField.Local
+#pragma warning disable IDE0052
+    private readonly ITestOutputHelper _testOutputHelper;
+#pragma warning restore IDE0052
 
     public RedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base( testContext )
     {
         this._redisSetupFixture = redisSetupFixture;
-        this.testOutputHelper = testOutputHelper;
+        this._testOutputHelper = testOutputHelper;
     }
 
     protected override void Cleanup()
@@ -49,17 +53,17 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         return await RedisCacheDependencyGarbageCollector.CreateAsync( ((DisposingRedisCachingBackend) backend).UnderlyingBackend );
     }
 
-    private DisposingRedisCachingBackend CreateBackend( string keyPrefix )
+    private DisposingRedisCachingBackend CreateBackend( string? keyPrefix )
     {
         return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, keyPrefix, supportsDependencies: true );
     }
 
-    private async Task<DisposingRedisCachingBackend> CreateBackendAsync( string keyPrefix )
+    private async Task<DisposingRedisCachingBackend> CreateBackendAsync( string? keyPrefix )
     {
         return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, keyPrefix, supportsDependencies: true );
     }
 
-    private string GeneratePrefix()
+    private static string GeneratePrefix()
     {
         var keyPrefix = Guid.NewGuid().ToString();
 
@@ -67,21 +71,27 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     }
 
     [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
-    public async Task TestGarbageCollectionAsync()
+    public Task TestGarbageCollectionAsync()
     {
-        var prefix = this.GeneratePrefix();
+        var prefix = GeneratePrefix();
 
         var redisTestInstance = this._redisSetupFixture.TestInstance;
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
         Assert.Equal( 0, this.GetAllKeys( prefix ).Count );
 
+        // [Porting] The null passed to CreateAsync in the second using below will throw because that parameter is [Required]. This test
+        // is currently skipped (as per original code), but would throw here if re-enabled. Not fixing, as can't be certain of original intent.
+        throw new NotImplementedException( "This test was identified as known-broken during porting, see comment above." );
+/*
         using ( var cache = await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix: prefix, supportsDependencies: true ) )
         using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
         {
             cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i3", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+            
+            // ReSharper restore MethodHasAsyncOverload
 
             Assert.True( this.GetAllKeys( prefix ).Count > 0 );
 
@@ -89,21 +99,26 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
             await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
         }
+        
+        // ReSharper restore UseAwaitUsing
 
         // Make sure we dispose the back-end so that the GC key gets removed too.
 
         IList<string> keys = this.GetAllKeys( prefix );
 
-        this.testOutputHelper.WriteLine( "Remaining keys:" + string.Join( ", ", keys ) );
+        this._testOutputHelper.WriteLine( "Remaining keys:" + string.Join( ", ", keys ) );
 
         Assert.Equal( 0, keys.Count );
+*/
     }
 
     [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
     public async Task TestGarbageCollectionByExpiration()
     {
-        var keyPrefix = this.GeneratePrefix();
-
+        var keyPrefix = GeneratePrefix();
+        
+        // [Porting] Not fixing, can't be certain of original intent.
+        // ReSharper disable UseAwaitUsing
         using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
         using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.UnderlyingBackend ) )
         {
@@ -121,7 +136,8 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
             var itemExpiredEvent = new TaskCompletionSource<bool>();
 
-            cache.ItemRemoved += ( sender, args ) =>
+            // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+            cache.ItemRemoved += ( _, args ) =>
             {
                 Assert.Equal( valueSmallKey, args.Key );
                 Assert.Equal( CacheItemRemovedReason.Expired, args.RemovedReason );
@@ -152,12 +168,18 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
             await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
         }
+        
+        // ReSharper restore UseAwaitUsing
     }
 
     [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
-    public async Task TestSetBeforeGarbageCollectionByExpiration()
+    public Task TestSetBeforeGarbageCollectionByExpiration()
     {
-        var keyPrefix = this.GeneratePrefix();
+        // [Porting] The null passed to CreateAsync in the second using below will throw because that parameter is [Required]. This test
+        // is currently skipped (as per original code), but would throw here if re-enabled. Not fixing, as can't be certain of original intent.
+        throw new NotImplementedException( "This test was identified as known-broken during porting, see comment above." );
+/*
+        var keyPrefix = GeneratePrefix();
 
         using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
         using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
@@ -209,19 +231,29 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
             await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
         }
+*/
+
+        // ReSharper restore UseAwaitUsing
     }
 
     [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
     public async Task TestCleanUp()
     {
-        var keyPrefix = this.GeneratePrefix();
+        var keyPrefix = GeneratePrefix();
 
+        // [Porting] Not fixing, can't be certain of original intent (twice).
+        // ReSharper disable UseAwaitUsing
+        // ReSharper disable once MethodHasAsyncOverload
         using ( var redisCachingBackend = this.CreateBackend( keyPrefix ) )
         using ( var cache = (DependenciesRedisCachingBackend) redisCachingBackend.UnderlyingBackend )
         {
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable MethodHasAsyncOverload
             cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i3", new CacheItem( "value" ) );
+
+            // ReSharper restore MethodHasAsyncOverload
 
             cache.Database.ListRightPush( GetValueKey( cache, "lonely-value-key" ), new RedisValue[] { Guid.NewGuid().ToString(), "value" } );
             cache.Database.StringSet( GetDependenciesKey( cache, "lonely-dependencies-key1" ), "non-existing-value-key1" );
@@ -264,9 +296,13 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
             await cache.CleanUpAsync();
 
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable MethodHasAsyncOverload
             Assert.NotNull( cache.GetItem( "i1" ) );
             Assert.NotNull( cache.GetItem( "i2" ) );
             Assert.NotNull( cache.GetItem( "i3" ) );
+
+            // ReSharper restore MethodHasAsyncOverload
 
             Assert.True( ValueSmallKeyExists( cache, "i1" ) );
             Assert.True( DependenciesSmallKeyExists( cache, "i1" ) );
@@ -294,6 +330,8 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
             await TestableCachingComponentDisposer.DisposeAsync( cache );
         }
+
+        // ReSharper restore UseAwaitUsing
     }
 
     private static string GetValueKey( DependenciesRedisCachingBackend cache, string smallKey )
@@ -330,10 +368,10 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     {
         using ( var connection = RedisFactory.CreateConnection( this.TestContext ) )
         {
-            List<IServer> servers = connection.Inner.GetEndPoints().Select( endpoint => connection.Inner.GetServer( endpoint ) ).ToList();
+            var servers = connection.Inner.GetEndPoints().Select( endpoint => connection.Inner.GetServer( endpoint ) ).ToList();
             var keys = servers.SelectMany( server => server.Keys( pattern: prefix + ":*" ) ).ToList();
 
-            return keys.Select( k => k.ToString() ).Where( k => !k.Contains( ":gc:" ) ).ToList();
+            return keys.Select( k => k.ToString() ).Where( k => k.IndexOf( ":gc:", StringComparison.Ordinal ) == -1 ).ToList();
         }
     }
 }

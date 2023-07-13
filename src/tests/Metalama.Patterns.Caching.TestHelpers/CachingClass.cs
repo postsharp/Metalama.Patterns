@@ -9,31 +9,31 @@ namespace Metalama.Patterns.Caching.TestHelpers
     public partial class CachingClass<T>
         where T : CachedValueClass, new()
     {
-        private int counter = 0;
+        private int _counter = 0;
 
-        private bool methodCalled = false;
+        private bool _methodCalled = false;
 
         public event EventHandler<T> MethodCalled;
 
         public bool Reset()
         {
-            var result = this.methodCalled;
-            this.methodCalled = false;
+            var result = this._methodCalled;
+            this._methodCalled = false;
 
             return result;
         }
 
         private T CreateNextValue()
         {
-            if ( this.methodCalled )
+            if ( this._methodCalled )
             {
                 throw new InvalidOperationException(
                     "Cached method called twice unexpectedly. If this is the expected behavior, call reset before the second call of the method." );
             }
 
-            this.methodCalled = true;
+            this._methodCalled = true;
 
-            var value = new T() { Id = this.counter++ };
+            var value = new T() { Id = this._counter++ };
             this.MethodCalled?.Invoke( this, value );
 
             return value;

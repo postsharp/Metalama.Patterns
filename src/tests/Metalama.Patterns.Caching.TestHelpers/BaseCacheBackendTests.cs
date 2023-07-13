@@ -1,25 +1,25 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Caching.TestHelpers;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.TestHelpers.Backends
+namespace Metalama.Patterns.Caching.TestHelpers
 {
     public abstract class BaseCacheBackendTests : IDisposable, IClassFixture<TestContext>
     {
         protected const int Timeout = 120000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
         protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout * 0.8 );
-
-        private const string namePrefix = "Caching.Tests.Backends.MemoryCacheBackendTests_";
-        private const int eventTimeout = 1000;
-
-        public BaseCacheBackendTests( TestContext testContext )
+        
+        protected ITestOutputHelper TestOutputHelper { get; }
+        
+        protected BaseCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper )
         {
             this.TestContext = testContext;
+            this.TestOutputHelper = testOutputHelper;
         }
 
         protected virtual bool TestDependencies { get; } = true;
@@ -75,7 +75,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                     cache.Clear();
                 }
 
-                object retrievedItem = cache.GetItem( key );
+                var retrievedItem = cache.GetItem( key );
 
                 AssertEx.Null( retrievedItem, "The cache does not return null on miss." );
 
@@ -86,6 +86,8 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestMissAsync()
         {
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable once UseAwaitUsing
             using ( var cache = await this.CreateBackendAsync() )
             {
                 var key = Guid.NewGuid().ToString();
@@ -95,7 +97,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                     await cache.ClearAsync();
                 }
 
-                object retrievedItem = await cache.GetItemAsync( key );
+                var retrievedItem = await cache.GetItemAsync( key );
 
                 AssertEx.Null( retrievedItem, $"The cache does not return null on miss. It returned {{{retrievedItem}}} instead." );
 
@@ -122,7 +124,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 if ( this.TestDependencies )
                 {
                     // The dependencies retrieved before the timeout must be the same as the initial dependencies.
-                    Assert.Equal( cacheItem0.Dependencies.ToList(), (ICollection) retrievedItem.Dependencies.ToList() );
+                    Assert.Equal( cacheItem0.Dependencies?.ToList(), (ICollection?) retrievedItem.Dependencies?.ToList() );
                 }
 
                 var storedValue1 = new CachedValueClass( 1 );
@@ -142,12 +144,16 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestSetAsync()
         {
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable once UseAwaitUsing
             using ( var cache = await this.CreateBackendAsync() )
             {
                 var storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
                 var cacheItem0 = new CacheItem( storedValue0, this.TestDependencies ? ImmutableList.Create( "a", "b", "c" ) : null );
 
+                // [Porting] Not fixing, can't be certain of original intent.
+                // ReSharper disable once MethodHasAsyncOverload
                 cache.SetItem( key, cacheItem0 );
                 var retrievedItem = await cache.GetItemAsync( key );
 
@@ -158,7 +164,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 if ( this.TestDependencies )
                 {
                     // "The dependencies retrieved before the timeout must be the same as the initial dependencies."
-                    Assert.Equal( cacheItem0.Dependencies.ToList(), (ICollection) retrievedItem.Dependencies.ToList() );
+                    Assert.Equal( cacheItem0.Dependencies?.ToList(), (ICollection?) retrievedItem.Dependencies?.ToList() );
                 }
 
                 var storedValue1 = new CachedValueClass( 1 );
@@ -195,7 +201,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                             dependencies: this.TestDependencies ? ImmutableList.Create( "d" ) : null );
 
                         var itemRemovedEvent = new ManualResetEvent( false );
-                        cache.ItemRemoved += ( s, a ) => itemRemovedEvent.Set();
+                        cache.ItemRemoved += ( _, _ ) => itemRemovedEvent.Set();
                         var setTime = DateTime.Now;
 
                         cache.SetItem( key, cacheItem );
@@ -217,7 +223,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
 
                         Assert.True( itemRemovedEvent.WaitOne( TimeoutTimeSpan ) );
 
-                        object retrievedItemAfterTimeout = cache.GetItem( key );
+                        var retrievedItemAfterTimeout = cache.GetItem( key );
 
                         AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
 
@@ -241,6 +247,8 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 return;
             }
 
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable UseAwaitUsing
             using ( var cache = await this.CreateBackendAsync() )
             using ( var collector = await this.CreateCollectorAsync( cache ) )
             {
@@ -257,19 +265,21 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                         dependencies: ImmutableList.Create( "d" ) );
 
                     var itemRemoved = new TaskCompletionSource<bool>();
-                    cache.ItemRemoved += ( sender, args ) => itemRemoved.SetResult( true );
+                    cache.ItemRemoved += ( _, _ ) => itemRemoved.SetResult( true );
 
                     await cache.SetItemAsync( key, cacheItem );
 
                     while ( !itemRemoved.Task.IsCompleted )
                     {
+                        // [Porting] Not fixing, can't be certain of original intent.
+                        // ReSharper disable once MethodHasAsyncOverload
                         cache.SetItem( "cycle", new CacheItem( "value" ) );
                         await Task.Delay( 50 );
                     }
 
                     Assert.True( await itemRemoved.Task.WithTimeout( TimeoutTimeSpan ) );
 
-                    object retrievedItemAfterTimeout = await cache.GetItemAsync( key );
+                    var retrievedItemAfterTimeout = await cache.GetItemAsync( key );
 
                     AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
 
@@ -288,7 +298,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                             }
                         }
 
-                        Console.WriteLine( $"Checking for dependency in {cache}." );
+                        this.TestOutputHelper.WriteLine( $"Checking for dependency in {cache}." );
                         Assert.True( success );
                     }
                 }
@@ -297,15 +307,17 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                     await TestableCachingComponentDisposer.DisposeAsync( cache, collector );
                 }
             }
+            
+            // ReSharper restore UseAwaitUsing
         }
 
-        private static bool? runningOnWindows;
+        private static bool? _runningOnWindows;
 
         /// <summary>
-        /// Returns true if the test is run on Windows. We don't run some tests on Linux because, for some reason, the event that an item expired from the cache
+        /// Gets a value indicating whether the test is run on Windows. We don't run some tests on Linux because, for some reason, the event that an item expired from the cache
         /// arrives up to 20 minutes later on Linux, and I don't know why. So we're just no longer testing this on Linux.
         /// </summary>
-        private static bool RunningOnWindows => runningOnWindows ?? (runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
+        private static bool RunningOnWindows => _runningOnWindows ?? (_runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
 
         [Fact( Timeout = Timeout )]
         public void TestAbsoluteExpirationDependencyCollected()
@@ -333,7 +345,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                     dependencies: ImmutableList.Create( "d" ) );
 
                 var itemRemoved = new ManualResetEventSlim( false );
-                cache.ItemRemoved += ( sender, args ) => itemRemoved.Set();
+                cache.ItemRemoved += ( _, _ ) => itemRemoved.Set();
                 cache.SetItem( key, cacheItem );
 
                 while ( !itemRemoved.IsSet )
@@ -342,7 +354,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                     Thread.Yield();
                 }
 
-                object retrievedItemAfterTimeout = cache.GetItem( key );
+                var retrievedItemAfterTimeout = cache.GetItem( key );
 
                 AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
 
@@ -361,7 +373,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                         }
                     }
 
-                    Console.WriteLine( $"Checking for dependency in {cache}." );
+                    this.TestOutputHelper.WriteLine( $"Checking for dependency in {cache}." );
                     Assert.True( success );
                 }
 
@@ -395,17 +407,17 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                             new CacheItemConfiguration { SlidingExpiration = expiration } );
 
                         var itemRemoved = new ManualResetEventSlim( false );
-                        cache.ItemRemoved += ( sender, args ) => itemRemoved.Set();
+                        cache.ItemRemoved += ( _, _ ) => itemRemoved.Set();
                         var timeWhenSet = DateTime.Now;
 
                         cache.SetItem( key, cacheItem );
                         Thread.Sleep( this.GetExpirationTolerance() );
 
-                        object retrievedItemBeforeTimeout = cache.GetItem( key );
+                        var retrievedItemBeforeTimeout = cache.GetItem( key );
 
                         if ( DateTime.Now > timeWhenSet + expiration )
                         {
-                            Console.WriteLine( "We slept too much time. Retry the test." );
+                            this.TestOutputHelper.WriteLine( "We slept too much time. Retry the test." );
 
                             continue;
                         }
@@ -418,7 +430,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                             Thread.Yield();
                         }
 
-                        object retrievedItemAfterTimeout = cache.GetItem( key );
+                        var retrievedItemAfterTimeout = cache.GetItem( key );
 
                         AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
 
@@ -446,8 +458,11 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
             {
                 // Having an outer try-finally block is broken in VS 2019
                 // https://github.com/dotnet/roslyn/issues/34720
-                //using ( CachingBackend cache = this.CreateBackend() )
-                //{
+                // using ( CachingBackend cache = this.CreateBackend() )
+                // {
+                
+                // [Porting] Not fixing, can't be certain of original intent.
+                // ReSharper disable once MethodHasAsyncOverload
                 var cache = this.CreateBackend();
 
                 try
@@ -463,28 +478,30 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
 
                     var timeWhenSet = DateTime.Now;
                     var itemRemoved = new TaskCompletionSource<bool>();
-                    cache.ItemRemoved += ( sender, args ) => itemRemoved.SetResult( true );
+                    cache.ItemRemoved += ( _, _ ) => itemRemoved.SetResult( true );
                     await cache.SetItemAsync( key, cacheItem );
 
                     Thread.Sleep( this.GetExpirationTolerance() );
 
                     if ( DateTime.Now > timeWhenSet + expiration )
                     {
-                        Console.WriteLine( "We slept too much time." );
+                        this.TestOutputHelper.WriteLine( "We slept too much time." );
 
                         continue;
                     }
 
-                    object retrievedItemBeforeTimeout = await cache.GetItemAsync( key );
+                    var retrievedItemBeforeTimeout = await cache.GetItemAsync( key );
                     AssertEx.NotNull( retrievedItemBeforeTimeout, "There is not an item retrieved before the timeout." );
 
                     while ( !itemRemoved.Task.IsCompleted )
                     {
+                        // [Porting] Not fixing, can't be certain of original intent.
+                        // ReSharper disable once MethodHasAsyncOverload
                         cache.SetItem( "cycle", new CacheItem( "value" ) );
                         await Task.Delay( 50 );
                     }
 
-                    object retrievedItemAfterTimeout = await cache.GetItemAsync( key );
+                    var retrievedItemAfterTimeout = await cache.GetItemAsync( key );
 
                     AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
 
@@ -493,10 +510,13 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 finally
                 {
                     await TestableCachingComponentDisposer.DisposeAsync( cache );
+                    
+                    // [Porting] Not fixing, can't be certain of original intent.
+                    // ReSharper disable once MethodHasAsyncOverload
                     cache.Dispose();
                 }
 
-                //}
+                // }
             }
         }
 
@@ -513,9 +533,9 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 }
 
                 var eventRaised = new ManualResetEvent( false );
-                CacheItemRemovedEventArgs removalArguments = null;
+                CacheItemRemovedEventArgs? removalArguments = null;
 
-                cache.ItemRemoved += ( sender, args ) =>
+                cache.ItemRemoved += ( _, args ) =>
                 {
                     removalArguments = args;
                     eventRaised.Set();
@@ -544,6 +564,9 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestRemovalEventByExpirationAsync()
         {
+            // [Porting] Not fixing, can't be certain of original intent (twice).
+            // ReSharper disable once UseAwaitUsing
+            // ReSharper disable once MethodHasAsyncOverload
             using ( var cache = this.CreateBackend() )
             {
                 if ( !cache.SupportedFeatures.Events )
@@ -554,9 +577,9 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 }
 
                 var eventRaised = new ManualResetEvent( false );
-                CacheItemRemovedEventArgs removalArguments = null;
+                CacheItemRemovedEventArgs? removalArguments = null;
 
-                cache.ItemRemoved += ( sender, args ) =>
+                cache.ItemRemoved += ( _, args ) =>
                 {
                     removalArguments = args;
                     eventRaised.Set();
@@ -595,9 +618,9 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 }
 
                 var eventRaised = new ManualResetEventSlim();
-                CacheItemRemovedEventArgs removalArguments = null;
+                CacheItemRemovedEventArgs? removalArguments = null;
 
-                cache.ItemRemoved += ( sender, args ) =>
+                cache.ItemRemoved += ( _, args ) =>
                 {
                     // Order matters, since at the point that the manual reset event is set, the assertions can start happening,
                     // and so the argument must already be set:
@@ -623,6 +646,9 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestRemovalEventByEvictionAsync()
         {
+            // [Porting] Not fixing, can't be certain of original intent (twice).
+            // ReSharper disable once UseAwaitUsing
+            // ReSharper disable once MethodHasAsyncOverload
             using ( var cache = this.CreateBackend() )
             {
                 if ( !cache.SupportedFeatures.Clear || !cache.SupportedFeatures.Events )
@@ -633,9 +659,9 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 }
 
                 var eventRaised = new ManualResetEvent( false );
-                CacheItemRemovedEventArgs removalArguments = null;
+                CacheItemRemovedEventArgs? removalArguments = null;
 
-                cache.ItemRemoved += ( sender, args ) =>
+                cache.ItemRemoved += ( _, args ) =>
                 {
                     removalArguments = args;
                     eventRaised.Set();
@@ -659,7 +685,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
 
         [Fact]
 
-        //[Timeout( Timeout )]
+        // [Timeout( Timeout )]
         public void TestRemovalEventByDependency()
         {
             if ( !this.TestDependencies )
@@ -679,18 +705,18 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 }
 
                 var itemEventRaised = new ManualResetEvent( false );
-                CacheItemRemovedEventArgs itemEventArgs = null;
+                CacheItemRemovedEventArgs? itemEventArgs = null;
 
-                cache.ItemRemoved += ( sender, args ) =>
+                cache.ItemRemoved += ( _, args ) =>
                 {
                     itemEventArgs = args;
                     itemEventRaised.Set();
                 };
 
                 var dependencyEventRaised = new ManualResetEvent( false );
-                CacheDependencyInvalidatedEventArgs dependencyEventArgs = null;
+                CacheDependencyInvalidatedEventArgs? dependencyEventArgs = null;
 
-                cache.DependencyInvalidated += ( sender, args ) =>
+                cache.DependencyInvalidated += ( _, args ) =>
                 {
                     dependencyEventArgs = args;
                     dependencyEventRaised.Set();
@@ -731,6 +757,9 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 return;
             }
 
+            // [Porting] Not fixing, can't be certain of original intent (twice).
+            // ReSharper disable once UseAwaitUsing
+            // ReSharper disable once MethodHasAsyncOverload
             using ( var cache = this.CreateBackend() )
             {
                 if ( !cache.SupportedFeatures.Events )
@@ -741,18 +770,18 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 }
 
                 var itemEventRaised = new TaskCompletionSource<bool>();
-                CacheItemRemovedEventArgs itemEventArgs = null;
+                CacheItemRemovedEventArgs? itemEventArgs = null;
 
-                cache.ItemRemoved += ( sender, args ) =>
+                cache.ItemRemoved += ( _, args ) =>
                 {
                     itemEventArgs = args;
                     itemEventRaised.SetResult( true );
                 };
 
                 var dependencyEventRaised = new TaskCompletionSource<bool>();
-                CacheDependencyInvalidatedEventArgs dependencyEventArgs = null;
+                CacheDependencyInvalidatedEventArgs? dependencyEventArgs = null;
 
-                cache.DependencyInvalidated += ( sender, args ) =>
+                cache.DependencyInvalidated += ( _, args ) =>
                 {
                     dependencyEventArgs = args;
                     dependencyEventRaised.SetResult( true );
@@ -774,7 +803,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
 
                 Assert.True( await Task.WhenAll( itemEventRaised.Task, dependencyEventRaised.Task ).WithTimeout( TimeoutTimeSpan ) );
 
-                //await cache.FlushAsync();
+                // await cache.FlushAsync();
 
                 AssertEx.NotNull( itemEventArgs, "The item event did not pass any arguments." );
                 Assert.Equal( CacheItemRemovedReason.Invalidated, itemEventArgs.RemovedReason );
@@ -798,7 +827,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
             using ( var cache = this.CreateBackend() )
             {
                 List<CacheItemRemovedEventArgs> events = new();
-                cache.ItemRemoved += ( sender, args ) => events.Add( args );
+                cache.ItemRemoved += ( _, args ) => events.Add( args );
 
                 const string dependencyKey = "dependency";
                 var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), ImmutableList.Create( dependencyKey ) );
@@ -833,10 +862,13 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 return;
             }
 
+            // [Porting] Not fixing, can't be certain of original intent (twice).
+            // ReSharper disable once UseAwaitUsing
+            // ReSharper disable once MethodHasAsyncOverload
             using ( var cache = this.CreateBackend() )
             {
                 var eventsCount = 0;
-                cache.ItemRemoved += ( sender, args ) => eventsCount++;
+                cache.ItemRemoved += ( _, _ ) => eventsCount++;
 
                 const string dependencyKey = "dependency";
                 var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), ImmutableList.Create( dependencyKey ) );
@@ -874,7 +906,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
             using ( var cache = this.CreateBackend() )
             {
                 var eventsCount = 0;
-                cache.ItemRemoved += ( sender, args ) => eventsCount++;
+                cache.ItemRemoved += ( _, _ ) => eventsCount++;
 
                 const string dependencyKey = "dependency";
                 var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ImmutableList.Create( dependencyKey ) : null );
@@ -904,10 +936,13 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 return;
             }
 
+            // [Porting] Not fixing, can't be certain of original intent (twice).
+            // ReSharper disable once UseAwaitUsing
+            // ReSharper disable once MethodHasAsyncOverload
             using ( var cache = this.CreateBackend() )
             {
                 var eventsCount = 0;
-                cache.ItemRemoved += ( sender, args ) => eventsCount++;
+                cache.ItemRemoved += ( _, _ ) => eventsCount++;
 
                 const string dependencyKey = "dependency";
                 var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ImmutableList.Create( dependencyKey ) : null );
@@ -960,6 +995,8 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestReplaceAsync()
         {
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable once UseAwaitUsing
             using ( var cache = await this.CreateBackendAsync() )
             {
                 var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ImmutableList.Create( "d1" ) : null );
@@ -1003,10 +1040,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
                 Assert.Throws<NotSupportedException>(
-                    () =>
-                    {
-                        cache.SetItem( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) );
-                    } );
+                    () => cache.SetItem( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) ) );
 
                 TestableCachingComponentDisposer.Dispose( cache );
             }
@@ -1015,6 +1049,8 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestSetItemWithDependencyWithoutSupportAsync()
         {
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable once UseAwaitUsing
             using ( var cache = await this.CreateBackendAsync() )
             {
                 if ( this.TestDependencies )
@@ -1028,10 +1064,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
                 await Assert.ThrowsAsync<NotSupportedException>(
-                    async () =>
-                    {
-                        await cache.SetItemAsync( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) );
-                    } );
+                    async () => await cache.SetItemAsync( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) ) );
 
                 await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
@@ -1052,11 +1085,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
 
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
-                Assert.Throws<NotSupportedException>(
-                    () =>
-                    {
-                        cache.InvalidateDependency( "d" );
-                    } );
+                Assert.Throws<NotSupportedException>( () => cache.InvalidateDependency( "d" ) );
 
                 TestableCachingComponentDisposer.Dispose( cache );
             }
@@ -1065,6 +1094,8 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestInvalidateDependencyWithoutSupportAsync()
         {
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable once UseAwaitUsing
             using ( var cache = await this.CreateBackendAsync() )
             {
                 if ( this.TestDependencies )
@@ -1078,10 +1109,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
                 await Assert.ThrowsAsync<NotSupportedException>(
-                    async () =>
-                    {
-                        await cache.InvalidateDependencyAsync( "d" );
-                    } );
+                    async () => await cache.InvalidateDependencyAsync( "d" ) );
 
                 await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
@@ -1103,11 +1131,7 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 Assert.False( cache.SupportedFeatures.Dependencies );
                 Assert.False( cache.SupportedFeatures.ContainsDependency );
 
-                Assert.Throws<NotSupportedException>(
-                    () =>
-                    {
-                        cache.ContainsDependency( "d" );
-                    } );
+                Assert.Throws<NotSupportedException>( () => cache.ContainsDependency( "d" ) );
 
                 TestableCachingComponentDisposer.Dispose( cache );
             }
@@ -1116,6 +1140,8 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
         [Fact( Timeout = Timeout )]
         public async Task TestContainsDependencyWithoutSupportAsync()
         {
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable once UseAwaitUsing
             using ( var cache = await this.CreateBackendAsync() )
             {
                 if ( this.TestDependencies )
@@ -1129,22 +1155,15 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
                 Assert.False( cache.SupportedFeatures.Dependencies );
                 Assert.False( cache.SupportedFeatures.ContainsDependency );
 
-                await Assert.ThrowsAsync<NotSupportedException>(
-                    async () =>
-                    {
-                        await cache.ContainsDependencyAsync( "d" );
-                    } );
+                await Assert.ThrowsAsync<NotSupportedException>( async () => await cache.ContainsDependencyAsync( "d" ) );
 
                 await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
-        private class NullTestableCachingComponent : ITestableCachingComponent
+        private sealed class NullTestableCachingComponent : ITestableCachingComponent
         {
-            public int BackgroundTaskExceptions
-            {
-                get { return 0; }
-            }
+            public int BackgroundTaskExceptions => 0;
 
             public void Dispose() { }
 
@@ -1152,14 +1171,6 @@ namespace Metalama.Patterns.Caching.TestHelpers.Backends
             {
                 return Task.CompletedTask;
             }
-        }
-    }
-
-    internal static class TimeSpanExtensions
-    {
-        public static TimeSpan Multiply( this TimeSpan t, double m )
-        {
-            return TimeSpan.FromMilliseconds( t.TotalMilliseconds * m );
         }
     }
 }

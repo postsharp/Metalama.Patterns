@@ -1,48 +1,40 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
+namespace Metalama.Patterns.Caching.LoadTests;
 
-namespace Metalama.Patterns.Caching.LoadTests
+// These strings would be less random when using multi-threaded
+internal static class RandomString
 {
-    // These strings would be less random when using multithreaded
-    public static class RandomString
+    // ReSharper disable StringLiteralTypo
+    private static readonly char[] _allowedChars =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#&@{}:;".ToCharArray();
+    
+    // Random is not thread-safe
+    [ThreadStatic]
+    private static Random? _random;
+    
+    // ReSharper restore StringLiteralTypo
+
+    public static string New( int minLength, int maxLength )
     {
-        // Random is not thread-safe
-        [ThreadStatic]
-        private static Random random;
+        _random ??= new Random();
 
-        public static char[] AllowedChars =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#&@{}:;".ToCharArray();
+        var length = _random.Next( minLength, maxLength + 1 );
 
-        //"abc".ToCharArray();
+        return New( length );
+    }
 
-        public static string New( int minLength, int maxLength )
+    private static string New( int length )
+    {
+        _random ??= new Random();
+
+        var chars = new char[length];
+
+        for ( var i = 0; i < length; i++ )
         {
-            if ( random == null )
-            {
-                random = new Random();
-            }
-
-            var length = random.Next( minLength, maxLength + 1 );
-
-            return New( length );
+            chars[i] = _allowedChars[_random.Next( 0, _allowedChars.Length )];
         }
 
-        public static string New( int length )
-        {
-            if ( random == null )
-            {
-                random = new Random();
-            }
-
-            var chars = new char[length];
-
-            for ( var i = 0; i < length; i++ )
-            {
-                chars[i] = AllowedChars[random.Next( 0, AllowedChars.Length )];
-            }
-
-            return new string( chars );
-        }
+        return new string( chars );
     }
 }

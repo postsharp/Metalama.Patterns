@@ -8,12 +8,12 @@ namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.Di
 
 public static class MethodWithNotMatchingParameterType
 {
-    public class CachingClass
+    public sealed class CachingClass
     {
         [Cache( IgnoreThisParameter = true )]
         public object DoAction( CachedValueChildClass param )
         {
-            return null;
+            return null!;
         }
     }
 

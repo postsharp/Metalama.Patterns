@@ -43,7 +43,9 @@ internal static class CompileTimeHelpers
         var bytes = md5.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() + purpose ) );
 
         // TODO: !!! use base62 or something else more compact than hex.
+#pragma warning disable CA1307
         return prefix + "_" + BitConverter.ToString( bytes ).Replace( "-", string.Empty );
+#pragma warning restore CA1307
     }
 
     // ReSharper disable once UnusedMember.Global

@@ -3,25 +3,27 @@
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
+// ReSharper disable once UnusedType.Global
 public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFixture<RedisSetupFixture>
 {
-    private RedisSetupFixture _redisSetupFixture;
+    private readonly RedisSetupFixture _redisSetupFixture;
 
-    public SimpleRedisDistributedTest( TestContext testContext, RedisSetupFixture redisSetupFixture ) : base( testContext )
+    public SimpleRedisDistributedTest( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
     }
 
-    protected override bool TestDependencies { get; } = false;
+    protected override bool TestDependencies => false;
 
     protected override async Task<CachingBackend[]> CreateBackendsAsync()
     {
         var prefix = Guid.NewGuid().ToString();
 
-        return new[]
+        return new CachingBackend[]
         {
             await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix ),
             await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix )
@@ -32,7 +34,7 @@ public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFi
     {
         var prefix = Guid.NewGuid().ToString();
 
-        return new[]
+        return new CachingBackend[]
         {
             RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix ),
             RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix )

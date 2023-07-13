@@ -4,32 +4,25 @@
 using Metalama.Patterns.Caching.Backends.Azure;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
+using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends
+namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed
 {
     public class ServiceBusInvalidationTests : BaseInvalidationBrokerTests
     {
-        private const string connectionString =
-                "Endpoint=sb://postsharp-test.servicebus.windows.net/;SharedAccessKeyName=TestClient;SharedAccessKey=NngSkkAP1Ve9djFW29FbMT5orajCe+y8T9f1URLVzh8=;EntityPath=cacheinvalidationtest";
+        private const string _connectionString =
+            "Endpoint=sb://postsharp-test.servicebus.windows.net/;SharedAccessKeyName=TestClient;SharedAccessKey=NngSkkAP1Ve9djFW29FbMT5orajCe+y8T9f1URLVzh8=;EntityPath=cacheinvalidationtest";
 
-        public ServiceBusInvalidationTests( TestContext testContext ) : base( testContext )
-        {
-        }
+        public ServiceBusInvalidationTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
 
         protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
         {
-            return await AzureCacheInvalidator.CreateAsync( backend, new AzureCacheInvalidatorOptions( connectionString )
-                                                       {
-                                                           Prefix = prefix
-                                                       } );
+            return await AzureCacheInvalidator.CreateAsync( backend, new AzureCacheInvalidatorOptions( _connectionString ) { Prefix = prefix } );
         }
 
         protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
         {
-            return AzureCacheInvalidator.Create( backend, new AzureCacheInvalidatorOptions( connectionString )
-                                                                     {
-                                                                         Prefix = prefix
-                                                                     } );
+            return AzureCacheInvalidator.Create( backend, new AzureCacheInvalidatorOptions( _connectionString ) { Prefix = prefix } );
         }
     }
 }

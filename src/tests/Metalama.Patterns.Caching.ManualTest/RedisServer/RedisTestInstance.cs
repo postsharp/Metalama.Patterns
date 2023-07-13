@@ -9,9 +9,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Metalama.Patterns.Caching.ManualTest;
+namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
 
-#region Taken from github.com/poulfoged/redis-inside (no strong name in the distributed package).
+#pragma warning disable CA2201
+
+// ReSharper disable once CommentTypo
+// Originally taken from github.com/poulfoged/redis-inside (no strong name in the distributed package).
 
 /// <summary>
 /// Run integration-tests against Redis.
@@ -20,15 +23,15 @@ public class RedisTestInstance : IDisposable
 {
     private static int _instanceCounter;
     public static readonly ConcurrentBag<WeakReference<RedisTestInstance>> Instances = new();
-    private readonly Process process;
-    private readonly TemporaryFile executable;
-    private readonly Config config;
+    private readonly Process _process;
+    private readonly TemporaryFile _executable;
+    private readonly Config _config;
 
     public string Name { get; }
 
     public bool IsDisposed { get; private set; }
 
-    public RedisTestInstance( [CallerMemberName] string name = null )
+    public RedisTestInstance( [CallerMemberName] string? name = null )
     {
         var counter = Interlocked.Increment( ref _instanceCounter );
         this.Name = $"{counter}:{name}";
@@ -41,7 +44,7 @@ public class RedisTestInstance : IDisposable
         if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
         {
             executableStream =
-                typeof(ExecutablesResourceTarget).Assembly.GetManifestResourceStream( typeof(ExecutablesResourceTarget), "redis-server.exe" );
+                typeof(IExecutablesResourceTarget).Assembly.GetManifestResourceStream( typeof(IExecutablesResourceTarget), "redis-server.exe" )!;
 
             extension = "exe";
         }
@@ -51,16 +54,16 @@ public class RedisTestInstance : IDisposable
             extension = "";
         }
 
-        this.executable = new TemporaryFile( executableStream, "redis-test-", extension );
+        this._executable = new TemporaryFile( executableStream, "redis-test-", extension );
 
     restart:
-        this.config = new Config();
+        this._config = new Config();
 
-        var processStartInfo = new ProcessStartInfo( this.executable.Info.FullName )
+        var processStartInfo = new ProcessStartInfo( this._executable.FileInfo.FullName )
         {
             UseShellExecute = false,
             Arguments =
-                $"--port {this.config.port} --bind 127.0.0.1 --appendonly no --save \"\" --maxmemory-policy volatile-lru --notify-keyspace-events AKE --dbfilename {this.executable.Info.Name}.rdb",
+                $"--port {this._config.Port} --bind 127.0.0.1 --appendonly no --save \"\" --maxmemory-policy volatile-lru --notify-keyspace-events AKE --dbfilename {this._executable.FileInfo.Name}.rdb",
             WindowStyle = ProcessWindowStyle.Hidden,
             CreateNoWindow = true,
             RedirectStandardError = true,
@@ -72,15 +75,23 @@ public class RedisTestInstance : IDisposable
         var serverStartupEvent = new ManualResetEventSlim( false );
         var exited = false;
         var portError = false;
-        string lastLine = null;
+        string? lastLine = null;
 
-        this.process = new Process() { StartInfo = processStartInfo };
+        this._process = new Process() { StartInfo = processStartInfo };
 
-        this.process.ErrorDataReceived +=
-            ( sender, eventArgs ) => this.config.logger.Invoke( eventArgs.Data );
+        this._process.ErrorDataReceived +=
+            ( _, eventArgs ) =>
+            {
+                if ( eventArgs.Data != null )
+                {
+                    this._config.Logger.Invoke( eventArgs.Data );
+                }
+            };
 
-        this.process.OutputDataReceived +=
-            ( sender, eventArgs ) =>
+        // ReSharper disable AccessToModifiedClosure
+
+        this._process.OutputDataReceived +=
+            ( _, eventArgs ) =>
             {
                 if ( eventArgs.Data == null )
                 {
@@ -88,33 +99,34 @@ public class RedisTestInstance : IDisposable
                 }
 
                 // This not the best way, but it's a quick way to know it's properly started.
-                if ( eventArgs.Data.Contains( $"The server is now ready to accept connections on port {this.config.port}" ) )
+                if ( eventArgs.Data.IndexOf( $"The server is now ready to accept connections on port {this._config.Port}", StringComparison.Ordinal ) != -1 )
                 {
                     serverStartupEvent.Set();
                 }
 
                 // This is to recognize port conflicts and restart quickly.
-                if ( eventArgs.Data.Contains( $":{this.config.port}: bind: No such file or directory" )
-                   )
+                if ( eventArgs.Data.IndexOf( $":{this._config.Port}: bind: No such file or directory", StringComparison.Ordinal ) != -1 )
                 {
                     Volatile.Write( ref portError, true );
                     serverStartupEvent.Set();
                 }
 
                 Volatile.Write( ref lastLine, eventArgs.Data );
-                this.config.logger.Invoke( eventArgs.Data );
+                this._config.Logger.Invoke( eventArgs.Data );
             };
 
-        this.process.Exited +=
-            ( s, ea ) =>
+        this._process.Exited +=
+            ( _, _ ) =>
             {
                 Volatile.Write( ref exited, true );
                 serverStartupEvent.Set();
             };
 
+        // ReSharper restore AccessToModifiedClosure
+
         try
         {
-            this.process.Start();
+            this._process.Start();
         }
         catch ( Win32Exception e )
         {
@@ -122,7 +134,7 @@ public class RedisTestInstance : IDisposable
                 $"Unable to start Redis test instance process (path={processStartInfo.FileName},exists={File.Exists( processStartInfo.FileName )},exception={e.Message},code={e.NativeErrorCode})." );
         }
 
-        this.process.BeginOutputReadLine();
+        this._process.BeginOutputReadLine();
 
         for ( var i = 0; i < 30; i++ )
         {
@@ -131,7 +143,7 @@ public class RedisTestInstance : IDisposable
                 goto waitingDone;
             }
 
-            if ( this.process.HasExited )
+            if ( this._process.HasExited )
             {
                 Volatile.Write( ref exited, true );
 
@@ -145,7 +157,7 @@ public class RedisTestInstance : IDisposable
 
         if ( Volatile.Read( ref portError ) )
         {
-            this.process.Kill();
+            this._process.Kill();
 
             goto restart;
         }
@@ -156,10 +168,7 @@ public class RedisTestInstance : IDisposable
         }
     }
 
-    [Obsolete( "Use Endpoint Instead" )]
-    public string Node => this.Endpoint.ToString();
-
-    public EndPoint Endpoint => new IPEndPoint( IPAddress.Loopback, this.config.port );
+    public EndPoint Endpoint => new IPEndPoint( IPAddress.Loopback, this._config.Port );
 
     protected virtual void Dispose( bool disposing )
     {
@@ -170,20 +179,20 @@ public class RedisTestInstance : IDisposable
 
         try
         {
-            this.process.CancelOutputRead();
-            this.process.StandardInput.Close();
-            this.process.Kill();
+            this._process.CancelOutputRead();
+            this._process.StandardInput.Close();
+            this._process.Kill();
 
             if ( disposing )
             {
-                this.process.WaitForExit( 2000 );
-                this.process.Dispose();
-                this.executable.Dispose();
+                this._process.WaitForExit( 2000 );
+                this._process.Dispose();
+                this._executable.Dispose();
             }
         }
         catch ( Exception ex )
         {
-            this.config.logger.Invoke( ex.ToString() );
+            this._config.Logger.Invoke( ex.ToString() );
         }
 
         this.IsDisposed = true;
@@ -200,115 +209,37 @@ public class RedisTestInstance : IDisposable
         GC.SuppressFinalize( this );
     }
 
-    private class Config
+    private sealed class Config
     {
-        private static readonly ConcurrentDictionary<int, byte> usedPorts = new();
-        private static readonly Random random = new();
-        internal Action<string> logger;
-        internal int port;
+        private static readonly ConcurrentDictionary<int, byte> _usedPorts = new();
+        private static readonly Random _random = new();
+
+        internal Action<string> Logger { get; }
+       
+        internal int Port { get; }
 
         public Config()
         {
             do
             {
-                this.port = random.Next( 49152, 65535 + 1 );
+                this.Port = _random.Next( 49152, 65535 + 1 );
             }
-            while ( usedPorts.ContainsKey( this.port ) );
+            while ( _usedPorts.ContainsKey( this.Port ) );
 
-            usedPorts.AddOrUpdate( this.port, i => byte.MinValue, ( i, b ) => byte.MinValue );
-            this.logger = this.TraceMessage;
+            _usedPorts.AddOrUpdate( this.Port, _ => byte.MinValue, ( _, _ ) => byte.MinValue );
+            this.Logger = TraceMessage;
         }
 
-        private void TraceMessage( string message )
+        private static void TraceMessage( string message )
         {
             try
             {
                 Trace.WriteLine( message );
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
         }
     }
 }
-
-public class TemporaryFile : IDisposable
-{
-    [DllImport( "libc", SetLastError = true )]
-    private static extern int chmod( string pathname, int mode );
-
-    private readonly FileInfo _fileInfo;
-    private bool _disposed;
-
-    public TemporaryFile( string prefix = "", string extension = "tmp" )
-    {
-        this._fileInfo = new FileInfo(
-            Path.Combine(
-                Path.GetTempPath(),
-                string.IsNullOrEmpty( extension )
-                    ? prefix + Guid.NewGuid().ToString( "N" )
-                    : prefix + Guid.NewGuid().ToString( "N" ) + "." + extension ) );
-    }
-
-    public TemporaryFile( Stream stream, string prefix = "", string extension = "tmp" ) : this( prefix, extension )
-    {
-        using ( stream )
-        using ( var destination = this._fileInfo.OpenWrite() )
-        {
-            stream.CopyTo( destination );
-        }
-
-        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Linux ) )
-        {
-            chmod( this._fileInfo.FullName, Convert.ToInt32( "777", 8 ) );
-        }
-    }
-
-    public FileInfo Info
-    {
-        get { return this._fileInfo; }
-    }
-
-    protected virtual void Dispose( bool disposing )
-    {
-        if ( this._disposed )
-        {
-            return;
-        }
-
-        try
-        {
-            this._fileInfo.Delete();
-        }
-        catch ( Exception ex )
-        {
-            Trace.WriteLine( ex );
-        }
-
-        this._disposed = true;
-    }
-
-    ~TemporaryFile()
-    {
-        this.Dispose( false );
-    }
-
-    public void Dispose()
-    {
-        this.Dispose( true );
-        GC.SuppressFinalize( this );
-    }
-
-    public void CopyTo( Stream result )
-    {
-        using ( var stream = this._fileInfo.OpenRead() )
-        {
-            stream.CopyTo( result );
-        }
-
-        if ( result.CanSeek )
-        {
-            result.Seek( 0, SeekOrigin.Begin );
-        }
-    }
-}
-
-#endregion

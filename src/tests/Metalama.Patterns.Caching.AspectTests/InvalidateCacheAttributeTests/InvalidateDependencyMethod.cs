@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 // @RemoveOutputCode
+// ReSharper disable once CheckNamespace
 
 namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.InvalidateDependencyMethod;
 
@@ -16,7 +17,7 @@ public class TestClass
     [InvalidateCache( typeof(DependencyClass), nameof(DependencyClass.CachedUsingAttribute) )]
     public void InvalidateMethodCachedUsingAttribute() { }
 
-    /* When the CacheAttrbute aspect is applied by a fabric purely as an aspect, the Metalama framework
+    /* When the CacheAttribute aspect is applied by a fabric purely as an aspect, the Metalama framework
      * does not implicitly introduce a [Cache] attribute to the target method. Note that aspects do not
      * have to be attributes. To make this work as desired for caching, the CacheAttribute aspect
      * explicitly introduces a corresponding [Cache] attribute to its target if it does not have one

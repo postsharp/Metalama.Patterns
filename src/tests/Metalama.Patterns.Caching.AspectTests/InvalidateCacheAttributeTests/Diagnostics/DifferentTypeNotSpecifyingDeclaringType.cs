@@ -6,12 +6,12 @@ namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.Di
 
 public static class DifferentTypeNotSpecifyingDeclaringType
 {
-    public class CachingClass
+    public sealed class CachingClass
     {
         [Cache]
         public object DoAction()
         {
-            return null;
+            return null!;
         }
     }
 

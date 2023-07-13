@@ -7,10 +7,6 @@ using Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
-// ReSharper disable MemberCanBeInternal
-// ReSharper disable ClassCanBeSealed.Global
-// ReSharper disable MemberCanBeMadeStatic.Global
-// ReSharper disable UnusedMethodReturnValue.Global
 public static class TestValues
 {
     public const string DefaultProfileName = CachingProfile.DefaultName;
@@ -20,7 +16,7 @@ public static class TestValues
 
 public class ReferencedParentCachingClass
 {
-    public class ReferencedInnerCachingClassInBase
+    public sealed class ReferencedInnerCachingClassInBase
     {
         [Cache]
         public object GetValueReferencedInnerBase()
@@ -38,7 +34,7 @@ public class ReferencedParentCachingClass
 
 public class ReferencedChildCachingClass : ReferencedParentCachingClass
 {
-    public class ReferencedInnerCachingClassInChild
+    public sealed class ReferencedInnerCachingClassInChild
     {
         [Cache]
         public object GetValueReferencedInnerChild()
@@ -57,7 +53,7 @@ public class ReferencedChildCachingClass : ReferencedParentCachingClass
 [CacheConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName2 )]
 public class ReferencedParentCachingClassOverridden
 {
-    public class ReferencedInnerCachingClassInBaseOverridden
+    public sealed class ReferencedInnerCachingClassInBaseOverridden
     {
         [Cache]
         public object GetValueReferencedInnerBase()
@@ -75,7 +71,7 @@ public class ReferencedParentCachingClassOverridden
 
 public class ReferencedChildCachingClassOverridden : ReferencedParentCachingClassOverridden
 {
-    public class ReferencedInnerCachingClassInChildOverridden
+    public sealed class ReferencedInnerCachingClassInChildOverridden
     {
         [Cache]
         public object GetValueReferencedInnerChild()
