@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
-/// The entry point to configure <c>PostSharp.Patterns.Caching</c> at run-time.
+/// The entry point to configure <c>Metalama.Patterns.Caching</c> at run-time.
 /// </summary>
 [PublicAPI]
 public static partial class CachingServices

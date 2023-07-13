@@ -18,7 +18,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// This cache is recommended for ASP.NET Core use (as opposed to <c>System.Runtime.Caching.MemoryCache</c>).
 /// </summary>
 /// <remarks>
-/// This backend converts PostSharp configuration properties into <see cref="ICacheEntry"/> instances as follows:
+/// This backend converts Metalama configuration properties into <see cref="ICacheEntry"/> instances as follows:
 /// <list type="bullet">
 ///    <item>The priority <c>Default</c> is converted to <see cref="CacheItemPriority.Normal"/>.</item>
 ///    <item>The property <see cref="ICacheEntry.Size"/> is normally not set. If you want it to be set, supply a function to calculate this value for each entry
