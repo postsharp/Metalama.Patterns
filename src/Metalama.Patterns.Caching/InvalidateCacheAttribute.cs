@@ -13,6 +13,7 @@ using Metalama.Patterns.Caching.Implementation;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
 [assembly: AspectOrder( typeof(InvalidateCacheAttribute), typeof(CacheAttribute) )]
 
@@ -123,7 +124,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             IntroductionScope.Static,
             OverrideStrategy.Fail,
             b => b.Name = methodsInvalidatedByFieldName );
-
+        
         builder.Advice.AddInitializer(
             builder.Target.DeclaringType,
             nameof( InitializeMethodInfoArray ),
@@ -131,7 +132,6 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             args: new
             {
                 methods = invalidatedMethods.Keys.ToList(),
-                signatures = invalidatedMethods.Keys.Select( m => m.ToDisplayString() ).ToList(),
                 field = methodsInvalidatedByField.Declaration
             } );
 
@@ -162,20 +162,20 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
 
     [Template]
-    public static void InitializeMethodInfoArray( IReadOnlyList<IMethod> methods, [CompileTime] IReadOnlyList<string> signatures, IField field)
+    public static void InitializeMethodInfoArray( IReadOnlyList<IMethod> methods, IField field )
     {
-        // TODO: Initialize this array using initializer syntax. Currently appears to be not possible.
-        field.Value = new MethodInfo[methods.Count];
-        var i = meta.CompileTime( 0 );
+        var b = new ArrayBuilder( typeof( MethodInfo ) );
+
         foreach ( var method in methods )
         {
-            field.Value[i] = RunTimeHelpers.ThrowIfMissing( method.ToMethodInfo(), signatures[i] );
-            ++i;
+            b.Add( RunTimeHelpers.ThrowIfMissing( method.ToMethodInfo(), method.ToDisplayString() ) );
         }
-    }
 
+        field.Value = b.ToValue();
+    }
+    
     [Template]
-    public static dynamic OverrideMethod(
+    private static dynamic OverrideMethod(
         IField logSourceField,
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
@@ -214,7 +214,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
 
     [Template]
-    public static async Task<dynamic> OverrideMethodAsyncTaskOfT(
+    private static async Task<dynamic> OverrideMethodAsyncTaskOfT(
         IField logSourceField,
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
@@ -301,7 +301,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
 
     [Template]
-    public static async Task OverrideMethodAsyncTask(
+    private static async Task OverrideMethodAsyncTask(
         IField logSourceField,
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
