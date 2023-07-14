@@ -318,7 +318,8 @@ public sealed class CacheAttribute : MethodAspect
             meta.Target.Method.IsStatic ? null : meta.This,
             meta.Target.Method.Parameters.ToValueArray() );
 
-        return task!.AsAsyncEnumerable();
+        // Avoid extension method form due to current Metalama framework issue.
+        return AsyncEnumerableHelper.AsAsyncEnumerable( task );
     }
 
     // ReSharper disable once UnusedMember.Global
@@ -330,7 +331,8 @@ public sealed class CacheAttribute : MethodAspect
             meta.Target.Method.IsStatic ? null : meta.This,
             meta.Target.Method.Parameters.ToValueArray() );
 
-        return task!.AsAsyncEnumerator();
+        // Avoid extension method form due to current Metalama framework issue.
+        return AsyncEnumerableHelper.AsAsyncEnumerator( task );
     }
 
 #endif
