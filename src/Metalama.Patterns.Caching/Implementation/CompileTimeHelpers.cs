@@ -35,19 +35,18 @@ internal static class CompileTimeHelpers
             throw new ArgumentNullException( nameof(purpose) );
         }
 
-        // TODO: !!! Don't use MD5, will throw on some platforms.
-        // Not used for cryptographic purposes.
-#pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms
-        var md5 = MD5.Create();
-#pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
-        var bytes = md5.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() + purpose ) );
+        // TODO: Use Metalama framework hashing service if/when implemented.
+        
+        var sha = SHA256.Create();
+        var bytes = sha.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() + purpose ) );
 
-        // TODO: !!! use base62 or something else more compact than hex.
-#pragma warning disable CA1307
-        return prefix + "_" + BitConverter.ToString( bytes ).Replace( "-", string.Empty );
-#pragma warning restore CA1307
+#pragma warning disable CA1307 // Specify StringComparison for clarity
+        var hash = BitConverter.ToString( bytes, 0, 16 ).Replace( "-", string.Empty );
+#pragma warning restore CA1307 // Specify StringComparison for clarity
+
+        return prefix + "_" + hash;
     }
-
+    
     // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// Throws the current exception at compile time. Useful when called from a template.
