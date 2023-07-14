@@ -96,7 +96,6 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             throw new MetalamaPatternsCachingAssertionFailedException( "invalidatedMethods.Count == 0 not expected." );
         }
 
-        // TODO: [Porting] Discuss idea of common purposes, exposing etc.
         var logSourceFieldName = builder.Target.DeclaringType.ToSerializableId()
             .MakeAssociatedIdentifier( "Metalama.Patterns/StaticLogSourceForType", "_logSource" );
 
@@ -114,27 +113,26 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             ? builder.Target.DeclaringType.Fields.Single( f => f.Name == logSourceFieldName )
             : logSourceFieldAdviceResult.Declaration;
 
-        var arrayBuilder = new ArrayBuilder( typeof(MethodInfo) );
-
-        foreach ( var method in invalidatedMethods.Keys )
-        {
-            // TODO: !!! Use ThrowIfMissing.
-            arrayBuilder.Add( method.ToMethodInfo() );
-        }
-
         var methodsInvalidatedByFieldName = builder.Target.ToSerializableId()
             .MakeAssociatedIdentifier( "{3AB07EE4-9AB7-423C-810A-994D9BC620CA}", $"_methodsInvalidatedBy_{builder.Target.Name}" );
 
         var methodsInvalidatedByField = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
             methodsInvalidatedByFieldName,
-            typeof(MethodInfo[]),
+            typeof( MethodInfo[] ),
             IntroductionScope.Static,
             OverrideStrategy.Fail,
-            b =>
+            b => b.Name = methodsInvalidatedByFieldName );
+
+        builder.Advice.AddInitializer(
+            builder.Target.DeclaringType,
+            nameof( InitializeMethodInfoArray ),
+            InitializerKind.BeforeTypeConstructor,
+            args: new
             {
-                b.Name = methodsInvalidatedByFieldName;
-                b.InitializerExpression = arrayBuilder.ToExpression();
+                methods = invalidatedMethods.Keys.ToList(),
+                signatures = invalidatedMethods.Keys.Select( m => m.ToDisplayString() ).ToList(),
+                field = methodsInvalidatedByField.Declaration
             } );
 
         var asyncInfo = builder.Target.GetAsyncInfo();
@@ -162,6 +160,19 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
     [Template]
     private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
+
+    [Template]
+    public static void InitializeMethodInfoArray( IReadOnlyList<IMethod> methods, [CompileTime] IReadOnlyList<string> signatures, IField field)
+    {
+        // TODO: Initialize this array using initializer syntax. Currently appears to be not possible.
+        field.Value = new MethodInfo[methods.Count];
+        var i = meta.CompileTime( 0 );
+        foreach ( var method in methods )
+        {
+            field.Value[i] = RunTimeHelpers.ThrowIfMissing( method.ToMethodInfo(), signatures[i] );
+            ++i;
+        }
+    }
 
     [Template]
     public static dynamic OverrideMethod(
