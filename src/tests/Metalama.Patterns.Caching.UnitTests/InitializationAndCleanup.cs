@@ -2,6 +2,7 @@
 
 using System.Diagnostics;
 
+// ReSharper disable all
 namespace Metalama.Patterns.Caching.Tests
 {
     public class InitializationAndCleanup

@@ -6,7 +6,7 @@ namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.Di
 
 public static class DifferentTypeNotIgnoringThisParameter
 {
-    public class CachingClass
+    public sealed class CachingClass
     {
         [Cache]
         public object? DoAction()
@@ -15,7 +15,7 @@ public static class DifferentTypeNotIgnoringThisParameter
         }
     }
 
-    public class InvalidatingClass
+    public sealed class InvalidatingClass
     {
         [InvalidateCache( typeof(CachingClass), nameof(CachingClass.DoAction) )]
         public void Invalidate() { }

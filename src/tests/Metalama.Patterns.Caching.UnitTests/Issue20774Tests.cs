@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public class Issue20774Tests
+    public sealed class Issue20774Tests
     {
         [Fact]
         public void InvalidateBeforeCachedClassHasBeenTouched()

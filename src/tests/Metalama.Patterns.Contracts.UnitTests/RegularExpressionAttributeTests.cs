@@ -5,6 +5,7 @@ using Xunit;
 namespace Metalama.Patterns.Contracts.UnitTests;
 
 // ReSharper disable InconsistentNaming
+// ReSharper disable RedundantSuppressNullableWarningExpression
 public sealed class RegularExpressionAttributeTests
 {
     [Fact]

@@ -48,7 +48,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return Task.FromResult( this.CreateCollector( backend ) );
         }
 
-        protected virtual TimeSpan GetExpirationTolerance( double multiplier = 1 )
+        // ReSharper disable once MemberCanBeProtected.Global
+        public virtual TimeSpan GetExpirationTolerance( double multiplier = 1 )
         {
             return TimeSpan.FromSeconds( 0.1 * multiplier );
         }

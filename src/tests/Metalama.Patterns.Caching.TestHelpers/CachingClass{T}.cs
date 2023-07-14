@@ -80,6 +80,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         }
 
         // ReSharper disable once VirtualMemberNeverOverridden.Global
+        // ReSharper disable once UnusedMember.Global
         public virtual IEnumerable<T> GetValues()
         {
             yield return this.CreateNextValue();

@@ -12,13 +12,13 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public static void InitializeTestWithoutBackend()
         {
             Assert.True(
-                CachingServices.DefaultBackend is UninitializedCachingBackend
-                || CachingServices.DefaultBackend is NullCachingBackend,
+                CachingServices.DefaultBackend is UninitializedCachingBackend or NullCachingBackend,
                 "Each test has to use the TestProfileConfigurationFactory." );
 
             CachingServices.DefaultKeyBuilder = null; // Ensure we use the default key builder.
         }
 
+        // ReSharper disable once UnusedMethodReturnValue.Global
         public static CachingBackend InitializeTestWithCachingBackend( string name )
         {
             InitializeTestWithoutBackend();

@@ -4,9 +4,10 @@ using System.Collections;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class TestContext
     {
-        public IDictionary Properties { get; private set; }
+        public IDictionary Properties { get; }
 
         public TestContext()
         {

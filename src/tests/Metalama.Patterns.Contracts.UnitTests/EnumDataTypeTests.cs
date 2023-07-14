@@ -35,6 +35,8 @@ public sealed class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.IntEnum = 10 );
 
         Assert.NotNull( e );
+
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         Assert.Contains( "IntEnum", e!.Message, StringComparison.Ordinal );
     }
 
@@ -46,6 +48,8 @@ public sealed class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringEnum = "asd" );
 
         Assert.NotNull( e );
+
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         Assert.Contains( "StringEnum", e!.Message, StringComparison.Ordinal );
     }
 
@@ -57,6 +61,8 @@ public sealed class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.ObjectEnum = new object() );
 
         Assert.NotNull( e );
+
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         Assert.Contains( "ObjectEnum", e!.Message, StringComparison.Ordinal );
     }
 
@@ -75,6 +81,8 @@ public sealed class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.IntFlag = 10 );
 
         Assert.NotNull( e );
+        
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         Assert.Contains( "IntFlag", e!.Message, StringComparison.Ordinal );
     }
 }

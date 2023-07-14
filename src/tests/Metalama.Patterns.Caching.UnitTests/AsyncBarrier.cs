@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public class AsyncBarrier
+    internal sealed class AsyncBarrier
     {
         private readonly int _participantCount;
         private int _remainingParticipants;

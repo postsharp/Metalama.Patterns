@@ -17,6 +17,7 @@ public sealed class DependencyClass
     {
         public override void AmendType( ITypeAmender amender )
         {
+            // ReSharper disable once ArrangeThisQualifier
             amender
                 .Outbound
                 .Select( t => t.Methods.Single( m => m.Name == nameof(CachedUsingFabric) ) )

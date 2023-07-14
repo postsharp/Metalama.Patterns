@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single
 {
+    // ReSharper disable once UnusedType.Global
     public sealed class MicrosoftIMemoryCacheTests : BaseCacheBackendTests
     {
         public MicrosoftIMemoryCacheTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }

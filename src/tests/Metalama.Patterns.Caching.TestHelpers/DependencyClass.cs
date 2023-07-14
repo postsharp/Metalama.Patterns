@@ -5,6 +5,7 @@ using IFormattable = Flashtrace.Formatters.IFormattable;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
+    // ReSharper disable once UnusedType.Global
     public class DependencyClass : IFormattable
     {
         private readonly string _key;

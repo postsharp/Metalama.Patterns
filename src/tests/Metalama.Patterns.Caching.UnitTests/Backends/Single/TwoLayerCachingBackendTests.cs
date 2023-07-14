@@ -10,6 +10,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 
 public class TwoLayerCachingBackendTests : BaseCacheBackendTests
 {
+    // ReSharper disable once MemberCanBeProtected.Global
     public TwoLayerCachingBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
 
     protected override CachingBackend CreateBackend()

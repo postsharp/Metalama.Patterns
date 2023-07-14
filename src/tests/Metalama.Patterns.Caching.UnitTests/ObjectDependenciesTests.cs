@@ -161,6 +161,7 @@ namespace Metalama.Patterns.Caching.Tests
             public TestNestedDependenciesCachingClass1 Class1 { get; }
 
             // ReSharper disable once UnusedAutoPropertyAccessor.Local
+            // ReSharper disable once MemberCanBePrivate.Local
             public TestNestedDependenciesCachedValueClass1 Value1 { get; private set; } = null!;
 
             public TestNestedDependenciesCachingClass2()
@@ -230,6 +231,7 @@ namespace Metalama.Patterns.Caching.Tests
             public TestNestedDependenciesAsyncCachingClass1 Class1 { get; }
 
             // ReSharper disable once UnusedAutoPropertyAccessor.Local
+            // ReSharper disable once MemberCanBePrivate.Local
             public TestNestedDependenciesAsyncCachedValueClass1 Value1 { get; private set; } = null!;
 
             public TestNestedDependenciesAsyncCachingClass2()

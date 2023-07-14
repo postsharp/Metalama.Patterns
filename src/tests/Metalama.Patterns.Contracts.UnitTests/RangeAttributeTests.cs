@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
+// ReSharper disable RedundantSuppressNullableWarningExpression
 public sealed class RangeAttributeTests
 {
     [Fact]
