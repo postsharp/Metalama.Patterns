@@ -2,7 +2,6 @@
 
 #if NETCOREAPP3_0_OR_GREATER
 using Metalama.Framework.RunTime;
-using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching.ValueAdapters;
 
