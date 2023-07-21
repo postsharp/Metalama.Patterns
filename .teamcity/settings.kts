@@ -92,7 +92,7 @@ object DebugBuild : BuildType({
 
     dependencies {
 
-        dependency(AbsoluteId("Metalama_Metalama20232_Metalama_DebugBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20233_Metalama_DebugBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -105,7 +105,7 @@ object DebugBuild : BuildType({
 
         }
 
-        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaBackstage_ReleaseBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20233_MetalamaBackstage_ReleaseBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -118,7 +118,7 @@ object DebugBuild : BuildType({
 
         }
 
-        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaCompiler_ReleaseBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20233_MetalamaCompiler_ReleaseBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -196,7 +196,7 @@ object PublicBuild : BuildType({
 
     dependencies {
 
-        dependency(AbsoluteId("Metalama_Metalama20232_Metalama_PublicBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20233_Metalama_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -209,7 +209,7 @@ object PublicBuild : BuildType({
 
         }
 
-        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaBackstage_PublicBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20233_MetalamaBackstage_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -222,7 +222,7 @@ object PublicBuild : BuildType({
 
         }
 
-        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaCompiler_PublicBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20233_MetalamaCompiler_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
