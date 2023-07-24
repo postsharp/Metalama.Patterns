@@ -14,9 +14,9 @@ In contrary to a naive implementation, it also attempts to solve the following:
 4) Allow subscribers to events to be GC'ed, i.e. weak event semantics (optional).
 
 ## Aspect interface
-The aspect implements an "internal" interface `INotifyChildPropertyChanged`, that allows to propagate changes to properties of child objects upstream.
+The aspect implements an "internal" interface `INotifyChildPropertyChanged`, which is the main mean of communication between instances of the aspect.
 
-This is done by `ChildPropertyChanged` event, which carries a "property path", a sequence of property names which describe the source of the change.
+It allows to propagate changes to properties of child objects upstream using `ChildPropertyChanged` event, which carries a "property path", a sequence of property names which describe the source of the change.
 
 ```
 class A
@@ -30,7 +30,7 @@ class B
 }
 ```
 
-In the above example, object `x` of type `A` can notify `ChildPropertyChanged` with `Property.AnotherProperty`, which would mean that `x.Property.AnotherProperty` changed.
+In the above example, object `x` of type `A` can raise `ChildPropertyChanged` with `Property.AnotherProperty` argument, which would mean that `x.Property.AnotherProperty` changed.
 
 ```
 class C
@@ -41,16 +41,14 @@ class C
 }
 ```
 
-An object of class `C` above can subscribe to `ChildPropertyChanged` of it's `A` property. When it receives a notification for `Property.AnotherProperty` from this object, it means that the value of `YetAnotherProperty` should be reported as changed.
+An object `c` of class `C` above subscribes to `ChildPropertyChanged` of `c.A` property. When it receives a notification for `Property.AnotherProperty` from `c.A`, it means that `c.A.Property.AnotherProperty` has changed and PropertyChanged should be raised for `c.YetAnotherProperty`.
 
 ## Compile-time analysis
-The aspect automatically analyses the user code of the target class.
+The aspect automatically analyses the user code of the target class. The analysis is performed on PostSharp's code model, which builds expressions on top of the IL code. 
 
-The analysis is performed on PostSharp's code model, which builds expressions on top of the IL code. 
+However, due to limitations of PostSharp, the analysis is performed only on the original code, all other aspects need to integrate with `NotifyPropertyChanged` aspect using internal interfaces and helpers.
 
-However, due to limitations of PostSharp, the analysis is performed only the original code, all other aspects need to integrate with `NotifyPropertyChanged` aspect using internal interfaces and helpers.
-
-During the analysis phase it attempts to build a list of dependencies for each property:
+During the analysis phase the aspect attempts to build a list of dependencies for each property:
 1) Dependencies on fields, i.e. when field `F` changes, value of property `P` potentially also changes.
 ```
 private int F;
@@ -71,7 +69,7 @@ The analysis is performed only for the particular target type that the aspect is
 1) There is one aspect instance per CLR type (instance-scoped aspect).
 2) There is no simple way of communication between aspect instances in PostSharp (currently also limitation in Metalama).
 
-This results in the "glue" between aspects being deferred to runtime because there is not simple way to push data between aspect instances at compile-time.
+This results in the "glue" between aspects being deferred to runtime because there is not a simple way to push data between aspect instances at compile-time.
 
 ### Limited data flow analysis
 The analysis algorithm expands method calls to methods of the target class and does limited data-flow analysis for cases like:
@@ -98,9 +96,9 @@ public int Foo()
 ```
 
 ### [SafeForDependencyAnalysis]
-Dependency analyzer uses validators that "vote" on expressions and decide, whether the expression is correct, acceptable or wrong.
+Dependency analyzer uses validators that "vote" on expressions and decide, whether the expression is correct, acceptable or wrong. Some expressions have dependencies on non-observable sources of values (such as a static method).
 
-Some validators will fail when encountering an unsupported expression. In this case, the aspect will require user to add `[SafeForDependencyAnalysis]` attribute, which
+When validators fail when encountering an unsupported expression, the aspect will require user to add `[SafeForDependencyAnalysis]` attribute, which
 suppresses these errors. This occurs in following cases:
 1) Method accesses a static state.
 2) Method calls a method of another object.
@@ -109,24 +107,24 @@ suppresses these errors. This occurs in following cases:
 5) Method accesses property of a class that does not implement INotifyPropertyChange and does not have the aspect.
 6) Method assigns return value within exception handling block.
 
-Other validators will "approve" the method, causing the exception to be accepted even if there were errors. For example, IdempotentMethodValidator will accept method calls to idempotent (pure) methods as their result would never depend on properties that can change. Referring to the above case, idempotent static method is usable and will not create error requiring [SafeForDependencyAnalysis].
+Some other validators will "approve" the method, causing the it to be accepted even if there would be other errors. For example, IdempotentMethodValidator will accept method calls to idempotent (pure) methods as their result would never depend on properties that can change. Referring to the above case, idempotent static method is usable and will not create error requiring [SafeForDependencyAnalysis].
 
-**The problem** of having one attribute for the whole method body is that once suppressed, the user may not be aware of another problem with the property after it changes slightly, unless they remove the attribute.
+**The problem** of having one attribute for the whole method body is that once suppressed, the user may not be aware of another problem with the property after the code changes slightly, unless they remove the attribute.
 
 ### Manual dependencies
 User can choose and specify a custom dependencies using `Depends.On(this.Property.AnotherProperty)` construct.
 
-However, **using any manual dependency disables** the automatic analysis, leading to a need to specify all the dependencies in the property.
+However, **using any manual dependency disables the automatic analysis**, leading to a need to specify all the dependencies in the property.
 
 ## Evaluation Model
 The aspect uses a stack of thread-static contexts. A new context is pushed every time instrumented class method (including accessors) are executed and popped
 when the method exits. 
 
-When change of a property of an instrumented object is registered one of the following happens:
-1) If the object is on top of the stack, the change to the property is stored in an "accumulator".
-2) If the object is not on top of the stack, the change is immediately transformed into events being fired. (this occurs only for publicly accessible fields).
+When change of a property of an instrumented object is registered, one of the following happens:
+1) If the object is on the top of the stack, the change to the property is stored in an "accumulator".
+2) If the object is not on the top of the stack, the change is immediately transformed into events being fired. (this occurs only for publicly accessible fields).
 
-To monitor changes to own fields, all fields are instrumented and their "set value" is monitored (are promoted to properties). When a fields change occurs, the aspect retrieves a list of dependent properties and pushes change to these properties to the accumulator.
+To monitor changes to own fields, all fields are instrumented and their "set value" is monitored (are promoted to properties). When a field change occurs, the aspect retrieves a list of dependent properties and pushes change to these properties to the accumulator.
 
 When a method exits, the one of the following occurs:
 1) If the object on the top of the stack does not change after removing the current context, nothing happens and the property changes that were registered are kept in the accumulator. This is a case of
@@ -199,14 +197,14 @@ public void OnPropertyChanged(string propertyName)
 This will make the aspect use the provided method to fire events. This is often used for dispatching to another thread.
 
 ### Manual event raise (original)
-User can invoke `NotifyPropertyChangedServices.SignalPropertyChanged` to signal a change of property by simulating the property change as processed by an aspect.
+User can invoke `NotifyPropertyChangedServices.SignalPropertyChanged(object, string)` to signal a change of property by simulating the property change as processed by an aspect.
 
 ### Suspending events (original)
-Using `NotifyPropertyChangedServices.SuspendEvents` suspends notifications for the current thread. NotifyPropertyChangedServices.ResumeEvents resumed event notifications,
+Using `NotifyPropertyChangedServices.SuspendEvents(object)` suspends notifications for the current thread. NotifyPropertyChangedServices.ResumeEvents resumed event notifications,
 flushing the accumulated property change notifications.
 
 ### Immediate flushing of events for an object (original)
-Allows the user to immediately raise event for all stored property changes on a particular object using `NotifyPropertyChangedServices.RaiseEventsImmediate`.
+Allows the user to immediately raise event for all stored property changes on a particular object using `NotifyPropertyChangedServices.RaiseEventsImmediate(object)`.
 
 This operation may not have well-defined consequences.
 
@@ -219,22 +217,22 @@ At the point the PropertyChanged is being fired, `PropertyChanging` is being als
 
 This means that for each PropertyChanged there should be exactly one `PropertyChanging`.
 
-The support was added when not all platforms supported the interface at the time, the aspect requires the user to provide user implementation of the interface (see above).
+The support was added when not all platforms supported the interface at the time (e.g. .NET Framework 4.5), the aspect requires the user to provide user implementation of the interface.
 
 ### Support for async/iterator methods (added)
-The aspect treats "yield" and "await" operations as "points where the object is consistent", i.e. as method exit. When control
+The aspect treats "yield" and "await" operations as "points where the object is consistent" (same as method exit). When control
 returns to the method, a new context is pushed (same as method entry).
 
 There was no attempt to support async methods that cause the object not to have consistent state until the end of evaluation.
 
-However, objects with inconsistent external state in multi-threaded environment are not very useful.
+However, objects with inconsistent external state in a multi-threaded environment are not very useful anyway.
 
 ### Weak event semantics (added)
 By default events prevent the registered object from being collected, because delegates contains a reference to the target object.
 
 NPC aspect uses `WeakEventHandler` structure which allows for keeping strong or weak references to objects.
 
-When weak semantics are enabled, registered delegates are kept alive using ConditionalWeakTable hidden in DelegateReferenceKeeper type.
+When weak semantics are enabled, registered delegates are kept alive using `ConditionalWeakTable` hidden in `DelegateReferenceKeeper` type.
 
 It is an optional feature that can be disabled when applying the aspect (see `WeakEventStrategy` property). 
 
@@ -243,8 +241,7 @@ There was a plan to add a "smart" strategy, that would take strong or weak refer
 ### [AggregateAllChanges] (added)
 Using this attribute on a property will aggregate changes to the content of the property and report it as a change of the property itself.
 
-Currently this is supported only for `ICollection` and `ICollection[T]` and works based on a special `Item[]` property notification, therefore being fired when
-collection content changes.
+Because this was not a priority for general use, the feature is limited only to `ICollection` and `ICollection[T]` and works based on a special `Item[]` property notification, therefore being fired when collection content changes.
 
 ### Preventing false positives (added)
 In some uses, event notification for a property that did not changed is not desirable.
@@ -277,7 +274,7 @@ In objects graphs and/or in combinations with [AggregateAllChanges] this may res
 ### PropertyPath
 Originally, the `INotifyChildPropertyChanged` worked based on strings. This meant that string were constantly allocated and parsed and tested for "prefix"
 
-An optimization at that point was `PropertyPath` class, which is based on interned strings and has pre-computed hash code.
+An optimization at that point was `PropertyPath` class, which is based on interned strings, has pre-computed hash, etc.
 
 However, this only reduces the complexity by a constant factor (length of property names can be treated as a constant).
 
@@ -288,37 +285,38 @@ Because of having multiple aspect instances per single object and other limitati
 
 # Future Implementation
 
-The future implementation should take only necessary features that are well-defined (or can be well-defined).
+The future implementation should take only necessary features that are well-defined (or can become well-defined).
 
 ## Dropped or significantly changed features
 
 ### Validators
-Validators are nice abstraction, but lead to a not very well defined behavior because of voting (i.e. earlier validator can "hide" all the errors). There is no particular idea on whether to change this or how, but it should be considered.
+Validators are nice abstraction, but lead to a not well-defined behavior because of voting (i.e. earlier validator can "hide" all the errors). There is no particular idea on whether to change this or how, but it should be reconsidered.
 
 ### SafeForDependencyAnalysis
 
 [SafeForDependencyAnalysis] should be removed completely or significantly changed (and renamed).
 
-It should not alter behavior for the whole property when only a part of it is wrong. Messages should be reported on exact span and should be suppressible individually.
+It should not alter behavior for the whole property when only a part of it is wrong. Messages should be reported on an exact span and should be suppressible individually.
 
 ## New features (wish list)
 
 ### Ahead-of-time
 Most of time, there should be a complete information available at build time for a given type, i.e.:
-
-Dependency lists for properties - what needs to change for the property to change.
-Effect lists for received change - if change of a dependency is detected, which properties are changed.
+* Dependency lists for properties - what needs to change for the property to change.
+* Effect lists for received change - if change of a dependency is detected, which properties are changed.
 
 ### Faster internal interface
 See performance above and for an idea how it can be approached see the prototype description below.
 
-### Changing behavior of a single method/property.
+### Changing the behavior of a single method/property.
 When behavior is configurable, it should be configurable for each property separately when it makes sense.
 
 Specifically, often-requested feature is to disable the aspect for a property or for a field.
 
 ### Native support for INotifyCollectionChanged
-A property may depends on a one or several values of a collection. The interface is giving detailed notification about changes of the collection. Where PropertyChanged firing is done on every change of any item in the collection, CollectionChanged is more granular.
+A property may depends on a one or several values of a collection. The interface is giving detailed notification about changes to the collection. Where PropertyChanged firing is done on every change of any item in the collection, CollectionChanged is more granular.
+
+However, it is not clear if this can be supported without extensive runtime structures that are expensive to maintain.
 
 ### Custom "dependency handlers"
 Extensibility point that would allow users to resolve dependencies for e.g. extension method even when source is not available to the aspect.
@@ -336,22 +334,27 @@ Sdk aspect could then choose to work on this compilation, instead of the initial
 
 It could then be supplied information by the linker to be able to analyze the code of expanded templates.
 
-### Non-instrumented dependency chains
-The current implementation has a limitation for target types of longer dependency chains. For example, if a property depends on `this.Foo.Bar.Quz`, it is expected that Foo uses the aspect. When both Foo and Foo.Bar are non-instrumented classes manually implementing INPC, the aspect would receive changed of Quz.
+However, this does not seem compatible with design-time pipeline and its intended usage.
 
-This requires a primitive that is registered to Foo and observes Bar. When the property changes, it unsubscribes and resubscribes the handler on the new value of Bar.
+### Non-instrumented dependency chains
+The current implementation has a limitation for target types of longer dependency chains. For example, if a property depends on `this.Foo.Bar.Quz`, it is expected that Foo uses the aspect (supports INotifyChildPropertyChanged). When both Foo and Foo.Bar are non-instrumented classes manually implementing INPC, the aspect would not receive changes of Quz.
+
+This requires a runtime primitive that is registered to Foo and observes Bar. When the property changes, it unsubscribes and resubscribes the handler on the new value of Bar.
 
 This should be supported on an arbitrary path.
 
 ### Analysis results should be available cross-assembly
-For example serialized aspect state should be used (no public API implemented).
+This is just a reminder that the aspect has to work in an identical way when a derived class of the target is moved to a different assembly. When this happens, all the information about the base class that the aspect requires has to be serialized.
 
 ### Dynamic enabling/disabling dependencies
 The original aspect define dependencies as a set of "all possible" dependencies. There may be properties (e.g. with large switch statements) that have a large number of possible dependencies but not more than a few at any given point. 
 
 The aspect may (at compile-time) decide that it is worthwhile to track the path execution took during last execution and ignore changes that cannot change the value of the property.
 
-Metalama is quite far from supporting this, but it would be nice to have this option in the future.
+Metalama is quite far from supporting this (requires injecting code into branches etc.). It would be nice to have this option in the future.
+
+### Accepting dependencies from other aspects
+Other aspects should be able to add custom dependencies that will be consumed by NotifyPropertyChanged, for example for an introduced property.
 
 # Learning Friday Prototype
 Available in PostSharp repo, 'experimental/fastnpc' branch.
@@ -363,11 +366,11 @@ LF Prototype attempted to alleviate performance and memory cost of the aspect:
 * CPU cache-friendly algorithm (i.e. minimizing usage of hash tables).
 
 ## Subscription model
-The prototype uses subscription model, where consumer subscribes to receive notification for a specific "slot" on the target object.
+The prototype uses subscription model, where consumer subscribes to receive notification for a specific "source slot" on the target object.
 
 This allows consumers to subscribe to a notification of change of a specific property without the need for dictionary lookup. 
 
-The slot resolution (determining to which slot to subscribe to) can be done either statically or dynamically.
+The source slot resolution (determining to which source slot to subscribe to for a given property dependency) can be done either statically or dynamically.
 
 ```
 class A 
@@ -385,7 +388,7 @@ class B
 }
 ```
 
-Type B has three slots - slot 0 is fired when B.Z is changed, slot 1 is fired when B.W is changed, slot 2 is fired when B.V is changed. 
+Type B has three source slots - slot 0 is fired when B.Z is changed, slot 1 is fired when B.W is changed, slot 2 is fired when B.V is changed. 
 
 When B.Z is assigned, slots 0 and 2 are fired. When B.Y is assigned, slots 1 and 2 are fired.
 
@@ -413,9 +416,9 @@ public interface INpcReceiver
 ```
 
 ### Subscribing
-When A.B is assigned, the object needs to subscribe to all slots of B, i.e. slots 0, 1, 2. 
+When A.B is assigned, the object needs to subscribe to all source slots of B, i.e. slots 0, 1, 2. 
 
-This may look more expensive than adding one handler to an event, but there is no allocation as the subscription record may be a tuple `(INpcReceiver, NpcTargetSlot)` and may be stored in an optimized data structure.
+This may look more expensive than adding one handler to an event, but there is no allocation as the subscription record may be a tuple `(INpcReceiver, NpcTargetSlot)` and may be stored in an optimized data structure (shared between slots to save memory and have a better CPU cache performance).
 
 ### Intra-type dependencies
 One described performance issue of the original implementation was the need to process dependencies between own properties using the same mechanism - raising the event, receiving it, resolving dependent properties, etc.
@@ -455,6 +458,9 @@ public EType E {get;set;}
 public int F {get;set;}
 public int H {get;set;}
 ```
+
+To relay changes when change of a dependency outside of the object is received, the implementation
+defines "target slots", which allow it to quickly perform all the work necessary to process a change of a dependency.
 
 The above example has following dependencies:
 
@@ -497,6 +503,33 @@ Target slot handlers:
 [4] - changes local source slot [2]
 
 All of the above also should fire `PropertyChanged` if there are any observers.
+
+### Subscribe trees
+Performance of the prototype is suboptimal in the following case:
+
+```
+this.X.A1.B1
+this.X.A1.B2
+...
+this.X.A1.Bn
+...
+this.X.Am.B1
+this.X.Am.B2
+...
+this.X.Am.Bn
+```
+
+In this case, changing the value of X means resubscribing to `m` objects and `m + m*n` slots, while changing the value of Ai means resubscribing to `n` slots.
+
+The prototype uses "subscribe trees" to have an optimized way of subscribing and resubscribing to slots. Theses are trees that are stored in an array, where resubscribing as a consequence of a property change equates to iterating through a span of the array.
+
+When `X` can change often and `A1.B1 ... Am.Bn` change sparsely, an optional broadcast interface may be more appropriate.
+
+## Metalama adaptation
+
+Most of the data structures that the prototype uses can be completely generated using templates, without a need for runtime data structures.
+
+The "target slot" lookup (i.e. the decision what to do in `ReceiveSlotChange`) can be made into a large switch, which when based on a range of values is transformed into a jump table by the runtime.
 
 ## Performance results
 
