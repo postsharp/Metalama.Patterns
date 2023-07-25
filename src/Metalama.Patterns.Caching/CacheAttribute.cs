@@ -5,6 +5,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Implementation;
 
@@ -202,6 +203,21 @@ public sealed class CacheAttribute : MethodAspect
         builder.Advice.IntroduceAttribute( builder.Target, effectiveConfiguration.ToAttributeConstruction(), OverrideStrategy.Override );
     }
 
+    private static IEnumerable<IExpression> GetArgumentExpressions(IMethod method, IExpression arrayExpression)
+    {
+        IExpression Index(int i)
+        {
+            var eb = new ExpressionBuilder();
+            eb.AppendExpression( arrayExpression );
+            eb.AppendVerbatim( "[" );
+            eb.AppendLiteral( i );
+            eb.AppendVerbatim( "]" );
+            return eb.ToExpression();
+        }
+
+        return method.Parameters.Select( p => Index(p.Index) );
+    }
+
     [Template]
     public Func<object?, object?[], object?> GetOriginalMethodInvoker( IMethod method )
     {
@@ -209,7 +225,7 @@ public sealed class CacheAttribute : MethodAspect
 
         object? Invoke( object? instance, object?[] args )
         {
-            return method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args );
+            return method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )!;
         }
     }
 
@@ -220,7 +236,7 @@ public sealed class CacheAttribute : MethodAspect
 
         async Task<object?> Invoke( object? instance, object?[] args )
         {
-            return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args )!;
+            return await method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )!;
         }
     }
 
@@ -231,7 +247,7 @@ public sealed class CacheAttribute : MethodAspect
 
         async ValueTask<object?> Invoke( object? instance, object?[] args )
         {
-            return await method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args )!;
+            return await method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )!;
         }
     }
 
@@ -246,7 +262,7 @@ public sealed class CacheAttribute : MethodAspect
 
         ValueTask<object?> Invoke( object? instance, object?[] args )
         {
-            return new ValueTask<object?>( method.With( instance, InvokerOptions.Base ).InvokeWithArgumentsObject( args ) );
+            return new ValueTask<object?>( method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )! );
         }
     }
 #endif
