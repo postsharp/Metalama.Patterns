@@ -12,18 +12,18 @@
     
     <!-- Set the default versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>2023.2.26</PostSharpEngineeringVersion>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
         <xUnitVersion>2.4.1</xUnitVersion>
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
-        <XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
+		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
+        <PostSharpEngineeringVersion>2023.2.32</PostSharpEngineeringVersion>
     </PropertyGroup>
 
     <!-- Set the deafult versions of auto-updated dependencies -->
     <Import Project="AutoUpdatedVersions.props" />
 
-    <!-- Override versions (both this product and dependencies) for the local build -->
+    <!-- Import overrides for the local build -->
     <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
 
     <PropertyGroup>
