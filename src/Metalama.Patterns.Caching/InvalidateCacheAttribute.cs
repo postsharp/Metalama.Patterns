@@ -13,7 +13,6 @@ using Metalama.Patterns.Caching.Implementation;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 
 [assembly: AspectOrder( typeof(InvalidateCacheAttribute), typeof(CacheAttribute) )]
 
@@ -175,7 +174,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
     
     [Template]
-    private static dynamic OverrideMethod(
+    private static dynamic? OverrideMethod(
         IField logSourceField,
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
@@ -214,7 +213,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
 
     [Template]
-    private static async Task<dynamic> OverrideMethodAsyncTaskOfT(
+    private static async Task<dynamic?> OverrideMethodAsyncTaskOfT(
         IField logSourceField,
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
@@ -232,8 +231,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
             try
             {
-                // ReSharper disable once MethodHasAsyncOverload
-                var task = meta.Proceed();
+                var task = meta.ProceedAsync();
 
                 if ( !task.IsCompleted )
                 {
@@ -317,7 +315,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             try
             {
                 // ReSharper disable once MethodHasAsyncOverload
-                var task = meta.Proceed();
+                var task = meta.ProceedAsync();
 
                 if ( !task.IsCompleted )
                 {
