@@ -382,7 +382,7 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
             }
         }
 
-        void ILogRecordBuilder.WriteString( in CharSpan str )
+        void ILogRecordBuilder.WriteString( in CharSpan span )
         {
             if ( this._appendComma )
             {
@@ -390,7 +390,7 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
                 this._stringBuilder.Append( ", " );
             }
 
-            this._stringBuilder.Append( str.ToString() );
+            span.AppendToStringBuilder( this._stringBuilder );
         }
 
         void ILogRecordBuilder.Complete()

@@ -28,6 +28,7 @@
 		<SystemThreadingTasksExtensionsVersion>4.5.4</SystemThreadingTasksExtensionsVersion>
 		<SystemValueTupleVersion>4.5.0</SystemValueTupleVersion>
         <SystemXmlXmlSerializerVersion>4.3.0</SystemXmlXmlSerializerVersion>
+        <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
         <WindowsAzureServiceBusVersion>4.1.2</WindowsAzureServiceBusVersion>
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
         <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' != 'net471' " >2.2.0</xUnitAssemblyFixtureVersion>

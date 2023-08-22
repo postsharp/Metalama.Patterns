@@ -23,6 +23,3 @@ public readonly struct TypeExtensionInfo<T>
     internal bool ShouldOverwrite( TypeExtensionInfo<T> typeExtension )
         => CovariantTypeExtensionFactory<T>.ShouldOverwrite( this.ObjectType, this.IsGeneric, typeExtension.ObjectType, this.IsGeneric );
 }
-
-public delegate void TypeExtensionCacheUpdateCallback<T>( TypeExtensionInfo<T> typeExtension )
-    where T : class;

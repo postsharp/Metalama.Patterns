@@ -411,6 +411,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
                     // ReSharper disable once MethodSupportsCancellation
                     // ReSharper disable once BadPreprocessorIndent
+#pragma warning disable SA1137
 #if NETCOREAPP
                     await
 #endif
@@ -419,6 +420,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
                         // All messages are processed at this point.
                         await this._notificationProcessingThreadCompleted.Task;
                     }
+#pragma warning restore SA1137
 
                     this.ChangeStatus( Status.DisposingPhase2 );
 

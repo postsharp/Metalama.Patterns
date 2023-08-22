@@ -4,10 +4,11 @@ using Flashtrace.Formatters.TypeExtensions;
 
 namespace Flashtrace.Formatters.Implementations;
 
-internal sealed class FormattableFormatter<[BindToExtendedType] TValue> : Formatter<TValue>
-    where TValue : IFormattable
+#if NET6_0_OR_GREATER
+internal sealed class SpanFormattableFormatter<[BindToExtendedType] TValue> : Formatter<TValue>
+    where TValue : ISpanFormattable
 {
-    public FormattableFormatter( IFormatterRepository repository ) : base( repository ) { }
+    public SpanFormattableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
     {
@@ -17,7 +18,9 @@ internal sealed class FormattableFormatter<[BindToExtendedType] TValue> : Format
         }
         else
         {
-            value.Format( stringBuilder, this.Repository );
+            stringBuilder.Append( value );
         }
     }
 }
+
+#endif

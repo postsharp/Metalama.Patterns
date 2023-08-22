@@ -1,47 +1,34 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
+using System.Text;
 
 namespace Flashtrace.Formatters;
 
 /// <summary>
 /// Represents a span of <see cref="char"/> by encapsulating a substring or a range of a <see cref="char"/> array.
+/// The benefit of <see cref="CharSpan"/> over <see cref="ReadOnlySpan{T}"/> is that it can wrap a string without allocating memory
+/// even in .NET Framework.
 /// </summary>
-public readonly struct CharSpan : CharSpan.IArrayAccessor
+public readonly ref struct CharSpan
 {
-    /* TODO: [FT-Review] Review explicit interface-based replacement pattern. I considered exposing Array publicly to be too unsafe. Cleanup when confirmed.
-    [ExplicitCrossPackageInternal]
-    internal object _array { get;  }
-    */
+#if NET6_0_OR_GREATER
+    private readonly ReadOnlySpan<char> _span;
 
-    /// <summary>
-    /// Provides access to the internal storage of <see cref="CharSpan"/>. 
-    /// </summary>
-    [PublicAPI]
-    public interface IArrayAccessor
-    {
-        /// <summary>
-        /// Gets the internal storage object. <see cref="Array"/> will be <see langword="null"/>, array of <see cref="char"/>, or <see cref="string"/>.
-        /// Do not mutate the returned object.
-        /// </summary>
-        object? Array { get; }
-    }
-
-    internal int StartIndex { get; }
-
+    public int Length => this._span.Length;
+#else
+    public readonly int StartIndex;
+    private readonly object? _data;
+    
     /// <summary>
     /// Gets the number of <see cref="char"/> in the span.
     /// </summary>
     public int Length { get; }
+#endif
 
     /// <summary>
     /// Gets a value indicating whether the current instance represents a null string.
     /// </summary>
-    public bool IsNull => this.Array == null;
-
-    object? IArrayAccessor.Array => this.Array;
-
-    internal object? Array { get; }
+    public bool IsEmpty => this.Length == 0;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharSpan"/> struct from an array of <see cref="char"/>.
@@ -51,9 +38,13 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// <param name="length">The number of characters in the span.</param>
     public CharSpan( char[]? array, int start, int length )
     {
-        this.Array = array;
+#if NET6_0_OR_GREATER
+        this._span = new ReadOnlySpan<char>( array, start, length );
+#else
+        this._data = array;
         this.StartIndex = start;
         this.Length = length;
+#endif
     }
 
     /// <summary>
@@ -64,9 +55,16 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// <param name="length">The number of characters in the span.</param>
     public CharSpan( string? str, int start, int length )
     {
-        this.Array = str;
+#if NET6_0_OR_GREATER
+        if ( str != null )
+        {
+            this._span = ((ReadOnlySpan<char>) str).Slice( start, length );
+        }
+#else
+        this._data = str;
         this.StartIndex = start;
         this.Length = length;
+#endif
     }
 
     // ReSharper disable once MergeConditionalExpression
@@ -101,16 +99,13 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
     /// <param name="str"></param>
     public static CharSpan FromArraySegment( ArraySegment<char> str ) => new( str.Array, str.Offset, str.Count );
 
-    /// <summary>
-    /// Gets a value indicating whether the current <see cref="CharSpan"/> is backed by a <c>char[]</c>. In this case,
-    /// the <see cref="ToCharArraySegment"/> method does not allocate memory.
-    /// </summary>
-    public bool IsBackedByCharArray => this.Array is char[];
-
     /// <inheritdoc/>
     public override string? ToString()
     {
-        switch ( this.Array )
+#if NET6_0_OR_GREATER
+        return new string( this._span );
+#else
+        switch ( this._data )
         {
             case string s:
                 return s.Substring( this.StartIndex, this.Length );
@@ -121,25 +116,45 @@ public readonly struct CharSpan : CharSpan.IArrayAccessor
             default:
                 return null;
         }
+#endif
     }
 
-    /// <summary>
-    /// Converts the current <see cref="CharSpan"/> into an <see cref="System.ArraySegment{T}"/> of <see cref="char"/>.
-    /// When the <see cref="IsBackedByCharArray"/> or <see cref="IsNull"/> property is <c>true</c>, this method does not allocate memory.
-    /// </summary>
-    /// <returns></returns>
-    public ArraySegment<char> ToCharArraySegment()
+    public void AppendToStringBuilder( StringBuilder stringBuilder )
     {
-        switch ( this.Array )
+#if NET6_0_OR_GREATER
+        stringBuilder.Append( this._span );
+#else
+        switch ( this._data )
         {
             case string s:
-                return new ArraySegment<char>( s.ToCharArray(), this.StartIndex, this.Length );
+                stringBuilder.Append( s, this.StartIndex, this.Length );
+
+                break;
 
             case char[] c:
-                return new ArraySegment<char>( c, this.StartIndex, this.Length );
+                stringBuilder.Append( c, this.StartIndex, this.Length );
+
+                break;
+        }
+#endif
+    }
+
+    public bool AppendToStringBuilder( UnsafeStringBuilder stringBuilder )
+    {
+#if NET6_0_OR_GREATER
+        return stringBuilder.Append( this._span );
+#else
+        switch ( this._data )
+        {
+            case string s:
+                return stringBuilder.Append( s, this.StartIndex, this.Length );
+
+            case char[] c:
+                return stringBuilder.Append( c, this.StartIndex, this.Length );
 
             default:
-                return default;
+                throw new FormattersAssertionFailedException();
         }
+#endif
     }
 }

@@ -338,6 +338,30 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
         return true;
     }
 
+    public bool Append( ReadOnlySpan<char> c )
+    {
+        if ( c.Length == 0 )
+        {
+            return true;
+        }
+
+        var count = c.Length;
+
+        if ( this._cursor + count > this._end )
+        {
+            return this.OnOverflow();
+        }
+
+        fixed ( char* theirArray = c )
+        {
+            BufferHelper.CopyMemory( this._cursor, theirArray, count * sizeof(char) );
+        }
+
+        this._cursor += count;
+
+        return true;
+    }
+
     /// <summary>
     /// Appends a <see cref="string"/> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
@@ -389,20 +413,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
     public bool Append( in CharSpan span )
     {
-        switch ( span.Array )
-        {
-            case string s:
-                return this.Append( s, span.StartIndex, span.Length );
-
-            case char[] a:
-                return this.Append( a, span.StartIndex, span.Length );
-
-            case null:
-                return true;
-
-            default:
-                throw new FlashtraceFormattersAssertionFailedException();
-        }
+        return span.AppendToStringBuilder( this );
     }
 
     /// <summary>
@@ -806,7 +817,7 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     {
         if ( ((value / 1000000000) % 10) != 0 )
         {
-            throw new FlashtraceFormattersAssertionFailedException();
+            throw new FormattersAssertionFailedException();
         }
 
         unchecked
@@ -928,6 +939,23 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
             return this.Append( 'f', 'a', 'l', 's', 'e' );
         }
     }
+
+#if NET6_0_OR_GREATER
+    public void Append<T>( T formattable, ReadOnlySpan<char> format = default, IFormatProvider? formatProvider = null )
+        where T : ISpanFormattable
+    {
+        var span = new Span<char>( this._cursor, (int) (this._end - this._cursor) );
+
+        if ( !formattable.TryFormat( span, out var charsWritten, format, formatProvider ) )
+        {
+            this.OnOverflow();
+        }
+        else
+        {
+            this._cursor += charsWritten;
+        }
+    }
+#endif
 
     /// <summary>
     /// Clears the current <see cref="UnsafeStringBuilder"/> so it can be reused to build a new string.
