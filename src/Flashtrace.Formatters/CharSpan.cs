@@ -7,7 +7,6 @@ namespace Flashtrace.Formatters;
 /// <summary>
 /// Represents a span of <see cref="char"/> by encapsulating a substring or a range of a <see cref="char"/> array.
 /// </summary>
-[PublicAPI]
 public readonly struct CharSpan : CharSpan.IArrayAccessor
 {
     /* TODO: [FT-Review] Review explicit interface-based replacement pattern. I considered exposing Array publicly to be too unsafe. Cleanup when confirmed.

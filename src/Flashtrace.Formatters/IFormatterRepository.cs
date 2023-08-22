@@ -8,8 +8,7 @@ namespace Flashtrace.Formatters;
 /// Accesses a repository of formatters.
 /// </summary>
 [PublicAPI]
-public interface 
-    IFormatterRepository
+public interface IFormatterRepository
 {
     // TODO: Do we still want this generic API? Is it properly implemented for non-sealed types?
     /// <summary>
