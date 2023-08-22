@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Activities;
-using JetBrains.Annotations;
 using System.Globalization;
 
 namespace Flashtrace.Messages;
@@ -9,8 +8,7 @@ namespace Flashtrace.Messages;
 /// <summary>
 /// Parses the formatting string for messages of the <see cref="LogLevelSource"/> and <see cref="LogActivity{TActivityDescription}"/> classes.
 /// </summary>
-[PublicAPI]
-public struct FormattingStringParser
+internal struct FormattingStringParser
 {
     private readonly string _str;
     private readonly char[] _charArray;

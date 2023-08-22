@@ -2,12 +2,10 @@
 // To edit, go to LegacySourceLogger.Generated.tt.
 // To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" LegacySourceLogger.Generated.tt
 
-
-
 using Flashtrace.Contexts;
 using Flashtrace.Records;
 
-namespace Flashtrace.Internal
+namespace Flashtrace.Loggers
 {
 	partial class LegacySourceLogger
 	{

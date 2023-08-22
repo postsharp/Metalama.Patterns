@@ -4,7 +4,7 @@ using Flashtrace.Messages;
 using JetBrains.Annotations;
 using System.Runtime.CompilerServices;
 
-namespace Flashtrace;
+namespace Flashtrace.Messages;
 
 /// <summary>
 /// Creates semantic messages composed of a message name and a list of properties given as name-value pairs. These messages are ideal for machine analysis.

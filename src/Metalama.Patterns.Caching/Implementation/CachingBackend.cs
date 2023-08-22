@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.ValueAdapters;
 using Metalama.Patterns.Contracts;
 using System.Globalization;
-using static Flashtrace.FormattedMessageBuilder;
+using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 

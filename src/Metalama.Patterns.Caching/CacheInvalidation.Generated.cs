@@ -9,7 +9,7 @@ using System;
 using System.Threading.Tasks;
 using Metalama.Patterns.Contracts;
 using Flashtrace;
-using static Flashtrace.SemanticMessageBuilder;
+using static Flashtrace.Messages.SemanticMessageBuilder;
 
 namespace Metalama.Patterns.Caching
 {

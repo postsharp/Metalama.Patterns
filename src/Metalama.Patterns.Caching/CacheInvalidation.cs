@@ -5,7 +5,7 @@ using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Contracts;
 using System.Collections.Concurrent;
 using System.Reflection;
-using static Flashtrace.FormattedMessageBuilder;
+using static Flashtrace.Messages.FormattedMessageBuilder;
 
 #pragma warning disable CA1034  // Nested types should not be visible
 #pragma warning disable IDE0008 // Use explicit type (we use var for logging)

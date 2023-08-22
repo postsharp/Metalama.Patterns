@@ -160,9 +160,7 @@ public sealed class LogLevelSource
                 }
 
                 // Do the actual opening:
-                var mutableOptions = options;
-                mutableOptions.Level = this.Level;
-                context = logger.OpenActivity( mutableOptions, ref callerInfo );
+                context = logger.OpenActivity( options with { Level = this.Level }, ref callerInfo );
 
                 // The log source has changed during OpenActivity because we're now within a ".Use()" call so we must update ourselves
                 // to use the new log source:
@@ -180,10 +178,7 @@ public sealed class LogLevelSource
                 }
                 else
                 {
-                    var mutableOptions = options;
-                    mutableOptions.IsHidden = true;
-
-                    context = logger.OpenActivity( mutableOptions, ref callerInfo );
+                    context = logger.OpenActivity( options with { IsHidden = true }, ref callerInfo );
                 }
             }
             else

@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
-using static Flashtrace.FormattedMessageBuilder;
+using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
@@ -414,7 +414,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 #if NETCOREAPP
                     await
 #endif
-                    using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                     {
                         // All messages are processed at this point.
                         await this._notificationProcessingThreadCompleted.Task;

@@ -2,16 +2,19 @@
 
 using StackExchange.Redis;
 using StackExchange.Redis.Profiling;
+using System;
+using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
 internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
 {
     private readonly IDisposable[] _disposables;
-    
+
     public ConnectionMultiplexer Inner { get; }
-    
+
     public DisposingConnectionMultiplexer( ConnectionMultiplexer inner, params IDisposable[] disposables )
     {
         this.Inner = inner;
@@ -100,7 +103,7 @@ internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
         {
             disposable.Dispose();
         }
-    } 
+    }
 
     void IConnectionMultiplexer.ExportConfiguration( Stream destination, ExportOptions options ) => this.Inner.ExportConfiguration( destination, options );
 

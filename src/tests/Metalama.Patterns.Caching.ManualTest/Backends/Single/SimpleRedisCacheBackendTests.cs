@@ -4,6 +4,7 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,7 +15,9 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
-    public SimpleRedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper )
+    public SimpleRedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
+        testContext,
+        testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
     }

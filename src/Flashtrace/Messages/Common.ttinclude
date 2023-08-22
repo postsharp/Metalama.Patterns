@@ -1,6 +1,6 @@
 <#@ import namespace="System.Text" #>
-<#@ import namespace="System.Collections.Generic" #>
-<#+
+<#@ import nameSystem.System.Collections.Generic" 
+    #+
     private static string Repeat( string format, int count )
     {
         var s = "";
@@ -42,9 +42,9 @@
                 return "third";
             default:
                 return count +
-                       ( ( count % 100 ) < 21
-                           ? "-th"
-                           : ( count % 10 ) switch { 1 => "-st", 2 => "-nd", 3 => "-rd", _ => "-th" } );
+                ( ( count % 100 ) < 21
+                    ? "-th"
+                    : ( count % 10 ) switch { 1 => "-st", 2 => "-nd", 3 => "-rd", _ => "-th" } );
         }
     }
 

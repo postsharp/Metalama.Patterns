@@ -5,7 +5,11 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
 using StackExchange.Redis;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,8 +18,10 @@ namespace Metalama.Patterns.Caching.ManualTest.Backends.Single;
 public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
-    
-    public RedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper )
+
+    public RedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
+        testContext,
+        testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
     }
@@ -83,7 +89,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
             cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i3", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-            
+
             // ReSharper restore MethodHasAsyncOverload
 
             Assert.True( this.GetAllKeys( prefix ).Count > 0 );
@@ -92,7 +98,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 
             await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
         }
-        
+
         // ReSharper restore UseAwaitUsing
 
         // Make sure we dispose the back-end so that the GC key gets removed too.
@@ -109,7 +115,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
     public async Task TestGarbageCollectionByExpiration()
     {
         var keyPrefix = GeneratePrefix();
-        
+
         // [Porting] Not fixing, can't be certain of original intent.
         // ReSharper disable UseAwaitUsing
         using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
@@ -161,7 +167,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 
             await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
         }
-        
+
         // ReSharper restore UseAwaitUsing
     }
 

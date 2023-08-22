@@ -2,7 +2,7 @@
 
 using Flashtrace.Options;
 
-namespace Flashtrace.Internal;
+namespace Flashtrace.Transactions;
 
 /// <summary>
 /// This means a <c>LoggingTypeSource</c> starting in 6.8.
@@ -16,5 +16,5 @@ internal interface ITransactionAwareContextLocalLogger
     /// This method must be invoked before calling <see cref="LogLevelSource.OpenActivity{T}(T, OpenActivityOptions)"/>.
     /// </summary>
     /// <param name="options">Options of the activity that creates the transaction.</param>
-    void ApplyTransactionRequirements( ref OpenActivityOptions options );
+    OpenActivityOptions ApplyTransactionRequirements( in OpenActivityOptions options );
 }

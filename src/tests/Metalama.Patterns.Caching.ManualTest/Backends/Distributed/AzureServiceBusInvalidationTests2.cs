@@ -4,6 +4,7 @@
 using Metalama.Patterns.Caching.Backends.Azure;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;

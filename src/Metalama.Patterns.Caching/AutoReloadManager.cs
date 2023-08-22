@@ -3,7 +3,7 @@
 using Flashtrace;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Concurrent;
-using static Flashtrace.FormattedMessageBuilder;
+using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching;
 

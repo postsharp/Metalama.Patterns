@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
@@ -119,26 +120,22 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         var methodsInvalidatedByField = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
             methodsInvalidatedByFieldName,
-            typeof( MethodInfo[] ),
+            typeof(MethodInfo[]),
             IntroductionScope.Static,
             OverrideStrategy.Fail,
             b => b.Name = methodsInvalidatedByFieldName );
-        
+
         builder.Advice.AddInitializer(
             builder.Target.DeclaringType,
-            nameof( InitializeMethodInfoArray ),
+            nameof(InitializeMethodInfoArray),
             InitializerKind.BeforeTypeConstructor,
-            args: new
-            {
-                methods = invalidatedMethods.Keys.ToList(),
-                field = methodsInvalidatedByField.Declaration
-            } );
+            args: new { methods = invalidatedMethods.Keys.ToList(), field = methodsInvalidatedByField.Declaration } );
 
         var asyncInfo = builder.Target.GetAsyncInfo();
 
         var templates = new MethodTemplateSelector(
-            nameof(this.OverrideMethod),
-            builder.Target.ReturnType.IsTask( withResult: false ) ? nameof(this.OverrideMethodAsyncTask) : nameof(this.OverrideMethodAsyncTaskOfT),
+            nameof(OverrideMethod),
+            builder.Target.ReturnType.IsTask( withResult: false ) ? nameof(OverrideMethodAsyncTask) : nameof(OverrideMethodAsyncTaskOfT),
             useAsyncTemplateForAnyAwaitable: true );
 
         builder.Advice.Override(
@@ -163,7 +160,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     [Template]
     public static void InitializeMethodInfoArray( IReadOnlyList<IMethod> methods, IField field )
     {
-        var b = new ArrayBuilder( typeof( MethodInfo ) );
+        var b = new ArrayBuilder( typeof(MethodInfo) );
 
         foreach ( var method in methods )
         {
@@ -172,7 +169,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         field.Value = b.ToValue();
     }
-    
+
     [Template]
     private static dynamic? OverrideMethod(
         IField logSourceField,
@@ -410,14 +407,16 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     {
         if ( attribute._invalidatedMethodNames == null || attribute._invalidatedMethodNames.Length == 0 )
         {
-            builder.Diagnostics.Report( CachingDiagnosticDescriptors.InvalidateCache.ErrorInvalidAspectConstructorNoMethodName.WithArguments( builder.Target ) );
+            builder.Diagnostics.Report(
+                CachingDiagnosticDescriptors.InvalidateCache.ErrorInvalidAspectConstructorNoMethodName.WithArguments( builder.Target ) );
 
             return false;
         }
 
         if ( attribute._invalidatedMethodNames.Any( s => string.IsNullOrWhiteSpace( s ) ) )
         {
-            builder.Diagnostics.Report( CachingDiagnosticDescriptors.InvalidateCache.ErrorInvalidAspectConstructorNullOrWhitespaceString.WithArguments( builder.Target ) );
+            builder.Diagnostics.Report(
+                CachingDiagnosticDescriptors.InvalidateCache.ErrorInvalidAspectConstructorNullOrWhitespaceString.WithArguments( builder.Target ) );
 
             return false;
         }
@@ -506,7 +505,8 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 {
                     matchingErrorsDictionary.Add(
                         invalidatedMethod.Name,
-                        CachingDiagnosticDescriptors.InvalidateCache.ErrorMissingParameterInInvalidatingMethod.WithArguments( (invalidatedMethod, invalidatedMethod, invalidatedMethodParameter.Name) ) );
+                        CachingDiagnosticDescriptors.InvalidateCache.ErrorMissingParameterInInvalidatingMethod.WithArguments(
+                            (invalidatedMethod, invalidatedMethod, invalidatedMethodParameter.Name) ) );
 
                     allParametersMatching = false;
 
@@ -518,7 +518,8 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 {
                     matchingErrorsDictionary.Add(
                         invalidatedMethod.Name,
-                        CachingDiagnosticDescriptors.InvalidateCache.ErrorParameterTypeIsNotCompatible.WithArguments( (invalidatingMethod, invalidatedMethod, invalidatedMethodParameter.Name) ) );
+                        CachingDiagnosticDescriptors.InvalidateCache.ErrorParameterTypeIsNotCompatible.WithArguments(
+                            (invalidatingMethod, invalidatedMethod, invalidatedMethodParameter.Name) ) );
 
                     allParametersMatching = false;
 
@@ -552,7 +553,8 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 {
                     // The method of the given name does not exist
                     builder.Diagnostics.Report(
-                        CachingDiagnosticDescriptors.InvalidateCache.ErrorCachedMethodNotFound.WithArguments( (invalidatingMethod, invalidatedMethodName, invalidatedMethodsDeclaringType) ) );
+                        CachingDiagnosticDescriptors.InvalidateCache.ErrorCachedMethodNotFound.WithArguments(
+                            (invalidatingMethod, invalidatedMethodName, invalidatedMethodsDeclaringType) ) );
                 }
 
                 isValid = false;
@@ -562,7 +564,8 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
             if ( !attribute.AllowMultipleOverloads && invalidatedOverloads.Count > 1 )
             {
-                builder.Diagnostics.Report( CachingDiagnosticDescriptors.InvalidateCache.ErrorMultipleOverloadsFound.WithArguments( (invalidatingMethod, invalidatedMethodName) ) );
+                builder.Diagnostics.Report(
+                    CachingDiagnosticDescriptors.InvalidateCache.ErrorMultipleOverloadsFound.WithArguments( (invalidatingMethod, invalidatedMethodName) ) );
 
                 isValid = false;
 
@@ -605,11 +608,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             list.Add( value );
         }
 
-        public bool TryGetList( TKey key, [NotNullWhen( true )] out List<TValue>? list )
-            => this._collectionsDictionary.TryGetValue( key, out list );
+        public bool TryGetList( TKey key, [NotNullWhen( true )] out List<TValue>? list ) => this._collectionsDictionary.TryGetValue( key, out list );
 
-        public IEnumerator<KeyValuePair<TKey, List<TValue>>> GetEnumerator() 
-            => this._collectionsDictionary.GetEnumerator();
+        public IEnumerator<KeyValuePair<TKey, List<TValue>>> GetEnumerator() => this._collectionsDictionary.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
@@ -629,7 +630,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         }
 
         internal IMethod Method { get; }
-        
+
         internal int[] ParameterMap { get; }
     }
 }

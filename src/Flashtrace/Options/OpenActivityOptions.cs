@@ -3,7 +3,6 @@
 using Flashtrace.Activities;
 using Flashtrace.Contexts;
 using Flashtrace.Correlation;
-using Flashtrace.Internal;
 using Flashtrace.Records;
 using Flashtrace.Transactions;
 using JetBrains.Annotations;
@@ -16,12 +15,12 @@ namespace Flashtrace.Options;
 /// Argument of the  <see cref="LogLevelSource.OpenActivity{T}(in T,in OpenActivity)"/> method.
 /// </summary>
 [PublicAPI]
-public struct OpenActivityOptions
+public readonly struct OpenActivityOptions
 {
     // ReSharper restore InvalidXmlDocComment
 
-    private short _kind;
-    private Flags _flags;
+    private readonly short _kind;
+    private readonly Flags _flags;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenActivityOptions"/> struct specifying properties using an arbitrary object 
@@ -47,17 +46,15 @@ public struct OpenActivityOptions
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenActivityOptions"/> struct based on the specified <see cref="LogActivityOptions"/>.
     /// </summary>
-    [ExplicitCrossPackageInternal]
     internal OpenActivityOptions( in LogActivityOptions options ) : this()
     {
         this._kind = (short) options.Kind;
     }
 
-    [ExplicitCrossPackageInternal]
     internal bool IsHidden
     {
-        readonly get => (this._flags & Flags.IsHidden) != 0;
-        set
+        get => (this._flags & Flags.IsHidden) != 0;
+        init
         {
             var otherFlags = this._flags & ~Flags.IsHidden;
             var thisFlag = value ? Flags.IsHidden : Flags.Default;
@@ -71,9 +68,9 @@ public struct OpenActivityOptions
     /// </summary>
     public IncomingRequestOptions IncomingRequestOptions
     {
-        readonly get => new( (this._flags & Flags.IsParentSampled) != 0 );
+        get => new( (this._flags & Flags.IsParentSampled) != 0 );
 
-        set
+        init
         {
             var otherFlags = this._flags & ~Flags.IsParentSampled;
             var thisFlag = value.IsParentSampled ? Flags.IsParentSampled : Flags.Default;
@@ -88,7 +85,7 @@ public struct OpenActivityOptions
     /// by the caller of <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> or
     /// by <see cref="LogSource.ApplyTransactionRequirements(ref OpenActivityOptions)"/>.
     /// </summary>
-    public TransactionRequirement TransactionRequirement { get; set; }
+    public TransactionRequirement TransactionRequirement { get; init; }
 
     // ReSharper restore InvalidXmlDocComment
 
@@ -99,8 +96,9 @@ public struct OpenActivityOptions
     /// </summary>
     public bool IsSyntheticRootId
     {
-        readonly get => (this._flags & Flags.IsRoot) != 0;
-        set
+        get => (this._flags & Flags.IsRoot) != 0;
+
+        init
         {
             var otherFlags = this._flags & ~Flags.IsRoot;
             var thisFlag = value ? Flags.IsRoot : Flags.Default;
@@ -113,35 +111,34 @@ public struct OpenActivityOptions
     /// </summary>
     public LogActivityKind Kind
     {
-        readonly get => (LogActivityKind) this._kind;
-        set => this._kind = (short) value;
+        get => (LogActivityKind) this._kind;
+        init => this._kind = (short) value;
     }
 
-    [ExplicitCrossPackageInternal]
     internal LogLevel Level
     {
-        readonly get => (LogLevel) ((short) this._flags >> 4);
-        set => this._flags = (Flags) (((short) this._flags & ~0xf) | ((int) value << 4));
+        get => (LogLevel) ((short) this._flags >> 4);
+        init => this._flags = (Flags) (((short) this._flags & ~0xf) | ((int) value << 4));
     }
 
     /// <summary>
     /// Gets or sets the properties of the <see cref="OpenActivityOptions"/>, typically specified as an instance of a well-known or anonymous CLR type.
     /// </summary>
-    public LogEventData Data { get; set; }
+    public LogEventData Data { get; init; }
 
     /// <summary>
     /// Gets or sets a specific value to use as the parent identifier part when building the <see cref="ILoggingContext.SyntheticId"/> property. When
     /// <see cref="SyntheticParentId"/> is null, <see cref="ILoggingContext.SyntheticId"/> is built recursively using the synthetic identifier
     /// based on the parent context. 
     /// </summary>
-    public string? SyntheticParentId { get; set; }
+    public string? SyntheticParentId { get; init; }
 
     /// <summary>
     /// Gets or sets a specific value to use for the <see cref="ILoggingContext.SyntheticId"/> property. When
     /// <see cref="SyntheticRootId"/> is null, <see cref="ILoggingContext.SyntheticId"/> is built recursively using the synthetic identifier
     /// based on the parent context. 
     /// </summary>
-    public string? SyntheticRootId { get; set; }
+    public string? SyntheticRootId { get; init; }
 
     [Flags]
     private enum Flags : short

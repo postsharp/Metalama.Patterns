@@ -2,7 +2,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Flashtrace.Internal;
+namespace Flashtrace;
 
 /// <summary>
 /// Exception thrown upon internal assertion failures in the Flashtrace library.
@@ -12,7 +12,7 @@ namespace Flashtrace.Internal;
 /// assert methods so that the compiler can track execution flow.
 /// </remarks>
 [Serializable]
-internal sealed class FlashtraceAssertionFailedException : ApplicationException
+public sealed class FlashtraceAssertionFailedException : ApplicationException
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FlashtraceAssertionFailedException"/> class with the default error message.

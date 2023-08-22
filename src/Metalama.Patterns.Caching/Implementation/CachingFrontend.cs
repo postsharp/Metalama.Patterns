@@ -5,7 +5,7 @@ using Metalama.Patterns.Caching.Locking;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Reflection;
-using static Flashtrace.FormattedMessageBuilder;
+using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 

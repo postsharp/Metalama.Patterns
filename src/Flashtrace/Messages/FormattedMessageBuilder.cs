@@ -4,7 +4,7 @@ using Flashtrace.Messages;
 using JetBrains.Annotations;
 using System.Runtime.CompilerServices;
 
-namespace Flashtrace;
+namespace Flashtrace.Messages;
 
 /// <summary>
 /// Creates messages based on a human-readable formatted string. These messages are suitable for structured logging are not optimal for machine analysis.

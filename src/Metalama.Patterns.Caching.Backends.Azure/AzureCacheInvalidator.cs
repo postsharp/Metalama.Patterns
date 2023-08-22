@@ -2,6 +2,7 @@
 
 #if NETFRAMEWORK
 using Flashtrace;
+using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;

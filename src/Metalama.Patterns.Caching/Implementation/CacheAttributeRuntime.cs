@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 using System.ComponentModel;
-using static Flashtrace.FormattedMessageBuilder;
+using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
@@ -100,7 +100,7 @@ public static class CacheAttributeRunTime
             throw new ArgumentNullException( nameof(registration) + "." + nameof(registration.InvokeOriginalMethodAsyncTask) );
         }
 #endif
-        
+
         // TODO: What about ConfigureAwait( false )?
 
         var logSource = registration.Logger;
@@ -223,7 +223,7 @@ public static class CacheAttributeRunTime
             throw new ArgumentNullException( nameof(registration) + "." + nameof(registration.InvokeOriginalMethodAsyncValueTask) );
         }
 #endif
-        
+
         // TODO: What about ConfigureAwait( false )?
 
         var logSource = registration.Logger;

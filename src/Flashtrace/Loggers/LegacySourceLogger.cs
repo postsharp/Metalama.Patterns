@@ -11,7 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
-namespace Flashtrace.Internal;
+namespace Flashtrace.Loggers;
 
 // Disable all warnings until to do below is decided.
 // ReSharper disable all
@@ -209,7 +209,7 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
     }
 
     ILoggingContext ILogger.OpenActivity( in LogActivityOptions options, ref CallerInfo callerInfo )
-    {        
+    {
         return new Context( options.IsAsync );
     }
 

@@ -7,7 +7,7 @@ using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using static Flashtrace.FormattedMessageBuilder;
+using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 

@@ -1,13 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.ManualTest.Executables;
+using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
 
@@ -217,7 +220,7 @@ public class RedisTestInstance : IDisposable
         private static readonly Random _random = new();
 
         internal Action<string> Logger { get; }
-       
+
         internal int Port { get; }
 
         public Config()

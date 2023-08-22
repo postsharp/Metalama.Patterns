@@ -9,7 +9,7 @@
 using System.Runtime.CompilerServices;
 using Flashtrace.Messages;
 
-namespace Flashtrace;
+namespace Flashtrace.Messages;
 
 partial class FormattedMessageBuilder
 {

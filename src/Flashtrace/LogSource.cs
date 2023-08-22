@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
-using Flashtrace.Internal;
+using Flashtrace.Loggers;
 using Flashtrace.Options;
 using Flashtrace.Records;
+using Flashtrace.Transactions;
 using JetBrains.Annotations;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -331,7 +332,7 @@ public sealed class LogSource
         // ReSharper disable once SuspiciousTypeConversion.Global
         if ( this.Logger.GetContextLocalLogger() is ITransactionAwareContextLocalLogger logger )
         {
-            logger.ApplyTransactionRequirements( ref openActivityOptions );
+            openActivityOptions = logger.ApplyTransactionRequirements( openActivityOptions );
         }
     }
 

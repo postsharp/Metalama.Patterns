@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
@@ -41,7 +43,7 @@ internal sealed class TemporaryFile : IDisposable
             chmod( this.FileInfo.FullName, Convert.ToInt32( "777", 8 ) );
         }
     }
-    
+
     private void DisposeImpl()
     {
         if ( this._disposed )

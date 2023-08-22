@@ -10,7 +10,7 @@ namespace Flashtrace.Options;
 /// Options of the closing methods of the <see cref="LogActivity{TActivityDescription}"/> type.
 /// </summary>
 [PublicAPI]
-public struct CloseActivityOptions
+public record struct CloseActivityOptions
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CloseActivityOptions"/> struct specifying properties using an arbitrary object 
@@ -33,5 +33,5 @@ public struct CloseActivityOptions
     /// <summary>
     /// Gets or sets the properties of the <see cref="CloseActivityOptions"/>, typically specified as an instance of a well-known or anonymous CLR type.
     /// </summary>
-    public LogEventData Data { get; set; }
+    public LogEventData Data { get; init; }
 }

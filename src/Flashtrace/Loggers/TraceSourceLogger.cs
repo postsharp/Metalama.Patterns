@@ -6,7 +6,7 @@ using Flashtrace.Records;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
-namespace Flashtrace.Internal;
+namespace Flashtrace.Loggers;
 
 internal sealed class TraceSourceLogger : LegacySourceLogger
 {

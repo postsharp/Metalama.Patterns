@@ -2,7 +2,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace Flashtrace.Internal;
+namespace Flashtrace.Loggers;
 
 internal static class ReflectionHelpers
 {

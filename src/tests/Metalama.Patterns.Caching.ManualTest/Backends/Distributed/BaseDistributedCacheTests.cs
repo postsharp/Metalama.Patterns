@@ -2,7 +2,11 @@
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
+using System;
 using System.Collections.Immutable;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,7 +19,7 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
 
     // ReSharper disable once MemberCanBePrivate.Global
     protected ITestOutputHelper TestOutputHelper { get; }
-    
+
     protected virtual bool TestDependencies { get; } = true;
 
     protected abstract Task<CachingBackend[]> CreateBackendsAsync();

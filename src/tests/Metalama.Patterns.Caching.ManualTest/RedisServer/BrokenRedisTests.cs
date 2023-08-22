@@ -4,6 +4,7 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
 using StackExchange.Redis;
+using System;
 using Xunit;
 
 namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
@@ -34,8 +35,7 @@ public sealed class BrokenRedisTests
     [Fact( Timeout = 20000 )]
     public void TestRedisAbortsConnection()
     {
-        AssertEx.Throws<RedisConnectionException>(
-            () => _ = CreateConnection( true ) );
+        AssertEx.Throws<RedisConnectionException>( () => _ = CreateConnection( true ) );
     }
 
     private static IConnectionMultiplexer CreateConnection( bool redisAborts )

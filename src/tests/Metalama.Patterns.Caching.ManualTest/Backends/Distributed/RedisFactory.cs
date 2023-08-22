@@ -4,7 +4,9 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.ManualTest.RedisServer;
 using Metalama.Patterns.Caching.TestHelpers;
 using StackExchange.Redis;
+using System;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
