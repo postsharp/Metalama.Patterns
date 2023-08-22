@@ -3,7 +3,6 @@
 // TODO: [Porting] Disabled: Logging in caching tests currently rely on TextLoggingBackend.
 
 #if false
-
 using Metalama.Patterns.Caching.TestHelpers;
 using System;
 using Xunit;

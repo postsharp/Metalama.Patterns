@@ -10,7 +10,7 @@ internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
 
     public DynamicFormatter( IFormatterRepository repository ) : this( repository, FormattingOptions.Default ) { }
 
-    public DynamicFormatter( IFormatterRepository repository, FormattingOptions? options )
+    private DynamicFormatter( IFormatterRepository repository, FormattingOptions? options )
         : base( repository )
     {
         this._options = options ?? FormattingOptions.Default;
