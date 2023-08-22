@@ -207,7 +207,14 @@ public abstract class TypeExtensionFactoryBase<T>
                 }
             }
 
-            CheckGenericExtensionType( assignableType );
+            if ( assignableType != typeof(Array) )
+            {
+                CheckGenericExtensionType( assignableType );
+            }
+            else
+            {
+                // Arrays are hacked and CheckGenericExtensionType will behave incorrectly with this argument.
+            }
 
             var assignableGenericTypeDefinition = GetGenericTypeDefinition( assignableType );
 
