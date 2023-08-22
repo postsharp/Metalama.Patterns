@@ -1,4 +1,3 @@
-<#@ import namespace="System.Text" #>
 <#@ import nameSystem.System.Collections.Generic" 
     #+
     private static string Repeat( string format, int count )

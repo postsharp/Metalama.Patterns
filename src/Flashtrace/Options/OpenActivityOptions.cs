@@ -63,7 +63,7 @@ public readonly struct OpenActivityOptions
     }
 
     /// <summary>
-    /// Gets or sets the logging options set by the remote caller of the request
+    /// Gets the logging options set by the remote caller of the request
     /// represented by the current <see cref="OpenActivityOptions"/>.
     /// </summary>
     public IncomingRequestOptions IncomingRequestOptions
@@ -81,7 +81,7 @@ public readonly struct OpenActivityOptions
     // ReSharper disable InvalidXmlDocComment
 
     /// <summary>
-    /// Gets or sets the <see cref="TransactionRequirement"/> for the current activity. These requirements can be set
+    /// Gets the <see cref="TransactionRequirement"/> for the current activity. These requirements can be set
     /// by the caller of <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> or
     /// by <see cref="LogSource.ApplyTransactionRequirements(ref OpenActivityOptions)"/>.
     /// </summary>
@@ -90,7 +90,7 @@ public readonly struct OpenActivityOptions
     // ReSharper restore InvalidXmlDocComment
 
     /// <summary>
-    /// Gets or sets a value indicating whether the resulting activity will be assigned a global id, irrespective of the id generation strategy.
+    /// Gets a value indicating whether the resulting activity will be assigned a global id, irrespective of the id generation strategy.
     /// This means that the resulting <see cref="ILoggingContext.SyntheticId"/> will be rooted by  the current activity. When this property is <c>false</c>,
     /// the <see cref="ILoggingContext.SyntheticId"/> will may start with the id of the parent context. 
     /// </summary>
@@ -107,7 +107,7 @@ public readonly struct OpenActivityOptions
     }
 
     /// <summary>
-    /// Gets or sets the kind of <see cref="LogActivity{TActivityDescription}"/>.
+    /// Gets the kind of <see cref="LogActivity{TActivityDescription}"/>.
     /// </summary>
     public LogActivityKind Kind
     {
@@ -122,19 +122,19 @@ public readonly struct OpenActivityOptions
     }
 
     /// <summary>
-    /// Gets or sets the properties of the <see cref="OpenActivityOptions"/>, typically specified as an instance of a well-known or anonymous CLR type.
+    /// Gets the properties of the <see cref="OpenActivityOptions"/>, typically specified as an instance of a well-known or anonymous CLR type.
     /// </summary>
     public LogEventData Data { get; init; }
 
     /// <summary>
-    /// Gets or sets a specific value to use as the parent identifier part when building the <see cref="ILoggingContext.SyntheticId"/> property. When
+    /// Gets a specific value to use as the parent identifier part when building the <see cref="ILoggingContext.SyntheticId"/> property. When
     /// <see cref="SyntheticParentId"/> is null, <see cref="ILoggingContext.SyntheticId"/> is built recursively using the synthetic identifier
     /// based on the parent context. 
     /// </summary>
     public string? SyntheticParentId { get; init; }
 
     /// <summary>
-    /// Gets or sets a specific value to use for the <see cref="ILoggingContext.SyntheticId"/> property. When
+    /// Gets a specific value to use for the <see cref="ILoggingContext.SyntheticId"/> property. When
     /// <see cref="SyntheticRootId"/> is null, <see cref="ILoggingContext.SyntheticId"/> is built recursively using the synthetic identifier
     /// based on the parent context. 
     /// </summary>

@@ -93,7 +93,9 @@ public sealed class CacheAttribute : MethodAspect
 
         builder.MustNotHaveRefOrOutParameter();
         builder.ReturnType().MustSatisfy( t => t.SpecialType != SpecialType.Void, _ => $"the return type must not be void" );
-        builder.ReturnType().MustSatisfy( t => !t.IsTaskOrValueTask( hasResult: false ), _ => $"the return type must not be a Task or ValueTask without a return value" );
+
+        builder.ReturnType()
+            .MustSatisfy( t => !t.IsTaskOrValueTask( hasResult: false ), _ => $"the return type must not be a Task or ValueTask without a return value" );
 
         builder.ReturnType()
             .MustSatisfy(
@@ -130,10 +132,10 @@ public sealed class CacheAttribute : MethodAspect
             } );
 
         var templates = new MethodTemplateSelector(
-            defaultTemplate: nameof(this.OverrideMethod),
-            asyncTemplate: returnTypeIsTask ? nameof(this.OverrideMethodAsyncTask) : nameof(this.OverrideMethodAsyncValueTask),
-            enumerableTemplate: nameof(this.OverrideMethod),
-            enumeratorTemplate: nameof(this.OverrideMethod),
+            defaultTemplate: nameof(OverrideMethod),
+            asyncTemplate: returnTypeIsTask ? nameof(OverrideMethodAsyncTask) : nameof(OverrideMethodAsyncValueTask),
+            enumerableTemplate: nameof(OverrideMethod),
+            enumeratorTemplate: nameof(OverrideMethod),
             asyncEnumerableTemplate: "OverrideMethodAsyncEnumerable",
             asyncEnumeratorTemplate: "OverrideMethodAsyncEnumerator",
             useAsyncTemplateForAnyAwaitable: true,
@@ -203,19 +205,20 @@ public sealed class CacheAttribute : MethodAspect
         builder.Advice.IntroduceAttribute( builder.Target, effectiveConfiguration.ToAttributeConstruction(), OverrideStrategy.Override );
     }
 
-    private static IEnumerable<IExpression> GetArgumentExpressions(IMethod method, IExpression arrayExpression)
+    private static IEnumerable<IExpression> GetArgumentExpressions( IMethod method, IExpression arrayExpression )
     {
-        IExpression Index(int i)
+        IExpression Index( int i )
         {
             var eb = new ExpressionBuilder();
             eb.AppendExpression( arrayExpression );
             eb.AppendVerbatim( "[" );
             eb.AppendLiteral( i );
             eb.AppendVerbatim( "]" );
+
             return eb.ToExpression();
         }
 
-        return method.Parameters.Select( p => Index(p.Index) );
+        return method.Parameters.Select( p => Index( p.Index ) );
     }
 
     [Template]
@@ -262,7 +265,8 @@ public sealed class CacheAttribute : MethodAspect
 
         ValueTask<object?> Invoke( object? instance, object?[] args )
         {
-            return new ValueTask<object?>( method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )! );
+            return new ValueTask<object?>(
+                method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )! );
         }
     }
 #endif
@@ -290,11 +294,11 @@ public sealed class CacheAttribute : MethodAspect
             method.ReturnType.IsReferenceType == true || method.ReturnType.IsNullable == true );
     }
 #pragma warning restore IDE0031
-    
+
     // ReSharper disable InconsistentNaming
     // ReSharper disable UnusedParameter.Global
 #pragma warning disable SA1313
-    
+
     [Template]
     public static TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType TValue /* not used */ )
     {
@@ -356,7 +360,7 @@ public sealed class CacheAttribute : MethodAspect
     // ReSharper restore InconsistentNaming
     // ReSharper restore UnusedParameter.Global
 #pragma warning restore SA1313
-    
+
     /// <summary>
     /// Gets the effective configuration of the method by applying fallback configuration from <see cref="CacheConfigurationAttribute"/>
     /// attributes on ancestor types and the declaring assembly.

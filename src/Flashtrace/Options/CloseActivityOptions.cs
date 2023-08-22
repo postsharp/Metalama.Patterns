@@ -31,7 +31,7 @@ public record struct CloseActivityOptions
     }
 
     /// <summary>
-    /// Gets or sets the properties of the <see cref="CloseActivityOptions"/>, typically specified as an instance of a well-known or anonymous CLR type.
+    /// Gets the properties of the <see cref="CloseActivityOptions"/>, typically specified as an instance of a well-known or anonymous CLR type.
     /// </summary>
     public LogEventData Data { get; init; }
 }

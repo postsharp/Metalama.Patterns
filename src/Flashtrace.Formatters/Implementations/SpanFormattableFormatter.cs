@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+#if NET6_0_OR_GREATER
 using Flashtrace.Formatters.TypeExtensions;
 
 namespace Flashtrace.Formatters.Implementations;
 
-#if NET6_0_OR_GREATER
 internal sealed class SpanFormattableFormatter<[BindToExtendedType] TValue> : Formatter<TValue>
     where TValue : ISpanFormattable
 {

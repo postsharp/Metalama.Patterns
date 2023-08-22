@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Text;
 
 namespace Flashtrace.Formatters;
@@ -9,6 +10,7 @@ namespace Flashtrace.Formatters;
 /// The benefit of <see cref="CharSpan"/> over <see cref="ReadOnlySpan{T}"/> is that it can wrap a string without allocating memory
 /// even in .NET Framework.
 /// </summary>
+[PublicAPI]
 public readonly ref struct CharSpan
 {
 #if NET6_0_OR_GREATER
@@ -16,9 +18,9 @@ public readonly ref struct CharSpan
 
     public int Length => this._span.Length;
 #else
-    public readonly int StartIndex;
+    private readonly int _startIndex;
     private readonly object? _data;
-    
+
     /// <summary>
     /// Gets the number of <see cref="char"/> in the span.
     /// </summary>
@@ -42,7 +44,7 @@ public readonly ref struct CharSpan
         this._span = new ReadOnlySpan<char>( array, start, length );
 #else
         this._data = array;
-        this.StartIndex = start;
+        this._startIndex = start;
         this.Length = length;
 #endif
     }
@@ -62,7 +64,7 @@ public readonly ref struct CharSpan
         }
 #else
         this._data = str;
-        this.StartIndex = start;
+        this._startIndex = start;
         this.Length = length;
 #endif
     }
@@ -100,7 +102,7 @@ public readonly ref struct CharSpan
     public static CharSpan FromArraySegment( ArraySegment<char> str ) => new( str.Array, str.Offset, str.Count );
 
     /// <inheritdoc/>
-    public override string? ToString()
+    public override string ToString()
     {
 #if NET6_0_OR_GREATER
         return new string( this._span );
@@ -108,13 +110,16 @@ public readonly ref struct CharSpan
         switch ( this._data )
         {
             case string s:
-                return s.Substring( this.StartIndex, this.Length );
+                return s.Substring( this._startIndex, this.Length );
 
             case char[] c:
-                return new string( c, this.StartIndex, this.Length );
+                return new string( c, this._startIndex, this.Length );
+
+            case null:
+                return "";
 
             default:
-                return null;
+                throw new FormattersAssertionFailedException();
         }
 #endif
     }
@@ -127,14 +132,20 @@ public readonly ref struct CharSpan
         switch ( this._data )
         {
             case string s:
-                stringBuilder.Append( s, this.StartIndex, this.Length );
+                stringBuilder.Append( s, this._startIndex, this.Length );
 
                 break;
 
             case char[] c:
-                stringBuilder.Append( c, this.StartIndex, this.Length );
+                stringBuilder.Append( c, this._startIndex, this.Length );
 
                 break;
+
+            case null:
+                break;
+
+            default:
+                throw new FormattersAssertionFailedException();
         }
 #endif
     }
@@ -147,10 +158,13 @@ public readonly ref struct CharSpan
         switch ( this._data )
         {
             case string s:
-                return stringBuilder.Append( s, this.StartIndex, this.Length );
+                return stringBuilder.Append( s, this._startIndex, this.Length );
 
             case char[] c:
-                return stringBuilder.Append( c, this.StartIndex, this.Length );
+                return stringBuilder.Append( c, this._startIndex, this.Length );
+
+            case null:
+                return true;
 
             default:
                 throw new FormattersAssertionFailedException();
