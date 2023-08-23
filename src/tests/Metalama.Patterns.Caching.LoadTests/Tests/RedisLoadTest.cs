@@ -37,12 +37,16 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 
     private static IConnectionMultiplexer CreateConnection()
     {
-        // ReSharper disable StringLiteralTypo
-        const string connectionString = "postsharp-test.redis.cache.windows.net:6380,password=zVXBseSX6KMMKaMJ13iyWwCWUIIUqrqIoKAlm882CzE=,ssl=True,abortConnect=False";
-        
-        // ReSharper restore StringLiteralTypo
+        const string redisConnectionStringEnvironmentVariableName = "REDIS_CONNECTION_STRING";
+        var redisConnectionString = Environment.GetEnvironmentVariable( redisConnectionStringEnvironmentVariableName );
 
-        var connection = ConnectionMultiplexer.Connect( connectionString );
+        if ( string.IsNullOrEmpty( redisConnectionString ) )
+        {
+            throw new InvalidOperationException(
+                $"We use Azure Cache for Redis for this test. We don't keep the service active. To perform the test, create a new Azure Cache for Redis and assign the connection string to '{redisConnectionStringEnvironmentVariableName}' environment variable. This can be done in the debugging profile, if needed." );
+        }
+
+        var connection = ConnectionMultiplexer.Connect( redisConnectionString );
 
         return connection;
     }

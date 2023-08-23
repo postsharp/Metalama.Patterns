@@ -72,6 +72,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
             catch ( Exception e )
             {
                 this._logger.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
+                this.BackgroundTaskExceptions++;
             }
         }
         catch

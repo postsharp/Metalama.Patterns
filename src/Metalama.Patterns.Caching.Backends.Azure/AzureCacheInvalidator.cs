@@ -22,11 +22,14 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         private readonly NamespaceManager _serviceBusNamespaceManager;
         private readonly TopicClient _topic;
         private readonly AzureCacheInvalidatorOptions _options;
+        private int _backgroundTaskExceptions;
 
         // According to Create method logic, consumers can't obtain instances where _subscription and _processMessageTask are null. 
         private SubscriptionClient _subscription = null!;
         private Task _processMessageTask = null!;
         private volatile bool _isStopped;
+
+        protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
         private AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions options ) : base( underlyingBackend, options )
         {
@@ -114,7 +117,6 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                         var value = message.GetBody<string>();
 
                         this.OnMessageReceived( value );
-                        await message.CompleteAsync();
                     }
                 }
                 catch ( OperationCanceledException ) { }
@@ -123,6 +125,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
                     _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                    this._backgroundTaskExceptions++;
                 }
             }
         }

@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
     <ProjectReference Include="..\..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
+    <ProjectReference Include="..\Metalama.Patterns.TestHelpers\Metalama.Patterns.TestHelpers.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">

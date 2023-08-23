@@ -23,6 +23,8 @@ public class RedisCachingBackend : CachingBackend
     private readonly ConcurrentStack<ISerializer> _serializerPool = new();
     private readonly bool _ownsConnection;
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
+    private int _backgroundTaskExceptions;
+    
 #pragma warning disable SA1401
     private protected readonly RedisKeyBuilder _keyBuilder;
 #pragma warning restore SA1401
@@ -602,6 +604,7 @@ public class RedisCachingBackend : CachingBackend
         catch ( Exception e )
         {
             this.LogSource.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
+            this._backgroundTaskExceptions++;
         }
     }
 
@@ -634,7 +637,8 @@ public class RedisCachingBackend : CachingBackend
         }
     }
 
-    protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this.NotificationQueue.BackgroundTaskExceptions;
+    protected override int BackgroundTaskExceptions
+        => base.BackgroundTaskExceptions + this.NotificationQueue.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
     /// <summary>
     /// Features of <see cref="RedisCachingBackend"/>.

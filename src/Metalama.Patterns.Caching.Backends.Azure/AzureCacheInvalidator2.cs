@@ -28,6 +28,9 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         private readonly ServiceBusConnectionStringBuilder _connectionStringBuilder;
         private string _subscriptionName = null!;
         private SubscriptionClient _subscription = null!;
+        private int _backgroundTaskExceptions;
+
+        protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
         private AzureCacheInvalidator2( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions2 options ) : base( underlyingBackend, options )
         {
@@ -96,6 +99,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             catch ( Exception e )
             {
                 _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                this._backgroundTaskExceptions++;
             }
 
             return Task.CompletedTask;
