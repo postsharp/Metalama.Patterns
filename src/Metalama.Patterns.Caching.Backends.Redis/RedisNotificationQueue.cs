@@ -383,7 +383,9 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         }
     }
 
-    public async Task DisposeAsync( CancellationToken cancellationToken = default )
+    ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
+
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {
         using ( var activity = this._logger.Default.OpenActivity( Formatted( "Disposing" ) ) )
         {

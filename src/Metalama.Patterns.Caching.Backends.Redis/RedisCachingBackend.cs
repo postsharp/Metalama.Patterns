@@ -24,7 +24,7 @@ public class RedisCachingBackend : CachingBackend
     private readonly bool _ownsConnection;
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
     private int _backgroundTaskExceptions;
-    
+
 #pragma warning disable SA1401
     private protected readonly RedisKeyBuilder _keyBuilder;
 #pragma warning restore SA1401
@@ -573,7 +573,7 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
     {
         if ( this._notificationQueue != null )
         {

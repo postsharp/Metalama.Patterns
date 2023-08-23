@@ -72,7 +72,7 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
     {
         await this._taskScheduler.DisposeAsync( cancellationToken );
         await base.DisposeAsyncCore( cancellationToken );

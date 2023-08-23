@@ -2,7 +2,6 @@
 
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
-using System.Runtime.Caching;
 using Xunit;
 
 namespace Metalama.Patterns.Caching.TestHelpers
@@ -22,7 +21,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public static CachingBackend InitializeTestWithCachingBackend( string name )
         {
             InitializeTestWithoutBackend();
-            var backend = new MemoryCachingBackend( new MemoryCache( "test-" + name ) );
+            var backend = new MemoryCachingBackend();
             CachingServices.DefaultBackend = backend;
 
             return backend;

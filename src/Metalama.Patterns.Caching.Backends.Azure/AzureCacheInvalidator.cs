@@ -33,7 +33,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         private AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions options ) : base( underlyingBackend, options ) { }
 
         protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
-        
+
         /// <summary>
         /// Asynchronously creates a new <see cref="AzureCacheInvalidator"/>.
         /// </summary>
@@ -55,13 +55,13 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         private async Task InitAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
         {
-            if ( options is AzureCacheInvalidatorOptions.NewSubscription newSubscriptionOptions )
+            if ( options.SubscriptionName == null )
             {
-                this._subscriptionName = await CreateSubscriptionAsync( newSubscriptionOptions, cancellationToken );
+                this._subscriptionName = await CreateSubscriptionAsync( options, cancellationToken );
             }
             else
             {
-                this._subscriptionName = ((AzureCacheInvalidatorOptions.ExistingSubscription) options).SubscriptionName;
+                this._subscriptionName = options.SubscriptionName;
             }
 
             var client = new ServiceBusClient( options.ConnectionString, options.ClientOptions );
@@ -70,7 +70,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             this._sender = client.CreateSender( options.TopicName );
 
             // Start a background task to process received messages.
-            _ = Task.Run( this.ReceiveMessagesAsync, CancellationToken.None );
+            Task.Run( this.ReceiveMessagesAsync, CancellationToken.None );
         }
 
         private async Task ReceiveMessagesAsync()
@@ -118,8 +118,24 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         protected override void DisposeCore( bool disposing )
         {
             this._receiverCancellation.Cancel();
-            this._receiver?.CloseAsync();
-            this._sender?.CloseAsync();
+
+            if ( this._receiver is { IsClosed: false } || this._sender is { IsClosed: false } )
+            {
+                Task.Run(
+                        async () =>
+                        {
+                            if ( this._receiver is { IsClosed: false } )
+                            {
+                                await this._receiver.CloseAsync();
+                            }
+
+                            if ( this._sender is { IsClosed: false } )
+                            {
+                                await this._sender.CloseAsync();
+                            }
+                        } )
+                    .Wait();
+            }
 
             if ( disposing )
             {
@@ -128,7 +144,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         }
 
         /// <inheritdoc />
-        protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
+        protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
         {
             this._receiverCancellation.Cancel();
 
@@ -153,7 +169,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             this.DisposeCore( false );
         }
 
-        private static async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorOptions.NewSubscription options, CancellationToken cancellationToken )
+        private static async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
         {
             try
             {

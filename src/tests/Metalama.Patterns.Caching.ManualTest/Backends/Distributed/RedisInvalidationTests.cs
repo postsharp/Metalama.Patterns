@@ -29,14 +29,6 @@ public class RedisInvalidationTests : BaseInvalidationBrokerTests, IAssemblyFixt
             new RedisCacheInvalidatorOptions { Prefix = prefix, OwnsConnection = true } );
     }
 
-    protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
-    {
-        return RedisCacheInvalidator.Create(
-            backend,
-            RedisFactory.CreateConnection( this.TestContext ),
-            new RedisCacheInvalidatorOptions { Prefix = prefix, OwnsConnection = true } );
-    }
-
     protected override void ConnectToRedisIfRequired()
     {
         RedisFactory.CreateTestInstance( this.TestContext, this._redisSetupFixture );

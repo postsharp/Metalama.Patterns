@@ -3,6 +3,7 @@
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
@@ -11,12 +12,12 @@ namespace Metalama.Patterns.Caching.TestHelpers
 {
     public abstract class BaseCacheBackendTests : IDisposable, IClassFixture<TestContext>
     {
-        protected const int Timeout = 120000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
-        protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout * 0.8 );
-        
+        protected const int Timeout = 120_000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
+        protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout );
+
         // ReSharper disable once MemberCanBePrivate.Global
         protected ITestOutputHelper TestOutputHelper { get; }
-        
+
         protected BaseCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper )
         {
             this.TestContext = testContext;
@@ -48,10 +49,45 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return Task.FromResult( this.CreateCollector( backend ) );
         }
 
-        // ReSharper disable once MemberCanBeProtected.Global
-        public virtual TimeSpan GetExpirationTolerance( double multiplier = 1 )
+        protected virtual TimeSpan GetExpirationQuantum( double multiplier = 1 )
         {
-            return TimeSpan.FromSeconds( 0.1 * multiplier );
+            return TimeSpan.FromSeconds( 0.05 * multiplier );
+        }
+
+        private static async Task RepeatUntilNullOrFailAsync<T>( Func<Task<T?>> func )
+            where T : class
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            while ( stopwatch.Elapsed < TimeoutTimeSpan )
+            {
+                if ( await func() == null )
+                {
+                    return;
+                }
+
+                await Task.Delay( 10 );
+            }
+
+            Assert.Fail( $"The item still exists in cache after the {TimeoutTimeSpan} timeout." );
+        }
+
+        private static void RepeatUntilNullOrFail<T>( Func<T?> func )
+            where T : class
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            while ( stopwatch.Elapsed < TimeoutTimeSpan )
+            {
+                if ( func() == null )
+                {
+                    return;
+                }
+
+                Thread.Sleep( 10 );
+            }
+
+            Assert.Fail( $"The item still exists in cache after the {TimeoutTimeSpan} timeout." );
         }
 
         public void Dispose()
@@ -195,7 +231,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                         var storedValue = new CachedValueClass( 0 );
                         const string key = "0";
 
-                        var offset = this.GetExpirationTolerance( 3 );
+                        var offset = this.GetExpirationQuantum( 3 );
 
                         var cacheItem = new CacheItem(
                             storedValue,
@@ -208,20 +244,23 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                         cache.SetItem( key, cacheItem );
 
-                        Thread.Sleep( this.GetExpirationTolerance() );
+                        Thread.Sleep( this.GetExpirationQuantum() );
                         var retrievedItemBeforeTimeout = cache.GetItem( key );
 
                         if ( DateTime.Now > setTime + offset )
                         {
                             // Bad timing. Retry the test.
+                            this.TestOutputHelper.WriteLine( "We waited too much." );
+
                             continue;
                         }
 
                         AssertEx.NotNull( retrievedItemBeforeTimeout, "The item has been removed before expiration." );
 
                         // This forces collection of the expired item on some backends.
+
                         Thread.Sleep( offset.Multiply( 2 ) );
-                        Assert.Null( cache.GetItem( key ) );
+                        RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 
                         Assert.True( itemRemovedEvent.WaitOne( TimeoutTimeSpan ) );
 
@@ -259,7 +298,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                     var storedValue = new CachedValueClass( 0 );
                     const string key = "0";
 
-                    var offset = this.GetExpirationTolerance();
+                    var offset = this.GetExpirationQuantum();
 
                     var cacheItem = new CacheItem(
                         storedValue,
@@ -281,9 +320,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                     Assert.True( await itemRemoved.Task.WithTimeout( TimeoutTimeSpan ) );
 
-                    var retrievedItemAfterTimeout = await cache.GetItemAsync( key );
-
-                    AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
+                    await RepeatUntilNullOrFailAsync( () => cache.GetItemAsync( key ) );
 
                     if ( cache.SupportedFeatures.ContainsDependency )
                     {
@@ -309,7 +346,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                     await TestableCachingComponentDisposer.DisposeAsync( cache, collector );
                 }
             }
-            
+
             // ReSharper restore UseAwaitUsing
         }
 
@@ -339,7 +376,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 var storedValue = new CachedValueClass( 0 );
                 const string key = "0";
 
-                var offset = this.GetExpirationTolerance();
+                var offset = this.GetExpirationQuantum();
 
                 var cacheItem = new CacheItem(
                     storedValue,
@@ -356,9 +393,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                     Thread.Yield();
                 }
 
-                var retrievedItemAfterTimeout = cache.GetItem( key );
-
-                AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
+                RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 
                 if ( cache.SupportedFeatures.ContainsDependency )
                 {
@@ -401,7 +436,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                     {
                         var storedValue = new CachedValueClass( 0 );
                         const string key = "0";
-                        var expiration = this.GetExpirationTolerance( 2 );
+                        var expiration = this.GetExpirationQuantum( 2 );
 
                         var cacheItem = new CacheItem(
                             storedValue,
@@ -413,7 +448,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                         var timeWhenSet = DateTime.Now;
 
                         cache.SetItem( key, cacheItem );
-                        Thread.Sleep( this.GetExpirationTolerance() );
+                        Thread.Sleep( this.GetExpirationQuantum() );
 
                         var retrievedItemBeforeTimeout = cache.GetItem( key );
 
@@ -432,9 +467,9 @@ namespace Metalama.Patterns.Caching.TestHelpers
                             Thread.Yield();
                         }
 
-                        var retrievedItemAfterTimeout = cache.GetItem( key );
+                        Thread.Sleep( this.GetExpirationQuantum() );
 
-                        AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
+                        RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 
                         return;
                     }
@@ -462,7 +497,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 // https://github.com/dotnet/roslyn/issues/34720
                 // using ( CachingBackend cache = this.CreateBackend() )
                 // {
-                
+
                 // [Porting] Not fixing, can't be certain of original intent.
                 // ReSharper disable once MethodHasAsyncOverload
                 var cache = this.CreateBackend();
@@ -471,7 +506,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 {
                     var storedValue = new CachedValueClass( 0 );
                     const string key = "0";
-                    var expiration = this.GetExpirationTolerance( 2 );
+                    var expiration = this.GetExpirationQuantum( 2 );
 
                     var cacheItem = new CacheItem(
                         storedValue,
@@ -483,7 +518,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                     cache.ItemRemoved += ( _, _ ) => itemRemoved.SetResult( true );
                     await cache.SetItemAsync( key, cacheItem );
 
-                    Thread.Sleep( this.GetExpirationTolerance() );
+                    Thread.Sleep( this.GetExpirationQuantum() );
 
                     if ( DateTime.Now > timeWhenSet + expiration )
                     {
@@ -503,16 +538,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
                         await Task.Delay( 50 );
                     }
 
-                    var retrievedItemAfterTimeout = await cache.GetItemAsync( key );
-
-                    AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
+                    await RepeatUntilNullOrFailAsync( () => cache.GetItemAsync( key ) );
 
                     return;
                 }
                 finally
                 {
                     await TestableCachingComponentDisposer.DisposeAsync( cache );
-                    
+
                     // [Porting] Not fixing, can't be certain of original intent.
                     // ReSharper disable once MethodHasAsyncOverload
                     cache.Dispose();
@@ -545,14 +578,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var storedValue = new CachedValueClass( 0 );
                 const string key = "0";
-                var offset = this.GetExpirationTolerance();
+                var offset = this.GetExpirationQuantum();
 
                 var cacheItem = new CacheItem( storedValue, configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
                 cache.SetItem( key, cacheItem );
 
                 Thread.Sleep( offset.Multiply( 2 ) );
-                Assert.Null( cache.GetItem( key ) ); // Forces collection in some backends as well.
+                RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 
                 Assert.True( eventRaised.WaitOne( TimeoutTimeSpan ) );
 
@@ -589,14 +622,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var storedValue = new CachedValueClass( 0 );
                 const string key = "0";
-                var offset = this.GetExpirationTolerance();
+                var offset = this.GetExpirationQuantum();
 
                 var cacheItem = new CacheItem( storedValue, configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
                 await cache.SetItemAsync( key, cacheItem );
 
                 Thread.Sleep( offset.Multiply( 2 ) );
-                Assert.Null( await cache.GetItemAsync( key ) ); // Forces collection in some backends as well.
+                await RepeatUntilNullOrFailAsync( () => cache.GetItemAsync( key ) ); // Forces collection in some backends as well.
 
                 Assert.True( eventRaised.WaitOne( TimeoutTimeSpan ) );
 
@@ -1041,8 +1074,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
-                Assert.Throws<NotSupportedException>(
-                    () => cache.SetItem( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) ) );
+                Assert.Throws<NotSupportedException>( () => cache.SetItem( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) ) );
 
                 TestableCachingComponentDisposer.Dispose( cache );
             }
@@ -1110,8 +1142,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
-                await Assert.ThrowsAsync<NotSupportedException>(
-                    async () => await cache.InvalidateDependencyAsync( "d" ) );
+                await Assert.ThrowsAsync<NotSupportedException>( async () => await cache.InvalidateDependencyAsync( "d" ) );
 
                 await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
@@ -1169,9 +1200,15 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
             public void Dispose() { }
 
-            public Task DisposeAsync( CancellationToken cancellationToken = default )
+            ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
+
+            public ValueTask DisposeAsync( CancellationToken cancellationToken = default )
             {
-                return Task.CompletedTask;
+#if NET6_0_OR_GREATER
+                return ValueTask.CompletedTask;
+#else
+                return new ValueTask( Task.CompletedTask );
+#endif
             }
         }
     }

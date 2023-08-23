@@ -2,62 +2,101 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Contracts;
+using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Runtime.Caching;
-using CacheItemPriority = System.Runtime.Caching.CacheItemPriority;
-using MemoryCacheItemPolicy = System.Runtime.Caching.CacheItemPolicy;
+using CacheItemPriority = Microsoft.Extensions.Caching.Memory.CacheItemPriority;
+using MemoryCache = Microsoft.Extensions.Caching.Memory.MemoryCache;
 using PSCacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
 using PSCacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
 namespace Metalama.Patterns.Caching.Backends;
 
 /// <summary>
-/// A <see cref="CachingBackend"/> based on <c>System.Runtime.Caching.MemoryCache</c> (<see cref="MemoryCache"/>). This cache is part of .NET Framework
-/// and is available for .NET Standard in the NuGet package System.Runtime.Caching.
+/// A <see cref="CachingBackend"/> based on Microsoft.Extensions.Caching.Memory.IMemoryCache (<see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache"/>).
+/// This cache is recommended for ASP.NET Core use (as opposed to <c>System.Runtime.Caching.MemoryCache</c>).
 /// </summary>
+/// <remarks>
+/// This backend converts Metalama configuration properties into <see cref="ICacheEntry"/> instances as follows:
+/// <list type="bullet">
+///    <item>The priority <c>Default</c> is converted to <see cref="CacheItemPriority.Normal"/>.</item>
+///    <item>The property <see cref="ICacheEntry.Size"/> is normally not set. If you want it to be set, supply a function to calculate this value for each entry
+/// in the <see cref="MemoryCachingBackend(IMemoryCache,Func{PSCacheItem,long})"/> constructor. You only need to do this if you intend to limit the size
+/// of the cache.</item>
+/// </list>
+/// </remarks>
 [PublicAPI]
 public sealed class MemoryCachingBackend : CachingBackend
 {
-    private static readonly MemoryCacheItemPolicy _dependencyCacheItemPolicy = new() { Priority = CacheItemPriority.NotRemovable };
+    private readonly IMemoryCache _cache;
+    private readonly Func<PSCacheItem, long>? _sizeCalculator;
 
-    private readonly MemoryCache _cache;
-
-    private static string GetItemKey( string key ) => nameof(MemoryCachingBackend) + ":item:" + key;
-
-    private static string GetDependencyKey( string key ) => nameof(MemoryCachingBackend) + ":dependency:" + key;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the <see cref="MemoryCache.Default"/> instance of the <see cref="MemoryCache"/> class.
-    /// </summary>
-    public MemoryCachingBackend() : this( null ) { }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the given <see cref="MemoryCache"/>.
-    /// </summary>
-    /// <param name="cache">A <see cref="MemoryCache"/>, or <c>null</c> to use  the <see cref="MemoryCache.Default"/> instance of the <see cref="MemoryCache"/> class.</param>
-    public MemoryCachingBackend( MemoryCache? cache )
+    /// <inheritdoc />
+    protected override void DisposeCore( bool disposing )
     {
-        this._cache = cache ?? MemoryCache.Default;
+        base.DisposeCore( disposing );
+        this._cache.Dispose();
     }
 
-    private static CacheItemRemovedReason CreateRemovalReason( CacheEntryRemovedReason sourceReason )
+    /// <inheritdoc />
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
+    {
+        await base.DisposeAsyncCore( cancellationToken ).ConfigureAwait( false );
+        this._cache.Dispose();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
+    /// </summary>
+    public MemoryCachingBackend() : this( new MemoryCache( new MemoryCacheOptions() ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the given <see cref="IMemoryCache"/>.
+    /// </summary>
+    /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
+    public MemoryCachingBackend( [Required] IMemoryCache cache ) : this( cache, null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the given <see cref="IMemoryCache"/>. The backend creates cache entries
+    /// with size calculated by the given function.
+    /// </summary>
+    /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
+    /// <param name="sizeCalculator">A function that calculates the size of a new cache item, which some backends may use to evict.</param>
+    public MemoryCachingBackend( [Required] IMemoryCache cache, Func<PSCacheItem, long>? sizeCalculator )
+    {
+        this._cache = cache;
+        this._sizeCalculator = sizeCalculator;
+    }
+
+    private static string GetItemKey( string key )
+    {
+        return nameof(MemoryCachingBackend) + ":item:" + key;
+    }
+
+    private static string GetDependencyKey( string key )
+    {
+        return nameof(MemoryCachingBackend) + ":dependency:" + key;
+    }
+
+    private static CacheItemRemovedReason CreateRemovalReason( EvictionReason sourceReason )
     {
         switch ( sourceReason )
         {
-            case CacheEntryRemovedReason.CacheSpecificEviction:
+            case EvictionReason.None:
+            case EvictionReason.Replaced:
                 return CacheItemRemovedReason.Other;
 
-            case CacheEntryRemovedReason.ChangeMonitorChanged:
+            case EvictionReason.TokenExpired:
                 return CacheItemRemovedReason.Invalidated;
 
-            case CacheEntryRemovedReason.Evicted:
+            case EvictionReason.Capacity:
                 return CacheItemRemovedReason.Evicted;
 
-            case CacheEntryRemovedReason.Expired:
+            case EvictionReason.Expired:
                 return CacheItemRemovedReason.Expired;
 
-            case CacheEntryRemovedReason.Removed:
+            case EvictionReason.Removed:
                 return CacheItemRemovedReason.Removed;
 
             default:
@@ -65,15 +104,16 @@ public sealed class MemoryCachingBackend : CachingBackend
         }
     }
 
-    private MemoryCacheItemPolicy CreatePolicy( PSCacheItem item )
+    private MemoryCacheEntryOptions CreatePolicy( PSCacheItem item )
     {
-        var targetPolicy = new MemoryCacheItemPolicy { RemovedCallback = this.OnCacheItemRemoved };
+        var targetPolicy = new MemoryCacheEntryOptions();
+        targetPolicy.RegisterPostEvictionCallback( this.OnCacheItemRemoved );
 
         if ( item.Configuration != null )
         {
             if ( item.Configuration.AbsoluteExpiration.HasValue )
             {
-                targetPolicy.AbsoluteExpiration = DateTime.Now + item.Configuration.AbsoluteExpiration.Value;
+                targetPolicy.AbsoluteExpirationRelativeToNow = item.Configuration.AbsoluteExpiration.Value;
             }
 
             if ( item.Configuration.SlidingExpiration.HasValue )
@@ -84,14 +124,22 @@ public sealed class MemoryCachingBackend : CachingBackend
             switch ( item.Configuration.Priority.GetValueOrDefault() )
             {
                 case PSCacheItemPriority.Default:
+                    targetPolicy.Priority = CacheItemPriority.Normal;
+
+                    break;
+
                 case PSCacheItemPriority.Low:
+                    targetPolicy.Priority = CacheItemPriority.Low;
+
+                    break;
+
                 case PSCacheItemPriority.High:
-                    targetPolicy.Priority = CacheItemPriority.Default;
+                    targetPolicy.Priority = CacheItemPriority.High;
 
                     break;
 
                 case PSCacheItemPriority.NotRemovable:
-                    targetPolicy.Priority = CacheItemPriority.NotRemovable;
+                    targetPolicy.Priority = CacheItemPriority.NeverRemove;
 
                     break;
 
@@ -104,27 +152,32 @@ public sealed class MemoryCachingBackend : CachingBackend
             }
         }
 
+        if ( this._sizeCalculator != null )
+        {
+            targetPolicy.Size = this._sizeCalculator( item );
+        }
+
         return targetPolicy;
     }
 
-    private void OnCacheItemRemoved( CacheEntryRemovedArguments arguments )
+    private void OnCacheItemRemoved( object keyAsObject, object? value, EvictionReason reason, object? state )
     {
-        if ( arguments.RemovedReason == CacheEntryRemovedReason.Removed )
+        if ( reason is EvictionReason.Removed or EvictionReason.Replaced )
         {
             // In this case, all actions are taken by the method that removes the item.
             return;
         }
 
         var prefix = GetItemKey( "" );
+        var fullKey = (string) keyAsObject;
 
-        if ( arguments.CacheItem.Key.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
+        if ( fullKey.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
         {
-            var key = arguments.CacheItem.Key.Substring( prefix.Length );
+            var key = fullKey.Substring( prefix.Length );
 
-            var item = (CacheValue) arguments.CacheItem.Value;
+            var item = (CacheValue) value;
             this.CleanDependencies( key, item );
-
-            this.OnItemRemoved( key, CreateRemovalReason( arguments.RemovedReason ), this.Id );
+            this.OnItemRemoved( key, CreateRemovalReason( reason ), this.Id );
         }
     }
 
@@ -145,8 +198,15 @@ public sealed class MemoryCachingBackend : CachingBackend
             {
                 HashSet<string> newHashSet = new();
 
-                // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract (only seen on via jb tool)
-                backwardDependencies = (HashSet<string>) this._cache.AddOrGetExisting( dependencyKey, newHashSet, _dependencyCacheItemPolicy ) ?? newHashSet;
+                backwardDependencies = this._cache.GetOrCreate(
+                    dependencyKey,
+                    ( createdEntry ) =>
+                    {
+                        createdEntry.Priority = CacheItemPriority.NeverRemove;
+                        createdEntry.Size = 0;
+
+                        return newHashSet;
+                    } );
             }
 
             lock ( backwardDependencies )
@@ -154,7 +214,15 @@ public sealed class MemoryCachingBackend : CachingBackend
                 backwardDependencies.Add( key );
 
                 // The invalidation callback may have removed the key.
-                _ = this._cache.AddOrGetExisting( dependencyKey, backwardDependencies, _dependencyCacheItemPolicy );
+                this._cache.GetOrCreate(
+                    dependencyKey,
+                    ( createdEntry ) =>
+                    {
+                        createdEntry.Priority = CacheItemPriority.NeverRemove;
+                        createdEntry.Size = 0;
+
+                        return backwardDependencies;
+                    } );
             }
         }
     }
@@ -194,10 +262,16 @@ public sealed class MemoryCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override bool ContainsItemCore( string key ) => this._cache.Contains( GetItemKey( key ) );
+    protected override bool ContainsItemCore( string key )
+    {
+        return this._cache.Get( GetItemKey( key ) ) != null;
+    }
 
     /// <inheritdoc />  
-    protected override CacheValue? GetItemCore( string key, bool includeDependencies ) => (CacheValue?) this._cache.Get( GetItemKey( key ) );
+    protected override CacheValue GetItemCore( string key, bool includeDependencies )
+    {
+        return (CacheValue) this._cache.Get( GetItemKey( key ) );
+    }
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key ) => this.InvalidateDependencyImpl( key );
@@ -247,12 +321,16 @@ public sealed class MemoryCachingBackend : CachingBackend
         {
             if ( replacementValue == null )
             {
-                cacheValue = (MemoryCacheValue?) this._cache.Remove( itemKey );
+                cacheValue = (MemoryCacheValue?) this._cache.Get( itemKey );
 
                 if ( cacheValue == null )
                 {
                     // The item has been removed by another thread.
                     return false;
+                }
+                else
+                {
+                    this._cache.Remove( itemKey );
                 }
             }
             else
@@ -296,10 +374,23 @@ public sealed class MemoryCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override bool ContainsDependencyCore( string key ) => this._cache.Contains( GetDependencyKey( key ) );
+    protected override bool ContainsDependencyCore( string key )
+    {
+        return this._cache.Get( GetDependencyKey( key ) ) != null;
+    }
 
     /// <inheritdoc />
-    protected override void ClearCore() => this._cache.Trim( 100 );
+    protected override void ClearCore()
+    {
+        if ( this._cache is MemoryCache classicMemoryCache )
+        {
+            classicMemoryCache.Compact( 1 );
+        }
+        else
+        {
+            throw new NotSupportedException( "IMemoryCache implementations other than MemoryCache don't support clearing." );
+        }
+    }
 
     /// <inheritdoc />
     protected override void RemoveItemCore( string key )
@@ -308,5 +399,21 @@ public sealed class MemoryCachingBackend : CachingBackend
         {
             this.OnItemRemoved( key, CacheItemRemovedReason.Removed, this.Id );
         }
+    }
+
+    /// <inheritdoc />
+    protected override CachingBackendFeatures CreateFeatures()
+    {
+        return new Features( this._cache is MemoryCache );
+    }
+
+    private class Features : CachingBackendFeatures
+    {
+        public Features( bool supportsClear )
+        {
+            this.Clear = supportsClear;
+        }
+
+        public override bool Clear { get; }
     }
 }

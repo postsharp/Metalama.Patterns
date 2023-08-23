@@ -2,7 +2,6 @@
 
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
-using System.Runtime.Caching;
 using CacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
 
 namespace Metalama.Patterns.Caching.TestHelpers
@@ -40,7 +39,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public TestingCacheBackend( string name )
         {
             this.ResetExpectations();
-            this._backend = new MemoryCachingBackend( new MemoryCache( name ) );
+            this._backend = MemoryCacheFactory.CreateBackend();
             this._backend.ItemRemoved += this.OnItemRemoved;
             this._backend.DependencyInvalidated += this.OnDependencyInvalidated;
         }
@@ -167,7 +166,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
         }
 
-        protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
+        protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
         {
             await TestableCachingComponentDisposer.DisposeAsync( this._backend );
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );

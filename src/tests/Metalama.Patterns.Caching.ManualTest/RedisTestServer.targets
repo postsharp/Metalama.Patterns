@@ -7,7 +7,10 @@
     <RedisServerExecutable>$(RedisServerDirectory)redis-server.exe</RedisServerExecutable>
   </PropertyGroup>
 
-  <Target Name="DownloadRedisServer">
+  <Target Name="DownloadRedisServer" 
+          BeforeTargets="CoreCompile"
+          Inputs="$(RedisArchivePath)"
+          Outputs="$(RedisServerExecutable)">
 
     <ItemGroup>
       <Statement Include="$ProgressPreference = 'SilentlyContinue'" />
@@ -21,24 +24,6 @@
     <OnError ExecuteTargets="PrintAdditionalErrorMessage" />
   </Target>
 
-  <Target
-      Name="PrepareRedisTestServer"
-      DependsOnTargets="DownloadRedisServer"
-      BeforeTargets="Build"
-      Inputs="$(RedisArchivePath)"
-      Outputs="$(RedisServerExecutable)">
-
-    <!-- Why bother?
-        <Copy SourceFiles="$(RedisServerExecutable)" DestinationFolder="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)\redis-server.exe')" />
-
-        <ItemGroup>
-            <EmbeddedResource Include="$(IntermediateOutputPath)\redis-server.exe">
-                <Link>Executables\redis-server.exe</Link>
-            </EmbeddedResource>
-        </ItemGroup> 
-        <OnError ExecuteTargets="PrintAdditionalErrorMessage" />
-        -->
-  </Target>
 
   <Target Name="PrintAdditionalErrorMessage">
     <Error Text="Probably the powershell command downloading redis-server.exe failed. This sometimes happens. Run the build again." />

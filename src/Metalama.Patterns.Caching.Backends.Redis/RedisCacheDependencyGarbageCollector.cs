@@ -316,7 +316,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async Task DisposeAsync( CancellationToken cancellationToken = default )
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -329,6 +329,8 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
             await this._backend.DisposeAsync( cancellationToken );
         }
     }
+
+    ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
 
     /// <summary>
     /// Performs a full garbage collection on all Redis servers. This operation enumerates and validates all keys in the database, and can possibly last several

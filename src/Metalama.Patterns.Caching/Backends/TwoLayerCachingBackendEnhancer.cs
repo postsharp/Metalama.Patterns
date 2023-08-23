@@ -391,7 +391,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
     {
         await base.DisposeAsyncCore( cancellationToken );
         await this.LocalCache.DisposeAsync( cancellationToken );

@@ -121,7 +121,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
     {
         // It is important to dispose 'this' before local and remote caches because we need to empty the current queue before disposing
         // the remote cache.

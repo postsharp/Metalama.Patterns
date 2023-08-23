@@ -3,7 +3,7 @@
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using System.Runtime.Caching;
+using Microsoft.Extensions.Caching.Memory;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single
@@ -15,9 +15,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
 
         protected override CachingBackend CreateBackend()
         {
-            MemoryCacheHack.MakeExpirationChecksMoreFrequently();
-
-            return new MemoryCachingBackend( new MemoryCache( "1" ) );
+            return MemoryCacheFactory.CreateBackend();
         }
     }
 }

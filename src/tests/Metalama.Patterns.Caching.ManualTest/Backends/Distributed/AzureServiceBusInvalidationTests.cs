@@ -19,10 +19,5 @@ namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed
         {
             return await AzureCacheInvalidator.CreateAsync( backend, new AzureCacheInvalidatorOptions( this._connectionString ) { Prefix = prefix } );
         }
-
-        protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
-        {
-            return AzureCacheInvalidator.Create( backend, new AzureCacheInvalidatorOptions( this._connectionString ) { Prefix = prefix } );
-        }
     }
 }

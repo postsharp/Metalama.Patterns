@@ -31,7 +31,7 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
         }
         finally
         {
-            Task.WaitAll( collectors.Select( c => c.DisposeAsync() ).ToArray() );
+            Task.WaitAll( collectors.Select( c => c.DisposeAsync().AsTask() ).ToArray() );
         }
     }
 

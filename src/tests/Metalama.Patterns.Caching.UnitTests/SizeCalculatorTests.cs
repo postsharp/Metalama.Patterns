@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact( Timeout = 5000 )]
         public void TestSizeCalculator()
         {
-            var backend = new MemoryCacheBackend(
+            var backend = new MemoryCachingBackend(
                 new MemoryCache(
                     new MemoryCacheOptions()
                     {
@@ -36,7 +36,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact( Timeout = 5000 )]
         public void TestPriorities()
         {
-            var backend = new MemoryCacheBackend(
+            var backend = new MemoryCachingBackend(
                 new MemoryCache(
                     new MemoryCacheOptions()
                     {
@@ -78,7 +78,7 @@ namespace Metalama.Patterns.Caching.Tests
             Assert.True( count > 4 );
         }
 
-        private static void EvictEventually( MemoryCacheBackend backend, string key )
+        private static void EvictEventually( MemoryCachingBackend backend, string key )
         {
             while ( backend.ContainsItem( key ) )
             {

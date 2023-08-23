@@ -15,7 +15,7 @@
         <AzureSecurityKeyVaultSecretsVersion>4.5.0</AzureSecurityKeyVaultSecretsVersion>
         <MicrosoftAzureManagementServiceBusVersion>2.1.0</MicrosoftAzureManagementServiceBusVersion>
         <MicrosoftAzureServiceBusVersion>5.2.0</MicrosoftAzureServiceBusVersion>
-        <MicrosoftExtensionsCachingMemoryVersion>3.1.1</MicrosoftExtensionsCachingMemoryVersion>
+        <MicrosoftExtensionsCachingMemoryVersion>7.0.0</MicrosoftExtensionsCachingMemoryVersion>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
         <MicrosoftWindowsAzureConfigurationManagerVersion>3.2.3</MicrosoftWindowsAzureConfigurationManagerVersion>
         <StackExchangeRedisVersion>2.0.601</StackExchangeRedisVersion>

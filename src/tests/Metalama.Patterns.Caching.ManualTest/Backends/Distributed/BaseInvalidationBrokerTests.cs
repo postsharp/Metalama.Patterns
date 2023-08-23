@@ -3,8 +3,7 @@
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using System.Runtime.Caching;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
@@ -21,9 +20,9 @@ public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
 
         return new CachingBackend[]
         {
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_1" ) ), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_2" ) ), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( new MemoryCache( "_3" ) ), testId )
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend(), testId ),
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend(), testId ),
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend(), testId )
         };
     }
 

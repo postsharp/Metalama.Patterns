@@ -3,9 +3,9 @@
 namespace Metalama.Patterns.Caching.Implementation;
 
 // Was [ExplicitCrossPackageInternal]. Used by Redis backend.
-public interface ITestableCachingComponent : IDisposable
+public interface ITestableCachingComponent : IDisposable, IAsyncDisposable
 {
-    Task DisposeAsync( CancellationToken cancellationToken = default );
+    ValueTask DisposeAsync( CancellationToken cancellationToken = default );
 
     int BackgroundTaskExceptions { get; }
 }

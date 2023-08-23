@@ -855,12 +855,14 @@ public abstract class CachingBackend : ITestableCachingComponent
         }
     }
 
+    ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
+
     /// <summary>
     /// Asynchronously dispose the current <see cref="CachingBackend"/>.
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async Task DisposeAsync( CancellationToken cancellationToken = default )
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {
         if ( this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) )
         {
@@ -903,7 +905,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    protected virtual async Task DisposeAsyncCore( CancellationToken cancellationToken )
+    protected virtual async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
     {
         var delay = Task.Delay( _disposeTimeout, cancellationToken );
 #pragma warning disable 612

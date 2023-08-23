@@ -3,7 +3,6 @@
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using System.Runtime.Caching;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single;
@@ -15,8 +14,6 @@ public class TwoLayerCachingBackendTests : BaseCacheBackendTests
 
     protected override CachingBackend CreateBackend()
     {
-        MemoryCacheHack.MakeExpirationChecksMoreFrequently();
-
-        return new TwoLayerCachingBackendEnhancer( new MemoryCachingBackend( new MemoryCache( "1" ) ), new MemoryCachingBackend( new MemoryCache( "2" ) ) );
+        return new TwoLayerCachingBackendEnhancer( MemoryCacheFactory.CreateBackend(), MemoryCacheFactory.CreateBackend() );
     }
 }

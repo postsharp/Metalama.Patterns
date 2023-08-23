@@ -122,7 +122,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
         {
             const string valueSmallKey = "i";
             const string dependencySmallKey = "d";
-            var offset = this.GetExpirationTolerance();
+            var offset = this.GetExpirationQuantum();
 
             var keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
 
@@ -158,7 +158,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 
             Assert.True( await itemExpiredEvent.Task.WithTimeout( TimeoutTimeSpan ) );
 
-            await Task.Delay( this.GetExpirationTolerance( 2 ) );
+            await Task.Delay( this.GetExpirationQuantum( 2 ) );
 
             Assert.False( await cache.Database.KeyExistsAsync( valueKey ) );
             Assert.False( await cache.Database.KeyExistsAsync( dependenciesKey ) );

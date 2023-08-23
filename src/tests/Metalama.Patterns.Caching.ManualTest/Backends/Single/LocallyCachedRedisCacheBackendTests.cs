@@ -34,7 +34,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
         AssertEx.Equal( 0, RedisNotificationQueue.NotificationProcessingThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
     }
 
-    public override TimeSpan GetExpirationTolerance( double multiplier = 1 )
+    protected override TimeSpan GetExpirationQuantum( double multiplier = 1 )
     {
         return TimeSpan.FromSeconds( 0.1 * multiplier );
     }
