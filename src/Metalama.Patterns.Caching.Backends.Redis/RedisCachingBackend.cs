@@ -151,20 +151,30 @@ public class RedisCachingBackend : CachingBackend
             ? new DependenciesRedisCachingBackend( connection, configuration )
             : new RedisCachingBackend( connection, configuration );
 
-        backend.Init();
-
-        CachingBackend enhancer;
-
-        if ( configuration.IsLocallyCached )
+        try
         {
-            enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
-        }
-        else
-        {
-            enhancer = backend;
-        }
+            backend.Init();
 
-        return enhancer;
+            CachingBackend enhancer;
+
+            if ( configuration.IsLocallyCached )
+            {
+                enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
+            }
+            else
+            {
+                enhancer = backend;
+            }
+
+            return enhancer;
+        }
+        catch
+        {
+            // Dispose the backend until it becomes unreachable, otherwise we may have a GC deadlock.
+            backend.Dispose();
+
+            throw;
+        }
     }
 
     /// <summary>
@@ -186,22 +196,32 @@ public class RedisCachingBackend : CachingBackend
             ? new DependenciesRedisCachingBackend( connection, configuration )
             : new RedisCachingBackend( connection, configuration );
 
-        await backend.InitAsync( cancellationToken );
-
-        CachingBackend enhancer;
-
-        if ( configuration.IsLocallyCached )
+        try
         {
+            await backend.InitAsync( cancellationToken );
+
+            CachingBackend enhancer;
+
+            if ( configuration.IsLocallyCached )
+            {
 #pragma warning disable CA2000 // Dispose objects before losing scope
-            enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
+                enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
 #pragma warning restore CA2000 // Dispose objects before losing scope
-        }
-        else
-        {
-            enhancer = backend;
-        }
+            }
+            else
+            {
+                enhancer = backend;
+            }
 
-        return enhancer;
+            return enhancer;
+        }
+        catch
+        {
+            // Dispose the backend until it becomes unreachable, otherwise we may have a GC deadlock.
+            await backend.DisposeAsync( CancellationToken.None );
+
+            throw;
+        }
     }
 
     /// <inheritdoc />

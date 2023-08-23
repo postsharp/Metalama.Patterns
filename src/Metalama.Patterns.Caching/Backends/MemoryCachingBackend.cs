@@ -267,9 +267,9 @@ public sealed class MemoryCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />  
-    protected override CacheValue GetItemCore( string key, bool includeDependencies )
+    protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
-        return (CacheValue?) this._cache.Get( GetItemKey( key ) ) ?? throw new CachingAssertionFailedException();
+        return (CacheValue?) this._cache.Get( GetItemKey( key ) );
     }
 
     /// <inheritdoc />

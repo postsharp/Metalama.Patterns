@@ -31,6 +31,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
     private readonly ImmutableArray<RedisChannel> _channels;
     private readonly Action<RedisNotification> _handler;
     private readonly TimeSpan _connectionTimeout;
+
     private volatile TaskCompletionSource<bool> _queueEmptyTask = new();
     private static volatile int _notificationProcessingThreads;
     private readonly string _id;
@@ -343,14 +344,17 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
                         // Redis resources are being finalized in the wrong order.
                     }
 
-                    // Messages are not enqueued from this point.
-
                     this._notificationProcessingLock.Set();
                     this._notificationQueue.CompleteAdding();
 
-                    // All messages are processed at this point.
+                    // Messages are not enqueued from this point.
 
-                    this._notificationProcessingThreadCompleted.Task.Wait();
+                    if ( this._notificationProcessingThread.IsAlive )
+                    {
+                        this._notificationProcessingThreadCompleted.Task.Wait();
+                    }
+
+                    // All messages are processed at this point.
 
                     this.ChangeStatus( Status.DisposingPhase2 );
 
@@ -407,23 +411,28 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    // Messages are not enqueued from this point.
-
                     this._notificationProcessingLock.Set();
                     this._notificationQueue.CompleteAdding();
 
-                    // ReSharper disable once MethodSupportsCancellation
-                    // ReSharper disable once BadPreprocessorIndent
+                    // Messages are not enqueued from this point.
+
+                    if ( this._notificationProcessingThread.IsAlive )
+                    {
+                        // ReSharper disable once MethodSupportsCancellation
+                        // ReSharper disable once BadPreprocessorIndent
 #pragma warning disable SA1137
+
 #if NETCOREAPP
                     await
 #endif
                         using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
-                    {
-                        // All messages are processed at this point.
-                        await this._notificationProcessingThreadCompleted.Task;
-                    }
+                        {
+                            await this._notificationProcessingThreadCompleted.Task;
+
+                            // All messages are processed at this point.\
+                        }
 #pragma warning restore SA1137
+                    }
 
                     this.ChangeStatus( Status.DisposingPhase2 );
 
