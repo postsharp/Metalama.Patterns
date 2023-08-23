@@ -39,6 +39,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// </summary>
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator"/>.</param>
         /// <param name="options">Options.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
         public static async Task<AzureCacheInvalidator> CreateAsync(
             [Required] CachingBackend backend,
@@ -70,7 +71,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             this._sender = client.CreateSender( options.TopicName );
 
             // Start a background task to process received messages.
-            Task.Run( this.ReceiveMessagesAsync, CancellationToken.None );
+            _ = Task.Run( this.ReceiveMessagesAsync, this._receiverCancellation.Token );
         }
 
         private async Task ReceiveMessagesAsync()
@@ -101,6 +102,8 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                     await Task.Delay( ((AzureCacheInvalidatorOptions) this.Options).RetryOnReceiveError );
                 }
             }
+
+            // ReSharper disable once FunctionNeverReturns
         }
 
         /// <inheritdoc />

@@ -260,6 +260,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
                         // This forces collection of the expired item on some backends.
 
                         Thread.Sleep( offset.Multiply( 2 ) );
+
+                        // ReSharper disable once AccessToDisposedClosure
                         RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 
                         Assert.True( itemRemovedEvent.WaitOne( TimeoutTimeSpan ) );

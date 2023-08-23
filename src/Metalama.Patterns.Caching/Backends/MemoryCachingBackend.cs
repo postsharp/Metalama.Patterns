@@ -52,18 +52,12 @@ public sealed class MemoryCachingBackend : CachingBackend
     public MemoryCachingBackend() : this( new MemoryCache( new MemoryCacheOptions() ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the given <see cref="IMemoryCache"/>.
-    /// </summary>
-    /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
-    public MemoryCachingBackend( [Required] IMemoryCache cache ) : this( cache, null ) { }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the given <see cref="IMemoryCache"/>. The backend creates cache entries
     /// with size calculated by the given function.
     /// </summary>
     /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
     /// <param name="sizeCalculator">A function that calculates the size of a new cache item, which some backends may use to evict.</param>
-    public MemoryCachingBackend( [Required] IMemoryCache cache, Func<PSCacheItem, long>? sizeCalculator )
+    public MemoryCachingBackend( [Required] IMemoryCache cache, Func<PSCacheItem, long>? sizeCalculator = null )
     {
         this._cache = cache;
         this._sizeCalculator = sizeCalculator;
@@ -175,7 +169,7 @@ public sealed class MemoryCachingBackend : CachingBackend
         {
             var key = fullKey.Substring( prefix.Length );
 
-            var item = (CacheValue) value;
+            var item = (CacheValue) (value ?? throw new ArgumentNullException( nameof(value) ));
             this.CleanDependencies( key, item );
             this.OnItemRemoved( key, CreateRemovalReason( reason ), this.Id );
         }
@@ -207,6 +201,11 @@ public sealed class MemoryCachingBackend : CachingBackend
 
                         return newHashSet;
                     } );
+
+                if ( backwardDependencies == null )
+                {
+                    throw new CachingAssertionFailedException();
+                }
             }
 
             lock ( backwardDependencies )
@@ -270,7 +269,7 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// <inheritdoc />  
     protected override CacheValue GetItemCore( string key, bool includeDependencies )
     {
-        return (CacheValue) this._cache.Get( GetItemKey( key ) );
+        return (CacheValue?) this._cache.Get( GetItemKey( key ) ) ?? throw new CachingAssertionFailedException();
     }
 
     /// <inheritdoc />
