@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 public static class CacheAttributeRunTime
 {
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static TResult? OverrideMethod<TResult>( CachedMethodRegistration registration, object? instance, object?[] args )
+    public static TResult? GetFromCacheOrExecute<TResult>( CachedMethodRegistration registration, object? instance, object?[] args )
     {
 #if DEBUG
         if ( registration == null )
@@ -84,10 +84,11 @@ public static class CacheAttributeRunTime
     }
 
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static async Task<TTaskResultType?> OverrideMethodAsyncTask<TTaskResultType>(
+    public static async Task<TTaskResultType?> GetFromCacheOrExecuteTaskAsync<TTaskResultType>(
         CachedMethodRegistration registration,
         object? instance,
-        object?[] args )
+        object?[] args,
+        CancellationToken cancellationToken )
     {
 #if DEBUG
         if ( registration == null )
@@ -151,8 +152,6 @@ public static class CacheAttributeRunTime
 
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
-                    // TODO: Pass CancellationToken (note from original code)
-
                     var task = CachingFrontend.GetOrAddAsync(
                         registration.Method,
                         methodKey,
@@ -162,7 +161,7 @@ public static class CacheAttributeRunTime
                         instance,
                         args,
                         logSource,
-                        CancellationToken.None );
+                        cancellationToken );
 
                     if ( !task.IsCompleted )
                     {
@@ -207,10 +206,11 @@ public static class CacheAttributeRunTime
     }
 
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static async ValueTask<TTaskResultType?> OverrideMethodAsyncValueTask<TTaskResultType>(
+    public static async ValueTask<TTaskResultType?> GetFromCacheOrExecuteValueTaskAsync<TTaskResultType>(
         CachedMethodRegistration registration,
         object? instance,
-        object?[] args )
+        object?[] args,
+        CancellationToken cancellationToken )
     {
 #if DEBUG
         if ( registration == null )
@@ -285,7 +285,7 @@ public static class CacheAttributeRunTime
                         instance,
                         args,
                         logSource,
-                        CancellationToken.None );
+                        cancellationToken );
 
                     if ( !task.IsCompleted )
                     {

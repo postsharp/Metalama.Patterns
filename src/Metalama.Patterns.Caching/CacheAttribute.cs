@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
@@ -133,7 +134,7 @@ public sealed class CacheAttribute : MethodAspect
             } );
 
         // Override the original method.
-        var templates = new MethodTemplateSelector(
+        var overrideTemplates = new MethodTemplateSelector(
             defaultTemplate: nameof(OverrideMethod),
             asyncTemplate: returnTypeIsTask ? nameof(OverrideMethodAsyncTask) : nameof(OverrideMethodAsyncValueTask),
             enumerableTemplate: nameof(OverrideMethod),
@@ -150,13 +151,18 @@ public sealed class CacheAttribute : MethodAspect
 
         builder.Advice.Override(
             builder.Target,
-            templates,
+            overrideTemplates,
             args: new { TValue = genericValueType, TReturnType = builder.Target.ReturnType, registrationField = registrationField.Declaration } );
 
         // Introduce a method that invokes the original method body but where the arguments are passed through an array.
         var getInvokerMethodName = builder.Target.ToSerializableId()
             .MakeAssociatedIdentifier( $"GetInvoker_{builder.Target.Name}" );
 
+        // TODO: The generation scheme could be significantly simplified with sub-templates:
+        // The invoker method should be just a delegate in the original method. There would be no need for separate methods, and the diff would look better.
+        // This would solve the issue of ugly names of methods at least.
+        // (not so sure that sub-templates are needed)
+        
         var getInvokerTemplate = unboundReturnSpecialType switch
         {
             SpecialType.Task_T => nameof(this.GetOriginalMethodInvokerForTask),
@@ -299,6 +305,27 @@ public sealed class CacheAttribute : MethodAspect
     }
 #pragma warning restore IDE0031
 
+    
+    private static IExpression GetCancellationToken()
+    {
+        // TODO: CancellationToken is currently incorrectly handled and must be checked:
+        // 1. The parameter should not be considered cacheable.
+        // 2. With auto-reload, the value should be replaced by a default token.
+        // 3. It is not tested.
+        
+        var cancellationTokenParameter = meta.Target.Method.Parameters.OfParameterType( typeof(CancellationToken) ).LastOrDefault();
+
+        if ( cancellationTokenParameter != null )
+        {
+            return cancellationTokenParameter;
+        }
+        else
+        {
+            return ExpressionFactory.Parse( "default" );
+        }
+
+    }
+
     // ReSharper disable InconsistentNaming
     // ReSharper disable UnusedParameter.Global
 #pragma warning disable SA1313
@@ -306,7 +333,7 @@ public sealed class CacheAttribute : MethodAspect
     [Template]
     public static TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType TValue /* not used */ )
     {
-        return CacheAttributeRunTime.OverrideMethod<TReturnType>(
+        return CacheAttributeRunTime.GetFromCacheOrExecute<TReturnType>(
             registrationField.Value,
             meta.Target.Method.IsStatic ? null : meta.This,
             meta.Target.Method.Parameters.ToValueArray() );
@@ -315,19 +342,21 @@ public sealed class CacheAttribute : MethodAspect
     [Template]
     public static Task<TValue> OverrideMethodAsyncTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
-        return CacheAttributeRunTime.OverrideMethodAsyncTask<TValue>(
+        return CacheAttributeRunTime.GetFromCacheOrExecuteTaskAsync<TValue>(
             registrationField.Value,
             meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray() );
+            meta.Target.Method.Parameters.ToValueArray(),
+            GetCancellationToken().Value );
     }
 
     [Template]
     public static ValueTask<TValue> OverrideMethodAsyncValueTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
-        return CacheAttributeRunTime.OverrideMethodAsyncValueTask<TValue>(
+        return CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<TValue>(
             registrationField.Value,
             meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray() );
+            meta.Target.Method.Parameters.ToValueArray(),
+            GetCancellationToken().Value  );
     }
 
     // ReSharper disable once RedundantBlankLines
@@ -337,10 +366,11 @@ public sealed class CacheAttribute : MethodAspect
     [Template]
     public static IAsyncEnumerable<TValue> OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
-        var task = CacheAttributeRunTime.OverrideMethodAsyncValueTask<IAsyncEnumerable<TValue>>(
+        var task = CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
             registrationField.Value,
             meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray() );
+            meta.Target.Method.Parameters.ToValueArray(),
+            GetCancellationToken().Value );
 
         // Avoid extension method form due to current Metalama framework issue.
         return AsyncEnumerableHelper.AsAsyncEnumerable( task );
@@ -350,10 +380,11 @@ public sealed class CacheAttribute : MethodAspect
     [Template]
     public static IAsyncEnumerator<TValue> OverrideMethodAsyncEnumerator<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
-        var task = CacheAttributeRunTime.OverrideMethodAsyncValueTask<IAsyncEnumerator<TValue>>(
+        var task = CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
             registrationField.Value,
             meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray() );
+            meta.Target.Method.Parameters.ToValueArray(),
+            GetCancellationToken().Value );
 
         // Avoid extension method form due to current Metalama framework issue.
         return AsyncEnumerableHelper.AsAsyncEnumerator( task );
