@@ -200,7 +200,7 @@ public static partial class CachingServices
                 try
                 {
                     var key = DefaultKeyBuilder.BuildMethodKey(
-                        MethodRegistrationCache.Get( method )
+                        CachedMethodMetadataRegistry.Get( method )
                         ?? throw new CachingAssertionFailedException( $"The method '{method}' is not registered." ),
                         args,
                         instance );
@@ -246,7 +246,7 @@ public static partial class CachingServices
                 try
                 {
                     var key = DefaultKeyBuilder.BuildMethodKey(
-                        MethodRegistrationCache.Get( method )
+                        CachedMethodMetadataRegistry.Get( method )
                         ?? throw new CachingAssertionFailedException( $"The method '{method}' is not registered." ),
                         args,
                         instance );
@@ -301,7 +301,7 @@ public static partial class CachingServices
         private static CachingContext OpenRecacheContext( Delegate method, params object[] args )
         {
             var key = DefaultKeyBuilder.BuildMethodKey(
-                MethodRegistrationCache.Get( method.Method )
+                CachedMethodMetadataRegistry.Get( method.Method )
                 ?? throw new CachingAssertionFailedException( $"The method '{method.Method}' is not registered." ),
                 args,
                 method.Target );

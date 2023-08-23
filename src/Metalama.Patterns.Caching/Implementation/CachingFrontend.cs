@@ -86,7 +86,6 @@ internal static class CachingFrontend
             if ( item == null )
             {
 #if DEBUG
-
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
@@ -140,7 +139,7 @@ internal static class CachingFrontend
         string key,
         Type valueType,
         ICacheItemConfiguration configuration,
-        Func<object?, object?[], Task<object?>> invokeOriginalMethod,
+        Func<object?, object?[], CancellationToken, Task<object?>> invokeOriginalMethod,
         object? instance,
         object?[] args,
         LogSource logger,
@@ -214,7 +213,6 @@ internal static class CachingFrontend
                 // Cache miss.
 
 #if DEBUG
-
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
@@ -224,7 +222,7 @@ internal static class CachingFrontend
 
                 if ( configuration.AutoReload.GetValueOrDefault() )
                 {
-                    var valueProvider = () => invokeOriginalMethod( instance, args );
+                    var valueProvider = () => invokeOriginalMethod( instance, args, cancellationToken );
                     backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, true );
                 }
 
@@ -232,7 +230,7 @@ internal static class CachingFrontend
 
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    var invokeValueProviderTask = invokeOriginalMethod( instance, args );
+                    var invokeValueProviderTask = invokeOriginalMethod( instance, args, cancellationToken );
 
                     value = await invokeValueProviderTask;
 
@@ -271,7 +269,7 @@ internal static class CachingFrontend
         string key,
         Type valueType,
         ICacheItemConfiguration configuration,
-        Func<object?, object?[], ValueTask<object?>> invokeOriginalMethod,
+        Func<object?, object?[], CancellationToken, ValueTask<object?>> invokeOriginalMethod,
         object? instance,
         object?[] args,
         LogSource logger,
@@ -346,7 +344,6 @@ internal static class CachingFrontend
                 // Cache miss.
 
 #if DEBUG
-
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
@@ -356,7 +353,7 @@ internal static class CachingFrontend
 
                 if ( configuration.AutoReload.GetValueOrDefault() )
                 {
-                    var valueProvider = () => invokeOriginalMethod( instance, args ).AsTask();
+                    var valueProvider = () => invokeOriginalMethod( instance, args, cancellationToken ).AsTask();
                     backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, true );
                 }
 
@@ -364,7 +361,7 @@ internal static class CachingFrontend
 
                 using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
-                    var invokeValueProviderTask = invokeOriginalMethod( instance, args );
+                    var invokeValueProviderTask = invokeOriginalMethod( instance, args, cancellationToken );
 
                     value = await invokeValueProviderTask;
 

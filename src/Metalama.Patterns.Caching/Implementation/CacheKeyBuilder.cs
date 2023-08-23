@@ -58,13 +58,13 @@ public class CacheKeyBuilder : IDisposable
     /// <summary>
     /// Builds a cache key for a given method call.
     /// </summary>
-    /// <param name="registration">The <see cref="CachedMethodRegistration"/> representing the method.</param>
+    /// <param name="metadata">The <see cref="CachedMethodMetadata"/> representing the method.</param>
     /// <param name="arguments">The arguments passed to the method call.</param>
     /// <param name="instance">The <c>this</c> instance of the method call, or <c>null</c> if the method is static.</param>
     /// <returns>A string uniquely representing the method call.</returns>
-    public virtual string BuildMethodKey( [Required] CachedMethodRegistration registration, [Required] IList<object?> arguments, object? instance = null )
+    public virtual string BuildMethodKey( [Required] CachedMethodMetadata metadata, [Required] IList<object?> arguments, object? instance = null )
     {
-        var method = registration.Method;
+        var method = metadata.Method;
 
         var parameters = method.GetParameters();
 
@@ -98,7 +98,7 @@ public class CacheKeyBuilder : IDisposable
 
         var addComma = false;
 
-        if ( !method.IsStatic && !registration.IsThisParameterIgnored )
+        if ( !method.IsStatic && !metadata.IsThisParameterIgnored )
         {
             // We need a 'this' specifier to differentiate an instance method
             // from a static method whose first parameter is of the declaring type.
@@ -111,7 +111,7 @@ public class CacheKeyBuilder : IDisposable
         {
             var argument = arguments[i];
 
-            if ( registration.Parameters[i].IsIgnored )
+            if ( metadata.Parameters[i].IsIgnored )
             {
                 this.AppendArgument( stringBuilder, parameters[i].ParameterType, this.IgnoredParameterSentinel, ref addComma );
             }

@@ -22,11 +22,11 @@ namespace Metalama.Patterns.Caching.Tests
 #pragma warning restore SA1401
 
             public override string BuildMethodKey(
-                [Required] CachedMethodRegistration registration,
+                [Required] CachedMethodMetadata metadata,
                 [Required] IList<object?> arguments,
                 object? instance = null )
             {
-                return this.LastMethodKey = base.BuildMethodKey( registration, arguments, instance );
+                return this.LastMethodKey = base.BuildMethodKey( metadata, arguments, instance );
             }
         }
 

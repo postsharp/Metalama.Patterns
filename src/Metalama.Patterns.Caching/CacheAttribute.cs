@@ -8,6 +8,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.RunTime;
 using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching;
@@ -118,13 +119,30 @@ public sealed class CacheAttribute : MethodAspect
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
 
         // Introduce a field of type CachedMethodRegistration.
-        var registrationFieldName = builder.Target.ToSerializableId()
-            .MakeAssociatedIdentifier( $"_cacheRegistration_{builder.Target.Name}" );
+        var registrationFieldPrefix = $"_cacheRegistration_{builder.Target.Name}";
+        string registrationFieldName;
+
+        if ( !builder.Target.DeclaringType.Fields.OfName( registrationFieldPrefix ).Any() )
+        {
+            registrationFieldName = registrationFieldPrefix;
+        }
+        else
+        {
+            for ( var i = 2; true; i++ )
+            {
+                registrationFieldName = $"{registrationFieldPrefix}{i}";
+
+                if ( !builder.Target.DeclaringType.Fields.OfName( registrationFieldName ).Any() )
+                {
+                    break;
+                }
+            }
+        }
 
         var registrationField = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
             registrationFieldName,
-            typeof(CachedMethodRegistration),
+            typeof(CachedMethodMetadata),
             IntroductionScope.Static,
             OverrideStrategy.Fail,
             b =>
@@ -162,26 +180,6 @@ public sealed class CacheAttribute : MethodAspect
         // The invoker method should be just a delegate in the original method. There would be no need for separate methods, and the diff would look better.
         // This would solve the issue of ugly names of methods at least.
         // (not so sure that sub-templates are needed)
-        
-        var getInvokerTemplate = unboundReturnSpecialType switch
-        {
-            SpecialType.Task_T => nameof(this.GetOriginalMethodInvokerForTask),
-            SpecialType.ValueTask_T => nameof(this.GetOriginalMethodInvokerForValueTask),
-            SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T => "GetOriginalMethodInvokerForAsyncEnumerableOrEnumerator",
-            _ => nameof(this.GetOriginalMethodInvoker)
-        };
-
-        var getOriginalMethodInvokerResult = builder.Advice.IntroduceMethod(
-            builder.Target.DeclaringType,
-            getInvokerTemplate,
-            IntroductionScope.Static,
-            OverrideStrategy.Fail,
-            b =>
-            {
-                b.Accessibility = Accessibility.Private;
-                b.Name = getInvokerMethodName;
-            },
-            args: new { method = builder.Target } );
 
         // Initialize the CachedMethodRegistration field from the static constructor.
         var awaitableResultType = unboundReturnSpecialType switch
@@ -195,13 +193,7 @@ public sealed class CacheAttribute : MethodAspect
             builder.Target.DeclaringType,
             nameof(this.CachedMethodRegistrationInitializer),
             InitializerKind.BeforeTypeConstructor,
-            args: new
-            {
-                method = builder.Target,
-                field = registrationField.Declaration,
-                getOriginalMethodInvoker = getOriginalMethodInvokerResult.Declaration,
-                awaitableResultType
-            } );
+            args: new { method = builder.Target, field = registrationField.Declaration, awaitableResultType } );
 
         var effectiveConfiguration = this.GetEffectiveConfiguration( builder.Target );
 
@@ -215,82 +207,42 @@ public sealed class CacheAttribute : MethodAspect
         builder.Advice.IntroduceAttribute( builder.Target, effectiveConfiguration.ToAttributeConstruction(), OverrideStrategy.Override );
     }
 
-    private static IEnumerable<IExpression> GetArgumentExpressions( IMethod method, IExpression arrayExpression )
+    private static IEnumerable<IExpression> GetArgumentExpressions( IMethod method, IExpression arrayExpression, IExpression? cancellationTokenArgument )
     {
+        // If the method accepts a CancellationToken parameter, we have to replace it with the value we received.
+
+        var cancellationTokenParameter = cancellationTokenArgument != null ? GetCancellationTokenParameter() : null;
+
         IExpression GetItem( IParameter p )
         {
-            var eb = new ExpressionBuilder();
-            eb.AppendExpression( arrayExpression );
-            eb.AppendVerbatim( "[" );
-            eb.AppendLiteral( p.Index );
-            eb.AppendVerbatim( "]" );
+            if ( cancellationTokenParameter == p )
+            {
+                return cancellationTokenArgument!;
+            }
+            else
+            {
+                var eb = new ExpressionBuilder();
+                eb.AppendExpression( arrayExpression );
+                eb.AppendVerbatim( "[" );
+                eb.AppendLiteral( p.Index );
+                eb.AppendVerbatim( "]" );
 
-            return eb.ToExpression();
+                return eb.ToExpression();
+            }
         }
 
         return method.Parameters.Select( GetItem );
     }
 
-    [Template]
-    public Func<object?, object?[], object?> GetOriginalMethodInvoker( IMethod method )
-    {
-        return Invoke;
-
-        object? Invoke( object? instance, object?[] args )
-        {
-            return method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )!;
-        }
-    }
-
-    [Template]
-    public Func<object?, object?[], Task<object?>> GetOriginalMethodInvokerForTask( IMethod method )
-    {
-        return Invoke;
-
-        async Task<object?> Invoke( object? instance, object?[] args )
-        {
-            return await method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )!;
-        }
-    }
-
-    [Template]
-    public Func<object?, object?[], ValueTask<object?>> GetOriginalMethodInvokerForValueTask( IMethod method )
-    {
-        return Invoke;
-
-        async ValueTask<object?> Invoke( object? instance, object?[] args )
-        {
-            return await method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )!;
-        }
-    }
-
-    // ReSharper disable once RedundantBlankLines
-#if NETCOREAPP3_0_OR_GREATER
-
-    // ReSharper disable once UnusedMember.Global
-    [Template]
-    public Func<object?, object?[], ValueTask<object?>> GetOriginalMethodInvokerForAsyncEnumerableOrEnumerator( IMethod method )
-    {
-        return Invoke;
-
-        ValueTask<object?> Invoke( object? instance, object?[] args )
-        {
-            return new ValueTask<object?>(
-                method.With( instance, InvokerOptions.Base ).Invoke( GetArgumentExpressions( method, ExpressionFactory.Capture( args ) ) )! );
-        }
-    }
-#endif
-
     // ReSharper disable once MergeConditionalExpression
 #pragma warning disable IDE0031
     [Template]
-    public void CachedMethodRegistrationInitializer( IMethod method, IField field, IMethod getOriginalMethodInvoker, IType? awaitableResultType )
+    public void CachedMethodRegistrationInitializer( IMethod method, IField field, IType? awaitableResultType )
     {
         var effectiveConfiguration = this.GetEffectiveConfiguration( method );
 
-        field.Value = CachingServices.MethodRegistrationCache.Register(
+        field.Value = CachingServices.RegisterCachedMethod(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
-            getOriginalMethodInvoker.Invoke(),
             awaitableResultType == null ? null : awaitableResultType.ToTypeOfExpression().Value,
             new CacheAttributeProperties()
             {
@@ -305,25 +257,19 @@ public sealed class CacheAttribute : MethodAspect
     }
 #pragma warning restore IDE0031
 
-    
-    private static IExpression GetCancellationToken()
+    private static IParameter? GetCancellationTokenParameter()
+    {
+        return meta.Target.Method.Parameters.OfParameterType( typeof(CancellationToken) ).LastOrDefault();
+    }
+
+    private static IExpression GetCancellationTokenExpression()
     {
         // TODO: CancellationToken is currently incorrectly handled and must be checked:
         // 1. The parameter should not be considered cacheable.
         // 2. With auto-reload, the value should be replaced by a default token.
         // 3. It is not tested.
-        
-        var cancellationTokenParameter = meta.Target.Method.Parameters.OfParameterType( typeof(CancellationToken) ).LastOrDefault();
 
-        if ( cancellationTokenParameter != null )
-        {
-            return cancellationTokenParameter;
-        }
-        else
-        {
-            return ExpressionFactory.Parse( "default" );
-        }
-
+        return GetCancellationTokenParameter() ?? ExpressionFactory.Parse( "default" );
     }
 
     // ReSharper disable InconsistentNaming
@@ -331,32 +277,57 @@ public sealed class CacheAttribute : MethodAspect
 #pragma warning disable SA1313
 
     [Template]
-    public static TReturnType OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType TValue /* not used */ )
+    public static TReturnType? OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType TValue /* not used */ )
     {
+        object? Invoke( object? instance, object?[] args )
+        {
+            return meta.Target.Method.With( instance, InvokerOptions.Base )
+                .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), null ) );
+        }
+
         return CacheAttributeRunTime.GetFromCacheOrExecute<TReturnType>(
-            registrationField.Value,
-            meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray() );
+            (CachedMethodMetadata) registrationField.Value!,
+            Invoke,
+            meta.Target.Method.IsStatic ? null : (object) meta.This,
+            (object[]) meta.Target.Method.Parameters.ToValueArray()! );
     }
 
     [Template]
-    public static Task<TValue> OverrideMethodAsyncTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
+    public static Task<TValue?> OverrideMethodAsyncTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
+        var cancellationTokenExpression = GetCancellationTokenExpression();
+
+        async Task<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        {
+            return await meta.Target.Method.With( instance, InvokerOptions.Base )
+                .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
+        }
+
         return CacheAttributeRunTime.GetFromCacheOrExecuteTaskAsync<TValue>(
-            registrationField.Value,
-            meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray(),
-            GetCancellationToken().Value );
+            (CachedMethodMetadata) registrationField.Value!,
+            InvokeAsync,
+            meta.Target.Method.IsStatic ? null : (object) meta.This,
+            (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            (CancellationToken) cancellationTokenExpression.Value! );
     }
 
     [Template]
-    public static ValueTask<TValue> OverrideMethodAsyncValueTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
+    public static ValueTask<TValue?> OverrideMethodAsyncValueTask<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
+        var cancellationTokenExpression = GetCancellationTokenExpression();
+
+        async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        {
+            return await meta.Target.Method.With( instance, InvokerOptions.Base )
+                .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
+        }
+
         return CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<TValue>(
-            registrationField.Value,
-            meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray(),
-            GetCancellationToken().Value  );
+            (CachedMethodMetadata) registrationField.Value!,
+            InvokeAsync,
+            meta.Target.Method.IsStatic ? null : (object) meta.This,
+            (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            (CancellationToken) cancellationTokenExpression.Value! );
     }
 
     // ReSharper disable once RedundantBlankLines
@@ -364,13 +335,32 @@ public sealed class CacheAttribute : MethodAspect
 
     // ReSharper disable once UnusedMember.Global
     [Template]
-    public static IAsyncEnumerable<TValue> OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
+    public static IAsyncEnumerable<TValue>? OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
+        var cancellationTokenExpression = GetCancellationTokenExpression();
+
+        async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        {
+            var enumerable = (IAsyncEnumerable<TValue>?)
+                meta.Target.Method.With( instance, InvokerOptions.Base )
+                    .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) );
+
+            if ( enumerable != null )
+            {
+                return await enumerable.BufferAsync( cancellationToken );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         var task = CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
-            registrationField.Value,
-            meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray(),
-            GetCancellationToken().Value );
+            (CachedMethodMetadata) registrationField.Value!,
+            InvokeAsync,
+            meta.Target.Method.IsStatic ? null : (object) meta.This,
+            (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            (CancellationToken) cancellationTokenExpression.Value! );
 
         // Avoid extension method form due to current Metalama framework issue.
         return AsyncEnumerableHelper.AsAsyncEnumerable( task );
@@ -380,11 +370,30 @@ public sealed class CacheAttribute : MethodAspect
     [Template]
     public static IAsyncEnumerator<TValue> OverrideMethodAsyncEnumerator<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
+        var cancellationTokenExpression = GetCancellationTokenExpression();
+
+        async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        {
+            var enumerator = (IAsyncEnumerator<TValue>?)
+                meta.Target.Method.With( instance, InvokerOptions.Base )
+                    .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) );
+
+            if ( enumerator == null )
+            {
+                return null;
+            }
+
+            var buffer = await enumerator.BufferAsync( cancellationToken );
+
+            return buffer;
+        }
+
         var task = CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
-            registrationField.Value,
-            meta.Target.Method.IsStatic ? null : meta.This,
-            meta.Target.Method.Parameters.ToValueArray(),
-            GetCancellationToken().Value );
+            (CachedMethodMetadata) registrationField.Value!,
+            InvokeAsync,
+            meta.Target.Method.IsStatic ? null : (object) meta.This,
+            (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            (CancellationToken) cancellationTokenExpression.Value! );
 
         // Avoid extension method form due to current Metalama framework issue.
         return AsyncEnumerableHelper.AsAsyncEnumerator( task );

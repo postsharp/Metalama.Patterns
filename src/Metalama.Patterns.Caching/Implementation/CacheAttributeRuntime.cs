@@ -14,50 +14,49 @@ namespace Metalama.Patterns.Caching.Implementation;
 public static class CacheAttributeRunTime
 {
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static TResult? GetFromCacheOrExecute<TResult>( CachedMethodRegistration registration, object? instance, object?[] args )
+    public static TResult? GetFromCacheOrExecute<TResult>(
+        CachedMethodMetadata metadata,
+        Func<object?, object?[], object?> func,
+        object? instance,
+        object?[] args )
     {
 #if DEBUG
         if ( registration == null )
         {
             throw new ArgumentNullException( nameof(registration) );
         }
-
-        if ( registration.InvokeOriginalMethod == null )
-        {
-            throw new ArgumentNullException( nameof(registration) + "." + nameof(registration.InvokeOriginalMethod) );
-        }
 #endif
-        var logSource = registration.Logger;
+        var logSource = metadata.Logger;
 
         object? result;
 
-        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of method {Method}", registration.Method ) ) )
+        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of method {Method}", metadata.Method ) ) )
         {
             try
             {
-                var mergedConfiguration = registration.MergedConfiguration;
+                var mergedConfiguration = metadata.MergedConfiguration;
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    result = registration.InvokeOriginalMethod!( instance, args );
+                    result = func( instance, args );
                 }
                 else
                 {
                     var methodKey = CachingServices.DefaultKeyBuilder.BuildMethodKey(
-                        registration,
+                        metadata,
                         args,
                         instance );
 
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
                     result = CachingFrontend.GetOrAdd(
-                        registration.Method,
+                        metadata.Method,
                         methodKey,
-                        registration.Method.ReturnType,
+                        metadata.Method.ReturnType,
                         mergedConfiguration,
-                        registration.InvokeOriginalMethod!,
+                        func,
                         instance,
                         args,
                         logSource );
@@ -73,7 +72,7 @@ public static class CacheAttributeRunTime
             }
         }
 
-        if ( registration.ReturnValueCanBeNull )
+        if ( metadata.ReturnValueCanBeNull )
         {
             return (TResult?) result;
         }
@@ -85,7 +84,8 @@ public static class CacheAttributeRunTime
 
     [EditorBrowsable( EditorBrowsableState.Never )]
     public static async Task<TTaskResultType?> GetFromCacheOrExecuteTaskAsync<TTaskResultType>(
-        CachedMethodRegistration registration,
+        CachedMethodMetadata metadata,
+        Func<object?, object?[], CancellationToken, Task<object?>> func,
         object? instance,
         object?[] args,
         CancellationToken cancellationToken )
@@ -95,32 +95,27 @@ public static class CacheAttributeRunTime
         {
             throw new ArgumentNullException( nameof(registration) );
         }
-
-        if ( registration.InvokeOriginalMethodAsyncTask == null )
-        {
-            throw new ArgumentNullException( nameof(registration) + "." + nameof(registration.InvokeOriginalMethodAsyncTask) );
-        }
 #endif
 
         // TODO: What about ConfigureAwait( false )?
 
-        var logSource = registration.Logger;
+        var logSource = metadata.Logger;
 
         object? result;
 
         // TODO: PostSharp passes an otherwise uninitialized CallerInfo with the CallerAttributes.IsAsync flag set.
 
-        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", registration.Method ) ) )
+        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", metadata.Method ) ) )
         {
             try
             {
-                var mergedConfiguration = registration.MergedConfiguration;
+                var mergedConfiguration = metadata.MergedConfiguration;
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    var task = registration.InvokeOriginalMethodAsyncTask!( instance, args );
+                    var task = func( instance, args, cancellationToken );
 
                     if ( !task.IsCompleted )
                     {
@@ -146,18 +141,18 @@ public static class CacheAttributeRunTime
                 else
                 {
                     var methodKey = CachingServices.DefaultKeyBuilder.BuildMethodKey(
-                        registration,
+                        metadata,
                         args,
                         instance );
 
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
                     var task = CachingFrontend.GetOrAddAsync(
-                        registration.Method,
+                        metadata.Method,
                         methodKey,
-                        registration.AwaitableResultType!,
+                        metadata.AwaitableResultType!,
                         mergedConfiguration,
-                        registration.InvokeOriginalMethodAsyncTask!,
+                        func,
                         instance,
                         args,
                         logSource,
@@ -195,7 +190,7 @@ public static class CacheAttributeRunTime
             }
         }
 
-        if ( registration.ReturnValueCanBeNull )
+        if ( metadata.ReturnValueCanBeNull )
         {
             return (TTaskResultType?) result;
         }
@@ -207,7 +202,8 @@ public static class CacheAttributeRunTime
 
     [EditorBrowsable( EditorBrowsableState.Never )]
     public static async ValueTask<TTaskResultType?> GetFromCacheOrExecuteValueTaskAsync<TTaskResultType>(
-        CachedMethodRegistration registration,
+        CachedMethodMetadata metadata,
+        Func<object?, object?[], CancellationToken, ValueTask<object?>> func,
         object? instance,
         object?[] args,
         CancellationToken cancellationToken )
@@ -217,32 +213,27 @@ public static class CacheAttributeRunTime
         {
             throw new ArgumentNullException( nameof(registration) );
         }
-
-        if ( registration.InvokeOriginalMethodAsyncValueTask == null )
-        {
-            throw new ArgumentNullException( nameof(registration) + "." + nameof(registration.InvokeOriginalMethodAsyncValueTask) );
-        }
 #endif
 
         // TODO: What about ConfigureAwait( false )?
 
-        var logSource = registration.Logger;
+        var logSource = metadata.Logger;
 
         object? result;
 
         // TODO: PostSharp passes an otherwise uninitialized CallerInfo with the CallerAttributes.IsAsync flag set.
 
-        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", registration.Method ) ) )
+        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", metadata.Method ) ) )
         {
             try
             {
-                var mergedConfiguration = registration.MergedConfiguration;
+                var mergedConfiguration = metadata.MergedConfiguration;
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {
                     logSource.Debug.EnabledOrNull?.Write( Formatted( "Ignoring the caching aspect because caching is disabled for this profile." ) );
 
-                    var task = registration.InvokeOriginalMethodAsyncValueTask!( instance, args );
+                    var task = func( instance, args, cancellationToken );
 
                     if ( !task.IsCompleted )
                     {
@@ -268,7 +259,7 @@ public static class CacheAttributeRunTime
                 else
                 {
                     var methodKey = CachingServices.DefaultKeyBuilder.BuildMethodKey(
-                        registration,
+                        metadata,
                         args,
                         instance );
 
@@ -277,11 +268,11 @@ public static class CacheAttributeRunTime
                     // TODO: Pass CancellationToken (note from original code)
 
                     var task = CachingFrontend.GetOrAddAsync(
-                        registration.Method,
+                        metadata.Method,
                         methodKey,
-                        registration.AwaitableResultType!,
+                        metadata.AwaitableResultType!,
                         mergedConfiguration,
-                        registration.InvokeOriginalMethodAsyncValueTask!,
+                        func,
                         instance,
                         args,
                         logSource,
@@ -319,7 +310,7 @@ public static class CacheAttributeRunTime
             }
         }
 
-        if ( registration.ReturnValueCanBeNull )
+        if ( metadata.ReturnValueCanBeNull )
         {
             return (TTaskResultType?) result;
         }

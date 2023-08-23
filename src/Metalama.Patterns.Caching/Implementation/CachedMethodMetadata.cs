@@ -12,11 +12,11 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// Encapsulates information about a method being cached. This class should only be used by the caching framework and the code it generates.
 /// </summary>
 /// <remarks>
-/// The implementation of <see cref="CachedMethodRegistration"/> is intentionally opaque (ie, internal) as it should be used only by the caching framework runtime.
+/// The implementation of <see cref="CachedMethodMetadata"/> is intentionally opaque (ie, internal) as it should be used only by the caching framework runtime.
 /// </remarks>
 [PublicAPI]
 [EditorBrowsable( EditorBrowsableState.Never )]
-public sealed class CachedMethodRegistration
+public sealed class CachedMethodMetadata
 {
     /// <summary>
     /// Gets the <see cref="MethodInfo"/> of the method.
@@ -43,33 +43,6 @@ public sealed class CachedMethodRegistration
     /// be represented by <see langword="null"/>.
     /// </remarks>
     internal bool ReturnValueCanBeNull { get; }
-
-    /// <summary>
-    /// Gets a delegate that can invoke the original uncached method.
-    /// </summary>
-    /// <remarks>
-    /// Only one of <see cref="InvokeOriginalMethod"/>, <see cref="InvokeOriginalMethodAsyncTask"/> and <see cref="InvokeOriginalMethodAsyncValueTask"/>
-    /// is initialized, the others will be <see langword="null"/>.
-    /// </remarks>
-    internal Func<object?, object?[], object?>? InvokeOriginalMethod { get; }
-
-    /// <summary>
-    /// Gets a delegate that can invoke the original uncached async method.
-    /// </summary>
-    /// <remarks>
-    /// Only one of <see cref="InvokeOriginalMethod"/>, <see cref="InvokeOriginalMethodAsyncTask"/> and <see cref="InvokeOriginalMethodAsyncValueTask"/>
-    /// is initialized, the others will be <see langword="null"/>.
-    /// </remarks>
-    internal Func<object?, object?[], Task<object?>>? InvokeOriginalMethodAsyncTask { get; }
-
-    /// <summary>
-    /// Gets a delegate that can invoke the original uncached async method.
-    /// </summary>
-    /// <remarks>
-    /// Only one of <see cref="InvokeOriginalMethod"/>, <see cref="InvokeOriginalMethodAsyncTask"/> and <see cref="InvokeOriginalMethodAsyncValueTask"/>
-    /// is initialized, the others will be <see langword="null"/>.
-    /// </remarks>
-    internal Func<object?, object?[], ValueTask<object?>>? InvokeOriginalMethodAsyncValueTask { get; }
 
     /// <summary>
     /// Gets the build time configuration that applies to the method.
@@ -143,9 +116,10 @@ public sealed class CachedMethodRegistration
         }
     }
 
-    private CachedMethodRegistration(
+    internal CachedMethodMetadata(
         MethodInfo method,
         ImmutableArray<CachedParameterInfo> parameters,
+        Type? awaitableResultType,
         bool isThisParameterIgnored,
         ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
@@ -155,45 +129,6 @@ public sealed class CachedMethodRegistration
         this.IsThisParameterIgnored = isThisParameterIgnored;
         this.BuildTimeConfiguration = buildTimeConfiguration.CloneAsCacheItemConfiguration();
         this.ReturnValueCanBeNull = returnValueCanBeNull;
-    }
-
-    internal CachedMethodRegistration(
-        MethodInfo method,
-        ImmutableArray<CachedParameterInfo> parameters,
-        bool isThisParameterIgnored,
-        Func<object?, object?[], object?> invokeOriginalMethod,
-        ICacheItemConfiguration buildTimeConfiguration,
-        bool returnValueCanBeNull )
-        : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
-    {
-        this.InvokeOriginalMethod = invokeOriginalMethod;
-    }
-
-    internal CachedMethodRegistration(
-        MethodInfo method,
-        ImmutableArray<CachedParameterInfo> parameters,
-        Type awaitableResultType,
-        bool isThisParameterIgnored,
-        Func<object?, object?[], Task<object?>> invokeOriginalMethodAsyncTask,
-        ICacheItemConfiguration buildTimeConfiguration,
-        bool returnValueCanBeNull )
-        : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
-    {
-        this.InvokeOriginalMethodAsyncTask = invokeOriginalMethodAsyncTask;
-        this.AwaitableResultType = awaitableResultType;
-    }
-
-    internal CachedMethodRegistration(
-        MethodInfo method,
-        ImmutableArray<CachedParameterInfo> parameters,
-        Type awaitableResultType,
-        bool isThisParameterIgnored,
-        Func<object?, object?[], ValueTask<object?>> invokeOriginalMethodAsyncValueTask,
-        ICacheItemConfiguration buildTimeConfiguration,
-        bool returnValueCanBeNull )
-        : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
-    {
-        this.InvokeOriginalMethodAsyncValueTask = invokeOriginalMethodAsyncValueTask;
         this.AwaitableResultType = awaitableResultType;
     }
 }
