@@ -11,8 +11,10 @@
     
     <!-- Set the default versions of dependencies -->
     <PropertyGroup>
+        <AzureIdentityVersion>1.9.0</AzureIdentityVersion>
+        <AzureSecurityKeyVaultSecretsVersion>4.5.0</AzureSecurityKeyVaultSecretsVersion>
         <MicrosoftAzureManagementServiceBusVersion>2.1.0</MicrosoftAzureManagementServiceBusVersion>
-        <MicrosoftAzureServiceBusVersion>4.1.1</MicrosoftAzureServiceBusVersion>
+        <MicrosoftAzureServiceBusVersion>5.2.0</MicrosoftAzureServiceBusVersion>
         <MicrosoftExtensionsCachingMemoryVersion>3.1.1</MicrosoftExtensionsCachingMemoryVersion>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
         <MicrosoftWindowsAzureConfigurationManagerVersion>3.2.3</MicrosoftWindowsAzureConfigurationManagerVersion>

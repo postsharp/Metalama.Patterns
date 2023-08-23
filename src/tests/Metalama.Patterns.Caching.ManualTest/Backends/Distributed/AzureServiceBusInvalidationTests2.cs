@@ -5,6 +5,7 @@ using Metalama.Patterns.Caching.Backends.Azure;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using System.Threading.Tasks;
+using Metalama.Patterns.TestHelpers;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
@@ -18,12 +19,14 @@ internal
 #endif
     class AzureServiceBusInvalidationTests2 : BaseInvalidationBrokerTests
 {
-    private const string _connectionString =
-        "Endpoint=sb://petrservicebusstandard.servicebus.windows.net/;SharedAccessKeyName=PetrSAS;SharedAccessKey=3C+I8BExn5AMRaxXJk4kTINM0f2uXCPWKtWAdmGgpQI=;EntityPath=petrtopic";
-
-    private const string _clientId = "95e2b555-60ed-49dd-8da7-7a5574f9b4f7";
-    private const string _tenantId = "171276b2-7a8c-4c9b-bc49-57889e2e4f42";
-    private const string _secret = "[?1x=eI@LabKmywBXxfNh5e67PNz3ZKm";
+    private static readonly string _connectionString = Secrets.Get( "CacheInvalidationNetCoreTestServiceBusConnectionString" );
+    private static readonly string _clientId = Secrets.Get( "ServiceBusManagerClientId" );
+    private static readonly string _tenantId = Secrets.Get( "ServiceBusManagerTenantId" );
+    private static readonly string _secret = Secrets.Get( "ServiceBusManagerSecret" );
+    private static readonly string _resourceGroup = Secrets.Get( "CacheInvalidationNetCoreTestServiceBusResourceGroup" );
+    private static readonly string _namespaceName = Secrets.Get( "CacheInvalidationNetCoreTestServiceBusNamespaceName" );
+    private static readonly string _topicName = Secrets.Get( "CacheInvalidationNetCoreTestServiceBusTopicName" );
+    private static readonly string _subscriptionId = Secrets.Get( "CacheInvalidationNetCoreTestServiceBusSubscriptionId" );
 
     public AzureServiceBusInvalidationTests2( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
 
@@ -39,10 +42,10 @@ internal
             _connectionString,
             _clientId,
             _tenantId,
-            "PetrResourceGroup",
-            "PetrServiceBusStandard",
-            "petrtopic",
-            "bd0b2c2c-a1b5-48a0-ae37-28713cf3f27c" );
+            _resourceGroup,
+            _namespaceName,
+            _topicName,
+            _subscriptionId );
     }
 
     protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
