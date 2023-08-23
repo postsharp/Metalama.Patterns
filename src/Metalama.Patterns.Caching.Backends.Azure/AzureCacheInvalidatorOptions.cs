@@ -1,31 +1,29 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if NETFRAMEWORK
+using Azure.Core;
+using Azure.Messaging.ServiceBus;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 
-namespace Metalama.Patterns.Caching.Backends.Azure
+namespace Metalama.Patterns.Caching.Backends.Azure;
+
+/// <summary>
+/// Options that determine the mode of operation of an <see cref="AzureCacheInvalidator"/> instance.
+/// </summary>
+[PublicAPI]
+public abstract partial class AzureCacheInvalidatorOptions : CacheInvalidatorOptions
 {
-    /// <summary>
-    /// Options for <see cref="AzureCacheInvalidator"/>.
-    /// </summary>
-    [PublicAPI]
-    public sealed class AzureCacheInvalidatorOptions : CacheInvalidatorOptions
+    public string TopicName { get; init; }
+
+    public string ConnectionString { get; }
+
+    public ServiceBusClientOptions ClientOptions { get; init; } = new();
+
+    public TimeSpan RetryOnReceiveError { get; init; } = TimeSpan.FromSeconds( 5 );
+
+    protected AzureCacheInvalidatorOptions( string connectionString, string topicName )
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AzureCacheInvalidatorOptions"/> class with the specified connection string.
-        /// </summary>
-        /// <param name="connectionString"></param>
-        public AzureCacheInvalidatorOptions( [Required] string connectionString )
-        {
-            this.ConnectionString = connectionString;
-        }
-        
-        /// <summary>
-        /// Gets the connection string for the Azure Service Bus topic. The value must be a valid argument of the <c>TopicClient.CreateFromConnectionString</c> method.
-        /// </summary>
-        public string ConnectionString { get; }
+        this.ConnectionString = connectionString;
+        this.TopicName = topicName;
     }
 }
-#endif

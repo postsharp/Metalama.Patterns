@@ -26,7 +26,6 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.Azure\Metalama.Patterns.Caching.Backends.Azure.csproj" />
-    <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.IMemoryCache\Metalama.Patterns.Caching.Backends.IMemoryCache.csproj" />
     <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.Redis\Metalama.Patterns.Caching.Backends.Redis.csproj" />
     <ProjectReference Include="..\..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
     <ProjectReference Include="..\Metalama.Patterns.Caching.TestHelpers\Metalama.Patterns.Caching.TestHelpers.csproj" />

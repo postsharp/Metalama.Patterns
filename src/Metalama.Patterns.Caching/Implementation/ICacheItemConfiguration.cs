@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// Configuration of a cached method determined at compile time.
 /// </summary>
 [PublicAPI]
-public interface ICompileTimeCacheItemConfiguration
+public interface ICacheItemConfiguration
 {
     /// <summary>
     /// Gets the total duration during which the result of the cached methods  is stored in cache. The absolute
@@ -43,4 +43,9 @@ public interface ICompileTimeCacheItemConfiguration
     /// which means that by default the <c>this</c> instance is a part of the cache key.
     /// </summary>
     bool? IgnoreThisParameter { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether caching is enabled.
+    /// </summary>
+    bool? IsEnabled { get; }
 }

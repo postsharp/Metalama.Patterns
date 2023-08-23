@@ -1,8 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using Flashtrace.Formatters;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Implementation;
 using System.Diagnostics.CodeAnalysis;
 
@@ -18,15 +20,12 @@ public static partial class CachingServices
     private static volatile CacheKeyBuilder _keyBuilder = new();
     private static volatile CachingBackend _backend = new UninitializedCachingBackend();
 
-    static CachingServices()
-    {
-        _ = Formatters.Instance;
-    }
+    public static FormatterRepository Formatters { get; } = new CachingFormatterRepository( CachingFormattingRole.Instance );
 
     /// <summary>
     /// Gets the <see cref="Implementation.MethodRegistrationCache"/>.
     /// </summary>
-    public static MethodRegistrationCache DefaultMethodRegistrationCache { get; } = new();
+    public static MethodRegistrationCache MethodRegistrationCache { get; } = new();
 
     /// <summary>
     /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.

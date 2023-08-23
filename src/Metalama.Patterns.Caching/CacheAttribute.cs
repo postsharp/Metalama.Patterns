@@ -116,8 +116,9 @@ public sealed class CacheAttribute : MethodAspect
 
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
 
+        // Introduce a field of type CachedMethodRegistration.
         var registrationFieldName = builder.Target.ToSerializableId()
-            .MakeAssociatedIdentifier( "{DC8C6993-4BD2-49BB-AACB-B628E69954CC}", $"_cacheRegistration_{builder.Target.Name}" );
+            .MakeAssociatedIdentifier( $"_cacheRegistration_{builder.Target.Name}" );
 
         var registrationField = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
@@ -131,6 +132,7 @@ public sealed class CacheAttribute : MethodAspect
                 b.Writeability = Writeability.ConstructorOnly;
             } );
 
+        // Override the original method.
         var templates = new MethodTemplateSelector(
             defaultTemplate: nameof(OverrideMethod),
             asyncTemplate: returnTypeIsTask ? nameof(OverrideMethodAsyncTask) : nameof(OverrideMethodAsyncValueTask),
@@ -151,8 +153,9 @@ public sealed class CacheAttribute : MethodAspect
             templates,
             args: new { TValue = genericValueType, TReturnType = builder.Target.ReturnType, registrationField = registrationField.Declaration } );
 
+        // Introduce a method that invokes the original method body but where the arguments are passed through an array.
         var getInvokerMethodName = builder.Target.ToSerializableId()
-            .MakeAssociatedIdentifier( "{FC85178F-3F0F-47E3-B5ED-25050804CF44}", $"GetInvoker_{builder.Target.Name}" );
+            .MakeAssociatedIdentifier( $"GetInvoker_{builder.Target.Name}" );
 
         var getInvokerTemplate = unboundReturnSpecialType switch
         {
@@ -174,6 +177,7 @@ public sealed class CacheAttribute : MethodAspect
             },
             args: new { method = builder.Target } );
 
+        // Initialize the CachedMethodRegistration field from the static constructor.
         var awaitableResultType = unboundReturnSpecialType switch
         {
             SpecialType.Task_T or SpecialType.ValueTask_T => ((INamedType) builder.Target.ReturnType).TypeArguments[0],
@@ -207,18 +211,18 @@ public sealed class CacheAttribute : MethodAspect
 
     private static IEnumerable<IExpression> GetArgumentExpressions( IMethod method, IExpression arrayExpression )
     {
-        IExpression Index( int i )
+        IExpression GetItem( IParameter p )
         {
             var eb = new ExpressionBuilder();
             eb.AppendExpression( arrayExpression );
             eb.AppendVerbatim( "[" );
-            eb.AppendLiteral( i );
+            eb.AppendLiteral( p.Index );
             eb.AppendVerbatim( "]" );
 
             return eb.ToExpression();
         }
 
-        return method.Parameters.Select( p => Index( p.Index ) );
+        return method.Parameters.Select( GetItem );
     }
 
     [Template]
@@ -278,7 +282,7 @@ public sealed class CacheAttribute : MethodAspect
     {
         var effectiveConfiguration = this.GetEffectiveConfiguration( method );
 
-        field.Value = CachingServices.DefaultMethodRegistrationCache.Register(
+        field.Value = CachingServices.MethodRegistrationCache.Register(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
             getOriginalMethodInvoker.Invoke(),
             awaitableResultType == null ? null : awaitableResultType.ToTypeOfExpression().Value,

@@ -5,7 +5,6 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
 using StackExchange.Redis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;

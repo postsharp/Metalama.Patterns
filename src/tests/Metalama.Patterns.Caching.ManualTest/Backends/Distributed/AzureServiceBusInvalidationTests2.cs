@@ -29,16 +29,15 @@ internal
 
     protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
     {
-        return await AzureCacheInvalidator2.CreateAsync( backend, CreateOptions() );
+        return await AzureCacheInvalidator.CreateAsync( backend, CreateOptions() );
     }
 
-    private static AzureCacheInvalidatorOptions2 CreateOptions()
+    private static AzureCacheInvalidatorOptions CreateOptions()
     {
         // ReSharper disable once StringLiteralTypo
-        return new AzureCacheInvalidatorOptions2.NewSubscription(
+        return new AzureCacheInvalidatorOptions.NewSubscription(
             _connectionString,
             _clientId,
-            _secret,
             _tenantId,
             "PetrResourceGroup",
             "PetrServiceBusStandard",
@@ -48,7 +47,7 @@ internal
 
     protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
     {
-        return AzureCacheInvalidator2.Create( backend, CreateOptions() );
+        return AzureCacheInvalidator.Create( backend, CreateOptions() );
     }
 }
 

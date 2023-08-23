@@ -26,7 +26,7 @@ public sealed class MethodRegistrationCache
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], object?> invokeOriginalMethod,
         Type? ignoredAwaitableResultType,
-        [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
+        [Required] ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
@@ -39,7 +39,7 @@ public sealed class MethodRegistrationCache
 
         if ( !this._methodInfoCache.TryAdd( method, toAdd ) )
         {
-            throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method}' has already been registered." );
+            throw new CachingAssertionFailedException( $"The method '{method}' has already been registered." );
         }
 
         return toAdd;
@@ -54,7 +54,7 @@ public sealed class MethodRegistrationCache
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], Task<object?>> invokeOriginalMethodAsync,
         [Required] Type awaitableResultType,
-        [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
+        [Required] ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
@@ -68,7 +68,7 @@ public sealed class MethodRegistrationCache
 
         if ( !this._methodInfoCache.TryAdd( method, toAdd ) )
         {
-            throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method}' has already been registered." );
+            throw new CachingAssertionFailedException( $"The method '{method}' has already been registered." );
         }
 
         return toAdd;
@@ -83,7 +83,7 @@ public sealed class MethodRegistrationCache
         [Required] MethodInfo method,
         [Required] Func<object?, object?[], ValueTask<object?>> invokeOriginalMethodAsync,
         [Required] Type awaitableResultType,
-        [Required] ICompileTimeCacheItemConfiguration buildTimeConfiguration,
+        [Required] ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var toAdd = new CachedMethodRegistration(
@@ -97,7 +97,7 @@ public sealed class MethodRegistrationCache
 
         if ( !this._methodInfoCache.TryAdd( method, toAdd ) )
         {
-            throw new MetalamaPatternsCachingAssertionFailedException( $"The method '{method}' has already been registered." );
+            throw new CachingAssertionFailedException( $"The method '{method}' has already been registered." );
         }
 
         return toAdd;

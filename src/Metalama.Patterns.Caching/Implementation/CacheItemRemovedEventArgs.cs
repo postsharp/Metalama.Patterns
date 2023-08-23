@@ -7,7 +7,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <summary>
 /// Arguments of the <see cref="CachingBackend.ItemRemoved"/> event.
 /// </summary>
-[PublicAPI] // TODO: Does CacheItemRemovedEventArgs need to be public? 
+[PublicAPI]
 public sealed class CacheItemRemovedEventArgs : EventArgs
 {
     internal CacheItemRemovedEventArgs( string key, CacheItemRemovedReason removedReason, Guid sourceId )

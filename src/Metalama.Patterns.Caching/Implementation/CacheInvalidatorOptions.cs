@@ -15,5 +15,5 @@ public class CacheInvalidatorOptions
     /// Messages received by the <see cref="CacheInvalidator.OnMessageReceived"/> method are
     /// ignored if they don't start with the proper prefix.
     /// </summary>
-    public string Prefix { get; set; } = "invalidate";
+    public string Prefix { get; init; } = "invalidate";
 }

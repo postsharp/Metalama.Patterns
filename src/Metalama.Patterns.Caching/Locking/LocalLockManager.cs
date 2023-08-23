@@ -22,7 +22,7 @@ public sealed class LocalLockManager : ILockManager
 #if DEBUG
         if ( @lock.References <= 0 )
         {
-            throw new MetalamaPatternsCachingAssertionFailedException();
+            throw new CachingAssertionFailedException();
         }
 #endif
         return new LockHandle( @lock );
@@ -104,7 +104,7 @@ public sealed class LocalLockManager : ILockManager
 #pragma warning disable CA1821 // Remove empty Finalizers
         ~LockHandle()
         {
-            throw new MetalamaPatternsCachingAssertionFailedException( "The Dispose method has not been invoked." );
+            throw new CachingAssertionFailedException( "The Dispose method has not been invoked." );
         }
 #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
 #pragma warning restore CA1821 // Remove empty Finalizers
@@ -164,7 +164,7 @@ public sealed class LocalLockManager : ILockManager
                 {
                     if ( !this._parent._locks.TryRemove( this._key, out var removedLock ) || removedLock != this )
                     {
-                        throw new MetalamaPatternsCachingAssertionFailedException( "Data race." );
+                        throw new CachingAssertionFailedException( "Data race." );
                     }
                 }
             }

@@ -1,64 +1,35 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if NETFRAMEWORK
+using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
 using Flashtrace;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
-using Microsoft.ServiceBus;
-using Microsoft.ServiceBus.Messaging;
+using System.Text;
 
 namespace Metalama.Patterns.Caching.Backends.Azure
 {
     /// <summary>
-    /// An implementation of <see cref="CacheInvalidator"/> based on Microsoft Azure Service Bus, using the older API, <c>WindowsAzure.ServiceBus</c>,
-    /// meant for .NET Framework.
+    /// An implementation of <see cref="CacheInvalidator"/> based on Microsoft Azure Service Bus, using the <c>Microsoft.Azure.ServiceBus</c> API
+    /// meant for .NET Standard.
     /// </summary>
     [PublicAPI]
     public class AzureCacheInvalidator : CacheInvalidator
     {
-        private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(AzureCacheInvalidator) );
-        private readonly string _subscriptionName = Guid.NewGuid().ToString();
-        private readonly NamespaceManager _serviceBusNamespaceManager;
-        private readonly TopicClient _topic;
-        private readonly AzureCacheInvalidatorOptions _options;
+        private const string _subject = "Metalama.Patterns.Caching.Backends.Azure.Invalidation";
 
-        // According to Create method logic, consumers can't obtain instances where _subscription and _processMessageTask are null. 
-        private SubscriptionClient _subscription = null!;
-        private Task _processMessageTask = null!;
-        private volatile bool _isStopped;
+        private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching )
+            .GetLogSource( typeof(AzureCacheInvalidator) );
 
-        private AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions options ) : base( underlyingBackend, options )
-        {
-            this._options = options;
-            this._topic = TopicClient.CreateFromConnectionString( options.ConnectionString );
+        private readonly CancellationTokenSource _receiverCancellation = new();
 
-            var connectionStringBuilder = new ServiceBusConnectionStringBuilder( options.ConnectionString ) { EntityPath = null };
+        private string _subscriptionName = null!;
+        private ServiceBusReceiver? _receiver;
+        private ServiceBusSender? _sender;
 
-            this._serviceBusNamespaceManager = NamespaceManager.CreateFromConnectionString( connectionStringBuilder.ToString() );
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="AzureCacheInvalidator"/>.
-        /// </summary>
-        /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator"/>.</param>
-        /// <param name="options">Options.</param>
-        /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
-        public static AzureCacheInvalidator Create( [Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions options )
-        {
-            var invalidator = new AzureCacheInvalidator( backend, options );
-            invalidator.Init();
-
-            return invalidator;
-        }
-
-        private void Init()
-        {
-            this._serviceBusNamespaceManager.CreateSubscription( this.CreateSubscriptionDescription() );
-
-            this.InitCommon();
-        }
+        private AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions options ) : base( underlyingBackend, options ) { }
 
         /// <summary>
         /// Asynchronously creates a new <see cref="AzureCacheInvalidator"/>.
@@ -66,64 +37,64 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator"/>.</param>
         /// <param name="options">Options.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
-        public static Task<AzureCacheInvalidator> CreateAsync( [Required] CachingBackend backend, [Required] AzureCacheInvalidatorOptions options )
+        public static async Task<AzureCacheInvalidator> CreateAsync(
+            [Required] CachingBackend backend,
+            [Required] AzureCacheInvalidatorOptions options,
+            CancellationToken cancellationToken = default )
         {
             var invalidator = new AzureCacheInvalidator( backend, options );
+            await invalidator.InitAsync( options, cancellationToken );
 
-            return invalidator.InitAsync();
+            return invalidator;
         }
 
-        private async Task<AzureCacheInvalidator> InitAsync()
+        public event EventHandler<AzureCacheInvalidatorExceptionEventArgs>? ReceiverException;
+
+        private async Task InitAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
         {
-            await this._serviceBusNamespaceManager.CreateSubscriptionAsync( this.CreateSubscriptionDescription() );
+            if ( options is AzureCacheInvalidatorOptions.NewSubscription newSubscriptionOptions )
+            {
+                this._subscriptionName = await CreateSubscriptionAsync( newSubscriptionOptions, cancellationToken );
+            }
+            else
+            {
+                this._subscriptionName = ((AzureCacheInvalidatorOptions.ExistingSubscription) options).SubscriptionName;
+            }
 
-            this.InitCommon();
+            var client = new ServiceBusClient( options.ConnectionString, options.ClientOptions );
 
-            return this;
+            this._receiver = client.CreateReceiver( options.TopicName, this._subscriptionName );
+            this._sender = client.CreateSender( options.TopicName );
+
+            // Start a background task to process received messages.
+            _ = Task.Run( this.ReceiveMessagesAsync, CancellationToken.None );
         }
 
-        private SubscriptionDescription CreateSubscriptionDescription()
+        private async Task ReceiveMessagesAsync()
         {
-            return new SubscriptionDescription( this._topic.Path, this._subscriptionName ) { AutoDeleteOnIdle = TimeSpan.FromMinutes( 5 ) };
-        }
-
-        private void InitCommon()
-        {
-            this._subscription =
-                SubscriptionClient.CreateFromConnectionString(
-                    this._options.ConnectionString,
-                    this._topic.Path,
-                    this._subscriptionName,
-                    ReceiveMode.ReceiveAndDelete );
-
-            this._processMessageTask = Task.Run( this.ProcessMessages );
-        }
-
-        private async Task ProcessMessages()
-        {
-            while ( !this._isStopped )
+            while ( true )
             {
                 try
                 {
-                    using ( var message = await this._subscription.ReceiveAsync() )
+                    await foreach ( var message in this._receiver!.ReceiveMessagesAsync( this._receiverCancellation.Token ) )
                     {
-                        if ( message == null )
+                        this._receiverCancellation.Token.ThrowIfCancellationRequested();
+
+                        try
                         {
-                            continue;
+                            this.OnMessageReceived( message.Body.ToString() );
                         }
-
-                        var value = message.GetBody<string>();
-
-                        this.OnMessageReceived( value );
-                        await message.CompleteAsync();
+                        catch ( OperationCanceledException ) { }
+                        catch ( Exception e )
+                        {
+                            _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                        }
                     }
                 }
-                catch ( OperationCanceledException ) { }
-#pragma warning disable CA1031 // Do not catch general exception types
                 catch ( Exception e )
-#pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                    this.ReceiverException?.Invoke( this, new AzureCacheInvalidatorExceptionEventArgs( e ) );
+                    await Task.Delay( ((AzureCacheInvalidatorOptions) this.Options).RetryOnReceiveError );
                 }
             }
         }
@@ -131,19 +102,20 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <inheritdoc />
         protected override Task SendMessageAsync( string message, CancellationToken cancellationToken )
         {
-            var brokeredMessage = new BrokeredMessage( message );
+            var azureMessage = new ServiceBusMessage( Encoding.UTF8.GetBytes( message ) )
+            {
+                ContentType = "text/plain", Subject = _subject, TimeToLive = TimeSpan.FromMinutes( 5 )
+            };
 
-            return this._topic.SendAsync( brokeredMessage );
+            return this._sender!.SendMessageAsync( azureMessage, cancellationToken );
         }
 
         /// <inheritdoc />
         protected override void DisposeCore( bool disposing )
         {
-            this._isStopped = true;
-            this._subscription.Close();
-            this._topic.Close();
-            this._serviceBusNamespaceManager.DeleteSubscription( this._topic.Path, this._subscriptionName );
-            this._processMessageTask.Wait();
+            this._receiverCancellation.Cancel();
+            this._receiver?.CloseAsync();
+            this._sender?.CloseAsync();
 
             if ( disposing )
             {
@@ -154,11 +126,18 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <inheritdoc />
         protected override async Task DisposeAsyncCore( CancellationToken cancellationToken )
         {
-            this._isStopped = true;
-            await this._subscription.CloseAsync();
-            await this._topic.CloseAsync();
-            await this._serviceBusNamespaceManager.DeleteSubscriptionAsync( this._topic.Path, this._subscriptionName );
-            await this._processMessageTask;
+            this._receiverCancellation.Cancel();
+
+            if ( this._receiver != null )
+            {
+                await this._receiver.CloseAsync( cancellationToken );
+            }
+
+            if ( this._sender != null )
+            {
+                await this._sender.CloseAsync( cancellationToken );
+            }
+
             GC.SuppressFinalize( this );
         }
 
@@ -169,6 +148,31 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         {
             this.DisposeCore( false );
         }
+
+        private static async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorOptions.NewSubscription options, CancellationToken cancellationToken )
+        {
+            try
+            {
+                var subscriptionId = Guid.NewGuid().ToString();
+
+                var client = new ServiceBusAdministrationClient( options.ConnectionString, options.AdministrationClientOptions );
+
+                var subscriptionOptions =
+                    new CreateSubscriptionOptions( options.TopicName, subscriptionId )
+                    {
+                        MaxDeliveryCount = options.MaxDeliveryCount, AutoDeleteOnIdle = options.AutoDeleteOnIdle
+                    };
+
+                await client.CreateSubscriptionAsync( subscriptionOptions, cancellationToken );
+
+                return subscriptionId;
+            }
+            catch ( Exception e )
+            {
+                _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
+
+                throw;
+            }
+        }
     }
 }
-#endif

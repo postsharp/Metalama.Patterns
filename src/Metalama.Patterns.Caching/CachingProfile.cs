@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching;
 /// Allows for centralized and run-time configuration of several instances of the <see cref="CacheAttribute"/> aspect.
 /// </summary>
 [PublicAPI]
-public sealed class CachingProfile : IRunTimeCacheItemConfiguration
+public sealed class CachingProfile : ICacheItemConfiguration
 {
     /// <summary>
     /// The name of the default profile.
@@ -110,23 +110,23 @@ public sealed class CachingProfile : IRunTimeCacheItemConfiguration
     }
 
     /// <inheritdoc />
-    bool? IRunTimeCacheItemConfiguration.IsEnabled => this._isEnabled;
+    bool? ICacheItemConfiguration.IsEnabled => this._isEnabled;
 
     // We can't modify specify IgnoreThisParameter in a profile because this setting is used at build time.
     /// <inheritdoc />
-    bool? ICompileTimeCacheItemConfiguration.IgnoreThisParameter => null;
+    bool? ICacheItemConfiguration.IgnoreThisParameter => null;
 
     /// <inheritdoc />
-    TimeSpan? ICompileTimeCacheItemConfiguration.AbsoluteExpiration => this.AbsoluteExpiration;
+    TimeSpan? ICacheItemConfiguration.AbsoluteExpiration => this.AbsoluteExpiration;
 
     /// <inheritdoc />
-    TimeSpan? ICompileTimeCacheItemConfiguration.SlidingExpiration => this.SlidingExpiration;
+    TimeSpan? ICacheItemConfiguration.SlidingExpiration => this.SlidingExpiration;
 
     /// <inheritdoc />
-    bool? ICompileTimeCacheItemConfiguration.AutoReload => this.AutoReload;
+    bool? ICacheItemConfiguration.AutoReload => this.AutoReload;
 
     /// <inheritdoc />
-    string ICompileTimeCacheItemConfiguration.ProfileName => this.Name;
+    string ICacheItemConfiguration.ProfileName => this.Name;
 
     /// <summary>
     /// Gets or sets the lock manager used to synchronize the execution of methods

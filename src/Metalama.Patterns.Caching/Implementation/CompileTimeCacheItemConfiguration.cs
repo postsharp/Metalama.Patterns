@@ -106,7 +106,7 @@ internal sealed class CompileTimeCacheItemConfiguration
         }
         catch ( Exception e )
         {
-            throw new MetalamaPatternsCachingAssertionFailedException( "The construction semantics of the attribute are not as expected.", e );
+            throw new CachingAssertionFailedException( "The construction semantics of the attribute are not as expected.", e );
         }
     }
 

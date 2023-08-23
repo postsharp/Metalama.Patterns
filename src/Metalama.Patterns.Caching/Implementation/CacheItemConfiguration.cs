@@ -5,7 +5,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <summary>
 /// Configuration of a <see cref="CacheItem"/>.
 /// </summary>
-internal sealed class CacheItemConfiguration : IRunTimeCacheItemConfiguration
+internal sealed class CacheItemConfiguration : ICacheItemConfiguration
 {
     /// <inheritdoc />
     public bool? IsEnabled { get; private set; }
@@ -28,7 +28,7 @@ internal sealed class CacheItemConfiguration : IRunTimeCacheItemConfiguration
     /// <inheritdoc />
     public bool? IgnoreThisParameter { get; set; }
 
-    public void ApplyFallback( IRunTimeCacheItemConfiguration fallback )
+    public void ApplyFallback( ICacheItemConfiguration fallback )
     {
         this.AutoReload ??= fallback.AutoReload;
         this.AbsoluteExpiration ??= fallback.AbsoluteExpiration;

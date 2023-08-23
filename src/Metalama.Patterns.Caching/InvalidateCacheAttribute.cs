@@ -94,11 +94,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         if ( invalidatedMethods.Count == 0 )
         {
-            throw new MetalamaPatternsCachingAssertionFailedException( "invalidatedMethods.Count == 0 not expected." );
+            throw new CachingAssertionFailedException( "invalidatedMethods.Count == 0 not expected." );
         }
 
         var logSourceFieldName = builder.Target.DeclaringType.ToSerializableId()
-            .MakeAssociatedIdentifier( "Metalama.Patterns/StaticLogSourceForType", "_logSource" );
+            .MakeAssociatedIdentifier( "_logSource" );
 
         var logSourceFieldAdviceResult = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,
@@ -115,7 +115,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             : logSourceFieldAdviceResult.Declaration;
 
         var methodsInvalidatedByFieldName = builder.Target.ToSerializableId()
-            .MakeAssociatedIdentifier( "{3AB07EE4-9AB7-423C-810A-994D9BC620CA}", $"_methodsInvalidatedBy_{builder.Target.Name}" );
+            .MakeAssociatedIdentifier( $"_methodsInvalidatedBy_{builder.Target.Name}" );
 
         var methodsInvalidatedByField = builder.Advice.IntroduceField(
             builder.Target.DeclaringType,

@@ -178,8 +178,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
                         else
                         {
                             var multiLayerCacheValue = (TwoLayerCacheValue) (remoteCacheValue.Value
-                                                                             ?? throw new MetalamaPatternsCachingAssertionFailedException(
-                                                                                 "null not expected." ));
+                                                                             ?? throw new CachingAssertionFailedException( "null not expected." ));
 
                             if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
                             {
@@ -228,7 +227,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     private static CacheValue GetReturnValue( CacheValue storedCacheValue )
     {
         var multiLayerCacheValue = (TwoLayerCacheValue) (
-            storedCacheValue.Value ?? throw new MetalamaPatternsCachingAssertionFailedException( "null not expected." ));
+            storedCacheValue.Value ?? throw new CachingAssertionFailedException( "null not expected." ));
 
         return new CacheValue( multiLayerCacheValue.Value, storedCacheValue.Dependencies );
     }
@@ -236,7 +235,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     private void SetMemoryCacheFromRemote( string key, CacheValue remoteCacheValue )
     {
         var multiLayerCacheValue =
-            (TwoLayerCacheValue) (remoteCacheValue.Value ?? throw new MetalamaPatternsCachingAssertionFailedException( "null not expected." ));
+            (TwoLayerCacheValue) (remoteCacheValue.Value ?? throw new CachingAssertionFailedException( "null not expected." ));
 
         var cacheItem = new CacheItem(
             multiLayerCacheValue.Value,
@@ -286,8 +285,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
                         else
                         {
                             var multiLayerCacheValue = (TwoLayerCacheValue) (remoteCacheValue.Value
-                                                                             ?? throw new MetalamaPatternsCachingAssertionFailedException(
-                                                                                 "null not expected." ));
+                                                                             ?? throw new CachingAssertionFailedException( "null not expected." ));
 
                             if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
                             {
@@ -411,7 +409,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         public override bool ContainsDependency => this.UnderlyingBackendFeatures is { ContainsDependency: true, Blocking: true };
     }
 
-    private sealed class RemovedValue : MemoryCacheValue
+    private sealed record RemovedValue : MemoryCacheValue
     {
 #pragma warning disable SA1401
         public readonly long Timestamp = GetTimestamp();

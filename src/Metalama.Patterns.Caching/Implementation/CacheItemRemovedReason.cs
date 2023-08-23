@@ -14,7 +14,7 @@ public enum CacheItemRemovedReason
     Removed,
 
     /// <summary>
-    /// Removed because of <see cref="IRunTimeCacheItemConfiguration.AbsoluteExpiration"/> or <see cref="IRunTimeCacheItemConfiguration.SlidingExpiration"/>.
+    /// Removed because of <see cref="ICacheItemConfiguration.AbsoluteExpiration"/> or <see cref="ICacheItemConfiguration.SlidingExpiration"/>.
     /// </summary>
     Expired,
 

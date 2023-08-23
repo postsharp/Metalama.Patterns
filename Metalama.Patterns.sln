@@ -23,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.Backends.Azure", "src\Metalama.Patterns.Caching.Backends.Azure\Metalama.Patterns.Caching.Backends.Azure.csproj", "{ECDEC749-B34B-4BE2-AEEF-55C85CD6A82D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.Backends.IMemoryCache", "src\Metalama.Patterns.Caching.Backends.IMemoryCache\Metalama.Patterns.Caching.Backends.IMemoryCache.csproj", "{E66B1524-CB35-45C8-835D-4749E7A50C83}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.Backends.Redis", "src\Metalama.Patterns.Caching.Backends.Redis\Metalama.Patterns.Caching.Backends.Redis.csproj", "{3152D01C-5F38-4A21-830E-613A17C4BC80}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.TestHelpers", "src\tests\Metalama.Patterns.Caching.TestHelpers\Metalama.Patterns.Caching.TestHelpers.csproj", "{97CE6AEE-F92D-4C54-A4CF-5C965D39BC9E}"
@@ -98,12 +96,6 @@ Global
 		{ECDEC749-B34B-4BE2-AEEF-55C85CD6A82D}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{ECDEC749-B34B-4BE2-AEEF-55C85CD6A82D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECDEC749-B34B-4BE2-AEEF-55C85CD6A82D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E66B1524-CB35-45C8-835D-4749E7A50C83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E66B1524-CB35-45C8-835D-4749E7A50C83}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E66B1524-CB35-45C8-835D-4749E7A50C83}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
-		{E66B1524-CB35-45C8-835D-4749E7A50C83}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
-		{E66B1524-CB35-45C8-835D-4749E7A50C83}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E66B1524-CB35-45C8-835D-4749E7A50C83}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3152D01C-5F38-4A21-830E-613A17C4BC80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3152D01C-5F38-4A21-830E-613A17C4BC80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3152D01C-5F38-4A21-830E-613A17C4BC80}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
@@ -131,6 +123,7 @@ Global
 		{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{204308D3-9A86-4BE5-A6B4-C54E3CD9EAF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU

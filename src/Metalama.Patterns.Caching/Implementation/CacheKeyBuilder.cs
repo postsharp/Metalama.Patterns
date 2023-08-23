@@ -28,11 +28,11 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="formatterRepository">
     /// The <see cref="IFormatterRepository"/> from which to obtain formatters, or <see langword="null"/> to
-    /// use <see cref="CachingServices.Formatters.Instance"/>.
+    /// use <see cref="CachingServices.Formatters"/>.
     /// </param>
     public CacheKeyBuilder( IFormatterRepository? formatterRepository = null ) : this( 2048 )
     {
-        this._formatterRepository = formatterRepository ?? CachingServices.Formatters.Instance;
+        this._formatterRepository = formatterRepository ?? CachingServices.Formatters;
     }
 
     /// <summary>
@@ -42,11 +42,11 @@ public class CacheKeyBuilder : IDisposable
     /// <param name="maxKeySize">The maximal number of characters in cache keys.</param>
     /// <param name="formatterRepository">
     /// The <see cref="IFormatterRepository"/> from which to obtain formatters, or <see langword="null"/> to
-    /// use <see cref="CachingServices.Formatters.Instance"/>.
+    /// use <see cref="CachingServices.Formatters"/>.
     /// </param>
     public CacheKeyBuilder( int maxKeySize, IFormatterRepository? formatterRepository = null )
     {
-        this._formatterRepository = formatterRepository ?? CachingServices.Formatters.Instance;
+        this._formatterRepository = formatterRepository ?? CachingServices.Formatters;
         this._stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
     }
 

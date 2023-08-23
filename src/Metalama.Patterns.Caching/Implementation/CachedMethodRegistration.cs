@@ -77,7 +77,7 @@ public sealed class CachedMethodRegistration
     /// <remarks>
     /// This already takes account of the any <see cref="CacheConfigurationAttribute"/> instances applied to parent classes and the assembly.
     /// </remarks>
-    internal ICompileTimeCacheItemConfiguration BuildTimeConfiguration { get; }
+    internal ICacheItemConfiguration BuildTimeConfiguration { get; }
 
     /// <summary>
     /// Gets the awaitable result type for awaitable (eg, async) methods, or <see langword="null"/> where not applicable.
@@ -102,7 +102,7 @@ public sealed class CachedMethodRegistration
     /// Gets the effective configuration which is determined by merging the build-time configuration with any applicable 
     /// profile-based configuration. This property always reflects any runtime changes to profile configuration.
     /// </summary>
-    internal IRunTimeCacheItemConfiguration MergedConfiguration
+    internal ICacheItemConfiguration MergedConfiguration
     {
         get
         {
@@ -119,7 +119,7 @@ public sealed class CachedMethodRegistration
                         var profileName = this.BuildTimeConfiguration.ProfileName ?? CachingProfile.DefaultName;
 
                         var localProfile = CachingServices.Profiles[profileName];
-                        
+
                         this._mergedConfiguration = this.BuildTimeConfiguration.CloneAsCacheItemConfiguration();
                         this._mergedConfiguration.ApplyFallback( localProfile );
 
@@ -147,7 +147,7 @@ public sealed class CachedMethodRegistration
         MethodInfo method,
         ImmutableArray<CachedParameterInfo> parameters,
         bool isThisParameterIgnored,
-        ICompileTimeCacheItemConfiguration buildTimeConfiguration,
+        ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         this.Method = method;
@@ -162,7 +162,7 @@ public sealed class CachedMethodRegistration
         ImmutableArray<CachedParameterInfo> parameters,
         bool isThisParameterIgnored,
         Func<object?, object?[], object?> invokeOriginalMethod,
-        ICompileTimeCacheItemConfiguration buildTimeConfiguration,
+        ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
         : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
     {
@@ -175,7 +175,7 @@ public sealed class CachedMethodRegistration
         Type awaitableResultType,
         bool isThisParameterIgnored,
         Func<object?, object?[], Task<object?>> invokeOriginalMethodAsyncTask,
-        ICompileTimeCacheItemConfiguration buildTimeConfiguration,
+        ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
         : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
     {
@@ -189,7 +189,7 @@ public sealed class CachedMethodRegistration
         Type awaitableResultType,
         bool isThisParameterIgnored,
         Func<object?, object?[], ValueTask<object?>> invokeOriginalMethodAsyncValueTask,
-        ICompileTimeCacheItemConfiguration buildTimeConfiguration,
+        ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
         : this( method, parameters, isThisParameterIgnored, buildTimeConfiguration, returnValueCanBeNull )
     {

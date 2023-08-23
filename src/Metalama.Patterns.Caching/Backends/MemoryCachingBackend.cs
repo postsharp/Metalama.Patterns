@@ -257,8 +257,7 @@ public sealed class MemoryCachingBackend : CachingBackend
             }
             else
             {
-                replacementValue.Sync = cacheValue.Sync;
-                this._cache.Set( itemKey, replacementValue, replacementValueExpiration!.Value );
+                this._cache.Set( itemKey, replacementValue with { Sync = cacheValue.Sync }, replacementValueExpiration!.Value );
             }
 
             this.CleanDependencies( key, cacheValue );

@@ -27,9 +27,6 @@
     <ProjectReference Include="..\..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
-    <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.IMemoryCache\Metalama.Patterns.Caching.Backends.IMemoryCache.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Update="CachingClass{T}.Generated.tt">

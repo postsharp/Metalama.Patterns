@@ -22,4 +22,7 @@ public sealed record CacheAttributeProperties(
         TimeSpan? SlidingExpiration = null,
         CacheItemPriority? Priority = null,
         bool? IgnoreThisParameter = null )
-    : ICompileTimeCacheItemConfiguration;
+    : ICacheItemConfiguration
+{
+    bool? ICacheItemConfiguration.IsEnabled => true;
+}

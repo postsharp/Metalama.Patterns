@@ -16,29 +16,19 @@ internal static class CompileTimeHelpers
     /// with an optional prefix.
     /// </summary>
     /// <param name="id">The ID.</param>
-    /// <param name="purpose">
-    /// Typically a unique hard-coded GUID corresponding to the purpose for which an identifier associated with the
-    /// given ID is required. This is to avoid collisions, for example when multiple unrelated aspects introduce members associated
-    /// with the same ID. Alternatively, related aspects could use a common value for <paramref name="purpose"/> if desired.
-    /// </param>
     /// <param name="prefix">An optional prefix for the identifier.</param>
     /// <returns></returns>
-    public static string MakeAssociatedIdentifier( this SerializableDeclarationId id, string purpose, string? prefix = null )
+    public static string MakeAssociatedIdentifier( this SerializableDeclarationId id, string prefix )
     {
         if ( id == null )
         {
             throw new ArgumentNullException( nameof(id) );
         }
 
-        if ( purpose == null )
-        {
-            throw new ArgumentNullException( nameof(purpose) );
-        }
-
         // TODO: Use Metalama framework hashing service if/when implemented.
-        
+
         var sha = SHA256.Create();
-        var bytes = sha.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() + purpose ) );
+        var bytes = sha.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() ) );
 
 #pragma warning disable CA1307 // Specify StringComparison for clarity
         var hash = BitConverter.ToString( bytes, 0, 16 ).Replace( "-", string.Empty );
@@ -46,7 +36,7 @@ internal static class CompileTimeHelpers
 
         return prefix + "_" + hash;
     }
-    
+
     // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// Throws the current exception at compile time. Useful when called from a template.

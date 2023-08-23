@@ -16,7 +16,7 @@ internal static class CachingFrontend
         MethodInfo method,
         string key,
         Type valueType,
-        IRunTimeCacheItemConfiguration configuration,
+        ICacheItemConfiguration configuration,
         Func<object?, object?[], object?> invokeOriginalMethod,
         object? instance,
         object?[] args,
@@ -65,7 +65,7 @@ internal static class CachingFrontend
                     if ( valueAdapter != null )
                     {
                         var unwrappedValue = valueAdapter.GetExposedValue( item.Value );
-                        item = item.WithValue( unwrappedValue );
+                        item = item with { Value = unwrappedValue };
                     }
                 }
             }
@@ -90,7 +90,7 @@ internal static class CachingFrontend
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
-                    throw new MetalamaPatternsCachingAssertionFailedException();
+                    throw new CachingAssertionFailedException();
                 }
 #endif
 
@@ -139,7 +139,7 @@ internal static class CachingFrontend
         MethodInfo method,
         string key,
         Type valueType,
-        IRunTimeCacheItemConfiguration configuration,
+        ICacheItemConfiguration configuration,
         Func<object?, object?[], Task<object?>> invokeOriginalMethod,
         object? instance,
         object?[] args,
@@ -191,7 +191,7 @@ internal static class CachingFrontend
                     if ( valueAdapter != null )
                     {
                         var unwrappedValue = valueAdapter.GetExposedValue( item.Value );
-                        item = item.WithValue( unwrappedValue );
+                        item = item with { Value = unwrappedValue };
                     }
                 }
             }
@@ -218,7 +218,7 @@ internal static class CachingFrontend
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
-                    throw new MetalamaPatternsCachingAssertionFailedException();
+                    throw new CachingAssertionFailedException();
                 }
 #endif
 
@@ -270,7 +270,7 @@ internal static class CachingFrontend
         MethodInfo method,
         string key,
         Type valueType,
-        IRunTimeCacheItemConfiguration configuration,
+        ICacheItemConfiguration configuration,
         Func<object?, object?[], ValueTask<object?>> invokeOriginalMethod,
         object? instance,
         object?[] args,
@@ -323,7 +323,7 @@ internal static class CachingFrontend
                     if ( valueAdapter != null )
                     {
                         var unwrappedValue = valueAdapter.GetExposedValue( item.Value );
-                        item = item.WithValue( unwrappedValue );
+                        item = item with { Value = unwrappedValue };
                     }
                 }
             }
@@ -350,7 +350,7 @@ internal static class CachingFrontend
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
-                    throw new MetalamaPatternsCachingAssertionFailedException();
+                    throw new CachingAssertionFailedException();
                 }
 #endif
 
@@ -408,7 +408,7 @@ internal static class CachingFrontend
         }
     }
 
-    public static object? SetItem( string key, object? value, Type valueType, IRunTimeCacheItemConfiguration configuration, CachingContext context )
+    public static object? SetItem( string key, object? value, Type valueType, ICacheItemConfiguration configuration, CachingContext context )
     {
         var exposedValue = value;
 
@@ -434,7 +434,7 @@ internal static class CachingFrontend
         string key,
         object? value,
         Type valueType,
-        IRunTimeCacheItemConfiguration configuration,
+        ICacheItemConfiguration configuration,
         CachingContext context,
         CancellationToken cancellationToken )
     {

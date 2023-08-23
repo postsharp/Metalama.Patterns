@@ -12,8 +12,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClass()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
-            CachingServices.Formatters.Instance.Register( new DogFormatter( CachingServices.Formatters.Instance ) );
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
+            CachingServices.Formatters.Register( new DogFormatter( CachingServices.Formatters ) );
 
             AssertKey( "FormattedDog", new Dog() );
         }
@@ -29,9 +29,9 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClassOverwritingFormatter()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
-            CachingServices.Formatters.Instance.Register( new AnimalFormatter( CachingServices.Formatters.Instance ) );
-            CachingServices.Formatters.Instance.Register( new DogFormatter( CachingServices.Formatters.Instance ) );
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
+            CachingServices.Formatters.Register( new AnimalFormatter( CachingServices.Formatters ) );
+            CachingServices.Formatters.Register( new DogFormatter( CachingServices.Formatters ) );
 
             AssertKey( "FormattedDog", new Dog() );
         }
@@ -39,16 +39,16 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestDerivedClass()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
-            CachingServices.Formatters.Instance.Register( new DogFormatter( CachingServices.Formatters.Instance ) );
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
+            CachingServices.Formatters.Register( new DogFormatter( CachingServices.Formatters ) );
             AssertKey( "FormattedDog", new Chihuahua() );
         }
 
         [Fact]
         public void TestInterface()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
-            CachingServices.Formatters.Instance.Register( new AnimalFormatter( CachingServices.Formatters.Instance ) );
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
+            CachingServices.Formatters.Register( new AnimalFormatter( CachingServices.Formatters ) );
 
             AssertKey( "FormattedAnimal", new Cat() );
         }
@@ -56,7 +56,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestManuallyFormatted()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters.Instance).Reset();
+            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
 
             AssertKey( "ManuallyFormatted:Caching", new ManuallyFormatted() );
         }

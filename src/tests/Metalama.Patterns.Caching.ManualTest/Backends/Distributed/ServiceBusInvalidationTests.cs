@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if NETFRAMEWORK
 using Metalama.Patterns.Caching.Backends.Azure;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
@@ -19,14 +18,9 @@ namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed
 
         protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
         {
-            return await AzureCacheInvalidator.CreateAsync( backend, new AzureCacheInvalidatorOptions( _connectionString ) { Prefix = prefix } );
-        }
-
-        protected override CacheInvalidator CreateInvalidationBroker( CachingBackend backend, string prefix )
-        {
-            return AzureCacheInvalidator.Create( backend, new AzureCacheInvalidatorOptions( _connectionString ) { Prefix = prefix } );
+            return await AzureCacheInvalidator.CreateAsync(
+                backend,
+                new AzureCacheInvalidatorOptions.NewSubscription( _connectionString ) { Prefix = prefix } );
         }
     }
 }
-
-#endif

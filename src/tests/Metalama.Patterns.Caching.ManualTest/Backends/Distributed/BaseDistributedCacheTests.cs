@@ -2,7 +2,6 @@
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;

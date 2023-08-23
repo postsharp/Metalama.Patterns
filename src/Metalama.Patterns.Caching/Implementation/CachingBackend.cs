@@ -807,7 +807,7 @@ public abstract class CachingBackend : ITestableCachingComponent
                     if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
                     {
 #if DEBUG
-                        throw new MetalamaPatternsCachingAssertionFailedException();
+                        throw new CachingAssertionFailedException();
 #else
                             this.LogSource.Error.Write( Formatted( "Cannot dispose back-end: cannot change the status to Disposed." ) );
                             return;
@@ -822,7 +822,7 @@ public abstract class CachingBackend : ITestableCachingComponent
                     if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
                     {
 #if DEBUG
-                        throw new MetalamaPatternsCachingAssertionFailedException();
+                        throw new CachingAssertionFailedException();
 #else
                             this.LogSource.Error.Write( Formatted( "Cannot dispose back-end: cannot change the status to DisposeFailed." ) );
                             return;
@@ -872,7 +872,7 @@ public abstract class CachingBackend : ITestableCachingComponent
 
                     if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
                     {
-                        throw new MetalamaPatternsCachingAssertionFailedException();
+                        throw new CachingAssertionFailedException();
                     }
 
                     this._disposeTask.SetResult( true );
@@ -882,7 +882,7 @@ public abstract class CachingBackend : ITestableCachingComponent
                 {
                     if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
                     {
-                        throw new MetalamaPatternsCachingAssertionFailedException();
+                        throw new CachingAssertionFailedException();
                     }
 
                     this._disposeTask.SetException( e );
