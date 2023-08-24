@@ -2,9 +2,7 @@
 
 using StackExchange.Redis;
 using StackExchange.Redis.Profiling;
-using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 

@@ -205,7 +205,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         return this.WhenBackgroundTasksCompleted( cancellationToken );
     }
 
-    ValueTask IAsyncDisposable.DisposeAsync() => new( this.DisposeAsync( default ) );
+    ValueTask IAsyncDisposable.DisposeAsync() => new( this.DisposeAsync() );
 
 #if DEBUG
     [SuppressMessage( "StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Class is for diagnostic purposes." )]

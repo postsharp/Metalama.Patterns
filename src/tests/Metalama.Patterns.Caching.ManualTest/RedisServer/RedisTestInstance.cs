@@ -4,12 +4,10 @@ using Metalama.Patterns.Caching.ManualTest.Executables;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 
 namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
 

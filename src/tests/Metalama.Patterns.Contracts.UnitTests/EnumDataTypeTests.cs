@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Contracts.UnitTests.Assets;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
@@ -81,7 +82,7 @@ public sealed class EnumDataTypeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.IntFlag = 10 );
 
         Assert.NotNull( e );
-        
+
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         Assert.Contains( "IntFlag", e!.Message, StringComparison.Ordinal );
     }

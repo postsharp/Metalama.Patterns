@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 public class CacheInvalidatorOptions
 {
     /// <summary>
-    /// Gets or sets the prefix of messages sent by the <see cref="CacheInvalidator"/>.
+    /// Gets the prefix of messages sent by the <see cref="CacheInvalidator"/>.
     /// Messages received by the <see cref="CacheInvalidator.OnMessageReceived"/> method are
     /// ignored if they don't start with the proper prefix.
     /// </summary>

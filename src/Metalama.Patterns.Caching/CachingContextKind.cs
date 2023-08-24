@@ -21,7 +21,7 @@ public enum CachingContextKind
 
     /// <summary>
     /// The <see cref="ICachingContext"/> of a method being re-evaluated, ignoring the previous value, and replaced into the cache, using the
-    /// <see cref="CachingServices.DefaultService.Invalidation.Recache{TReturn}"/> method.
+    /// <see cref="CacheInvalidationService.Recache{TReturn}"/> method.
     /// </summary>
     Recache = 2
 }

@@ -3,9 +3,6 @@
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Caching;
 /// The entry point to configure <c>Metalama.Patterns.Caching</c> at run-time.
 /// </summary>
 [PublicAPI]
-public static partial class CachingServices
+public static class CachingServices
 {
     public static CachingService DefaultService { get; } = new();
 

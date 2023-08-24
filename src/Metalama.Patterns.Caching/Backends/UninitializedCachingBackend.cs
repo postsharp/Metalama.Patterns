@@ -6,7 +6,7 @@ using System.Globalization;
 namespace Metalama.Patterns.Caching.Backends;
 
 /// <summary>
-/// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend until you see <see cref="CachingServices.DefaultService.DefaultBackend"/> to something else.
+/// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend until you see <see cref="CachingService.DefaultBackend"/> to something else.
 /// </summary>
 internal sealed class UninitializedCachingBackend : CachingBackend
 {

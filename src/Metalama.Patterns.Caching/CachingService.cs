@@ -2,6 +2,7 @@
 
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;

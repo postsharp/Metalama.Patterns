@@ -1,9 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
-using Metalama.Patterns.Caching.Formatters;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Formatters;
 
 /// <summary>
 /// Allows to get and register formatters used to generate caching keys.

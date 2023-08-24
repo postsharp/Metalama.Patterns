@@ -3,8 +3,6 @@
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 

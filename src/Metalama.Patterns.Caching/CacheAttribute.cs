@@ -13,6 +13,10 @@ using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching;
 
+// TODO: #33663 make local functions in templates static where possible
+// ReSharper disable LocalFunctionCanBeMadeStatic 
+#pragma warning disable IDE0062
+
 /// <summary>
 /// Custom attribute that, when applied on a method, causes the return value of the method to be cached
 /// for the specific list of arguments passed to this method call.
@@ -22,9 +26,9 @@ namespace Metalama.Patterns.Caching;
 /// <see cref="CacheAttribute"/> class, such as <see cref="AbsoluteExpiration"/> or <see cref="SlidingExpiration"/>. You can
 /// add the <see cref="CacheConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
 /// Finally, you can define a profile by setting the <see cref="ProfileName"/> property and configure the profile at run time
-/// by accessing the <see cref="CachingServices.DefaultService.Profiles"/> collection of the <see cref="CachingServices"/> class.</para>
+/// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="CachingService"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
-/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingServices.DefaultService.Invalidation"/>.</para>
+/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingService.Invalidation"/>.</para>
 /// </remarks>
 [PublicAPI]
 public sealed class CacheAttribute : MethodAspect
@@ -128,7 +132,7 @@ public sealed class CacheAttribute : MethodAspect
         }
         else
         {
-            for ( var i = 2; true; i++ )
+            for ( var i = 2; /* Intentionally empty */; i++ )
             {
                 registrationFieldName = $"{registrationFieldPrefix}{i}";
 
@@ -171,15 +175,6 @@ public sealed class CacheAttribute : MethodAspect
             builder.Target,
             overrideTemplates,
             args: new { TValue = genericValueType, TReturnType = builder.Target.ReturnType, registrationField = registrationField.Declaration } );
-
-        // Introduce a method that invokes the original method body but where the arguments are passed through an array.
-        var getInvokerMethodName = builder.Target.ToSerializableId()
-            .MakeAssociatedIdentifier( $"GetInvoker_{builder.Target.Name}" );
-
-        // TODO: The generation scheme could be significantly simplified with sub-templates:
-        // The invoker method should be just a delegate in the original method. There would be no need for separate methods, and the diff would look better.
-        // This would solve the issue of ugly names of methods at least.
-        // (not so sure that sub-templates are needed)
 
         // Initialize the CachedMethodRegistration field from the static constructor.
         var awaitableResultType = unboundReturnSpecialType switch
@@ -289,7 +284,7 @@ public sealed class CacheAttribute : MethodAspect
             (CachedMethodMetadata) registrationField.Value!,
             Invoke,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
-            (object[]) meta.Target.Method.Parameters.ToValueArray()! );
+            (object[]) meta.Target.Method.Parameters.ToValueArray() );
     }
 
     [Template]
@@ -329,10 +324,8 @@ public sealed class CacheAttribute : MethodAspect
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
             (CancellationToken) cancellationTokenExpression.Value! );
     }
-
-    // ReSharper disable once RedundantBlankLines
+    
 #if NETCOREAPP3_0_OR_GREATER
-    // ReSharper disable once UnusedMember.Global
     [Template]
     public static IAsyncEnumerable<TValue>? OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
@@ -360,14 +353,15 @@ public sealed class CacheAttribute : MethodAspect
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
             (CancellationToken) cancellationTokenExpression.Value! );
-
+        
         // Avoid extension method form due to current Metalama framework issue.
+        // ReSharper disable once InvokeAsExtensionMethod
         return AsyncEnumerableHelper.AsAsyncEnumerable( task );
     }
 
     // ReSharper disable once UnusedMember.Global
     [Template]
-    public static IAsyncEnumerator<TValue> OverrideMethodAsyncEnumerator<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
+    public static IAsyncEnumerator<TValue>? OverrideMethodAsyncEnumerator<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
     {
         var cancellationTokenExpression = GetCancellationTokenExpression();
 
@@ -395,6 +389,7 @@ public sealed class CacheAttribute : MethodAspect
             (CancellationToken) cancellationTokenExpression.Value! );
 
         // Avoid extension method form due to current Metalama framework issue.
+        // ReSharper disable once InvokeAsExtensionMethod
         return AsyncEnumerableHelper.AsAsyncEnumerator( task );
     }
 
