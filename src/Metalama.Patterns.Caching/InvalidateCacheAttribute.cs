@@ -253,17 +253,15 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 var index = meta.CompileTime( 0 );
 
-                // ReSharper disable once TooWideLocalVariableScope
-                Task task2;
 
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    task2 = CachingServices.DefaultService.Invalidation.InvalidateAsync(
+                    var invalidateTask = CachingServices.DefaultService.Invalidation.InvalidateAsync(
                         methodsInvalidatedByField.Value![index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
 
-                    if ( !task2.IsCompleted )
+                    if ( !invalidateTask.IsCompleted )
                     {
                         // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                         // and the await instrumentation policy is not applied.
@@ -337,17 +335,15 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 var index = meta.CompileTime( 0 );
 
-                // ReSharper disable once TooWideLocalVariableScope
-                Task task2;
 
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    task2 = CachingServices.DefaultService.Invalidation.InvalidateAsync(
+                    var invalidateTask = CachingServices.DefaultService.Invalidation.InvalidateAsync(
                         methodsInvalidatedByField.Value![index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
 
-                    if ( !task2.IsCompleted )
+                    if ( !invalidateTask.IsCompleted )
                     {
                         // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
                         // and the await instrumentation policy is not applied.

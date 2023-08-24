@@ -45,7 +45,7 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public Task InvalidateAsync<TReturn, <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+			public ValueTask InvalidateAsync<TReturn, <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
                 return this.InvalidateDelegateAsync( method, <#= Repeat( "arg{0}", i ) #> );
             }

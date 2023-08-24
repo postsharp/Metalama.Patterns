@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
@@ -41,7 +42,7 @@ public sealed class CachingProfileRegistry
     private void OnChange()
     {
         Interlocked.Increment( ref this._revisionNumber );
-        this.AllBackends = this._profiles.Values.Select( p => p.Backend ).Distinct().ToImmutableHashSet();
+        this.AllBackends = this._profiles.Values.Select( p => p.Backend ).Where( b => b is not UninitializedCachingBackend ).Distinct().ToImmutableHashSet();
     }
 
     private void OnProfileChanged( object? sender, PropertyChangedEventArgs args ) => this.OnChange();

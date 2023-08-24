@@ -70,7 +70,7 @@ public partial class CacheInvalidationService
     /// <param name="dependency">Typically, an <see cref="object"/>. If a <see cref="string"/>, <see cref="Delegate"/> or <see cref="ICacheDependency"/>
     /// is passed, the proper overload of the method is invoked. Otherwise, <paramref name="dependency"/> is wrapped into an <see cref="ObjectDependency"/> object.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public Task InvalidateAsync( [Required] object dependency )
+    public ValueTask InvalidateAsync( [Required] object dependency )
     {
         switch ( dependency )
         {
@@ -119,9 +119,9 @@ public partial class CacheInvalidationService
     /// </summary>
     /// <param name="dependency">A dependency.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public Task InvalidateAsync( [Required] ICacheDependency dependency ) => this.InvalidateAsync( dependency, dependency.GetType() );
+    public ValueTask InvalidateAsync( [Required] ICacheDependency dependency ) => this.InvalidateAsync( dependency, dependency.GetType() );
 
-    private async Task InvalidateAsync( [Required] ICacheDependency dependency, Type dependencyType )
+    private async ValueTask InvalidateAsync( [Required] ICacheDependency dependency, Type dependencyType )
     {
         using ( var activity =
                this._defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
@@ -179,7 +179,7 @@ public partial class CacheInvalidationService
     /// Asynchronously invalidates a cache dependency given as <see cref="string"/>, i.e. removes all cache items that are dependent on this dependency key.
     /// </summary>
     /// <param name="dependencyKey"></param>
-    public async Task InvalidateAsync( [Required] string dependencyKey )
+    public async ValueTask InvalidateAsync( [Required] string dependencyKey )
     {
         foreach ( var backend in this._cachingService.AllBackends )
         {
@@ -257,7 +257,7 @@ public partial class CacheInvalidationService
     /// <param name="method">The <see cref="MethodInfo"/> of the method call.</param>
     /// <param name="instance">The value of the <c>this</c> instance, or <c>null</c> for  methods.</param>
     /// <param name="args">The method arguments.</param>
-    public async Task InvalidateAsync( [Required] MethodInfo method, object? instance, params object[] args )
+    public async ValueTask InvalidateAsync( [Required] MethodInfo method, object? instance, params object[] args )
     {
         using ( var activity = this._defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
         {
@@ -302,7 +302,7 @@ public partial class CacheInvalidationService
 
     private void InvalidateDelegate( Delegate method, params object[] args ) => this.Invalidate( method.Method, method.Target, args );
 
-    private Task InvalidateDelegateAsync( Delegate method, params object[] args ) => this.InvalidateAsync( method.Method, method.Target, args );
+    private ValueTask InvalidateDelegateAsync( Delegate method, params object[] args ) => this.InvalidateAsync( method.Method, method.Target, args );
 
     /// <summary>
     /// Removes a method call result from the cache giving the delegate of the method. This overload is for methods with 0 parameter.
@@ -317,7 +317,7 @@ public partial class CacheInvalidationService
     /// <typeparam name="TReturn">The return type of the method.</typeparam>
     /// <param name="method">A delegate of the method to invalidate.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public Task InvalidateAsync<TReturn>( [Required] Func<TReturn> method ) => this.InvalidateDelegateAsync( method );
+    public ValueTask InvalidateAsync<TReturn>( [Required] Func<TReturn> method ) => this.InvalidateDelegateAsync( method );
 
     private CachingContext OpenRecacheContext( Delegate method, params object[] args )
     {

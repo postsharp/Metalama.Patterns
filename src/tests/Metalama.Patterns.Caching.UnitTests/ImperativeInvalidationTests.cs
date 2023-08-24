@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
+
     public sealed partial class ImperativeInvalidationTests : InvalidationTestsBase
     {
         private const string _profileNamePrefix = "Caching.Tests.ImperativeInvalidationTests_";
@@ -126,7 +127,7 @@ namespace Metalama.Patterns.Caching.Tests
         private static async Task DoTestSimpleImperativeInvalidationAsync(
             string profileName,
             Func<Task<CachedValueClass>> cachedMethod,
-            Func<Task> invalidatingMethod,
+            Func<ValueTask> invalidatingMethod,
             Func<bool> resetMethod )
         {
             async Task<CachedValueClass> InvalidatingMethodProxy()

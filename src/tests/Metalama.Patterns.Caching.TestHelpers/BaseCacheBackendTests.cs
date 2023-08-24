@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 {
     public abstract class BaseCacheBackendTests : IDisposable, IClassFixture<TestContext>
     {
-        protected const int Timeout = 120_000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
+        protected const int Timeout = 30_000; // 30 seconds ought to be enough to anyone. (otherwise the test should be refactored, anyway).
         protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout );
 
         // ReSharper disable once MemberCanBePrivate.Global

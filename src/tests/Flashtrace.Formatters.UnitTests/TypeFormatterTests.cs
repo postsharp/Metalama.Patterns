@@ -68,15 +68,15 @@ public class TypeFormatterTests : FormattersTestsBase
     [Fact]
     public void TestInnerTypes()
     {
-        this.TestFormatter( typeof(TestType.InnerType), "TestType.InnerType" );
-        this.TestFormatter( typeof(IEnumerable<TestType.InnerType>), "IEnumerable<TestType.InnerType>" );
-        this.TestFormatter( typeof(TestType.InnerType.MoreInnerType), "TestType.InnerType.MoreInnerType" );
-        this.TestFormatter( typeof(IEnumerable<TestType.InnerType.MoreInnerType>), "IEnumerable<TestType.InnerType.MoreInnerType>" );
-        this.TestFormatter( typeof(TestType.InnerType.MoreInnerType.EvenMoreInnerType), "TestType.InnerType.MoreInnerType.EvenMoreInnerType" );
+        this.TestFormatter( typeof(TestType.InnerType), "Flashtrace.Formatters.UnitTests.TestType.InnerType" );
+        this.TestFormatter( typeof(IEnumerable<TestType.InnerType>), "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType>" );
+        this.TestFormatter( typeof(TestType.InnerType.MoreInnerType), "Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType" );
+        this.TestFormatter( typeof(IEnumerable<TestType.InnerType.MoreInnerType>), "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType>" );
+        this.TestFormatter( typeof(TestType.InnerType.MoreInnerType.EvenMoreInnerType), "Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType.EvenMoreInnerType" );
 
         this.TestFormatter(
             typeof(IEnumerable<TestType.InnerType.MoreInnerType.EvenMoreInnerType>),
-            "IEnumerable<TestType.InnerType.MoreInnerType.EvenMoreInnerType>" );
+            "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType.EvenMoreInnerType>" );
     }
 
     [Fact]
@@ -84,39 +84,39 @@ public class TypeFormatterTests : FormattersTestsBase
     {
         this.TestFormatter(
             typeof(TestType.InnerType<,>),
-            "TestType.InnerType<,>" );
+            "Flashtrace.Formatters.UnitTests.TestType.InnerType<,>" );
 
         this.TestFormatter(
             typeof(TestType.InnerType<,>.MoreInnerType<,>),
-            "TestType.InnerType<,>.MoreInnerType<,>" );
+            "Flashtrace.Formatters.UnitTests.TestType.InnerType<,>.MoreInnerType<,>" );
 
         this.TestFormatter(
             typeof(TestType.InnerType<,>.MoreInnerType<,>.EvenMoreInnerType<,>),
-            "TestType.InnerType<,>.MoreInnerType<,>.EvenMoreInnerType<,>" );
+            "Flashtrace.Formatters.UnitTests.TestType.InnerType<,>.MoreInnerType<,>.EvenMoreInnerType<,>" );
 
         this.TestFormatter(
             typeof(TestType.InnerType<TestType1, TestType2>),
-            "TestType.InnerType<TestType1,TestType2>" );
+            "Flashtrace.Formatters.UnitTests.TestType.InnerType<Flashtrace.Formatters.UnitTests.TestType1,Flashtrace.Formatters.UnitTests.TestType2>" );
 
         this.TestFormatter(
             typeof(IEnumerable<TestType.InnerType<TestType1, TestType2>>),
-            "IEnumerable<TestType.InnerType<TestType1,TestType2>>" );
+            "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType<Flashtrace.Formatters.UnitTests.TestType1,Flashtrace.Formatters.UnitTests.TestType2>>" );
 
         this.TestFormatter(
             typeof(TestType.InnerType<TestType1, TestType2>.MoreInnerType<TestType3, TestType4>),
-            "TestType.InnerType<TestType1,TestType2>.MoreInnerType<TestType3,TestType4>" );
+            "Flashtrace.Formatters.UnitTests.TestType.InnerType<Flashtrace.Formatters.UnitTests.TestType1,Flashtrace.Formatters.UnitTests.TestType2>.MoreInnerType<Flashtrace.Formatters.UnitTests.TestType3,Flashtrace.Formatters.UnitTests.TestType4>" );
 
         this.TestFormatter(
             typeof(IEnumerable<TestType.InnerType<TestType1, TestType2>.MoreInnerType<TestType3, TestType4>>),
-            "IEnumerable<TestType.InnerType<TestType1,TestType2>.MoreInnerType<TestType3,TestType4>>" );
+            "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType<Flashtrace.Formatters.UnitTests.TestType1,Flashtrace.Formatters.UnitTests.TestType2>.MoreInnerType<Flashtrace.Formatters.UnitTests.TestType3,Flashtrace.Formatters.UnitTests.TestType4>>" );
 
         this.TestFormatter(
             typeof(TestType.InnerType<TestType1, TestType2>.MoreInnerType<TestType3, TestType4>.EvenMoreInnerType<TestType5, TestType6>),
-            "TestType.InnerType<TestType1,TestType2>.MoreInnerType<TestType3,TestType4>.EvenMoreInnerType<TestType5,TestType6>" );
+            "Flashtrace.Formatters.UnitTests.TestType.InnerType<Flashtrace.Formatters.UnitTests.TestType1,Flashtrace.Formatters.UnitTests.TestType2>.MoreInnerType<Flashtrace.Formatters.UnitTests.TestType3,Flashtrace.Formatters.UnitTests.TestType4>.EvenMoreInnerType<Flashtrace.Formatters.UnitTests.TestType5,Flashtrace.Formatters.UnitTests.TestType6>" );
 
         this.TestFormatter(
             typeof(IEnumerable<TestType.InnerType<TestType1, TestType2>.MoreInnerType<TestType3, TestType4>.EvenMoreInnerType<TestType5, TestType6>>),
-            "IEnumerable<TestType.InnerType<TestType1,TestType2>.MoreInnerType<TestType3,TestType4>.EvenMoreInnerType<TestType5,TestType6>>" );
+            "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType<Flashtrace.Formatters.UnitTests.TestType1,Flashtrace.Formatters.UnitTests.TestType2>.MoreInnerType<Flashtrace.Formatters.UnitTests.TestType3,Flashtrace.Formatters.UnitTests.TestType4>.EvenMoreInnerType<Flashtrace.Formatters.UnitTests.TestType5,Flashtrace.Formatters.UnitTests.TestType6>>" );
     }
 }
 

@@ -30,6 +30,7 @@ public sealed class CachingProfile : ICacheItemConfiguration, INotifyPropertyCha
     private CacheItemPriority? _priority;
     private ILockManager _lockManager = new NullLockManager();
     private IAcquireLockTimeoutStrategy _acquireLockTimeoutStrategy = new DefaultAcquireLockTimeoutStrategy();
+    private CachingBackend? _overwrittenBackend;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CachingProfile"/> class.
@@ -47,7 +48,16 @@ public sealed class CachingProfile : ICacheItemConfiguration, INotifyPropertyCha
     /// </summary>
     public string Name { get; }
 
-    public CachingBackend Backend => this._cachingService.DefaultBackend;
+    [AllowNull]
+    public CachingBackend Backend
+    {
+        get => this._overwrittenBackend ?? this._cachingService.DefaultBackend;
+        set
+        {
+            this._overwrittenBackend = value;
+            this.OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether caching is enabled for the current profile.

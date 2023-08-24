@@ -37,7 +37,7 @@ namespace Metalama.Patterns.Caching
 			/// <returns>A <see cref="Task"/>.</returns>
 			/// <typeparam name="TParam1">Type of the first parameter.</typeparam>
 			/// <param name="arg1">Value of the first parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1>( [Required] Func<TParam1, TReturn> method, TParam1 arg1 )
+				public ValueTask InvalidateAsync<TReturn, TParam1>( [Required] Func<TParam1, TReturn> method, TParam1 arg1 )
             {
                 return this.InvalidateDelegateAsync( method, arg1 );
             }
@@ -133,7 +133,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg1">Value of the first parameter.</param>
 				/// <typeparam name="TParam2">Type of the second parameter.</typeparam>
 			/// <param name="arg2">Value of the second parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2>( [Required] Func<TParam1, TParam2, TReturn> method, TParam1 arg1, TParam2 arg2 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2>( [Required] Func<TParam1, TParam2, TReturn> method, TParam1 arg1, TParam2 arg2 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2 );
             }
@@ -237,7 +237,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg2">Value of the second parameter.</param>
 				/// <typeparam name="TParam3">Type of the third parameter.</typeparam>
 			/// <param name="arg3">Value of the third parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2, TParam3>( [Required] Func<TParam1, TParam2, TParam3, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2, TParam3>( [Required] Func<TParam1, TParam2, TParam3, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2, arg3 );
             }
@@ -349,7 +349,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg3">Value of the third parameter.</param>
 				/// <typeparam name="TParam4">Type of the 4-th parameter.</typeparam>
 			/// <param name="arg4">Value of the 4-th parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2, arg3, arg4 );
             }
@@ -469,7 +469,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg4">Value of the 4-th parameter.</param>
 				/// <typeparam name="TParam5">Type of the 5-th parameter.</typeparam>
 			/// <param name="arg5">Value of the 5-th parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2, arg3, arg4, arg5 );
             }
@@ -597,7 +597,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg5">Value of the 5-th parameter.</param>
 				/// <typeparam name="TParam6">Type of the 6-th parameter.</typeparam>
 			/// <param name="arg6">Value of the 6-th parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2, arg3, arg4, arg5, arg6 );
             }
@@ -733,7 +733,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg6">Value of the 6-th parameter.</param>
 				/// <typeparam name="TParam7">Type of the 7-th parameter.</typeparam>
 			/// <param name="arg7">Value of the 7-th parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2, arg3, arg4, arg5, arg6, arg7 );
             }
@@ -877,7 +877,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg7">Value of the 7-th parameter.</param>
 				/// <typeparam name="TParam8">Type of the 8-th parameter.</typeparam>
 			/// <param name="arg8">Value of the 8-th parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 );
             }
@@ -1029,7 +1029,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg8">Value of the 8-th parameter.</param>
 				/// <typeparam name="TParam9">Type of the 9-th parameter.</typeparam>
 			/// <param name="arg9">Value of the 9-th parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8, TParam9 arg9 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8, TParam9 arg9 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 );
             }
@@ -1189,7 +1189,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg9">Value of the 9-th parameter.</param>
 				/// <typeparam name="TParam10">Type of the 10-th parameter.</typeparam>
 			/// <param name="arg10">Value of the 10-th parameter.</param>
-				public Task InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8, TParam9 arg9, TParam10 arg10 )
+				public ValueTask InvalidateAsync<TReturn, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10, TReturn> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8, TParam9 arg9, TParam10 arg10 )
             {
                 return this.InvalidateDelegateAsync( method, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 );
             }
