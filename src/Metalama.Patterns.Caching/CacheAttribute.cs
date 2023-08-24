@@ -241,7 +241,7 @@ public sealed class CacheAttribute : MethodAspect
     {
         var effectiveConfiguration = this.GetEffectiveConfiguration( method );
 
-        field.Value = CachingServices.RegisterCachedMethod(
+        field.Value = CachedMethodMetadata.Register(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
             awaitableResultType == null ? null : awaitableResultType.ToTypeOfExpression().Value,
             new CacheAttributeProperties()

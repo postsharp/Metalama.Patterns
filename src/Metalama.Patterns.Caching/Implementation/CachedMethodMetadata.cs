@@ -2,6 +2,7 @@
 
 using Flashtrace;
 using JetBrains.Annotations;
+using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Reflection;
@@ -130,5 +131,39 @@ public sealed class CachedMethodMetadata
         this.BuildTimeConfiguration = buildTimeConfiguration.CloneAsCacheItemConfiguration();
         this.ReturnValueCanBeNull = returnValueCanBeNull;
         this.AwaitableResultType = awaitableResultType;
+    }
+
+    public static CachedMethodMetadata Register(
+        [Required] MethodInfo method,
+        Type? awaitableResultType,
+        [Required] ICacheItemConfiguration buildTimeConfiguration,
+        bool returnValueCanBeNull )
+    {
+        var metadata = new CachedMethodMetadata(
+            method,
+            GetCachedParameterInfos( method ),
+            awaitableResultType,
+            buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
+            buildTimeConfiguration,
+            returnValueCanBeNull );
+
+        CachingServices.CachedMethodMetadataRegistry.Register( metadata );
+
+        return metadata;
+    }
+
+    private static ImmutableArray<CachedParameterInfo> GetCachedParameterInfos( MethodInfo method )
+    {
+        var parameterInfos = method.GetParameters();
+        var cachedParameterInfos = new CachedParameterInfo[parameterInfos.Length];
+
+        for ( var i = 0; i < parameterInfos.Length; i++ )
+        {
+            var isIgnored = parameterInfos[i].IsDefined( typeof(NotCacheKeyAttribute) );
+
+            cachedParameterInfos[i] = new CachedParameterInfo( isIgnored );
+        }
+
+        return cachedParameterInfos.ToImmutableArray();
     }
 }

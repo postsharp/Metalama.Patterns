@@ -6,9 +6,7 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 namespace Metalama.Patterns.Caching;
 
@@ -28,13 +26,6 @@ public static partial class CachingServices
     /// Gets the <see cref="CachedMethodMetadataRegistry"/>.
     /// </summary>
     internal static CachedMethodMetadataRegistry CachedMethodMetadataRegistry { get; } = new();
-
-    public static CachedMethodMetadata RegisterCachedMethod(
-        [Required] MethodInfo method,
-        Type? awaitableResultType,
-        [Required] ICacheItemConfiguration buildTimeConfiguration,
-        bool returnValueCanBeNull )
-        => CachedMethodMetadataRegistry.Register( method, awaitableResultType, buildTimeConfiguration, returnValueCanBeNull );
 
     /// <summary>
     /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
