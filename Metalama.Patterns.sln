@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace", "src\Flashtrac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.UnitTests", "src\tests\Flashtrace.UnitTests\Flashtrace.UnitTests.csproj", "{900FC057-DB84-486F-81C2-ED3F8D284E61}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.NotifyPropertyChanged", "src\Metalama.Patterns.NotifyPropertyChanged\Metalama.Patterns.NotifyPropertyChanged.csproj", "{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,12 @@ Global
 		{900FC057-DB84-486F-81C2-ED3F8D284E61}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
 		{900FC057-DB84-486F-81C2-ED3F8D284E61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{900FC057-DB84-486F-81C2-ED3F8D284E61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
