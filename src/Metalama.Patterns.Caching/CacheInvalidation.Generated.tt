@@ -11,17 +11,13 @@ using System;
 using System.Threading.Tasks;
 using Metalama.Patterns.Contracts;
 using Flashtrace;
-using static Flashtrace.SemanticMessageBuilder;
+using static Flashtrace.Messages.SemanticMessageBuilder;
 
 namespace Metalama.Patterns.Caching
 {
-	public static partial class CachingServices
+	public partial class CacheInvalidationService
     {
-        /// <summary>
-        /// Invalidates the cache.
-        /// </summary>
-        public static partial class Invalidation
-		{
+        
 		<#
     for (var i = 1; i <= 10; i++)
     {
@@ -35,9 +31,9 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-  			public static void Invalidate<TReturn, <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+  			public void Invalidate<TReturn, <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
-                InvalidateDelegate( method, <#= Repeat( "arg{0}", i ) #> );
+                this.InvalidateDelegate( method, <#= Repeat( "arg{0}", i ) #> );
             }
 
 			 /// <summary>
@@ -49,9 +45,9 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public static Task InvalidateAsync<TReturn, <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+			public Task InvalidateAsync<TReturn, <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
-                return InvalidateDelegateAsync( method, <#= Repeat( "arg{0}", i ) #> );
+                return this.InvalidateDelegateAsync( method, <#= Repeat( "arg{0}", i ) #> );
             }
 
 			/// <summary>
@@ -63,9 +59,9 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public static TReturn Recache<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func< <#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+			public TReturn Recache<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func< <#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
-				using ( var activity = defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+				using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -97,9 +93,9 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public static async Task<TReturn> RecacheAsync<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, Task<TReturn>> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+			public async Task<TReturn> RecacheAsync<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, Task<TReturn>> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
-                using ( var activity = defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -126,8 +122,7 @@ namespace Metalama.Patterns.Caching
     }
 #>
 	
-		}
-    
+	
 	}
 }
 
@@ -175,3 +170,4 @@ namespace Metalama.Patterns.Caching
         }
     }
 #>
+

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Contracts;
@@ -28,6 +29,8 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 return this.LastMethodKey = base.BuildMethodKey( metadata, arguments, instance );
             }
+
+            public MyCacheKeyBuilder( IFormatterRepository formatterRepository ) : base( formatterRepository ) { }
         }
 
         private static void DoTestMethod( string profileName, string expectedKey, Func<string> action )
@@ -37,8 +40,8 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                var keyBuilder = new MyCacheKeyBuilder();
-                CachingServices.DefaultKeyBuilder = keyBuilder;
+                var keyBuilder = new MyCacheKeyBuilder( CachingServices.DefaultService.Formatters );
+                CachingServices.DefaultService.KeyBuilder = keyBuilder;
                 action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
                 Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
@@ -56,8 +59,8 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                var keyBuilder = new MyCacheKeyBuilder();
-                CachingServices.DefaultKeyBuilder = keyBuilder;
+                var keyBuilder = new MyCacheKeyBuilder( CachingServices.DefaultService.Formatters );
+                CachingServices.DefaultService.KeyBuilder = keyBuilder;
                 await action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
                 Assert.Equal( expectedKey, keyBuilder.LastMethodKey );

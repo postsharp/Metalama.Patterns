@@ -12,15 +12,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClass()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
-            CachingServices.Formatters.Register( new DogFormatter( CachingServices.Formatters ) );
+            var formatters = new CachingFormatterRepository();
+            formatters.Register( new DogFormatter( formatters ) );
 
-            AssertKey( "FormattedDog", new Dog() );
+            AssertKey( formatters, "FormattedDog", new Dog() );
         }
 
-        private static void AssertKey( string expectedKey, object o )
+        private static void AssertKey( FormatterRepository formatters, string expectedKey, object o )
         {
-            var cacheKeyBuilder = new CacheKeyBuilder();
+            var cacheKeyBuilder = new CacheKeyBuilder( formatters );
             var key = cacheKeyBuilder.BuildDependencyKey( o );
 
             Assert.Equal( expectedKey, key );
@@ -29,36 +29,36 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClassOverwritingFormatter()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
-            CachingServices.Formatters.Register( new AnimalFormatter( CachingServices.Formatters ) );
-            CachingServices.Formatters.Register( new DogFormatter( CachingServices.Formatters ) );
+            var formatters = new CachingFormatterRepository();
+            formatters.Register( new AnimalFormatter( formatters ) );
+            formatters.Register( new DogFormatter( formatters ) );
 
-            AssertKey( "FormattedDog", new Dog() );
+            AssertKey( formatters, "FormattedDog", new Dog() );
         }
 
         [Fact]
         public void TestDerivedClass()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
-            CachingServices.Formatters.Register( new DogFormatter( CachingServices.Formatters ) );
-            AssertKey( "FormattedDog", new Chihuahua() );
+            var formatters = new CachingFormatterRepository();
+            formatters.Register( new DogFormatter( formatters ) );
+            AssertKey( formatters, "FormattedDog", new Chihuahua() );
         }
 
         [Fact]
         public void TestInterface()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
-            CachingServices.Formatters.Register( new AnimalFormatter( CachingServices.Formatters ) );
+            var formatters = new CachingFormatterRepository();
+            formatters.Register( new AnimalFormatter( formatters ) );
 
-            AssertKey( "FormattedAnimal", new Cat() );
+            AssertKey( formatters, "FormattedAnimal", new Cat() );
         }
 
         [Fact]
         public void TestManuallyFormatted()
         {
-            ((FormatterRepository.IUnitTesting) CachingServices.Formatters).Reset();
+            var formatters = new CachingFormatterRepository();
 
-            AssertKey( "ManuallyFormatted:Caching", new ManuallyFormatted() );
+            AssertKey( formatters, "ManuallyFormatted:Caching", new ManuallyFormatted() );
         }
 
         private interface IAnimal { }

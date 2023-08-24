@@ -4,7 +4,9 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Locking;
 using Metalama.Patterns.Contracts;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Caching;
 
@@ -12,8 +14,10 @@ namespace Metalama.Patterns.Caching;
 /// Allows for centralized and run-time configuration of several instances of the <see cref="CacheAttribute"/> aspect.
 /// </summary>
 [PublicAPI]
-public sealed class CachingProfile : ICacheItemConfiguration
+public sealed class CachingProfile : ICacheItemConfiguration, INotifyPropertyChanged
 {
+    private readonly CachingService _cachingService;
+
     /// <summary>
     /// The name of the default profile.
     /// </summary>
@@ -31,8 +35,9 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// Initializes a new instance of the <see cref="CachingProfile"/> class.
     /// </summary>
     /// <param name="name">Profile name (a case-insensitive string).</param>
-    public CachingProfile( [Required] string name )
+    internal CachingProfile( [Required] string name, CachingService cachingService )
     {
+        this._cachingService = cachingService;
         this.Name = name;
     }
 
@@ -40,6 +45,8 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// Gets the profile name  (a case-insensitive string).
     /// </summary>
     public string Name { get; }
+
+    public CachingBackend Backend => this._cachingService.DefaultBackend;
 
     /// <summary>
     /// Gets or sets a value indicating whether caching is enabled for the current profile.
@@ -49,8 +56,8 @@ public sealed class CachingProfile : ICacheItemConfiguration
         get => this._isEnabled;
         set
         {
-            CachingServices.Profiles.OnProfileChanged();
             this._isEnabled = value;
+            this.OnPropertyChanged();
         }
     }
 
@@ -63,8 +70,8 @@ public sealed class CachingProfile : ICacheItemConfiguration
         get => this._autoReload;
         set
         {
-            CachingServices.Profiles.OnProfileChanged();
             this._autoReload = value;
+            this.OnPropertyChanged();
         }
     }
 
@@ -77,8 +84,8 @@ public sealed class CachingProfile : ICacheItemConfiguration
         get => this._absoluteExpiration;
         set
         {
-            CachingServices.Profiles.OnProfileChanged();
             this._absoluteExpiration = value;
+            this.OnPropertyChanged();
         }
     }
 
@@ -91,8 +98,8 @@ public sealed class CachingProfile : ICacheItemConfiguration
         get => this._slidingExpiration;
         set
         {
-            CachingServices.Profiles.OnProfileChanged();
             this._slidingExpiration = value;
+            this.OnPropertyChanged();
         }
     }
 
@@ -104,8 +111,8 @@ public sealed class CachingProfile : ICacheItemConfiguration
         get => this._priority;
         set
         {
-            CachingServices.Profiles.OnProfileChanged();
             this._priority = value;
+            this.OnPropertyChanged();
         }
     }
 
@@ -159,5 +166,12 @@ public sealed class CachingProfile : ICacheItemConfiguration
     {
         get => this._acquireLockTimeoutStrategy;
         set => this._acquireLockTimeoutStrategy = value ?? new DefaultAcquireLockTimeoutStrategy();
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged( [CallerMemberName] string? propertyName = null )
+    {
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
 }

@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         // We don't like timeouts in tests but we need them to avoid test suites to hang in case of issues.
         private static readonly TimeSpan _timeout = TimeSpan.FromMinutes( 2 );
-        
+
         #region TestSync
 
         private const string _testSyncProfileName = _profileNamePrefix + "TestSync";
@@ -116,7 +116,7 @@ namespace Metalama.Patterns.Caching.Tests
                 AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
                 cachingClass.Reset();
 
-                CachingServices.Invalidation.Invalidate( cachingClass.GetValue );
+                CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue );
 
                 var value2 = cachingClass.GetValue();
                 var called = cachingClass.Reset();
@@ -298,7 +298,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        private static async Task DoAsyncTest<T>( CachingClass<T> cachingClass, TestingCacheBackend backend ) 
+        private static async Task DoAsyncTest<T>( CachingClass<T> cachingClass, TestingCacheBackend backend )
             where T : CachedValueClass, new()
         {
             const int currentId = 0;
@@ -495,7 +495,7 @@ namespace Metalama.Patterns.Caching.Tests
             backend.ExpectedContainsKeyCount = 1;
             backend.ExpectedRemoveCount = 1;
             backend.ExpectedSetCount = 1;
-            CachingServices.Invalidation.Invalidate( value1 );
+            CachingServices.DefaultService.Invalidation.Invalidate( value1 );
 
             var called = itemSetEvent.Wait( _timeout );
             Assert.True( called, "The method was not called automatically when the first cache item got invalidated: timeout." );
@@ -636,7 +636,7 @@ namespace Metalama.Patterns.Caching.Tests
             backend.ExpectedContainsKeyCount = 1;
             backend.ExpectedRemoveCount = 1;
             backend.ExpectedSetCount = 1;
-            await CachingServices.Invalidation.InvalidateAsync( value1 );
+            await CachingServices.DefaultService.Invalidation.InvalidateAsync( value1 );
 
             var called = await Task.WhenAny( itemSetEvent.Task, Task.Delay( _timeout ) ) == itemSetEvent.Task;
             Assert.True( called, "The method was not called automatically when the first cache item got invalidated: timeout." );

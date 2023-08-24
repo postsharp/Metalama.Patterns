@@ -72,7 +72,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingServices.Invalidation.Invalidate( cachingClass.GetValueDependency );
+                CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValueDependency );
 
                 cachingClass.GetValue();
 
@@ -146,7 +146,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -169,7 +169,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testDisposedContextAsyncProfileName = _profileNamePrefix + "DisposedContextAsync";
 
         // [Porting] Won't fix, can't be certain of original intent.
-#pragma warning disable CA1001 
+#pragma warning disable CA1001
         [CacheConfiguration( ProfileName = _testDisposedContextAsyncProfileName )]
         private sealed class TestDisposedContextAsyncCachingClass
 #pragma warning restore CA1001
@@ -194,7 +194,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             public async Task<Task<CachedValueClass>> GetValueIntermediateAsync()
             {
-                using ( CachingContext.OpenCacheContext( "k" ) )
+                using ( CachingContext.OpenCacheContext( "k", CachingServices.DefaultService ) )
                 {
                     await Task.Yield();
 
@@ -231,7 +231,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -306,7 +306,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingServices.Invalidation.Invalidate( cachingClass.GetValueDependency );
+                CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValueDependency );
 
                 cachingClass.GetValue();
 
@@ -387,7 +387,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 

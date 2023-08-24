@@ -1,12 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace;
-using Flashtrace.Formatters;
 using JetBrains.Annotations;
-using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Caching.Formatters;
-using Metalama.Patterns.Caching.Implementation;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching;
 
@@ -16,54 +10,14 @@ namespace Metalama.Patterns.Caching;
 [PublicAPI]
 public static partial class CachingServices
 {
-    private static readonly LogSource _defaultLogger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
-    private static volatile CacheKeyBuilder _keyBuilder = new();
-    private static volatile CachingBackend _backend = new UninitializedCachingBackend();
-
-    public static FormatterRepository Formatters { get; } = new CachingFormatterRepository( CachingFormattingRole.Instance );
-
-    /// <summary>
-    /// Gets the <see cref="CachedMethodMetadataRegistry"/>.
-    /// </summary>
-    internal static CachedMethodMetadataRegistry CachedMethodMetadataRegistry { get; } = new();
-
-    /// <summary>
-    /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
-    /// </summary>
-    [AllowNull]
-    public static CacheKeyBuilder DefaultKeyBuilder
-    {
-        get => _keyBuilder;
-        set => _keyBuilder = value ?? new CacheKeyBuilder();
-    }
-
-    /// <summary>
-    /// Gets or sets the default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
-    /// </summary>
-    [AllowNull]
-    public static CachingBackend DefaultBackend
-    {
-        get => _backend;
-        set
-        {
-            if ( _backend == value )
-            {
-                return;
-            }
-
-            _backend = value ?? new NullCachingBackend();
-        }
-    }
-
-    /// <summary>
-    /// Gets the repository of caching profiles (<see cref="CachingProfile"/>).
-    /// </summary>
-    public static CachingProfileRegistry Profiles { get; } = new();
+    public static CachingService DefaultService { get; } = new();
 
     /// <summary>
     /// Gets the current caching context, so dependencies can be added.
     /// </summary>
     public static ICachingContext CurrentContext => CachingContext.Current;
+
+    public static CachingService Default { get; } = new();
 
     /// <summary>
     /// Temporarily suspends propagation of dependencies from subsequently called methods to the caller method.

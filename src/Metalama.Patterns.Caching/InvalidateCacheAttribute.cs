@@ -188,7 +188,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    CachingServices.Invalidation.Invalidate(
+                    CachingServices.DefaultService.Invalidation.Invalidate(
                         methodsInvalidatedByField.Value![index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
@@ -258,7 +258,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    task2 = CachingServices.Invalidation.InvalidateAsync(
+                    task2 = CachingServices.DefaultService.Invalidation.InvalidateAsync(
                         methodsInvalidatedByField.Value![index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
@@ -342,7 +342,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    task2 = CachingServices.Invalidation.InvalidateAsync(
+                    task2 = CachingServices.DefaultService.Invalidation.InvalidateAsync(
                         methodsInvalidatedByField.Value![index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );

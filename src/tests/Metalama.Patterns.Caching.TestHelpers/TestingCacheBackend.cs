@@ -8,6 +8,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 {
     public sealed class TestingCacheBackend : CachingBackend
     {
+        private readonly string _name;
         private readonly CachingBackend _backend;
 
         // TODO: This pattern might be in a separate class
@@ -38,6 +39,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         public TestingCacheBackend( string name )
         {
+            this._name = name;
             this.ResetExpectations();
             this._backend = MemoryCacheFactory.CreateBackend();
             this._backend.ItemRemoved += this.OnItemRemoved;
@@ -101,7 +103,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this.ItemSet?.Invoke( this, new CacheItemSetEventArgs( key, item, null ) );
         }
 
-        protected override async Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
+        protected override async ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
         {
             ++this._actualSetCount;
             await this._backend.SetItemAsync( key, item, cancellationToken );
@@ -117,7 +119,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return this._backend.ContainsItem( key );
         }
 
-        protected override async Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
+        protected override async ValueTask<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
         {
             ++this._actualContainsKeyCount;
 
@@ -131,7 +133,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return this._backend.GetItem( key, includeDependencies );
         }
 
-        protected override async Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+        protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
         {
             ++this._actualGetCount;
 
@@ -144,7 +146,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this._backend.InvalidateDependency( key );
         }
 
-        protected override async Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
+        protected override async ValueTask InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
         {
             ++this._actualInvalidateCount;
             await this._backend.InvalidateDependencyAsync( key, cancellationToken );
@@ -155,7 +157,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return this._backend.ContainsDependency( key );
         }
 
-        protected override Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
+        protected override ValueTask<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
         {
             return this._backend.ContainsDependencyAsync( key, cancellationToken );
         }
@@ -177,7 +179,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this._backend.Clear();
         }
 
-        protected override Task ClearAsyncCore( CancellationToken cancellationToken )
+        protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
         {
             return this._backend.ClearAsync( cancellationToken );
         }
@@ -188,10 +190,12 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this._backend.RemoveItem( key );
         }
 
-        protected override async Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
+        protected override async ValueTask RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
         {
             ++this._actualRemoveCount;
             await this._backend.RemoveItemAsync( key, cancellationToken );
         }
+
+        public override string ToString() => $"Backend {this._name}";
     }
 }

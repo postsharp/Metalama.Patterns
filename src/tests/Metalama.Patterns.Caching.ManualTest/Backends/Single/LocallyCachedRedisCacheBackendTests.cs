@@ -83,7 +83,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend(
+        using ( CachingServices.DefaultService.DefaultBackend = RedisFactory.CreateBackend(
                    this.TestContext,
                    this._redisSetupFixture,
                    prefix: redisKeyPrefix,
@@ -100,7 +100,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
             }
         }
 
-        using ( CachingServices.DefaultBackend = RedisFactory.CreateBackend(
+        using ( CachingServices.DefaultService.DefaultBackend = RedisFactory.CreateBackend(
                    this.TestContext,
                    this._redisSetupFixture,
                    prefix: redisKeyPrefix,

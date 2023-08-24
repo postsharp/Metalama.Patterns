@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 
 // TODO: [Porting] BackgroundTaskScheduler was [ExplicitCrossPackageInternal]. Used by Redis backend so making public for now.
 [PublicAPI]
-public sealed class BackgroundTaskScheduler
+public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 {
     private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource();
 
@@ -48,6 +48,8 @@ public sealed class BackgroundTaskScheduler
     /// Forbids the use of the <see cref="EnqueueBackgroundTask(Func{Task})"/> method. This method is used for debugging purposes only.
     /// </summary>
     public void StopAcceptingBackgroundTasks() => this._backgroundTasksForbidden = true;
+
+    public void EnqueueBackgroundTask( Func<ValueTask> task ) => this.EnqueueBackgroundTask( () => task().AsTask() );
 
     /// <summary>
     /// Enqueues a background task.
@@ -196,12 +198,14 @@ public sealed class BackgroundTaskScheduler
         this._backgroundTasksFinishedEvent.Wait();
     }
 
-    public Task DisposeAsync( CancellationToken cancellationToken )
+    public Task DisposeAsync( CancellationToken cancellationToken = default )
     {
         this.StopAcceptingBackgroundTasks();
 
         return this.WhenBackgroundTasksCompleted( cancellationToken );
     }
+
+    ValueTask IAsyncDisposable.DisposeAsync() => new( this.DisposeAsync( default ) );
 
 #if DEBUG
     [SuppressMessage( "StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Class is for diagnostic purposes." )]

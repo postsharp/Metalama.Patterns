@@ -10,9 +10,16 @@ using static Flashtrace.Messages.FormattedMessageBuilder;
 namespace Metalama.Patterns.Caching.Implementation;
 
 [EditorBrowsable( EditorBrowsableState.Never )]
-internal static class CachingFrontend
+internal class CachingFrontend
 {
-    public static object? GetOrAdd(
+    private readonly CachingService _cachingService;
+
+    public CachingFrontend( CachingService cachingService )
+    {
+        this._cachingService = cachingService;
+    }
+
+    public object? GetOrAdd(
         MethodInfo method,
         string key,
         Type valueType,
@@ -24,9 +31,9 @@ internal static class CachingFrontend
     {
         ILockHandle? lockHandle = null;
         CacheValue? item = null;
-        var backend = CachingServices.DefaultBackend;
 
-        var profile = CachingServices.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
+        var profile = this._cachingService.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
+        var backend = profile.Backend;
 
         try
         {
@@ -86,6 +93,7 @@ internal static class CachingFrontend
             if ( item == null )
             {
 #if DEBUG
+
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
@@ -96,19 +104,20 @@ internal static class CachingFrontend
                 // Cache miss.
                 if ( configuration.AutoReload.GetValueOrDefault() )
                 {
-                    var valueProvider = () => invokeOriginalMethod( instance, args );
-                    backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, false );
+                    object? GetValue() => invokeOriginalMethod( instance, args );
+
+                    this._cachingService.AutoReloadManager.SubscribeAutoRefresh( backend, key, valueType, configuration, GetValue, logger, false );
                 }
 
                 logger.Debug.EnabledOrNull?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key ) )
+                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
                 {
                     value = invokeOriginalMethod( instance, args );
 
-                    value = SetItem( key, value, valueType, configuration, context );
+                    value = SetItem( profile.Backend, key, value, valueType, configuration, context );
 
-                    context.AddDependenciesToParent( method );
+                    context.AddDependenciesToParent( profile.Backend, method );
                 }
             }
             else
@@ -117,7 +126,7 @@ internal static class CachingFrontend
 
                 logger.Debug.EnabledOrNull?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
 
-                AddCacheHitDependencies( key, item );
+                AddCacheHitDependencies( backend, key, item );
 
                 value = item.Value;
             }
@@ -134,7 +143,7 @@ internal static class CachingFrontend
         }
     }
 
-    public static async Task<object?> GetOrAddAsync(
+    public async Task<object?> GetOrAddAsync(
         MethodInfo method,
         string key,
         Type valueType,
@@ -147,11 +156,11 @@ internal static class CachingFrontend
     {
         // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
 
-        var backend = CachingServices.DefaultBackend;
         CacheValue? item = null;
         ILockHandle? lockHandle = null;
 
-        var profile = CachingServices.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
+        var profile = this._cachingService.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
+        var backend = profile.Backend;
 
         try
         {
@@ -213,6 +222,7 @@ internal static class CachingFrontend
                 // Cache miss.
 
 #if DEBUG
+
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
@@ -222,23 +232,24 @@ internal static class CachingFrontend
 
                 if ( configuration.AutoReload.GetValueOrDefault() )
                 {
-                    var valueProvider = () => invokeOriginalMethod( instance, args, cancellationToken );
-                    backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, true );
+                    Task<object?> GetValue() => invokeOriginalMethod( instance, args, cancellationToken );
+
+                    this._cachingService.AutoReloadManager.SubscribeAutoRefresh( backend, key, valueType, configuration, GetValue, logger, true );
                 }
 
                 logger.Debug.EnabledOrNull?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key ) )
+                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
                 {
                     var invokeValueProviderTask = invokeOriginalMethod( instance, args, cancellationToken );
 
                     value = await invokeValueProviderTask;
 
-                    var invokeSetItemAsyncTask = SetItemAsync( key, value, valueType, configuration, context, cancellationToken );
+                    var invokeSetItemAsyncTask = SetItemAsync( profile.Backend, key, value, valueType, configuration, context, cancellationToken );
 
                     value = await invokeSetItemAsyncTask;
 
-                    context.AddDependenciesToParent( method );
+                    context.AddDependenciesToParent( profile.Backend, method );
                 }
             }
             else
@@ -247,7 +258,7 @@ internal static class CachingFrontend
 
                 logger.Debug.EnabledOrNull?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
 
-                AddCacheHitDependencies( key, item );
+                AddCacheHitDependencies( backend, key, item );
 
                 value = item.Value;
             }
@@ -264,7 +275,7 @@ internal static class CachingFrontend
         }
     }
 
-    public static async Task<object?> GetOrAddAsync(
+    public async ValueTask<object?> GetOrAddAsync(
         MethodInfo method,
         string key,
         Type valueType,
@@ -276,13 +287,12 @@ internal static class CachingFrontend
         CancellationToken cancellationToken )
     {
         // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
-        // TODO: Ideally we'd avoid allocating Task here (ie, use ValueTask), at least in the cache hit path, but this is non-trivial given the extensible API which uses Task widely.       
 
-        var backend = CachingServices.DefaultBackend;
         CacheValue? item = null;
         ILockHandle? lockHandle = null;
 
-        var profile = CachingServices.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
+        var profile = this._cachingService.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
+        var backend = profile.Backend;
 
         try
         {
@@ -344,6 +354,7 @@ internal static class CachingFrontend
                 // Cache miss.
 
 #if DEBUG
+
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
@@ -353,23 +364,24 @@ internal static class CachingFrontend
 
                 if ( configuration.AutoReload.GetValueOrDefault() )
                 {
-                    var valueProvider = () => invokeOriginalMethod( instance, args, cancellationToken ).AsTask();
-                    backend.AutoReloadManager.SubscribeAutoRefresh( key, valueType, configuration, valueProvider, logger, true );
+                    Task<object?> GetValue() => invokeOriginalMethod( instance, args, cancellationToken ).AsTask();
+
+                    this._cachingService.AutoReloadManager.SubscribeAutoRefresh( backend, key, valueType, configuration, GetValue, logger, true );
                 }
 
                 logger.Debug.EnabledOrNull?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key ) )
+                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
                 {
                     var invokeValueProviderTask = invokeOriginalMethod( instance, args, cancellationToken );
 
                     value = await invokeValueProviderTask;
 
-                    var invokeSetItemAsyncTask = SetItemAsync( key, value, valueType, configuration, context, cancellationToken );
+                    var invokeSetItemAsyncTask = SetItemAsync( profile.Backend, key, value, valueType, configuration, context, cancellationToken );
 
                     value = await invokeSetItemAsyncTask;
 
-                    context.AddDependenciesToParent( method );
+                    context.AddDependenciesToParent( profile.Backend, method );
                 }
             }
             else
@@ -378,7 +390,7 @@ internal static class CachingFrontend
 
                 logger.Debug.EnabledOrNull?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
 
-                AddCacheHitDependencies( key, item );
+                AddCacheHitDependencies( backend, key, item );
 
                 value = item.Value;
             }
@@ -395,23 +407,29 @@ internal static class CachingFrontend
         }
     }
 
-    private static void AddCacheHitDependencies( string key, CacheValue item )
+    private static void AddCacheHitDependencies( CachingBackend backend, string key, CacheValue item )
     {
         CachingContext.Current.AddDependencies( item.Dependencies );
 
-        if ( CachingServices.DefaultBackend.SupportedFeatures.Dependencies )
+        if ( backend.SupportedFeatures.Dependencies )
         {
             CachingContext.Current.AddDependency( key );
         }
     }
 
-    public static object? SetItem( string key, object? value, Type valueType, ICacheItemConfiguration configuration, CachingContext context )
+    public static object? SetItem(
+        CachingBackend backend,
+        string key,
+        object? value,
+        Type valueType,
+        ICacheItemConfiguration configuration,
+        CachingContext context )
     {
         var exposedValue = value;
 
         if ( value != null )
         {
-            var valueAdapter = CachingServices.DefaultBackend.ValueAdapters.Get( valueType );
+            var valueAdapter = backend.ValueAdapters.Get( valueType );
 
             if ( valueAdapter != null )
             {
@@ -422,12 +440,13 @@ internal static class CachingFrontend
 
         var cacheItem = new CacheItem( value, context.Dependencies.ToImmutableList(), configuration );
 
-        CachingServices.DefaultBackend.SetItem( key, cacheItem );
+        backend.SetItem( key, cacheItem );
 
         return exposedValue;
     }
 
     public static async Task<object?> SetItemAsync(
+        CachingBackend backend,
         string key,
         object? value,
         Type valueType,
@@ -439,7 +458,7 @@ internal static class CachingFrontend
 
         if ( value != null )
         {
-            var valueAdapter = CachingServices.DefaultBackend.ValueAdapters.Get( valueType );
+            var valueAdapter = backend.ValueAdapters.Get( valueType );
 
             if ( valueAdapter != null )
             {
@@ -460,7 +479,7 @@ internal static class CachingFrontend
 
         var cacheItem = new CacheItem( value, context.Dependencies.ToImmutableList(), configuration );
 
-        var setItemTask = CachingServices.DefaultBackend.SetItemAsync( key, cacheItem, cancellationToken );
+        var setItemTask = backend.SetItemAsync( key, cacheItem, cancellationToken );
         await setItemTask;
 
         return exposedValue;

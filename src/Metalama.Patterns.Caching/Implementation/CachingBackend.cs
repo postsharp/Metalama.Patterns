@@ -17,8 +17,9 @@ public abstract class CachingBackend : ITestableCachingComponent
 {
     private const int _disposeTimeout = 30000;
 
-    private static readonly Task<bool> _falseTaskResult = Task.FromResult( false );
-    private static readonly Task<bool> _trueTaskResult = Task.FromResult( true );
+    private static readonly ValueTask<bool> _falseTaskResult = new( false );
+    private static readonly ValueTask<bool> _trueTaskResult = new( true );
+    private static readonly ValueTask _completedTask = new( Task.CompletedTask );
 
     private readonly TaskCompletionSource<bool> _disposeTask = new();
 
@@ -80,13 +81,13 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="item">The cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    protected virtual Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
+    protected virtual ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         this.SetItemCore( key, item );
 
-        return _trueTaskResult;
+        return new ValueTask( Task.CompletedTask );
     }
 
     /// <summary>
@@ -122,7 +123,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="item">The cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async Task SetItemAsync( [Required] string key, [Required] CacheItem item, CancellationToken cancellationToken = default )
+    public async ValueTask SetItemAsync( [Required] string key, [Required] CacheItem item, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "SetItemAsync( \"{Key}\")", key ) ) )
         {
@@ -158,7 +159,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The key of the cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> that evaluates to <c>true</c> if the cache contains an item whose key is <paramref name="key"/>, otherwise <c>false</c>.</returns>
-    protected virtual Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected virtual ValueTask<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -197,7 +198,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The key of the cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> that evaluates to <c>true</c> if the cache contains an item whose key is <paramref name="key"/>, otherwise <c>false</c>.</returns>
-    public async Task<bool> ContainsItemAsync( [Required] string key, CancellationToken cancellationToken = default )
+    public async ValueTask<bool> ContainsItemAsync( [Required] string key, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsItemAsync( \"{Key}\" )", key ) ) )
         {
@@ -234,14 +235,14 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="key">The cache item.</param>
     /// <param name="includeDependencies"><c>true</c> if the <see cref="CacheValue.Dependencies"/> properties of the
-    /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
+    ///     resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> evaluating to a <see cref="CacheValue"/>, or evaluating to <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-    protected virtual Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected virtual ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        return Task.FromResult( this.GetItemCore( key, includeDependencies ) );
+        return new ValueTask<CacheValue?>( this.GetItemCore( key, includeDependencies ) );
     }
 
     /// <summary>
@@ -296,7 +297,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> evaluating to a <see cref="CacheValue"/>, or evaluating to <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-    public async Task<CacheValue?> GetItemAsync(
+    public async ValueTask<CacheValue?> GetItemAsync(
         [Required] string key,
         bool includeDependencies = true,
         CancellationToken cancellationToken = default )
@@ -348,13 +349,13 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The key of the cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    protected virtual Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected virtual ValueTask RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         this.RemoveItemCore( key );
 
-        return _trueTaskResult;
+        return _completedTask;
     }
 
     /// <summary>
@@ -386,7 +387,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The key of the cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async Task RemoveItemAsync( [Required] string key, CancellationToken cancellationToken = default )
+    public async ValueTask RemoveItemAsync( [Required] string key, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "RemoveItemAsync( \"{Key}\" )", key ) ) )
         {
@@ -419,13 +420,13 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    protected virtual Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected virtual ValueTask InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         this.InvalidateDependencyCore( key );
 
-        return _trueTaskResult;
+        return _completedTask;
     }
 
     /// <summary>
@@ -459,7 +460,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async Task InvalidateDependencyAsync( [Required] string key, CancellationToken cancellationToken = default )
+    public async ValueTask InvalidateDependencyAsync( [Required] string key, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "InvalidateDependencyAsync( \"{Key}\" )", key ) ) )
         {
@@ -495,7 +496,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> evaluating to <c>true</c> if the cache contains the dependency <paramref name="key"/>, otherwise <c>false</c>.</returns>
-    protected virtual Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected virtual ValueTask<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -537,7 +538,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> evaluating to <c>true</c> if the cache contains the dependency <paramref name="key"/>, otherwise <c>false</c>.</returns>
-    public async Task<bool> ContainsDependencyAsync( [Required] string key, CancellationToken cancellationToken = default )
+    public async ValueTask<bool> ContainsDependencyAsync( [Required] string key, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsDependencyAsync( \"{Key}\" )", key ) ) )
         {
@@ -575,11 +576,11 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    protected virtual Task ClearAsyncCore( CancellationToken cancellationToken )
+    protected virtual ValueTask ClearAsyncCore( CancellationToken cancellationToken )
     {
         this.ClearCore();
 
-        return _trueTaskResult;
+        return _completedTask;
     }
 
     /// <summary>
@@ -609,7 +610,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async Task ClearAsync( CancellationToken cancellationToken = default )
+    public async ValueTask ClearAsync( CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ClearAsync()" ) ) )
         {
@@ -643,7 +644,6 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected CachingBackend()
     {
         this.Id = Guid.NewGuid();
-        this.AutoReloadManager = new AutoReloadManager( this );
 
         // TODO: We may need an instance-scoped logger instead of a type-scoped logger.
 #pragma warning disable 618
@@ -921,6 +921,4 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected virtual int BackgroundTaskExceptions => 0;
 
     int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
-
-    internal AutoReloadManager AutoReloadManager { get; }
 }

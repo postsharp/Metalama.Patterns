@@ -67,7 +67,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
+    protected override ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
         var value = new TwoLayerCacheValue( item );
         var newItem = item.WithValue( value );
@@ -91,7 +91,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override async Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected override async ValueTask<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
     {
         if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
@@ -122,7 +122,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override async Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected override async ValueTask<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
         if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
@@ -246,7 +246,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override async Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         // ReSharper disable once MethodHasAsyncOverloadWithCancellation
         var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
@@ -323,7 +323,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected override ValueTask InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
         if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
@@ -353,7 +353,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected override ValueTask RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
     {
         if ( this.UnderlyingBackend.SupportedFeatures.Blocking )
         {
@@ -375,7 +375,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override Task ClearAsyncCore( CancellationToken cancellationToken )
+    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
     {
         this.LocalCache.Clear();
 

@@ -6,7 +6,7 @@ using System.Globalization;
 namespace Metalama.Patterns.Caching.Backends;
 
 /// <summary>
-/// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend until you see <see cref="CachingServices.DefaultBackend"/> to something else.
+/// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend until you see <see cref="CachingServices.DefaultService.DefaultBackend"/> to something else.
 /// </summary>
 internal sealed class UninitializedCachingBackend : CachingBackend
 {
@@ -16,7 +16,7 @@ internal sealed class UninitializedCachingBackend : CachingBackend
                 CultureInfo.InvariantCulture,
                 "The caching back-end has not been initialized. Set the {0}.{1} property before accessing a cached method.",
                 nameof(CachingServices),
-                nameof(CachingServices.DefaultBackend) ) );
+                nameof(CachingService.DefaultBackend) ) );
 
     /// <inheritdoc />
     protected override void ClearCore() => Throw();

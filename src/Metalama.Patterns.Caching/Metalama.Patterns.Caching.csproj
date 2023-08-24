@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
+    <TransformOnBuild>true</TransformOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,10 +36,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="CacheInvalidation.Generated.tt">
+    <T4Template Update="CacheInvalidation.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>CacheInvalidation.Generated.cs</LastGenOutput>
-    </None>
+    </T4Template>
     <Compile Update="CacheInvalidation.Generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -58,5 +59,5 @@
   </ItemGroup>
 
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
-
+  
 </Project>

@@ -469,7 +469,7 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override async Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
+    protected override async ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
         // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
         var value = this.CreateRedisValue( item );
@@ -488,9 +488,9 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected override async ValueTask<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
     {
-        return this.Database.KeyExistsAsync( this._keyBuilder.GetValueKey( key ) );
+        return await this.Database.KeyExistsAsync( this._keyBuilder.GetValueKey( key ) );
     }
 
     /// <exclude />
@@ -524,7 +524,7 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <exclude />
-    protected override async Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         var valueKey = this._keyBuilder.GetValueKey( key );
         var serializedValue = await this.Database.StringGetAsync( valueKey );
@@ -552,7 +552,7 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override async Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected override async ValueTask RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
     {
         await this.DeleteItemAsync( key );
         await this.SendEventAsync( _itemRemovedEvent, key );
@@ -635,7 +635,7 @@ public class RedisCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override Task ClearAsyncCore( CancellationToken cancellationToken )
+    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
     {
         throw new NotSupportedException();
     }

@@ -1,8 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
+using System.ComponentModel;
 
 #pragma warning disable CA1034 // Nested types should not be visible
 
@@ -10,20 +12,25 @@ namespace Metalama.Patterns.Caching;
 
 /// <summary>
 /// Allows to configure caching profiles (<see cref="CachingProfile"/>), and therefore influence the behavior
-/// of the <see cref="CacheAttribute"/> aspect at run-time. Exposed on the <see cref="CachingServices.Profiles"/> property.
+/// of the <see cref="CacheAttribute"/> aspect at run-time. Exposed on the <see cref="CachingService.Profiles"/> property.
 /// </summary>
 [PublicAPI]
 public sealed class CachingProfileRegistry
 {
+    private readonly CachingService _cachingService;
+
     private volatile ImmutableDictionary<string, CachingProfile> _profiles =
         ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
 
     private int _revisionNumber;
 
-    internal CachingProfileRegistry()
+    public CachingProfileRegistry( CachingService cachingService )
     {
+        this._cachingService = cachingService;
         this.Reset();
     }
+
+    internal ImmutableHashSet<CachingBackend> AllBackends { get; private set; } = ImmutableHashSet<CachingBackend>.Empty;
 
     /// <summary>
     /// Gets the revision number of all caching profiles. This property is incremented every time
@@ -31,7 +38,13 @@ public sealed class CachingProfileRegistry
     /// </summary>
     public int RevisionNumber => this._revisionNumber;
 
-    internal void OnProfileChanged() => Interlocked.Increment( ref this._revisionNumber );
+    private void OnChange()
+    {
+        Interlocked.Increment( ref this._revisionNumber );
+        this.AllBackends = this._profiles.Values.Select( p => p.Backend ).Distinct().ToImmutableHashSet();
+    }
+
+    private void OnProfileChanged( object? sender, PropertyChangedEventArgs args ) => this.OnChange();
 
     /// <summary>
     /// Gets the default <see cref="CachingProfile"/>.
@@ -61,38 +74,17 @@ public sealed class CachingProfileRegistry
                     return profile;
                 }
 
-                profile = new CachingProfile( profileName );
+                profile = new CachingProfile( profileName, this._cachingService );
                 newDictionary = oldDictionary.SetItem( profile.Name, profile );
             }
 #pragma warning disable 420
             while ( Interlocked.CompareExchange( ref this._profiles, newDictionary, oldDictionary ) != oldDictionary );
 #pragma warning restore 420
 
-            this.OnProfileChanged();
+            this.OnChange();
 
             return profile;
         }
-    }
-
-    /// <summary>
-    /// Registers a <see cref="CachingProfile"/>.
-    /// </summary>
-    /// <param name="profile">A <see cref="CachingProfile"/>.</param>
-    public void Register( [Required] CachingProfile profile )
-    {
-        ImmutableDictionary<string, CachingProfile> oldDictionary;
-        ImmutableDictionary<string, CachingProfile> newDictionary;
-
-        do
-        {
-            oldDictionary = this._profiles;
-            newDictionary = oldDictionary.SetItem( profile.Name, profile );
-        }
-#pragma warning disable 420
-        while ( Interlocked.CompareExchange( ref this._profiles, newDictionary, oldDictionary ) != oldDictionary );
-#pragma warning restore 420
-
-        this.OnProfileChanged();
     }
 
     /// <summary>
@@ -101,7 +93,8 @@ public sealed class CachingProfileRegistry
     public void Reset()
     {
         this._profiles = ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
-        this.Register( new CachingProfile( CachingProfile.DefaultName ) );
-        this.OnProfileChanged();
+
+        // Force the creation of the default backend. 
+        _ = this.Default;
     }
 }

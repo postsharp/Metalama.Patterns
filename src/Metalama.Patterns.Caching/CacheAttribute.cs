@@ -22,9 +22,9 @@ namespace Metalama.Patterns.Caching;
 /// <see cref="CacheAttribute"/> class, such as <see cref="AbsoluteExpiration"/> or <see cref="SlidingExpiration"/>. You can
 /// add the <see cref="CacheConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
 /// Finally, you can define a profile by setting the <see cref="ProfileName"/> property and configure the profile at run time
-/// by accessing the <see cref="CachingServices.Profiles"/> collection of the <see cref="CachingServices"/> class.</para>
+/// by accessing the <see cref="CachingServices.DefaultService.Profiles"/> collection of the <see cref="CachingServices"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
-/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingServices.Invalidation"/>.</para>
+/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingServices.DefaultService.Invalidation"/>.</para>
 /// </remarks>
 [PublicAPI]
 public sealed class CacheAttribute : MethodAspect
@@ -285,7 +285,7 @@ public sealed class CacheAttribute : MethodAspect
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), null ) );
         }
 
-        return CacheAttributeRunTime.GetFromCacheOrExecute<TReturnType>(
+        return CachingServices.DefaultService.Lookup.GetFromCacheOrExecute<TReturnType>(
             (CachedMethodMetadata) registrationField.Value!,
             Invoke,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -303,7 +303,7 @@ public sealed class CacheAttribute : MethodAspect
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
         }
 
-        return CacheAttributeRunTime.GetFromCacheOrExecuteTaskAsync<TValue>(
+        return CachingServices.DefaultService.Lookup.GetFromCacheOrExecuteTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -322,7 +322,7 @@ public sealed class CacheAttribute : MethodAspect
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
         }
 
-        return CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<TValue>(
+        return CachingServices.DefaultService.Lookup.GetFromCacheOrExecuteValueTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -332,7 +332,6 @@ public sealed class CacheAttribute : MethodAspect
 
     // ReSharper disable once RedundantBlankLines
 #if NETCOREAPP3_0_OR_GREATER
-
     // ReSharper disable once UnusedMember.Global
     [Template]
     public static IAsyncEnumerable<TValue>? OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
@@ -355,7 +354,7 @@ public sealed class CacheAttribute : MethodAspect
             }
         }
 
-        var task = CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
+        var task = CachingServices.DefaultService.Lookup.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -388,7 +387,7 @@ public sealed class CacheAttribute : MethodAspect
             return buffer;
         }
 
-        var task = CacheAttributeRunTime.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
+        var task = CachingServices.DefaultService.Lookup.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,

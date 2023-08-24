@@ -252,7 +252,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     }
 
     /// <inheritdoc />
-    protected override async Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
+    protected override async ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
         var valueKey = this._keyBuilder.GetValueKey( key );
 
@@ -390,7 +390,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     }
 
     /// <inheritdoc />
-    protected override async Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         var valueKey = this._keyBuilder.GetValueKey( key );
         RedisValue[] itemList;
@@ -441,13 +441,13 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     }
 
     /// <inheritdoc />
-    protected override Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected override async ValueTask<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
-        return this.Database.KeyExistsAsync( this._keyBuilder.GetDependencyKey( key ) );
+        return await this.Database.KeyExistsAsync( this._keyBuilder.GetDependencyKey( key ) );
     }
 
     /// <inheritdoc />
-    protected override async Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected override async ValueTask InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
         var dependencyKey = this._keyBuilder.GetDependencyKey( key );
 

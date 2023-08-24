@@ -80,31 +80,31 @@ public abstract class CachingBackendEnhancer : CachingBackend
     protected override void ClearCore() => this.UnderlyingBackend.Clear();
 
     /// <inheritdoc />
-    protected override Task SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
+    protected override ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
         => this.UnderlyingBackend.SetItemAsync( key, item, cancellationToken );
 
     /// <inheritdoc />
-    protected override Task<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected override ValueTask<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
         => this.UnderlyingBackend.ContainsItemAsync( key, cancellationToken );
 
     /// <inheritdoc />
-    protected override Task<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected override ValueTask<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
         => this.UnderlyingBackend.ContainsDependencyAsync( key, cancellationToken );
 
     /// <inheritdoc />
-    protected override Task<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
         => this.UnderlyingBackend.GetItemAsync( key, includeDependencies, cancellationToken );
 
     /// <inheritdoc />
-    protected override Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected override ValueTask InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
         => this.UnderlyingBackend.InvalidateDependencyAsync( key, cancellationToken );
 
     /// <inheritdoc />
-    protected override Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected override ValueTask RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
         => this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken );
 
     /// <inheritdoc />
-    protected override Task ClearAsyncCore( CancellationToken cancellationToken ) => this.UnderlyingBackend.ClearAsync( cancellationToken );
+    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken ) => this.UnderlyingBackend.ClearAsync( cancellationToken );
 
     /// <inheritdoc />
     protected override void DisposeCore( bool disposing )

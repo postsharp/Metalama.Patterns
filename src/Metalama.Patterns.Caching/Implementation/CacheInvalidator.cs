@@ -31,7 +31,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override async Task RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
+    protected override async ValueTask RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
     {
         await base.RemoveItemAsyncCore( key, cancellationToken );
 
@@ -47,7 +47,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override async Task InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
+    protected override async ValueTask InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
         await base.InvalidateDependencyAsyncCore( key, cancellationToken );
 

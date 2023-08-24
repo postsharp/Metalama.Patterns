@@ -54,6 +54,10 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return TimeSpan.FromSeconds( 0.05 * multiplier );
         }
 
+        private static Task RepeatUntilNullOrFailAsync<T>( Func<ValueTask<T?>> func )
+            where T : class
+            => RepeatUntilNullOrFailAsync( () => func().AsTask() );
+
         private static async Task RepeatUntilNullOrFailAsync<T>( Func<Task<T?>> func )
             where T : class
         {

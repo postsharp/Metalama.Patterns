@@ -14,6 +14,10 @@ internal sealed class CachedMethodMetadataRegistry
 {
     private readonly ConcurrentDictionary<MethodInfo, CachedMethodMetadata> _methodInfoCache = new();
 
+    private CachedMethodMetadataRegistry() { }
+
+    public static CachedMethodMetadataRegistry Instance { get; } = new();
+
     /// <summary>
     /// Gets the <see cref="CachedMethodMetadata"/> for a given <see cref="MethodInfo"/>, or <see langword="null"/> if no <see cref="CachedMethodMetadata"/> was registered for <paramref name="method"/>.
     /// </summary>

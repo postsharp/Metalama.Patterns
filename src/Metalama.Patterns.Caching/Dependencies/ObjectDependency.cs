@@ -7,26 +7,25 @@ namespace Metalama.Patterns.Caching.Dependencies;
 
 /// <summary>
 /// Wraps an <see cref="object"/> into an <see cref="ObjectDependency"/>. The <see cref="GetCacheKey"/>
-/// relies on the <see cref="CachingServices.DefaultKeyBuilder"/> to create the cache key of the wrapped object.
+/// relies on the <see cref="CachingServices.DefaultService.KeyBuilder"/> to create the cache key of the wrapped object.
 /// </summary>
 [PublicAPI]
 public sealed class ObjectDependency : ICacheDependency
 {
+    private readonly CachingService _cachingService;
+
     /// <summary>
     /// Gets the wrapped object.
     /// </summary>
     public object Object { get; }
 
     /// <inheritdoc />
-    public string GetCacheKey() => CachingServices.DefaultKeyBuilder.BuildDependencyKey( this.Object );
+    public string GetCacheKey() => this._cachingService.KeyBuilder.BuildDependencyKey( this.Object );
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ObjectDependency"/> class.
-    /// </summary>
-    /// <param name="dependencyObject">The wrapped object.</param>
-    public ObjectDependency( [Required] object dependencyObject )
+    internal ObjectDependency( [Required] object dependencyObject, CachingService cachingService )
     {
         this.Object = dependencyObject;
+        this._cachingService = cachingService;
     }
 
     /// <summary>Determines whether the specified object is equal to the current object.</summary>

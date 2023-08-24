@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Dependencies;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -11,6 +12,7 @@ namespace Metalama.Patterns.Caching;
 internal sealed class CachingContext : IDisposable, ICachingContext
 {
     private static readonly AsyncLocal<ICachingContext?> _currentContext = new();
+    private readonly CachingService _cachingService;
 
     [AllowNull]
     public static ICachingContext Current
@@ -26,11 +28,12 @@ internal sealed class CachingContext : IDisposable, ICachingContext
     private HashSet<string>? _dependencies;
     private ImmutableHashSet<string>? _immutableDependencies;
 
-    private CachingContext( string key, CachingContextKind options, ICachingContext? parent )
+    private CachingContext( string key, CachingContextKind options, ICachingContext? parent, CachingService cachingService )
     {
         this._key = key;
         this.Kind = options;
         this.Parent = parent;
+        this._cachingService = cachingService;
     }
 
     public CachingContextKind Kind { get; }
@@ -56,17 +59,17 @@ internal sealed class CachingContext : IDisposable, ICachingContext
 
     public ICachingContext? Parent { get; }
 
-    public static CachingContext OpenRecacheContext( string key )
+    internal static CachingContext OpenRecacheContext( string key, CachingService cachingService )
     {
-        var context = new CachingContext( key, CachingContextKind.Recache, Current );
+        var context = new CachingContext( key, CachingContextKind.Recache, Current, cachingService );
         Current = context;
 
         return context;
     }
 
-    internal static CachingContext OpenCacheContext( string key )
+    internal static CachingContext OpenCacheContext( string key, CachingService cachingService )
     {
-        var context = new CachingContext( key, CachingContextKind.Cache, Current );
+        var context = new CachingContext( key, CachingContextKind.Cache, Current, cachingService );
         Current = context;
 
         return context;
@@ -123,7 +126,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
                 return;
 
             default:
-                this.AddDependency( new ObjectDependency( dependency ) );
+                this.AddDependency( new ObjectDependency( dependency, this._cachingService ) );
 
                 return;
         }
@@ -190,19 +193,19 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         }
     }
 
-    internal void AddDependenciesToParent( MethodInfo method )
+    internal void AddDependenciesToParent( CachingBackend backend, MethodInfo method )
     {
         if ( this.Parent != null )
         {
             this.Parent.AddDependencies( this.Dependencies );
 
-            if ( CachingServices.DefaultBackend.SupportedFeatures.Dependencies )
+            if ( backend.SupportedFeatures.Dependencies )
             {
                 this.Parent.AddDependency( this._key );
             }
             else
             {
-                CachingServices.Invalidation.AddedNestedCachedMethod( method );
+                this._cachingService.Invalidation.AddedNestedCachedMethod( method );
             }
         }
     }

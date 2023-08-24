@@ -80,7 +80,7 @@ public sealed class CachedMethodMetadata
     {
         get
         {
-            if ( this._profile == null || this._profileRevision < CachingServices.Profiles.RevisionNumber || this._mergedConfiguration == null )
+            if ( this._profile == null || this._profileRevision < CachingServices.DefaultService.Profiles.RevisionNumber || this._mergedConfiguration == null )
             {
                 var initializeLockTaken = false;
 
@@ -88,11 +88,12 @@ public sealed class CachedMethodMetadata
                 {
                     this._initializeLock.Enter( ref initializeLockTaken );
 
-                    if ( this._profile == null || this._profileRevision < CachingServices.Profiles.RevisionNumber || this._mergedConfiguration == null )
+                    if ( this._profile == null || this._profileRevision < CachingServices.DefaultService.Profiles.RevisionNumber
+                                               || this._mergedConfiguration == null )
                     {
                         var profileName = this.BuildTimeConfiguration.ProfileName ?? CachingProfile.DefaultName;
 
-                        var localProfile = CachingServices.Profiles[profileName];
+                        var localProfile = CachingServices.DefaultService.Profiles[profileName];
 
                         this._mergedConfiguration = this.BuildTimeConfiguration.CloneAsCacheItemConfiguration();
                         this._mergedConfiguration.ApplyFallback( localProfile );
@@ -101,7 +102,7 @@ public sealed class CachedMethodMetadata
 
                         // Need to set this after setting mergedConfiguration to prevent data races.
                         this._profile = localProfile;
-                        this._profileRevision = CachingServices.Profiles.RevisionNumber;
+                        this._profileRevision = CachingServices.DefaultService.Profiles.RevisionNumber;
                     }
                 }
                 finally
@@ -147,7 +148,7 @@ public sealed class CachedMethodMetadata
             buildTimeConfiguration,
             returnValueCanBeNull );
 
-        CachingServices.CachedMethodMetadataRegistry.Register( metadata );
+        CachedMethodMetadataRegistry.Instance.Register( metadata );
 
         return metadata;
     }

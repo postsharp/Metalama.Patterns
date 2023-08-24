@@ -23,30 +23,16 @@ public class CacheKeyBuilder : IDisposable
     protected object IgnoredParameterSentinel { get; } = new();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CacheKeyBuilder"/> class optionally specifying a
-    /// <see cref="IFormatterRepository"/>.
-    /// </summary>
-    /// <param name="formatterRepository">
-    /// The <see cref="IFormatterRepository"/> from which to obtain formatters, or <see langword="null"/> to
-    /// use <see cref="CachingServices.Formatters"/>.
-    /// </param>
-    public CacheKeyBuilder( IFormatterRepository? formatterRepository = null ) : this( 2048 )
-    {
-        this._formatterRepository = formatterRepository ?? CachingServices.Formatters;
-    }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="CacheKeyBuilder"/> class specifying the maximal key size 
     /// and optionally a <see cref="IFormatterRepository"/>.
     /// </summary>
     /// <param name="maxKeySize">The maximal number of characters in cache keys.</param>
     /// <param name="formatterRepository">
-    /// The <see cref="IFormatterRepository"/> from which to obtain formatters, or <see langword="null"/> to
-    /// use <see cref="CachingServices.Formatters"/>.
+    /// The <see cref="IFormatterRepository"/> from which to obtain formatters.
     /// </param>
-    public CacheKeyBuilder( int maxKeySize, IFormatterRepository? formatterRepository = null )
+    public CacheKeyBuilder( [Required] IFormatterRepository formatterRepository, int maxKeySize = 1024 )
     {
-        this._formatterRepository = formatterRepository ?? CachingServices.Formatters;
+        this._formatterRepository = formatterRepository;
         this._stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
     }
 

@@ -48,7 +48,7 @@ namespace Metalama.Patterns.Caching.Tests
                     value2,
                     "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
 
-                CachingServices.Invalidation.Invalidate( value1 );
+                CachingServices.DefaultService.Invalidation.Invalidate( value1 );
 
                 ++currentId;
                 var value3 = cachingClass.GetValueAsDependency();
@@ -112,7 +112,7 @@ namespace Metalama.Patterns.Caching.Tests
                     value2,
                     "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
 
-                await CachingServices.Invalidation.InvalidateAsync( value1 );
+                await CachingServices.DefaultService.Invalidation.InvalidateAsync( value1 );
 
                 ++currentId;
                 var value3 = await cachingClass.GetValueAsDependencyAsync();
@@ -193,7 +193,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass1.Reset();
                 cachingClass2.Reset();
 
-                CachingServices.Invalidation.Invalidate( value1 );
+                CachingServices.DefaultService.Invalidation.Invalidate( value1 );
 
                 cachingClass2.GetValueAsDependency();
                 var called = cachingClass1.Reset();
@@ -263,7 +263,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass1.Reset();
                 cachingClass2.Reset();
 
-                await CachingServices.Invalidation.InvalidateAsync( value1 );
+                await CachingServices.DefaultService.Invalidation.InvalidateAsync( value1 );
 
                 await cachingClass2.GetValueAsDependencyAsync();
                 var called = cachingClass1.Reset();
@@ -291,7 +291,7 @@ namespace Metalama.Patterns.Caching.Tests
             private readonly TestNestedDependenciesWithEnumerableCachingClass1 _class1 = new();
 
             private int _class1CallCount;
-            
+
             [Cache]
             public IEnumerable<TestNestedDependenciesWithEnumerableCachedValueClass> GetTwoValuesAsDependencies()
             {
@@ -329,7 +329,7 @@ namespace Metalama.Patterns.Caching.Tests
                 var class1CallsCount = cachingClass2.Reset();
                 AssertEx.Equal( value1.Count, class1CallsCount, "The method did not get called for the first time." );
 
-                CachingServices.Invalidation.Invalidate( value1[0] );
+                CachingServices.DefaultService.Invalidation.Invalidate( value1[0] );
 
                 IList<TestNestedDependenciesWithEnumerableCachedValueClass> value2 = cachingClass2.GetTwoValuesAsDependencies().ToList();
                 class1CallsCount = cachingClass2.Reset();

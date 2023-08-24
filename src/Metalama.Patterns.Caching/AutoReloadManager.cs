@@ -7,37 +7,39 @@ using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching;
 
-internal sealed class AutoReloadManager
+internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
 {
-    private readonly CachingBackend _backend;
     private readonly ConcurrentDictionary<string, AutoRefreshInfo> _autoRefreshInfos = new();
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
+    private readonly CachingService _cachingService;
 
     private int _autoRefreshSubscriptions;
 
-    public AutoReloadManager( CachingBackend backend )
+    public AutoReloadManager( CachingService cachingService )
     {
-        this._backend = backend;
+        this._cachingService = cachingService;
     }
 
     private void BeginAutoRefreshValue( object? sender, CacheItemRemovedEventArgs args )
     {
+        var backend = (CachingBackend) sender!;
         var key = args.Key;
 
         if ( this._autoRefreshInfos.TryGetValue( key, out var autoRefreshInfo ) )
         {
             if ( autoRefreshInfo.IsAsync )
             {
-                this._backgroundTaskScheduler.EnqueueBackgroundTask( () => AutoRefreshCoreAsync( key, autoRefreshInfo, CancellationToken.None ) );
+                this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.AutoRefreshCoreAsync( backend, key, autoRefreshInfo, CancellationToken.None ) );
             }
             else
             {
-                this._backgroundTaskScheduler.EnqueueBackgroundTask( () => Task.Run( () => AutoRefreshCore( key, autoRefreshInfo ) ) );
+                this._backgroundTaskScheduler.EnqueueBackgroundTask( () => Task.Run( () => this.AutoRefreshCore( backend, key, autoRefreshInfo ) ) );
             }
         }
     }
 
     internal void SubscribeAutoRefresh(
+        CachingBackend backend,
         string key,
         Type valueType,
         ICacheItemConfiguration configuration,
@@ -45,9 +47,9 @@ internal sealed class AutoReloadManager
         LogSource logger,
         bool isAsync )
     {
-        if ( !this._backend.SupportedFeatures.Events )
+        if ( !backend.SupportedFeatures.Events )
         {
-            logger.Warning.Write( Formatted( "The backend {Backend} does not support auto-refresh.", this._backend ) );
+            logger.Warning.Write( Formatted( "The backend {Backend} does not support auto-refresh.", backend ) );
 
             return;
         }
@@ -60,7 +62,7 @@ internal sealed class AutoReloadManager
             {
                 if ( Interlocked.Increment( ref this._autoRefreshSubscriptions ) == 1 )
                 {
-                    this._backend.ItemRemoved += this.BeginAutoRefreshValue;
+                    backend.ItemRemoved += this.BeginAutoRefreshValue;
                 }
 
                 return new AutoRefreshInfo( configuration, valueType, valueProvider, logger, isAsync );
@@ -69,17 +71,17 @@ internal sealed class AutoReloadManager
         // NOTE: We never remove things from autoRefreshInfos. AutoRefresh keys are there forever, they are never evicted.
     }
 
-    private static void AutoRefreshCore( string key, AutoRefreshInfo info )
+    private void AutoRefreshCore( CachingBackend backend, string key, AutoRefreshInfo info )
     {
         using ( var activity = info.Logger.Default.OpenActivity( Formatted( "Auto-refreshing: {Key}", key ) ) )
         {
             try
             {
-                using ( var context = CachingContext.OpenCacheContext( key ) )
+                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
                 {
                     var value = info.ValueProvider.Invoke();
 
-                    CachingFrontend.SetItem( key, value, info.ReturnType, info.Configuration, context );
+                    CachingFrontend.SetItem( backend, key, value, info.ReturnType, info.Configuration, context );
                 }
 
                 activity.SetSuccess();
@@ -91,18 +93,18 @@ internal sealed class AutoReloadManager
         }
     }
 
-    private static async Task AutoRefreshCoreAsync( string key, AutoRefreshInfo info, CancellationToken cancellationToken )
+    private async Task AutoRefreshCoreAsync( CachingBackend backend, string key, AutoRefreshInfo info, CancellationToken cancellationToken )
     {
         using ( var activity = info.Logger.Default.OpenActivity( Formatted( "Auto-refreshing: {Key}", key ) ) )
         {
             try
             {
-                using ( var context = CachingContext.OpenCacheContext( key ) )
+                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
                 {
                     var invokeValueProviderTask = (Task<object?>?) info.ValueProvider.Invoke();
                     var value = invokeValueProviderTask == null ? null : await invokeValueProviderTask;
 
-                    await CachingFrontend.SetItemAsync( key, value, info.ReturnType, info.Configuration, context, cancellationToken );
+                    await CachingFrontend.SetItemAsync( backend, key, value, info.ReturnType, info.Configuration, context, cancellationToken );
                 }
 
                 activity.SetSuccess();
@@ -122,4 +124,14 @@ internal sealed class AutoReloadManager
         Func<object?> ValueProvider,
         LogSource Logger,
         bool IsAsync );
+
+    public void Dispose()
+    {
+        this._backgroundTaskScheduler.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await this._backgroundTaskScheduler.DisposeAsync();
+    }
 }

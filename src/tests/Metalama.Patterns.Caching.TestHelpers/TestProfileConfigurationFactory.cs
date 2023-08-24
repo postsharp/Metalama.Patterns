@@ -11,10 +11,10 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public static void InitializeTestWithoutBackend()
         {
             Assert.True(
-                CachingServices.DefaultBackend is UninitializedCachingBackend or NullCachingBackend,
+                CachingServices.DefaultService.DefaultBackend is UninitializedCachingBackend or NullCachingBackend,
                 "Each test has to use the TestProfileConfigurationFactory." );
 
-            CachingServices.DefaultKeyBuilder = null; // Ensure we use the default key builder.
+            CachingServices.DefaultService.KeyBuilder = null; // Ensure we use the default key builder.
         }
 
         // ReSharper disable once UnusedMethodReturnValue.Global
@@ -22,7 +22,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         {
             InitializeTestWithoutBackend();
             var backend = new MemoryCachingBackend();
-            CachingServices.DefaultBackend = backend;
+            CachingServices.DefaultService.DefaultBackend = backend;
 
             return backend;
         }
@@ -31,32 +31,25 @@ namespace Metalama.Patterns.Caching.TestHelpers
         {
             InitializeTestWithoutBackend();
             var backend = new TestingCacheBackend( "test-" + name );
-            CachingServices.DefaultBackend = backend;
+            CachingServices.DefaultService.DefaultBackend = backend;
 
             return backend;
         }
 
-        public static CachingProfile CreateProfile( string name )
-        {
-            var cacheProfile = new CachingProfile( name ) { IsEnabled = true };
-
-            CachingServices.Profiles.Register( cacheProfile );
-
-            return cacheProfile;
-        }
+        public static CachingProfile CreateProfile( string name ) => CachingServices.DefaultService.Profiles[name];
 
         public static void DisposeTest()
         {
-            CachingServices.Profiles.Reset();
-            TestableCachingComponentDisposer.Dispose( CachingServices.DefaultBackend );
-            CachingServices.DefaultBackend = null;
+            CachingServices.DefaultService.Profiles.Reset();
+            TestableCachingComponentDisposer.Dispose( CachingServices.DefaultService.DefaultBackend );
+            CachingServices.DefaultService.DefaultBackend = null;
         }
 
         public static async Task DisposeTestAsync()
         {
-            CachingServices.Profiles.Reset();
-            await TestableCachingComponentDisposer.DisposeAsync( CachingServices.DefaultBackend );
-            CachingServices.DefaultBackend = null;
+            CachingServices.DefaultService.Profiles.Reset();
+            await TestableCachingComponentDisposer.DisposeAsync( CachingServices.DefaultService.DefaultBackend );
+            CachingServices.DefaultService.DefaultBackend = null;
         }
     }
 }
