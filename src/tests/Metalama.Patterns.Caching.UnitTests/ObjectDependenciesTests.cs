@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testOneDependencyProfileName = _profileNamePrefix + "TestOneDependency";
 
-        [CacheConfiguration( ProfileName = _testOneDependencyProfileName )]
+        [CachingConfiguration( ProfileName = _testOneDependencyProfileName )]
         private sealed class TestOneDependencyCachingClass : CachingClass
         {
             [Cache]
@@ -78,7 +78,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testOneDependencyAsyncProfileName = _profileNamePrefix + "TestOneDependencyAsync";
 
-        [CacheConfiguration( ProfileName = _testOneDependencyAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testOneDependencyAsyncProfileName )]
         private sealed class TestOneDependencyAsyncCachingClass : CachingClass
         {
             [Cache]
@@ -146,7 +146,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private sealed class TestNestedDependenciesCachedValueClass2 : CachedValueClass { }
 
-        [CacheConfiguration( ProfileName = _testNestedDependenciesProfileName )]
+        [CachingConfiguration( ProfileName = _testNestedDependenciesProfileName )]
         private sealed class TestNestedDependenciesCachingClass1 : CachingClass<TestNestedDependenciesCachedValueClass1>
         {
             [Cache]
@@ -156,7 +156,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        [CacheConfiguration( ProfileName = _testNestedDependenciesProfileName )]
+        [CachingConfiguration( ProfileName = _testNestedDependenciesProfileName )]
         private sealed class TestNestedDependenciesCachingClass2 : CachingClass<TestNestedDependenciesCachedValueClass2>
         {
             public TestNestedDependenciesCachingClass1 Class1 { get; }
@@ -216,7 +216,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private sealed class TestNestedDependenciesAsyncCachedValueClass2 : CachedValueClass { }
 
-        [CacheConfiguration( ProfileName = _testNestedDependenciesAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testNestedDependenciesAsyncProfileName )]
         private sealed class TestNestedDependenciesAsyncCachingClass1 : CachingClass<TestNestedDependenciesAsyncCachedValueClass1>
         {
             [Cache]
@@ -226,7 +226,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        [CacheConfiguration( ProfileName = _testNestedDependenciesAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testNestedDependenciesAsyncProfileName )]
         private sealed class TestNestedDependenciesAsyncCachingClass2 : CachingClass<TestNestedDependenciesAsyncCachedValueClass2>
         {
             public TestNestedDependenciesAsyncCachingClass1 Class1 { get; }
@@ -286,7 +286,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private sealed class TestNestedDependenciesWithEnumerableCachingClass1 : CachingClass<TestNestedDependenciesWithEnumerableCachedValueClass> { }
 
-        [CacheConfiguration( ProfileName = _testNestedDependenciesWithEnumerableProfileName )]
+        [CachingConfiguration( ProfileName = _testNestedDependenciesWithEnumerableProfileName )]
         private sealed class TestNestedDependenciesWithEnumerableCachingClass2
         {
             private readonly TestNestedDependenciesWithEnumerableCachingClass1 _class1 = new();

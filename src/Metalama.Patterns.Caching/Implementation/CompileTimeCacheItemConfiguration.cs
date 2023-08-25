@@ -30,6 +30,8 @@ internal sealed class CompileTimeCacheItemConfiguration
 
     public bool? IgnoreThisParameter { get; set; }
 
+    public bool? UseDependencyInjection { get; set; }
+
     public void ApplyFallback( CompileTimeCacheItemConfiguration fallback )
     {
         this.AutoReload ??= fallback.AutoReload;
@@ -38,10 +40,11 @@ internal sealed class CompileTimeCacheItemConfiguration
         this.Priority ??= fallback.Priority;
         this.ProfileName ??= fallback.ProfileName;
         this.IgnoreThisParameter ??= fallback.IgnoreThisParameter;
+        this.UseDependencyInjection ??= fallback.UseDependencyInjection;
     }
 
     /// <summary>
-    /// Applies the effective configuration of the method by applying fallback configuration from <see cref="CacheConfigurationAttribute"/>
+    /// Applies the effective configuration of the method by applying fallback configuration from <see cref="CachingConfigurationAttribute"/>
     /// attributes on ancestor types and the declaring assembly.
     /// </summary>
     public void ApplyEffectiveConfiguration( IMethod method )
@@ -55,7 +58,7 @@ internal sealed class CompileTimeCacheItemConfiguration
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CompileTimeCacheItemConfiguration"/> class from the given
-    /// custom attribute which must have construction semantics equivalent to <see cref="CacheConfigurationAttribute"/>
+    /// custom attribute which must have construction semantics equivalent to <see cref="CachingConfigurationAttribute"/>
     /// and <see cref="CacheAttribute"/> (which both have the same construction semantics).
     /// </summary>
     public CompileTimeCacheItemConfiguration( IAttribute attribute )
@@ -65,43 +68,48 @@ internal sealed class CompileTimeCacheItemConfiguration
             throw new ArgumentNullException( nameof(attribute) );
         }
 
-        if ( !(attribute.Type.Is( typeof(CacheAttribute) ) || attribute.Type.Is( typeof(CacheConfigurationAttribute) )) )
+        if ( !(attribute.Type.Is( typeof(CacheAttribute) ) || attribute.Type.Is( typeof(CachingConfigurationAttribute) )) )
         {
             throw new ArgumentOutOfRangeException(
                 nameof(attribute),
-                "Must be a " + nameof(CacheAttribute) + " or a " + nameof(CacheConfigurationAttribute) + "." );
+                "Must be a " + nameof(CacheAttribute) + " or a " + nameof(CachingConfigurationAttribute) + "." );
         }
 
         try
         {
-            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.ProfileName), out var profileName ) )
+            if ( attribute.TryGetNamedArgument( nameof(ICachingConfigurationAttribute.ProfileName), out var profileName ) )
             {
                 this.ProfileName = (string?) profileName.Value;
             }
 
-            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.AutoReload), out var autoReload ) )
+            if ( attribute.TryGetNamedArgument( nameof(ICachingConfigurationAttribute.AutoReload), out var autoReload ) )
             {
                 this.AutoReload = (bool) autoReload.Value!;
             }
 
-            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.AbsoluteExpiration), out var absoluteExpiration ) )
+            if ( attribute.TryGetNamedArgument( nameof(ICachingConfigurationAttribute.AbsoluteExpiration), out var absoluteExpiration ) )
             {
                 this.AbsoluteExpiration = TimeSpan.FromMinutes( (double) absoluteExpiration.Value! );
             }
 
-            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.SlidingExpiration), out var slidingExpiration ) )
+            if ( attribute.TryGetNamedArgument( nameof(ICachingConfigurationAttribute.SlidingExpiration), out var slidingExpiration ) )
             {
                 this.SlidingExpiration = TimeSpan.FromMinutes( (double) slidingExpiration.Value! );
             }
 
-            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.Priority), out var priority ) )
+            if ( attribute.TryGetNamedArgument( nameof(ICachingConfigurationAttribute.Priority), out var priority ) )
             {
                 this.Priority = (CacheItemPriority) priority.Value!;
             }
 
-            if ( attribute.TryGetNamedArgument( nameof(CacheConfigurationAttribute.IgnoreThisParameter), out var ignoreThisParameter ) )
+            if ( attribute.TryGetNamedArgument( nameof(ICachingConfigurationAttribute.IgnoreThisParameter), out var ignoreThisParameter ) )
             {
                 this.IgnoreThisParameter = (bool) ignoreThisParameter.Value!;
+            }
+
+            if ( attribute.TryGetNamedArgument( nameof(ICachingConfigurationAttribute.UseDependencyInjection), out var useDependencyInjection ) )
+            {
+                this.UseDependencyInjection = (bool) useDependencyInjection.Value!;
             }
         }
         catch ( Exception e )
@@ -116,32 +124,37 @@ internal sealed class CompileTimeCacheItemConfiguration
 
         if ( this.AbsoluteExpiration.HasValue )
         {
-            args[nameof(CacheConfigurationAttribute.AbsoluteExpiration)] = this.AbsoluteExpiration.Value.TotalMinutes;
+            args[nameof(CachingConfigurationAttribute.AbsoluteExpiration)] = this.AbsoluteExpiration.Value.TotalMinutes;
         }
 
         if ( this.AutoReload.HasValue )
         {
-            args[nameof(CacheConfigurationAttribute.AutoReload)] = this.AutoReload;
+            args[nameof(CachingConfigurationAttribute.AutoReload)] = this.AutoReload;
         }
 
         if ( this.IgnoreThisParameter.HasValue )
         {
-            args[nameof(CacheConfigurationAttribute.IgnoreThisParameter)] = this.IgnoreThisParameter;
+            args[nameof(CachingConfigurationAttribute.IgnoreThisParameter)] = this.IgnoreThisParameter;
         }
 
         if ( this.Priority.HasValue )
         {
-            args[nameof(CacheConfigurationAttribute.Priority)] = this.Priority;
+            args[nameof(CachingConfigurationAttribute.Priority)] = this.Priority;
         }
 
         if ( this.SlidingExpiration.HasValue )
         {
-            args[nameof(CacheConfigurationAttribute.SlidingExpiration)] = this.SlidingExpiration.Value.TotalMinutes;
+            args[nameof(CachingConfigurationAttribute.SlidingExpiration)] = this.SlidingExpiration.Value.TotalMinutes;
         }
 
         if ( this.ProfileName != null )
         {
-            args[nameof(CacheConfigurationAttribute.ProfileName)] = this.ProfileName;
+            args[nameof(CachingConfigurationAttribute.ProfileName)] = this.ProfileName;
+        }
+
+        if ( this.UseDependencyInjection != null )
+        {
+            args[nameof(CachingConfigurationAttribute.UseDependencyInjection)] = this.UseDependencyInjection;
         }
 
         return AttributeConstruction.Create( typeof(CacheAttribute), namedArguments: args.ToList() );

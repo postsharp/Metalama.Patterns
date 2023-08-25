@@ -199,7 +199,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testImperativeInvalidationProfileName = _profileNamePrefix + nameof(TestImperativeInvalidation);
 
-        [CacheConfiguration( ProfileName = _testImperativeInvalidationProfileName )]
+        [CachingConfiguration( ProfileName = _testImperativeInvalidationProfileName )]
         private sealed class TestImperativeInvalidationCachingClass
         {
             private static int _counter;
@@ -318,7 +318,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testImperativeInvalidationAsyncProfileName = _profileNamePrefix + nameof(TestImperativeInvalidationAsync);
 
-        [CacheConfiguration( ProfileName = _testImperativeInvalidationAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testImperativeInvalidationAsyncProfileName )]
         private sealed class TestImperativeInvalidationAsyncCachingClass
         {
             private static int _counter;
@@ -437,7 +437,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testRecachingProfileName = _profileNamePrefix + nameof(TestRecaching);
 
-        [CacheConfiguration( ProfileName = _testRecachingProfileName )]
+        [CachingConfiguration( ProfileName = _testRecachingProfileName )]
         private sealed class TestRecachingCachingClass
         {
             private static int _counter;
@@ -556,7 +556,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testRecachingAsyncProfileName = _profileNamePrefix + nameof(TestRecachingAsync);
 
-        [CacheConfiguration( ProfileName = _testRecachingAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testRecachingAsyncProfileName )]
         private sealed class TestRecachingAsyncCachingClass
         {
             private static int _counter;
@@ -676,7 +676,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testImperativeInvalidationWithNestedContextsProfileName =
             _profileNamePrefix + nameof(TestImperativeInvalidationWithNestedContexts);
 
-        [CacheConfiguration( ProfileName = _testImperativeInvalidationWithNestedContextsProfileName )]
+        [CachingConfiguration( ProfileName = _testImperativeInvalidationWithNestedContextsProfileName )]
         public sealed class TestImperativeInvalidationWithNestedContextsClass
         {
             private int _invocations;
@@ -722,7 +722,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testImperativeInvalidationWithNestedContextsAsyncProfileName =
             _profileNamePrefix + nameof(TestImperativeInvalidationWithNestedContextsAsync);
 
-        [CacheConfiguration( ProfileName = _testImperativeInvalidationWithNestedContextsAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testImperativeInvalidationWithNestedContextsAsyncProfileName )]
         public sealed class TestImperativeInvalidationWithNestedContextsAsyncClass
         {
             private int _invocations;
@@ -768,7 +768,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testRecachingOfInnerMethodProfileName =
             _profileNamePrefix + nameof(TestRecachingOfInnerMethod);
 
-        [CacheConfiguration( ProfileName = _testRecachingOfInnerMethodProfileName )]
+        [CachingConfiguration( ProfileName = _testRecachingOfInnerMethodProfileName )]
         public sealed class TestRecachingOfInnerMethodClass
         {
             private int _invocations;
@@ -815,7 +815,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testRecachingOfInnerMethodAsyncProfileName =
             _profileNamePrefix + nameof(TestRecachingOfInnerMethodAsync);
 
-        [CacheConfiguration( ProfileName = _testRecachingOfInnerMethodAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testRecachingOfInnerMethodAsyncProfileName )]
         public sealed class TestRecachingOfInnerMethodAsyncClass
         {
             private int _invocations;
@@ -862,7 +862,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testRecachingOfOuterMethodProfileName =
             _profileNamePrefix + nameof(TestRecachingOfOuterMethod);
 
-        [CacheConfiguration( ProfileName = _testRecachingOfOuterMethodProfileName )]
+        [CachingConfiguration( ProfileName = _testRecachingOfOuterMethodProfileName )]
         public sealed class TestRecachingOfOuterMethodClass
         {
             private int _invocations;
@@ -909,7 +909,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testRecachingOfOuterMethodAsyncProfileName =
             _profileNamePrefix + nameof(TestRecachingOfOuterMethodAsync);
 
-        [CacheConfiguration( ProfileName = _testRecachingOfOuterMethodAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testRecachingOfOuterMethodAsyncProfileName )]
         public sealed class TestRecachingOfOuterMethodAsyncClass
         {
             private int _invocations;

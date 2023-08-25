@@ -22,7 +22,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testDependencyPropagationProfileName = _profileNamePrefix + "DependencyPropagation";
 
-        [CacheConfiguration( ProfileName = _testDependencyPropagationProfileName )]
+        [CachingConfiguration( ProfileName = _testDependencyPropagationProfileName )]
         private sealed class TestDependencyPropagationCachingClass
         {
             public bool WasGetValueCalled { get; set; }
@@ -93,7 +93,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testDependencyPropagationAsyncProfileName = _profileNamePrefix + "DependencyPropagationAsync";
 
-        [CacheConfiguration( ProfileName = _testDependencyPropagationAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testDependencyPropagationAsyncProfileName )]
         private sealed class TestDependencyPropagationAsyncCachingClass
         {
             public bool WasGetValueCalled { get; set; }
@@ -171,7 +171,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         // [Porting] Won't fix, can't be certain of original intent.
 #pragma warning disable CA1001
-        [CacheConfiguration( ProfileName = _testDisposedContextAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testDisposedContextAsyncProfileName )]
         private sealed class TestDisposedContextAsyncCachingClass
 #pragma warning restore CA1001
         {
@@ -253,7 +253,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testSuspendedDependencyPropagationProfileName = _profileNamePrefix + "SuspendedDependencyPropagation";
 
-        [CacheConfiguration( ProfileName = _testSuspendedDependencyPropagationProfileName )]
+        [CachingConfiguration( ProfileName = _testSuspendedDependencyPropagationProfileName )]
         private sealed class TestSuspendedDependencyPropagationCachingClass
         {
             public bool WasGetValueCalled { get; set; }
@@ -331,7 +331,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testSuspendedDependencyPropagationAsyncProfileName = _profileNamePrefix + "SuspendedDependencyPropagationAsync";
 
-        [CacheConfiguration( ProfileName = _testSuspendedDependencyPropagationAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testSuspendedDependencyPropagationAsyncProfileName )]
         private sealed class TestSuspendedDependencyPropagationAsyncCachingClass
         {
             public bool WasGetValueCalled { get; set; }

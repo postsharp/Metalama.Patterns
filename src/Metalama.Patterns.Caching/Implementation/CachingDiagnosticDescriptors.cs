@@ -16,6 +16,13 @@ internal static class CachingDiagnosticDescriptors
 
     // Original PS CAC001 and CAC010 apply to [Cache] and are handled by eligibility.
 
+    public static DiagnosticDefinition<IMethod> MethodCannotBeStaticBecauseItUsesDependencyInjection = new(
+        "LAMA5110",
+        Error,
+        "The method '{0}' cannot be cached because it is static and caching is configured to use dependency injection. " +
+        "Disable dependency injection using CacheAttribute.UseDependencyInjection or CacheConfigurationAttribute.UseDependencyInjection or make the method non-static.",
+        "The method cannot be cached because it is static and caching is configured to use dependency injection." );
+
     public static class InvalidateCache
     {
         /// <summary>

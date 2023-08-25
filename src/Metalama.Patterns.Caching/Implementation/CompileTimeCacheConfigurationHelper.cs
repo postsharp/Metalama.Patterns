@@ -51,7 +51,7 @@ internal static class CompileTimeCacheConfigurationHelper
 
     private static CompileTimeCacheItemConfiguration? GetConfigurationOnDeclaration( IDeclaration declaration )
     {
-        var attributeType = (INamedType) TypeFactory.GetType( typeof(CacheConfigurationAttribute) );
+        var attributeType = (INamedType) TypeFactory.GetType( typeof(CachingConfigurationAttribute) );
         var attr = declaration.Attributes.OfAttributeType( attributeType ).SingleOrDefault();
 
         return attr == null ? null : new CompileTimeCacheItemConfiguration( attr );

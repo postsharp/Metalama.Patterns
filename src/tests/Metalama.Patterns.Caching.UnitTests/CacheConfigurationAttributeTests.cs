@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testCachingAttributeProfileName = _profileNamePrefix + "TestCachingAttribute";
 
-        [CacheConfiguration( ProfileName = _testCachingAttributeProfileName )]
+        [CachingConfiguration( ProfileName = _testCachingAttributeProfileName )]
         private class BaseCachingClass
         {
             public sealed class InnerCachingClassInBase

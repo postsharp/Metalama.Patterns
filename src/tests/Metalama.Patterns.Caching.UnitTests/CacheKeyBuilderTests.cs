@@ -270,7 +270,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testMethodWithIgnoredThisParameterProfileName = _profileNamePrefix + "TestMethodWithIgnoredThisParameter";
 
-        [CacheConfiguration( ProfileName = _testMethodWithIgnoredThisParameterProfileName, IgnoreThisParameter = true )]
+        [CachingConfiguration( ProfileName = _testMethodWithIgnoredThisParameterProfileName, IgnoreThisParameter = true )]
         private sealed class SomeClassWithIgnoredThisParameter
         {
             [Cache]
@@ -295,7 +295,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testMethodWithIgnoredThisParameterAsyncProfileName = _profileNamePrefix + "TestMethodWithIgnoredThisParameterAsync";
 
-        [CacheConfiguration( ProfileName = _testMethodWithIgnoredThisParameterAsyncProfileName, IgnoreThisParameter = true )]
+        [CachingConfiguration( ProfileName = _testMethodWithIgnoredThisParameterAsyncProfileName, IgnoreThisParameter = true )]
         private sealed class SomeAsyncClassWithIgnoredThisParameter
         {
             [Cache]

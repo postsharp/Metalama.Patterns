@@ -25,7 +25,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testSyncProfileName = _profileNamePrefix + "TestSync";
 
-        [CacheConfiguration( ProfileName = _testSyncProfileName )]
+        [CachingConfiguration( ProfileName = _testSyncProfileName )]
         private sealed class TestSyncCachingClass : CachingClass
         {
             [Cache]
@@ -138,7 +138,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testNotCacheKeyProfileName = _profileNamePrefix + "TestNotCacheKey";
 
-        [CacheConfiguration( ProfileName = _testNotCacheKeyProfileName )]
+        [CachingConfiguration( ProfileName = _testNotCacheKeyProfileName )]
         private sealed class TestNotCacheKeyCachingClass : CachingClass
         {
             [Cache]
@@ -243,7 +243,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testSyncGenericProfileName = _profileNamePrefix + "TestSyncGeneric";
 
-        [CacheConfiguration( ProfileName = _testSyncGenericProfileName )]
+        [CachingConfiguration( ProfileName = _testSyncGenericProfileName )]
         private sealed class TestSyncGenericCachingClass<T> : CachingClass<T>
             where T : CachedValueClass, new()
         {
@@ -291,7 +291,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAsyncProfileName = _profileNamePrefix + "TestAsync";
 
-        [CacheConfiguration( ProfileName = _testAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testAsyncProfileName )]
         private sealed class TestAsyncCachingClass : CachingClass
         {
             [Cache]
@@ -350,7 +350,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAsyncGenericProfileName = _profileNamePrefix + "TestAsyncGeneric";
 
-        [CacheConfiguration( ProfileName = _testAsyncGenericProfileName )]
+        [CachingConfiguration( ProfileName = _testAsyncGenericProfileName )]
         private sealed class TestAsyncGenericCachingClass<T> : CachingClass<T>
             where T : CachedValueClass, new()
         {
@@ -385,7 +385,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testDisabledProfileName = _profileNamePrefix + "TestDisabled";
 
-        [CacheConfiguration( ProfileName = _testDisabledProfileName )]
+        [CachingConfiguration( ProfileName = _testDisabledProfileName )]
         private sealed class TestDisabledCachingClass : CachingClass
         {
             [Cache]
@@ -429,7 +429,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testDisabledAsyncProfileName = _profileNamePrefix + "TestDisabledAsync";
 
-        [CacheConfiguration( ProfileName = _testDisabledAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testDisabledAsyncProfileName )]
         private sealed class TestDisabledAsyncCachingClass : CachingClass
         {
             [Cache]
@@ -516,7 +516,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAutoReloadProfileName1 = _profileNamePrefix + "TestAutoReload1";
 
-        [CacheConfiguration( ProfileName = _testAutoReloadProfileName1 )]
+        [CachingConfiguration( ProfileName = _testAutoReloadProfileName1 )]
         private sealed class TestAutoReloadSetInProfileUsingConfigurationAttributeCachingClass : CachingClass
         {
             [Cache]
@@ -548,7 +548,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAutoReloadProfileName2 = _profileNamePrefix + "TestAutoReload2";
 
-        [CacheConfiguration( ProfileName = _testAutoReloadProfileName2, AutoReload = true )]
+        [CachingConfiguration( ProfileName = _testAutoReloadProfileName2, AutoReload = true )]
         private sealed class TestAutoReloadSetInCacheConfigurationAttributeCachingClass : CachingClass
         {
             [Cache]
@@ -580,7 +580,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAutoReloadProfileName3 = _profileNamePrefix + "TestAutoReload3";
 
-        [CacheConfiguration( ProfileName = _testAutoReloadProfileName3 )]
+        [CachingConfiguration( ProfileName = _testAutoReloadProfileName3 )]
         private sealed class TestAutoReloadSetInCacheAttributeCachingClass : CachingClass
         {
             [Cache( AutoReload = true )]
@@ -657,7 +657,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAutoReloadAsyncProfileName1 = _profileNamePrefix + "TestAutoReloadAsync1";
 
-        [CacheConfiguration( ProfileName = _testAutoReloadAsyncProfileName1 )]
+        [CachingConfiguration( ProfileName = _testAutoReloadAsyncProfileName1 )]
         private sealed class TestAutoReloadAsyncSetInProfileUsingConfigurationAttributeCachingClass : CachingClass
         {
             [Cache]
@@ -689,7 +689,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAutoReloadAsyncProfileName2 = _profileNamePrefix + "TestAutoReloadAsync2";
 
-        [CacheConfiguration( ProfileName = _testAutoReloadAsyncProfileName2, AutoReload = true )]
+        [CachingConfiguration( ProfileName = _testAutoReloadAsyncProfileName2, AutoReload = true )]
         private sealed class TestAutoReloadAsyncSetInCacheConfigurationAttributeCachingClass : CachingClass
         {
             [Cache]
@@ -721,7 +721,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAutoReloadAsyncProfileName3 = _profileNamePrefix + "TestAutoReloadAsync3";
 
-        [CacheConfiguration( ProfileName = _testAutoReloadAsyncProfileName3 )]
+        [CachingConfiguration( ProfileName = _testAutoReloadAsyncProfileName3 )]
         private sealed class TestAutoReloadAsyncSetInCacheAttributeCachingClass : CachingClass
         {
             [Cache( AutoReload = true )]
@@ -832,7 +832,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testAbsoluteExpirationProfileName1 = _profileNamePrefix + "TestAbsoluteExpiration1";
         private const string _testAbsoluteExpirationProfileName2 = _profileNamePrefix + "TestAbsoluteExpiration2";
 
-        [CacheConfiguration( ProfileName = _testAbsoluteExpirationProfileName1 )]
+        [CachingConfiguration( ProfileName = _testAbsoluteExpirationProfileName1 )]
         private sealed class TestAbsoluteExpirationSetInProfileAndCacheAttributeCachingClass
         {
             [Cache]
@@ -896,7 +896,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAbsoluteExpirationProfileName4 = _profileNamePrefix + "TestAbsoluteExpiration4";
 
-        [CacheConfiguration( ProfileName = _testAbsoluteExpirationProfileName4, AbsoluteExpiration = _absoluteExpirationOffsetTestValue4 )]
+        [CachingConfiguration( ProfileName = _testAbsoluteExpirationProfileName4, AbsoluteExpiration = _absoluteExpirationOffsetTestValue4 )]
         private sealed class TestAbsoluteExpirationSetInCacheConfigurationAttributeAndCacheAttributeCachingClass
         {
             [Cache]
@@ -946,7 +946,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testAbsoluteExpirationAsyncProfileName1 = _profileNamePrefix + "TestAbsoluteExpirationAsync1";
         private const string _testAbsoluteExpirationAsyncProfileName2 = _profileNamePrefix + "TestAbsoluteExpirationAsync2";
 
-        [CacheConfiguration( ProfileName = _testAbsoluteExpirationAsyncProfileName1 )]
+        [CachingConfiguration( ProfileName = _testAbsoluteExpirationAsyncProfileName1 )]
         private sealed class TestAbsoluteExpirationAsyncSetInProfileAndCacheAttributeCachingClass
         {
             [Cache]
@@ -1012,7 +1012,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testAbsoluteExpirationAsyncProfileName4 = _profileNamePrefix + "TestAbsoluteExpirationAsync4";
 
-        [CacheConfiguration( ProfileName = _testAbsoluteExpirationAsyncProfileName4, AbsoluteExpiration = _absoluteExpirationOffsetTestValue4 )]
+        [CachingConfiguration( ProfileName = _testAbsoluteExpirationAsyncProfileName4, AbsoluteExpiration = _absoluteExpirationOffsetTestValue4 )]
         private sealed class TestAbsoluteExpirationAsyncSetInCacheConfigurationAttributeAndCacheAttributeCachingClass
         {
             [Cache]
@@ -1075,7 +1075,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testSlidingExpirationProfileName1 = _profileNamePrefix + "TestSlidingExpiration1";
         private const string _testSlidingExpirationProfileName2 = _profileNamePrefix + "TestSlidingExpiration2";
 
-        [CacheConfiguration( ProfileName = _testSlidingExpirationProfileName1 )]
+        [CachingConfiguration( ProfileName = _testSlidingExpirationProfileName1 )]
         private sealed class TestSlidingExpirationSetInProfileCachingClass
         {
             [Cache]
@@ -1135,7 +1135,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testSlidingExpirationProfileName4 = _profileNamePrefix + "TestSlidingExpiration4";
 
-        [CacheConfiguration( ProfileName = _testSlidingExpirationProfileName4, SlidingExpiration = _slidingExpirationOffsetTestDoubleValue4 )]
+        [CachingConfiguration( ProfileName = _testSlidingExpirationProfileName4, SlidingExpiration = _slidingExpirationOffsetTestDoubleValue4 )]
         private sealed class TestSlidingExpirationSetInCacheConfigurationAttributeAndCacheAttributeCachingClass
         {
             [Cache]
@@ -1185,7 +1185,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testSlidingExpirationAsyncProfileName1 = _profileNamePrefix + "TestSlidingExpirationAsync1";
         private const string _testSlidingExpirationAsyncProfileName2 = _profileNamePrefix + "TestSlidingExpirationAsync2";
 
-        [CacheConfiguration( ProfileName = _testSlidingExpirationAsyncProfileName1 )]
+        [CachingConfiguration( ProfileName = _testSlidingExpirationAsyncProfileName1 )]
         private sealed class TestSlidingExpirationAsyncSetInProfileCachingClass
         {
             [Cache]
@@ -1245,7 +1245,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testSlidingExpirationAsyncProfileName4 = _profileNamePrefix + "TestSlidingExpirationAsync4";
 
-        [CacheConfiguration( ProfileName = _testSlidingExpirationAsyncProfileName4, SlidingExpiration = _slidingExpirationOffsetTestDoubleValue4 )]
+        [CachingConfiguration( ProfileName = _testSlidingExpirationAsyncProfileName4, SlidingExpiration = _slidingExpirationOffsetTestDoubleValue4 )]
         private sealed class TestSlidingExpirationAsyncSetInCacheConfigurationAttributeAndCacheAttributeCachingClass
         {
             [Cache]
@@ -1311,7 +1311,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testCacheItemPriorityProfileName1 = _profileNamePrefix + "TestCacheItemPriority1";
 
-        [CacheConfiguration( ProfileName = _testCacheItemPriorityProfileName1 )]
+        [CachingConfiguration( ProfileName = _testCacheItemPriorityProfileName1 )]
         private sealed class TestCacheItemPrioritySetInProfileUsingConfigurationAttributeCachingClass : CachingClass
         {
             [Cache]
@@ -1343,7 +1343,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testCacheItemPriorityProfileName2 = _profileNamePrefix + "TestCacheItemPriority2";
 
-        [CacheConfiguration( ProfileName = _testCacheItemPriorityProfileName2, Priority = CacheItemPriority.NotRemovable )]
+        [CachingConfiguration( ProfileName = _testCacheItemPriorityProfileName2, Priority = CacheItemPriority.NotRemovable )]
         private sealed class TestCacheItemPrioritySetInProfileUsingCacheAttributeCachingClass : CachingClass
         {
             [Cache]
@@ -1375,7 +1375,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testCacheItemPriorityProfileName3 = _profileNamePrefix + "TestCacheItemPriority3";
 
-        [CacheConfiguration( ProfileName = _testCacheItemPriorityProfileName3 )]
+        [CachingConfiguration( ProfileName = _testCacheItemPriorityProfileName3 )]
         private sealed class TestCacheItemPrioritySetInCacheAttributeCachingClass : CachingClass
         {
             [Cache( Priority = CacheItemPriority.NotRemovable )]
@@ -1422,7 +1422,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testCacheItemPriorityAsyncProfileName1 = _profileNamePrefix + "TestCacheItemPriorityAsync1";
 
-        [CacheConfiguration( ProfileName = _testCacheItemPriorityAsyncProfileName1 )]
+        [CachingConfiguration( ProfileName = _testCacheItemPriorityAsyncProfileName1 )]
         private sealed class TestCacheItemPriorityAsyncSetInProfileUsingConfigurationAttributeCachingClass : CachingClass
         {
             [Cache]
@@ -1456,7 +1456,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testCacheItemPriorityAsyncProfileName2 = _profileNamePrefix + "TestCacheItemPriorityAsync2";
 
-        [CacheConfiguration( ProfileName = _testCacheItemPriorityAsyncProfileName2, Priority = CacheItemPriority.NotRemovable )]
+        [CachingConfiguration( ProfileName = _testCacheItemPriorityAsyncProfileName2, Priority = CacheItemPriority.NotRemovable )]
         private sealed class TestCacheItemPriorityAsyncSetInProfileUsingCacheAttributeCachingClass : CachingClass
         {
             [Cache]
@@ -1490,7 +1490,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testCacheItemPriorityAsyncProfileName3 = _profileNamePrefix + "TestCacheItemPriorityAsync3";
 
-        [CacheConfiguration( ProfileName = _testCacheItemPriorityAsyncProfileName3 )]
+        [CachingConfiguration( ProfileName = _testCacheItemPriorityAsyncProfileName3 )]
         private sealed class TestCacheItemPriorityAsyncSetInCacheAttributeCachingClass : CachingClass
         {
             [Cache( Priority = CacheItemPriority.NotRemovable )]
@@ -1566,7 +1566,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testIgnoreThisParameterProfileName1 = _profileNamePrefix + "TestIgnoreThisParameter1";
 
-        [CacheConfiguration( ProfileName = _testIgnoreThisParameterProfileName1 )]
+        [CachingConfiguration( ProfileName = _testIgnoreThisParameterProfileName1 )]
         private sealed class CachingClassNotIgnoringThisParameterSetInCacheAttribute : NamedCachingClass
         {
             public CachingClassNotIgnoringThisParameterSetInCacheAttribute( string name ) : base( name ) { }
@@ -1578,7 +1578,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        [CacheConfiguration( ProfileName = _testIgnoreThisParameterProfileName1 )]
+        [CachingConfiguration( ProfileName = _testIgnoreThisParameterProfileName1 )]
         private sealed class CachingClassIgnoringThisParameterSetInCacheAttribute : NamedCachingClass
         {
             public CachingClassIgnoringThisParameterSetInCacheAttribute( string name ) : base( name ) { }
@@ -1621,7 +1621,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testIgnoreThisParameterProfileName2 = _profileNamePrefix + "TestIgnoreThisParameter2";
 
-        [CacheConfiguration( ProfileName = _testIgnoreThisParameterProfileName2 )]
+        [CachingConfiguration( ProfileName = _testIgnoreThisParameterProfileName2 )]
         private sealed class CachingClassNotIgnoringThisParameterSetInCacheConfigurationAttribute : NamedCachingClass
         {
             public CachingClassNotIgnoringThisParameterSetInCacheConfigurationAttribute( string name ) : base( name ) { }
@@ -1633,7 +1633,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        [CacheConfiguration( ProfileName = _testIgnoreThisParameterProfileName2, IgnoreThisParameter = true )]
+        [CachingConfiguration( ProfileName = _testIgnoreThisParameterProfileName2, IgnoreThisParameter = true )]
         private sealed class CachingClassIgnoringThisParameterSetInCacheConfigurationAttribute : NamedCachingClass
         {
             public CachingClassIgnoringThisParameterSetInCacheConfigurationAttribute( string name ) : base( name ) { }
@@ -1706,7 +1706,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testIgnoreThisParameterAsyncProfileName1 = _profileNamePrefix + "TestIgnoreThisParameterAsync1";
 
-        [CacheConfiguration( ProfileName = _testIgnoreThisParameterAsyncProfileName1 )]
+        [CachingConfiguration( ProfileName = _testIgnoreThisParameterAsyncProfileName1 )]
         private sealed class AsyncCachingClassNotIgnoringThisParameterSetInCacheAttribute : NamedCachingClass
         {
             public AsyncCachingClassNotIgnoringThisParameterSetInCacheAttribute( string name ) : base( name ) { }
@@ -1718,7 +1718,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        [CacheConfiguration( ProfileName = _testIgnoreThisParameterAsyncProfileName1 )]
+        [CachingConfiguration( ProfileName = _testIgnoreThisParameterAsyncProfileName1 )]
         private sealed class AsyncCachingClassIgnoringThisParameterSetInCacheAttribute : NamedCachingClass
         {
             public AsyncCachingClassIgnoringThisParameterSetInCacheAttribute( string name ) : base( name ) { }
@@ -1761,7 +1761,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testIgnoreThisParameterAsyncProfileName2 = _profileNamePrefix + "TestIgnoreThisParameterAsync2";
 
-        [CacheConfiguration( ProfileName = _testIgnoreThisParameterAsyncProfileName2 )]
+        [CachingConfiguration( ProfileName = _testIgnoreThisParameterAsyncProfileName2 )]
         private sealed class AsyncCachingClassNotIgnoringThisParameterSetInCacheConfigurationAttribute : NamedCachingClass
         {
             public AsyncCachingClassNotIgnoringThisParameterSetInCacheConfigurationAttribute( string name ) : base( name ) { }
@@ -1773,7 +1773,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        [CacheConfiguration( ProfileName = _testIgnoreThisParameterAsyncProfileName2, IgnoreThisParameter = true )]
+        [CachingConfiguration( ProfileName = _testIgnoreThisParameterAsyncProfileName2, IgnoreThisParameter = true )]
         private sealed class AsyncCachingClassIgnoringThisParameterSetInCacheConfigurationAttribute : NamedCachingClass
         {
             public AsyncCachingClassIgnoringThisParameterSetInCacheConfigurationAttribute( string name ) : base( name ) { }
@@ -1824,7 +1824,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testMethodLevelProfileNameSetInConfigurationAttribute = _profileNamePrefix + "MethodLevelProfileNameSetInConfigurationAttribute";
         private const string _testMethodLevelProfileNameSetInCacheAttribute = _profileNamePrefix + "MethodLevelProfileNameSetInCacheAttribute";
 
-        [CacheConfiguration( ProfileName = _testMethodLevelProfileNameSetInConfigurationAttribute )]
+        [CachingConfiguration( ProfileName = _testMethodLevelProfileNameSetInConfigurationAttribute )]
         private sealed class TestMethodLevelProfileCachingClass
         {
             [Cache]
@@ -1885,7 +1885,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testMethodLevelProfileAsyncNameSetInCacheAttribute = _profileNamePrefix + "MethodLevelProfileNameSetInCacheAttribute";
 
-        [CacheConfiguration( ProfileName = _testMethodLevelProfileAsyncNameSetInConfigurationAttribute )]
+        [CachingConfiguration( ProfileName = _testMethodLevelProfileAsyncNameSetInConfigurationAttribute )]
         private sealed class TestMethodLevelProfileAsyncCachingClass
         {
             [Cache]

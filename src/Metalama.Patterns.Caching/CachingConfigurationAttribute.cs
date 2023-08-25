@@ -1,32 +1,32 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Aspects;
 using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
 /// Custom attribute that, when applied on a type, configures the <see cref="CacheAttribute"/> aspects applied to the methods of this type
-/// or its derived types. When applied to an assembly, the <see cref="CacheConfigurationAttribute"/> custom attribute configures all methods
+/// or its derived types. When applied to an assembly, the <see cref="CachingConfigurationAttribute"/> custom attribute configures all methods
 /// of the current assembly.
 /// </summary>
 /// <remarks>
-/// <para>Any <see cref="CacheConfigurationAttribute"/> on the base class has always priority over a <see cref="CacheConfigurationAttribute"/>
+/// <para>Any <see cref="CachingConfigurationAttribute"/> on the base class has always priority over a <see cref="CachingConfigurationAttribute"/>
 /// on the assembly, even if the base class is in a different assembly.</para>
 /// </remarks>
 [PublicAPI]
 [AttributeUsage( AttributeTargets.Class | AttributeTargets.Assembly )]
-public sealed class CacheConfigurationAttribute : Attribute
+[RunTime]
+public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigurationAttribute
 {
-    internal CacheItemConfiguration Configuration { get; private set; } = new();
-
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the cached methods.
     /// </summary>
     public string ProfileName
     {
-        get => this.Configuration.ProfileName ?? CachingProfile.DefaultName;
-        set => this.Configuration = this.Configuration with { ProfileName = value };
+        get;
+        set;
     }
 
     /// <summary>
@@ -35,8 +35,8 @@ public sealed class CacheConfigurationAttribute : Attribute
     /// </summary>
     public bool AutoReload
     {
-        get => this.Configuration.AutoReload.GetValueOrDefault();
-        set => this.Configuration = this.Configuration with { AutoReload = value };
+        get;
+        set;
     }
 
     /// <summary>
@@ -45,8 +45,8 @@ public sealed class CacheConfigurationAttribute : Attribute
     /// </summary>
     public double AbsoluteExpiration
     {
-        get => this.Configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
-        set => this.Configuration = this.Configuration with { AbsoluteExpiration = TimeSpan.FromMinutes( value ) };
+        get;
+        set;
     }
 
     /// <summary>
@@ -55,8 +55,8 @@ public sealed class CacheConfigurationAttribute : Attribute
     /// </summary>
     public double SlidingExpiration
     {
-        get => this.Configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
-        set => this.Configuration = this.Configuration with { SlidingExpiration = TimeSpan.FromMinutes( value ) };
+        get;
+        set;
     }
 
     /// <summary>
@@ -64,8 +64,8 @@ public sealed class CacheConfigurationAttribute : Attribute
     /// </summary>
     public CacheItemPriority Priority
     {
-        get => this.Configuration.Priority.GetValueOrDefault( CacheItemPriority.Default );
-        set => this.Configuration = this.Configuration with { Priority = value };
+        get;
+        set;
     }
 
     /// <summary>
@@ -74,7 +74,9 @@ public sealed class CacheConfigurationAttribute : Attribute
     /// </summary>
     public bool IgnoreThisParameter
     {
-        get => this.Configuration.IgnoreThisParameter.GetValueOrDefault();
-        set => this.Configuration = this.Configuration with { IgnoreThisParameter = value };
+        get;
+        set;
     }
+
+    public bool UseDependencyInjection { get; set; }
 }

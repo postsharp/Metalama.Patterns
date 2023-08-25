@@ -48,7 +48,7 @@ public sealed class CachedMethodMetadata
     /// Gets the build time configuration that applies to the method.
     /// </summary>
     /// <remarks>
-    /// This already takes account of the any <see cref="CacheConfigurationAttribute"/> instances applied to parent classes and the assembly.
+    /// This already takes account of the any <see cref="CachingConfigurationAttribute"/> instances applied to parent classes and the assembly.
     /// </remarks>
     internal ICacheItemConfiguration BuildTimeConfiguration { get; }
 

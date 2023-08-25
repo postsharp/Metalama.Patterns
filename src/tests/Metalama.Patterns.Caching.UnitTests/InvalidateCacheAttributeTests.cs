@@ -22,7 +22,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testFromDifferentTypeIgnoringThisParameterProfileName = _profileNamePrefix + nameof(TestFromDifferentTypeIgnoringThisParameter);
 
-        [CacheConfiguration( ProfileName = _testFromDifferentTypeIgnoringThisParameterProfileName )]
+        [CachingConfiguration( ProfileName = _testFromDifferentTypeIgnoringThisParameterProfileName )]
         private sealed class TestFromDifferentTypeIgnoringThisParameterCachingClass
         {
             private static int _counter;
@@ -154,7 +154,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromDifferentTypeIgnoringThisParameterAsyncProfileName =
             _profileNamePrefix + nameof(TestFromDifferentTypeIgnoringThisParameterAsync);
 
-        [CacheConfiguration( ProfileName = _testFromDifferentTypeIgnoringThisParameterAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testFromDifferentTypeIgnoringThisParameterAsyncProfileName )]
         private sealed class TestFromDifferentTypeIgnoringThisParameterAsyncCachingClass
         {
             private static int _counter;
@@ -290,7 +290,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testFromDerivedTypeNotIgnoringThisParameterProfileName = _profileNamePrefix + nameof(TestFromDerivedTypeNotIgnoringThisParameter);
 
-        [CacheConfiguration( ProfileName = _testFromDerivedTypeNotIgnoringThisParameterProfileName )]
+        [CachingConfiguration( ProfileName = _testFromDerivedTypeNotIgnoringThisParameterProfileName )]
         private class TestFromDerivedTypeNotIgnoringThisParameterCachingClass
         {
             private static int _counter;
@@ -419,7 +419,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName =
             _profileNamePrefix + nameof(TestFromDerivedTypeNotIgnoringThisParameterAsync);
 
-        [CacheConfiguration( ProfileName = _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName )]
         private class TestFromDerivedTypeNotIgnoringThisParameterAsyncCachingClass
         {
             private static int _counter;
@@ -553,7 +553,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName =
             _profileNamePrefix + nameof(TestFromDifferentTypeInstanceMethodOnStaticMethod);
 
-        [CacheConfiguration( ProfileName = _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName )]
+        [CachingConfiguration( ProfileName = _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName )]
         private sealed class TestFromDifferentTypeInstanceMethodOnStaticMethodCachingClass
         {
             private static int _counter;
@@ -682,7 +682,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName =
             _profileNamePrefix + nameof(TestFromDifferentTypeInstanceMethodOnStaticMethodAsync);
 
-        [CacheConfiguration( ProfileName = _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName )]
         private sealed class TestFromDifferentTypeInstanceMethodOnStaticMethodAsyncCachingClass
         {
             private static int _counter;
@@ -816,7 +816,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromDifferentTypeStaticMethodOnStaticMethodProfileName =
             _profileNamePrefix + nameof(TestFromDifferentTypeStaticMethodOnStaticMethod);
 
-        [CacheConfiguration( ProfileName = _testFromDifferentTypeStaticMethodOnStaticMethodProfileName )]
+        [CachingConfiguration( ProfileName = _testFromDifferentTypeStaticMethodOnStaticMethodProfileName )]
         private sealed class TestFromDifferentTypeStaticMethodOnStaticMethodCachingClass
         {
             private static int _counter;
@@ -943,7 +943,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName =
             _profileNamePrefix + nameof(TestFromDifferentTypeStaticMethodOnStaticMethodAsync);
 
-        [CacheConfiguration( ProfileName = _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName )]
         private sealed class TestFromDifferentTypeStaticMethodOnStaticMethodAsyncCachingClass
         {
             private static int _counter;
@@ -1087,7 +1087,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromTheSameTypeIgnoringThisParameterProfileName =
             _profileNamePrefix + nameof(TestFromTheSameTypeIgnoringThisParameter);
 
-        [CacheConfiguration( ProfileName = _testFromTheSameTypeIgnoringThisParameterProfileName )]
+        [CachingConfiguration( ProfileName = _testFromTheSameTypeIgnoringThisParameterProfileName )]
         private sealed class TestFromTheSameTypeIgnoringThisParameterInvalidatingAndCachingClass
         {
             private static int _counter;
@@ -1244,7 +1244,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromTheSameTypeIgnoringThisParameterAsyncProfileName =
             _profileNamePrefix + nameof(TestFromTheSameTypeIgnoringThisParameterAsync);
 
-        [CacheConfiguration( ProfileName = _testFromTheSameTypeIgnoringThisParameterAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testFromTheSameTypeIgnoringThisParameterAsyncProfileName )]
         private sealed class TestFromTheSameTypeIgnoringThisParameterAsyncInvalidatingAndCachingClass
         {
             private static int _counter;
@@ -1406,7 +1406,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromTheSameTypeNotIgnoringThisParameterProfileName =
             _profileNamePrefix + nameof(TestFromTheSameTypeNotIgnoringThisParameter);
 
-        [CacheConfiguration( ProfileName = _testFromTheSameTypeNotIgnoringThisParameterProfileName )]
+        [CachingConfiguration( ProfileName = _testFromTheSameTypeNotIgnoringThisParameterProfileName )]
         private sealed class TestFromTheSameTypeNotIgnoringThisParameterInvalidatingAndCachingClass
         {
             private static int _counter;
@@ -1563,7 +1563,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName =
             _profileNamePrefix + nameof(TestFromTheSameTypeNotIgnoringThisParameterAsync);
 
-        [CacheConfiguration( ProfileName = _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName )]
         private sealed class TestFromTheSameTypeNotIgnoringThisParameterAsyncInvalidatingAndCachingClass
         {
             private static int _counter;
@@ -1725,7 +1725,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testNestedContextsProfileName =
             _profileNamePrefix + nameof(TestNestedContexts);
 
-        [CacheConfiguration( ProfileName = _testNestedContextsProfileName )]
+        [CachingConfiguration( ProfileName = _testNestedContextsProfileName )]
         public sealed class TestNestedContextsClass
         {
             private int _invocations;
@@ -1774,7 +1774,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _testNestedContextsAsyncProfileName =
             _profileNamePrefix + nameof(TestNestedContextsAsync);
 
-        [CacheConfiguration( ProfileName = _testNestedContextsAsyncProfileName )]
+        [CachingConfiguration( ProfileName = _testNestedContextsAsyncProfileName )]
         public sealed class TestNestedContextsAsyncClass
         {
             private int _invocations;
