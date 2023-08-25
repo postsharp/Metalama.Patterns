@@ -19,8 +19,8 @@ public class RedisCachingBackend : CachingBackend
 {
     private const string _itemRemovedEvent = "item-removed";
 
-    private readonly Func<ISerializer> _createSerializerFunc;
-    private readonly ConcurrentStack<ISerializer> _serializerPool = new();
+    private readonly Func<ICachingSerializer> _createSerializerFunc;
+    private readonly ConcurrentStack<ICachingSerializer> _serializerPool = new();
     private readonly bool _ownsConnection;
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler;
     private int _backgroundTaskExceptions;
@@ -68,7 +68,7 @@ public class RedisCachingBackend : CachingBackend
 
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
-        this._createSerializerFunc = configuration.CreateSerializer ?? (() => new BinarySerializer());
+        this._createSerializerFunc = configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
     }
 
@@ -85,7 +85,7 @@ public class RedisCachingBackend : CachingBackend
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
 
         // [Porting] This line added to fix _createSerializerFunc being possible null. Might cause change of behaviour. 
-        this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new BinarySerializer());
+        this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
     }
 
     /// <summary>

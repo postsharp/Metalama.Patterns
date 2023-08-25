@@ -5,7 +5,7 @@ namespace Metalama.Patterns.Caching.Serializers;
 /// <summary>
 /// Serializes an object into a byte array and deserializes the byte array back.
 /// </summary>
-public interface ISerializer
+public interface ICachingSerializer
 {
     /// <summary>
     /// Serializes an object into a byte array.

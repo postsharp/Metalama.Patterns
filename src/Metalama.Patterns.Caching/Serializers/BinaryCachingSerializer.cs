@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json.Serialization;
 
 namespace Metalama.Patterns.Caching.Serializers;
 
@@ -9,7 +10,7 @@ namespace Metalama.Patterns.Caching.Serializers;
 /// (for classes annotated with <see cref="SerializableAttribute"/>).
 /// </summary>
 [Obsolete( "The BinaryFormatter facility is considered obsolete." )]
-public sealed class BinarySerializer : ISerializer
+public sealed class BinaryCachingSerializer : ICachingSerializer
 {
     private readonly BinaryFormatter _serializer = new();
 

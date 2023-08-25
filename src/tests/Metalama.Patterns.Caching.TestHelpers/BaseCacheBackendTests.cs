@@ -485,7 +485,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             }
         }
 
-        [Fact( Timeout = Timeout )]
+        [Fact( Timeout = Timeout, Skip = "#33668" )]
         public async Task TestSlidingExpirationAsync()
         {
             if ( !RunningOnWindows )

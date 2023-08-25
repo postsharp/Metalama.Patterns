@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Serializers;
 
 // ReSharper disable once InvalidXmlDocComment
 /// <summary>
-/// An implementation of <see cref="ISerializer"/> that uses <see cref="NetDataContractSerializer"/>.
+/// An implementation of <see cref="ICachingSerializer"/> that uses <see cref="NetDataContractSerializer"/>.
 /// You can derive this class to use a different <see cref="XmlObjectSerializer"/>.
 /// </summary>
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
@@ -20,12 +20,12 @@ namespace Metalama.Patterns.Caching.Serializers;
 [EditorBrowsable( EditorBrowsableState.Never )]
 #endif
 [PublicAPI]
-public class DataContractSerializer : ISerializer
+public class DataContractCachingSerializer : ICachingSerializer
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="DataContractSerializer"/> class.
+    /// Initializes a new instance of the <see cref="DataContractCachingSerializer"/> class.
     /// </summary>
-    public DataContractSerializer()
+    public DataContractCachingSerializer()
     {
 #if !NET_DATA_CONTRACT_SERIALIZER
         throw new PlatformNotSupportedException();

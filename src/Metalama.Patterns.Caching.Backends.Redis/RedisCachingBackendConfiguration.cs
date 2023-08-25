@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
-using ISerializer = Metalama.Patterns.Caching.Serializers.ISerializer;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
@@ -45,9 +44,9 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
 
     /// <summary>
     /// Gets a function that creates the serializer used to serialize objects into byte arrays (and conversely).
-    /// The default value is <c>null</c>, which means that <see cref="BinarySerializer"/> will be used.
+    /// The default value is <c>null</c>, which means that <see cref="BinaryCachingSerializer"/> will be used.
     /// </summary>
-    public Func<ISerializer>? CreateSerializer { get; init; }
+    public Func<ICachingSerializer>? CreateSerializer { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether determines whether the <see cref="RedisCachingBackend"/> should dispose the Redis connection when the <see cref="RedisCachingBackend"/>
