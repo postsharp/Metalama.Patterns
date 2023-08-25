@@ -39,6 +39,7 @@
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
         <xUnitVersion>2.4.2</xUnitVersion>
         <PostSharpEngineeringVersion>2023.2.36</PostSharpEngineeringVersion>
+        <MetalamaExtensionsVersion></MetalamaExtensionsVersion>
     </PropertyGroup>
 
     <!-- Set the deafult versions of auto-updated dependencies -->
