@@ -2,7 +2,8 @@
 
 namespace Flashtrace.UnitTests.Assets;
 
-public sealed class TestExpressionModel
+// Resharper disable UnusedMember.Global
+internal sealed class TestExpressionModel
 {
     public readonly object? Data;
 

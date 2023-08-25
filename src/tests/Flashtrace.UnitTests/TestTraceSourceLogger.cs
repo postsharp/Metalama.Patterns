@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Flashtrace.UnitTests;
 
-public sealed class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSourceFixture>
+public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.TraceSourceFixture>
 {
     // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class TraceSourceFixture : IDisposable
@@ -17,7 +17,7 @@ public sealed class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSou
 
         internal MyListener Listener { get; } = new();
 
-        internal LogSource LogSource { get; } = LogSource.Get();
+        internal LogSource LogSource { get; } = new TraceSourceLoggerFactory().GetLogSource( "test" );
 
         public TraceSourceFixture()
         {
@@ -33,7 +33,7 @@ public sealed class TestDefaultLogger : IClassFixture<TestDefaultLogger.TraceSou
 
     private readonly TraceSourceFixture _fixture;
 
-    public TestDefaultLogger( TraceSourceFixture fixture )
+    public TestTraceSourceLogger( TraceSourceFixture fixture )
     {
         this._fixture = fixture;
         this._fixture.Listener.Messages.Clear();

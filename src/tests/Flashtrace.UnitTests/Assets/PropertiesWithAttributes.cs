@@ -4,7 +4,8 @@ using Flashtrace.Records;
 
 namespace Flashtrace.UnitTests.Assets;
 
-public sealed class PropertiesWithAttributes
+// Resharper disable UnusedMember.Global
+internal sealed class PropertiesWithAttributes
 {
     [LoggingPropertyOptions( IsIgnored = true )]
     public string Ignored { get; set; }

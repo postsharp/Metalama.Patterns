@@ -5,7 +5,8 @@ using JetBrains.Annotations;
 namespace Flashtrace;
 
 /// <summary>
-/// Creates instances of the <see cref="ILogger"/> interface. An instance of this interface must be registered into the <see cref="LoggingServiceLocator"/>.
+/// Creates instances of the <see cref="ILogger"/> interface. An instance of this interface must be registered into the <see cref="IServiceProvider"/>
+/// or, if you are using the legacy mechanism, to <see cref="LogSourceFactory"/>.
 /// </summary>
 [PublicAPI]
 public interface IRoleLoggerFactory

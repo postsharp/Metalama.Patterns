@@ -2,25 +2,15 @@
 
 namespace Flashtrace.Loggers;
 
-internal sealed class TraceSourceLoggerFactory : IRoleLoggerFactory, ILoggerFactory
+internal sealed class TraceSourceLoggerFactory : ILoggerFactory
 {
-    ILogger IRoleLoggerFactory.GetLogger( Type type )
-    {
-        throw new NotImplementedException();
-    }
+    IRoleLoggerFactory ILoggerFactory.ForRole( string role ) => new RoleLoggerFactory( role );
 
-    ILogger IRoleLoggerFactory.GetLogger( string sourceName )
-    {
-        throw new NotImplementedException();
-    }
-
-    IRoleLoggerFactory ILoggerFactory.ForRole( string role ) => new Factory( role );
-
-    private sealed class Factory : IRoleLoggerFactory
+    private sealed class RoleLoggerFactory : IRoleLoggerFactory
     {
         private readonly string _role;
 
-        public Factory( string role )
+        public RoleLoggerFactory( string role )
         {
             this._role = role;
         }

@@ -4,7 +4,7 @@ using Flashtrace.Records;
 
 namespace Flashtrace.UnitTests.Assets;
 
-public sealed class TestMetadata : LogEventMetadata<TestExpressionModel>
+internal sealed class TestMetadata : LogEventMetadata<TestExpressionModel>
 {
     public TestMetadata() : base( "Test" ) { }
 
