@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
+    <PackageReference Include="xunit.assemblyfixture" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
     <PackageReference Include="Xunit.SkippableFact" Version="$(XunitSkippableFactVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitVersion)" />
@@ -26,8 +27,13 @@
     <ProjectReference Include="..\..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
     <ProjectReference Include="..\..\Flashtrace\Flashtrace.csproj" />
     <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.Azure\Metalama.Patterns.Caching.Backends.Azure.csproj" />
+    <ProjectReference Include="..\..\Metalama.Patterns.Caching.Backends.Redis\Metalama.Patterns.Caching.Backends.Redis.csproj" />
+
     <ProjectReference Include="..\..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
     <ProjectReference Include="..\Metalama.Patterns.Caching.TestHelpers\Metalama.Patterns.Caching.TestHelpers.csproj" />
   </ItemGroup>
+  
+
+  <Import Project="RedisTestServer.targets" />
   
 </Project>
