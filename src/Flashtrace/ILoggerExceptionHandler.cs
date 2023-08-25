@@ -20,7 +20,7 @@ public interface ILoggerExceptionHandler
     /// <param name="callerInfo">Information about the line of code causing the error.</param>
     /// <param name="format">Formatting string of the error message.</param>
     /// <param name="args">Arguments.</param>
-    void OnInvalidUserCode( ref CallerInfo callerInfo, string format, params object[] args );
+    void OnInvalidUserCode( in CallerInfo callerInfo, string format, params object[] args );
 
     /// <summary>
     /// Method invoked when an exception is thrown in logging code.

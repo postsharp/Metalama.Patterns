@@ -5,13 +5,12 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Runtime.Serialization;
 
 namespace Metalama.Patterns.Caching.Backends;
 
 /// <summary>
 /// A <see cref="CachingBackendEnhancer"/> that adds a local (fast) <see cref="MemoryCachingBackend"/> to a remote (slower) cache.
-/// This class is typically instantiate in the back-end factory method. You should normally not use this class unless you develop a custom caching back-end.
+/// This class is typically instantiated in the back-end factory method. You should normally not use this class unless you develop a custom caching back-end.
 /// </summary>
 [PublicAPI]
 public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
@@ -29,9 +28,12 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     /// </summary>
     /// <param name="remoteCache">The remote <see cref="CachingBackend"/>.</param>
     /// <param name="memoryCache">A <see cref="MemoryCachingBackend"/>, or <c>null</c> to use a new default <see cref="MemoryCachingBackend"/>.</param>
-    public TwoLayerCachingBackendEnhancer( [Required] CachingBackend remoteCache, MemoryCachingBackend? memoryCache = null ) : base( remoteCache )
+    public TwoLayerCachingBackendEnhancer( [Required] CachingBackend remoteCache, MemoryCachingBackend? memoryCache = null ) : base(
+        remoteCache,
+        new CachingBackendConfiguration() { ServiceProvider = remoteCache.Configuration.ServiceProvider } )
     {
-        this.LocalCache = memoryCache ?? new MemoryCachingBackend();
+        this.LocalCache = memoryCache
+                          ?? new MemoryCachingBackend( new MemoryCachingBackendConfiguration { ServiceProvider = remoteCache.Configuration.ServiceProvider } );
     }
 
     /// <inheritdoc />
@@ -60,7 +62,8 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     protected override void SetItemCore( string key, CacheItem item )
     {
         var value = new TwoLayerCacheValue( item );
-        var newItem = item.WithValue( value );
+
+        var newItem = item with { Value = value, Configuration = item.Configuration.WithoutAutoReload() };
 
         this.LocalCache.SetItem( key, item );
         this.UnderlyingBackend.SetItem( key, newItem );
@@ -70,7 +73,8 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     protected override ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
         var value = new TwoLayerCacheValue( item );
-        var newItem = item.WithValue( value );
+
+        var newItem = item with { Value = value, Configuration = item.Configuration.WithoutAutoReload() };
 
         this.LocalCache.SetItem( key, item );
 
@@ -416,75 +420,5 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 #pragma warning restore SA1401
 
         public RemovedValue() : base( null, null, new object() ) { }
-    }
-
-    /// <summary>
-    /// The object stored in the remote class.
-    /// </summary>
-    [Serializable]
-    [DataContract]
-
-    // TODO: Unnest this type.
-#pragma warning disable CA1034 // Nested types should not be visible
-    public sealed class TwoLayerCacheValue
-#pragma warning restore CA1034 // Nested types should not be visible
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TwoLayerCacheValue"/> class.
-        /// </summary>
-        /// <param name="item">The original <see cref="CacheItem"/>.</param>
-        public TwoLayerCacheValue( [Required] CacheItem item )
-        {
-            this.Value = item.Value;
-            this.SlidingExpiration = item.Configuration?.SlidingExpiration;
-            this.Priority = item.Configuration?.Priority;
-
-            if ( item.Configuration?.AbsoluteExpiration != null )
-            {
-                this.AbsoluteExpiration = DateTime.UtcNow + item.Configuration?.AbsoluteExpiration.Value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the timestamp of the cache item.
-        /// </summary>
-        [DataMember]
-        public long Timestamp { get; set; } = GetTimestamp();
-
-        /// <summary>
-        /// Gets or sets the cached value.
-        /// </summary>
-        [DataMember]
-        public object? Value { get; set; }
-
-        /// <summary>
-        /// Gets or sets the absolute expiration of the cache item.
-        /// </summary>
-        [DataMember]
-        public DateTime? AbsoluteExpiration { get; set; }
-
-        /// <summary>
-        /// Gets or sets the sliding expiration of the cache item.
-        /// </summary>
-        [DataMember]
-        public TimeSpan? SlidingExpiration { get; set; }
-
-        /// <summary>
-        /// Gets or sets the cache item priority.
-        /// </summary>
-        [DataMember]
-        public CacheItemPriority? Priority { get; set; }
-
-        internal CacheItemConfiguration ToCacheItemConfiguration()
-        {
-            var configuration = new CacheItemConfiguration { Priority = this.Priority, SlidingExpiration = this.SlidingExpiration };
-
-            if ( this.AbsoluteExpiration != null )
-            {
-                configuration.AbsoluteExpiration = DateTime.UtcNow - this.AbsoluteExpiration.Value;
-            }
-
-            return configuration;
-        }
     }
 }

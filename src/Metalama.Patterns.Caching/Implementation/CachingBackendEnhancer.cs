@@ -19,7 +19,9 @@ public abstract class CachingBackendEnhancer : CachingBackend
     /// Initializes a new instance of the <see cref="CachingBackendEnhancer"/> class.
     /// </summary>
     /// <param name="underlyingBackend">The next <see cref="CachingBackend"/> in the chain of responsibility.</param>
-    protected CachingBackendEnhancer( [Required] CachingBackend underlyingBackend )
+    /// <param name="enhancerConfiguration"></param>
+    protected CachingBackendEnhancer( [Required] CachingBackend underlyingBackend, CachingBackendConfiguration? enhancerConfiguration ) : base(
+        enhancerConfiguration )
     {
         this.UnderlyingBackend = underlyingBackend;
 

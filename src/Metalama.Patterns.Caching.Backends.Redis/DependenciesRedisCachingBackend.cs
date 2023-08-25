@@ -32,7 +32,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         IConnectionMultiplexer connection,
         IDatabase database,
         RedisKeyBuilder keyBuilder,
-        RedisCachingBackendConfiguration? configuration )
+        RedisCachingBackendConfiguration configuration )
         : base( connection, database, keyBuilder, configuration ) { }
 
     protected override CachingBackendFeatures CreateFeatures() => new DependenciesRedisCachingBackendFeatures( this );

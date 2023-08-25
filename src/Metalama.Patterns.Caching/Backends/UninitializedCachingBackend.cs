@@ -53,4 +53,6 @@ internal sealed class UninitializedCachingBackend : CachingBackend
 
     /// <inheritdoc />
     protected override void SetItemCore( string key, CacheItem item ) => Throw();
+
+    public UninitializedCachingBackend() : base( null ) { }
 }

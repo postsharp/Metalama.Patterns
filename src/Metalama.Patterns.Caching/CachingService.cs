@@ -11,6 +11,8 @@ namespace Metalama.Patterns.Caching;
 
 public sealed class CachingService : IDisposable, IAsyncDisposable
 {
+    internal IServiceProvider? ServiceProvider { get; }
+
     private volatile CacheKeyBuilder _keyBuilder;
     private volatile CachingBackend _backend = new UninitializedCachingBackend();
 
@@ -20,8 +22,9 @@ public sealed class CachingService : IDisposable, IAsyncDisposable
 
     internal CachingFrontend Frontend { get; }
 
-    public CachingService()
+    public CachingService( IServiceProvider? serviceProvider = null )
     {
+        this.ServiceProvider = serviceProvider;
         this.Invalidation = new CacheInvalidationService( this );
         this._keyBuilder = new CacheKeyBuilder( this.Formatters );
         this.Profiles = new CachingProfileRegistry( this );
@@ -60,6 +63,7 @@ public sealed class CachingService : IDisposable, IAsyncDisposable
             }
 
             this._backend = value ?? new NullCachingBackend();
+            this.Profiles.OnChange();
         }
     }
 

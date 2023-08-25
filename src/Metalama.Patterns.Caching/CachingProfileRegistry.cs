@@ -39,7 +39,7 @@ public sealed class CachingProfileRegistry
     /// </summary>
     public int RevisionNumber => this._revisionNumber;
 
-    private void OnChange()
+    internal void OnChange()
     {
         Interlocked.Increment( ref this._revisionNumber );
         this.AllBackends = this._profiles.Values.Select( p => p.Backend ).Where( b => b is not UninitializedCachingBackend ).Distinct().ToImmutableHashSet();

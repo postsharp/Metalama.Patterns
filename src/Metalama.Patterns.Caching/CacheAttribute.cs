@@ -280,7 +280,7 @@ public sealed class CacheAttribute : MethodAspect
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), null ) );
         }
 
-        return CachingServices.DefaultService.Lookup.GetFromCacheOrExecute<TReturnType>(
+        return CachingServices.Default.Lookup.GetFromCacheOrExecute<TReturnType>(
             (CachedMethodMetadata) registrationField.Value!,
             Invoke,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -298,7 +298,7 @@ public sealed class CacheAttribute : MethodAspect
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
         }
 
-        return CachingServices.DefaultService.Lookup.GetFromCacheOrExecuteTaskAsync<TValue>(
+        return CachingServices.Default.Lookup.GetFromCacheOrExecuteTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -317,14 +317,14 @@ public sealed class CacheAttribute : MethodAspect
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
         }
 
-        return CachingServices.DefaultService.Lookup.GetFromCacheOrExecuteValueTaskAsync<TValue>(
+        return CachingServices.Default.Lookup.GetFromCacheOrExecuteValueTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
             (CancellationToken) cancellationTokenExpression.Value! );
     }
-    
+
 #if NETCOREAPP3_0_OR_GREATER
     [Template]
     public static IAsyncEnumerable<TValue>? OverrideMethodAsyncEnumerable<[CompileTime] TValue>( IField registrationField, IType TReturnType /* not used */ )
@@ -347,13 +347,13 @@ public sealed class CacheAttribute : MethodAspect
             }
         }
 
-        var task = CachingServices.DefaultService.Lookup.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
+        var task = CachingServices.Default.Lookup.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
             (CancellationToken) cancellationTokenExpression.Value! );
-        
+
         // Avoid extension method form due to current Metalama framework issue.
         // ReSharper disable once InvokeAsExtensionMethod
         return AsyncEnumerableHelper.AsAsyncEnumerable( task );
@@ -381,7 +381,7 @@ public sealed class CacheAttribute : MethodAspect
             return buffer;
         }
 
-        var task = CachingServices.DefaultService.Lookup.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
+        var task = CachingServices.Default.Lookup.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,

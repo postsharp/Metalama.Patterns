@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
-public sealed partial class CustomExceptionFactoryTests : IDisposable
+public sealed class CustomExceptionFactoryTests : IDisposable
 {
     public CustomExceptionFactoryTests()
     {

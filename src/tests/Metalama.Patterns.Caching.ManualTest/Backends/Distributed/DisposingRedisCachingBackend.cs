@@ -19,11 +19,13 @@ internal sealed class DisposingRedisCachingBackend : CachingBackendEnhancer
 
     public IDatabase Database => this.RedisBackend.Database;
 
-    public RedisCachingBackendConfiguration Configuration => this.RedisBackend.Configuration;
+    public new RedisCachingBackendConfiguration Configuration => this.RedisBackend.Configuration;
 
     private RedisCachingBackend RedisBackend => GetRedisCachingBackend( this );
 
-    public DisposingRedisCachingBackend( CachingBackend underlyingBackend, params IDisposable[] disposables ) : base( underlyingBackend )
+    public DisposingRedisCachingBackend( CachingBackend underlyingBackend, params IDisposable[] disposables ) : base(
+        underlyingBackend,
+        new CachingBackendConfiguration { ServiceProvider = underlyingBackend.Configuration.ServiceProvider } )
     {
         this._disposables = disposables;
     }

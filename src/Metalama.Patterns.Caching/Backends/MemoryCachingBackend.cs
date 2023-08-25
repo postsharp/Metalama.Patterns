@@ -22,7 +22,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// <list type="bullet">
 ///    <item>The priority <c>Default</c> is converted to <see cref="CacheItemPriority.Normal"/>.</item>
 ///    <item>The property <see cref="ICacheEntry.Size"/> is normally not set. If you want it to be set, supply a function to calculate this value for each entry
-/// in the <see cref="MemoryCachingBackend(IMemoryCache,Func{PSCacheItem,long})"/> constructor. You only need to do this if you intend to limit the size
+/// in the <see cref="MemoryCachingBackend"/> constructor. You only need to do this if you intend to limit the size
 /// of the cache.</item>
 /// </list>
 /// </remarks>
@@ -49,18 +49,20 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
     /// </summary>
-    public MemoryCachingBackend() : this( new MemoryCache( new MemoryCacheOptions() ) ) { }
+    public MemoryCachingBackend( MemoryCachingBackendConfiguration? serviceProvider = null ) : this(
+        new MemoryCache( new MemoryCacheOptions() ),
+        serviceProvider ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the given <see cref="IMemoryCache"/>. The backend creates cache entries
     /// with size calculated by the given function.
     /// </summary>
     /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
-    /// <param name="sizeCalculator">A function that calculates the size of a new cache item, which some backends may use to evict.</param>
-    public MemoryCachingBackend( [Required] IMemoryCache cache, Func<PSCacheItem, long>? sizeCalculator = null )
+    /// <param name="configuration"></param>
+    public MemoryCachingBackend( [Required] IMemoryCache cache, MemoryCachingBackendConfiguration? configuration = null ) : base( configuration )
     {
         this._cache = cache;
-        this._sizeCalculator = sizeCalculator;
+        this._sizeCalculator = configuration?.SizeCalculator;
     }
 
     private static string GetItemKey( string key )

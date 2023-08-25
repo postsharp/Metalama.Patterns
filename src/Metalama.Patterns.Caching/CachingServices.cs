@@ -10,14 +10,12 @@ namespace Metalama.Patterns.Caching;
 [PublicAPI]
 public static class CachingServices
 {
-    public static CachingService DefaultService { get; } = new();
+    public static CachingService Default { get; set; } = new();
 
     /// <summary>
     /// Gets the current caching context, so dependencies can be added.
     /// </summary>
     public static ICachingContext CurrentContext => CachingContext.Current;
-
-    public static CachingService Default { get; } = new();
 
     /// <summary>
     /// Temporarily suspends propagation of dependencies from subsequently called methods to the caller method.

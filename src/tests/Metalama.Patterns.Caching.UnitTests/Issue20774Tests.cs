@@ -3,15 +3,16 @@
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Assets;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class Issue20774Tests
+    public sealed class Issue20774Tests : BaseCachingTests
     {
         [Fact]
         public void InvalidateBeforeCachedClassHasBeenTouched()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( nameof(Issue20774Tests) );
+            this.InitializeTestWithCachingBackend( nameof(Issue20774Tests) );
 
             try
             {
@@ -23,5 +24,7 @@ namespace Metalama.Patterns.Caching.Tests
                 TestProfileConfigurationFactory.DisposeTest();
             }
         }
+
+        public Issue20774Tests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

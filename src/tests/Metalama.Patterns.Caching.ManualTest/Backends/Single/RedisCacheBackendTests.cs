@@ -366,7 +366,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
             var servers = connection.Inner.GetEndPoints().Select( endpoint => connection.Inner.GetServer( endpoint ) ).ToList();
             var keys = servers.SelectMany( server => server.Keys( pattern: prefix + ":*" ) ).ToList();
 
-            return keys.Select( k => k.ToString() ).Where( k => k.IndexOf( ":gc:", StringComparison.Ordinal ) == -1 ).ToList();
+            return keys.Select( k => k.ToString() ).Where( k => k?.IndexOf( ":gc:", StringComparison.Ordinal ) == -1 ).ToList();
         }
     }
 }

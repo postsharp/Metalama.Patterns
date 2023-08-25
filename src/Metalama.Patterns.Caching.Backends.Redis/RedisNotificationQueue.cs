@@ -15,9 +15,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 {
     private const int _connectDelay = 10;
 
-    private LogSource _logger = null!; // "Guaranteed" to be initialized via Init et al.
-
-    public ISubscriber Subscriber { get; }
+    private readonly LogSource _logger;
 
 #pragma warning disable CA2213 // This is properly disposed
     private readonly BlockingCollection<RedisNotification> _notificationQueue = new();
@@ -42,19 +40,23 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         IConnectionMultiplexer connection,
         ImmutableArray<RedisChannel> channels,
         Action<RedisNotification> handler,
-        TimeSpan connectionTimeout )
+        TimeSpan connectionTimeout,
+        IServiceProvider? serviceProvider )
     {
         this._id = id;
         this._channels = channels;
         this._handler = handler;
         this._connectionTimeout = connectionTimeout;
         this.Subscriber = connection.GetSubscriber();
+        this._logger = serviceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
 
         this._notificationProcessingThread = new Thread( ProcessNotificationQueue )
         {
             Name = nameof(DependenciesRedisCachingBackend) + ".ProcessNotificationQueue"
         };
     }
+
+    public ISubscriber Subscriber { get; }
 
     ~RedisNotificationQueue()
     {
@@ -84,8 +86,6 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
     private void Init()
     {
-        this._logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.GetType() );
-
         var startedAt = DateTime.Now;
 
         foreach ( var channel in this._channels )
@@ -112,8 +112,6 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
     private async Task<RedisNotificationQueue> InitAsync( CancellationToken cancellationToken )
     {
-        this._logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.GetType() );
-
         foreach ( var channel in this._channels )
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -142,9 +140,10 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         IConnectionMultiplexer connection,
         ImmutableArray<RedisChannel> channels,
         Action<RedisNotification> handler,
-        TimeSpan connectionTimeout )
+        TimeSpan connectionTimeout,
+        IServiceProvider? serviceProvider )
     {
-        var queue = new RedisNotificationQueue( id, connection, channels, handler, connectionTimeout );
+        var queue = new RedisNotificationQueue( id, connection, channels, handler, connectionTimeout, serviceProvider );
         queue.Init();
 
         return queue;
@@ -156,9 +155,10 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         ImmutableArray<RedisChannel> channels,
         Action<RedisNotification> handler,
         TimeSpan connectionTimeout,
+        IServiceProvider? serviceProvider,
         CancellationToken cancellationToken )
     {
-        var queue = new RedisNotificationQueue( id, connection, channels, handler, connectionTimeout );
+        var queue = new RedisNotificationQueue( id, connection, channels, handler, connectionTimeout, serviceProvider );
 
         return queue.InitAsync( cancellationToken );
     }
@@ -391,7 +391,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
     public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {
-        using ( var activity = this._logger.Default.OpenActivity( Formatted( "Disposing" ) ) )
+        using ( var activity = this._logger.Default.OpenAsyncActivity( Formatted( "Disposing" ) ) )
         {
             try
             {
@@ -423,9 +423,9 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 #pragma warning disable SA1137
 
 #if NETCOREAPP
-                    await
+                        await
 #endif
-                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                            using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                         {
                             await this._notificationProcessingThreadCompleted.Task;
 

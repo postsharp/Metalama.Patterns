@@ -2,6 +2,7 @@
 
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 
 // ReSharper disable UnusedMethodReturnValue.Local
 // ReSharper disable MemberCanBeMadeStatic.Local
@@ -120,7 +121,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingClass.Invalidate( 1, cachedValue2, 3, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -137,7 +138,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -257,7 +258,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingClass.InvalidateAsync( 1, cachedValue2, 3, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -274,7 +275,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -385,7 +386,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingAndCachingClass.Invalidate( 1, cachedValue2, 3, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDerivedTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -402,7 +403,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingAndCachingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDerivedTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -519,7 +520,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingAndCachingClass.InvalidateAsync( 1, cachedValue2, 3, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -536,7 +537,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingAndCachingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -648,7 +649,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingClass.Invalidate( 1, cachedValue2, 3, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -665,7 +666,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -782,7 +783,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingClass.InvalidateAsync( 1, cachedValue2, 3, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -799,7 +800,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => invalidatingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -909,7 +910,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 1, cachedValue2, 3, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeStaticMethodOnStaticMethodProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -926,7 +927,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeStaticMethodOnStaticMethodProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1047,7 +1048,7 @@ namespace Metalama.Patterns.Caching.Tests
                         .GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1070,7 +1071,7 @@ namespace Metalama.Patterns.Caching.Tests
                         .GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1176,7 +1177,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.Invalidate( 1, cachedValue2, 3, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1193,7 +1194,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1210,7 +1211,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass2.Invalidate( 1, cachedValue2, 3, 4, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1227,7 +1228,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass2.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1338,7 +1339,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.InvalidateAsync( 1, cachedValue2, 3, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1355,7 +1356,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1372,7 +1373,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass2.InvalidateAsync( 1, cachedValue2, 3, 4, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1389,7 +1390,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass2.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1495,7 +1496,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.Invalidate( 1, cachedValue2, 3, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1512,7 +1513,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1529,7 +1530,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass2.Invalidate( 1, cachedValue2, 3, 4, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1546,7 +1547,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass2.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1657,7 +1658,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.InvalidateAsync( 1, cachedValue2, 3, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1674,7 +1675,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass1.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1691,7 +1692,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass2.InvalidateAsync( 1, cachedValue2, 3, 4, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1708,7 +1709,7 @@ namespace Metalama.Patterns.Caching.Tests
                     () => testClass2.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] ).GetAwaiter().GetResult()
                 };
 
-            DoInvalidateCacheAttributeTest(
+            this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
@@ -1748,7 +1749,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedContexts()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testNestedContextsProfileName );
+            this.InitializeTestWithCachingBackend( _testNestedContextsProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testNestedContextsProfileName );
 
             try
@@ -1800,7 +1801,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestNestedContextsAsync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testNestedContextsAsyncProfileName );
+            this.InitializeTestWithCachingBackend( _testNestedContextsAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testNestedContextsAsyncProfileName );
 
             try
@@ -1819,5 +1820,7 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         #endregion TestNestedContextsAsync
+
+        public InvalidateCacheAttributeTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

@@ -9,75 +9,11 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// Represents an item being added to the cache.
 /// </summary>
 [PublicAPI]
-public sealed class CacheItem : IEquatable<CacheItem>
+public sealed record CacheItem(
+    object? Value,
+    IImmutableList<string>? Dependencies = null,
+    ICacheItemConfiguration? Configuration = null )
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CacheItem"/> class.
-    /// </summary>
-    /// <param name="value">The value to be cached (<c>null</c> is a valid value).</param>
-    /// <param name="dependencies">A list of dependencies, or <c>null</c> if there is no dependency.</param>
-    /// <param name="configuration">The configuration of the cache item, or <c>null</c> to use the default configuration.</param>
-    public CacheItem( object? value, IImmutableList<string>? dependencies = null, ICacheItemConfiguration? configuration = null )
-    {
-        this.Value = value;
-        this.Dependencies = dependencies;
-        this.Configuration = configuration;
-    }
-
-    /// <summary>
-    /// Gets the value to be cached.
-    /// </summary>
-    public object? Value { get; }
-
-    /// <summary>
-    /// Gets the list of dependencies of the current item, or <c>null</c>
-    /// if there is no dependency.
-    /// </summary>
-    public IImmutableList<string>? Dependencies { get; }
-
-    /// <summary>
-    /// Gets the <see cref="ICacheItemConfiguration"/> for the current item,
-    /// or <c>null</c> to use the default configuration.
-    /// </summary>
-    public ICacheItemConfiguration? Configuration { get; }
-
-    internal CacheItem WithValue( object value ) => new( value, this.Dependencies, this.Configuration );
-
-    /// <inheritdoc />
-    public override bool Equals( object? obj )
-    {
-        if ( obj is CacheItem item )
-        {
-            return this.Equals( item );
-        }
-
-        return ReferenceEquals( obj, this );
-    }
-
-    /// <summary>
-    /// Determines whether two instances of the <see cref="CacheItem"/> class are structurally equal.
-    /// </summary>
-    /// <param name="first">The first <see cref="CacheItem"/>.</param>
-    /// <param name="second">The second <see cref="CacheItem"/>.</param>
-    /// <returns><c>true</c> if <paramref name="first"/> equals <paramref name="second"/>, otherwise <c>false</c>.</returns>
-    public static bool operator ==( CacheItem? first, CacheItem? second )
-    {
-        if ( ReferenceEquals( first, null ) )
-        {
-            return ReferenceEquals( second, null );
-        }
-
-        return first.Equals( second );
-    }
-
-    /// <summary>
-    /// Determines whether two instances of the <see cref="CacheItem"/> class are structurally different.
-    /// </summary>
-    /// <param name="first">The first <see cref="CacheItem"/>.</param>
-    /// <param name="second">The second <see cref="CacheItem"/>.</param>
-    /// <returns><c>true</c> if <paramref name="first"/> is different to <paramref name="second"/>, otherwise <c>false</c>.</returns>
-    public static bool operator !=( CacheItem? first, CacheItem? second ) => !(first == second);
-
     /// <summary>
     /// Determines whether the current <see cref="CacheItem"/> is structurally equal to another <see cref="CacheItem"/>.
     /// </summary>

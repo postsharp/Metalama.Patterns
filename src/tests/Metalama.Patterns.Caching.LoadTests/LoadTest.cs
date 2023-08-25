@@ -21,7 +21,7 @@ internal sealed class LoadTest : IDisposable
         }
 
         private const int _randomnessMultiplier = 1000;
-        
+
         private readonly LoadTest _loadTest;
         private readonly CachingBackend _backend;
         private readonly Random _random = new();
@@ -201,7 +201,7 @@ internal sealed class LoadTest : IDisposable
 
             if ( dependenciesCount == 0 )
             {
-                item = new CacheItem( payload, configuration: configuration );
+                item = new CacheItem( payload, Configuration: configuration );
             }
             else
             {
@@ -358,7 +358,7 @@ internal sealed class LoadTest : IDisposable
                 foreach ( var error in this._errorsCounters.Counters )
                 {
                     Console.WriteLine( $"> {error.Key}: {error.Value}" );
-                    
+
                     if ( this._errorsCounters.Details.TryGetValue( error.Key, out var details ) )
                     {
                         foreach ( var detail in details )
@@ -389,7 +389,7 @@ internal sealed class LoadTest : IDisposable
     private string[] _dependencyKeys = null!;
 
     // "Guaranteed" to be initialized by Initialize(...)
-    private TestClient[] _clients = null!; 
+    private TestClient[] _clients = null!;
 
     public LoadTest( LoadTestConfiguration configuration )
     {

@@ -3,20 +3,23 @@
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 {
     // TODO: as we have prepared the generalization of testing of the CacheBackend ancestors, we should remove the respective test from this class.
     // (See MemoryCacheBackendTests.)
 
-    public sealed class TestingCacheBackendTests
+    public sealed class TestingCacheBackendTests : BaseCachingTests
     {
         private const string _namePrefix = "Caching.Tests.Backends.TestingCacheBackendTests_";
+
+        public TestingCacheBackendTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
         [Fact]
         public void TestContainsKey()
         {
-            using ( var cache = new TestingCacheBackend( _namePrefix + "TestContainsKey" ) )
+            using ( var cache = new TestingCacheBackend( _namePrefix + "TestContainsKey", this.ServiceProvider ) )
             {
                 const string key = "0";
 
@@ -46,7 +49,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestGet()
         {
-            using ( var cache = new TestingCacheBackend( _namePrefix + "TestGet" ) )
+            using ( var cache = new TestingCacheBackend( _namePrefix + "TestGet", this.ServiceProvider ) )
             {
                 const string key = "0";
 
@@ -63,7 +66,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestSet()
         {
-            using ( var cache = new TestingCacheBackend( _namePrefix + "TestSet" ) )
+            using ( var cache = new TestingCacheBackend( _namePrefix + "TestSet", this.ServiceProvider ) )
             {
                 var storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
@@ -97,7 +100,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
         [Fact]
         public void TestInvalidateObjectDependency()
         {
-            using ( var cache = new TestingCacheBackend( _namePrefix + "TestInvalidateObjectDependency" ) )
+            using ( var cache = new TestingCacheBackend( _namePrefix + "TestInvalidateObjectDependency", this.ServiceProvider ) )
             {
                 const string dependencyKey = "0";
 

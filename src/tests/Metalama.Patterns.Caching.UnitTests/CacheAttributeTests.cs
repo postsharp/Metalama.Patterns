@@ -2,6 +2,7 @@
 
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
 // ReSharper disable UnusedMethodReturnValue.Local
@@ -11,12 +12,14 @@ using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPrio
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class CacheAttributeTests
+    public sealed class CacheAttributeTests : BaseCachingTests
     {
         private const string _profileNamePrefix = "Caching.Tests.CacheAttributeTests_";
 
         // We don't like timeouts in tests but we need them to avoid test suites to hang in case of issues.
         private static readonly TimeSpan _timeout = TimeSpan.FromMinutes( 2 );
+
+        public CacheAttributeTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
         #region TestSync
 
@@ -53,7 +56,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testSyncProfileName );
+            this.InitializeTestWithCachingBackend( _testSyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testSyncProfileName );
 
             try
@@ -104,7 +107,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestInvalidateMethod()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testSyncProfileName );
+            this.InitializeTestWithCachingBackend( _testSyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testSyncProfileName );
 
             try
@@ -116,7 +119,7 @@ namespace Metalama.Patterns.Caching.Tests
                 AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
                 cachingClass.Reset();
 
-                CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue );
+                CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue );
 
                 var value2 = cachingClass.GetValue();
                 var called = cachingClass.Reset();
@@ -154,7 +157,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNotCacheKey()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testNotCacheKeyProfileName );
+            this.InitializeTestWithCachingBackend( _testNotCacheKeyProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testNotCacheKeyProfileName );
 
             try
@@ -205,7 +208,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestReturnsNull()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testReturnsNullProfileName );
+            this.InitializeTestWithCachingBackend( _testReturnsNullProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testReturnsNullProfileName );
 
             try
@@ -254,7 +257,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSyncGeneric()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testSyncGenericProfileName );
+            this.InitializeTestWithCachingBackend( _testSyncGenericProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testSyncGenericProfileName );
 
             try
@@ -326,7 +329,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsync()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAsyncProfileName );
+            var backend = this.InitializeTestWithTestingBackend( _testAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testAsyncProfileName );
 
             try
@@ -361,7 +364,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncGeneric()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAsyncGenericProfileName );
+            var backend = this.InitializeTestWithTestingBackend( _testAsyncGenericProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testAsyncGenericProfileName );
 
             try
@@ -395,7 +398,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestDisabled()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testDisabledProfileName );
+            this.InitializeTestWithCachingBackend( _testDisabledProfileName );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testDisabledProfileName );
             profile.IsEnabled = false;
 
@@ -439,7 +442,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDisabledAsync()
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( _testDisabledAsyncProfileName );
+            this.InitializeTestWithCachingBackend( _testDisabledAsyncProfileName );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testDisabledAsyncProfileName );
             profile.IsEnabled = false;
 
@@ -495,7 +498,7 @@ namespace Metalama.Patterns.Caching.Tests
             backend.ExpectedContainsKeyCount = 1;
             backend.ExpectedRemoveCount = 1;
             backend.ExpectedSetCount = 1;
-            CachingServices.DefaultService.Invalidation.Invalidate( value1 );
+            CachingServices.Default.Invalidation.Invalidate( value1 );
 
             var called = itemSetEvent.Wait( _timeout );
             Assert.True( called, "The method was not called automatically when the first cache item got invalidated: timeout." );
@@ -526,7 +529,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestAutoReloadSetInProfile()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAutoReloadProfileName1 );
+            var backend = this.InitializeTestWithTestingBackend( _testAutoReloadProfileName1 );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testAutoReloadProfileName1 );
             profile.AutoReload = true;
 
@@ -558,7 +561,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestAutoReloadSetInCacheConfigurationAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAutoReloadProfileName2 );
+            var backend = this.InitializeTestWithTestingBackend( _testAutoReloadProfileName2 );
             var profile2 = TestProfileConfigurationFactory.CreateProfile( _testAutoReloadProfileName2 );
             profile2.AutoReload = false;
 
@@ -590,7 +593,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestAutoReloadSetInCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAutoReloadProfileName3 );
+            var backend = this.InitializeTestWithTestingBackend( _testAutoReloadProfileName3 );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testAutoReloadProfileName3 );
             profile.AutoReload = false;
             var cachingClass = new TestAutoReloadSetInCacheAttributeCachingClass();
@@ -636,7 +639,7 @@ namespace Metalama.Patterns.Caching.Tests
             backend.ExpectedContainsKeyCount = 1;
             backend.ExpectedRemoveCount = 1;
             backend.ExpectedSetCount = 1;
-            await CachingServices.DefaultService.Invalidation.InvalidateAsync( value1 );
+            await CachingServices.Default.Invalidation.InvalidateAsync( value1 );
 
             var called = await Task.WhenAny( itemSetEvent.Task, Task.Delay( _timeout ) ) == itemSetEvent.Task;
             Assert.True( called, "The method was not called automatically when the first cache item got invalidated: timeout." );
@@ -667,7 +670,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAutoReloadAsyncSetInProfile()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAutoReloadAsyncProfileName1 );
+            var backend = this.InitializeTestWithTestingBackend( _testAutoReloadAsyncProfileName1 );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testAutoReloadAsyncProfileName1 );
             profile.AutoReload = true;
 
@@ -699,7 +702,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAutoReloadAsyncSetInCacheConfigurationAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAutoReloadAsyncProfileName2 );
+            var backend = this.InitializeTestWithTestingBackend( _testAutoReloadAsyncProfileName2 );
             var profile2 = TestProfileConfigurationFactory.CreateProfile( _testAutoReloadAsyncProfileName2 );
             profile2.AutoReload = false;
 
@@ -729,9 +732,16 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         [Fact]
+        public async Task AutoReload_ReproducingDeadlock()
+        {
+            await this.TestAutoReloadAsyncSetInCacheAttribute();
+            this.TestAutoReloadSetInCacheConfigurationAttribute();
+        }
+
+        [Fact]
         public async Task TestAutoReloadAsyncSetInCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAutoReloadAsyncProfileName3 );
+            var backend = this.InitializeTestWithTestingBackend( _testAutoReloadAsyncProfileName3 );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testAutoReloadAsyncProfileName3 );
             profile.AutoReload = false;
             var cachingClass = new TestAutoReloadAsyncSetInCacheAttributeCachingClass();
@@ -753,7 +763,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncContext()
         {
-            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAsyncGenericProfileName );
+            _ = this.InitializeTestWithTestingBackend( _testAsyncGenericProfileName );
 
             try
             {
@@ -847,7 +857,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestAbsoluteExpirationSetInProfileAndCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAbsoluteExpirationProfileName1 );
+            var backend = this.InitializeTestWithTestingBackend( _testAbsoluteExpirationProfileName1 );
             var profile1 = TestProfileConfigurationFactory.CreateProfile( _testAbsoluteExpirationProfileName1 );
             profile1.AbsoluteExpiration = _absoluteExpirationTestValue1;
             var profile2 = TestProfileConfigurationFactory.CreateProfile( _testAbsoluteExpirationProfileName2 );
@@ -905,7 +915,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestAbsoluteExpirationSetInCacheConfigurationAttributeAndCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAbsoluteExpirationProfileName4 );
+            var backend = this.InitializeTestWithTestingBackend( _testAbsoluteExpirationProfileName4 );
             var profile1 = TestProfileConfigurationFactory.CreateProfile( _testAbsoluteExpirationProfileName4 );
             profile1.AbsoluteExpiration = null;
 
@@ -967,7 +977,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAbsoluteExpirationAsyncSetInProfileAndCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAbsoluteExpirationAsyncProfileName1 );
+            var backend = this.InitializeTestWithTestingBackend( _testAbsoluteExpirationAsyncProfileName1 );
             var profile1 = TestProfileConfigurationFactory.CreateProfile( _testAbsoluteExpirationAsyncProfileName1 );
             profile1.AbsoluteExpiration = _absoluteExpirationTestValue1;
             var profile2 = TestProfileConfigurationFactory.CreateProfile( _testAbsoluteExpirationAsyncProfileName2 );
@@ -1025,7 +1035,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAbsoluteExpirationAsyncSetInCacheConfigurationAttributeAndCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testAbsoluteExpirationAsyncProfileName4 );
+            var backend = this.InitializeTestWithTestingBackend( _testAbsoluteExpirationAsyncProfileName4 );
             var profile1 = TestProfileConfigurationFactory.CreateProfile( _testAbsoluteExpirationAsyncProfileName4 );
             profile1.AbsoluteExpiration = null;
 
@@ -1090,7 +1100,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSlidingExpiration()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testSlidingExpirationProfileName1 );
+            var backend = this.InitializeTestWithTestingBackend( _testSlidingExpirationProfileName1 );
             var profile1 = TestProfileConfigurationFactory.CreateProfile( _testSlidingExpirationProfileName1 );
             profile1.SlidingExpiration = _slidingExpirationOffsetTestTimeSpanValue1;
             var profile2 = TestProfileConfigurationFactory.CreateProfile( _testSlidingExpirationProfileName2 );
@@ -1144,7 +1154,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSlidingExpirationSetInCacheConfigurationAttributeAndCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testSlidingExpirationProfileName4 );
+            var backend = this.InitializeTestWithTestingBackend( _testSlidingExpirationProfileName4 );
             var profile1 = TestProfileConfigurationFactory.CreateProfile( _testSlidingExpirationProfileName4 );
             profile1.SlidingExpiration = null;
 
@@ -1206,7 +1216,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestSlidingExpirationAsync()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testSlidingExpirationAsyncProfileName1 );
+            var backend = this.InitializeTestWithTestingBackend( _testSlidingExpirationAsyncProfileName1 );
             var profile1 = TestProfileConfigurationFactory.CreateProfile( _testSlidingExpirationAsyncProfileName1 );
             profile1.SlidingExpiration = _slidingExpirationOffsetTestTimeSpanValue1;
             var profile2 = TestProfileConfigurationFactory.CreateProfile( _testSlidingExpirationAsyncProfileName2 );
@@ -1258,7 +1268,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestSlidingExpirationAsyncSetInCacheConfigurationAttributeAndCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testSlidingExpirationAsyncProfileName4 );
+            var backend = this.InitializeTestWithTestingBackend( _testSlidingExpirationAsyncProfileName4 );
             var profile1 = TestProfileConfigurationFactory.CreateProfile( _testSlidingExpirationAsyncProfileName4 );
             profile1.SlidingExpiration = null;
 
@@ -1314,7 +1324,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestCacheItemPrioritySetInProfile()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCacheItemPriorityProfileName1 );
+            var backend = this.InitializeTestWithTestingBackend( _testCacheItemPriorityProfileName1 );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testCacheItemPriorityProfileName1 );
             profile.Priority = CacheItemPriority.NotRemovable;
 
@@ -1346,7 +1356,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestCacheItemPrioritySetInCacheConfigurationAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCacheItemPriorityProfileName2 );
+            var backend = this.InitializeTestWithTestingBackend( _testCacheItemPriorityProfileName2 );
             var profile2 = TestProfileConfigurationFactory.CreateProfile( _testCacheItemPriorityProfileName2 );
             profile2.Priority = CacheItemPriority.Default;
 
@@ -1378,7 +1388,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestCacheItemPrioritySetInCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCacheItemPriorityProfileName3 );
+            var backend = this.InitializeTestWithTestingBackend( _testCacheItemPriorityProfileName3 );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testCacheItemPriorityProfileName3 );
             profile.Priority = CacheItemPriority.Default;
             var cachingClass = new TestCacheItemPrioritySetInCacheAttributeCachingClass();
@@ -1427,7 +1437,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestCacheItemPriorityAsyncSetInProfile()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCacheItemPriorityAsyncProfileName1 );
+            var backend = this.InitializeTestWithTestingBackend( _testCacheItemPriorityAsyncProfileName1 );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testCacheItemPriorityAsyncProfileName1 );
             profile.Priority = CacheItemPriority.NotRemovable;
 
@@ -1461,7 +1471,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestCacheItemPriorityAsyncSetInCacheConfigurationAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCacheItemPriorityAsyncProfileName2 );
+            var backend = this.InitializeTestWithTestingBackend( _testCacheItemPriorityAsyncProfileName2 );
             var profile2 = TestProfileConfigurationFactory.CreateProfile( _testCacheItemPriorityAsyncProfileName2 );
             profile2.Priority = CacheItemPriority.Default;
 
@@ -1495,7 +1505,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestCacheItemPriorityAsyncSetInCacheAttribute()
         {
-            var backend = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCacheItemPriorityAsyncProfileName3 );
+            var backend = this.InitializeTestWithTestingBackend( _testCacheItemPriorityAsyncProfileName3 );
             var profile = TestProfileConfigurationFactory.CreateProfile( _testCacheItemPriorityAsyncProfileName3 );
             profile.Priority = CacheItemPriority.Default;
             var cachingClass = new TestCacheItemPriorityAsyncSetInCacheAttributeCachingClass();
@@ -1583,7 +1593,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestIgnoreThisParameterOffsetSetInCacheAttribute()
         {
-            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testIgnoreThisParameterProfileName1 );
+            this.InitializeTestWithTestingBackend( _testIgnoreThisParameterProfileName1 );
             TestProfileConfigurationFactory.CreateProfile( _testIgnoreThisParameterProfileName1 );
 
             CachingClassNotIgnoringThisParameterSetInCacheAttribute
@@ -1638,7 +1648,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestIgnoreThisParameterOffsetSetInCacheConfigurationAttribute()
         {
-            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testIgnoreThisParameterProfileName2 );
+            this.InitializeTestWithTestingBackend( _testIgnoreThisParameterProfileName2 );
             TestProfileConfigurationFactory.CreateProfile( _testIgnoreThisParameterProfileName2 );
 
             CachingClassNotIgnoringThisParameterSetInCacheConfigurationAttribute cachingClassNotIgnoringThisParameter1 =
@@ -1723,7 +1733,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestIgnoreThisParameterAsyncOffsetSetInCacheAttribute()
         {
-            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testIgnoreThisParameterAsyncProfileName1 );
+            this.InitializeTestWithTestingBackend( _testIgnoreThisParameterAsyncProfileName1 );
             TestProfileConfigurationFactory.CreateProfile( _testIgnoreThisParameterAsyncProfileName1 );
 
             AsyncCachingClassNotIgnoringThisParameterSetInCacheAttribute cachingClassNotIgnoringThisParameter1 =
@@ -1778,7 +1788,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestIgnoreThisParameterAsyncOffsetSetInCacheConfigurationAttribute()
         {
-            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testIgnoreThisParameterAsyncProfileName2 );
+            this.InitializeTestWithTestingBackend( _testIgnoreThisParameterAsyncProfileName2 );
             TestProfileConfigurationFactory.CreateProfile( _testIgnoreThisParameterAsyncProfileName2 );
 
             AsyncCachingClassNotIgnoringThisParameterSetInCacheConfigurationAttribute cachingClassNotIgnoringThisParameter1 =
@@ -1834,7 +1844,7 @@ namespace Metalama.Patterns.Caching.Tests
         public void TestMethodLevelProfile()
         {
             var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testMethodLevelProfileNameSetInConfigurationAttribute );
+                this.InitializeTestWithTestingBackend( _testMethodLevelProfileNameSetInConfigurationAttribute );
 
             TestProfileConfigurationFactory.CreateProfile( _testMethodLevelProfileNameSetInConfigurationAttribute );
             TestProfileConfigurationFactory.CreateProfile( _testMethodLevelProfileNameSetInCacheAttribute );
@@ -1899,7 +1909,7 @@ namespace Metalama.Patterns.Caching.Tests
         public async Task TestMethodLevelProfileAsync()
         {
             var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testMethodLevelProfileAsyncNameSetInConfigurationAttribute );
+                this.InitializeTestWithTestingBackend( _testMethodLevelProfileAsyncNameSetInConfigurationAttribute );
 
             TestProfileConfigurationFactory.CreateProfile( _testMethodLevelProfileAsyncNameSetInConfigurationAttribute );
             TestProfileConfigurationFactory.CreateProfile( _testMethodLevelProfileAsyncNameSetInCacheAttribute );

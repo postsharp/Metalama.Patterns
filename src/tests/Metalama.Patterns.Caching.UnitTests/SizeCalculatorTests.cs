@@ -2,13 +2,15 @@
 
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.TestHelpers;
 using Microsoft.Extensions.Caching.Memory;
 using Xunit;
+using Xunit.Abstractions;
 using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class SizeCalculatorTests
+    public sealed class SizeCalculatorTests : BaseCachingTests
     {
         [Fact( Timeout = 5000 )]
         public void TestSizeCalculator()
@@ -19,9 +21,7 @@ namespace Metalama.Patterns.Caching.Tests
                     {
                         SizeLimit = 5, CompactionPercentage = 1 // compact full cache
                     } ),
-#pragma warning disable CS8605
-                ( cItem ) => (int) cItem.Value );
-#pragma warning restore CS8605
+                new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider, SizeCalculator = ( cItem ) => (int) cItem.Value! } );
 
             backend.SetItem( "A", new CacheItem( 2 ) );
             backend.SetItem( "B", new CacheItem( 2 ) );
@@ -42,7 +42,7 @@ namespace Metalama.Patterns.Caching.Tests
                     {
                         SizeLimit = 10, CompactionPercentage = 0.5 // compact half
                     } ),
-                ( cItem ) => 1 );
+                new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider, SizeCalculator = ( cItem ) => 1 } );
 
             backend.SetItem( "A", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
             backend.SetItem( "B", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
@@ -86,5 +86,7 @@ namespace Metalama.Patterns.Caching.Tests
                 Thread.Yield();
             }
         }
+
+        public SizeCalculatorTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

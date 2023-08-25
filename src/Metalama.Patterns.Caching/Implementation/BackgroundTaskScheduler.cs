@@ -10,11 +10,10 @@ using System.Globalization;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-// TODO: [Porting] BackgroundTaskScheduler was [ExplicitCrossPackageInternal]. Used by Redis backend so making public for now.
 [PublicAPI]
 public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 {
-    private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource();
+    private readonly LogSource _logger;
 
     private readonly AwaitableEvent _backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
     private readonly bool _sequential;
@@ -37,11 +36,10 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 
     private volatile Task _lastTask = Task.CompletedTask;
 
-    public BackgroundTaskScheduler() : this( false ) { }
-
-    public BackgroundTaskScheduler( bool sequential )
+    public BackgroundTaskScheduler( IServiceProvider? serviceProvider, bool sequential = false )
     {
         this._sequential = sequential;
+        this._logger = serviceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
     }
 
     /// <summary>
@@ -148,10 +146,10 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         catch ( Exception e )
 #pragma warning restore CA1031 // Do not catch general exception types
         {
-            _logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
+            this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
 
 #if DEBUG
-            _logger.Debug.EnabledOrNull?.Write(
+            this._logger.Debug.EnabledOrNull?.Write(
                 FormattedMessageBuilder.Formatted( "Stack trace that created the failing task: {StackTrace}", pendingTask.StackTrace ) );
 #endif
 

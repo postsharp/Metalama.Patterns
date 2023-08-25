@@ -37,16 +37,16 @@ namespace Flashtrace.Loggers;
 /// A base class for implementations of <see cref="ILogger"/> that cannot depend on the <c>PostSharp.Patterns.Diagnostics</c> package.
 /// </summary>
 [PublicAPI]
-internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogger
+public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="LegacySourceLogger"/> class.
+    /// Initializes a new instance of the <see cref="SimpleSourceLogger"/> class.
     /// </summary>
     /// <param name="role">The role.</param>
-    /// <param name="type">The source <see cref="Type"/>.</param>
-    protected LegacySourceLogger( string role, Type type )
+    /// <param name="name">The source name.</param>
+    protected SimpleSourceLogger( string role, string name )
     {
-        this.Type = type;
+        this.Name = name;
         this.Role = role;
     }
 
@@ -54,11 +54,9 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
     public abstract bool IsEnabled( LogLevel level );
 
     /// <inheritdoc/>
-    public abstract ILoggerFactory Factory { get; }
+    public abstract IRoleLoggerFactory Factory { get; }
 
-    /// <inheritdoc/>
-    [SuppressMessage( "Microsoft.Naming", "CA1721" )]
-    public Type Type { get; }
+    public string Name { get; }
 
     /// <inheritdoc/>
     public string Role { get; }
@@ -192,7 +190,7 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
         string text,
         object[] args,
         Exception exception,
-        ref CallerInfo recordInfo )
+        in CallerInfo recordInfo )
     {
         if ( this.IsEnabled( level ) )
         {
@@ -200,7 +198,7 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
         }
     }
 
-    void ILogger.Write( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, Exception exception, ref CallerInfo recordInfo )
+    void ILogger.Write( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, Exception exception, in CallerInfo recordInfo )
     {
         if ( this.IsEnabled( level ) )
         {
@@ -208,31 +206,31 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
         }
     }
 
-    ILoggingContext ILogger.OpenActivity( in LogActivityOptions options, ref CallerInfo callerInfo )
+    ILoggingContext ILogger.OpenActivity( in LogActivityOptions options, in CallerInfo callerInfo )
     {
         return new Context( options.IsAsync );
     }
 
-    ILoggingContext IContextLocalLogger.OpenActivity( in OpenActivityOptions options, ref CallerInfo callerInfo ) => new Context( callerInfo.IsAsync );
+    ILoggingContext IContextLocalLogger.OpenActivity( in OpenActivityOptions options, in CallerInfo callerInfo, bool isAsync ) => new Context( isAsync );
 
-    void ILogger.ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
+    void ILogger.ResumeActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void ILogger.SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
+    void ILogger.SuspendActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
     void ILogger.SetWaitDependency( ILoggingContext context, object waited ) { }
 
     bool ILogger.RequiresSuspendResume => false;
 
-    void IContextLocalLogger.ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
+    void IContextLocalLogger.ResumeActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void IContextLocalLogger.SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
+    void IContextLocalLogger.SuspendActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
     void IContextLocalLogger.SetWaitDependency( ILoggingContext context, object waited ) { }
 
     string ILogger.Role => null;
 
     [SuppressMessage( "Microsoft.Design", "CA1031" )]
-    void ILoggerExceptionHandler.OnInvalidUserCode( ref CallerInfo callerInfo, string format, params object[] args )
+    void ILoggerExceptionHandler.OnInvalidUserCode( in CallerInfo callerInfo, string format, params object[] args )
     {
         try
         {
@@ -256,12 +254,12 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
         catch { }
     }
 
-    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext context )
+    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, in CallerInfo callerInfo, ILoggingContext context )
     {
         return new RecordBuilder( this, recordInfo.Level, recordInfo.Kind, (Context) context );
     }
 
-    ILoggerFactory ILogger.Factory => (ILoggerFactory) this.Factory;
+    IRoleLoggerFactory ILogger.Factory => (IRoleLoggerFactory) this.Factory;
 
     IContextLocalLogger ILogger.GetContextLocalLogger() => this;
 
@@ -276,7 +274,7 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
 
     private class RecordBuilder : ILogRecordBuilder
     {
-        private LegacySourceLogger _logger;
+        private SimpleSourceLogger _logger;
         private readonly StringBuilder _stringBuilder = new();
         private readonly LogLevel _level;
         private readonly LogRecordKind _recordKind;
@@ -284,7 +282,7 @@ internal abstract partial class LegacySourceLogger : ILogger, IContextLocalLogge
         private readonly Context _context;
         private bool _appendComma;
 
-        public RecordBuilder( LegacySourceLogger logger, LogLevel level, LogRecordKind recordKind, Context context )
+        public RecordBuilder( SimpleSourceLogger logger, LogLevel level, LogRecordKind recordKind, Context context )
         {
             this._logger = logger;
             this._level = level;

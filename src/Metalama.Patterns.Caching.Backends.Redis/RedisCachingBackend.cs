@@ -22,7 +22,7 @@ public class RedisCachingBackend : CachingBackend
     private readonly Func<ISerializer> _createSerializerFunc;
     private readonly ConcurrentStack<ISerializer> _serializerPool = new();
     private readonly bool _ownsConnection;
-    private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
+    private readonly BackgroundTaskScheduler _backgroundTaskScheduler;
     private int _backgroundTaskExceptions;
 
 #pragma warning disable SA1401
@@ -52,36 +52,37 @@ public class RedisCachingBackend : CachingBackend
     /// <summary>
     /// Gets the configuration of the current <see cref="RedisCachingBackend"/>.
     /// </summary>
-    public RedisCachingBackendConfiguration Configuration { get; }
+    public new RedisCachingBackendConfiguration Configuration => (RedisCachingBackendConfiguration) base.Configuration;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RedisCachingBackend"/> class.
     /// </summary>
     /// <param name="connection">The Redis connection.</param>
     /// <param name="configuration">Configuration.</param>
-    internal RedisCachingBackend( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration )
+    internal RedisCachingBackend( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration ) : base(
+        configuration )
     {
         this.Connection = connection;
         this._ownsConnection = configuration.OwnsConnection;
-        this.Configuration = configuration;
         this.Database = this.Connection.GetDatabase( configuration.Database );
 
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
         this._createSerializerFunc = configuration.CreateSerializer ?? (() => new BinarySerializer());
+        this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
     }
 
     internal RedisCachingBackend(
         IConnectionMultiplexer connection,
         IDatabase database,
         RedisKeyBuilder keyBuilder,
-        RedisCachingBackendConfiguration? configuration )
+        RedisCachingBackendConfiguration configuration ) : base( configuration )
     {
         this.Connection = connection;
         this.Database = database;
         this._keyBuilder = keyBuilder;
-        this.Configuration = configuration ?? new RedisCachingBackendConfiguration();
         this._ownsConnection = false;
+        this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
 
         // [Porting] This line added to fix _createSerializerFunc being possible null. Might cause change of behaviour. 
         this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new BinarySerializer());
@@ -97,7 +98,8 @@ public class RedisCachingBackend : CachingBackend
             this.Connection,
             ImmutableArray.Create( this._keyBuilder.EventsChannel, this._keyBuilder.NotificationChannel ),
             this.ProcessNotification,
-            this.Configuration.ConnectionTimeout );
+            this.Configuration.ConnectionTimeout,
+            this.Configuration.ServiceProvider );
     }
 
     /// <summary>
@@ -115,6 +117,7 @@ public class RedisCachingBackend : CachingBackend
                 this._keyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
+            this.Configuration.ServiceProvider,
             cancellationToken );
     }
 
@@ -130,22 +133,8 @@ public class RedisCachingBackend : CachingBackend
         // #20775 Caching: two-layered cache should modify the key to avoid conflicts when toggling the option
         if ( configuration.IsLocallyCached )
         {
-            if ( configuration.IsFrozen )
-            {
-                configuration = configuration.Clone();
-            }
-
-            if ( configuration.KeyPrefix != null )
-            {
-                configuration.KeyPrefix += "_L2";
-            }
-            else
-            {
-                configuration.KeyPrefix = "L2";
-            }
+            configuration = configuration with { KeyPrefix = configuration.KeyPrefix != null ? configuration.KeyPrefix + "L2" : "L2" };
         }
-
-        configuration.Freeze();
 
         var backend = configuration.SupportsDependencies
             ? new DependenciesRedisCachingBackend( connection, configuration )
@@ -190,8 +179,6 @@ public class RedisCachingBackend : CachingBackend
         [Required] RedisCachingBackendConfiguration configuration,
         CancellationToken cancellationToken = default )
     {
-        configuration.Freeze();
-
         var backend = configuration.SupportsDependencies
             ? new DependenciesRedisCachingBackend( connection, configuration )
             : new RedisCachingBackend( connection, configuration );

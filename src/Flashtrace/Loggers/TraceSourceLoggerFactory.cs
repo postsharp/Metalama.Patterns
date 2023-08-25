@@ -2,21 +2,21 @@
 
 namespace Flashtrace.Loggers;
 
-internal sealed class TraceSourceLoggerFactory : ILoggerFactory, ILoggerFactoryProvider
+internal sealed class TraceSourceLoggerFactory : IRoleLoggerFactory, ILoggerFactory
 {
-    ILogger ILoggerFactory.GetLogger( Type type )
+    ILogger IRoleLoggerFactory.GetLogger( Type type )
     {
         throw new NotImplementedException();
     }
 
-    ILogger ILoggerFactory.GetLogger( string sourceName )
+    ILogger IRoleLoggerFactory.GetLogger( string sourceName )
     {
         throw new NotImplementedException();
     }
 
-    ILoggerFactory ILoggerFactoryProvider.GetLoggerFactory( string role ) => new Factory( role );
+    IRoleLoggerFactory ILoggerFactory.ForRole( string role ) => new Factory( role );
 
-    private sealed class Factory : ILoggerFactory
+    private sealed class Factory : IRoleLoggerFactory
     {
         private readonly string _role;
 
@@ -25,9 +25,8 @@ internal sealed class TraceSourceLoggerFactory : ILoggerFactory, ILoggerFactoryP
             this._role = role;
         }
 
-        // Probably no-one is using the Type property anyway, so let's just put null in there:
-        ILogger ILoggerFactory.GetLogger( Type type ) => new TraceSourceLogger( this, this._role, type );
+        ILogger IRoleLoggerFactory.GetLogger( Type type ) => new TraceSourceLogger( this, this._role, type.FullName! );
 
-        public ILogger GetLogger( string sourceName ) => new TraceSourceLogger( this, this._role, null! );
+        public ILogger GetLogger( string sourceName ) => new TraceSourceLogger( this, this._role, sourceName );
     }
 }

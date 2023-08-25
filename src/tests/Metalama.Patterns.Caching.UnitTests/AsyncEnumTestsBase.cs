@@ -7,22 +7,18 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests;
 
-public abstract class AsyncEnumTestsBase : IDisposable
+public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
 {
-    // ReSharper disable once MemberCanBePrivate.Global
-    protected ITestOutputHelper TestOutputHelper { get; }
-
     protected StringBuilder StringBuilder { get; }
 
     protected TestClass Instance { get; }
 
-    protected AsyncEnumTestsBase( ITestOutputHelper testOutputHelper )
+    protected AsyncEnumTestsBase( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
     {
-        this.TestOutputHelper = testOutputHelper;
-        this.StringBuilder = new();
+        this.StringBuilder = new StringBuilder();
         this.Instance = new TestClass( this.Log );
 
-        TestProfileConfigurationFactory.InitializeTestWithCachingBackend( nameof(AsyncEnumerableTests) );
+        this.InitializeTestWithCachingBackend( nameof(AsyncEnumerableTests) );
     }
 
     public void Dispose()
@@ -87,11 +83,11 @@ public abstract class AsyncEnumTestsBase : IDisposable
             this._log( "E2" );
 
             yield return 42;
-            
+
             this._log( "E3" );
-            
+
             yield return 99;
-            
+
             this._log( "E4" );
         }
     }

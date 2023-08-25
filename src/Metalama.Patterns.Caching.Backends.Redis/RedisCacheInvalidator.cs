@@ -44,7 +44,8 @@ public sealed class RedisCacheInvalidator : CacheInvalidator
             this.Connection,
             ImmutableArray.Create( this._channel ),
             this.HandleMessage,
-            this._connectionTimeout );
+            this._connectionTimeout,
+            this.Configuration.ServiceProvider );
     }
 
     private async Task<RedisCacheInvalidator> InitAsync( CancellationToken cancellationToken )
@@ -55,6 +56,7 @@ public sealed class RedisCacheInvalidator : CacheInvalidator
             ImmutableArray.Create( this._channel ),
             this.HandleMessage,
             this._connectionTimeout,
+            this.Configuration.ServiceProvider,
             cancellationToken );
 
         return this;

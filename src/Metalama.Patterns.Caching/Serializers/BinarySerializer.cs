@@ -8,6 +8,7 @@ namespace Metalama.Patterns.Caching.Serializers;
 /// An implementation of <see cref="BinaryFormatter"/> that uses <see cref="BinaryFormatter"/>
 /// (for classes annotated with <see cref="SerializableAttribute"/>).
 /// </summary>
+[Obsolete( "The BinaryFormatter facility is considered obsolete." )]
 public sealed class BinarySerializer : ISerializer
 {
     private readonly BinaryFormatter _serializer = new();

@@ -34,7 +34,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith1ParametersProfileName,
                                                 () => cachingClass.GetValue( 1 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1 ),
                                                 cachingClass.Reset );
         }
 
@@ -62,7 +62,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith1ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1 ),
                                                            cachingClass.Reset );
         }
 
@@ -89,7 +89,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith1ParametersProfileName,
                                                 () => cachingClass.GetValue( 1 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1 ),
                                                 cachingClass.Reset );
         }
 
@@ -116,7 +116,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith1ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1 ),
                                                            cachingClass.Reset );
         }
 
@@ -144,7 +144,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith2ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2 ),
                                                 cachingClass.Reset );
         }
 
@@ -172,7 +172,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith2ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2 ),
                                                            cachingClass.Reset );
         }
 
@@ -199,7 +199,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith2ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2 ),
                                                 cachingClass.Reset );
         }
 
@@ -226,7 +226,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith2ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2 ),
                                                            cachingClass.Reset );
         }
 
@@ -254,7 +254,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith3ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3 ),
                                                 cachingClass.Reset );
         }
 
@@ -282,7 +282,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith3ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3 ),
                                                            cachingClass.Reset );
         }
 
@@ -309,7 +309,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith3ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3 ),
                                                 cachingClass.Reset );
         }
 
@@ -336,7 +336,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith3ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3 ),
                                                            cachingClass.Reset );
         }
 
@@ -364,7 +364,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith4ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4 ),
                                                 cachingClass.Reset );
         }
 
@@ -392,7 +392,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith4ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4 ),
                                                            cachingClass.Reset );
         }
 
@@ -419,7 +419,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith4ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4 ),
                                                 cachingClass.Reset );
         }
 
@@ -446,7 +446,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith4ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4 ),
                                                            cachingClass.Reset );
         }
 
@@ -474,7 +474,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith5ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5 ),
                                                 cachingClass.Reset );
         }
 
@@ -502,7 +502,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith5ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5 ),
                                                            cachingClass.Reset );
         }
 
@@ -529,7 +529,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith5ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5 ),
                                                 cachingClass.Reset );
         }
 
@@ -556,7 +556,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith5ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5 ),
                                                            cachingClass.Reset );
         }
 
@@ -584,7 +584,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith6ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6 ),
                                                 cachingClass.Reset );
         }
 
@@ -612,7 +612,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith6ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6 ),
                                                            cachingClass.Reset );
         }
 
@@ -639,7 +639,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith6ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6 ),
                                                 cachingClass.Reset );
         }
 
@@ -666,7 +666,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith6ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6 ),
                                                            cachingClass.Reset );
         }
 
@@ -694,7 +694,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith7ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6, 7 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7 ),
                                                 cachingClass.Reset );
         }
 
@@ -722,7 +722,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith7ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6, 7 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7 ),
                                                            cachingClass.Reset );
         }
 
@@ -749,7 +749,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith7ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6, 7 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7 ),
                                                 cachingClass.Reset );
         }
 
@@ -776,7 +776,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith7ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6, 7 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7 ),
                                                            cachingClass.Reset );
         }
 
@@ -804,7 +804,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith8ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6, 7, 8 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8 ),
                                                 cachingClass.Reset );
         }
 
@@ -832,7 +832,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith8ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6, 7, 8 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8 ),
                                                            cachingClass.Reset );
         }
 
@@ -859,7 +859,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith8ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6, 7, 8 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8 ),
                                                 cachingClass.Reset );
         }
 
@@ -886,7 +886,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith8ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6, 7, 8 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8 ),
                                                            cachingClass.Reset );
         }
 
@@ -914,7 +914,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith9ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
                                                 cachingClass.Reset );
         }
 
@@ -942,7 +942,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith9ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
                                                            cachingClass.Reset );
         }
 
@@ -969,7 +969,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith9ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
                                                 cachingClass.Reset );
         }
 
@@ -996,7 +996,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith9ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8, 9 ),
                                                            cachingClass.Reset );
         }
 
@@ -1024,7 +1024,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeInvalidationWith10ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
-                                                () => CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
+                                                () => CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
                                                 cachingClass.Reset );
         }
 
@@ -1052,7 +1052,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeInvalidationWith10ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
-                                                           () => CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
+                                                           () => CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
                                                            cachingClass.Reset );
         }
 
@@ -1079,7 +1079,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             DoTestSimpleImperativeInvalidation( testSimpleImperativeRecachingWith10ParametersProfileName,
                                                 () => cachingClass.GetValue( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
-                                                () => CachingServices.DefaultService.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
+                                                () => CachingServices.Default.Invalidation.Recache( cachingClass.GetValue, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
                                                 cachingClass.Reset );
         }
 
@@ -1106,7 +1106,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             await DoTestSimpleImperativeInvalidationAsync( testSimpleImperativeRecachingWith10ParametersAsyncProfileName,
                                                            () => cachingClass.GetValueAsync( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
-                                                           () => CachingServices.DefaultService.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
+                                                           () => CachingServices.Default.Invalidation.RecacheAsync( cachingClass.GetValueAsync, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ),
                                                            cachingClass.Reset );
         }
 

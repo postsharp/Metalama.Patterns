@@ -85,7 +85,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg1">Value of the first parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1>( [Required] Func<TParam1, Task<TReturn>> method, TParam1 arg1 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -185,7 +185,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg2">Value of the second parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2>( [Required] Func<TParam1, TParam2, Task<TReturn>> method, TParam1 arg1, TParam2 arg2 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -293,7 +293,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg3">Value of the third parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2, TParam3>( [Required] Func<TParam1, TParam2, TParam3, Task<TReturn>> method, TParam1 arg1, TParam2 arg2, TParam3 arg3 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -409,7 +409,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg4">Value of the 4-th parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2, TParam3, TParam4>( [Required] Func<TParam1, TParam2, TParam3, TParam4, Task<TReturn>> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -533,7 +533,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg5">Value of the 5-th parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2, TParam3, TParam4, TParam5>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, Task<TReturn>> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -665,7 +665,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg6">Value of the 6-th parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, Task<TReturn>> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -805,7 +805,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg7">Value of the 7-th parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, Task<TReturn>> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -953,7 +953,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg8">Value of the 8-th parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, Task<TReturn>> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -1109,7 +1109,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg9">Value of the 9-th parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, Task<TReturn>> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8, TParam9 arg9 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
@@ -1273,7 +1273,7 @@ namespace Metalama.Patterns.Caching
 			/// <param name="arg10">Value of the 10-th parameter.</param>
 				public async Task<TReturn> RecacheAsync<TReturn,  TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10>( [Required] Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TParam8, TParam9, TParam10, Task<TReturn>> method, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6, TParam7 arg7, TParam8 arg8, TParam9 arg9, TParam10 arg10 )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {

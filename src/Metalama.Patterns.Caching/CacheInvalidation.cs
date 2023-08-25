@@ -20,7 +20,7 @@ namespace Metalama.Patterns.Caching;
 [PublicAPI]
 public partial class CacheInvalidationService
 {
-    private readonly LogSource _defaultLogger = LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( typeof(CachingServices) );
+    private readonly LogSource _defaultLogger;
 
     private readonly ConcurrentDictionary<MethodInfo, int> _nestedCachedMethods = new();
 
@@ -29,6 +29,7 @@ public partial class CacheInvalidationService
     public CacheInvalidationService( CachingService cachingService )
     {
         this._cachingService = cachingService;
+        this._defaultLogger = cachingService.ServiceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
     }
 
     internal void AddedNestedCachedMethod( MethodInfo method ) => this._nestedCachedMethods.TryAdd( method, 0 );
@@ -124,7 +125,7 @@ public partial class CacheInvalidationService
     private async ValueTask InvalidateAsync( [Required] ICacheDependency dependency, Type dependencyType )
     {
         using ( var activity =
-               this._defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
+               this._defaultLogger.Default.OpenAsyncActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
         {
             try
             {
@@ -184,7 +185,7 @@ public partial class CacheInvalidationService
         foreach ( var backend in this._cachingService.AllBackends )
         {
             using ( var activity =
-                   this._defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( key = {Key}, backend = {Backend} )", dependencyKey, backend ) ) )
+                   this._defaultLogger.Default.OpenAsyncActivity( Formatted( "InvalidateAsync( key = {Key}, backend = {Backend} )", dependencyKey, backend ) ) )
             {
                 try
                 {
@@ -259,7 +260,7 @@ public partial class CacheInvalidationService
     /// <param name="args">The method arguments.</param>
     public async ValueTask InvalidateAsync( [Required] MethodInfo method, object? instance, params object[] args )
     {
-        using ( var activity = this._defaultLogger.Default.OpenActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
+        using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
         {
             try
             {
@@ -370,7 +371,7 @@ public partial class CacheInvalidationService
     /// <returns>A <see cref="Task{TResult}"/> that evaluates to the return value of <paramref name="method"/>.</returns>
     public async Task<TReturn> RecacheAsync<TReturn>( [Required] Func<Task<TReturn>> method )
     {
-        using ( var activity = this._defaultLogger.Default.OpenActivity( Formatted( "RecacheAsync( method = {Method} )", method.Method ) ) )
+        using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Formatted( "RecacheAsync( method = {Method} )", method.Method ) ) )
         {
             try
             {

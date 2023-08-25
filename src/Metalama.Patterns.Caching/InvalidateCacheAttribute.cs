@@ -164,6 +164,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         foreach ( var method in methods )
         {
+            // ReSharper disable once InvokeAsExtensionMethod
             b.Add( RunTimeHelpers.ThrowIfMissing( method.ToMethodInfo(), method.ToDisplayString() ) );
         }
 
@@ -188,7 +189,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    CachingServices.DefaultService.Invalidation.Invalidate(
+                    CachingServices.Default.Invalidation.Invalidate(
                         methodsInvalidatedByField.Value![index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
@@ -220,7 +221,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         // TODO: Automagically accept CancellationToken parameter?
 
-        using ( var activity = logSourceField.Value!.Default.OpenActivity(
+        using ( var activity = logSourceField.Value!.Default.OpenAsyncActivity(
                    FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
         {
             // ReSharper disable once RedundantAssignment
@@ -253,10 +254,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 var index = meta.CompileTime( 0 );
 
-
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    var invalidateTask = CachingServices.DefaultService.Invalidation.InvalidateAsync(
+                    var invalidateTask = CachingServices.Default.Invalidation.InvalidateAsync(
                         methodsInvalidatedByField.Value![index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );
@@ -304,7 +304,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         // TODO: Automagically accept CancellationToken parameter?
 
-        using ( var activity = logSourceField.Value!.Default.OpenActivity(
+        using ( var activity = logSourceField.Value!.Default.OpenAsyncActivity(
                    FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
         {
             try
@@ -335,10 +335,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 var index = meta.CompileTime( 0 );
 
-
                 foreach ( var invalidatedMethod in invalidatedMethods )
                 {
-                    var invalidateTask = CachingServices.DefaultService.Invalidation.InvalidateAsync(
+                    var invalidateTask = CachingServices.Default.Invalidation.InvalidateAsync(
                         methodsInvalidatedByField.Value![index],
                         invalidatedMethod.Method.IsStatic ? null : meta.This,
                         MapArguments( invalidatedMethod ).Value );

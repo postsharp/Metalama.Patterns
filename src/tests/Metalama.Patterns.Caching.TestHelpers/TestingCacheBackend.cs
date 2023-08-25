@@ -36,11 +36,12 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         protected override CachingBackendFeatures CreateFeatures() => this._backend.SupportedFeatures;
 
-        public TestingCacheBackend( string name )
+        public TestingCacheBackend( string name, IServiceProvider? serviceProvider ) : base(
+            new CachingBackendConfiguration() { ServiceProvider = serviceProvider } )
         {
             this._name = name;
             this.ResetExpectations();
-            this._backend = MemoryCacheFactory.CreateBackend();
+            this._backend = MemoryCacheFactory.CreateBackend( serviceProvider );
             this._backend.ItemRemoved += this.OnItemRemoved;
             this._backend.DependencyInvalidated += this.OnDependencyInvalidated;
         }

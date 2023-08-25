@@ -10,8 +10,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace Flashtrace.Loggers;
 
 // ReSharper disable once UnusedType.Global : Usage is conditional.
-internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory, ILoggingContext, ILogRecordBuilder,
-                                    ILoggerFactoryProvider
+internal partial class NullLogger : ILogger, IContextLocalLogger, IRoleLoggerFactory, ILoggingContext, ILogRecordBuilder,
+                                    ILoggerFactory
 {
     private static bool _warningEmitted;
 
@@ -23,7 +23,7 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
 
     bool IContextLocalLogger.IsEnabled( LogLevel level ) => false;
 
-    void ILogger.Write( ILoggingContext? context, LogLevel level, LogRecordKind logRecordKind, string text, Exception? exception, ref CallerInfo callerInfo )
+    void ILogger.Write( ILoggingContext? context, LogLevel level, LogRecordKind logRecordKind, string text, Exception? exception, in CallerInfo callerInfo )
         => EmitWarning( level );
 
     void ILogger.Write(
@@ -33,20 +33,20 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
         string text,
         object[] args,
         Exception? exception,
-        ref CallerInfo callerInfo )
+        in CallerInfo callerInfo )
         => EmitWarning( level );
 
-    ILoggingContext ILogger.OpenActivity( in LogActivityOptions options, ref CallerInfo callerInfo ) => this;
+    ILoggingContext ILogger.OpenActivity( in LogActivityOptions options, in CallerInfo callerInfo ) => this;
 
-    ILoggingContext IContextLocalLogger.OpenActivity( in OpenActivityOptions options, ref CallerInfo callerInfo ) => this;
+    ILoggingContext IContextLocalLogger.OpenActivity( in OpenActivityOptions options, in CallerInfo callerInfo, bool isAsync ) => this;
 
-    void ILogger.ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
+    void ILogger.ResumeActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void ILogger.SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
+    void ILogger.SuspendActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void IContextLocalLogger.ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
+    void IContextLocalLogger.ResumeActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void IContextLocalLogger.SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo ) { }
+    void IContextLocalLogger.SuspendActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
     void IContextLocalLogger.SetWaitDependency( ILoggingContext context, object waited ) { }
 
@@ -60,7 +60,7 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
 
     string ILoggingContext.SyntheticId => null!;
 
-    ILoggerFactory ILogger.Factory => this;
+    IRoleLoggerFactory ILogger.Factory => this;
 
     (IContextLocalLogger Logger, bool IsEnabled) ILogger.GetContextLocalLogger( LogLevel level ) => (this, false);
 
@@ -88,9 +88,9 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
 
     void ILogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, ref CallerInfo callerInfo, ILoggingContext? context ) => this;
+    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, in CallerInfo callerInfo, ILoggingContext? context ) => this;
 
-    void ILoggerExceptionHandler.OnInvalidUserCode( ref CallerInfo callerInfo, string format, params object[] args ) { }
+    void ILoggerExceptionHandler.OnInvalidUserCode( in CallerInfo callerInfo, string format, params object[] args ) { }
 
     void ILoggerExceptionHandler.OnInternalException( Exception exception ) { }
 
@@ -102,9 +102,9 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, ILoggerFactory
 
     IContextLocalLogger ILogger.GetContextLocalLogger() => this;
 
-    ILoggerFactory ILoggerFactoryProvider.GetLoggerFactory( string role ) => this;
+    IRoleLoggerFactory ILoggerFactory.ForRole( string role ) => this;
 
-    ILogger ILoggerFactory.GetLogger( Type type ) => this;
+    ILogger IRoleLoggerFactory.GetLogger( Type type ) => this;
 
     public ILogger GetLogger( string sourceName ) => this;
 }

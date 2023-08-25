@@ -30,7 +30,7 @@ namespace Flashtrace
 		<#
         GenerateXmlDoc( i );
 #>
-	   void Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception, ref CallerInfo recordInfo  );
+	   void Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception, in CallerInfo recordInfo  );
 
 
 	<#

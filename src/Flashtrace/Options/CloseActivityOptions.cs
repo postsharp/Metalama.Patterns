@@ -6,6 +6,8 @@ using JetBrains.Annotations;
 
 namespace Flashtrace.Options;
 
+#pragma warning disable SA1642
+
 /// <summary>
 /// Options of the closing methods of the <see cref="LogActivity{TActivityDescription}"/> type.
 /// </summary>

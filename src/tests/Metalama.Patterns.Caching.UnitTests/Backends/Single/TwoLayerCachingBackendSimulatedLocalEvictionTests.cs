@@ -16,7 +16,9 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
 
         protected override CachingBackend CreateBackend()
         {
-            return new TwoLayerCachingBackendEnhancer( MemoryCacheFactory.CreateBackend(), MemoryCacheFactory.CreateBackend() );
+            return new TwoLayerCachingBackendEnhancer(
+                MemoryCacheFactory.CreateBackend( this.ServiceProvider, "Remote" ),
+                MemoryCacheFactory.CreateBackend( this.ServiceProvider, "Local" ) ) { DebugName = "TwoLayer" };
         }
 
         protected override void GiveChanceToResetLocalCache( CachingBackend backend )

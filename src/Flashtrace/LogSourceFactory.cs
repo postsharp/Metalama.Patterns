@@ -4,14 +4,15 @@ using JetBrains.Annotations;
 
 namespace Flashtrace;
 
+[Obsolete( "Consider using dependency injection." )]
 [PublicAPI]
 public static class LogSourceFactory
 {
-    private static ILoggerFactoryProvider GetLoggerFactoryProvider()
-        => LoggingServiceLocator.GetService<ILoggerFactoryProvider>()
-           ?? throw new InvalidOperationException( "The " + nameof(ILoggerFactoryProvider) + " service has not been registered." );
+    private static ILoggerFactory GetLoggerFactoryProvider()
+        => LoggingServiceLocator.GetService<ILoggerFactory>()
+           ?? throw new InvalidOperationException( "The " + nameof(ILoggerFactory) + " service has not been registered." );
 
-    public static ILoggerFactory Default => GetLoggerFactoryProvider().GetLoggerFactory( LoggingRoles.Default );
+    public static IRoleLoggerFactory Default => GetLoggerFactoryProvider().ForRole( LoggingRoles.Default );
 
-    public static ILoggerFactory ForRole( string role ) => GetLoggerFactoryProvider().GetLoggerFactory( role );
+    public static IRoleLoggerFactory ForRole( string role ) => GetLoggerFactoryProvider().ForRole( role );
 }

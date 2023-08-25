@@ -28,7 +28,8 @@ internal static class RedisFactory
         RedisSetupFixture redisSetupFixture,
         string? prefix = null,
         bool supportsDependencies = false,
-        bool locallyCached = false )
+        bool locallyCached = false,
+        IServiceProvider? serviceProvider = null )
     {
         _ = CreateTestInstance( testContext, redisSetupFixture );
 

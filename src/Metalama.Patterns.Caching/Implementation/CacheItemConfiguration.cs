@@ -5,39 +5,40 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <summary>
 /// Configuration of a <see cref="CacheItem"/>.
 /// </summary>
-internal sealed class CacheItemConfiguration : ICacheItemConfiguration
+internal sealed record CacheItemConfiguration : ICacheItemConfiguration
 {
     /// <inheritdoc />
-    public bool? IsEnabled { get; private set; }
+    public bool? IsEnabled { get; init; }
 
     /// <inheritdoc />
-    public string? ProfileName { get; set; }
+    public string? ProfileName { get; init; }
 
     /// <inheritdoc />
-    public bool? AutoReload { get; set; }
+    public bool? AutoReload { get; init; }
 
     /// <inheritdoc />
-    public TimeSpan? AbsoluteExpiration { get; set; }
+    public TimeSpan? AbsoluteExpiration { get; init; }
 
     /// <inheritdoc />
-    public TimeSpan? SlidingExpiration { get; set; }
+    public TimeSpan? SlidingExpiration { get; init; }
 
     /// <inheritdoc />
-    public CacheItemPriority? Priority { get; set; }
+    public CacheItemPriority? Priority { get; init; }
 
     /// <inheritdoc />
-    public bool? IgnoreThisParameter { get; set; }
+    public bool? IgnoreThisParameter { get; init; }
 
-    public void ApplyFallback( ICacheItemConfiguration fallback )
+    public CacheItemConfiguration ApplyFallback( ICacheItemConfiguration fallback )
     {
-        this.AutoReload ??= fallback.AutoReload;
-        this.AbsoluteExpiration ??= fallback.AbsoluteExpiration;
-        this.SlidingExpiration ??= fallback.SlidingExpiration;
-        this.Priority ??= fallback.Priority;
-        this.ProfileName ??= fallback.ProfileName;
-        this.IsEnabled ??= fallback.IsEnabled;
-        this.IgnoreThisParameter ??= fallback.IgnoreThisParameter;
+        return new CacheItemConfiguration
+        {
+            AutoReload = this.AutoReload ?? fallback.AutoReload,
+            AbsoluteExpiration = this.AbsoluteExpiration ?? fallback.AbsoluteExpiration,
+            SlidingExpiration = this.SlidingExpiration ?? fallback.SlidingExpiration,
+            Priority = this.Priority ?? fallback.Priority,
+            ProfileName = this.ProfileName ?? fallback.ProfileName,
+            IsEnabled = this.IsEnabled ?? fallback.IsEnabled,
+            IgnoreThisParameter = this.IgnoreThisParameter ?? fallback.IgnoreThisParameter
+        };
     }
-
-    internal CacheItemConfiguration Clone() => (CacheItemConfiguration) this.MemberwiseClone();
 }

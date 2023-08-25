@@ -18,7 +18,7 @@ namespace Flashtrace.Internal
     {
 #>
 
-	    void ILogger.Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind logRecordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception,  ref CallerInfo callerInfo )
+	    void ILogger.Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind logRecordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception,  in CallerInfo callerInfo )
         {
 			if ( this.IsEnabled( level ) )
 			{

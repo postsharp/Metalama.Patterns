@@ -10,18 +10,14 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
-    public abstract class BaseCacheBackendTests : IDisposable, IClassFixture<TestContext>
+    public abstract class BaseCacheBackendTests : BaseCachingTests, IDisposable, IClassFixture<TestContext>
     {
         protected const int Timeout = 30_000; // 30 seconds ought to be enough to anyone. (otherwise the test should be refactored, anyway).
         protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout );
-
-        // ReSharper disable once MemberCanBePrivate.Global
-        protected ITestOutputHelper TestOutputHelper { get; }
-
-        protected BaseCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper )
+        
+        protected BaseCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {
             this.TestContext = testContext;
-            this.TestOutputHelper = testOutputHelper;
         }
 
         protected virtual bool TestDependencies { get; } = true;
@@ -239,8 +235,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                         var cacheItem = new CacheItem(
                             storedValue,
-                            configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                            dependencies: this.TestDependencies ? ImmutableList.Create( "d" ) : null );
+                            Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
+                            Dependencies: this.TestDependencies ? ImmutableList.Create( "d" ) : null );
 
                         var itemRemovedEvent = new ManualResetEvent( false );
                         cache.ItemRemoved += ( _, _ ) => itemRemovedEvent.Set();
@@ -308,8 +304,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                     var cacheItem = new CacheItem(
                         storedValue,
-                        configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                        dependencies: ImmutableList.Create( "d" ) );
+                        Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
+                        Dependencies: ImmutableList.Create( "d" ) );
 
                     var itemRemoved = new TaskCompletionSource<bool>();
                     cache.ItemRemoved += ( _, _ ) => itemRemoved.SetResult( true );
@@ -386,8 +382,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var cacheItem = new CacheItem(
                     storedValue,
-                    configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                    dependencies: ImmutableList.Create( "d" ) );
+                    Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
+                    Dependencies: ImmutableList.Create( "d" ) );
 
                 var itemRemoved = new ManualResetEventSlim( false );
                 cache.ItemRemoved += ( _, _ ) => itemRemoved.Set();
@@ -399,6 +395,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                     Thread.Yield();
                 }
 
+                // ReSharper disable once AccessToDisposedClosure
                 RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 
                 if ( cache.SupportedFeatures.ContainsDependency )
@@ -446,7 +443,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                         var cacheItem = new CacheItem(
                             storedValue,
-                            configuration:
+                            Configuration:
                             new CacheItemConfiguration { SlidingExpiration = expiration } );
 
                         var itemRemoved = new ManualResetEventSlim( false );
@@ -475,6 +472,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                         Thread.Sleep( this.GetExpirationQuantum() );
 
+                        // ReSharper disable once AccessToDisposedClosure
                         RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 
                         return;
@@ -504,9 +502,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 // using ( CachingBackend cache = this.CreateBackend() )
                 // {
 
-                // [Porting] Not fixing, can't be certain of original intent.
-                // ReSharper disable once MethodHasAsyncOverload
-                var cache = this.CreateBackend();
+                var cache = await this.CreateBackendAsync();
 
                 try
                 {
@@ -516,7 +512,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                     var cacheItem = new CacheItem(
                         storedValue,
-                        configuration:
+                        Configuration:
                         new CacheItemConfiguration { SlidingExpiration = expiration } );
 
                     var timeWhenSet = DateTime.Now;
@@ -538,9 +534,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                     while ( !itemRemoved.Task.IsCompleted )
                     {
-                        // [Porting] Not fixing, can't be certain of original intent.
-                        // ReSharper disable once MethodHasAsyncOverload
-                        cache.SetItem( "cycle", new CacheItem( "value" ) );
+                        await cache.SetItemAsync( "cycle", new CacheItem( "value" ) );
                         await Task.Delay( 50 );
                     }
 
@@ -586,11 +580,13 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 const string key = "0";
                 var offset = this.GetExpirationQuantum();
 
-                var cacheItem = new CacheItem( storedValue, configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
+                var cacheItem = new CacheItem( storedValue, Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
                 cache.SetItem( key, cacheItem );
 
                 Thread.Sleep( offset.Multiply( 2 ) );
+                
+                // ReSharper disable once AccessToDisposedClosure
                 RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 
                 Assert.True( eventRaised.WaitOne( TimeoutTimeSpan ) );
@@ -630,7 +626,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 const string key = "0";
                 var offset = this.GetExpirationQuantum();
 
-                var cacheItem = new CacheItem( storedValue, configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
+                var cacheItem = new CacheItem( storedValue, Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
                 await cache.SetItemAsync( key, cacheItem );
 
@@ -770,7 +766,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var cacheItem = new CacheItem(
                     storedValue,
-                    dependencies: ImmutableList.Create( dependencyKey ) );
+                    Dependencies: ImmutableList.Create( dependencyKey ) );
 
                 cache.SetItem( key, cacheItem );
                 cache.InvalidateDependency( dependencyKey );
@@ -835,7 +831,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var cacheItem = new CacheItem(
                     storedValue,
-                    dependencies: ImmutableList.Create( dependencyKey ) );
+                    Dependencies: ImmutableList.Create( dependencyKey ) );
 
                 await cache.SetItemAsync( key, cacheItem );
 

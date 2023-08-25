@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
@@ -65,12 +64,6 @@ public sealed class CachedMethodMetadata
     private int _profileRevision;
     private CacheItemConfiguration? _mergedConfiguration;
     private SpinLock _initializeLock;
-    private LogSource? _logSource;
-
-    /// <summary>
-    /// Gets the logger for the current registration.
-    /// </summary>
-    internal LogSource Logger => this._logSource ??= LogSourceFactory.ForRole( LoggingRoles.Caching ).GetLogSource( this.Method.DeclaringType! );
 
     /// <summary>
     /// Gets the effective configuration which is determined by merging the build-time configuration with any applicable 
@@ -80,7 +73,7 @@ public sealed class CachedMethodMetadata
     {
         get
         {
-            if ( this._profile == null || this._profileRevision < CachingServices.DefaultService.Profiles.RevisionNumber || this._mergedConfiguration == null )
+            if ( this._profile == null || this._profileRevision < CachingServices.Default.Profiles.RevisionNumber || this._mergedConfiguration == null )
             {
                 var initializeLockTaken = false;
 
@@ -88,21 +81,20 @@ public sealed class CachedMethodMetadata
                 {
                     this._initializeLock.Enter( ref initializeLockTaken );
 
-                    if ( this._profile == null || this._profileRevision < CachingServices.DefaultService.Profiles.RevisionNumber
+                    if ( this._profile == null || this._profileRevision < CachingServices.Default.Profiles.RevisionNumber
                                                || this._mergedConfiguration == null )
                     {
                         var profileName = this.BuildTimeConfiguration.ProfileName ?? CachingProfile.DefaultName;
 
-                        var localProfile = CachingServices.DefaultService.Profiles[profileName];
+                        var localProfile = CachingServices.Default.Profiles[profileName];
 
-                        this._mergedConfiguration = this.BuildTimeConfiguration.CloneAsCacheItemConfiguration();
-                        this._mergedConfiguration.ApplyFallback( localProfile );
+                        this._mergedConfiguration = this.BuildTimeConfiguration.AsCacheItemConfiguration().ApplyFallback( localProfile );
 
                         Thread.MemoryBarrier();
 
                         // Need to set this after setting mergedConfiguration to prevent data races.
                         this._profile = localProfile;
-                        this._profileRevision = CachingServices.DefaultService.Profiles.RevisionNumber;
+                        this._profileRevision = CachingServices.Default.Profiles.RevisionNumber;
                     }
                 }
                 finally
@@ -129,7 +121,7 @@ public sealed class CachedMethodMetadata
         this.Method = method;
         this.Parameters = parameters;
         this.IsThisParameterIgnored = isThisParameterIgnored;
-        this.BuildTimeConfiguration = buildTimeConfiguration.CloneAsCacheItemConfiguration();
+        this.BuildTimeConfiguration = buildTimeConfiguration.AsCacheItemConfiguration();
         this.ReturnValueCanBeNull = returnValueCanBeNull;
         this.AwaitableResultType = awaitableResultType;
     }

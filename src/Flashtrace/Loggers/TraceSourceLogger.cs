@@ -8,18 +8,18 @@ using System.Diagnostics;
 
 namespace Flashtrace.Loggers;
 
-internal sealed class TraceSourceLogger : LegacySourceLogger
+internal sealed class TraceSourceLogger : SimpleSourceLogger
 {
     private readonly TraceSource _traceSource;
     private static readonly ConcurrentDictionary<string, TraceSource> _traceSources = new( StringComparer.OrdinalIgnoreCase );
 
-    internal TraceSourceLogger( ILoggerFactory factory, string role, Type type ) : base( role, type )
+    internal TraceSourceLogger( IRoleLoggerFactory factory, string role, string name ) : base( role, name )
     {
         this.Factory = factory;
         this._traceSource = GetTraceSource( role );
     }
 
-    public override ILoggerFactory Factory { get; }
+    public override IRoleLoggerFactory Factory { get; }
 
     private static string GetSourceName( string role )
     {

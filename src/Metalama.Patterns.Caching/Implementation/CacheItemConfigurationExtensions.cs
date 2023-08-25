@@ -6,11 +6,19 @@ namespace Metalama.Patterns.Caching.Implementation;
 
 internal static class CacheItemConfigurationExtensions
 {
-    public static CacheItemConfiguration CloneAsCacheItemConfiguration( [Required] this ICacheItemConfiguration other )
+    public static ICacheItemConfiguration? WithoutAutoReload( [Required] this ICacheItemConfiguration? other )
+        => other switch
+        {
+            null => null,
+            { AutoReload: false } => other,
+            _ => other.AsCacheItemConfiguration() with { AutoReload = false }
+        };
+
+    public static CacheItemConfiguration AsCacheItemConfiguration( [Required] this ICacheItemConfiguration other )
     {
         if ( other is CacheItemConfiguration cacheItemConfiguration )
         {
-            return cacheItemConfiguration.Clone();
+            return cacheItemConfiguration;
         }
 
         return new CacheItemConfiguration()

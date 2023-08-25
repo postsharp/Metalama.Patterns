@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
 
         protected override CachingBackend CreateBackend()
         {
-            return MemoryCacheFactory.CreateBackend();
+            return MemoryCacheFactory.CreateBackend( this.ServiceProvider );
         }
     }
 }

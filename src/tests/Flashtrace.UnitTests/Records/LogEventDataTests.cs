@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Flashtrace.UnitTests.Records;
 
-public sealed partial class LogEventDataTests
+public sealed class LogEventDataTests
 {
     [Fact]
     public void TestAnonymous()

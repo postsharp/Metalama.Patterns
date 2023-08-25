@@ -44,8 +44,8 @@ public static class LoggingServiceLocator
     {
         // TODO: [FT-Review] Decide default startup behaviour - TraceSourceLogger vs NullLogger.
 #if true
+        RegisterService<IRoleLoggerFactory>( new TraceSourceLoggerFactory() );
         RegisterService<ILoggerFactory>( new TraceSourceLoggerFactory() );
-        RegisterService<ILoggerFactoryProvider>( new TraceSourceLoggerFactory() );
 #else
         RegisterService<ILoggerFactory>(new NullLogger());
         RegisterService<ILoggerFactoryProvider>(new NullLogger());

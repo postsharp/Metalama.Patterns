@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 [PublicAPI]
 public abstract class CacheInvalidator : CachingBackendEnhancer
 {
-    private readonly BackgroundTaskScheduler _backgroundTaskScheduler = new();
+    private readonly BackgroundTaskScheduler _backgroundTaskScheduler;
 
     /// <summary>
     /// Gets the options of the current <see cref="CacheInvalidator"/>.
@@ -25,9 +25,12 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     /// </summary>
     /// <param name="underlyingBackend">The underlying <see cref="CachingBackend"/> (typically an in-memory cache).</param>
     /// <param name="options">Options of the new <see cref="CacheInvalidator"/>.</param>
-    protected CacheInvalidator( [Required] CachingBackend underlyingBackend, [Required] CacheInvalidatorOptions options ) : base( underlyingBackend )
+    protected CacheInvalidator( [Required] CachingBackend underlyingBackend, [Required] CacheInvalidatorOptions options ) : base(
+        underlyingBackend,
+        new CachingBackendConfiguration() { ServiceProvider = underlyingBackend.Configuration.ServiceProvider } )
     {
         this.Options = options;
+        this._backgroundTaskScheduler = new BackgroundTaskScheduler( underlyingBackend.Configuration.ServiceProvider );
     }
 
     /// <inheritdoc />

@@ -2,14 +2,15 @@
 
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class ValueAdapterTests : IDisposable
+    public sealed class ValueAdapterTests : BaseCachingTests, IDisposable
     {
-        public ValueAdapterTests()
+        public ValueAdapterTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( "Caching.Tests.ValueAdapterTests" );
+            this.InitializeTestWithCachingBackend( "Caching.Tests.ValueAdapterTests" );
         }
 
         public void Dispose()
@@ -38,7 +39,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var s1 = await this.MethodReturningStreamAsync();
             var buffer1 = new byte[512];
-            
+
             // [Porting] Won't fix, can't be certain of original intent.
             // ReSharper disable once MethodHasAsyncOverload
             _ = s1.Read( buffer1, 0, buffer1.Length );
@@ -47,7 +48,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             var s2 = await this.MethodReturningStreamAsync();
             var buffer2 = new byte[512];
-            
+
             // [Porting] Won't fix, can't be certain of original intent.
             // ReSharper disable once MethodHasAsyncOverload
             _ = s2.Read( buffer2, 0, buffer2.Length );

@@ -8,13 +8,10 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 
-public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
+public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixture<TestContext>
 {
     private const int _timeout = 120000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
     private static readonly TimeSpan _timeoutTimeSpan = TimeSpan.FromMilliseconds( _timeout * 0.8 );
-
-    // ReSharper disable once MemberCanBePrivate.Global
-    protected ITestOutputHelper TestOutputHelper { get; }
 
     protected virtual bool TestDependencies { get; } = true;
 
@@ -22,9 +19,8 @@ public abstract class BaseDistributedCacheTests : IClassFixture<TestContext>
 
     protected abstract CachingBackend[] CreateBackends();
 
-    protected BaseDistributedCacheTests( TestContext testContext, ITestOutputHelper testOutputHelper )
+    protected BaseDistributedCacheTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
     {
-        this.TestOutputHelper = testOutputHelper;
         this.TestContext = testContext;
     }
 

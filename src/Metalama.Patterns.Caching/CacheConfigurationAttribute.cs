@@ -18,7 +18,7 @@ namespace Metalama.Patterns.Caching;
 [AttributeUsage( AttributeTargets.Class | AttributeTargets.Assembly )]
 public sealed class CacheConfigurationAttribute : Attribute
 {
-    internal CacheItemConfiguration Configuration { get; } = new();
+    internal CacheItemConfiguration Configuration { get; private set; } = new();
 
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the cached methods.
@@ -26,7 +26,7 @@ public sealed class CacheConfigurationAttribute : Attribute
     public string ProfileName
     {
         get => this.Configuration.ProfileName ?? CachingProfile.DefaultName;
-        set => this.Configuration.ProfileName = value;
+        set => this.Configuration = this.Configuration with { ProfileName = value };
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public sealed class CacheConfigurationAttribute : Attribute
     public bool AutoReload
     {
         get => this.Configuration.AutoReload.GetValueOrDefault();
-        set => this.Configuration.AutoReload = value;
+        set => this.Configuration = this.Configuration with { AutoReload = value };
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public sealed class CacheConfigurationAttribute : Attribute
     public double AbsoluteExpiration
     {
         get => this.Configuration.AbsoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
-        set => this.Configuration.AbsoluteExpiration = TimeSpan.FromMinutes( value );
+        set => this.Configuration = this.Configuration with { AbsoluteExpiration = TimeSpan.FromMinutes( value ) };
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public sealed class CacheConfigurationAttribute : Attribute
     public double SlidingExpiration
     {
         get => this.Configuration.SlidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
-        set => this.Configuration.SlidingExpiration = TimeSpan.FromMinutes( value );
+        set => this.Configuration = this.Configuration with { SlidingExpiration = TimeSpan.FromMinutes( value ) };
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public sealed class CacheConfigurationAttribute : Attribute
     public CacheItemPriority Priority
     {
         get => this.Configuration.Priority.GetValueOrDefault( CacheItemPriority.Default );
-        set => this.Configuration.Priority = value;
+        set => this.Configuration = this.Configuration with { Priority = value };
     }
 
     /// <summary>
@@ -75,6 +75,6 @@ public sealed class CacheConfigurationAttribute : Attribute
     public bool IgnoreThisParameter
     {
         get => this.Configuration.IgnoreThisParameter.GetValueOrDefault();
-        set => this.Configuration.IgnoreThisParameter = value;
+        set => this.Configuration = this.Configuration with { IgnoreThisParameter = value };
     }
 }

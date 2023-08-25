@@ -95,7 +95,7 @@ namespace Metalama.Patterns.Caching
 #>
 			public async Task<TReturn> RecacheAsync<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, Task<TReturn>> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
-                using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
                     try
                     {

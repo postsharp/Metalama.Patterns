@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Caching.Backends;
 public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
 {
     private static readonly ValueTask _finishedTask = new( Task.CompletedTask );
-    private readonly BackgroundTaskScheduler _taskScheduler = new( true );
+    private readonly BackgroundTaskScheduler _taskScheduler;
 
     /// <inheritdoc />
     protected override CachingBackendFeatures CreateFeatures() => new Features( this.UnderlyingBackend.SupportedFeatures );
@@ -21,8 +21,12 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     /// <summary>
     /// Initializes a new instance of the <see cref="NonBlockingCachingBackendEnhancer"/> class.
     /// </summary>
-    /// <param name="underlyingBackend"><inheritdoc cref="CachingBackendEnhancer(CachingBackend)"/></param>
-    public NonBlockingCachingBackendEnhancer( CachingBackend underlyingBackend ) : base( underlyingBackend ) { }
+    public NonBlockingCachingBackendEnhancer( CachingBackend underlyingBackend ) : base(
+        underlyingBackend,
+        new CachingBackendConfiguration { ServiceProvider = underlyingBackend.Configuration.ServiceProvider } )
+    {
+        this._taskScheduler = new BackgroundTaskScheduler( underlyingBackend.Configuration.ServiceProvider, true );
+    }
 
     private void EnqueueBackgroundTask( Func<Task> task ) => this._taskScheduler.EnqueueBackgroundTask( task );
 

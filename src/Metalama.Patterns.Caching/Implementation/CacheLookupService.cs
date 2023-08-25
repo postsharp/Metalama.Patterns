@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace;
 using JetBrains.Annotations;
 using System.ComponentModel;
 using static Flashtrace.Messages.FormattedMessageBuilder;
@@ -13,10 +14,12 @@ namespace Metalama.Patterns.Caching.Implementation;
 public class CacheLookupService
 {
     private readonly CachingFrontend _cachingFrontend;
+    private readonly IServiceProvider? _serviceProvider;
 
     public CacheLookupService( CachingService cachingService )
     {
         this._cachingFrontend = new CachingFrontend( cachingService );
+        this._serviceProvider = cachingService.ServiceProvider;
     }
 
     [EditorBrowsable( EditorBrowsableState.Never )]
@@ -32,7 +35,7 @@ public class CacheLookupService
             throw new ArgumentNullException( nameof(metadata) );
         }
 #endif
-        var logSource = metadata.Logger;
+        var logSource = this._serviceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
 
         object? result;
 
@@ -50,7 +53,7 @@ public class CacheLookupService
                 }
                 else
                 {
-                    var methodKey = CachingServices.DefaultService.KeyBuilder.BuildMethodKey(
+                    var methodKey = CachingServices.Default.KeyBuilder.BuildMethodKey(
                         metadata,
                         args,
                         instance );
@@ -105,13 +108,13 @@ public class CacheLookupService
 
         // TODO: What about ConfigureAwait( false )?
 
-        var logSource = metadata.Logger;
+        var logSource = this._serviceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
 
         object? result;
 
         // TODO: PostSharp passes an otherwise uninitialized CallerInfo with the CallerAttributes.IsAsync flag set.
 
-        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", metadata.Method ) ) )
+        using ( var activity = logSource.Default.OpenAsyncActivity( Formatted( "Processing invocation of async method {Method}", metadata.Method ) ) )
         {
             try
             {
@@ -146,7 +149,7 @@ public class CacheLookupService
                 }
                 else
                 {
-                    var methodKey = CachingServices.DefaultService.KeyBuilder.BuildMethodKey(
+                    var methodKey = CachingServices.Default.KeyBuilder.BuildMethodKey(
                         metadata,
                         args,
                         instance );
@@ -223,13 +226,13 @@ public class CacheLookupService
 
         // TODO: What about ConfigureAwait( false )?
 
-        var logSource = metadata.Logger;
+        var logSource = this._serviceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
 
         object? result;
 
         // TODO: PostSharp passes an otherwise uninitialized CallerInfo with the CallerAttributes.IsAsync flag set.
 
-        using ( var activity = logSource.Default.OpenActivity( Formatted( "Processing invocation of async method {Method}", metadata.Method ) ) )
+        using ( var activity = logSource.Default.OpenAsyncActivity( Formatted( "Processing invocation of async method {Method}", metadata.Method ) ) )
         {
             try
             {
@@ -264,7 +267,7 @@ public class CacheLookupService
                 }
                 else
                 {
-                    var methodKey = CachingServices.DefaultService.KeyBuilder.BuildMethodKey(
+                    var methodKey = CachingServices.Default.KeyBuilder.BuildMethodKey(
                         metadata,
                         args,
                         instance );

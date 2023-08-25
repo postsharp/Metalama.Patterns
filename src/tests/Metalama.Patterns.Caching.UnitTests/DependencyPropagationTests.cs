@@ -2,6 +2,7 @@
 
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 
 // ReSharper disable UnusedMethodReturnValue.Local
 // ReSharper disable MemberCanBeMadeStatic.Local
@@ -13,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class DependencyPropagationTests
+    public sealed class DependencyPropagationTests : BaseCachingTests
     {
         private const string _profileNamePrefix = "Caching.Tests.DependencyPropagationTests_";
 
@@ -58,7 +59,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestDependencyPropagation()
         {
-            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testDependencyPropagationProfileName );
+            _ = this.InitializeTestWithTestingBackend( _testDependencyPropagationProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testDependencyPropagationProfileName );
 
@@ -72,7 +73,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValueDependency );
+                CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValueDependency );
 
                 cachingClass.GetValue();
 
@@ -132,7 +133,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDependencyPropagationAsync()
         {
-            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testDependencyPropagationAsyncProfileName );
+            _ = this.InitializeTestWithTestingBackend( _testDependencyPropagationAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testDependencyPropagationAsyncProfileName );
 
@@ -146,7 +147,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -194,7 +195,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             public async Task<Task<CachedValueClass>> GetValueIntermediateAsync()
             {
-                using ( CachingContext.OpenCacheContext( "k", CachingServices.DefaultService ) )
+                using ( CachingContext.OpenCacheContext( "k", CachingServices.Default ) )
                 {
                     await Task.Yield();
 
@@ -215,7 +216,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDisposedContextAsync()
         {
-            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testDisposedContextAsyncProfileName );
+            _ = this.InitializeTestWithTestingBackend( _testDisposedContextAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testDisposedContextAsyncProfileName );
 
@@ -231,7 +232,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -292,7 +293,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSuspendedDependencyPropagation()
         {
-            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationProfileName );
+            _ = this.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testSuspendedDependencyPropagationProfileName );
 
@@ -306,7 +307,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingServices.DefaultService.Invalidation.Invalidate( cachingClass.GetValueDependency );
+                CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValueDependency );
 
                 cachingClass.GetValue();
 
@@ -373,7 +374,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestSuspendedDependencyPropagationAsync()
         {
-            _ = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationAsyncProfileName );
+            _ = this.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testSuspendedDependencyPropagationAsyncProfileName );
 
@@ -387,7 +388,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.DefaultService.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -408,5 +409,7 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         #endregion
+
+        public DependencyPropagationTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

@@ -2,13 +2,14 @@
 
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 
 // ReSharper disable MemberCanBeMadeStatic.Local
 #pragma warning disable CA1822
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class CacheConfigurationAttributeTests
+    public sealed class CacheConfigurationAttributeTests : BaseCachingTests
     {
         private const string _profileNamePrefix = "Caching.Tests.CacheConfigurationAttributeTests_";
 
@@ -83,10 +84,10 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        private static void DoCachingAttributeTest( Func<object> getValueAction, bool defaultProfile )
+        private void DoCachingAttributeTest( Func<object> getValueAction, bool defaultProfile )
         {
             var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
+                this.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testCachingAttributeProfileName );
 
@@ -110,10 +111,10 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        private static async Task DoCachingAttributeTestAsync( Func<Task<object>> getValueAction, bool defaultProfile )
+        private async Task DoCachingAttributeTestAsync( Func<Task<object>> getValueAction, bool defaultProfile )
         {
             var backend =
-                TestProfileConfigurationFactory.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
+                this.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testCachingAttributeProfileName );
 
@@ -141,56 +142,58 @@ namespace Metalama.Patterns.Caching.Tests
         public void TestCachingAttributeBase()
         {
             var cachingClass = new ChildCachingClass();
-            DoCachingAttributeTest( cachingClass.GetValueBase, false );
+            this.DoCachingAttributeTest( cachingClass.GetValueBase, false );
         }
 
         [Fact]
         public async Task TestCachingAttributeBaseAsync()
         {
             var cachingClass = new ChildCachingClass();
-            await DoCachingAttributeTestAsync( cachingClass.GetValueBaseAsync, false );
+            await this.DoCachingAttributeTestAsync( cachingClass.GetValueBaseAsync, false );
         }
 
         [Fact]
         public void TestCachingAttributeChild()
         {
             var cachingClass = new ChildCachingClass();
-            DoCachingAttributeTest( cachingClass.GetValueChild, false );
+            this.DoCachingAttributeTest( cachingClass.GetValueChild, false );
         }
 
         [Fact]
         public async Task TestCachingAttributeChildAsync()
         {
             var cachingClass = new ChildCachingClass();
-            await DoCachingAttributeTestAsync( cachingClass.GetValueChildAsync, false );
+            await this.DoCachingAttributeTestAsync( cachingClass.GetValueChildAsync, false );
         }
 
         [Fact]
         public void TestCachingAttributeInnerInBase()
         {
             var cachingClass = new BaseCachingClass.InnerCachingClassInBase();
-            DoCachingAttributeTest( cachingClass.GetValueInnerBase, true );
+            this.DoCachingAttributeTest( cachingClass.GetValueInnerBase, true );
         }
 
         [Fact]
         public async Task TestCachingAttributeInnerInBaseAsync()
         {
             var cachingClass = new BaseCachingClass.InnerCachingClassInBase();
-            await DoCachingAttributeTestAsync( cachingClass.GetValueInnerBaseAsync, true );
+            await this.DoCachingAttributeTestAsync( cachingClass.GetValueInnerBaseAsync, true );
         }
 
         [Fact]
         public void TestCachingAttributeInnerInBaseChild()
         {
             var cachingClass = new ChildCachingClass.InnerCachingClassInChild();
-            DoCachingAttributeTest( cachingClass.GetValueInnerChild, true );
+            this.DoCachingAttributeTest( cachingClass.GetValueInnerChild, true );
         }
 
         [Fact]
         public async Task TestCachingAttributeInnerInBaseChildAsync()
         {
             var cachingClass = new ChildCachingClass.InnerCachingClassInChild();
-            await DoCachingAttributeTestAsync( cachingClass.GetValueInnerChildAsync, true );
+            await this.DoCachingAttributeTestAsync( cachingClass.GetValueInnerChildAsync, true );
         }
+
+        public CacheConfigurationAttributeTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

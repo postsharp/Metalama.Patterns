@@ -27,7 +27,7 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void SetSuccess( in CloseActivityOptions options, ref CallerInfo callerInfo );
+    void SetSuccess( in CloseActivityOptions options, in CallerInfo callerInfo );
 
     /// <summary>
     /// Closes the activity with success and includes a result in the outcome message.
@@ -38,7 +38,7 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void SetResult<TResult>( TResult result, in CloseActivityOptions options, ref CallerInfo callerInfo );
+    void SetResult<TResult>( TResult result, in CloseActivityOptions options, in CallerInfo callerInfo );
 
     /// <summary>
     /// Closes the activity and sets its outcome.
@@ -53,7 +53,7 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo )
+    void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception exception, in CloseActivityOptions options, in CallerInfo callerInfo )
         where TMessage : IMessage;
 
     /// <summary>
@@ -65,7 +65,7 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void SetException( Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo );
+    void SetException( Exception exception, in CloseActivityOptions options, in CallerInfo callerInfo );
 
 #pragma warning disable CA1716 // Identifiers should not match keywords
     /// <summary>
@@ -76,7 +76,7 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void Resume( ref CallerInfo callerInfo );
+    void Resume( in CallerInfo callerInfo );
 #pragma warning restore CA1716 // Identifiers should not match keywords
 
     /// <summary>
@@ -88,5 +88,5 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void Suspend( ref CallerInfo callerInfo );
+    void Suspend( in CallerInfo callerInfo );
 }

@@ -138,7 +138,8 @@ internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
 
     void IConnectionMultiplexer.ResetStormLog() => this.Inner.ResetStormLog();
 
-    string IConnectionMultiplexer.ToString() => this.Inner.ToString();
+    // ReSharper disable once RedundantSuppressNullableWarningExpression
+    string IConnectionMultiplexer.ToString() => this.Inner.ToString()!;
 
     void IConnectionMultiplexer.Wait( Task task ) => this.Inner.Wait( task );
 

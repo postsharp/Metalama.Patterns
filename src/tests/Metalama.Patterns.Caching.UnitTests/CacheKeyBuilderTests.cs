@@ -5,6 +5,7 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Contracts;
 using Xunit;
+using Xunit.Abstractions;
 
 // ReSharper disable MemberCanBeMadeStatic.Local
 // ReSharper disable UnusedMember.Local
@@ -14,7 +15,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class CacheKeyBuilderTests
+    public sealed class CacheKeyBuilderTests : BaseCachingTests
     {
         private sealed class MyCacheKeyBuilder : CacheKeyBuilder
         {
@@ -33,15 +34,15 @@ namespace Metalama.Patterns.Caching.Tests
             public MyCacheKeyBuilder( IFormatterRepository formatterRepository ) : base( formatterRepository ) { }
         }
 
-        private static void DoTestMethod( string profileName, string expectedKey, Func<string> action )
+        private void DoTestMethod( string profileName, string expectedKey, Func<string> action )
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( profileName );
+            this.InitializeTestWithCachingBackend( profileName );
             TestProfileConfigurationFactory.CreateProfile( profileName );
 
             try
             {
-                var keyBuilder = new MyCacheKeyBuilder( CachingServices.DefaultService.Formatters );
-                CachingServices.DefaultService.KeyBuilder = keyBuilder;
+                var keyBuilder = new MyCacheKeyBuilder( CachingServices.Default.Formatters );
+                CachingServices.Default.KeyBuilder = keyBuilder;
                 action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
                 Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
@@ -52,15 +53,15 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        private static async Task DoTestMethodAsync( string profileName, string expectedKey, Func<Task<string>> action )
+        private async Task DoTestMethodAsync( string profileName, string expectedKey, Func<Task<string>> action )
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( profileName );
+            this.InitializeTestWithCachingBackend( profileName );
             TestProfileConfigurationFactory.CreateProfile( profileName );
 
             try
             {
-                var keyBuilder = new MyCacheKeyBuilder( CachingServices.DefaultService.Formatters );
-                CachingServices.DefaultService.KeyBuilder = keyBuilder;
+                var keyBuilder = new MyCacheKeyBuilder( CachingServices.Default.Formatters );
+                CachingServices.Default.KeyBuilder = keyBuilder;
                 await action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
                 Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
@@ -88,7 +89,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestInstanceMethod()
         {
-            DoTestMethod(
+            this.DoTestMethod(
                 _testInstanceMethodProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedInstanceMethod(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests})",
                 this.CachedInstanceMethod );
@@ -111,7 +112,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestInstanceMethodAsync()
         {
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testInstanceMethodAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedInstanceMethodAsync(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests})",
                 this.CachedInstanceMethodAsync );
@@ -132,7 +133,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestStaticMethod()
         {
-            DoTestMethod(
+            this.DoTestMethod(
                 _testStaticMethodProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedStaticMethod()",
                 CachedStaticMethod );
@@ -155,7 +156,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestStaticMethodAsync()
         {
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testStaticMethodAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedStaticMethodAsync()",
                 CachedStaticMethodAsync );
@@ -182,7 +183,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodWithParameters()
         {
-            DoTestMethod(
+            this.DoTestMethod(
                 _testMethodWithParametersProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedInstanceMethodWithParameters(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests}, (int) 0, (string) null, (object) null)",
                 () => this.CachedInstanceMethodWithParameters( 0, null, null ) );
@@ -213,7 +214,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestMethodWithParametersAsync()
         {
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testMethodWithParametersAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedInstanceMethodWithParametersAsync(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests}, (int) 0, (string) null, (object) null)",
                 () => this.CachedInstanceMethodWithParametersAsync( 0, null, null ) );
@@ -234,7 +235,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodWithIgnoredParameters()
         {
-            DoTestMethod(
+            this.DoTestMethod(
                 _testMethodWithIgnoredParametersProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedInstanceMethodWithIgnoredParameters(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests}, (int) 0, (object) null, (int) *)",
                 () => this.CachedInstanceMethodWithIgnoredParameters( 0, null, -1 ) );
@@ -257,7 +258,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestMethodWithIgnoredParametersAsync()
         {
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testMethodWithIgnoredParametersAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.CachedInstanceMethodWithIgnoredParametersAsync(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests}, (int) 0, (object) null, (int) *)",
                 () => this.CachedInstanceMethodWithIgnoredParametersAsync( 0, null, -1 ) );
@@ -282,7 +283,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodWithIgnoredThisParameter()
         {
-            DoTestMethod(
+            this.DoTestMethod(
                 _testMethodWithIgnoredThisParameterProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.SomeClassWithIgnoredThisParameter.SomeInstanceMethod()",
                 () => new SomeClassWithIgnoredThisParameter().SomeInstanceMethod() );
@@ -309,7 +310,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestMethodWithIgnoredThisParameterAsync()
         {
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testMethodWithIgnoredThisParameterAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.SomeAsyncClassWithIgnoredThisParameter.SomeInstanceMethodAsync()",
                 () => new SomeAsyncClassWithIgnoredThisParameter().SomeInstanceMethodAsync() );
@@ -371,7 +372,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new TestClassForNullCollectionParameters();
 
-            DoTestMethod(
+            this.DoTestMethod(
                 _testMethodWithNullCollectionParametersProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForNullCollectionParameters.CachedInstanceMethodWithCollectionParameters(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForNullCollectionParameters}, (IEnumerable<int>) null, (IEnumerable<object>) null, (List<int>) null, (List<object>) null, (int[]) null, (object[]) null)",
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
@@ -409,7 +410,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new AsyncTestClassForNullCollectionParameters();
 
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testMethodWithNullCollectionParametersAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForNullCollectionParameters.CachedInstanceMethodWithCollectionParametersAsync(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForNullCollectionParameters}, (IEnumerable<int>) null, (IEnumerable<object>) null, (List<int>) null, (List<object>) null, (int[]) null, (object[]) null)",
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
@@ -447,7 +448,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new TestClassForEmptyCollectionParameters();
 
-            DoTestMethod(
+            this.DoTestMethod(
                 _testMethodWithEmptyCollectionParametersProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForEmptyCollectionParameters.CachedInstanceMethodWithCollectionParameters(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForEmptyCollectionParameters}, (IEnumerable<int>) [], (IEnumerable<object>) [], (List<int>) [], (List<object>) [], (int[]) [], (object[]) [])",
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
@@ -485,7 +486,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new AsyncTestClassForEmptyCollectionParameters();
 
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testMethodWithEmptyCollectionParametersAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForEmptyCollectionParameters.CachedInstanceMethodWithCollectionParametersAsync(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForEmptyCollectionParameters}, (IEnumerable<int>) [], (IEnumerable<object>) [], (List<int>) [], (List<object>) [], (int[]) [], (object[]) [])",
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
@@ -523,7 +524,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new TestClassForOneCollectionParameters();
 
-            DoTestMethod(
+            this.DoTestMethod(
                 _testMethodWithOneItemCollectionParametersProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForOneCollectionParameters.CachedInstanceMethodWithCollectionParameters(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForOneCollectionParameters}, (IEnumerable<int>) [ 1 ], (IEnumerable<object>) [ \"Object1\" ], (List<int>) [ 2 ], (List<object>) [ \"Object2\" ], (int[]) [ 3 ], (object[]) [ \"Object3\" ])",
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
@@ -561,7 +562,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new AsyncTestClassForOneCollectionParameters();
 
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testMethodWithOneItemCollectionParametersAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForOneCollectionParameters.CachedInstanceMethodWithCollectionParametersAsync(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForOneCollectionParameters}, (IEnumerable<int>) [ 1 ], (IEnumerable<object>) [ \"Object1\" ], (List<int>) [ 2 ], (List<object>) [ \"Object2\" ], (int[]) [ 3 ], (object[]) [ \"Object3\" ])",
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
@@ -599,7 +600,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new TestClassForTwoCollectionParameters();
 
-            DoTestMethod(
+            this.DoTestMethod(
                 _testMethodWithTwoItemCollectionParametersProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForTwoCollectionParameters.CachedInstanceMethodWithCollectionParameters(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForTwoCollectionParameters}, (IEnumerable<int>) [ 1, 2 ], (IEnumerable<object>) [ \"Object1\", \"Object2\" ], (List<int>) [ 3, 4 ], (List<object>) [ \"Object3\", \"Object4\" ], (int[]) [ 5, 6 ], (object[]) [ \"Object5\", \"Object6\" ])",
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
@@ -637,7 +638,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new AsyncTestClassForTwoCollectionParameters();
 
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testMethodWithTwoItemCollectionParametersAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForTwoCollectionParameters.CachedInstanceMethodWithCollectionParametersAsync(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForTwoCollectionParameters}, (IEnumerable<int>) [ 1, 2 ], (IEnumerable<object>) [ \"Object1\", \"Object2\" ], (List<int>) [ 3, 4 ], (List<object>) [ \"Object3\", \"Object4\" ], (int[]) [ 5, 6 ], (object[]) [ \"Object5\", \"Object6\" ])",
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
@@ -675,7 +676,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new TestClassForThreeCollectionParameters();
 
-            DoTestMethod(
+            this.DoTestMethod(
                 _testMethodWithThreeItemCollectionParametersProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForThreeCollectionParameters.CachedInstanceMethodWithCollectionParameters(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.TestClassForThreeCollectionParameters}, (IEnumerable<int>) [ 1, 2, 3 ], (IEnumerable<object>) [ \"Object1\", \"Object2\", \"Object3\" ], (List<int>) [ 4, 5, 6 ], (List<object>) [ \"Object4\", \"Object5\", \"Object6\" ], (int[]) [ 7, 8, 9 ], (object[]) [ \"Object7\", \"Object8\", \"Object9\" ])",
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
@@ -714,7 +715,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var testObject = new AsyncTestClassForThreeCollectionParameters();
 
-            await DoTestMethodAsync(
+            await this.DoTestMethodAsync(
                 _testMethodWithThreeItemCollectionParametersAsyncProfileName,
                 "Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForThreeCollectionParameters.CachedInstanceMethodWithCollectionParametersAsync(this={Metalama.Patterns.Caching.Tests.CacheKeyBuilderTests.AsyncTestClassForThreeCollectionParameters}, (IEnumerable<int>) [ 1, 2, 3 ], (IEnumerable<object>) [ \"Object1\", \"Object2\", \"Object3\" ], (List<int>) [ 4, 5, 6 ], (List<object>) [ \"Object4\", \"Object5\", \"Object6\" ], (int[]) [ 7, 8, 9 ], (object[]) [ \"Object7\", \"Object8\", \"Object9\" ])",
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
@@ -727,5 +728,7 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         #endregion TestMethodWithThreeItemCollectionParametersAsync
+
+        public CacheKeyBuilderTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

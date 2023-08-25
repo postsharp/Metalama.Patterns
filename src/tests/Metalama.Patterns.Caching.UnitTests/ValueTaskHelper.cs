@@ -4,6 +4,6 @@ namespace Metalama.Patterns.Caching.Tests
 {
     internal static class ValueTaskHelper
     {
-        public static void Wait( this ValueTask task) => task.AsTask().Wait();
+        public static void Wait( this ValueTask task ) => task.AsTask().Wait();
     }
 }

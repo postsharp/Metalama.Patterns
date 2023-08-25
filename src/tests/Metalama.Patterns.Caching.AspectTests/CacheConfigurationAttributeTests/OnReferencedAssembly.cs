@@ -18,7 +18,7 @@ public class Program
         Console.WriteLine( "Test started." );
 
         var backend =
-            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestValues.CacheConfigurationAttributeProfileName1 );
+            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestValues.CacheConfigurationAttributeProfileName1, null );
 
         TestProfileConfigurationFactory.CreateProfile( TestValues.CacheConfigurationAttributeProfileName1 );
         TestProfileConfigurationFactory.CreateProfile( TestValues.CacheConfigurationAttributeProfileName2 );

@@ -16,12 +16,13 @@ public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
     protected override async Task<CachingBackend[]> CreateBackendsAsync()
     {
         var testId = Guid.NewGuid().ToString();
+        var configuration = new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider };
 
         return new CachingBackend[]
         {
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend(), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend(), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend(), testId )
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId ),
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId ),
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId )
         };
     }
 

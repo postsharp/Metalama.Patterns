@@ -2,10 +2,11 @@
 
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public abstract class InvalidationTestsBase
+    public abstract class InvalidationTestsBase : BaseCachingTests
     {
         protected sealed class CallsCounters
         {
@@ -29,7 +30,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
         }
 
-        protected static void DoInvalidateCacheAttributeTest(
+        protected void DoInvalidateCacheAttributeTest(
             string profileName,
             Func<CachedValueClass>[] cachedMethods,
             Func<CachedValueClass>[] invalidatingMethods,
@@ -38,7 +39,7 @@ namespace Metalama.Patterns.Caching.Tests
             bool othersShouldWork,
             bool onlyPairsShouldWork = false )
         {
-            TestProfileConfigurationFactory.InitializeTestWithCachingBackend( profileName );
+            this.InitializeTestWithCachingBackend( profileName );
             TestProfileConfigurationFactory.CreateProfile( profileName );
 
             try
@@ -105,5 +106,7 @@ namespace Metalama.Patterns.Caching.Tests
                 TestProfileConfigurationFactory.DisposeTest();
             }
         }
+
+        protected InvalidationTestsBase( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

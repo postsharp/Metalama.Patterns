@@ -2,7 +2,6 @@
 
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
-using Flashtrace;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
@@ -19,9 +18,6 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     public class AzureCacheInvalidator : CacheInvalidator
     {
         private const string _subject = "Metalama.Patterns.Caching.Backends.Azure.Invalidation";
-
-        private static readonly LogSource _logger = LogSourceFactory.ForRole( LoggingRoles.Caching )
-            .GetLogSource( typeof(AzureCacheInvalidator) );
 
         private readonly CancellationTokenSource _receiverCancellation = new();
 
@@ -58,7 +54,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         {
             if ( options.SubscriptionName == null )
             {
-                this._subscriptionName = await CreateSubscriptionAsync( options, cancellationToken );
+                this._subscriptionName = await this.CreateSubscriptionAsync( options, cancellationToken );
             }
             else
             {
@@ -91,7 +87,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                         catch ( OperationCanceledException ) { }
                         catch ( Exception e )
                         {
-                            _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                            this.LogSource.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
                             this._backgroundTaskExceptions++;
                         }
                     }
@@ -172,7 +168,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             this.DisposeCore( false );
         }
 
-        private static async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
+        private async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
         {
             try
             {
@@ -192,7 +188,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             }
             catch ( Exception e )
             {
-                _logger.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
+                this.LogSource.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
 
                 throw;
             }
