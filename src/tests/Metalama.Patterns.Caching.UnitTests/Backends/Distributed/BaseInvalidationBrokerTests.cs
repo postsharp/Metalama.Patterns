@@ -5,7 +5,7 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
+namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
 {

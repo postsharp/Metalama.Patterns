@@ -4,7 +4,7 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
+namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 /// <summary>
 /// This class is now probably not necessary because its "dispose of disposables" features is no longer used by any of our tests.

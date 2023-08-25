@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
+namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixture<TestContext>
 {

@@ -3,12 +3,12 @@
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
 using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends.Single;
+namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 
 #pragma warning disable SA1124
 #pragma warning disable LAMA0048

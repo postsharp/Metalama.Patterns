@@ -4,7 +4,7 @@ using StackExchange.Redis;
 using StackExchange.Redis.Profiling;
 using System.Net;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
+namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
 {

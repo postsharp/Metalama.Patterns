@@ -5,7 +5,7 @@ using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
+namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 // ReSharper disable once UnusedType.Global
 public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IAssemblyFixture<RedisSetupFixture>

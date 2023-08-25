@@ -7,7 +7,7 @@ using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.TestHelpers;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.ManualTest.Backends.Distributed;
+namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 #if ENABLE_AZURE_TESTS
 public

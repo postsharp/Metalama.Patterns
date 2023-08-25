@@ -3,7 +3,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
+namespace Metalama.Patterns.Caching.Tests.RedisServer;
 
 internal sealed class TemporaryFile : IDisposable
 {

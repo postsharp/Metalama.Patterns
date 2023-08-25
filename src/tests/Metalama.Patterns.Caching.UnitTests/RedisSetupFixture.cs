@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.ManualTest.RedisServer;
+using Metalama.Patterns.Caching.Tests.RedisServer;
 
-namespace Metalama.Patterns.Caching.ManualTest;
+namespace Metalama.Patterns.Caching.Tests;
 
 #pragma warning disable CA2201
 

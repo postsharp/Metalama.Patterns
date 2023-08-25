@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.ManualTest.Executables;
+using Metalama.Patterns.Caching.Tests.Executables;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Metalama.Patterns.Caching.ManualTest.RedisServer;
+namespace Metalama.Patterns.Caching.Tests.RedisServer;
 
 #pragma warning disable CA2201
 
