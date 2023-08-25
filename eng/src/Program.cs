@@ -12,7 +12,12 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
 {
     Solutions = new Solution[] { new DotNetSolution( "Metalama.Patterns.sln" ) { CanFormatCode = true } },
   
-    PublicArtifacts = Pattern.Create( "Metalama.Patterns.Caching.$(PackageVersion).nupkg", "Metalama.Patterns.Contracts.$(PackageVersion).nupkg" , "Flashtrace.$(PackageVersion).nupkg"),
+    PublicArtifacts = Pattern.Create( 
+        "Metalama.Patterns.Caching.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Caching.Backends.Azure.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Caching.Backends.Redis.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Contracts.$(PackageVersion).nupkg" , 
+        "Flashtrace.$(PackageVersion).nupkg"),
     Dependencies = new[] { DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions },
     MainVersionDependency = MetalamaDependencies.Metalama,
     Configurations = Product.DefaultConfigurations.WithValue( 
