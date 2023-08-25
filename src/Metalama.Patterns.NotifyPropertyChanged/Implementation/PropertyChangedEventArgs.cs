@@ -8,8 +8,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
  * ------------------------------------------------------------
  * 
  * A notable downside of this approach is that a new instance of the derived type must be used for 
- * each event raised derived type must be used for each event raised. Underived PropertyChangedEventArgs 
- * can be cached per property name (eg, static field, global dictionary).
+ * each event raised. Underived PropertyChangedEventArgs can be cached per property name (eg, static field, global dictionary).
  * 
  * The naive model benefits most from using the extended PropertyChangedEventArgs when notifying that
  * a ref type property has changed (that is, the instance has been changed to a different instance). So

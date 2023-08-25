@@ -36,7 +36,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
     private sealed class BuildAspectContext
     {
-        readonly Dictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
+        private readonly Dictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
 
         public BuildAspectContext( IAspectBuilder<INamedType> builder )
         {
@@ -44,6 +44,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
             this.Type_INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof( INotifyPropertyChanged ) );
             this.Event_INotifyPropertyChanged_PropertyChanged = this.Type_INotifyPropertyChanged.Events.First();
             this.Type_PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof( PropertyChangedEventHandler ) );
+            this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
         }
 
         public IAspectBuilder<INamedType> Builder { get; }
@@ -55,6 +56,8 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         public IEvent Event_INotifyPropertyChanged_PropertyChanged { get; }
 
         public INamedType Type_PropertyChangedEventHandler { get; }
+
+        public INamedType Type_IgnoreAutoChangeNotificationAttribute { get; }
 
         public IMethod OnPropertyChangedMethod { get; set; } = null!;
 
@@ -222,7 +225,13 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         var onPropertyChangedMethodHasCallerMemberNameAttribute = ctx.OnPropertyChangedMethod.Parameters[0].Attributes.Any( typeof( CallerMemberNameAttribute ) );
 
         // PS appears to consider all instance properties regardless of accessibility.
-        var autoProperties = target.Properties.Where( p => !p.IsStatic && p.IsAutoPropertyOrField == true ).ToList();
+        var autoProperties = 
+            target.Properties
+            .Where( p => 
+                !p.IsStatic 
+                && p.IsAutoPropertyOrField == true 
+                && !p.Attributes.Any( ctx.Type_IgnoreAutoChangeNotificationAttribute ) )
+            .ToList();
 
         foreach ( var p in autoProperties )
         {
