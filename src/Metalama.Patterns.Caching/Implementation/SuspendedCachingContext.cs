@@ -2,7 +2,7 @@
 
 using Metalama.Patterns.Caching.Dependencies;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Implementation;
 
 internal sealed class SuspendedCachingContext : IDisposable, ICachingContext
 {
