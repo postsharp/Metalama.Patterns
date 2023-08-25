@@ -6,7 +6,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 
 internal static class CacheItemConfigurationExtensions
 {
-    public static ICacheItemConfiguration? WithoutAutoReload( [Required] this ICacheItemConfiguration? other )
+    public static ICacheItemConfiguration? WithoutAutoReload( this ICacheItemConfiguration? other )
         => other switch
         {
             null => null,

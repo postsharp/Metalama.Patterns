@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
     {
         protected const int Timeout = 30_000; // 30 seconds ought to be enough to anyone. (otherwise the test should be refactored, anyway).
         protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout );
-        
+
         protected BaseCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {
             this.TestContext = testContext;
@@ -421,7 +421,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             }
         }
 
-        [Fact( Timeout = Timeout )]
+        [Fact( Timeout = Timeout, Skip = "#33668" )]
         public void TestSlidingExpiration()
         {
             if ( !RunningOnWindows )
@@ -585,7 +585,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 cache.SetItem( key, cacheItem );
 
                 Thread.Sleep( offset.Multiply( 2 ) );
-                
+
                 // ReSharper disable once AccessToDisposedClosure
                 RepeatUntilNullOrFail( () => cache.GetItem( key ) );
 

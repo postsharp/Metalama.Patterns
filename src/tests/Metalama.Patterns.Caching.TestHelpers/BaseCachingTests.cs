@@ -12,24 +12,22 @@ public abstract class BaseCachingTests
     protected BaseCachingTests( ITestOutputHelper testOutputHelper )
     {
         this.TestOutputHelper = testOutputHelper;
-        this.ServiceCollection = new ServiceCollection();
-        this.ServiceCollection.AddSingleton<ILoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
-        this.ServiceProvider = this.ServiceCollection.BuildServiceProvider();
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton<ILoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
+        this.ServiceProvider = serviceCollection.BuildServiceProvider();
+        CachingServices.Default = new CachingService( this.ServiceProvider );
     }
 
-    public ServiceProvider ServiceProvider { get; }
-
-    public ServiceCollection ServiceCollection { get; }
-
+    protected ServiceProvider ServiceProvider { get; }
+    
     protected ITestOutputHelper TestOutputHelper { get; }
 
-    // ReSharper disable once UnusedMethodReturnValue.Global
-    public CachingBackend InitializeTestWithCachingBackend( string name )
+    protected CachingBackend InitializeTestWithCachingBackend( string name )
     {
         return TestProfileConfigurationFactory.InitializeTestWithCachingBackend( name, this.ServiceProvider );
     }
 
-    public TestingCacheBackend InitializeTestWithTestingBackend( string name )
+    protected TestingCacheBackend InitializeTestWithTestingBackend( string name )
     {
         return TestProfileConfigurationFactory.InitializeTestWithTestingBackend( name, this.ServiceProvider );
     }
