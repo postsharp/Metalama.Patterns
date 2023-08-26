@@ -112,8 +112,6 @@ public class CacheLookupService
 
         object? result;
 
-        // TODO: PostSharp passes an otherwise uninitialized CallerInfo with the CallerAttributes.IsAsync flag set.
-
         using ( var activity = logSource.Default.OpenAsyncActivity( Formatted( "Processing invocation of async method {Method}", metadata.Method ) ) )
         {
             try

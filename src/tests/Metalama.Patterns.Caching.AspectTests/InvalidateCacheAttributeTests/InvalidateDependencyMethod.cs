@@ -1,6 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
+
 // ReSharper disable once CheckNamespace
 
 namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.InvalidateDependencyMethod;
@@ -11,7 +14,7 @@ public class TestClass
      * is only meaningful for declarations in the assembly being compiled. It will always be empty
      * for declarations in dependency assemblies. If cross-assembly aspect awareness is required,
      * it is up to the user to decide how to do this for their particular use case. For caching,
-     * the InvalidateCacheAttribute aspect must look at the Attributes collection on the dependency 
+     * the InvalidateCacheAttribute aspect must look at the Attributes collection on the dependency
      * method to determine if it has been cached. This test verifies that behaviour.
      */
     [InvalidateCache( typeof(DependencyClass), nameof(DependencyClass.CachedUsingAttribute) )]

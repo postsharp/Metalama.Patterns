@@ -233,7 +233,7 @@ public partial class CacheInvalidationService
                     }
                     else if ( this._nestedCachedMethods.ContainsKey( method ) )
                     {
-                        this._defaultLogger.Debug.EnabledOrNull?.Write(
+                        this._defaultLogger.Warning.EnabledOrNull?.Write(
                             Formatted(
                                 "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
                                 "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
@@ -282,7 +282,7 @@ public partial class CacheInvalidationService
                     }
                     else if ( this._nestedCachedMethods.ContainsKey( method ) )
                     {
-                        this._defaultLogger.Warning.Write(
+                        this._defaultLogger.Warning.EnabledOrNull?.Write(
                             Formatted(
                                 "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
                                 "These dependent methods will not be invalidated because the current back-end does not support dependencies.",

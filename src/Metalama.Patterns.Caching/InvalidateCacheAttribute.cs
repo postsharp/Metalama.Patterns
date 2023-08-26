@@ -1,8 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
-using Flashtrace.Messages;
 using JetBrains.Annotations;
+using Metalama.Extensions.DependencyInjection;
+using Metalama.Extensions.DependencyInjection.Implementation;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -80,11 +81,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         var isValid = true;
 
-        isValid &= Validate( builder, this, invalidatedMethods );
+        isValid &= ValidateAndFindInvalidatedMethods( builder, this, invalidatedMethods );
 
         foreach ( var secondaryInstance in builder.AspectInstance.SecondaryInstances )
         {
-            isValid &= Validate( builder, (InvalidateCacheAttribute) secondaryInstance.Aspect, invalidatedMethods );
+            isValid &= ValidateAndFindInvalidatedMethods( builder, (InvalidateCacheAttribute) secondaryInstance.Aspect, invalidatedMethods );
         }
 
         if ( !isValid )
@@ -97,23 +98,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             throw new CachingAssertionFailedException( "invalidatedMethods.Count == 0 not expected." );
         }
 
-        var logSourceFieldName = builder.Target.DeclaringType.ToSerializableId()
-            .MakeAssociatedIdentifier( "_logSource" );
-
-        var logSourceFieldAdviceResult = builder.Advice.IntroduceField(
-            builder.Target.DeclaringType,
-            nameof(_logSource),
-            IntroductionScope.Static,
-            OverrideStrategy.Ignore,
-            b => b.Name = logSourceFieldName,
-            tags: new { type = builder.Target.DeclaringType } );
-
-        // TODO: Update when #33489 fixed.
-        // Remove this when fixed:
-        var logSourceField = logSourceFieldAdviceResult.Outcome == AdviceOutcome.Ignore
-            ? builder.Target.DeclaringType.Fields.Single( f => f.Name == logSourceFieldName )
-            : logSourceFieldAdviceResult.Declaration;
-
+        // Create a field that stores the list of methods to be invalidated.
         var methodsInvalidatedByFieldName = builder.Target.ToSerializableId()
             .MakeAssociatedIdentifier( $"_methodsInvalidatedBy_{builder.Target.Name}" );
 
@@ -131,6 +116,37 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             InitializerKind.BeforeTypeConstructor,
             args: new { methods = invalidatedMethods.Keys.ToList(), field = methodsInvalidatedByField.Declaration } );
 
+        // If any invalidated method uses dependency injection, also use dependency injection.
+        IFieldOrProperty? cachingServiceField;
+
+        if ( invalidatedMethods.Values.Any( m => m.UsesDependencyInjection ) )
+        {
+            if ( builder.Target.IsStatic )
+            {
+                builder.Diagnostics.Report( CachingDiagnosticDescriptors.MethodCannotBeStaticBecauseItUsesDependencyInjection.WithArguments( builder.Target ) );
+                builder.SkipAspect();
+
+                return;
+            }
+
+            if ( !builder.TryIntroduceDependency(
+                    new DependencyProperties(
+                        builder.Target.DeclaringType,
+                        typeof(CachingService),
+                        "_cachingService" ),
+                    out cachingServiceField ) )
+            {
+                builder.SkipAspect();
+
+                return;
+            }
+        }
+        else
+        {
+            cachingServiceField = null;
+        }
+
+        // Override the method.
         var asyncInfo = builder.Target.GetAsyncInfo();
 
         var templates = new MethodTemplateSelector(
@@ -143,10 +159,10 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             templates,
             args: new
             {
-                TReturn = asyncInfo.IsAwaitable ? asyncInfo.ResultType : builder.Target.ReturnType,
-                logSourceField,
+                returnType = asyncInfo.IsAwaitable ? asyncInfo.ResultType : builder.Target.ReturnType,
                 methodsInvalidatedByField = methodsInvalidatedByField.Declaration,
-                invalidatedMethods = invalidatedMethods.Values
+                invalidatedMethods = invalidatedMethods.Values,
+                cachingServiceField
             } );
     }
 
@@ -173,202 +189,77 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
     [Template]
     private static dynamic? OverrideMethod(
-        IField logSourceField,
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
-        IType TReturn /* not used */ )
+        IType returnType /* not used */,
+        IField? cachingServiceField )
     {
-        using ( var activity = logSourceField.Value!.Default.OpenActivity(
-                   FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+        var result = meta.Proceed();
+
+        var index = meta.CompileTime( 0 );
+
+        foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            try
-            {
-                var result = meta.Proceed();
+            CachingServices.Default.Invalidation.Invalidate(
+                methodsInvalidatedByField.Value![index],
+                invalidatedMethod.Method.IsStatic ? null : meta.This,
+                MapArguments( invalidatedMethod ).Value );
 
-                var index = meta.CompileTime( 0 );
-
-                foreach ( var invalidatedMethod in invalidatedMethods )
-                {
-                    CachingServices.Default.Invalidation.Invalidate(
-                        methodsInvalidatedByField.Value![index],
-                        invalidatedMethod.Method.IsStatic ? null : meta.This,
-                        MapArguments( invalidatedMethod ).Value );
-
-                    ++index;
-                }
-
-                activity.SetSuccess();
-
-                return result;
-            }
-            catch ( Exception e )
-            {
-                activity.SetException( e );
-
-                throw;
-            }
+            ++index;
         }
+
+        return result;
     }
 
     [Template]
     private static async Task<dynamic?> OverrideMethodAsyncTaskOfT(
-        IField logSourceField,
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
-        IType TReturn )
+        IType returnType,
+        IField? cachingServiceField )
     {
-        // TODO: Abstract to RunTime helper where possible.
-
         // TODO: Automagically accept CancellationToken parameter?
 
-        using ( var activity = logSourceField.Value!.Default.OpenAsyncActivity(
-                   FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
+
+        // ReSharper disable once RedundantAssignment
+        var result = await meta.ProceedAsync();
+        var index = meta.CompileTime( 0 );
+
+        foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            // ReSharper disable once RedundantAssignment
-            var result = TReturn.DefaultValue();
+            await ((CachingService) cachingServiceExpression.Value!).Invalidation.InvalidateAsync(
+                methodsInvalidatedByField.Value![index],
+                invalidatedMethod.Method.IsStatic ? null : meta.This,
+                MapArguments( invalidatedMethod ).Value );
 
-            try
-            {
-                var task = meta.ProceedAsync();
-
-                if ( !task.IsCompleted )
-                {
-                    // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
-                    // and the await instrumentation policy is not applied.
-                    activity.Suspend();
-
-                    try
-                    {
-                        result = await task;
-                    }
-                    finally
-                    {
-                        activity.Resume();
-                    }
-                }
-                else
-                {
-                    // Don't wrap any exception.
-                    result = task.GetAwaiter().GetResult();
-                }
-
-                var index = meta.CompileTime( 0 );
-
-                foreach ( var invalidatedMethod in invalidatedMethods )
-                {
-                    var invalidateTask = CachingServices.Default.Invalidation.InvalidateAsync(
-                        methodsInvalidatedByField.Value![index],
-                        invalidatedMethod.Method.IsStatic ? null : meta.This,
-                        MapArguments( invalidatedMethod ).Value );
-
-                    if ( !invalidateTask.IsCompleted )
-                    {
-                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
-                        // and the await instrumentation policy is not applied.
-                        activity.Suspend();
-
-                        try
-                        {
-                            await task;
-                        }
-                        finally
-                        {
-                            activity.Resume();
-                        }
-                    }
-
-                    ++index;
-                }
-
-                activity.SetSuccess();
-
-                return result;
-            }
-            catch ( Exception e )
-            {
-                activity.SetException( e );
-
-                throw;
-            }
+            ++index;
         }
+
+        return result;
     }
 
     [Template]
     private static async Task OverrideMethodAsyncTask(
-        IField logSourceField,
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
         IField methodsInvalidatedByField,
-        IType TReturn /* not used */ )
+        IType returnType /* not used */,
+        IField? cachingServiceField )
     {
-        // TODO: Abstract to RunTime helper where possible.
-
         // TODO: Automagically accept CancellationToken parameter?
 
-        using ( var activity = logSourceField.Value!.Default.OpenAsyncActivity(
-                   FormattedMessageBuilder.Formatted( $"Processing invalidation by method {meta.Target.Method.ToDisplayString()}" ) ) )
+        var result = await meta.ProceedAsync();
+
+        var index = meta.CompileTime( 0 );
+
+        foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            try
-            {
-                // ReSharper disable once MethodHasAsyncOverload
-                var task = meta.ProceedAsync();
+            await CachingServices.Default.Invalidation.InvalidateAsync(
+                methodsInvalidatedByField.Value![index],
+                invalidatedMethod.Method.IsStatic ? null : meta.This,
+                MapArguments( invalidatedMethod ).Value );
 
-                if ( !task.IsCompleted )
-                {
-                    // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
-                    // and the await instrumentation policy is not applied.
-                    activity.Suspend();
-
-                    try
-                    {
-                        await task;
-                    }
-                    finally
-                    {
-                        activity.Resume();
-                    }
-                }
-                else
-                {
-                    // Don't wrap any exception.
-                    task.GetAwaiter().GetResult();
-                }
-
-                var index = meta.CompileTime( 0 );
-
-                foreach ( var invalidatedMethod in invalidatedMethods )
-                {
-                    var invalidateTask = CachingServices.Default.Invalidation.InvalidateAsync(
-                        methodsInvalidatedByField.Value![index],
-                        invalidatedMethod.Method.IsStatic ? null : meta.This,
-                        MapArguments( invalidatedMethod ).Value );
-
-                    if ( !invalidateTask.IsCompleted )
-                    {
-                        // We need to call LogActivity.Suspend and LogActivity.Resume manually because we're in an aspect,
-                        // and the await instrumentation policy is not applied.
-                        activity.Suspend();
-
-                        try
-                        {
-                            await task;
-                        }
-                        finally
-                        {
-                            activity.Resume();
-                        }
-                    }
-
-                    ++index;
-                }
-
-                activity.SetSuccess();
-            }
-            catch ( Exception e )
-            {
-                activity.SetException( e );
-
-                throw;
-            }
+            ++index;
         }
     }
 
@@ -395,7 +286,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     /// Validates the given aspect attribute. If valid, adds details of the invalidated methods to <paramref name="invalidatedMethods"/>.
     /// </summary>
     /// <returns><see langword="false"/> if any <see cref="Severity.Error"/> severity diagnostics are reported; otherwise, <see langword="false"/>.</returns>
-    private static bool Validate(
+    private static bool ValidateAndFindInvalidatedMethods(
         IAspectBuilder<IMethod> builder,
         InvalidateCacheAttribute attribute,
         Dictionary<IMethod, InvalidatedMethodInfo> invalidatedMethods )
@@ -479,7 +370,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             // Match parameters.
             var invalidatedMethodParameters = invalidatedMethod.Parameters;
 
-            var invalidatedMethodInfo = new InvalidatedMethodInfo( invalidatedMethod );
+            var invalidatedMethodInfo = new InvalidatedMethodInfo(
+                invalidatedMethod,
+                cacheAspectConfiguration.UseDependencyInjection.GetValueOrDefault( true ) );
 
             var allParametersMatching = true;
 
@@ -613,9 +506,10 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     [CompileTime]
     public sealed class InvalidatedMethodInfo
     {
-        internal InvalidatedMethodInfo( IMethod method )
+        public InvalidatedMethodInfo( IMethod method, bool usesDependencyInjection )
         {
             this.Method = method;
+            this.UsesDependencyInjection = usesDependencyInjection;
             this.ParameterMap = new int[method.Parameters.Count];
 
             for ( var i = 0; i < this.ParameterMap.Length; i++ )
@@ -624,8 +518,10 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             }
         }
 
-        internal IMethod Method { get; }
+        public IMethod Method { get; }
 
-        internal int[] ParameterMap { get; }
+        public int[] ParameterMap { get; }
+
+        public bool UsesDependencyInjection { get; }
     }
 }
