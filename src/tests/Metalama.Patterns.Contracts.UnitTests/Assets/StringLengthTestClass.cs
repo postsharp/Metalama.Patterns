@@ -9,6 +9,6 @@ public class StringLengthTestClass
 
     // Incorrect warning at build time, but no squiggly.
 #pragma warning disable IDE0079 // Remove unnecessary suppression
-    public string StringMethod( [StringLength( 10 )] string parameter ) => parameter;
+    public string StringMethod( [StringLength( 10 )] string parameter ) => parameter!;
 #pragma warning restore IDE0079 // Remove unnecessary suppression
 }
