@@ -83,8 +83,6 @@ public class RedisCachingBackend : CachingBackend
         this._keyBuilder = keyBuilder;
         this._ownsConnection = false;
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
-
-        // [Porting] This line added to fix _createSerializerFunc being possible null. Might cause change of behaviour. 
         this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
     }
 
@@ -268,24 +266,27 @@ public class RedisCachingBackend : CachingBackend
         var sourceIdStr = tokenizer.GetNext();
         var key = tokenizer.GetRest();
 
-        // [Porting] Was `if ( kind == null || sourceIdStr == null || key == null )`, but tokenizer.GetNext() never returns null, so updated checks. May cause change in behaviour.
-        if ( string.IsNullOrEmpty( kind ) || string.IsNullOrEmpty( sourceIdStr ) || string.IsNullOrEmpty( key ) )
+        if ( kind.IsEmpty || sourceIdStr.IsEmpty || key.IsEmpty )
         {
             this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
 
             return;
         }
 
+#if NET6_0_OR_GREATER
         if ( !Guid.TryParse( sourceIdStr, out var sourceId ) )
+ #else
+        if ( !Guid.TryParse( sourceIdStr.ToString(), out var sourceId ) )
+#endif
         {
-            this.LogSource.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr ) );
+            this.LogSource.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr.ToString() ) );
 
             return;
         }
 
-        if ( !this.ProcessEvent( kind, key, sourceId ) )
+        if ( !this.ProcessEvent( kind.ToString(), key.ToString(), sourceId ) )
         {
-            this.LogSource.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind ) );
+            this.LogSource.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind.ToString()) );
         }
     }
 

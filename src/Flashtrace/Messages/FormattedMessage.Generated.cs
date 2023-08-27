@@ -44,7 +44,7 @@ public readonly struct FormattedMessage<T1> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 1 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -93,7 +93,7 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 2 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -102,7 +102,7 @@ public readonly struct FormattedMessage<T1, T2> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 2 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -151,7 +151,7 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -160,7 +160,7 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -169,7 +169,7 @@ public readonly struct FormattedMessage<T1, T2, T3> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 3 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 2, parameter, this.arg3, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -218,7 +218,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -227,7 +227,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -236,7 +236,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 2, parameter, this.arg3, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -245,7 +245,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 4 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 3, parameter, this.arg4, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -294,7 +294,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -303,7 +303,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -312,7 +312,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 2, parameter, this.arg3, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -321,7 +321,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 3, parameter, this.arg4, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -330,7 +330,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 5 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 4, parameter, this.arg5, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -379,7 +379,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -388,7 +388,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -397,7 +397,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 2, parameter, this.arg3, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -406,7 +406,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 3, parameter, this.arg4, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -415,7 +415,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 4, parameter, this.arg5, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -424,7 +424,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 6 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 5, parameter, this.arg6, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -473,7 +473,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -482,7 +482,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -491,7 +491,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 2, parameter, this.arg3, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -500,7 +500,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 3, parameter, this.arg4, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -509,7 +509,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 4, parameter, this.arg5, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -518,7 +518,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 5, parameter, this.arg6, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -527,7 +527,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7> : IMessage
 			throw new InvalidFormattingStringException("The formatting string must have exactly 7 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 6, parameter, arg7, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 6, parameter, this.arg7, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -576,7 +576,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -585,7 +585,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -594,7 +594,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 2, parameter, this.arg3, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -603,7 +603,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 3, parameter, this.arg4, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -612,7 +612,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 4, parameter, this.arg5, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -621,7 +621,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 5, parameter, this.arg6, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -630,7 +630,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 6, parameter, arg7, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 6, parameter, this.arg7, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -639,7 +639,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8> : IMessa
 			throw new InvalidFormattingStringException("The formatting string must have exactly 8 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 7, parameter, arg8, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 7, parameter, this.arg8, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -688,7 +688,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -697,7 +697,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -706,7 +706,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 2, parameter, this.arg3, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -715,7 +715,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 3, parameter, this.arg4, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -724,7 +724,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 4, parameter, this.arg5, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -733,7 +733,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 5, parameter, this.arg6, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -742,7 +742,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 6, parameter, arg7, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 6, parameter, this.arg7, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -751,7 +751,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 7, parameter, arg8, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 7, parameter, this.arg8, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -760,7 +760,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IM
 			throw new InvalidFormattingStringException("The formatting string must have exactly 9 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 8, parameter, arg9, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 8, parameter, this.arg9, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )
@@ -809,7 +809,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 0, parameter, arg1, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 0, parameter, this.arg1, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -818,7 +818,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 1, parameter, arg2, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 1, parameter, this.arg2, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -827,7 +827,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 2, parameter, arg3, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 2, parameter, this.arg3, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -836,7 +836,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 3, parameter, arg4, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 3, parameter, this.arg4, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -845,7 +845,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 4, parameter, arg5, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 4, parameter, this.arg5, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -854,7 +854,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 5, parameter, arg6, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 5, parameter, this.arg6, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -863,7 +863,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 6, parameter, arg7, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 6, parameter, this.arg7, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -872,7 +872,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 7, parameter, arg8, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 7, parameter, this.arg8, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -881,7 +881,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 8, parameter, arg9, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 8, parameter, this.arg9, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 
@@ -890,7 +890,7 @@ public readonly struct FormattedMessage<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 			throw new InvalidFormattingStringException("The formatting string must have exactly 10 parameters.");
 		}
 
-		recordBuilder.WriteParameter( 9, parameter, arg10, LogParameterOptions.FormattedStringParameter );
+		recordBuilder.WriteParameter( 9, parameter, this.arg10, LogParameterOptions.FormattedStringParameter );
 		recordBuilder.WriteString( parser.GetNextText() );
 
 		if ( parser.TryGetNextParameter( out _ ) )

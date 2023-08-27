@@ -2,17 +2,13 @@
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-// TODO: [Porting] Outdated?
-// TODO: [Porting] Consider using Microsoft.Toolkit.HighPerformance.Extensions.StringExtensions (now called CommunityToolkit)?
-
-// NB: Also used by Redis backend, copied local for now.
-// Ported from PostSharp.Patterns.Common/Utilities
-// Was [ExplicitCrossPackageInternal]
-internal ref struct StringTokenizer
+public ref struct StringTokenizer
 {
     private readonly ReadOnlySpan<char> _s;
     private readonly char _separator;
     private int _position;
+
+    public StringTokenizer( string s, char separator = ':' ) : this( s.AsSpan(), separator ) { }
 
     public StringTokenizer( ReadOnlySpan<char> s, char separator = ':' )
     {

@@ -34,9 +34,6 @@ public sealed class ObjectDependency : ICacheDependency
     /// <see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
     public bool Equals( ICacheDependency? other )
     {
-        // [Porting] NB: 'other' was [Required] but this did not make much sense, especially given the impl of Equals( object? obj ),
-        // and it broke nullable.
-
         if ( other is ObjectDependency otherObjectDependency )
         {
             return Equals( this.Object, otherObjectDependency.Object );

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -56,21 +57,20 @@ internal sealed class RedisKeyBuilder
 
         var tokenizer = new StringTokenizer( channelName );
 
-        // [Porting] Was `if ( tokenizer.GetNext() == null )`, but tokenizer.GetNext() never returns null. Updated check, behaviour may have changed. 
-        if ( string.IsNullOrEmpty( tokenizer.GetNext() ) )
+        if ( tokenizer.GetNext().IsEmpty )
         {
             return false;
         }
 
         var prefix = tokenizer.GetNext();
 
-        if ( prefix != this.KeyPrefix )
+        if ( prefix != this.KeyPrefix.AsSpan() )
         {
             return false;
         }
 
-        keyKind = tokenizer.GetNext();
-        itemKey = tokenizer.GetRest();
+        keyKind = tokenizer.GetNext().ToString();
+        itemKey = tokenizer.GetRest().ToString();
 
         return true;
     }

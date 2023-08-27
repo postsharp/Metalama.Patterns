@@ -339,7 +339,7 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
 
         void ILogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-        void ILogRecordBuilder.WriteParameter<T>( int index, ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
+        void ILogRecordBuilder.WriteParameter<T>( int index, in ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
             where T : default
         {
             this.WriteParameter( parameterName.ToString(), value, options );
@@ -379,7 +379,7 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
             }
         }
 
-        void ILogRecordBuilder.WriteString( ReadOnlySpan<char> span )
+        void ILogRecordBuilder.WriteString( in ReadOnlySpan<char> span )
         {
             if ( this._appendComma )
             {

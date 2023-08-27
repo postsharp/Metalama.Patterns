@@ -194,14 +194,14 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
 
         var prefix = tokenizer.GetNext();
 
-        if ( prefix != this._keyBuilder.KeyPrefix )
+        if ( prefix != this._keyBuilder.KeyPrefix.AsSpan() )
         {
             return;
         }
 
         var keyKind = tokenizer.GetNext();
 
-        var itemKey = tokenizer.GetRest();
+        var itemKey = tokenizer.GetRest().ToString();
 
         switch ( keyKind )
         {

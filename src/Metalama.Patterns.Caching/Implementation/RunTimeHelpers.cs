@@ -9,5 +9,5 @@ namespace Metalama.Patterns.Caching.Implementation;
 public static class RunTimeHelpers
 {
     public static MethodInfo ThrowIfMissing( this MethodInfo? methodInfo, string methodSignature )
-        => methodInfo ?? throw new MissingMethodException( $"The method could not be found: {methodSignature}" );
+        => methodInfo ?? throw new MissingMethodException( $"The method '{methodSignature}' could not be found." );
 }

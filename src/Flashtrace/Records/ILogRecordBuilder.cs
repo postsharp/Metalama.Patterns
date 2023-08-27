@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace.Formatters;
 using JetBrains.Annotations;
 
 // TODO: Consider normalizing the terms "Log Record", "Log Event" and "Log Entry" in type names etc, likely to "Log Record" et al. 
@@ -35,13 +34,13 @@ public interface ILogRecordBuilder : IDisposable
     /// <param name="parameterName">Name of the parameter.</param>
     /// <param name="value">Value of the parameter.</param>
     /// <param name="options">Options.</param>
-    void WriteParameter<T>( int index, ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options );
+    void WriteParameter<T>( int index, in ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options );
 
     /// <summary>
     /// Writes a string.
     /// </summary>
     /// <param name="str">A string.</param>
-    void WriteString( ReadOnlySpan<char> str );
+    void WriteString( in ReadOnlySpan<char> str );
 
     /// <summary>
     /// Assigns an <see cref="Exception"/> to the record.

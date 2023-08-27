@@ -80,10 +80,10 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, IRoleLoggerFac
 
     void IDisposable.Dispose() { }
 
-    void ILogRecordBuilder.WriteParameter<T>( int index, ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
+    void ILogRecordBuilder.WriteParameter<T>( int index, in ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
         where T : default { }
 
-    void ILogRecordBuilder.WriteString( ReadOnlySpan<char> str ) { }
+    void ILogRecordBuilder.WriteString( in ReadOnlySpan<char> str ) { }
 
     void ILogRecordBuilder.SetException( Exception e ) { }
 

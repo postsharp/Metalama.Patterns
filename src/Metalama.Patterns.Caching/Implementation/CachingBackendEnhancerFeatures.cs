@@ -9,8 +9,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// An abstract implementation of <see cref="CachingBackendEnhancerFeatures"/> for use in implementations of <see cref="CachingBackendEnhancer"/>,
 /// where the default behavior is to return the features of the underlying <see cref="CachingBackend"/>.
 /// </summary>
-[PublicAPI] // TODO: [Porting] Does CachingBackendEnhancerFeatures need to be public? 
-public abstract class CachingBackendEnhancerFeatures : CachingBackendFeatures
+internal abstract class CachingBackendEnhancerFeatures : CachingBackendFeatures
 {
     /// <summary>
     /// Gets the feature of the underlying <see cref="CachingBackend"/>.

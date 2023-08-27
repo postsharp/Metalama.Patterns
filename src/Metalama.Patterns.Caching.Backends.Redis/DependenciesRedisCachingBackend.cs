@@ -552,21 +552,21 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             var keyPrefix = tokenizer.GetNext();
 
-            if ( keyPrefix != this._keyBuilder.KeyPrefix )
+            if ( keyPrefix != this._keyBuilder.KeyPrefix.AsSpan() )
             {
-                this.LogSource.Warning.Write( Formatted( "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix ) );
+                this.LogSource.Warning.IfEnabled?.Write( Formatted( "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix.ToString() ) );
 
                 continue;
             }
 
-            var keyKind = tokenizer.GetNext();
+            var keyKind = tokenizer.GetNext().ToString();
 
             if ( keyKind == RedisKeyBuilder.GarbageCollectionPrefix )
             {
                 continue;
             }
 
-            var smallKey = tokenizer.GetRest();
+            var smallKey = tokenizer.GetRest().ToString();
 
             switch ( keyKind )
             {
