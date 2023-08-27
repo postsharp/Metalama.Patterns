@@ -26,6 +26,7 @@ public partial class CachingService
             throw new ArgumentNullException( nameof(metadata) );
         }
 #endif
+       
         var logSource = this.ServiceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
 
         object? result;

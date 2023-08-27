@@ -31,7 +31,6 @@ internal static class CompileTimeCacheConfigurationHelper
 
         return mergedConfiguration;
     }
-
     private static void PopulateConfigurations( INamedType type, List<CompileTimeCacheItemConfiguration> configurations )
     {
         var configuration = GetConfigurationOnDeclaration( type );
@@ -51,6 +50,11 @@ internal static class CompileTimeCacheConfigurationHelper
 
     private static CompileTimeCacheItemConfiguration? GetConfigurationOnDeclaration( IDeclaration declaration )
     {
+        if ( declaration.Attributes.Count == 0 )
+        {
+            return null;
+        }
+
         var attributeType = (INamedType) TypeFactory.GetType( typeof(CachingConfigurationAttribute) );
         var attr = declaration.Attributes.OfAttributeType( attributeType ).SingleOrDefault();
 

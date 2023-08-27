@@ -29,8 +29,10 @@ public static class CacheConfigurationAttributeTest
     }
 }
 
+[CachingConfiguration( UseDependencyInjection = false)]
 public sealed class LocalChildCachingClass : ReferencedChildCachingClass
 {
+    [CachingConfiguration( UseDependencyInjection = false )]
     public sealed class LocalInnerCachingClassInChild
     {
         [Cache]
@@ -47,8 +49,10 @@ public sealed class LocalChildCachingClass : ReferencedChildCachingClass
     }
 }
 
+[CachingConfiguration( UseDependencyInjection = false )]
 public sealed class LocalChildCachingClassOverridden : ReferencedChildCachingClassOverridden
 {
+    [CachingConfiguration( UseDependencyInjection = false )]
     public sealed class LocalInnerCachingClassInChildOverridden
     {
         [Cache]

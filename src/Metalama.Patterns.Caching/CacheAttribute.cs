@@ -10,6 +10,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Implementation;
+using System.Diagnostics;
 
 #if NET6_0_OR_GREATER
 using Metalama.Framework.RunTime;
@@ -173,6 +174,8 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         if ( effectiveConfiguration.UseDependencyInjection.GetValueOrDefault( true ) )
         {
+            Debugger.Break();
+
             if ( builder.Target.IsStatic )
             {
                 builder.Diagnostics.Report( CachingDiagnosticDescriptors.MethodCannotBeStaticBecauseItUsesDependencyInjection.WithArguments( builder.Target ) );

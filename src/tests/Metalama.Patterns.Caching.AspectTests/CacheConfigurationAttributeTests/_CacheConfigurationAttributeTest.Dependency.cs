@@ -3,7 +3,7 @@
 using Metalama.Patterns.Caching;
 using Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
-[assembly: CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName1, UseDependencyInjection = false )]
+[assembly: CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName1 )]
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
@@ -14,8 +14,10 @@ public static class TestValues
     public const string CacheConfigurationAttributeProfileName2 = "[B]";
 }
 
+[CachingConfiguration( UseDependencyInjection = false )]
 public class ReferencedParentCachingClass
 {
+    [CachingConfiguration( UseDependencyInjection = false )]
     public sealed class ReferencedInnerCachingClassInBase
     {
         [Cache]
@@ -32,8 +34,10 @@ public class ReferencedParentCachingClass
     }
 }
 
+[CachingConfiguration( UseDependencyInjection = false )]
 public class ReferencedChildCachingClass : ReferencedParentCachingClass
 {
+    [CachingConfiguration( UseDependencyInjection = false )]
     public sealed class ReferencedInnerCachingClassInChild
     {
         [Cache]
@@ -50,9 +54,10 @@ public class ReferencedChildCachingClass : ReferencedParentCachingClass
     }
 }
 
-[CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName2 )]
+[CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName2, UseDependencyInjection = false )]
 public class ReferencedParentCachingClassOverridden
 {
+    [CachingConfiguration( UseDependencyInjection = false )]
     public sealed class ReferencedInnerCachingClassInBaseOverridden
     {
         [Cache]
@@ -69,8 +74,10 @@ public class ReferencedParentCachingClassOverridden
     }
 }
 
+[CachingConfiguration( UseDependencyInjection = false )]
 public class ReferencedChildCachingClassOverridden : ReferencedParentCachingClassOverridden
 {
+    [CachingConfiguration( UseDependencyInjection = false )]
     public sealed class ReferencedInnerCachingClassInChildOverridden
     {
         [Cache]

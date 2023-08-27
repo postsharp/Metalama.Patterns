@@ -159,7 +159,17 @@ public class RedisTestInstance : IDisposable
 
         if ( Volatile.Read( ref portError ) )
         {
-            this._process.Kill();
+            if ( !this._process.HasExited )
+            {
+                try
+                {
+                    this._process.Kill();
+                }
+                catch ( Win32Exception )
+                {
+
+                }
+            }
 
             goto restart;
         }
@@ -183,7 +193,18 @@ public class RedisTestInstance : IDisposable
         {
             this._process.CancelOutputRead();
             this._process.StandardInput.Close();
-            this._process.Kill();
+
+            if ( !this._process.HasExited )
+            {
+                try
+                {
+                    this._process.Kill();
+                }
+                catch ( Win32Exception )
+                {
+
+                }
+            }
 
             if ( disposing )
             {

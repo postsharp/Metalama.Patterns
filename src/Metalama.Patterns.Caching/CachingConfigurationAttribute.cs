@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Caching;
 /// </remarks>
 [PublicAPI]
 [AttributeUsage( AttributeTargets.Class | AttributeTargets.Assembly )]
-[RunTime]
+[RunTimeOrCompileTime]
 public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigurationAttribute
 {
     /// <summary>
