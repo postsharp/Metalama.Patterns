@@ -1,6 +1,9 @@
 ﻿// THIS FILE IS T4-GENERATED.
 // To edit, go to NullLogger.Generated.tt.
-// To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" NullLogger.Generated.tt
+// To transform, run RunT4.ps1.
+
+ 
+    
 
 using Flashtrace.Contexts;
 using Flashtrace.Records;

@@ -41,11 +41,6 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>CacheInvalidation.Generated.cs</LastGenOutput>
     </T4Template>
-    <Compile Update="CachingService.Invalidation.g.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>CacheInvalidation.Generated.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>

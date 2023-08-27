@@ -1,7 +1,6 @@
 ﻿// THIS FILE IS T4-GENERATED.
 // To edit, go to CacheInvalidation.Generated.tt.
-// To transform, run this: "C:\Program Files\Microsoft Visual Studio\2022\17.0\Common7\IDE\TextTransform.exe" CachingService.Invalidation.g.tt
-// The transformation is not automatic because we are in a shared project.
+// To transform, run RunT4.ps1.
 
 <#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
