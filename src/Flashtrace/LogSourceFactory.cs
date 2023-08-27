@@ -10,7 +10,7 @@ namespace Flashtrace;
 public static class LogSourceFactory
 {
     public static ILoggerFactory DefaultFactory { get; set; } = new NullLogger();
-    
+
     public static IRoleLoggerFactory Default => DefaultFactory.ForRole( LoggingRoles.Default );
 
     public static IRoleLoggerFactory ForRole( string role ) => DefaultFactory.ForRole( role );

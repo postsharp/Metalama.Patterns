@@ -19,7 +19,7 @@ public abstract class BaseCachingTests
     }
 
     protected ServiceProvider ServiceProvider { get; }
-    
+
     protected ITestOutputHelper TestOutputHelper { get; }
 
     protected CachingBackend InitializeTestWithCachingBackend( string name )

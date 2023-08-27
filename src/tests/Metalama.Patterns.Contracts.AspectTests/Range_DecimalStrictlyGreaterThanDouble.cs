@@ -5,6 +5,5 @@ namespace Metalama.Patterns.Contracts.AspectTests;
 public class Range_DecimalStrictlyGreaterThanDouble
 {
     public void MethodWithDecimalStrictlyGreaterThanDouble(
-        [StrictlyGreaterThan( (double) decimal.MaxValue + ((double) decimal.MaxValue * 1e-6) )]
-        decimal? a ) { }
+        [StrictlyGreaterThan( (double) decimal.MaxValue + ((double) decimal.MaxValue * 1e-6) )] decimal? a ) { }
 }

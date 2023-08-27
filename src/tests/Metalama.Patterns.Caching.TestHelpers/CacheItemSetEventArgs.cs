@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         internal CacheItemSetEventArgs( string key, CacheItem item, string? sourceId )
         {
             this.Key = key ?? throw new ArgumentNullException( nameof(key) );
-            this.Item = item ?? throw new ArgumentNullException( nameof(item) ); 
+            this.Item = item ?? throw new ArgumentNullException( nameof(item) );
             this.SourceId = sourceId;
         }
     }

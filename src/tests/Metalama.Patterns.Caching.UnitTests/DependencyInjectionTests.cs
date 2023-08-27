@@ -30,7 +30,7 @@ public sealed class DependencyInjectionTests : BaseCachingTests
     private sealed class C
     {
         [Cache( UseDependencyInjection = true )]
-        
+
         // ReSharper disable once MemberCanBeMadeStatic.Local
 #pragma warning disable CA1822
         public string Method() => "DependencyInjection!";

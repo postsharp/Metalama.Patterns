@@ -73,10 +73,10 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     public async void IteratesExpectedSequence3()
     {
         var seq = this.Instance.CachedEnumerable();
-        
+
         // ReSharper disable once PossibleMultipleEnumeration
         await this.Iterate( seq.GetAsyncEnumerator() );
-        
+
         // ReSharper disable once PossibleMultipleEnumeration
         await this.Iterate( seq.GetAsyncEnumerator() );
 

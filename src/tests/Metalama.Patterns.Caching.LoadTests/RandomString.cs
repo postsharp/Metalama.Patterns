@@ -8,11 +8,11 @@ internal static class RandomString
     // ReSharper disable StringLiteralTypo
     private static readonly char[] _allowedChars =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#&@{}:;".ToCharArray();
-    
+
     // Random is not thread-safe
     [ThreadStatic]
     private static Random? _random;
-    
+
     // ReSharper restore StringLiteralTypo
 
     public static string New( int minLength, int maxLength )

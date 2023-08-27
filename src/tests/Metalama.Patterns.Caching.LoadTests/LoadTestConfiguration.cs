@@ -5,10 +5,10 @@ namespace Metalama.Patterns.Caching.LoadTests;
 internal record LoadTestConfiguration(
     int ClientsCount = default,
     Interval ValueKeyLength = default,
-    int ValueKeysCount = default, 
+    int ValueKeysCount = default,
     Interval ValueKeyExpiry = default,
     Interval ValueLength = default,
-    Interval DependencyKeyLength = default, 
-    int DependencyKeysCount = default, 
+    Interval DependencyKeyLength = default,
+    int DependencyKeysCount = default,
     Interval DependenciesPerValueCount = default,
     Interval ValuesPerSharedDependency = default );

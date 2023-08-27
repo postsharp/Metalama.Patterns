@@ -27,7 +27,7 @@ public record FormattingOptions( bool RequiresUnquotedStrings )
     /// Gets the <see cref="FormattingOptions"/> indicating that string should not be quoted.
     /// </summary>
     public static FormattingOptions Unquoted { get; } = new( true );
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="FormattingOptions"/> class by copying all values from another <see cref="FormattingOptions"/>.
     /// </summary>

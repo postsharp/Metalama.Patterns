@@ -191,7 +191,7 @@ public static class AsyncEnumerableHelper
         {
             return task.Result;
         }
-        
+
         return new EnumeratorFromValueTask<T>( task );
     }
 

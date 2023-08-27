@@ -12,7 +12,7 @@ internal sealed record RedisLoadTestConfiguration(
         int DependencyKeysCount = default,
         Interval DependenciesPerValueCount = default,
         Interval ValuesPerSharedDependency = default,
-        int CollectorsCount = default ) 
+        int CollectorsCount = default )
     : LoadTestConfiguration(
         ClientsCount,
         ValueKeyLength,
