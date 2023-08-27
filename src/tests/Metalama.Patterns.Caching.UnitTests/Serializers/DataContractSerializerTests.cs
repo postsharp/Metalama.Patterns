@@ -2,8 +2,6 @@
 
 #if NETFRAMEWORK
 using Metalama.Patterns.Caching.Serializers;
-using System.Runtime.Serialization;
-using Xunit;
 
 namespace Metalama.Patterns.Caching.Tests.Serializers;
 

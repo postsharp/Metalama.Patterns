@@ -1,11 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
-using Flashtrace.Formatters;
 using Flashtrace.Options;
 using Flashtrace.Records;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace.Loggers;
 
@@ -80,8 +78,10 @@ internal partial class NullLogger : ILogger, IContextLocalLogger, IRoleLoggerFac
 
     void IDisposable.Dispose() { }
 
+#pragma warning disable SA1000 // Keywords should be spaced correctly
     void ILogRecordBuilder.WriteParameter<T>( int index, in ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
         where T : default { }
+#pragma warning restore SA1000 // Keywords should be spaced correctly
 
     void ILogRecordBuilder.WriteString( in ReadOnlySpan<char> str ) { }
 

@@ -247,7 +247,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     {
         // TODO: Automagically accept CancellationToken parameter?
 
-        var result = await meta.ProceedAsync();
+        await meta.ProceedAsync();
 
         var index = meta.CompileTime( 0 );
 

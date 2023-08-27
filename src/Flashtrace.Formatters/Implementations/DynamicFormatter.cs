@@ -28,11 +28,8 @@ internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
         }
         else
         {
-            if ( this._otherFormatter == null )
-            {
-                // There are just two options currently.
-                this._otherFormatter = new DynamicFormatter<TValue>( this.Repository, this._options );
-            }
+            // There are just two options currently.
+            this._otherFormatter ??= new DynamicFormatter<TValue>( this.Repository, this._options );
 
             return this._otherFormatter;
         }
@@ -46,13 +43,9 @@ internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
         }
         else
         {
-            var formatter = this.Repository.Get( value.GetType() ).WithOptions( this._options );
-
-            if ( formatter == null )
-            {
-                throw new FormattersAssertionFailedException(
-                    string.Format( CultureInfo.InvariantCulture, "Cannot get a formatter for type {0}.", value.GetType() ) );
-            }
+            var formatter = this.Repository.Get( value.GetType() ).WithOptions( this._options )
+                ?? throw new FormattersAssertionFailedException(
+                        string.Format( CultureInfo.InvariantCulture, "Cannot get a formatter for type {0}.", value.GetType() ) );
 
             if ( (formatter.Attributes & FormatterAttributes.Dynamic) != 0 )
             {

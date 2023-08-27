@@ -42,12 +42,12 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     private bool? _useDependencyInjection;
 
     /// <summary>
-    /// Gets the name of the <see cref="CachingProfile"/>  that contains the configuration of the cached methods.
+    /// Gets or sets the name of the <see cref="CachingProfile"/>  that contains the configuration of the cached methods.
     /// </summary>
     public string? ProfileName { get; set; }
 
     /// <summary>
-    /// Gets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
+    /// Gets or sets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
     /// when the cache item is removed from the cache.
     /// </summary>
     public bool AutoReload
@@ -57,7 +57,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     }
 
     /// <summary>
-    /// Gets the total duration, in minutes, during which the result of the current method is stored in cache. The absolute
+    /// Gets or sets the total duration, in minutes, during which the result of the current method is stored in cache. The absolute
     /// expiration time is counted from the moment the method is evaluated and cached.
     /// </summary>
     public double AbsoluteExpiration
@@ -67,7 +67,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     }
 
     /// <summary>
-    /// Gets the duration, in minutes, during which the result of the current method is stored in cache after it has been
+    /// Gets or sets he duration, in minutes, during which the result of the current method is stored in cache after it has been
     /// added to or accessed from the cache. The expiration is extended every time the value is accessed from the cache.
     /// </summary>
     public double SlidingExpiration
@@ -77,7 +77,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     }
 
     /// <summary>
-    /// Gets the priority of the current method.
+    /// Gets or sets the priority of the current method.
     /// </summary>
     public CacheItemPriority Priority
     {
@@ -86,7 +86,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     }
 
     /// <summary>
-    /// Gets a value indicating whether the <c>this</c> instance should be a part of the cache key. The default value of this property is <c>false</c>,
+    /// Gets or sets a value indicating whether the <c>this</c> instance should be a part of the cache key. The default value of this property is <c>false</c>,
     /// which means that by default the <c>this</c> instance is a part of the cache key.
     /// </summary>
     public bool IgnoreThisParameter
