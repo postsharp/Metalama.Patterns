@@ -3,7 +3,7 @@
 using Metalama.Patterns.Caching;
 using Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
-[assembly: CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName1 )]
+[assembly: CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName1, UseDependencyInjection = false)]
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
