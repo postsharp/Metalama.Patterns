@@ -30,9 +30,9 @@ internal static class CompileTimeHelpers
         var sha = SHA256.Create();
         var bytes = sha.ComputeHash( Encoding.UTF8.GetBytes( id.ToString() ) );
 
-#pragma warning disable CA1307 // Specify StringComparison for clarity
+#pragma warning disable CA1307 // Use the .NET Standard 2.0 overload because we are in compile-time code.
         var hash = BitConverter.ToString( bytes, 0, 16 ).Replace( "-", string.Empty );
-#pragma warning restore CA1307 // Specify StringComparison for clarity
+#pragma warning restore CA1307
 
         return prefix + "_" + hash;
     }

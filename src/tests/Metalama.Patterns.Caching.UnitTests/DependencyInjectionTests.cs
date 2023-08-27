@@ -21,13 +21,13 @@ public sealed class DependencyInjectionTests : BaseCachingTests
         serviceCollection.AddSingleton( cachingService );
         serviceCollection.AddSingleton<C>();
         var c = (C) serviceCollection.BuildServiceProvider().GetService( typeof(C) )!;
-        c.Method();
+        _ = c.Method();
 
         Assert.NotNull( backend.LastCachedItem );
         Assert.Equal( "DependencyInjection!", backend.LastCachedItem.Value );
     }
 
-    private class C
+    private sealed class C
     {
         [Cache( UseDependencyInjection = true )]
         

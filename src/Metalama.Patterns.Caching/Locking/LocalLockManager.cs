@@ -100,13 +100,11 @@ public sealed class LocalLockManager : ILockManager
         }
 
 #if DEBUG
-#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
 #pragma warning disable CA1821 // Remove empty Finalizers
         ~LockHandle()
         {
             throw new CachingAssertionFailedException( "The Dispose method has not been invoked." );
         }
-#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
 #pragma warning restore CA1821 // Remove empty Finalizers
 #endif
     }
@@ -120,9 +118,7 @@ public sealed class LocalLockManager : ILockManager
 
         // This locks prevents a data race between AddReference and RemoveReference. 
         // It enforces the following invariant: this.References == 0 and 'this' is not present in in this.parent.lock.
-#pragma warning disable IDE0044 // Add readonly modifier (this is a mutable struct type)
         private SpinLock _spinLock;
-#pragma warning restore IDE0044 // Add readonly modifier
 
         public Lock( LocalLockManager parent, string key ) : base( 1 )
         {

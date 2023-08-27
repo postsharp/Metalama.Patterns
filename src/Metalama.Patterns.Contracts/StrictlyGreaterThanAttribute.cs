@@ -4,8 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
-#pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
-
 // Resharper disable RedundantCast
 
 namespace Metalama.Patterns.Contracts;

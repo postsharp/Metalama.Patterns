@@ -88,7 +88,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
             }
             catch ( Exception e ) when ( activity != null )
             {
-                activity?.SetException( e );
+                activity.Value.SetException( e );
             }
         }
     }
@@ -109,9 +109,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
 
                 activity.SetSuccess();
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch ( Exception e )
-#pragma warning restore CA1031 // Do not catch general exception types
             {
                 activity.SetException( e );
             }

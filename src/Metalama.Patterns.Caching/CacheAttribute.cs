@@ -9,8 +9,11 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.RunTime;
 using Metalama.Patterns.Caching.Implementation;
+
+#if NET6_0_OR_GREATER
+using Metalama.Framework.RunTime;
+#endif
 
 namespace Metalama.Patterns.Caching;
 
@@ -29,7 +32,7 @@ namespace Metalama.Patterns.Caching;
 /// Finally, you can define a profile by setting the <see cref="ProfileName"/> property and configure the profile at run time
 /// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="CachingService"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
-/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and <see cref="CachingService.Invalidation"/>.</para>
+/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="CachingService.Invalidate(object)"/> method.</para>
 /// </remarks>
 [PublicAPI]
 public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribute

@@ -6,7 +6,6 @@ namespace Metalama.Patterns.Caching;
 /// Enumerates the kinds of <see cref="ICachingContext"/>.
 /// </summary>
 [Flags]
-#pragma warning disable CA1714 // Flags enums should have plural names
 public enum CachingContextKind
 {
     /// <summary>
@@ -21,7 +20,7 @@ public enum CachingContextKind
 
     /// <summary>
     /// The <see cref="ICachingContext"/> of a method being re-evaluated, ignoring the previous value, and replaced into the cache, using the
-    /// <see cref="CacheInvalidationService.Recache{TReturn}"/> method.
+    /// <see cref="CachingService.Recache{TReturn}"/> method.
     /// </summary>
     Recache = 2
 }

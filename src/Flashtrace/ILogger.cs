@@ -4,7 +4,6 @@ using Flashtrace.Contexts;
 using Flashtrace.Options;
 using Flashtrace.Records;
 using JetBrains.Annotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace;
 
@@ -111,7 +110,6 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// Gets the logger for the current context.
     /// </summary>
     /// <returns></returns>
-    [SuppressMessage( "Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Expensive to evaluate." )]
     IContextLocalLogger GetContextLocalLogger();
 
     /// <summary>

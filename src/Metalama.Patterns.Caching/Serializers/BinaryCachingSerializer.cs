@@ -23,9 +23,8 @@ public sealed class BinaryCachingSerializer : ICachingSerializer
 
         using ( var stream = new MemoryStream() )
         {
-#pragma warning disable SYSLIB0011
             this._serializer.Serialize( stream, value );
-#pragma warning restore SYSLIB0011
+
             return stream.ToArray();
         }
     }
@@ -40,9 +39,7 @@ public sealed class BinaryCachingSerializer : ICachingSerializer
 
         using ( var stream = new MemoryStream( array ) )
         {
-#pragma warning disable SYSLIB0011
             return this._serializer.Deserialize( stream );
-#pragma warning restore SYSLIB0011
         }
     }
 }

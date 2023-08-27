@@ -37,10 +37,8 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected CachingBackend( CachingBackendConfiguration? configuration )
     {
         this.Configuration = configuration ?? new MemoryCachingBackendConfiguration();
-#pragma warning disable 618
         this.LogSource = this.Configuration.ServiceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
         this.DebugName = this.Id.ToString();
-#pragma warning restore 618
     }
 
     internal string DebugName { get; set; }
@@ -877,9 +875,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     protected virtual void DisposeCore( bool disposing )
     {
-#pragma warning disable 612
         if ( !this.WhenBackgroundTasksCompleted( CancellationToken.None ).Wait( _disposeTimeout ) )
-#pragma warning restore 612
         {
             throw new TimeoutException( "Timeout when waiting for background tasks to complete." );
         }
@@ -938,9 +934,8 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected virtual async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
     {
         var delay = Task.Delay( _disposeTimeout, cancellationToken );
-#pragma warning disable 612
         var task = await Task.WhenAny( this.WhenBackgroundTasksCompleted( cancellationToken ), delay );
-#pragma warning restore 612
+
         if ( task == delay )
         {
             throw new TimeoutException( "Timeout when waiting for background tasks to complete." );

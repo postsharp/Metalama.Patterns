@@ -10,9 +10,6 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 
-#pragma warning disable SA1124
-#pragma warning disable LAMA0048
-
 public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;

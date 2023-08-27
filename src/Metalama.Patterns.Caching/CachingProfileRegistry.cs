@@ -7,8 +7,6 @@ using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.ComponentModel;
 
-#pragma warning disable CA1034 // Nested types should not be visible
-
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
@@ -78,9 +76,7 @@ public sealed class CachingProfileRegistry
                 profile = new CachingProfile( profileName, this._cachingService );
                 newDictionary = oldDictionary.SetItem( profile.Name, profile );
             }
-#pragma warning disable 420
             while ( Interlocked.CompareExchange( ref this._profiles, newDictionary, oldDictionary ) != oldDictionary );
-#pragma warning restore 420
 
             this.OnChange();
 

@@ -195,7 +195,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
 
         var prefix = tokenizer.GetNext( ':' );
 
-        if ( !prefix.Equals( this._keyBuilder.KeyPrefix.AsSpan(), StringComparison.Ordinal) )
+        if ( !prefix.Equals( this._keyBuilder.KeyPrefix.AsSpan(), StringComparison.Ordinal ) )
         {
             return;
         }

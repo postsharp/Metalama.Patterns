@@ -71,8 +71,14 @@ public class TypeFormatterTests : FormattersTestsBase
         this.TestFormatter( typeof(TestType.InnerType), "Flashtrace.Formatters.UnitTests.TestType.InnerType" );
         this.TestFormatter( typeof(IEnumerable<TestType.InnerType>), "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType>" );
         this.TestFormatter( typeof(TestType.InnerType.MoreInnerType), "Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType" );
-        this.TestFormatter( typeof(IEnumerable<TestType.InnerType.MoreInnerType>), "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType>" );
-        this.TestFormatter( typeof(TestType.InnerType.MoreInnerType.EvenMoreInnerType), "Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType.EvenMoreInnerType" );
+
+        this.TestFormatter(
+            typeof(IEnumerable<TestType.InnerType.MoreInnerType>),
+            "IEnumerable<Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType>" );
+
+        this.TestFormatter(
+            typeof(TestType.InnerType.MoreInnerType.EvenMoreInnerType),
+            "Flashtrace.Formatters.UnitTests.TestType.InnerType.MoreInnerType.EvenMoreInnerType" );
 
         this.TestFormatter(
             typeof(IEnumerable<TestType.InnerType.MoreInnerType.EvenMoreInnerType>),
@@ -124,7 +130,6 @@ public class TypeFormatterTests : FormattersTestsBase
 // ReSharper disable MemberCanBeInternal
 // ReSharper disable UnusedTypeParameter
 #pragma warning disable SA1314
-#pragma warning disable SA1403
 #pragma warning disable SA1402
 
 public class TestType

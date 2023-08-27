@@ -5,9 +5,7 @@ namespace Flashtrace.Formatters.UnitTests.Assets;
 internal class ThrowingFormatter<T> : Formatter<IEnumerable<T>>
 {
     // ReSharper disable once StaticMemberInGenericType
-#pragma warning disable SA1401
     public static bool Ran;
-#pragma warning restore SA1401
 
     public ThrowingFormatter( IFormatterRepository repository ) : base( repository )
     {

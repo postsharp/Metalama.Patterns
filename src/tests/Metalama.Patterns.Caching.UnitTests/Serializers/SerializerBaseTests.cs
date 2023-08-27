@@ -57,9 +57,7 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
 #pragma warning restore SA1401
 
             [DataMember]
-#pragma warning disable SA1401
             public int Value { get; set; } = NextValue++;
-#pragma warning restore SA1401
         }
     }
 }

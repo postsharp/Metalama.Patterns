@@ -30,9 +30,7 @@ public class RedisCachingBackend : CachingBackend
     private protected readonly RedisKeyBuilder _keyBuilder;
 #pragma warning restore SA1401
 
-#pragma warning disable CA2213 // We're doing DisposeAsync.
     private RedisNotificationQueue? _notificationQueue;
-#pragma warning restore CA2213
 
     /// <summary>
     /// Gets <see cref="_notificationQueue"/> if not null, otherwise throws <see cref="RedisCachingBackendAssertionFailedException"/>.
@@ -190,9 +188,7 @@ public class RedisCachingBackend : CachingBackend
 
             if ( configuration.IsLocallyCached )
             {
-#pragma warning disable CA2000 // Dispose objects before losing scope
                 enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
-#pragma warning restore CA2000 // Dispose objects before losing scope
             }
             else
             {
@@ -234,7 +230,7 @@ public class RedisCachingBackend : CachingBackend
             return;
         }
 
-        if (! keyKind.Equals( RedisKeyBuilder.ValueKindPrefix.AsSpan(), StringComparison.Ordinal ) )
+        if ( !keyKind.Equals( RedisKeyBuilder.ValueKindPrefix.AsSpan(), StringComparison.Ordinal ) )
         {
             return;
         }

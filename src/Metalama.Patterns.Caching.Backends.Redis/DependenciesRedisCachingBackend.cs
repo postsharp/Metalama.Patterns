@@ -146,14 +146,10 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             this.RemoveDependenciesTransaction( key, dependencies, transaction );
         }
 
-#pragma warning disable 4014
-
         this.LogSource.Debug.Write( Formatted( "KeyDelete({Key})", dependenciesKey ) );
         transaction.KeyDeleteAsync( dependenciesKey );
         this.LogSource.Debug.Write( Formatted( "KeyDelete({Key})", valueKey ) );
         transaction.KeyDeleteAsync( valueKey );
-
-#pragma warning restore 4014
     }
 
     internal void RemoveDependenciesTransaction( string key, string[]? dependencies, ITransaction transaction )
@@ -260,7 +256,6 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         for ( var attempt = 0; attempt < this.Configuration.TransactionMaxRetries + 1; attempt++ )
         {
             var transaction = this.Database.CreateTransaction();
-#pragma warning disable 4014
 
             var version = await this.Database.ListGetByIndexAsync( valueKey, _itemVersionIndex );
 
@@ -294,8 +289,6 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             }
 
             this.SetItemTransaction( key, item, transaction );
-
-#pragma warning restore 4014
 
             if ( await transaction.ExecuteAsync() )
             {

@@ -13,7 +13,7 @@ public static class CharSpanExtensions
 #else
         unsafe
         {
-            fixed ( char* s = span)
+            fixed ( char* s = span )
             {
                 stringBuilder.Append( s, span.Length );
             }

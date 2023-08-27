@@ -18,9 +18,7 @@ public class RegexTestClass
 
     // Incorrect warning at build time, but no squiggly.
 #pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable CS8603  // Possible null reference return.
     public string SetEmail( [RegularExpression( ".+@.+" )] string email ) => email;
-#pragma warning restore CS8603  // Possible null reference return.
 #pragma warning restore IDE0079 // Remove unnecessary suppression
 
     [RegularExpression( @"^[a-z]{4}$" )]

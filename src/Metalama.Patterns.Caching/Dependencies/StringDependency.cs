@@ -13,10 +13,8 @@ public sealed class StringDependency : ICacheDependency
 {
     private readonly string _key;
 
-#pragma warning disable CA1024 // Use properties where appropriate
     /// <inheritdoc />
     public string GetCacheKey() => this._key;
-#pragma warning restore CA1024 // Use properties where appropriate
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StringDependency"/> class.

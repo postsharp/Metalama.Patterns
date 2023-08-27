@@ -167,7 +167,6 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
     // ReSharper disable InconsistentNaming
     // ReSharper disable UnusedParameter.Global
-#pragma warning disable SA1313
 
     [Template]
     private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
@@ -264,7 +263,6 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
     // ReSharper restore InconsistentNaming
     // ReSharper restore UnusedParameter.Global
-#pragma warning restore SA1313
 
     private static IExpression MapArguments( InvalidatedMethodInfo invalidatedMethod )
     {

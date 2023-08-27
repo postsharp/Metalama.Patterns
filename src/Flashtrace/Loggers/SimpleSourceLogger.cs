@@ -226,7 +226,6 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
 
     string ILogger.Role => null;
 
-    [SuppressMessage( "Microsoft.Design", "CA1031" )]
     void ILoggerExceptionHandler.OnInvalidUserCode( in CallerInfo callerInfo, string format, params object[] args )
     {
         try
@@ -240,7 +239,6 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
         catch { }
     }
 
-    [SuppressMessage( "Microsoft.Design", "CA1031" )]
     void ILoggerExceptionHandler.OnInternalException( Exception exception )
     {
         try

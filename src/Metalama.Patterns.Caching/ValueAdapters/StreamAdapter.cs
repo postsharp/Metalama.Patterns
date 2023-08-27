@@ -40,9 +40,8 @@ internal sealed class StreamAdapter : ValueAdapter<Stream>
         using ( var memoryStream = new MemoryStream() )
         {
             int bytes;
-#pragma warning disable CA1835 // Use Memory<T> instead of T[]
+
             while ( (bytes = await value.ReadAsync( buffer, 0, buffer.Length, cancellationToken )) > 0 )
-#pragma warning disable CA1835 // Use Memory<T> instead of T[]
             {
                 memoryStream.Write( buffer, 0, bytes );
             }
