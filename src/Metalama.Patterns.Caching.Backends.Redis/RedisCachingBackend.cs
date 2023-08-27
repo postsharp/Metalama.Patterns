@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
+using Metalama.Patterns.Caching.Utilities;
 using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
@@ -233,7 +234,7 @@ public class RedisCachingBackend : CachingBackend
             return;
         }
 
-        if ( keyKind != RedisKeyBuilder.ValueKindPrefix )
+        if (! keyKind.Equals( RedisKeyBuilder.ValueKindPrefix.AsSpan(), StringComparison.Ordinal ) )
         {
             return;
         }
@@ -256,15 +257,15 @@ public class RedisCachingBackend : CachingBackend
                 return;
         }
 
-        this.OnItemRemoved( itemKey, reason, Guid.Empty );
+        this.OnItemRemoved( itemKey.ToString(), reason, Guid.Empty );
     }
 
     private void ProcessEvent( RedisNotification notification )
     {
         var tokenizer = new StringTokenizer( notification.Value );
-        var kind = tokenizer.GetNext();
-        var sourceIdStr = tokenizer.GetNext();
-        var key = tokenizer.GetRest();
+        var kind = tokenizer.GetNext( ':' );
+        var sourceIdStr = tokenizer.GetNext( ':' );
+        var key = tokenizer.GetRemainder();
 
         if ( kind.IsEmpty || sourceIdStr.IsEmpty || key.IsEmpty )
         {
@@ -275,7 +276,7 @@ public class RedisCachingBackend : CachingBackend
 
 #if NET6_0_OR_GREATER
         if ( !Guid.TryParse( sourceIdStr, out var sourceId ) )
- #else
+#else
         if ( !Guid.TryParse( sourceIdStr.ToString(), out var sourceId ) )
 #endif
         {
@@ -286,7 +287,7 @@ public class RedisCachingBackend : CachingBackend
 
         if ( !this.ProcessEvent( kind.ToString(), key.ToString(), sourceId ) )
         {
-            this.LogSource.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind.ToString()) );
+            this.LogSource.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind.ToString() ) );
         }
     }
 

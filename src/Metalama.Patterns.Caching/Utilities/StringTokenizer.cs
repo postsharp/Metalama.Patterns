@@ -1,29 +1,30 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Caching.Implementation;
+using JetBrains.Annotations;
 
+namespace Metalama.Patterns.Caching.Utilities;
+
+[PublicAPI]
 public ref struct StringTokenizer
 {
     private readonly ReadOnlySpan<char> _s;
-    private readonly char _separator;
     private int _position;
 
-    public StringTokenizer( string s, char separator = ':' ) : this( s.AsSpan(), separator ) { }
+    public StringTokenizer( string s ) : this( s.AsSpan() ) { }
 
-    public StringTokenizer( ReadOnlySpan<char> s, char separator = ':' )
+    public StringTokenizer( ReadOnlySpan<char> s )
     {
         this._s = s;
         this._position = 0;
-        this._separator = separator;
     }
 
-    public ReadOnlySpan<char> GetNext()
+    public ReadOnlySpan<char> GetNext( char separator )
     {
         var oldPosition = this._position;
 
         for ( var i = oldPosition; i < this._s.Length; i++ )
         {
-            if ( this._s[i] == this._separator )
+            if ( this._s[i] == separator )
             {
                 this._position = i + 1;
 
@@ -31,8 +32,14 @@ public ref struct StringTokenizer
             }
         }
 
-        return this.GetRest();
+        return this.GetRemainder();
     }
 
-    public ReadOnlySpan<char> GetRest() => this._s.Slice( this._position );
+    public ReadOnlySpan<char> GetRemainder()
+    {
+        var oldPosition = this._position;
+        this._position = this._s.Length;
+
+        return this._s.Slice( oldPosition );
+    }
 }

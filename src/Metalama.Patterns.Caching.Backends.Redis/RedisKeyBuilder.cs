@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Utilities;
 using StackExchange.Redis;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -50,27 +51,29 @@ internal sealed class RedisKeyBuilder
         return this.KeyPrefix + ":" + DependenciesKindPrefix + ":" + item;
     }
 
-    public bool TryParseKeyspaceNotification( string channelName, [NotNullWhen( true )] out string? keyKind, [NotNullWhen( true )] out string? itemKey )
+    public bool TryParseKeyspaceNotification( string channelName, out ReadOnlySpan<char> keyKind, out ReadOnlySpan<char> itemKey )
     {
         keyKind = null;
         itemKey = null;
 
         var tokenizer = new StringTokenizer( channelName );
 
-        if ( tokenizer.GetNext().IsEmpty )
+        // Consume the keyspace prefix.
+        if ( tokenizer.GetNext( ':' ).IsEmpty )
         {
             return false;
         }
 
-        var prefix = tokenizer.GetNext();
+        // Get and match our own prefix.
+        var prefix = tokenizer.GetNext( ':' );
 
-        if ( prefix != this.KeyPrefix.AsSpan() )
+        if ( !prefix.Equals( this.KeyPrefix.AsSpan(), StringComparison.Ordinal ) )
         {
             return false;
         }
 
-        keyKind = tokenizer.GetNext().ToString();
-        itemKey = tokenizer.GetRest().ToString();
+        keyKind = tokenizer.GetNext( ':' );
+        itemKey = tokenizer.GetRemainder();
 
         return true;
     }

@@ -3,6 +3,7 @@
 using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Utilities;
 using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
@@ -190,18 +191,18 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         var tokenizer = new StringTokenizer( channelName );
 
         // Was: `if ( tokenizer.GetNext() == null ) return;` - However, GetNext() never returns null, but does have side effects, so using discard.   
-        _ = tokenizer.GetNext();
+        _ = tokenizer.GetNext( ':' );
 
-        var prefix = tokenizer.GetNext();
+        var prefix = tokenizer.GetNext( ':' );
 
-        if ( prefix != this._keyBuilder.KeyPrefix.AsSpan() )
+        if ( !prefix.Equals( this._keyBuilder.KeyPrefix.AsSpan(), StringComparison.Ordinal) )
         {
             return;
         }
 
-        var keyKind = tokenizer.GetNext();
+        var keyKind = tokenizer.GetNext( ':' );
 
-        var itemKey = tokenizer.GetRest().ToString();
+        var itemKey = tokenizer.GetRemainder().ToString();
 
         switch ( keyKind )
         {

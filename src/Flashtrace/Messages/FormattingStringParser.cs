@@ -46,6 +46,8 @@ internal ref struct FormattingStringParser
                 return -1;
             }
 
+            index += cursor;
+
             if ( index < this._str.Length - 1 && this._str[index + 1] == separator )
             {
                 unescape = true;

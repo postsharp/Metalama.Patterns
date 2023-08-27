@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Utilities;
 using Metalama.Patterns.Contracts;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
@@ -71,10 +72,10 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     /// <param name="message">The serialized invalidation message.</param>
     protected void OnMessageReceived( [Required] string message )
     {
-        var tokenizer = new StringTokenizer( message.AsSpan() );
-        var prefix = tokenizer.GetNext();
+        var tokenizer = new StringTokenizer( message );
+        var prefix = tokenizer.GetNext( ':' );
 
-        if ( prefix.Equals( this.Options.Prefix.AsSpan(), StringComparison.Ordinal ) )
+        if ( !prefix.Equals( this.Options.Prefix.AsSpan(), StringComparison.Ordinal ) )
         {
             return;
         }
@@ -83,8 +84,8 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
 
         try
         {
-            var kind = tokenizer.GetNext();
-            var backendIdStr = tokenizer.GetNext();
+            var kind = tokenizer.GetNext( ':' );
+            var backendIdStr = tokenizer.GetNext( ':' );
 
 #if NET6_0_OR_GREATER
             if ( !Guid.TryParse( backendIdStr, out var sourceId ) )
@@ -99,7 +100,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
                 return;
             }
 
-            var key = tokenizer.GetRest().ToString();
+            var key = tokenizer.GetRemainder().ToString();
 
             // We use synchronous APIs because most the typical consumer of InvalidationBroker is synchronous.
 

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Utilities;
 using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
@@ -550,23 +551,24 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             var tokenizer = new StringTokenizer( key );
 
-            var keyPrefix = tokenizer.GetNext();
+            var keyPrefix = tokenizer.GetNext( ':' );
 
-            if ( keyPrefix != this._keyBuilder.KeyPrefix.AsSpan() )
+            if ( !keyPrefix.Equals( this._keyBuilder.KeyPrefix.AsSpan(), StringComparison.Ordinal ) )
             {
-                this.LogSource.Warning.IfEnabled?.Write( Formatted( "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix.ToString() ) );
+                this.LogSource.Warning.IfEnabled?.Write(
+                    Formatted( "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix.ToString() ) );
 
                 continue;
             }
 
-            var keyKind = tokenizer.GetNext().ToString();
+            var keyKind = tokenizer.GetNext( ':' ).ToString();
 
             if ( keyKind == RedisKeyBuilder.GarbageCollectionPrefix )
             {
                 continue;
             }
 
-            var smallKey = tokenizer.GetRest().ToString();
+            var smallKey = tokenizer.GetRemainder().ToString();
 
             switch ( keyKind )
             {
