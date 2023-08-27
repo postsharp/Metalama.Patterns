@@ -8,6 +8,8 @@ public class StringLengthTestClass
     public string StringField;
 
     // Incorrect warning at build time, but no squiggly.
+    // ReSharper disable once RedundantSuppressNullableWarningExpression
+
 #pragma warning disable IDE0079 // Remove unnecessary suppression
     public string StringMethod( [StringLength( 10 )] string parameter ) => parameter!;
 #pragma warning restore IDE0079 // Remove unnecessary suppression

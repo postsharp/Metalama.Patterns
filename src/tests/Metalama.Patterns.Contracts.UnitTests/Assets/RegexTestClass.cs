@@ -17,6 +17,8 @@ public class RegexTestClass
     public string UrlField;
 
     // Incorrect warning at build time, but no squiggly.
+    // ReSharper disable once RedundantSuppressNullableWarningExpression
+
 #pragma warning disable IDE0079 // Remove unnecessary suppression
     public string SetEmail( [RegularExpression( ".+@.+" )] string email ) => email!;
 #pragma warning restore IDE0079 // Remove unnecessary suppression
