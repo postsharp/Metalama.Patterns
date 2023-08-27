@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 
 namespace Flashtrace.Formatters;
 
+#pragma warning disable SA1003
+
 /// <summary>
 /// A class similar to <see cref="System.Text.StringBuilder"/>, but implemented using unsafe C#.
 /// </summary>
