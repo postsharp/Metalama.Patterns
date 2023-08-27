@@ -149,7 +149,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
             this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
 
 #if DEBUG
-            this._logger.Debug.EnabledOrNull?.Write(
+            this._logger.Debug.IfEnabled?.Write(
                 FormattedMessageBuilder.Formatted( "Stack trace that created the failing task: {StackTrace}", pendingTask.StackTrace ) );
 #endif
 

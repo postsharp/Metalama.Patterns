@@ -11,7 +11,7 @@ internal interface ICachingConfigurationAttribute
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the cached methods.
     /// </summary>
-    string ProfileName { get; set; }
+    string? ProfileName { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)

@@ -5,6 +5,7 @@ using Flashtrace.Formatters;
 using Flashtrace.Messages;
 using Flashtrace.Options;
 using Flashtrace.Records;
+using Flashtrace.Utilities;
 using JetBrains.Annotations;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -34,8 +35,12 @@ namespace Flashtrace.Loggers;
  */
 
 /// <summary>
-/// A base class for implementations of <see cref="ILogger"/> that cannot depend on the <c>PostSharp.Patterns.Diagnostics</c> package.
+/// A base class for simple and low-performance implementations of <see cref="ILogger"/>.
 /// </summary>
+/// <remarks>
+/// <para>The simplification stems from the wrapping of all message arguments in an object array, which
+/// allocates memory.</para>
+/// </remarks>
 [PublicAPI]
 public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
 {
@@ -155,24 +160,17 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
         }
         else
         {
-            var parser = new FormattingStringParser( text );
+            var parser = new FormattingStringParser( text.AsSpan() );
 
             var parameterIndex = 0;
 
             while ( true )
             {
-                var str = parser.GetNextSubstring();
+                var str = parser.GetNextText();
 
-                if ( str.Array == null )
-                {
-                    break;
-                }
+                stringBuilder.PortableAppend( str );
 
-                stringBuilder.Append( str.Array, str.Offset, str.Count );
-
-                str = parser.GetNextParameter();
-
-                if ( str.Array == null )
+                if ( !parser.TryGetNextParameter( out _ ) )
                 {
                     break;
                 }
@@ -341,7 +339,8 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
 
         void ILogRecordBuilder.SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-        void ILogRecordBuilder.WriteParameter<T>( int index, in CharSpan parameterName, T value, in LogParameterOptions options )
+        void ILogRecordBuilder.WriteParameter<T>( int index, ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
+            where T : default
         {
             this.WriteParameter( parameterName.ToString(), value, options );
         }
@@ -380,7 +379,7 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
             }
         }
 
-        void ILogRecordBuilder.WriteString( in CharSpan span )
+        void ILogRecordBuilder.WriteString( ReadOnlySpan<char> span )
         {
             if ( this._appendComma )
             {
@@ -388,7 +387,7 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
                 this._stringBuilder.Append( ", " );
             }
 
-            span.AppendToStringBuilder( this._stringBuilder );
+            this._stringBuilder.PortableAppend( span );
         }
 
         void ILogRecordBuilder.Complete()

@@ -35,13 +35,13 @@ public interface ILogRecordBuilder : IDisposable
     /// <param name="parameterName">Name of the parameter.</param>
     /// <param name="value">Value of the parameter.</param>
     /// <param name="options">Options.</param>
-    void WriteParameter<T>( int index, in CharSpan parameterName, T? value, in LogParameterOptions options );
+    void WriteParameter<T>( int index, ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options );
 
     /// <summary>
     /// Writes a string.
     /// </summary>
     /// <param name="str">A string.</param>
-    void WriteString( in CharSpan str );
+    void WriteString( ReadOnlySpan<char> str );
 
     /// <summary>
     /// Assigns an <see cref="Exception"/> to the record.

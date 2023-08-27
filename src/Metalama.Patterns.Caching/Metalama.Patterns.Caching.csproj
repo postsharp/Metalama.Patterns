@@ -41,7 +41,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>CacheInvalidation.Generated.cs</LastGenOutput>
     </T4Template>
-    <Compile Update="CacheInvalidation.Generated.cs">
+    <Compile Update="CachingService.Invalidation.g.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>CacheInvalidation.Generated.tt</DependentUpon>
@@ -58,6 +58,7 @@
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
+
 
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
   

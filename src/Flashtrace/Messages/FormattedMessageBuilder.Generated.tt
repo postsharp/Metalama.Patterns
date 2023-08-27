@@ -4,7 +4,7 @@
 
 <#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
-<#@ include file="Common.ttinclude" #>
+<#@ include file="..\Common.ttinclude" #>
 
 #nullable enable
 

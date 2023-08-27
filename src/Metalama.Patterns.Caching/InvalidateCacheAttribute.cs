@@ -3,7 +3,6 @@
 using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Extensions.DependencyInjection;
-using Metalama.Extensions.DependencyInjection.Implementation;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -200,7 +199,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            CachingServices.Default.Invalidation.Invalidate(
+            CachingServices.Default.Invalidate(
                 methodsInvalidatedByField.Value![index],
                 invalidatedMethod.Method.IsStatic ? null : meta.This,
                 MapArguments( invalidatedMethod ).Value );
@@ -228,7 +227,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            await ((CachingService) cachingServiceExpression.Value!).Invalidation.InvalidateAsync(
+            await ((CachingService) cachingServiceExpression.Value!).InvalidateAsync(
                 methodsInvalidatedByField.Value![index],
                 invalidatedMethod.Method.IsStatic ? null : meta.This,
                 MapArguments( invalidatedMethod ).Value );
@@ -254,7 +253,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            await CachingServices.Default.Invalidation.InvalidateAsync(
+            await CachingServices.Default.InvalidateAsync(
                 methodsInvalidatedByField.Value![index],
                 invalidatedMethod.Method.IsStatic ? null : meta.This,
                 MapArguments( invalidatedMethod ).Value );

@@ -499,5 +499,5 @@ public sealed class LogLevelSource
     /// Gets the current <see cref="LogLevelSource"/>, or <c>null</c> if logging is not enabled for the current instance. This
     /// property allows to write conditional logging using the <c>?.</c> operator.
     /// </summary>
-    public LogLevelSource? EnabledOrNull => this.IsEnabled ? this : null;
+    public LogLevelSource? IfEnabled => this.IsEnabled ? this : null;
 }

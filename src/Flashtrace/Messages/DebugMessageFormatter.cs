@@ -36,12 +36,12 @@ internal static class DebugMessageFormatter
 
         public void SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-        public void WriteParameter<T>( int index, in CharSpan parameterName, T? value, in LogParameterOptions options )
+        public void WriteParameter<T>( int index, ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
         {
             this._stringBuilder.Append( value?.ToString() );
         }
 
-        public void WriteString( in CharSpan str )
+        public void WriteString( ReadOnlySpan<char> str )
         {
             this._stringBuilder.Append( str.ToString() );
         }

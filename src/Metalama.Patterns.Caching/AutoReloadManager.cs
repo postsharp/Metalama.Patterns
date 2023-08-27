@@ -73,7 +73,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
 
     private void AutoRefreshCore( CachingBackend backend, string key, AutoRefreshSubscription subscription )
     {
-        using ( var activity = subscription.Logger.Default.OpenActivity( Formatted( "Auto-refreshing: {Key}", key ) ) )
+        using ( var activity = subscription.Logger.Default.IfEnabled?.OpenActivity( Formatted( "Auto-refreshing: {Key}", key ) ) )
         {
             try
             {
@@ -84,11 +84,11 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
                     CachingFrontend.SetItem( backend, key, value, subscription.ReturnType, subscription.Configuration, context );
                 }
 
-                activity.SetSuccess();
+                activity?.SetSuccess();
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( activity != null )
             {
-                activity.SetException( e );
+                activity?.SetException( e );
             }
         }
     }

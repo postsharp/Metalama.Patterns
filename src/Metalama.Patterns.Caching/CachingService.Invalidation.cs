@@ -17,20 +17,11 @@ namespace Metalama.Patterns.Caching;
 /// <summary>
 /// Invalidates the cache.
 /// </summary>
-[PublicAPI]
-public partial class CacheInvalidationService
+public partial class CachingService
 {
     private readonly LogSource _defaultLogger;
 
     private readonly ConcurrentDictionary<MethodInfo, int> _nestedCachedMethods = new();
-
-    private readonly CachingService _cachingService;
-
-    public CacheInvalidationService( CachingService cachingService )
-    {
-        this._cachingService = cachingService;
-        this._defaultLogger = cachingService.ServiceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
-    }
 
     internal void AddedNestedCachedMethod( MethodInfo method ) => this._nestedCachedMethods.TryAdd( method, 0 );
 
@@ -59,7 +50,7 @@ public partial class CacheInvalidationService
                 break;
 
             default:
-                this.Invalidate( new ObjectDependency( dependency, this._cachingService ), dependency.GetType() );
+                this.Invalidate( new ObjectDependency( dependency, this ), dependency.GetType() );
 
                 break;
         }
@@ -85,7 +76,7 @@ public partial class CacheInvalidationService
                 return this.InvalidateAsync( cacheDependency );
 
             default:
-                return this.InvalidateAsync( new ObjectDependency( dependency, this._cachingService ), dependency.GetType() );
+                return this.InvalidateAsync( new ObjectDependency( dependency, this ), dependency.GetType() );
         }
     }
 
@@ -148,7 +139,7 @@ public partial class CacheInvalidationService
     /// <param name="dependencyKey"></param>
     public void Invalidate( [Required] string dependencyKey )
     {
-        foreach ( var backend in this._cachingService.AllBackends )
+        foreach ( var backend in this.AllBackends )
         {
             using ( var activity =
                    this._defaultLogger.Default.OpenActivity( Formatted( "Invalidate( key = {Key}, backend = {Backend} )", dependencyKey, backend ) ) )
@@ -171,7 +162,7 @@ public partial class CacheInvalidationService
 
     private void InvalidateImpl( CachingBackend backend, [Required] string dependencyKey )
     {
-        this._defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
+        this._defaultLogger.Debug.IfEnabled?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
 
         backend.InvalidateDependency( dependencyKey );
     }
@@ -182,7 +173,7 @@ public partial class CacheInvalidationService
     /// <param name="dependencyKey"></param>
     public async ValueTask InvalidateAsync( [Required] string dependencyKey )
     {
-        foreach ( var backend in this._cachingService.AllBackends )
+        foreach ( var backend in this.AllBackends )
         {
             using ( var activity =
                    this._defaultLogger.Default.OpenAsyncActivity( Formatted( "InvalidateAsync( key = {Key}, backend = {Backend} )", dependencyKey, backend ) ) )
@@ -215,15 +206,15 @@ public partial class CacheInvalidationService
         {
             try
             {
-                var key = this._cachingService.KeyBuilder.BuildMethodKey(
+                var key = this.KeyBuilder.BuildMethodKey(
                     CachedMethodMetadataRegistry.Instance.Get( method )
                     ?? throw new CachingAssertionFailedException( $"The method '{method}' is not registered." ),
                     args,
                     instance );
 
-                this._defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key ) );
+                this._defaultLogger.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
-                foreach ( var backend in this._cachingService.AllBackends )
+                foreach ( var backend in this.AllBackends )
                 {
                     backend.RemoveItem( key );
 
@@ -233,7 +224,7 @@ public partial class CacheInvalidationService
                     }
                     else if ( this._nestedCachedMethods.ContainsKey( method ) )
                     {
-                        this._defaultLogger.Warning.EnabledOrNull?.Write(
+                        this._defaultLogger.Warning.IfEnabled?.Write(
                             Formatted(
                                 "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
                                 "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
@@ -264,15 +255,15 @@ public partial class CacheInvalidationService
         {
             try
             {
-                var key = this._cachingService.KeyBuilder.BuildMethodKey(
+                var key = this.KeyBuilder.BuildMethodKey(
                     CachedMethodMetadataRegistry.Instance.Get( method )
                     ?? throw new CachingAssertionFailedException( $"The method '{method}' is not registered." ),
                     args,
                     instance );
 
-                this._defaultLogger.Debug.EnabledOrNull?.Write( Formatted( "Key=\"{Key}\".", key ) );
+                this._defaultLogger.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
-                foreach ( var backend in this._cachingService.AllBackends )
+                foreach ( var backend in this.AllBackends )
                 {
                     await backend.RemoveItemAsync( key );
 
@@ -282,7 +273,7 @@ public partial class CacheInvalidationService
                     }
                     else if ( this._nestedCachedMethods.ContainsKey( method ) )
                     {
-                        this._defaultLogger.Warning.EnabledOrNull?.Write(
+                        this._defaultLogger.Warning.IfEnabled?.Write(
                             Formatted(
                                 "Method {Method} is being invalidated from the cache, but other cached methods depend on it. " +
                                 "These dependent methods will not be invalidated because the current back-end does not support dependencies.",
@@ -322,13 +313,13 @@ public partial class CacheInvalidationService
 
     private CachingContext OpenRecacheContext( Delegate method, params object[] args )
     {
-        var key = this._cachingService.KeyBuilder.BuildMethodKey(
+        var key = this.KeyBuilder.BuildMethodKey(
             CachedMethodMetadataRegistry.Instance.Get( method.Method )
             ?? throw new CachingAssertionFailedException( $"The method '{method.Method}' is not registered." ),
             args,
             method.Target );
 
-        return CachingContext.OpenRecacheContext( key, this._cachingService );
+        return CachingContext.OpenRecacheContext( key, this );
     }
 
     /// <summary>

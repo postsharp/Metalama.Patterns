@@ -42,7 +42,7 @@ public readonly struct SemanticMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
         for (var j = 1; j <= i; j++)
         {
 #>
-		recordBuilder.WriteParameter( <#= j - 1 #>, this.name<#= j #>, this.value<#= j #>, LogParameterOptions.SemanticParameter );
+		recordBuilder.WriteParameter( <#= j - 1 #>, this.name<#= j #>.AsSpan(), this.value<#= j #>, LogParameterOptions.SemanticParameter );
 <#
         }
 #>

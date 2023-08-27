@@ -109,7 +109,7 @@ internal class CachingFrontend
                     this._cachingService.AutoReloadManager.SubscribeAutoRefresh( backend, key, valueType, configuration, GetValue, logger, false );
                 }
 
-                logger.Debug.EnabledOrNull?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
+                logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
                 using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
                 {
@@ -124,7 +124,7 @@ internal class CachingFrontend
             {
                 // Cache hit.
 
-                logger.Debug.EnabledOrNull?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
+                logger.Debug.IfEnabled?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
 
                 AddCacheHitDependencies( backend, key, item );
 
@@ -237,7 +237,7 @@ internal class CachingFrontend
                     this._cachingService.AutoReloadManager.SubscribeAutoRefresh( backend, key, valueType, configuration, GetValue, logger, true );
                 }
 
-                logger.Debug.EnabledOrNull?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
+                logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
                 using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
                 {
@@ -256,7 +256,7 @@ internal class CachingFrontend
             {
                 // Cache hit.
 
-                logger.Debug.EnabledOrNull?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
+                logger.Debug.IfEnabled?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
 
                 AddCacheHitDependencies( backend, key, item );
 
@@ -369,7 +369,7 @@ internal class CachingFrontend
                     this._cachingService.AutoReloadManager.SubscribeAutoRefresh( backend, key, valueType, configuration, GetValue, logger, true );
                 }
 
-                logger.Debug.EnabledOrNull?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
+                logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
                 using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
                 {
@@ -388,7 +388,7 @@ internal class CachingFrontend
             {
                 // Cache hit.
 
-                logger.Debug.EnabledOrNull?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
+                logger.Debug.IfEnabled?.Write( Formatted( "Cache hit: Key=\"{Key}\".", key ) );
 
                 AddCacheHitDependencies( backend, key, item );
 

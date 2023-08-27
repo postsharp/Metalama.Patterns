@@ -11,7 +11,7 @@ namespace Flashtrace.Formatters;
 [PublicAPI]
 public sealed class UnsafeStringBuilderPool : IDisposable
 {
-    private readonly ConcurrentStack<UnsafeStringBuilder> _instances = new();
+    private readonly ConcurrentBag<UnsafeStringBuilder> _instances = new();
 
     /// <summary>
     /// Gets the maximum number of characters in instances of the <see cref="UnsafeStringBuilder"/> class managed by the current pool.
@@ -41,7 +41,7 @@ public sealed class UnsafeStringBuilderPool : IDisposable
     /// <returns>An <see cref="UnsafeStringBuilder"/>.</returns>
     public UnsafeStringBuilder GetInstance()
     {
-        if ( !this._instances.TryPop( out var stringBuilder ) )
+        if ( !this._instances.TryTake( out var stringBuilder ) )
         {
             stringBuilder = new UnsafeStringBuilder( this.StringBuilderCapacity, this._throwOnOverflow );
         }
@@ -78,14 +78,14 @@ public sealed class UnsafeStringBuilderPool : IDisposable
         else
         {
             stringBuilder.Clear();
-            this._instances.Push( stringBuilder );
+            this._instances.Add( stringBuilder );
         }
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        while ( this._instances.TryPop( out var stringBuilder ) )
+        while ( this._instances.TryTake( out var stringBuilder ) )
         {
             stringBuilder.Dispose();
         }

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace;
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Formatters;
@@ -9,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching;
 
-public sealed class CachingService : IDisposable, IAsyncDisposable
+public sealed partial class CachingService : IDisposable, IAsyncDisposable
 {
     internal IServiceProvider? ServiceProvider { get; }
 
@@ -25,12 +26,11 @@ public sealed class CachingService : IDisposable, IAsyncDisposable
     public CachingService( IServiceProvider? serviceProvider = null )
     {
         this.ServiceProvider = serviceProvider;
-        this.Invalidation = new CacheInvalidationService( this );
         this._keyBuilder = new CacheKeyBuilder( this.Formatters );
         this.Profiles = new CachingProfileRegistry( this );
-        this.Lookup = new CacheLookupService( this );
         this.Frontend = new CachingFrontend( this );
         this.AutoReloadManager = new AutoReloadManager( this );
+        this._defaultLogger = serviceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
     }
 
     /// <summary>
@@ -71,10 +71,6 @@ public sealed class CachingService : IDisposable, IAsyncDisposable
     /// Gets the repository of caching profiles (<see cref="CachingProfile"/>).
     /// </summary>
     public CachingProfileRegistry Profiles { get; }
-
-    public CacheInvalidationService Invalidation { get; }
-
-    public CacheLookupService Lookup { get; }
 
     public void Dispose()
     {

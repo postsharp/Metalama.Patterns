@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Extensions.DependencyInjection;
-using Metalama.Extensions.DependencyInjection.Implementation;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -324,7 +323,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
 
-        return ((CachingService) cachingServiceExpression.Value!).Lookup.GetFromCacheOrExecute<TReturnType>(
+        return ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecute<TReturnType>(
             (CachedMethodMetadata) registrationField.Value!,
             Invoke,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -347,7 +346,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
 
-        return ((CachingService) cachingServiceExpression.Value!).Lookup.GetFromCacheOrExecuteTaskAsync<TValue>(
+        return ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -371,7 +370,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
 
-        return ((CachingService) cachingServiceExpression.Value!).Lookup.GetFromCacheOrExecuteValueTaskAsync<TValue>(
+        return ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -406,7 +405,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
 
-        var task = ((CachingService) cachingServiceExpression.Value!).Lookup.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
+        var task = ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
@@ -445,7 +444,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
 
-        var task = ((CachingService) cachingServiceExpression.Value!).Lookup.GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
+        var task = ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
             InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,

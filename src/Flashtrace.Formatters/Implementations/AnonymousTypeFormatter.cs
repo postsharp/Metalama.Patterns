@@ -2,7 +2,7 @@
 
 using Flashtrace.Formatters.Utilities;
 
-namespace Flashtrace.Formatters;
+namespace Flashtrace.Formatters.Implementations;
 
 /// <summary>
 /// The formatter used to for anonymous types by default.

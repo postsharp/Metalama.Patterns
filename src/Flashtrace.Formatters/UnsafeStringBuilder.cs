@@ -407,16 +407,6 @@ public sealed unsafe class UnsafeStringBuilder : IDisposable
     }
 
     /// <summary>
-    /// Appends a <see cref="CharSpan"/> to the current <see cref="UnsafeStringBuilder"/>.
-    /// </summary>
-    /// <param name="span">A <see cref="CharSpan"/>.</param>
-    /// <returns><c>true</c> in case of success, <c>false</c> in case of buffer overflow.</returns>
-    public bool Append( in CharSpan span )
-    {
-        return span.AppendToStringBuilder( this );
-    }
-
-    /// <summary>
     /// Appends an <see cref="UnsafeString"/> to the current <see cref="UnsafeStringBuilder"/>.
     /// </summary>
     /// <param name="s">An <see cref="UnsafeString"/>.</param>

@@ -8,35 +8,35 @@ namespace Metalama.Patterns.Caching.Implementation;
 // NB: Also used by Redis backend, copied local for now.
 // Ported from PostSharp.Patterns.Common/Utilities
 // Was [ExplicitCrossPackageInternal]
-internal struct StringTokenizer
+internal ref struct StringTokenizer
 {
-    private readonly string _s;
+    private readonly ReadOnlySpan<char> _s;
     private readonly char _separator;
     private int _position;
 
-    public StringTokenizer( string s, char separator = ':' )
+    public StringTokenizer( ReadOnlySpan<char> s, char separator = ':' )
     {
         this._s = s;
         this._position = 0;
         this._separator = separator;
     }
 
-    public string GetNext()
+    public ReadOnlySpan<char> GetNext()
     {
         var oldPosition = this._position;
-        var p = this._s.IndexOf( this._separator, oldPosition );
 
-        if ( p < 0 )
+        for ( var i = oldPosition; i < this._s.Length; i++ )
         {
-            return this.GetRest();
-        }
-        else
-        {
-            this._position = p + 1;
+            if ( this._s[i] == this._separator )
+            {
+                this._position = i + 1;
 
-            return this._s.Substring( oldPosition, p - oldPosition );
+                return this._s.Slice( oldPosition, i - oldPosition );
+            }
         }
+
+        return this.GetRest();
     }
 
-    public string GetRest() => this._s.Substring( this._position );
+    public ReadOnlySpan<char> GetRest() => this._s.Slice( this._position );
 }

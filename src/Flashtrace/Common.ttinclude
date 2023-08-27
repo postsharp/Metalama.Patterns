@@ -1,5 +1,5 @@
-<#@ import nameSystem.System.Collections.Generic" 
-    #+
+<#@ import namespace="System.Collections.Generic" #> 
+    <#+
     private static string Repeat( string format, int count )
     {
         var s = "";

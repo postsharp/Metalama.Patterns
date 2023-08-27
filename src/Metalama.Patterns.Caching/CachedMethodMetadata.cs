@@ -1,12 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching;
 
 /// <summary>
 /// Encapsulates information about a method being cached. This class should only be used by the caching framework and the code it generates.

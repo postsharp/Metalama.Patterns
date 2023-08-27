@@ -119,7 +119,7 @@ namespace Metalama.Patterns.Caching.Tests
                 AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
                 cachingClass.Reset();
 
-                CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValue );
+                CachingServices.Default.Invalidate( cachingClass.GetValue );
 
                 var value2 = cachingClass.GetValue();
                 var called = cachingClass.Reset();
@@ -498,7 +498,7 @@ namespace Metalama.Patterns.Caching.Tests
             backend.ExpectedContainsKeyCount = 1;
             backend.ExpectedRemoveCount = 1;
             backend.ExpectedSetCount = 1;
-            CachingServices.Default.Invalidation.Invalidate( value1 );
+            CachingServices.Default.Invalidate( value1 );
 
             var called = itemSetEvent.Wait( _timeout );
             Assert.True( called, "The method was not called automatically when the first cache item got invalidated: timeout." );
@@ -639,7 +639,7 @@ namespace Metalama.Patterns.Caching.Tests
             backend.ExpectedContainsKeyCount = 1;
             backend.ExpectedRemoveCount = 1;
             backend.ExpectedSetCount = 1;
-            await CachingServices.Default.Invalidation.InvalidateAsync( value1 );
+            await CachingServices.Default.InvalidateAsync( value1 );
 
             var called = await Task.WhenAny( itemSetEvent.Task, Task.Delay( _timeout ) ) == itemSetEvent.Task;
             Assert.True( called, "The method was not called automatically when the first cache item got invalidated: timeout." );

@@ -73,7 +73,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValueDependency );
+                CachingServices.Default.Invalidate( cachingClass.GetValueDependency );
 
                 cachingClass.GetValue();
 
@@ -147,7 +147,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -232,7 +232,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -307,7 +307,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingServices.Default.Invalidation.Invalidate( cachingClass.GetValueDependency );
+                CachingServices.Default.Invalidate( cachingClass.GetValueDependency );
 
                 cachingClass.GetValue();
 
@@ -388,7 +388,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Default.Invalidation.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingServices.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 

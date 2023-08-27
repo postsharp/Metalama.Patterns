@@ -205,7 +205,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
             }
             else
             {
-                this._cachingService.Invalidation.AddedNestedCachedMethod( method );
+                this._cachingService.AddedNestedCachedMethod( method );
             }
         }
     }

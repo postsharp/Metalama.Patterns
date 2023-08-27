@@ -204,7 +204,7 @@ namespace Metalama.Patterns.Caching.Tests
             for ( var i = 0; i < 1000; i++ )
             {
                 this.CachedMethod( 0 );
-                CachingServices.Default.Invalidation.Invalidate( this.CachedMethod, 0, (Barrier?) null, true );
+                CachingServices.Default.Invalidate( this.CachedMethod, 0, (Barrier?) null, true );
             }
         }
 
@@ -233,7 +233,7 @@ namespace Metalama.Patterns.Caching.Tests
             for ( var i = 0; i < 1000; i++ )
             {
                 await this.CachedMethodAsync( 0 );
-                await CachingServices.Default.Invalidation.InvalidateAsync( this.CachedMethodAsync, 0, (AsyncBarrier?) null, true );
+                await CachingServices.Default.InvalidateAsync( this.CachedMethodAsync, 0, (AsyncBarrier?) null, true );
             }
         }
 

@@ -23,7 +23,7 @@ public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigura
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the cached methods.
     /// </summary>
-    public string ProfileName
+    public string? ProfileName
     {
         get;
         set;

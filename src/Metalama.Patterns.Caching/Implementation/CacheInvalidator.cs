@@ -71,10 +71,10 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     /// <param name="message">The serialized invalidation message.</param>
     protected void OnMessageReceived( [Required] string message )
     {
-        var tokenizer = new StringTokenizer( message );
+        var tokenizer = new StringTokenizer( message.AsSpan() );
         var prefix = tokenizer.GetNext();
 
-        if ( prefix != this.Options.Prefix )
+        if ( prefix.Equals( this.Options.Prefix.AsSpan(), StringComparison.Ordinal ) )
         {
             return;
         }
@@ -85,16 +85,21 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
         {
             var kind = tokenizer.GetNext();
             var backendIdStr = tokenizer.GetNext();
-            var key = tokenizer.GetRest();
 
+#if NET6_0_OR_GREATER
             if ( !Guid.TryParse( backendIdStr, out var sourceId ) )
+#else
+            if ( !Guid.TryParse( backendIdStr.ToString(), out var sourceId ) )
+#endif
             {
                 activity.SetOutcome(
                     this.LogSource.Failure.Level,
-                    Formatted( "Failed: cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", backendIdStr ) );
+                    Formatted( "Failed: cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", backendIdStr.ToString() ) );
 
                 return;
             }
+
+            var key = tokenizer.GetRest().ToString();
 
             // We use synchronous APIs because most the typical consumer of InvalidationBroker is synchronous.
 
@@ -123,7 +128,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
                     break;
 
                 default:
-                    activity.SetOutcome( this.LogSource.Failure.Level, Formatted( "Failed: invalid kind key: {Kind}.", kind ) );
+                    activity.SetOutcome( this.LogSource.Failure.Level, Formatted( "Failed: invalid kind key: {Kind}.", kind.ToString() ) );
 
                     break;
             }

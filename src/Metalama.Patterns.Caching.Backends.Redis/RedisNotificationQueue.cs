@@ -94,7 +94,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
             while ( !this.Subscriber.IsConnected( channel ) )
             {
-                this._logger.Debug.EnabledOrNull?.Write( Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
+                this._logger.Debug.IfEnabled?.Write( Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
 
                 Thread.Sleep( _connectDelay );
 
@@ -122,7 +122,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                this._logger.Debug.EnabledOrNull?.Write( Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
+                this._logger.Debug.IfEnabled?.Write( Formatted( "Not connected to {Channel}. Waiting {Delay} ms and retrying.", channel, _connectDelay ) );
 
                 await Task.Delay( _connectDelay, cancellationToken );
             }
@@ -165,7 +165,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
     private void OnNotificationReceived( RedisChannel channel, RedisValue value )
     {
-        this._logger.Debug.EnabledOrNull?.Write( Formatted( "Received notification {Value} on channel {Channel}", value, channel ) );
+        this._logger.Debug.IfEnabled?.Write( Formatted( "Received notification {Value} on channel {Channel}", value, channel ) );
 
         try
         {
@@ -178,7 +178,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         }
         catch ( ObjectDisposedException ) { }
 
-        this._logger.Debug.EnabledOrNull?.Write( Formatted( "The notification was not queued because the queue was already disposed." ) );
+        this._logger.Debug.IfEnabled?.Write( Formatted( "The notification was not queued because the queue was already disposed." ) );
     }
 
     private static void ProcessNotificationQueue( object? state )
@@ -201,8 +201,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
             var id = queue._id;
             var blockingCollection = queue._notificationQueue;
 
-            logger.Debug.EnabledOrNull?.Write(
-                Formatted( "The {ThreadName} thread for object {ObjectId} has started.", nameof(ProcessNotificationQueue), id ) );
+            logger.Debug.IfEnabled?.Write( Formatted( "The {ThreadName} thread for object {ObjectId} has started.", nameof(ProcessNotificationQueue), id ) );
 
             // Don't hold a strong reference during enumeration.
             // ReSharper disable RedundantAssignment
@@ -225,20 +224,20 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
                     queue._notificationProcessingLock.Wait();
 
                     using ( var activity =
-                           logger.Default.OpenActivity(
+                           logger.Default.IfEnabled?.OpenActivity(
                                Formatted( "Processing notification {Value} received on channel {Channel}", notification.Value, notification.Channel ) ) )
                     {
                         try
                         {
                             queue._handler( notification );
 
-                            activity.SetSuccess();
+                            activity?.SetSuccess();
                         }
                         catch ( Exception e )
                         {
                             queue.BackgroundTaskExceptions++;
 
-                            activity.SetException( e );
+                            activity?.SetException( e );
                         }
                     }
 
@@ -259,8 +258,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
                 queue = null;
             }
 
-            logger.Debug.EnabledOrNull?.Write(
-                Formatted( "The {ThreadName} thread for object {ObjectId} has completed.", nameof(ProcessNotificationQueue), id ) );
+            logger.Debug.IfEnabled?.Write( Formatted( "The {ThreadName} thread for object {ObjectId} has completed.", nameof(ProcessNotificationQueue), id ) );
         }
         finally
         {
@@ -391,13 +389,13 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
     public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {
-        using ( var activity = this._logger.Default.OpenAsyncActivity( Formatted( "Disposing" ) ) )
+        using ( var activity = this._logger.Default.IfEnabled?.OpenAsyncActivity( Formatted( "Disposing" ) ) )
         {
             try
             {
                 if ( !this.TryChangeStatus( Status.Default, Status.DisposingPhase1 ) )
                 {
-                    activity.SetOutcome( LogLevel.Debug, Formatted( "The method was already called." ) );
+                    activity?.SetOutcome( LogLevel.Debug, Formatted( "The method was already called." ) );
                     await this._disposeTask.Task;
 
                     return;
@@ -425,7 +423,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 #if NETCOREAPP
                         await
 #endif
-                            using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                         {
                             await this._notificationProcessingThreadCompleted.Task;
 
@@ -441,7 +439,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 
                     this.ChangeStatus( Status.Disposed );
 
-                    activity.SetSuccess();
+                    activity?.SetSuccess();
                     this._disposeTask.SetResult( true );
                 }
                 catch ( Exception e )
@@ -451,9 +449,9 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
                     throw;
                 }
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( activity != null )
             {
-                activity.SetException( e );
+                activity?.SetException( e );
 
                 throw;
             }

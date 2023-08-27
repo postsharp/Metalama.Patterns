@@ -249,13 +249,13 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
                 break;
 
             case RedisKeyBuilder.ValueKindPrefix:
-                this._logger.Debug.EnabledOrNull?.Write( Formatted( "Enqueue processing of cache eviction." ) );
+                this._logger.Debug.IfEnabled?.Write( Formatted( "Enqueue processing of cache eviction." ) );
                 this._backend.ExecuteNonBlockingTask( () => this.OnValueEvictedAsync( itemKey ) );
 
                 break;
 
             default:
-                this._logger.Debug.EnabledOrNull?.Write( Formatted( "Notification ignored." ) );
+                this._logger.Debug.IfEnabled?.Write( Formatted( "Notification ignored." ) );
 
                 break;
         }
