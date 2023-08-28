@@ -2,7 +2,7 @@
 
 ## Phase 1
 
-* Property chains of type `A.B.C....D` or `A?.B?.C....?D` (or a combination of `?.` or `.`) where all types implement `INotifyPropertyChanged<T>` and all nodes are properties (not fields).
+* Property chains of type `A.B.C....D` or `A?.B?.C....?D` (or a combination of `?.` or `.`) where all types implement `INotifyPropertyChanged<T>` and all nodes are properties (not fields) in the same project.
 * Report warning on unsupported constructs.
 * `[SafeForDependencyAnalysis]` suppresses the warning.
 
@@ -12,4 +12,7 @@
 
 ## Next
 
-* Support named events e.g. XAML-style `ColorChanged`.*
+* Support named events e.g. XAML-style `ColorChanged`.
+* Support for functions
+* Cross-project
+* API for human-generated hints
