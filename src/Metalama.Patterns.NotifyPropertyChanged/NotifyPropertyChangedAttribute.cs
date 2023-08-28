@@ -61,8 +61,6 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
         public IMethod OnPropertyChangedMethod { get; set; } = null!;
 
-        public IMethod? OnPropertyChangedWithValuesMethod { get; set; }
-
         public InpcInstrumentationKind GetInpcInstrumentationKind( IType type )
         {
             if ( this._inpcInstrumentationKindLookup.TryGetValue( type, out var result ) )
@@ -139,7 +137,6 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         var implementsInpc = target.Is( ctx.Type_INotifyPropertyChanged );
 
         IMethod? onPropertyChangedMethod = null;
-        IMethod? onPropertyChangedWithValuesMethod = null;
 
         if ( implementsInpc )
         {
@@ -153,10 +150,6 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                 return;
             }
-
-            onPropertyChangedWithValuesMethod = GetOnPropertyChangedWithValuesMethod( target );
-
-            // TODO: Warn that it would be good to implement OnPropertyChanged<T> if it's not implemented.
         }
         else
         {
@@ -185,37 +178,9 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                 } );
 
             onPropertyChangedMethod = introduceOnPropertyChangedMethodResult.Declaration;
-
-            // TODO: Re-enable pending ML bugfix:
-#if false 
-            var introduceOnPropertyChangedWithValuesMethodResult = builder.Advice.IntroduceMethod(
-                            builder.Target,
-                            nameof( OnPropertyChangedWithValues ),
-                            IntroductionScope.Instance,
-                            OverrideStrategy.Fail,
-                            b =>
-                            {
-                                if ( target.IsSealed )
-                                {
-                                    b.Accessibility = Accessibility.Private;
-                                }
-                                else
-                                {
-                                    b.Accessibility = Accessibility.Protected;
-                                    b.IsVirtual = true;
-                                }
-                            },
-                            args: new
-                            {
-                                propertyChangedEvent = implementInterfaceResult.InterfaceMembers.First().TargetMember
-                            } );
-
-            onPropertyChangedWithValuesMethod = introduceOnPropertyChangedMethodResult.Declaration;
-#endif
         }
 
         ctx.OnPropertyChangedMethod = onPropertyChangedMethod;
-        ctx.OnPropertyChangedWithValuesMethod = onPropertyChangedWithValuesMethod;
 
         ProcessAutoProperties( ctx );
     }
@@ -228,11 +193,11 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         var onPropertyChangedMethodHasCallerMemberNameAttribute = ctx.OnPropertyChangedMethod.Parameters[0].Attributes.Any( typeof( CallerMemberNameAttribute ) );
 
         // PS appears to consider all instance properties regardless of accessibility.
-        var autoProperties = 
+        var autoProperties =
             target.Properties
-            .Where( p => 
-                !p.IsStatic 
-                && p.IsAutoPropertyOrField == true 
+            .Where( p =>
+                !p.IsStatic
+                && p.IsAutoPropertyOrField == true
                 && !p.Attributes.Any( ctx.Type_IgnoreAutoChangeNotificationAttribute ) )
             .ToList();
 
@@ -268,11 +233,10 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                             handlerField = introduceHandlerFieldResult.Declaration;
                         }
 
-                        ctx.Builder.Advice.Override( p, nameof( OverrideInpcRefTypeProperty), tags: new
+                        ctx.Builder.Advice.Override( p, nameof( OverrideInpcRefTypeProperty ), tags: new
                         {
                             onPropertyChangedMethodHasCallerMemberNameAttribute,
                             onPropertyChangedMethod = ctx.OnPropertyChangedMethod,
-                            onPropertyChangedWithValuesMethod = ctx.OnPropertyChangedWithValuesMethod,
                             handlerField,
                             ctx
                         } );
@@ -281,14 +245,13 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                     {
                         throw new NotImplementedException( "Not implemented: uninstrumented reference-type properties" );
                     }
-                    break;                    
+                    break;
 
                 case false:
                     ctx.Builder.Advice.Override( p, nameof( OverrideValueTypeProperty ), tags: new
                     {
                         onPropertyChangedMethodHasCallerMemberNameAttribute,
                         onPropertyChangedMethod = ctx.OnPropertyChangedMethod,
-                        onPropertyChangedWithValuesMethod = ctx.OnPropertyChangedWithValuesMethod
                     } );
                     break;
             }
@@ -302,20 +265,6 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
             && m.ReturnType.SpecialType == SpecialType.Void
             && m.Parameters.Count == 1
             && m.Parameters[0].Type.SpecialType == SpecialType.String
-            && _onPropertyChangedMethodNames.Contains( m.Name ) );
-
-    private static IMethod? GetOnPropertyChangedWithValuesMethod( INamedType type )
-        => type.AllMethods.FirstOrDefault( m =>
-            !m.IsStatic
-            && m.IsGeneric
-            && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
-            && m.ReturnType.SpecialType == SpecialType.Void
-            && m.Parameters.Count == 3
-            && m.TypeParameters.Count == 1
-            && m.TypeParameters[0].TypeConstraints.Count == 0
-            && m.Parameters[0].Type.Equals( m.TypeParameters[0] )
-            && m.Parameters[1].Type.Equals( m.TypeParameters[0] )
-            && m.Parameters[2].Type.SpecialType == SpecialType.String
             && _onPropertyChangedMethodNames.Contains( m.Name ) );
 
     private static string GetAvailableFieldName( INamedType type, string desiredFieldName )
@@ -379,20 +328,10 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                 meta.Target.FieldOrProperty.Value = value;
 
-                var onPropertyChangedWithValuesMethod = (IMethod) meta.Tags["onPropertyChangedWithValuesMethod"]!;
+                var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
 
-                if ( onPropertyChangedWithValuesMethod != null )
-                {
-                    meta.Target.FieldOrProperty.Value = value;
-                    onPropertyChangedWithValuesMethod.Invoke( oldValue, value, meta.Target.Property.Name );
-                }
-                else
-                {
-                    var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
-
-                    meta.Target.FieldOrProperty.Value = value;
-                    onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
-                }
+                meta.Target.FieldOrProperty.Value = value;
+                onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
 
                 if ( handlerField != null )
                 {
@@ -428,21 +367,10 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         {
             if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
             {
-                var onPropertyChangedWithValuesMethod = (IMethod) meta.Tags["onPropertyChangedWithValuesMethod"]!;
+                var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
 
-                if ( onPropertyChangedWithValuesMethod != null )
-                {
-                    var oldValue = meta.Target.FieldOrProperty.Value;
-                    meta.Target.FieldOrProperty.Value = value;
-                    onPropertyChangedWithValuesMethod.Invoke( oldValue, value, meta.Target.Property.Name );
-                }
-                else
-                {
-                    var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
-
-                    meta.Target.FieldOrProperty.Value = value;
-                    onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
-                }
+                meta.Target.FieldOrProperty.Value = value;
+                onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
             }
         }
     }
@@ -487,11 +415,5 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
     private static void OnPropertyChanged( [CompileTime] IEvent propertyChangedEvent, [CallerMemberName] string? propertyName = null )
     {
         propertyChangedEvent.With( InvokerOptions.NullConditional ).Raise( meta.This, new PropertyChangedEventArgs( propertyName ) );
-    }
-
-    [Template]
-    private static void OnPropertyChangedWithValues<T>( [CompileTime] IEvent propertyChangedEvent, T? oldValue, T? newValue, [CallerMemberName] string? propertyName = null )
-    {
-        propertyChangedEvent.With( InvokerOptions.NullConditional ).Raise( meta.This, new PropertyChangedEventArgs<T>( oldValue, newValue, propertyName ) );
     }
 }
