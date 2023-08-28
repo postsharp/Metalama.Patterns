@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.UnitTests", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.NotifyPropertyChanged", "src\Metalama.Patterns.NotifyPropertyChanged\Metalama.Patterns.NotifyPropertyChanged.csproj", "{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NpcExperiments", "src\tests\NpcExperiments\NpcExperiments.csproj", "{136AAA95-AC64-431B-A840-E715E62D6850}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NpcExperiments", "src\tests\NpcExperiments\NpcExperiments.csproj", "{136AAA95-AC64-431B-A840-E715E62D6850}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,14 +74,14 @@ Global
 		{900FC057-DB84-486F-81C2-ED3F8D284E61}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
+		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{136AAA95-AC64-431B-A840-E715E62D6850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{136AAA95-AC64-431B-A840-E715E62D6850}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{136AAA95-AC64-431B-A840-E715E62D6850}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{136AAA95-AC64-431B-A840-E715E62D6850}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{136AAA95-AC64-431B-A840-E715E62D6850}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
+		{136AAA95-AC64-431B-A840-E715E62D6850}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{136AAA95-AC64-431B-A840-E715E62D6850}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{136AAA95-AC64-431B-A840-E715E62D6850}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
