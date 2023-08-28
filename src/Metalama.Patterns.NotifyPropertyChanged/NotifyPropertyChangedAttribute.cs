@@ -186,6 +186,8 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
             onPropertyChangedMethod = introduceOnPropertyChangedMethodResult.Declaration;
 
+            // TODO: Re-enable pending ML bugfix:
+#if false 
             var introduceOnPropertyChangedWithValuesMethodResult = builder.Advice.IntroduceMethod(
                             builder.Target,
                             nameof( OnPropertyChangedWithValues ),
@@ -209,6 +211,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                             } );
 
             onPropertyChangedWithValuesMethod = introduceOnPropertyChangedMethodResult.Declaration;
+#endif
         }
 
         ctx.OnPropertyChangedMethod = onPropertyChangedMethod;
@@ -381,14 +384,14 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                 if ( onPropertyChangedWithValuesMethod != null )
                 {
                     meta.Target.FieldOrProperty.Value = value;
-                    onPropertyChangedWithValuesMethod.Invoke( oldValue, value, meta.Target.Member.Name );
+                    onPropertyChangedWithValuesMethod.Invoke( oldValue, value, meta.Target.Property.Name );
                 }
                 else
                 {
                     var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
 
                     meta.Target.FieldOrProperty.Value = value;
-                    onPropertyChangedMethod.Invoke( meta.Target.Member.Name );
+                    onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
                 }
 
                 if ( handlerField != null )
@@ -431,14 +434,14 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                 {
                     var oldValue = meta.Target.FieldOrProperty.Value;
                     meta.Target.FieldOrProperty.Value = value;
-                    onPropertyChangedWithValuesMethod.Invoke( oldValue, value, meta.Target.Member.Name );
+                    onPropertyChangedWithValuesMethod.Invoke( oldValue, value, meta.Target.Property.Name );
                 }
                 else
                 {
                     var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
 
                     meta.Target.FieldOrProperty.Value = value;
-                    onPropertyChangedMethod.Invoke( meta.Target.Member.Name );
+                    onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
                 }
             }
         }

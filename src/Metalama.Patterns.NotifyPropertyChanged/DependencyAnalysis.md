@@ -57,4 +57,3 @@ Accepts (final) fields of the `Depends` type.
 4. Abstains for access to fields of `ValueTuple`.
 5. Rejects (final) direct access to fields of another class unless the calling method is marked `[SafeForDependencyAnalysisAttribute]`.
 6. Otherwise, accepts (final).
-
