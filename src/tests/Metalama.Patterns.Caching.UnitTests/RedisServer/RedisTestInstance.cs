@@ -165,10 +165,7 @@ public class RedisTestInstance : IDisposable
                 {
                     this._process.Kill();
                 }
-                catch ( Win32Exception )
-                {
-
-                }
+                catch ( Win32Exception ) { }
             }
 
             goto restart;
@@ -200,10 +197,7 @@ public class RedisTestInstance : IDisposable
                 {
                     this._process.Kill();
                 }
-                catch ( Win32Exception )
-                {
-
-                }
+                catch ( Win32Exception ) { }
             }
 
             if ( disposing )
