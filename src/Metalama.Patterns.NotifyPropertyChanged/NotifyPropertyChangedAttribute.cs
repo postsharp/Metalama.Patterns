@@ -157,7 +157,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
             var introduceOnPropertyChangedMethodResult = builder.Advice.IntroduceMethod(
                 builder.Target,
-                nameof( OnPropertyChanged ),
+                nameof( this.OnPropertyChanged ),
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
                 b =>
@@ -171,10 +171,6 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                         b.Accessibility = Accessibility.Protected;
                         b.IsVirtual = true;
                     }
-                },
-                args: new
-                {
-                    propertyChangedEvent = implementInterfaceResult.InterfaceMembers.First().TargetMember
                 } );
 
             onPropertyChangedMethod = introduceOnPropertyChangedMethodResult.Declaration;
@@ -222,7 +218,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                         if ( hasDependentProperties )
                         {
-                            var handlerFieldName = GetAvailableFieldName( ctx.Target, $"_on{p.Name}PropertyChangedHandler" );
+                            var handlerFieldName = GetUnusedMemberName( ctx.Target, $"_on{p.Name}PropertyChangedHandler" );
 
                             var introduceHandlerFieldResult = ctx.Builder.Advice.IntroduceField(
                                 ctx.Target,
@@ -235,10 +231,9 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                         ctx.Builder.Advice.Override( p, nameof( OverrideInpcRefTypeProperty ), tags: new
                         {
+                            ctx,
                             onPropertyChangedMethodHasCallerMemberNameAttribute,
-                            onPropertyChangedMethod = ctx.OnPropertyChangedMethod,
-                            handlerField,
-                            ctx
+                            handlerField
                         } );
                     }
                     else
@@ -250,8 +245,8 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                 case false:
                     ctx.Builder.Advice.Override( p, nameof( OverrideValueTypeProperty ), tags: new
                     {
+                        ctx,
                         onPropertyChangedMethodHasCallerMemberNameAttribute,
-                        onPropertyChangedMethod = ctx.OnPropertyChangedMethod,
                     } );
                     break;
             }
@@ -267,25 +262,49 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
             && m.Parameters[0].Type.SpecialType == SpecialType.String
             && _onPropertyChangedMethodNames.Contains( m.Name ) );
 
-    private static string GetAvailableFieldName( INamedType type, string desiredFieldName )
+    private static string GetUnusedMemberName( INamedType type, string desiredName )
+    {
+        HashSet<string>? existingMemberNames = null;
+        return GetUnusedMemberName( type, desiredName, ref existingMemberNames, false );
+    }
+
+    /// <summary>
+    /// Gets an unused member name for the given type by adding an numeric suffix until an unused name is found.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="desiredName"></param>
+    /// <param name="existingMemberNames">
+    /// If not <see langword="null"/> on entry, specifies the known set of member names to consider (the actual member names of <paramref name="type"/>
+    /// will be ignored). If <see langword="null"/> on entry, on exit will be set to the member names of <paramref name="type"/> (including the names of nested types),
+    /// optionally also including the return value according to <paramref name="addResultToExistingMemberNames"/>.
+    /// </param>
+    /// <returns></returns>
+    private static string GetUnusedMemberName( INamedType type, string desiredName, ref HashSet<string>? existingMemberNames, bool addResultToExistingMemberNames = true )
     {
         string result;
 
-        if ( !type.Fields.OfName( desiredFieldName ).Any() )
+        existingMemberNames ??= new( ((IEnumerable<INamedDeclaration>) type.AllMembers()).Concat( type.NestedTypes ).Select( m => m.Name ) );
+
+        if ( !existingMemberNames.Contains( desiredName ) )
         {
-            result = desiredFieldName;
+            result = desiredName;
         }
         else
         {
             for ( var i = 2; true; i++ )
             {
-                result = $"{desiredFieldName}{i}";
+                result = $"{desiredName}{i}";
 
-                if ( !type.Fields.OfName( result ).Any() )
+                if ( !existingMemberNames.Contains( result ) )
                 {
                     break;
                 }
             }
+        }
+
+        if ( addResultToExistingMemberNames )
+        {
+            existingMemberNames.Add( result );
         }
 
         return result;
@@ -303,8 +322,8 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
     {
         set
         {
-            var handlerField = (IField?) meta.Tags["handlerField"];
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
+            var handlerField = (IField?) meta.Tags["handlerField"];
             var eventRequiresCast = ctx.GetInpcInstrumentationKind( meta.Target.Property.Type ) is InpcInstrumentationKind.Explicit;
 
             if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
@@ -328,10 +347,9 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                 meta.Target.FieldOrProperty.Value = value;
 
-                var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
 
                 meta.Target.FieldOrProperty.Value = value;
-                onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
+                ctx.OnPropertyChangedMethod.Invoke( meta.Target.Property.Name );
 
                 if ( handlerField != null )
                 {
@@ -365,12 +383,12 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
     {
         set
         {
+            var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
+
             if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
             {
-                var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
-
                 meta.Target.FieldOrProperty.Value = value;
-                onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
+                ctx.OnPropertyChangedMethod.Invoke( meta.Target.Property.Name );
             }
         }
     }
@@ -380,40 +398,134 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
     {
         set
         {
+            var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
+
             if ( value != meta.Target.FieldOrProperty.Value )
             {
                 meta.Target.FieldOrProperty.Value = value;
 
-                var onPropertyChangedMethod = (IMethod) meta.Tags["onPropertyChangedMethod"]!;
-
                 // TODO: IMethod.Invoke is not aware of/does not support default args, so we can't currently emit this idomatic expression.
                 //       If/when supported, update other invocations, this is the only commented example.
 #if true
-                onPropertyChangedMethod.Invoke( meta.Target.Property.Name );
+                ctx.OnPropertyChangedMethod.Invoke( meta.Target.Property.Name );
 #else
                 if ( false || (bool)meta.Tags["onPropertyChangedMethodHasCallerMemberNameAttribute"]! )
                 {
                     // Emit human idomatic "OnPropertyChanged()" where the property name will be injected by the C# compiler thanks to [CallerMemberName] on
                     // the introduced or existing OnPropertyChanged method.
-                    onPropertyChangedMethod.Invoke();
+                    ctx.OnPropertyChangedMethod.Invoke();
                 }
                 else
                 {
-                    onPropertyChangedMethod.Invoke( meta.Target.Member.Name );
+                    ctx.OnPropertyChangedMethod.Invoke( meta.Target.Property.Name );
                 }
 #endif
             }
         }
     }
 
-    // TODO: ML BUG? https://doc.metalama.net/conceptual/aspects/advising/implementing-interfaces says "The accessibility of introduced members is inconsequential.",
-    //       but the aspect fails if this member is private.
+    // TODO: Make this private pending #33686
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
 
     [Template]
-    private static void OnPropertyChanged( [CompileTime] IEvent propertyChangedEvent, [CallerMemberName] string? propertyName = null )
+    private void OnPropertyChanged( [CallerMemberName] string? propertyName = null )
     {
-        propertyChangedEvent.With( InvokerOptions.NullConditional ).Raise( meta.This, new PropertyChangedEventArgs( propertyName ) );
+        this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
     }
+
+    [Template]
+    private static void UpdateChildren( [CompileTime] IEnumerable<IMethod> updateChildPropertyMethods ) // UpdateA2Children
+    {
+        // UpdateA2B2();
+        // ...
+        foreach ( var method in updateChildPropertyMethods )
+        {
+            method.Invoke();
+        }
+    }
+
+    [Template]
+    private static void UpdateChildProperty( 
+        [CompileTime] IExpression accessChildExpression, 
+        [CompileTime] IField lastValueField,
+        [CompileTime] IField onPropertyChangedHandlerField,
+        [CompileTime] IMethod onPropertyChangedMethod ) // UpdateA2B2
+    {
+        //var newA2B2 = _a2?.B2;
+        var newValue = accessChildExpression.Value;
+
+        //if ( !ReferenceEquals( newA2B2, _lastA2B2 ) )
+        if ( !ReferenceEquals( newValue, lastValueField.Value ) )
+        {
+            //if ( _lastA2B2 != null )
+            if ( !ReferenceEquals( lastValueField.Value, null ) )
+            {
+                lastValueField.Value.PropertyChanged -= onPropertyChangedHandlerField.Value;
+            }
+
+            if ( newValue != null )
+            {
+                //_onA2B2PropertyChangedHandler ??= this.OnA2B2PropertyChanged;
+                onPropertyChangedHandlerField.Value ??= (PropertyChangedEventHandler) OnSpecificPropertyChanged;
+                //newA2B2.PropertyChanged += _onA2B2PropertyChangedHandler;
+                newValue.PropertyChanged += onPropertyChangedHandlerField.Value;
+            }
+
+            //_lastA2B2 = newA2B2;
+            lastValueField.Value = newValue;
+
+            // TODO: Lookup from dependency dictionary for those props affected by change to "A2.B2"
+            var affectedProperties = meta.RunTime( new string[] { "A4" } );
+
+            foreach ( var name in affectedProperties )
+            {
+                onPropertyChangedMethod.Invoke( name );
+            }
+        }
+
+        // OnA2B2PropertyChanged
+        void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )
+        {
+            // TODO: Lookup from dependency dictionary for those props affected by change to "A2.B2" sub-dictionary e.PropertyName
+            // Or possibly one static dictionary for the target class's own props, and one static dictionary per child propertypath
+            // (eg, one for A2.B2) - otherwise we could get a lot of nested dictionary lookups. Or we do string concat to get the key.
+            // Or some fancy heap-free key thingy. Or we could generated a sequence of calls to OnPropertyChanged with the "firm-coded"
+            // values.
+            var affectedProperties = meta.RunTime( new string[] { "A4" } );
+
+            foreach ( var name in affectedProperties )
+            {
+                onPropertyChangedMethod.Invoke( name );
+            }
+        }
+    }
+
+    sealed class Node
+    {
+        public string[]? DependentProperties { get; set; }
+
+        public Dictionary<string, Node>? ChildProperties { get; set; }
+    }
+
+    // When some property where key=name changes, value is list of properties that are affected.
+    Dictionary<string, Node> _propertyDependents = new Dictionary<string, Node>()
+    {
+        {
+            "A2",
+            new Node()
+            {
+                ChildProperties = new Dictionary<string, Node>()
+                {
+                    {
+                        "B2",
+                        new Node()
+                        {
+                            DependentProperties = new[] { "A4" },
+                        }
+                    }  
+                }
+            }
+        }
+    };
 }
