@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Formatters.Implementations;
+using Flashtrace.Formatters.TypeExtensions;
 using JetBrains.Annotations;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -10,8 +12,17 @@ namespace Flashtrace.Formatters;
 /// Allows to get and register formatters for a specific type.
 /// </summary>
 [PublicAPI]
-public class FormatterRepository : IFormatterRepository
+public class FormatterRepository : IFormatterRepository, FormatterRepository.IUnitTesting
 {
+    internal interface IUnitTesting
+    {
+        /// <summary>
+        /// Clears formatters, but doesn't reset registrations.
+        /// </summary>
+        /// <remarks>Used by unit tests to clear standard formatters.</remarks>
+        void Reset();
+    }
+
     private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _formatterFactory;
     private readonly CovariantTypeExtensionFactory<IFormatter, IFormatterRepository> _dynamicFormatterFactory;
 
@@ -68,7 +79,10 @@ public class FormatterRepository : IFormatterRepository
         this.Register( typeof(DateTimeOffset), new DefaultFormatter<DateTimeOffset>( this ) );
         this.Register( typeof(Guid), new DefaultFormatter<Guid>( this ) );
         this.Register( typeof(TimeSpan), new DefaultFormatter<TimeSpan>( this ) );
-        this.Register( typeof(IFormattable), new FormattableFormatter<IFormattable>( this ) );
+#if NET6_0_OR_GREATER
+        this.Register( typeof(ISpanFormattable), typeof(SpanFormattableFormatter<>) );
+#endif
+        this.Register( typeof(IFormattable), typeof(FormattableFormatter<>) );
         this.Register( typeof(Nullable<>), typeof(NullableFormatter<>) );
         this.Register( typeof(Type), new TypeFormatter( this ) );
         this.Register( typeof(MethodBase), new MethodInfoFormatter( this ) );
@@ -144,8 +158,30 @@ public class FormatterRepository : IFormatterRepository
     /// <param name="objectType">Object type.</param>
     /// <returns>The formatter the object <paramref name="objectType"/>.</returns>
     public IFormatter Get( Type objectType )
+        => this._dynamicFormatterCache.GetOrAdd( objectType, this._getFormatterFunc ).Extension
+           ?? throw new FormatterNotFoundException();
+
+    /// <summary>
+    /// Attempts to get the <see cref="IFormatter"/> for the specified <see cref="Type"/>.
+    /// </summary>
+    /// <param name="objectType">Object type.</param>
+    /// <param name="formatter">The formatter for objects of the specified type, or null if the repository is unable to provide a formatter for the specified type.</param>
+    /// <returns>true if the repository was able to provide a formatter for the specified type; otherwise, false.</returns>
+    public bool TryGet( Type objectType, out IFormatter? formatter )
     {
-        return this._dynamicFormatterCache.GetOrAdd( objectType, this._getFormatterFunc ).Extension;
+        formatter = this._dynamicFormatterCache.GetOrAdd( objectType, this._getFormatterFunc ).Extension;
+
+        return formatter != null;
+    }
+
+    /// <summary>
+    /// Clears formatters, but doesn't reset registrations.
+    /// </summary>
+    /// <remarks>Used by unit tests to clear standard formatters.</remarks>
+    void IUnitTesting.Reset()
+    {
+        this._formatterFactory.Clear();
+        this.RegisterDefaultFormatters();
     }
 
     private void UpdateFormatterCache( Type objectType, TypeExtensionInfo<IFormatter> newFormatterInfo )
@@ -198,7 +234,9 @@ public class FormatterRepository : IFormatterRepository
         {
             this._parent = parent;
             this._formatterInfo = parent._formatterFactory.GetTypeExtension( typeof(T), this.UpdateCacheCallback, this.CreateDefaultFormatter );
-            this._formatter = (IFormatter<T>) this._formatterInfo.Extension;
+
+            this._formatter = (IFormatter<T>) (this._formatterInfo.Extension
+                                               ?? throw new FormattersAssertionFailedException( "null was not expected." ));
         }
 
         private IFormatter CreateDefaultFormatter()
@@ -221,7 +259,9 @@ public class FormatterRepository : IFormatterRepository
         {
             if ( typeExtensionInfo.ShouldOverwrite( this._formatterInfo ) )
             {
-                this._formatter = (IFormatter<T>) this._parent._formatterFactory.Convert( typeExtensionInfo.Extension, typeof(T) );
+                this._formatter = (IFormatter<T>) (this._parent._formatterFactory.Convert( typeExtensionInfo.Extension, typeof(T) )
+                                                   ?? throw new FormattersAssertionFailedException( "null was not expected." ));
+
                 this._formatterInfo = typeExtensionInfo;
             }
         }

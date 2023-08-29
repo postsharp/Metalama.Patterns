@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Metalama.Patterns.Contracts.UnitTests;
 
 /// <summary>
-/// Exception thrown upon internal assertion failures in PostSharp Pattern Libraries.
+/// Exception thrown upon internal assertion failures in Metalama Pattern Libraries.
 /// </summary>
 [Serializable]
 public sealed class AssertionFailedException : Exception

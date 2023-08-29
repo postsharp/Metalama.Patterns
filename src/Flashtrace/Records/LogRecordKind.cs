@@ -64,7 +64,7 @@ public enum LogRecordKind
     /// <remarks>
     /// Emitted by:
     ///     <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> and
-    ///     <see cref="LogLevelSource.LogActivity{TDescription}(in TDescription, Action, in OpenActivityOptions)"/> and related overloads.
+    ///     <see cref="LogActivity{TActivityDescription}"/> and related overloads.
     /// </remarks>
     ActivityEntry = 1 << 8,
 

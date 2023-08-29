@@ -26,7 +26,7 @@ public readonly struct FormattedMessage : IMessage
 
         if ( !string.IsNullOrEmpty( this._text ) )
         {
-            recordBuilder.WriteString( this._text );
+            recordBuilder.WriteString( this._text.AsSpan() );
         }
 
         recordBuilder.EndWriteItem( item );

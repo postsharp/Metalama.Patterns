@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Contracts.UnitTests.Assets;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
@@ -22,6 +23,8 @@ public sealed class StringLengthAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethod( "12345678901" ) );
 
         Assert.NotNull( e );
+
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -41,6 +44,8 @@ public sealed class StringLengthAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = "12345678901" );
 
         Assert.NotNull( e );
+
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         Assert.Contains( "StringField", e!.Message, StringComparison.Ordinal );
     }
 
@@ -52,6 +57,8 @@ public sealed class StringLengthAttributeTests
         var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = "1234" );
 
         Assert.NotNull( e );
+
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         Assert.Contains( "StringField", e!.Message, StringComparison.Ordinal );
     }
 

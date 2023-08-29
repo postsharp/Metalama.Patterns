@@ -30,7 +30,7 @@ public readonly struct SemanticMessageArray : IMessage
         {
             var (name, value) = this._parameters[i];
 
-            builder.WriteParameter( i, name, value, LogParameterOptions.SemanticParameter );
+            builder.WriteParameter( i, name.AsSpan(), value, LogParameterOptions.SemanticParameter );
         }
 
         builder.EndWriteItem( item );

@@ -16,7 +16,7 @@ namespace Flashtrace.Formatters;
 /// </para>
 /// </remarks>
 [PublicAPI]
-public class FormattingOptions
+public record FormattingOptions( bool RequiresUnquotedStrings )
 {
     /// <summary>
     /// Gets the default <see cref="FormattingOptions"/>.
@@ -32,7 +32,7 @@ public class FormattingOptions
     /// Initializes a new instance of the <see cref="FormattingOptions"/> class by copying all values from another <see cref="FormattingOptions"/>.
     /// </summary>
     /// <param name="prototype">The <see cref="FormattingOptions"/> instance whose values have to be copied.</param>
-    protected FormattingOptions( FormattingOptions prototype )
+    public FormattingOptions( FormattingOptions prototype )
     {
         if ( prototype == null )
         {
@@ -41,14 +41,4 @@ public class FormattingOptions
 
         this.RequiresUnquotedStrings = prototype.RequiresUnquotedStrings;
     }
-
-    private FormattingOptions( bool unquotedStrings )
-    {
-        this.RequiresUnquotedStrings = unquotedStrings;
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether the formatters should not use quotation when formatting strings.
-    /// </summary>
-    public bool RequiresUnquotedStrings { get; }
 }

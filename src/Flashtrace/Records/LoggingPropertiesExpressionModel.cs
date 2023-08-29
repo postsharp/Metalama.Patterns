@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using System.Globalization;
 
 namespace Flashtrace.Records;
-#pragma warning disable CA1815 // Override equals and operator equals on value types
 
 /// <summary>
 /// Type of the <c>t</c> parameters for <c>if</c> and <c>sample</c> expressions in the policy configuration file.

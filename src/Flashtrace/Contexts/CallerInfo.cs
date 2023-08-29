@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Flashtrace.Contexts;
 
@@ -9,9 +10,9 @@ namespace Flashtrace.Contexts;
 /// Describes the caller of a logging method.
 /// </summary>
 [PublicAPI]
-public struct CallerInfo
+public readonly struct CallerInfo
 {
-    private Type? _sourceType;
+    private readonly Type? _sourceType;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CallerInfo"/> struct specifying the source type as a <see cref="RuntimeTypeHandle"/>.
@@ -21,15 +22,13 @@ public struct CallerInfo
     /// <param name="file">Path of the source code of the calling code.</param>
     /// <param name="line">Line in <paramref name="file"/> of the caller.</param>
     /// <param name="column">Column in <paramref name="file"/> of the caller.</param>
-    /// <param name="attributes">Attributes.</param>
     [DebuggerStepThrough]
-    public CallerInfo( RuntimeTypeHandle sourceTypeToken, string methodName, string file, int line, int column, CallerAttributes attributes )
+    public CallerInfo( RuntimeTypeHandle sourceTypeToken, string methodName, string file, int line, int column )
     {
         this.SourceTypeToken = sourceTypeToken;
         this.MethodName = methodName;
         this.SourceLineInfo = new SourceLineInfo( file, line, column );
         this._sourceType = null;
-        this.Attributes = attributes;
     }
 
     /// <summary>
@@ -40,43 +39,19 @@ public struct CallerInfo
     /// <param name="file">Path of the source code of the calling code.</param>
     /// <param name="line">Line in <paramref name="file"/> of the caller.</param>
     /// <param name="column">Column in <paramref name="file"/> of the caller.</param>
-    /// <param name="attributes">Attributes.</param>
     [DebuggerStepThrough]
-    public CallerInfo( Type sourceType, string methodName, string? file, int line, int column, CallerAttributes attributes )
+    public CallerInfo( Type sourceType, string methodName, string? file, int line, int column )
     {
         this._sourceType = sourceType;
         this.MethodName = methodName;
         this.SourceTypeToken = default;
         this.SourceLineInfo = new SourceLineInfo( file, line, column );
-        this.Attributes = attributes;
     }
-
-    /// <summary>
-    /// Gets the caller attributes.
-    /// </summary>
-    public CallerAttributes Attributes { get; private set; }
-
-    /// <summary>
-    /// Gets a value indicating whether the caller is an <c>async</c> method.
-    /// </summary>
-    public bool IsAsync => (this.Attributes & CallerAttributes.IsAsync) != 0;
 
     /// <summary>
     /// Gets the source <see cref="Type"/>.
     /// </summary>
-    public Type? SourceType
-    {
-        get
-        {
-            // As per MS documentation, Type.GetTypeFromHandle will return null if the argument "is null", despite the return type not being marked as Type?.
-            if ( this._sourceType == null && this.SourceTypeToken.Value != IntPtr.Zero )
-            {
-                this._sourceType = Type.GetTypeFromHandle( this.SourceTypeToken );
-            }
-
-            return this._sourceType;
-        }
-    }
+    public Type? SourceType => this._sourceType ?? (this.SourceTypeToken.Value == default ? null : Type.GetTypeFromHandle( this.SourceTypeToken ));
 
     /// <summary>
     /// Gets the <see cref="RuntimeTypeHandle"/> of the caller <see cref="Type"/>.
@@ -86,12 +61,12 @@ public struct CallerInfo
     /// <summary>
     /// Gets the name of the caller method.
     /// </summary>
-    public string? MethodName { get; private set; }
+    public string? MethodName { get; }
 
     /// <summary>
     /// Gets the <see cref="SourceLineInfo"/> of the caller.
     /// </summary>
-    public SourceLineInfo SourceLineInfo { get; private set; }
+    public SourceLineInfo SourceLineInfo { get; }
 
     /// <summary>
     /// Gets a value indicating whether the current <see cref="CallerInfo"/> is null.
@@ -120,6 +95,9 @@ public struct CallerInfo
             return useTypeName + "." + useMethodName + " at " + this.SourceLineInfo.File + ", " + this.SourceLineInfo.Line;
         }
     }
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public CallerInfo GetDynamicWhenNull( int skipFrames = 0 ) => this.IsNull ? this : GetDynamic( skipFrames );
 
     /// <summary>
     /// Gets a <see cref="CallerInfo"/> of the caller by performing a stack walk (using <see cref="StackFrame"/>).
@@ -155,8 +133,7 @@ public struct CallerInfo
                 method.Name,
                 frame.GetFileName(),
                 frame.GetFileLineNumber(),
-                frame.GetFileColumnNumber(),
-                CallerAttributes.None );
+                frame.GetFileColumnNumber() );
         }
     }
 }

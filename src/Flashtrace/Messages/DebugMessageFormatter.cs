@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace.Formatters;
 using Flashtrace.Records;
 using System.Text;
 
@@ -36,12 +35,12 @@ internal static class DebugMessageFormatter
 
         public void SetExecutionTime( double executionTime, bool isOvertime ) { }
 
-        public void WriteParameter<T>( int index, in CharSpan parameterName, T? value, in LogParameterOptions options )
+        public void WriteParameter<T>( int index, in ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
         {
             this._stringBuilder.Append( value?.ToString() );
         }
 
-        public void WriteString( in CharSpan str )
+        public void WriteString( in ReadOnlySpan<char> str )
         {
             this._stringBuilder.Append( str.ToString() );
         }
