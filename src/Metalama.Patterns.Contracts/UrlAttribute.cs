@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 /// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.UrlErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.UrlErrorMessage"/>.</para>
 /// </remarks>
 [PublicAPI]
 public sealed class UrlAttribute : RegularExpressionAttribute
@@ -28,13 +28,8 @@ public sealed class UrlAttribute : RegularExpressionAttribute
     public UrlAttribute()
         : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
 
-    /// <inheritdoc/>
-    [CompileTime]
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .UrlErrorMessage) ),
-            false );
+    protected override void OnContractViolated( dynamic? value )
+    {
+        meta.Target.Project.ContractOptions().ThrowTemplates.OnUrlContractViolated( value );
+    }
 }

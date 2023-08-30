@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Contracts;
 /// are matched against enumeration member values.     Null values are accepted and do not
 /// throw exception.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.EnumDataTypeErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.EnumDataTypeErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to <see cref="EnumType"/> name.</para>
 /// </remarks>
 [PublicAPI]
@@ -78,24 +78,13 @@ public sealed class EnumDataTypeAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
         var targetType = meta.Target.GetTargetType();
 
         if ( targetType.SpecialType is SpecialType.String or SpecialType.Object )
         {
             if ( value != null! && !EnumDataTypeAttributeHelper.IsValidEnumValue( value, this.EnumType ) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentException),
-                        typeof(EnumDataTypeAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
-                        this.EnumType.Name ) );
+                meta.Target.Project.ContractOptions().ThrowTemplates.OnInvalidEnumValue( value );
             }
         }
         else if ( targetType.IsNullable == true )
@@ -107,16 +96,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
                 if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentException),
-                            typeof(EnumDataTypeAttribute),
-                            enumValue,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
-                            this.EnumType.Name ) );
+                    meta.Target.Project.ContractOptions().ThrowTemplates.OnInvalidEnumValue( value );
                 }
             }
         }
@@ -127,16 +107,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
             if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentException),
-                        typeof(EnumDataTypeAttribute),
-                        enumValue,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.EnumDataTypeErrorMessage,
-                        this.EnumType.Name ) );
+                meta.Target.Project.ContractOptions().ThrowTemplates.OnInvalidEnumValue( value );
             }
         }
     }

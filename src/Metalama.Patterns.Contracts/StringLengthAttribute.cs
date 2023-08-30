@@ -16,15 +16,15 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Depending on supplied constructor arguments, one of the following holds:
 /// <list type="bullet">
 ///     <item><description>
-///         if there is no minimum specified, then the error message is identified by <see cref="ContractLocalizedTextProvider.StringLengthMaxErrorMessage"/>
+///         if there is no minimum specified, then the error message is identified by <see cref="ContractTextProvider.StringLengthMaxErrorMessage"/>
 ///         and can use additional argument <value>{4}</value> to refer to the maximum value specified,
 ///     </description></item>
 ///     <item><description>
-///         or if there is maximum is equal to <see cref="int.MaxValue"/>, then the error message is identified by <see cref="ContractLocalizedTextProvider.StringLengthMinErrorMessage"/>
+///         or if there is maximum is equal to <see cref="int.MaxValue"/>, then the error message is identified by <see cref="ContractTextProvider.StringLengthMinErrorMessage"/>
 ///         and can use additional argument <value>{4}</value> to refer to the minimum value specified,
 ///     </description></item>
 ///     <item><description>
-///         otherwise, the error message is identified by <see cref="ContractLocalizedTextProvider.StringLengthRangeErrorMessage"/>
+///         otherwise, the error message is identified by <see cref="ContractTextProvider.StringLengthRangeErrorMessage"/>
 ///         and can use additional arguments <value>{4}</value> to refer to the minimum value specified and <value>{5}</value> to refer to the maximum value specified.
 ///     </description></item>
 /// </list></para>
@@ -92,32 +92,14 @@ public sealed class StringLengthAttribute : ContractAspect
         {
             if ( value != null && value!.Length > this.MaximumLength )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentException),
-                        typeof(StringLengthAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.StringLengthMaxErrorMessage,
-                        this.MaximumLength ) );
+                meta.Target.Project.ContractOptions().ThrowTemplates.OnStringMaxLengthContractViolated( value, this.MaximumLength );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength == int.MaxValue )
         {
             if ( value != null && value!.Length < this.MinimumLength )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentException),
-                        typeof(StringLengthAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.StringLengthMinErrorMessage,
-                        this.MinimumLength ) );
+                meta.Target.Project.ContractOptions().ThrowTemplates.OnStringMinLengthContractViolated( value, this.MinimumLength );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength != int.MaxValue )
@@ -126,17 +108,7 @@ public sealed class StringLengthAttribute : ContractAspect
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentException),
-                        typeof(StringLengthAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.StringLengthRangeErrorMessage,
-                        this.MinimumLength,
-                        this.MaximumLength ) );
+                meta.Target.Project.ContractOptions().ThrowTemplates.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
             }
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }

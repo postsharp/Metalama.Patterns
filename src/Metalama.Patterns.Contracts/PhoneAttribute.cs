@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 /// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.PhoneErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.PhoneErrorMessage"/>.</para>
 /// </remarks>
 [PublicAPI]
 public sealed class PhoneAttribute : RegularExpressionAttribute
@@ -27,13 +27,8 @@ public sealed class PhoneAttribute : RegularExpressionAttribute
     public PhoneAttribute()
         : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
 
-    /// <inheritdoc/>
-    [CompileTime]
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .PhoneErrorMessage) ),
-            false );
+    protected override void OnContractViolated( dynamic? value )
+    {
+        meta.Target.Project.ContractOptions().ThrowTemplates.OnPhoneContractViolated( value );
+    }
 }

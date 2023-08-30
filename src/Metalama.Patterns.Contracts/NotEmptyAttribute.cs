@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Contracts;
 /// (where empty means zero items). 
 /// </summary>
 /// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotEmptyErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.NotEmptyErrorMessage"/>.</para>
 /// </remarks>
 [PublicAPI]
 [Inheritable]
@@ -44,23 +44,13 @@ public sealed class NotEmptyAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
         var targetType = (INamedType) meta.Target.GetTargetType();
 
         if ( targetType.Equals( SpecialType.String ) )
         {
             if ( string.IsNullOrEmpty( value ) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentNullException),
-                        typeof(NotEmptyAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                meta.Target.Project.ContractOptions().ThrowTemplates.OnNotEmptyContractViolated( value );
             }
         }
         else if ( TryGetCompatibleTargetInterface( targetType, out var interfaceType, out var requiresCast ) )
@@ -69,30 +59,14 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentNullException),
-                            typeof(NotEmptyAttribute),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                    meta.Target.Project.ContractOptions().ThrowTemplates.OnNotEmptyContractViolated( value );
                 }
             }
             else
             {
                 if ( value == null || value!.Count <= 0 )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentNullException),
-                            typeof(NotEmptyAttribute),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                    meta.Target.Project.ContractOptions().ThrowTemplates.OnNotEmptyContractViolated( value );
                 }
             }
         }

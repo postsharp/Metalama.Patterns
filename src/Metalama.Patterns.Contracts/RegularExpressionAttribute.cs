@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 /// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.RegularExpressionErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.RegularExpressionErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the regular expression used.</para>
 /// </remarks>
 [PublicAPI]
@@ -26,15 +26,8 @@ public class RegularExpressionAttribute : ContractAspect
     /// Initializes a new instance of the <see cref="RegularExpressionAttribute"/> class.
     /// </summary>
     /// <param name="pattern">The regular expression.</param>
-    public RegularExpressionAttribute( string pattern )
-        : this( pattern, RegexOptions.None ) { }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RegularExpressionAttribute"/> class.
-    /// </summary>
-    /// <param name="pattern">The regular expression.</param>
     /// <param name="options">Options.</param>
-    public RegularExpressionAttribute( string pattern, RegexOptions options )
+    public RegularExpressionAttribute( string pattern, RegexOptions options = RegexOptions.None )
     {
         this.Pattern = pattern;
         this.Options = options | RegexOptions.Compiled;
@@ -71,57 +64,15 @@ public class RegularExpressionAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
-        var info = this.GetExceptionInfo();
-        var aspectType = meta.CompileTime( this.GetType() );
-
         if ( value != null && !Regex.IsMatch( value, this.Pattern, this.Options ) )
         {
-            if ( info.IncludePatternArgument )
-            {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        info.ExceptionType,
-                        aspectType,
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        info.MessageIdExpression.Value,
-                        this.Pattern ) );
-            }
-            else
-            {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        info.ExceptionType,
-                        aspectType,
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        info.MessageIdExpression.Value ) );
-            }
+            this.OnContractViolated( value );
         }
     }
 
-    /// <summary>
-    /// Describes exception information as returned by <see cref="GetExceptionInfo"/>.
-    /// </summary>
-    [CompileTime]
-    protected record struct ExceptionInfo( Type ExceptionType, IExpression MessageIdExpression, bool IncludePatternArgument );
-
-    /// <summary>
-    /// Called by <see cref="Validate(object?)"/> to determine the message to emit, and whether the pattern
-    /// should be provided as a formatting argument.
-    /// </summary>
-    [CompileTime]
-    protected virtual ExceptionInfo GetExceptionInfo()
-        => new(
-            typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .RegularExpressionErrorMessage) ),
-            true );
+    [Template]
+    protected virtual void OnContractViolated( dynamic? value )
+    {
+        meta.Target.Project.ContractOptions().ThrowTemplates.OnRegularExpressionContractViolated( value, this.Pattern );
+    }
 }

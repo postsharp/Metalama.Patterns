@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// an <see cref="ArgumentNullException"/> if the target is assigned a <see langword="null"/> value.
 /// </summary>
 /// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotNullErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.NotNullErrorMessage"/>.</para>
 /// </remarks>
 [PublicAPI]
 [Inheritable]
@@ -48,15 +48,7 @@ public sealed class NotNullAttribute : ContractAspect
     {
         if ( value == null! )
         {
-            throw ContractsServices.Default.ExceptionFactory.CreateException(
-                ContractExceptionInfo.Create(
-                    typeof(ArgumentNullException),
-                    typeof(NotNullAttribute),
-                    value,
-                    meta.Target.GetTargetName(),
-                    meta.Target.GetTargetKind(),
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.NotNullErrorMessage ) );
+            meta.Target.Project.ContractOptions().ThrowTemplates.OnNotNullContractViolated( value );
         }
     }
 }

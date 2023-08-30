@@ -20,7 +20,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 ///     <para>Null values are accepted and do not throw an exception.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.RangeErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.RangeErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used and <value>{5}</value> to refer to the maximum value used.</para>
 /// </remarks>
 [PublicAPI]
@@ -551,13 +551,9 @@ public class RangeAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
         var type = meta.Target.GetTargetType();
         var basicType = (INamedType) type.ToNonNullableType();
         var isNullable = type.IsNullable == true;
-        var exceptionInfo = this.GetExceptionInfo();
-        var aspectType = meta.CompileTime( this.GetType() );
 
         if ( type.SpecialType == SpecialType.Object )
         {
@@ -579,19 +575,7 @@ public class RangeAttribute : ContractAspect
 
                 if ( !validateResult.IsInRange )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentOutOfRangeException),
-                            aspectType,
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            exceptionInfo.MessageIdExpression.Value,
-                            exceptionInfo.IncludeMinValue
-                                ? this.DisplayMinValue
-                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
+                    this.OnContractViolated( value );
                 }
             }
         }
@@ -603,59 +587,22 @@ public class RangeAttribute : ContractAspect
             {
                 if ( value!.HasValue && (value < min.Value || value > max.Value) )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentOutOfRangeException),
-                            aspectType,
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            exceptionInfo.MessageIdExpression.Value,
-                            exceptionInfo.IncludeMinValue
-                                ? this.DisplayMinValue
-                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
+                    this.OnContractViolated( value );
                 }
             }
             else
             {
                 if ( value < min.Value || value > max.Value )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentOutOfRangeException),
-                            aspectType,
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            exceptionInfo.MessageIdExpression.Value,
-                            exceptionInfo.IncludeMinValue
-                                ? this.DisplayMinValue
-                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
+                    this.OnContractViolated( value );
                 }
             }
         }
     }
 
-    /// <summary>
-    /// Describes exception information as returned by <see cref="GetExceptionInfo"/>.
-    /// </summary>
-    [CompileTime]
-    protected record struct ExceptionInfo( IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue );
-
-    /// <summary>
-    /// Called by <see cref="Validate(object?)"/> to determine the message to emit, and whether the minimum and maximum values
-    /// should be provided as formatting arguments.
-    /// </summary>
-    [CompileTime]
-    protected virtual ExceptionInfo GetExceptionInfo()
-        => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .RangeErrorMessage) ),
-            true,
-            true );
+    [Template]
+    protected virtual void OnContractViolated( dynamic? value )
+    {
+        meta.Target.Project.ContractOptions().ThrowTemplates.OnRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
+    }
 }

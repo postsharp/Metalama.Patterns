@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 /// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.EmailAddressErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.EmailAddressErrorMessage"/>.</para>
 /// </remarks>
 [PublicAPI]
 public sealed class EmailAddressAttribute : RegularExpressionAttribute
@@ -27,13 +27,8 @@ public sealed class EmailAddressAttribute : RegularExpressionAttribute
     public EmailAddressAttribute()
         : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
 
-    /// <inheritdoc/>
-    [CompileTime]
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .EmailAddressErrorMessage) ),
-            false );
+    protected override void OnContractViolated( dynamic? value )
+    {
+        meta.Target.Project.ContractOptions().ThrowTemplates.OnEmailAddressContractViolated( value );
+    }
 }

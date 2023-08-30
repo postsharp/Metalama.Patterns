@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -22,7 +23,7 @@ namespace Metalama.Patterns.Contracts;
 ///     of the value closest to the maximum value according to the precision
 ///     of the respective floating-point numerical data type.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.StrictlyLessThanErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.StrictlyLessThanErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
 [PublicAPI]
@@ -82,14 +83,10 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             DoubleMaximum.ToDecimal( max ),
             GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) ) { }
 
-    /// <inheritdoc/>
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .StrictlyLessThanErrorMessage) ),
-            false,
-            true );
+    protected override void OnContractViolated( dynamic? value )
+    {
+        meta.Target.Project.ContractOptions().ThrowTemplates.OnStrictlyLessThanContractViolated( value, this.DisplayMaxValue );
+    }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
         CreateCannotBeAppliedDiagnosticDefinition( "LAMA5006", nameof(StrictlyLessThanAttribute) );

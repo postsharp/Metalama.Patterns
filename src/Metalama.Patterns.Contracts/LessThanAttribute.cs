@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -17,7 +18,7 @@ namespace Metalama.Patterns.Contracts;
 /// </summary>
 /// <remarks>
 ///     <para>Null values are accepted and do not throw an exception.</para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.LessThanErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.LessThanErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
 [PublicAPI]
@@ -125,14 +126,10 @@ public class LessThanAttribute : RangeAttribute
         }
     }
 
-    /// <inheritdoc/>
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .LessThanErrorMessage) ),
-            false,
-            true );
+    protected override void OnContractViolated( dynamic? value )
+    {
+        meta.Target.Project.ContractOptions().ThrowTemplates.OnLessThanContractViolated( value, this.DisplayMaxValue );
+    }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
         CreateCannotBeAppliedDiagnosticDefinition( "LAMA5002", nameof(LessThanAttribute) );

@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 ///     <para>Null values are accepted and do not throw an exception.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.LessThanErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.LessThanErrorMessage"/>.</para>
 /// </remarks>
 [PublicAPI]
 public class StrictlyNegativeAttribute : StrictlyLessThanAttribute

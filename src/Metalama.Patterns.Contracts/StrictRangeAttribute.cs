@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -20,7 +21,7 @@ namespace Metalama.Patterns.Contracts;
 ///     of the value closest to the bounds according to the precision
 ///     of the respective floating-point numerical data type.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.StrictRangeErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.StrictRangeErrorMessage"/>.</para>
 /// <para>Error message can use additional arguments <value>{4}</value> and <value>{5}</value> to refer to the bounds.</para>
 /// </remarks>
 [PublicAPI]
@@ -87,14 +88,10 @@ public class StrictRangeAttribute : RangeAttribute
                 min < double.MaxValue - 1 ? min + 1 : double.MaxValue,
                 max > double.MinValue + 1 ? max - 1 : double.MinValue ) ) { }
 
-    /// <inheritdoc/>
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .StrictRangeErrorMessage) ),
-            true,
-            true );
+    protected override void OnContractViolated( dynamic? value )
+    {
+        meta.Target.Project.ContractOptions().ThrowTemplates.OnStrictRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
+    }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
         CreateCannotBeAppliedDiagnosticDefinition( "LAMA5009", nameof(StrictRangeAttribute) );

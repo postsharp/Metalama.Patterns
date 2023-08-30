@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 
 namespace Metalama.Patterns.Contracts;
@@ -14,7 +15,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 /// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.CreditCardErrorMessage"/>.</para>
+/// <para>Error message is identified by <see cref="ContractTextProvider.CreditCardErrorMessage"/>.</para>
 /// </remarks>
 [PublicAPI]
 [Inheritable]
@@ -44,15 +45,7 @@ public sealed class CreditCardAttribute : ContractAspect
     {
         if ( !CreditCardAttributeHelper.IsValidCreditCardNumber( value ) )
         {
-            throw ContractsServices.Default.ExceptionFactory.CreateException(
-                ContractExceptionInfo.Create(
-                    typeof(ArgumentNullException),
-                    typeof(CreditCardAttribute),
-                    value,
-                    meta.Target.GetTargetName(),
-                    meta.Target.GetTargetKind(),
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.CreditCardErrorMessage ) );
+            meta.Target.Project.ContractOptions().ThrowTemplates.OnCreditCardContractViolated( value );
         }
     }
 }
