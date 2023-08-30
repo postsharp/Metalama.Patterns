@@ -6,5 +6,5 @@ namespace Metalama.Patterns.Contracts;
 
 public sealed class ContractOptions : ProjectExtension
 {
-    public ContractThrowTemplates ThrowTemplates { get; set; } = new();
+    public ContractTemplates Templates { get; set; } = new();
 }

@@ -85,7 +85,7 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnStrictlyLessThanContractViolated( value, this.DisplayMaxValue );
+        meta.Target.Project.ContractOptions().Templates.OnStrictlyLessThanContractViolated( value, this.DisplayMaxValue );
     }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =

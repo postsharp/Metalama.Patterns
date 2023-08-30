@@ -29,6 +29,6 @@ public sealed class EmailAddressAttribute : RegularExpressionAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnEmailAddressContractViolated( value );
+        meta.Target.Project.ContractOptions().Templates.OnEmailAddressContractViolated( value );
     }
 }

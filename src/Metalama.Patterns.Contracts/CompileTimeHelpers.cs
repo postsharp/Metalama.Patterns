@@ -21,59 +21,33 @@ internal static class CompileTimeHelpers
         return expressionBuilder.ToExpression();
     }
 
-    public static string? GetTargetName( this IMetaTarget target )
+    public static string? GetTargetDisplayName( this IMetaTarget target )
     {
-        if ( target == null )
-        {
-            throw new ArgumentNullException( nameof(target) );
-        }
-
         return target.Declaration.DeclarationKind switch
         {
-            DeclarationKind.Parameter => target.Parameter.IsReturnParameter ? null : target.Parameter.Name,
-            DeclarationKind.Property => target.Property.Name,
-            DeclarationKind.Field => target.Field.Name,
+            DeclarationKind.Parameter when target.Parameter.IsReturnParameter => "return value",
+            DeclarationKind.Parameter => $"'{target.Parameter.Name}' parameter",
+            DeclarationKind.Property => $"'{target.Property.Name}' property",
+            DeclarationKind.Field => $"'{target.Field.Name}' field",
             _ => throw new ArgumentOutOfRangeException(
                 nameof(target) + "." + nameof(target.Declaration) + "." +
                 nameof(target.Declaration.DeclarationKind) )
         };
     }
 
-    public static ContractTargetKind GetTargetKind( this IMetaTarget target )
+    public static string? GetTargetParameterName( this IMetaTarget target )
     {
-        if ( target == null )
-        {
-            throw new ArgumentNullException( nameof(target) );
-        }
-
         return target.Declaration.DeclarationKind switch
         {
-            DeclarationKind.Parameter => target.Parameter.IsReturnParameter ? ContractTargetKind.ReturnValue : ContractTargetKind.Parameter,
-            DeclarationKind.Property => ContractTargetKind.Property,
-            DeclarationKind.Field => ContractTargetKind.Field,
+            DeclarationKind.Parameter => target.Parameter.Name,
+            DeclarationKind.Property or DeclarationKind.Field => "value",
             _ => throw new ArgumentOutOfRangeException(
                 nameof(target) + "." + nameof(target.Declaration) + "." +
                 nameof(target.Declaration.DeclarationKind) )
         };
     }
 
-    public static IType GetTargetType( this IMetaTarget target )
-    {
-        if ( target == null )
-        {
-            throw new ArgumentNullException( nameof(target) );
-        }
-
-        return target.Declaration.DeclarationKind switch
-        {
-            DeclarationKind.Parameter => target.Parameter.Type,
-            DeclarationKind.Property => target.Property.Type,
-            DeclarationKind.Field => target.Field.Type,
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(target) + "." + nameof(target.Declaration) + "." +
-                nameof(target.Declaration.DeclarationKind) )
-        };
-    }
+    public static IType GetTargetType( this IMetaTarget target ) => ((IHasType) target.Declaration).Type;
 
     public static IEnumerable<INamedType> GetSelfAndAllImplementedInterfaces( this INamedType type )
     {

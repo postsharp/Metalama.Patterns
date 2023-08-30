@@ -90,7 +90,7 @@ public class StrictRangeAttribute : RangeAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnStrictRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
+        meta.Target.Project.ContractOptions().Templates.OnStrictRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
     }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =

@@ -30,6 +30,6 @@ public sealed class UrlAttribute : RegularExpressionAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnUrlContractViolated( value );
+        meta.Target.Project.ContractOptions().Templates.OnUrlContractViolated( value );
     }
 }

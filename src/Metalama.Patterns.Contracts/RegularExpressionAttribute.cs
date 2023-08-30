@@ -73,6 +73,6 @@ public class RegularExpressionAttribute : ContractAspect
     [Template]
     protected virtual void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnRegularExpressionContractViolated( value, this.Pattern );
+        meta.Target.Project.ContractOptions().Templates.OnRegularExpressionContractViolated( value, this.Pattern );
     }
 }

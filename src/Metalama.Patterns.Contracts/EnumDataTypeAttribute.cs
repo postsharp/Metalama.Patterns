@@ -84,7 +84,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
         {
             if ( value != null! && !EnumDataTypeAttributeHelper.IsValidEnumValue( value, this.EnumType ) )
             {
-                meta.Target.Project.ContractOptions().ThrowTemplates.OnInvalidEnumValue( value );
+                meta.Target.Project.ContractOptions().Templates.OnInvalidEnumValue( value );
             }
         }
         else if ( targetType.IsNullable == true )
@@ -96,7 +96,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
                 if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
                 {
-                    meta.Target.Project.ContractOptions().ThrowTemplates.OnInvalidEnumValue( value );
+                    meta.Target.Project.ContractOptions().Templates.OnInvalidEnumValue( value );
                 }
             }
         }
@@ -107,7 +107,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
 
             if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
             {
-                meta.Target.Project.ContractOptions().ThrowTemplates.OnInvalidEnumValue( value );
+                meta.Target.Project.ContractOptions().Templates.OnInvalidEnumValue( value );
             }
         }
     }

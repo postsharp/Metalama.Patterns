@@ -559,21 +559,16 @@ public class RangeAttribute : ContractAspect
         {
             if ( value != null )
             {
-                var rangeValues = new RangeValues(
-                    this._minInt64,
-                    this._maxInt64,
-                    this._minUInt64,
-                    this._maxUInt64,
-                    this._minDouble,
-                    this._maxDouble,
-                    this._minDecimal,
-                    this._maxDecimal );
-
-                var validateResult = RangeAttributeHelpers.Validate( value, rangeValues );
-
-                // TODO: Maybe include validateResult.UnderlyingType in the message?
-
-                if ( !validateResult.IsInRange )
+                if ( !ContractHelpers.IsInRange(
+                        value,
+                        this._minInt64,
+                        this._maxInt64,
+                        this._minUInt64,
+                        this._maxUInt64,
+                        this._minDouble,
+                        this._maxDouble,
+                        this._minDecimal,
+                        this._maxDecimal ) )
                 {
                     this.OnContractViolated( value );
                 }
@@ -603,6 +598,6 @@ public class RangeAttribute : ContractAspect
     [Template]
     protected virtual void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
+        meta.Target.Project.ContractOptions().Templates.OnRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
     }
 }

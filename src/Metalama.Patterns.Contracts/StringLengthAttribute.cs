@@ -85,21 +85,18 @@ public sealed class StringLengthAttribute : ContractAspect
     {
         // TODO: We assume that min and max are sensible (eg, non-negative) here. This should be validated ideally at compile time. See comment at head of class.
 
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
-
         if ( this.MinimumLength == 0 && this.MaximumLength != int.MaxValue )
         {
             if ( value != null && value!.Length > this.MaximumLength )
             {
-                meta.Target.Project.ContractOptions().ThrowTemplates.OnStringMaxLengthContractViolated( value, this.MaximumLength );
+                meta.Target.Project.ContractOptions().Templates.OnStringMaxLengthContractViolated( value, this.MaximumLength );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength == int.MaxValue )
         {
             if ( value != null && value!.Length < this.MinimumLength )
             {
-                meta.Target.Project.ContractOptions().ThrowTemplates.OnStringMinLengthContractViolated( value, this.MinimumLength );
+                meta.Target.Project.ContractOptions().Templates.OnStringMinLengthContractViolated( value, this.MinimumLength );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength != int.MaxValue )
@@ -108,7 +105,7 @@ public sealed class StringLengthAttribute : ContractAspect
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
             {
-                meta.Target.Project.ContractOptions().ThrowTemplates.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
+                meta.Target.Project.ContractOptions().Templates.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
             }
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }

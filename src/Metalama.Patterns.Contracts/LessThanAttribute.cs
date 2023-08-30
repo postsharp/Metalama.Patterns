@@ -128,7 +128,7 @@ public class LessThanAttribute : RangeAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnLessThanContractViolated( value, this.DisplayMaxValue );
+        meta.Target.Project.ContractOptions().Templates.OnLessThanContractViolated( value, this.DisplayMaxValue );
     }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =

@@ -129,7 +129,7 @@ public class GreaterThanAttribute : RangeAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnGreaterThanContractViolated( value, this.DisplayMinValue );
+        meta.Target.Project.ContractOptions().Templates.OnGreaterThanContractViolated( value, this.DisplayMinValue );
     }
 
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =

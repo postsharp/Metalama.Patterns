@@ -8,12 +8,24 @@ namespace Metalama.Patterns.Contracts;
 /// Runtime helper methods for <see cref="RangeAttribute"/>.
 /// </summary>
 [PublicAPI]
-public static class RangeAttributeHelpers
+public static class ContractHelpers
 {
     /// <summary>
-    /// The result of the <see cref="Validate{T}"/> method.
+    /// The result of the <see cref="ContractHelpers.ValidateRange{T}"/> method.
     /// </summary>
-    public record struct ValidateResult( bool IsInRange, TypeCode UnderlyingType, bool IsNull );
+    internal record struct ValidateResult( bool IsInRange, TypeCode UnderlyingType, bool IsNull );
+
+    public static bool IsInRange<T>(
+        T value,
+        long minInt64,
+        long maxInt64,
+        ulong minUInt64,
+        ulong maxUInt64,
+        double minDouble,
+        double maxDouble,
+        decimal minDecimal,
+        decimal maxDecimal )
+        => ValidateRange( value, new RangeValues( minInt64, maxInt64, minUInt64, maxUInt64, minDouble, maxDouble, minDecimal, maxDecimal ) ).IsInRange;
 
     /// <summary>
     /// Determines if the specified value is within the specified range.
@@ -30,7 +42,7 @@ public static class RangeAttributeHelpers
     ///     is nullable; and
     ///     <c>IsNull</c> is <see langword="true" /> when <paramref name="value" /> matches <see langword="null" />.
     /// </returns>
-    public static ValidateResult Validate<T>(
+    internal static ValidateResult ValidateRange<T>(
         T value,
         in RangeValues rangeValues )
     {

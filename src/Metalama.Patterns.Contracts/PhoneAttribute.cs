@@ -29,6 +29,6 @@ public sealed class PhoneAttribute : RegularExpressionAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().ThrowTemplates.OnPhoneContractViolated( value );
+        meta.Target.Project.ContractOptions().Templates.OnPhoneContractViolated( value );
     }
 }
