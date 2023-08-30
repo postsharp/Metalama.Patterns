@@ -50,24 +50,25 @@ public static class ContractExtensions
             .SelectMany(
                 t => t.Properties
                     .Cast<IFieldOrProperty>()
-                    .Union( t.Fields ) );
+                    .Union( t.Fields ) )
+            .Where( f => IsVisible( f ) && IsNullableType( f ) && !f.Attributes.Any( a => a.Type.Name == "AllowNullAttribute" ) );
 
         fieldsAndProperties
-            .Where( f => IsVisible( f ) && IsNullableType( f ) && GetNullableAttribute( f ) == null )
-            .Where( f => f.Writeability is Writeability.InitOnly or Writeability.All )
+            .Where( f => GetNullableAttribute( f ) == null && f.Writeability is Writeability.InitOnly or Writeability.All )
             .RequireAspect<NotNullAttribute>();
 
         // Add aspects to method parameters.
         var parameters = types.SelectMany( t => t.Methods )
             .Where( IsVisible )
-            .SelectMany( t => t.Parameters );
+            .SelectMany( t => t.Parameters )
+            .Where( IsNullableType );
 
         parameters
-            .Where( parameter => IsNullableType( parameter ) && GetNullableAttribute( parameter ) == null )
+            .Where( parameter => GetNullableAttribute( parameter ) == null )
             .RequireAspect<NotNullAttribute>();
 
         // Warn if the attribute is duplicate.
-        fieldsAndProperties.Where( f => IsNullableType( f ) && GetNullableAttribute( f ) != null )
+        fieldsAndProperties.Where( f => GetNullableAttribute( f ) != null )
             .ReportDiagnostic(
                 f =>
                 {
@@ -77,7 +78,7 @@ public static class ContractExtensions
                         .WithCodeFixes( CodeFixFactory.RemoveAttributes( f, nullableAttribute.Type ) );
                 } );
 
-        parameters.Where( f => IsNullableType( f ) && GetNullableAttribute( f ) != null )
+        parameters.Where( f => GetNullableAttribute( f ) != null )
             .ReportDiagnostic(
                 f =>
                 {
