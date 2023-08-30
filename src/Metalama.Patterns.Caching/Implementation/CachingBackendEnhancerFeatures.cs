@@ -20,7 +20,7 @@ internal abstract class CachingBackendEnhancerFeatures : CachingBackendFeatures
     /// Initializes a new <see cref="CachingBackendEnhancerFeatures"/>.
     /// </summary>
     /// <param name="underlyingBackendFeatures">The feature of the underlying <see cref="CachingBackend"/>.</param>
-    protected CachingBackendEnhancerFeatures( [Required] CachingBackendFeatures underlyingBackendFeatures )
+    protected CachingBackendEnhancerFeatures( CachingBackendFeatures underlyingBackendFeatures )
     {
         this.UnderlyingBackendFeatures = underlyingBackendFeatures;
     }

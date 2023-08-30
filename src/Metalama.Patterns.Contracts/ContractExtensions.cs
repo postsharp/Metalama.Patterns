@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Project;
 
 namespace Metalama.Patterns.Contracts;
@@ -37,22 +38,52 @@ public static class ContractExtensions
     {
         bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
 
-        static bool RequiresVerification( IHasType d ) => d is { Type: { IsReferenceType: true, IsNullable: false }, RefKind: RefKind.None };
+        static bool IsNullableType( IHasType d ) => d is { Type: { IsReferenceType: true, IsNullable: false }, RefKind: RefKind.None };
+
+        static IAttribute? GetNullableAttribute( IDeclaration d )
+            => d.Attributes.OfAttributeType( typeof(RequiredAttribute) ).FirstOrDefault() ??
+               d.Attributes.OfAttributeType( typeof(NotNullAttribute) ).FirstOrDefault() ??
+               d.Attributes.OfAttributeType( typeof(NotEmptyAttribute) ).FirstOrDefault();
 
         // Add aspects to fields and properties.
-        types
+        var fieldsAndProperties = types
             .SelectMany(
                 t => t.Properties
                     .Cast<IFieldOrProperty>()
-                    .Union( t.Fields )
-                    .Where( f => IsVisible( f ) && RequiresVerification( f ) ) )
+                    .Union( t.Fields ) );
+
+        fieldsAndProperties
+            .Where( f => IsVisible( f ) && IsNullableType( f ) && GetNullableAttribute( f ) != null )
             .RequireAspect<NotNullAttribute>();
 
         // Add aspects to method parameters.
-        types.SelectMany( t => t.Methods )
+        var parameters = types.SelectMany( t => t.Methods )
             .Where( IsVisible )
-            .SelectMany( t => t.Parameters )
-            .Where( RequiresVerification )
+            .SelectMany( t => t.Parameters );
+
+        parameters
+            .Where( parameter => IsNullableType( parameter ) && GetNullableAttribute( parameter ) != null )
             .RequireAspect<NotNullAttribute>();
+
+        // Warn if the attribute is duplicate.
+        fieldsAndProperties.Where( f => IsNullableType( f ) && GetNullableAttribute( f ) != null )
+            .ReportDiagnostic(
+                f =>
+                {
+                    var nullableAttribute = GetNullableAttribute( f );
+
+                    return ContractDiagnostics.ContractRedundant.WithArguments( (f, nullableAttribute!.Type.Name) )
+                        .WithCodeFixes( CodeFixFactory.RemoveAttributes( f, nullableAttribute.Type ) );
+                } );
+
+        parameters.Where( f => IsNullableType( f ) && GetNullableAttribute( f ) != null )
+            .ReportDiagnostic(
+                f =>
+                {
+                    var nullableAttribute = GetNullableAttribute( f );
+
+                    return ContractDiagnostics.ContractRedundant.WithArguments( (f, nullableAttribute!.Type.Name) )
+                        .WithCodeFixes( CodeFixFactory.RemoveAttributes( f, nullableAttribute.Type ) );
+                } );
     }
 }

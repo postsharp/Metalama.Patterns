@@ -17,7 +17,7 @@ internal sealed class TwoLayerCacheValue
     /// Initializes a new instance of the <see cref="TwoLayerCacheValue"/> class.
     /// </summary>
     /// <param name="item">The original <see cref="CacheItem"/>.</param>
-    public TwoLayerCacheValue( [Required] CacheItem item )
+    public TwoLayerCacheValue( CacheItem item )
     {
         this.Value = item.Value;
         this.SlidingExpiration = item.Configuration?.SlidingExpiration;

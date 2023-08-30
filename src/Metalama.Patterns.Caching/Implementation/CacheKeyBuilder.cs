@@ -30,7 +30,7 @@ public class CacheKeyBuilder : IDisposable
     /// <param name="formatterRepository">
     /// The <see cref="IFormatterRepository"/> from which to obtain formatters.
     /// </param>
-    public CacheKeyBuilder( [Required] IFormatterRepository formatterRepository, int maxKeySize = 1024 )
+    public CacheKeyBuilder( IFormatterRepository formatterRepository, int maxKeySize = 1024 )
     {
         this._formatterRepository = formatterRepository;
         this._stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
@@ -48,7 +48,7 @@ public class CacheKeyBuilder : IDisposable
     /// <param name="arguments">The arguments passed to the method call.</param>
     /// <param name="instance">The <c>this</c> instance of the method call, or <c>null</c> if the method is static.</param>
     /// <returns>A string uniquely representing the method call.</returns>
-    public virtual string BuildMethodKey( [Required] CachedMethodMetadata metadata, [Required] IList<object?> arguments, object? instance = null )
+    public virtual string BuildMethodKey( CachedMethodMetadata metadata, IList<object?> arguments, object? instance = null )
     {
         var method = metadata.Method;
 
@@ -119,7 +119,7 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="o">An object.</param>
     /// <returns>A dependency key that uniquely represents <paramref name="o"/>.</returns>
-    public virtual string BuildDependencyKey( [Required] object o )
+    public virtual string BuildDependencyKey( object o )
     {
         var stringBuilder = this._stringBuilderPool.GetInstance();
         this.AppendObject( stringBuilder, o );
@@ -135,7 +135,7 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="method">A <see cref="MethodInfo"/>.</param>
-    protected virtual void AppendMethod( [Required] UnsafeStringBuilder stringBuilder, [Required] MethodInfo method )
+    protected virtual void AppendMethod( UnsafeStringBuilder stringBuilder, MethodInfo method )
     {
         this.AppendType( stringBuilder, method.DeclaringType! );
         stringBuilder.Append( '.' );
@@ -168,7 +168,7 @@ public class CacheKeyBuilder : IDisposable
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="parameterType">The type of the parameter.</param>
     /// <param name="parameterValue">The value assigned to the parameter (can be <c>null</c>).</param>
-    protected virtual void AppendArgument( [Required] UnsafeStringBuilder stringBuilder, [Required] Type parameterType, object? parameterValue )
+    protected virtual void AppendArgument( UnsafeStringBuilder stringBuilder, Type parameterType, object? parameterValue )
     {
         // We need to include the parameter type to avoid ambiguities between overloads of the same method.
         stringBuilder.Append( '(' );
@@ -191,15 +191,14 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="type">A <see cref="Type"/>.</param>
-    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, [Required] Type type )
-        => this._formatterRepository.Get<Type>().Write( stringBuilder, type );
+    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, Type type ) => this._formatterRepository.Get<Type>().Write( stringBuilder, type );
 
     /// <summary>
     /// Appends a string representing an <see cref="object"/> to an <see cref="UnsafeStringBuilder"/>.
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="o">An <see cref="object"/>.</param>
-    protected virtual void AppendObject( [Required] UnsafeStringBuilder stringBuilder, [Required] object o )
+    protected virtual void AppendObject( UnsafeStringBuilder stringBuilder, object o )
     {
         if ( o == this.IgnoredParameterSentinel )
         {

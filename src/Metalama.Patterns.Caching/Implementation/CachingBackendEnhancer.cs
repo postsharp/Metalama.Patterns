@@ -20,8 +20,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
     /// </summary>
     /// <param name="underlyingBackend">The next <see cref="CachingBackend"/> in the chain of responsibility.</param>
     /// <param name="enhancerConfiguration"></param>
-    protected CachingBackendEnhancer( [Required] CachingBackend underlyingBackend, CachingBackendConfiguration? enhancerConfiguration ) : base(
-        enhancerConfiguration )
+    protected CachingBackendEnhancer( CachingBackend underlyingBackend, CachingBackendConfiguration? enhancerConfiguration ) : base( enhancerConfiguration )
     {
         this.UnderlyingBackend = underlyingBackend;
 

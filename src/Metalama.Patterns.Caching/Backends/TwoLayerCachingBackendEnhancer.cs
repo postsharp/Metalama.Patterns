@@ -28,7 +28,7 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     /// </summary>
     /// <param name="remoteCache">The remote <see cref="CachingBackend"/>.</param>
     /// <param name="memoryCache">A <see cref="MemoryCachingBackend"/>, or <c>null</c> to use a new default <see cref="MemoryCachingBackend"/>.</param>
-    public TwoLayerCachingBackendEnhancer( [Required] CachingBackend remoteCache, MemoryCachingBackend? memoryCache = null ) : base(
+    public TwoLayerCachingBackendEnhancer( CachingBackend remoteCache, MemoryCachingBackend? memoryCache = null ) : base(
         remoteCache,
         new CachingBackendConfiguration() { ServiceProvider = remoteCache.Configuration.ServiceProvider } )
     {

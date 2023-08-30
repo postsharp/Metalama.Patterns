@@ -58,8 +58,8 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="configuration">A configuration object.</param>
     /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
     public static RedisCacheDependencyGarbageCollector Create(
-        [Required] IConnectionMultiplexer connection,
-        [Required] RedisCachingBackendConfiguration configuration )
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration configuration )
     {
         var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
         collector.Init( configuration );
@@ -87,7 +87,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// </summary>
     /// <param name="backend">An existing Redis <see cref="CachingBackend"/>, as returned by <see cref="RedisCachingBackend.Create"/>.</param>
     /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="backend"/>.</returns>
-    public static RedisCacheDependencyGarbageCollector Create( [Required] CachingBackend backend )
+    public static RedisCacheDependencyGarbageCollector Create( CachingBackend backend )
     {
         var redisCachingBackend = FindRedisCachingBackend( backend );
 
@@ -110,8 +110,8 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/> returning a <see cref="RedisCacheDependencyGarbageCollector"/> that uses <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
     public static Task<RedisCacheDependencyGarbageCollector> CreateAsync(
-        [Required] IConnectionMultiplexer connection,
-        [Required] RedisCachingBackendConfiguration configuration,
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration configuration,
         CancellationToken cancellationToken = default )
     {
         var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
@@ -125,7 +125,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="backend">An existing <see cref="CachingBackend"/>, as returned by <see cref="RedisCachingBackend.Create"/>, that supports dependencies.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/> returning a <see cref="RedisCacheDependencyGarbageCollector"/> that uses <paramref name="backend"/>.</returns>
-    public static Task<RedisCacheDependencyGarbageCollector> CreateAsync( [Required] CachingBackend backend, CancellationToken cancellationToken = default )
+    public static Task<RedisCacheDependencyGarbageCollector> CreateAsync( CachingBackend backend, CancellationToken cancellationToken = default )
     {
         var redisCachingBackend = FindRedisCachingBackend( backend );
 
@@ -346,7 +346,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="backend">A <see cref="RedisCachingBackend"/> that supports dependencies.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public static Task PerformFullCollectionAsync( [Required] RedisCachingBackend backend, CancellationToken cancellationToken = default )
+    public static Task PerformFullCollectionAsync( RedisCachingBackend backend, CancellationToken cancellationToken = default )
     {
         return ((DependenciesRedisCachingBackend) backend).CleanUpAsync( cancellationToken );
     }
@@ -360,8 +360,8 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
     public static Task PerformFullCollectionAsync(
-        [Required] RedisCachingBackend backend,
-        [Required] IServer server,
+        RedisCachingBackend backend,
+        IServer server,
         CancellationToken cancellationToken = default )
     {
         return ((DependenciesRedisCachingBackend) backend).CleanUpAsync( server, cancellationToken );

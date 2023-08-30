@@ -30,7 +30,7 @@ public sealed class CacheDependencyInvalidatedEventArgs : EventArgs
     /// <param name="sourceId">The <see cref="Guid"/> of the <see cref="CachingBackend"/>
     /// instance that requested the invalidation, or <see cref="Guid.Empty"/>
     /// if this information is not available.</param>
-    public CacheDependencyInvalidatedEventArgs( [Required] string key, Guid sourceId )
+    public CacheDependencyInvalidatedEventArgs( string key, Guid sourceId )
     {
         this.Key = key;
         this.SourceId = sourceId;

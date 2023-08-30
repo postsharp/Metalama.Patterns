@@ -26,7 +26,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private static readonly string _dependenciesSeparatorString = new( _dependenciesSeparator, 1 );
 
-    internal DependenciesRedisCachingBackend( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration )
+    internal DependenciesRedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration )
         : base( connection, configuration ) { }
 
     internal DependenciesRedisCachingBackend(

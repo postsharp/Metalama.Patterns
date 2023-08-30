@@ -24,4 +24,12 @@ internal static class ContractDiagnostics
             "The [{1}] contract has been applied to '{0}', but its type is nullable.",
             $"A non-nullable contract has been applied to a declaration of nullable type.",
             "Metalama.Patterns.Contracts" );
+
+    public static DiagnosticDefinition<(IDeclaration Declaration, string AspectType)> ContractRedundant { get; set; }
+        = new(
+            "LAMA5003",
+            Severity.Warning,
+            "The [{1}] contract is redundant because the [NotNull] contract is automatically added by a fabric.",
+            $"The non-nullable contract is redundant because it is automatically added by a fabric.",
+            "Metalama.Patterns.Contracts" );
 }

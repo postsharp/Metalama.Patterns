@@ -27,7 +27,7 @@ internal sealed class CachedMethodMetadataRegistry
     /// If no <see cref="CachedMethodMetadata"/> has been registered for the given <paramref name="method"/>, this method will run the class constructor
     /// of the declaring type of the method then lookup the registration again.
     /// </remarks>
-    internal CachedMethodMetadata? Get( [Required] MethodInfo method )
+    internal CachedMethodMetadata? Get( MethodInfo method )
     {
         if ( !this._methodInfoCache.TryGetValue( method, out var cachedMethodInfo ) )
         {

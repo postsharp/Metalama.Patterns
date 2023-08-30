@@ -59,7 +59,7 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// </summary>
     /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
     /// <param name="configuration"></param>
-    public MemoryCachingBackend( [Required] IMemoryCache cache, MemoryCachingBackendConfiguration? configuration = null ) : base( configuration )
+    public MemoryCachingBackend( IMemoryCache cache, MemoryCachingBackendConfiguration? configuration = null ) : base( configuration )
     {
         this._cache = cache;
         this._sizeCalculator = configuration?.SizeCalculator;

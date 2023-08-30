@@ -58,8 +58,7 @@ public class RedisCachingBackend : CachingBackend
     /// </summary>
     /// <param name="connection">The Redis connection.</param>
     /// <param name="configuration">Configuration.</param>
-    internal RedisCachingBackend( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration ) : base(
-        configuration )
+    internal RedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration ) : base( configuration )
     {
         this.Connection = connection;
         this._ownsConnection = configuration.OwnsConnection;
@@ -125,7 +124,7 @@ public class RedisCachingBackend : CachingBackend
     /// <param name="configuration">Configuration of the new back-end.</param>
     /// <returns>A <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
     /// according to the properties of the <paramref name="configuration"/>.</returns>
-    public static CachingBackend Create( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration )
+    public static CachingBackend Create( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration )
     {
         // #20775 Caching: two-layered cache should modify the key to avoid conflicts when toggling the option
         if ( configuration.IsLocallyCached )
@@ -172,8 +171,8 @@ public class RedisCachingBackend : CachingBackend
     /// <returns>A task returning a <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
     /// according to the properties of the <paramref name="configuration"/>.</returns>
     public static async Task<CachingBackend> CreateAsync(
-        [Required] IConnectionMultiplexer connection,
-        [Required] RedisCachingBackendConfiguration configuration,
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration configuration,
         CancellationToken cancellationToken = default )
     {
         var backend = configuration.SupportsDependencies
@@ -656,7 +655,7 @@ public class RedisCachingBackend : CachingBackend
         /// Initializes a new instance of the <see cref="RedisCachingBackendFeatures"/> class.
         /// </summary>
         /// <param name="parent">The parent <see cref="RedisCachingBackend"/>.</param>
-        public RedisCachingBackendFeatures( [Required] RedisCachingBackend parent )
+        public RedisCachingBackendFeatures( RedisCachingBackend parent )
         {
             this._parent = parent;
         }

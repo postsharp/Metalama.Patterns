@@ -19,7 +19,7 @@ public sealed class InterfaceTests
 
     private interface IFoo
     {
-        void Bar( [Required] string a );
+        void Bar( string a );
     }
 
     private sealed class Foo : IFoo

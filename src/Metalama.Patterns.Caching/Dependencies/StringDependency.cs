@@ -20,7 +20,7 @@ public sealed class StringDependency : ICacheDependency
     /// Initializes a new instance of the <see cref="StringDependency"/> class.
     /// </summary>
     /// <param name="key">The cache dependency.</param>
-    public StringDependency( [Required] string key )
+    public StringDependency( string key )
     {
         this._key = key;
     }
