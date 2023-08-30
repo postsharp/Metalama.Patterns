@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Reflection;
@@ -128,9 +127,9 @@ public sealed class CachedMethodMetadata
     }
 
     public static CachedMethodMetadata Register(
-        [Required] MethodInfo method,
+        MethodInfo method,
         Type? awaitableResultType,
-        [Required] ICacheItemConfiguration buildTimeConfiguration,
+        ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         var metadata = new CachedMethodMetadata(

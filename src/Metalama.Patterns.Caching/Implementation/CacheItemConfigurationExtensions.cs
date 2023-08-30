@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Contracts;
-
 namespace Metalama.Patterns.Caching.Implementation;
 
 internal static class CacheItemConfigurationExtensions
@@ -14,7 +12,7 @@ internal static class CacheItemConfigurationExtensions
             _ => other.AsCacheItemConfiguration() with { AutoReload = false }
         };
 
-    public static CacheItemConfiguration AsCacheItemConfiguration( [Required] this ICacheItemConfiguration other )
+    public static CacheItemConfiguration AsCacheItemConfiguration( this ICacheItemConfiguration other )
     {
         if ( other is CacheItemConfiguration cacheItemConfiguration )
         {

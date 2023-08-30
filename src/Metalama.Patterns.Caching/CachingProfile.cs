@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Locking;
-using Metalama.Patterns.Contracts;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -37,7 +36,7 @@ public sealed class CachingProfile : ICacheItemConfiguration, INotifyPropertyCha
     /// </summary>
     /// <param name="name">Profile name (a case-insensitive string).</param>
     /// <param name="cachingService"></param>
-    internal CachingProfile( [Required] string name, CachingService cachingService )
+    internal CachingProfile( string name, CachingService cachingService )
     {
         this._cachingService = cachingService;
         this.Name = name;

@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Utilities;
-using Metalama.Patterns.Contracts;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -26,7 +25,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     /// </summary>
     /// <param name="underlyingBackend">The underlying <see cref="CachingBackend"/> (typically an in-memory cache).</param>
     /// <param name="options">Options of the new <see cref="CacheInvalidator"/>.</param>
-    protected CacheInvalidator( [Required] CachingBackend underlyingBackend, [Required] CacheInvalidatorOptions options ) : base(
+    protected CacheInvalidator( CachingBackend underlyingBackend, CacheInvalidatorOptions options ) : base(
         underlyingBackend,
         new CachingBackendConfiguration() { ServiceProvider = underlyingBackend.Configuration.ServiceProvider } )
     {
@@ -70,7 +69,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     /// Implementations of <see cref="CacheInvalidator"/> must call this method when an invalidation message is received.
     /// </summary>
     /// <param name="message">The serialized invalidation message.</param>
-    protected void OnMessageReceived( [Required] string message )
+    protected void OnMessageReceived( string message )
     {
         var tokenizer = new StringTokenizer( message );
         var prefix = tokenizer.GetNext( ':' );

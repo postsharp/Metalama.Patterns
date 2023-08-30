@@ -2,7 +2,6 @@
 
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Utilities;
-using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
@@ -26,7 +25,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private static readonly string _dependenciesSeparatorString = new( _dependenciesSeparator, 1 );
 
-    internal DependenciesRedisCachingBackend( [Required] IConnectionMultiplexer connection, [Required] RedisCachingBackendConfiguration configuration )
+    internal DependenciesRedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration )
         : base( connection, configuration ) { }
 
     internal DependenciesRedisCachingBackend(

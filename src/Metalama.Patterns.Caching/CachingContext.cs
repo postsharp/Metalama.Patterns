@@ -2,7 +2,6 @@
 
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -83,7 +82,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         return context;
     }
 
-    public void AddDependency( [Required] ICacheDependency dependency )
+    public void AddDependency( ICacheDependency dependency )
     {
         if ( string.IsNullOrEmpty( this._key ) )
         {
@@ -111,7 +110,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         this._immutableDependencies = null;
     }
 
-    public void AddDependency( [Required] object dependency )
+    public void AddDependency( object dependency )
     {
         switch ( dependency )
         {
@@ -132,7 +131,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         }
     }
 
-    public void AddDependency( [Required] string dependency )
+    public void AddDependency( string dependency )
     {
         this.AddDependency( new StringDependency( dependency ) );
 

@@ -30,7 +30,7 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-  			public void Invalidate<TReturn, <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+  			public void Invalidate<TReturn, <#= Repeat( "TParam{0}", i ) #>>(  Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
                 this.InvalidateDelegate( method, <#= Repeat( "arg{0}", i ) #> );
             }
@@ -44,7 +44,7 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public ValueTask InvalidateAsync<TReturn, <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+			public ValueTask InvalidateAsync<TReturn, <#= Repeat( "TParam{0}", i ) #>>(  Func<<#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
                 return this.InvalidateDelegateAsync( method, <#= Repeat( "arg{0}", i ) #> );
             }
@@ -58,7 +58,7 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public TReturn Recache<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func< <#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+			public TReturn Recache<TReturn,  <#= Repeat( "TParam{0}", i ) #>>(  Func< <#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
 				using ( var activity = this._defaultLogger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {
@@ -92,7 +92,7 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public async Task<TReturn> RecacheAsync<TReturn,  <#= Repeat( "TParam{0}", i ) #>>( [Required] Func<<#= Repeat( "TParam{0}", i ) #>, Task<TReturn>> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+			public async Task<TReturn> RecacheAsync<TReturn,  <#= Repeat( "TParam{0}", i ) #>>(  Func<<#= Repeat( "TParam{0}", i ) #>, Task<TReturn>> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
                 using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
                 {

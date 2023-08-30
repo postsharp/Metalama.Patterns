@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Patterns.Contracts;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
@@ -30,7 +29,7 @@ public sealed class CacheDependencyInvalidatedEventArgs : EventArgs
     /// <param name="sourceId">The <see cref="Guid"/> of the <see cref="CachingBackend"/>
     /// instance that requested the invalidation, or <see cref="Guid.Empty"/>
     /// if this information is not available.</param>
-    public CacheDependencyInvalidatedEventArgs( [Required] string key, Guid sourceId )
+    public CacheDependencyInvalidatedEventArgs( string key, Guid sourceId )
     {
         this.Key = key;
         this.SourceId = sourceId;
