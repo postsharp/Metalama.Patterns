@@ -54,6 +54,7 @@ public static class ContractExtensions
 
         fieldsAndProperties
             .Where( f => IsVisible( f ) && IsNullableType( f ) && GetNullableAttribute( f ) == null )
+            .Where( f => f.Writeability is Writeability.InitOnly or Writeability.All )
             .RequireAspect<NotNullAttribute>();
 
         // Add aspects to method parameters.
