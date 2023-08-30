@@ -8,6 +8,9 @@ using System.Runtime.CompilerServices;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Metalama.Framework.Code.DeclarationBuilders;
+using System.Security.Permissions;
+using System.Xml.Serialization;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -279,7 +282,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                     var accessChildExpression = accessChildExprBuilder.ToExpression();
 
-                    ctx.Builder.Advice.IntroduceMethod(
+                    var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
                         ctx.Target,
                         nameof( UpdateChildProperty ),
                         IntroductionScope.Instance,
@@ -300,20 +303,15 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                         },
                         args: new
                         {
+                            ctx,
+                            node = parent,
                             accessChildExpression,
                             lastValueField,
                             onPropertyChangedHandlerField,
                             onPropertyChangedMethod = ctx.OnPropertyChangedMethod
                         } );
-                    /*
-    [Template]
-    private static void UpdateChildProperty( 
-        [CompileTime] IExpression accessChildExpression, 
-        [CompileTime] IField lastValueField,
-        [CompileTime] IField onPropertyChangedHandlerField,
-        [CompileTime] IMethod onPropertyChangedMethod ) // UpdateA2B2
-                     * 
-                     */
+
+                    parent.Data.UpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
                 }
             }
         }
@@ -612,12 +610,16 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
     }
 
     [Template]
-    private static void UpdateChildProperty( 
+    private static void UpdateChildProperty(
+        [CompileTime] BuildAspectContext ctx,
+        [CompileTime] DependencyHelper.TreeNode<TreeNodeData> node,
         [CompileTime] IExpression accessChildExpression, 
         [CompileTime] IField lastValueField,
         [CompileTime] IField onPropertyChangedHandlerField,
         [CompileTime] IMethod onPropertyChangedMethod ) // UpdateA2B2
     {
+        meta.InsertComment( ctx.DependencyGraph.ToString() );
+
         var newValue = accessChildExpression.Value;
 
         if ( !ReferenceEquals( newValue, lastValueField.Value ) )
@@ -635,33 +637,57 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
             lastValueField.Value = newValue;
 
-            // TODO: Lookup from dependency dictionary for those props affected by change to "A2.B2"
-            /*
-            var affectedProperties = meta.RunTime( new string[] { "A4" } );
+            var cascadeUpdateMethods = node.Children.Select( n => n.Data.UpdateMethod ).Where( m => m != null );
 
-            foreach ( var name in affectedProperties )
+            foreach ( var method in cascadeUpdateMethods )
+            {
+                method.Invoke();
+            }
+
+            var affectedPropertyNames = node.Children.SelectMany( c => c.ReferencedBy ).Select( s => s.Name ).Distinct().OrderBy( s => s );
+
+            foreach ( var name in affectedPropertyNames )
             {
                 onPropertyChangedMethod.Invoke( name );
             }
-            */
         }
 
-        // OnA2B2PropertyChanged
         void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )
         {
-            // TODO: Lookup from dependency dictionary for those props affected by change to "A2.B2" sub-dictionary e.PropertyName
-            // Or possibly one static dictionary for the target class's own props, and one static dictionary per child propertypath
-            // (eg, one for A2.B2) - otherwise we could get a lot of nested dictionary lookups. Or we do string concat to get the key.
-            // Or some fancy heap-free key thingy. Or we could generated a sequence of calls to OnPropertyChanged with the "firm-coded"
-            // values.
-            /*
-            var affectedProperties = meta.RunTime( new string[] { "A4" } );
+            var propertyName = e.PropertyName;
 
-            foreach ( var name in affectedProperties )
+            // TODO: How to build a switch statement nicely in a template?
+            // For now, use if. Also, might use a runtime static readonly dictionary at least for the OnPropertyChanged calls.
+            foreach ( var child in node.Children )
             {
-                onPropertyChangedMethod.Invoke( name );
+                var hasRefs = child.ReferencedBy.Count > 0;
+                var hasUpdateMethod = child.Data.UpdateMethod != null;
+
+                if ( hasRefs || hasUpdateMethod )
+                {
+                    if ( propertyName == child.Symbol.Name )
+                    {
+                        if ( hasUpdateMethod )
+                        {
+                            child.Data.UpdateMethod.Invoke();
+                        }
+
+                        if ( hasRefs )
+                        {
+                            var affectedPropertyNames = child.ReferencedBy.Select( s => s.Name ).OrderBy( s => s );
+
+                            foreach ( var name in affectedPropertyNames )
+                            {
+                                onPropertyChangedMethod.Invoke( name );
+                            }
+                        }
+
+                        // TODO: How to build an if..else if.. statement nicely in a template?
+                        // For now, use return.
+                        return;
+                    }        
+                }
             }
-            */
         }
     }
 }
