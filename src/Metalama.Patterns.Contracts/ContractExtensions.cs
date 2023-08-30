@@ -53,7 +53,7 @@ public static class ContractExtensions
                     .Union( t.Fields ) );
 
         fieldsAndProperties
-            .Where( f => IsVisible( f ) && IsNullableType( f ) && GetNullableAttribute( f ) != null )
+            .Where( f => IsVisible( f ) && IsNullableType( f ) && GetNullableAttribute( f ) == null )
             .RequireAspect<NotNullAttribute>();
 
         // Add aspects to method parameters.
@@ -62,7 +62,7 @@ public static class ContractExtensions
             .SelectMany( t => t.Parameters );
 
         parameters
-            .Where( parameter => IsNullableType( parameter ) && GetNullableAttribute( parameter ) != null )
+            .Where( parameter => IsNullableType( parameter ) && GetNullableAttribute( parameter ) == null )
             .RequireAspect<NotNullAttribute>();
 
         // Warn if the attribute is duplicate.
