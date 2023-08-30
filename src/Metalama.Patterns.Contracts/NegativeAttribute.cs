@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Contracts;
 

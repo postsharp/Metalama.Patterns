@@ -5,7 +5,6 @@ using Azure.Messaging.ServiceBus.Administration;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using System.Text;
 
 namespace Metalama.Patterns.Caching.Backends.Azure

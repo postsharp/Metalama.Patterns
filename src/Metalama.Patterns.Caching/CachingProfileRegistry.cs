@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.ComponentModel;
 

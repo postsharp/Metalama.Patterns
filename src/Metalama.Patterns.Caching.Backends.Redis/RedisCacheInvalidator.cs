@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 

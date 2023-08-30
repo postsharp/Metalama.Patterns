@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Utilities;
-using Metalama.Patterns.Contracts;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;

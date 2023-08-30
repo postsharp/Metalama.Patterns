@@ -4,7 +4,6 @@ using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.ValueAdapters;
-using Metalama.Patterns.Contracts;
 using System.Globalization;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 

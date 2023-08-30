@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
 using Metalama.Patterns.Caching.Utilities;
-using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;

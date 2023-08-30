@@ -3,7 +3,6 @@
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Contracts;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -2,7 +2,6 @@
 
 using Flashtrace.Formatters;
 using JetBrains.Annotations;
-using Metalama.Patterns.Contracts;
 using System.Globalization;
 using System.Reflection;
 
