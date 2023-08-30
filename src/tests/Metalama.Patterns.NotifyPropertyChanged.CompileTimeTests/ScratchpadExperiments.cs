@@ -82,6 +82,13 @@ class D
         var result = Implementation.DependencyHelper.GetDependencyGraph( type );
 
         this.TestOutput.WriteLine( result.ToString() );
+
+        this.TestOutput.WriteLine("");
+
+        foreach ( var node in result.DecendantsDepthFirst() )
+        {
+            this.TestOutput.WriteLine( node.GetPath() );
+        }
     }
 
     [Fact]

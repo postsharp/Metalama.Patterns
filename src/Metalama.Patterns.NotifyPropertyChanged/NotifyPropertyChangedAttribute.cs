@@ -5,6 +5,9 @@ using Metalama.Framework.Eligibility;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -60,6 +63,20 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         public INamedType Type_IgnoreAutoChangeNotificationAttribute { get; }
 
         public IMethod OnPropertyChangedMethod { get; set; } = null!;
+
+        private DependencyHelper.TreeNode<TreeNodeData>? _dependencyGraph;
+
+        private DependencyHelper.TreeNode<TreeNodeData> PrepareDependencyGraph()
+        {
+            var graph = DependencyHelper.GetDependencyGraph<TreeNodeData>( this.Target );
+            foreach ( var node in graph.DecendantsDepthFirst() )
+            {
+                node.Data.Initialize( this, node );
+            }
+            return graph;
+        }
+
+        public DependencyHelper.TreeNode<TreeNodeData> DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
 
         public InpcInstrumentationKind GetInpcInstrumentationKind( IType type )
         {
@@ -178,7 +195,128 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
         ctx.OnPropertyChangedMethod = onPropertyChangedMethod;
 
-        ProcessAutoProperties( ctx );
+        GenerateUpdateMethods( ctx );
+        //ProcessAutoProperties( ctx );
+    }
+
+    private struct TreeNodeData
+    {
+        public void Initialize( BuildAspectContext ctx, DependencyHelper.TreeNode<TreeNodeData> node )
+        {
+            // TODO: Better checks/exceptions.
+            this.FieldOrProperty = (IFieldOrProperty) ctx.Target.Compilation.GetDeclaration( node.Symbol );
+        }
+
+        public IFieldOrProperty FieldOrProperty { get; private set; }
+
+        public IMethod? UpdateMethod;
+    }
+
+    private static void GenerateUpdateMethods( BuildAspectContext ctx )
+    {
+        var allNodesDepthFirst = ctx.DependencyGraph.DecendantsDepthFirst().ToList();
+        allNodesDepthFirst.Reverse();
+
+        HashSet<string>? usedMemberNames = null;
+
+        foreach ( var node in allNodesDepthFirst )
+        {
+            if ( node.ReferencedBy.Count > 0 )
+            {
+                var parent = node.Parent;
+
+                if ( parent == null )
+                {
+                    // node is a root property of the target type. Do we need to do anything for it?
+                    continue;
+                }
+
+                if ( parent.Data.UpdateMethod == null )
+                {
+                    // eg, for node X.Y.Z, parentElementNames is [X,Y]
+                    var parentElementNames = parent.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ).ToList();
+
+                    var pathForMemberNames = string.Join( "", parentElementNames );
+
+                    var lastValueFieldName = GetUnusedMemberName(
+                        ctx.Target,
+                        $"_last{pathForMemberNames}",
+                        ref usedMemberNames );
+                   
+                    var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
+                        ctx.Target,
+                        lastValueFieldName,
+                        parent.Data.FieldOrProperty.Type,
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Fail,
+                        b => b.Accessibility = Accessibility.Private );
+
+                    var lastValueField = introduceLastValueFieldResult.Declaration;
+
+                    var onPropertyChangedHandlerFieldName = GetUnusedMemberName(
+                        ctx.Target,
+                        $"_on{pathForMemberNames}ChangedHandler",
+                        ref usedMemberNames );
+
+                    var introduceOnPropertyChangedHandlerFieldName = ctx.Builder.Advice.IntroduceField(
+                        ctx.Target,
+                        onPropertyChangedHandlerFieldName,
+                        ctx.Type_PropertyChangedEventHandler,
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Fail,
+                        b => b.Accessibility = Accessibility.Private );
+
+                    var onPropertyChangedHandlerField = introduceOnPropertyChangedHandlerFieldName.Declaration;
+
+                    var methodName = GetUnusedMemberName(
+                                            ctx.Target,
+                                            $"Update{pathForMemberNames}",
+                                            ref usedMemberNames );
+
+                    var accessChildExprBuilder = new ExpressionBuilder();
+                    // TODO: Assuming all ref types, which is probably a correct requirement, but we don't actaully check anywhere (I think).
+                    accessChildExprBuilder.AppendVerbatim( string.Join( "?.", parentElementNames ) );
+
+                    var accessChildExpression = accessChildExprBuilder.ToExpression();
+
+                    ctx.Builder.Advice.IntroduceMethod(
+                        ctx.Target,
+                        nameof( UpdateChildProperty ),
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Fail,
+                        b =>
+                        {
+                            b.Name = methodName;
+
+                            if ( ctx.Target.IsSealed )
+                            {
+                                b.Accessibility = Accessibility.Private;
+                            }
+                            else
+                            {
+                                b.Accessibility = Accessibility.Protected;
+                                b.IsVirtual = true;
+                            }
+                        },
+                        args: new
+                        {
+                            accessChildExpression,
+                            lastValueField,
+                            onPropertyChangedHandlerField,
+                            onPropertyChangedMethod = ctx.OnPropertyChangedMethod
+                        } );
+                    /*
+    [Template]
+    private static void UpdateChildProperty( 
+        [CompileTime] IExpression accessChildExpression, 
+        [CompileTime] IField lastValueField,
+        [CompileTime] IField onPropertyChangedHandlerField,
+        [CompileTime] IMethod onPropertyChangedMethod ) // UpdateA2B2
+                     * 
+                     */
+                }
+            }
+        }
     }
 
     private static void ProcessAutoProperties( BuildAspectContext ctx )
@@ -480,13 +618,10 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         [CompileTime] IField onPropertyChangedHandlerField,
         [CompileTime] IMethod onPropertyChangedMethod ) // UpdateA2B2
     {
-        //var newA2B2 = _a2?.B2;
         var newValue = accessChildExpression.Value;
 
-        //if ( !ReferenceEquals( newA2B2, _lastA2B2 ) )
         if ( !ReferenceEquals( newValue, lastValueField.Value ) )
         {
-            //if ( _lastA2B2 != null )
             if ( !ReferenceEquals( lastValueField.Value, null ) )
             {
                 lastValueField.Value.PropertyChanged -= onPropertyChangedHandlerField.Value;
@@ -494,22 +629,21 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
             if ( newValue != null )
             {
-                //_onA2B2PropertyChangedHandler ??= this.OnA2B2PropertyChanged;
                 onPropertyChangedHandlerField.Value ??= (PropertyChangedEventHandler) OnSpecificPropertyChanged;
-                //newA2B2.PropertyChanged += _onA2B2PropertyChangedHandler;
                 newValue.PropertyChanged += onPropertyChangedHandlerField.Value;
             }
 
-            //_lastA2B2 = newA2B2;
             lastValueField.Value = newValue;
 
             // TODO: Lookup from dependency dictionary for those props affected by change to "A2.B2"
+            /*
             var affectedProperties = meta.RunTime( new string[] { "A4" } );
 
             foreach ( var name in affectedProperties )
             {
                 onPropertyChangedMethod.Invoke( name );
             }
+            */
         }
 
         // OnA2B2PropertyChanged
@@ -520,40 +654,14 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
             // (eg, one for A2.B2) - otherwise we could get a lot of nested dictionary lookups. Or we do string concat to get the key.
             // Or some fancy heap-free key thingy. Or we could generated a sequence of calls to OnPropertyChanged with the "firm-coded"
             // values.
+            /*
             var affectedProperties = meta.RunTime( new string[] { "A4" } );
 
             foreach ( var name in affectedProperties )
             {
                 onPropertyChangedMethod.Invoke( name );
             }
+            */
         }
     }
-
-    sealed class Node
-    {
-        public string[]? DependentProperties { get; set; }
-
-        public Dictionary<string, Node>? ChildProperties { get; set; }
-    }
-
-    // When some property where key=name changes, value is list of properties that are affected.
-    Dictionary<string, Node> _propertyDependents = new Dictionary<string, Node>()
-    {
-        {
-            "A2",
-            new Node()
-            {
-                ChildProperties = new Dictionary<string, Node>()
-                {
-                    {
-                        "B2",
-                        new Node()
-                        {
-                            DependentProperties = new[] { "A4" },
-                        }
-                    }  
-                }
-            }
-        }
-    }; 
 }

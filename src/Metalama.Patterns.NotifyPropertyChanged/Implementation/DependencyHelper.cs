@@ -13,57 +13,72 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 [CompileTime]
 internal static class DependencyHelper
 {
+
     [CompileTime]
-    public sealed class TreeNode
+    public interface ITreeNode
+    {
+        ITreeNode GetOrAddChild( ISymbol childSymbol );
+        
+        void AddReferencedBy( ISymbol symbol );
+    }
+
+    [CompileTime]
+    public class TreeNode<T> : ITreeNode
     {
         private readonly ISymbol? _symbol;
-        private Dictionary<ISymbol, TreeNode>? _children;
+        private Dictionary<ISymbol, TreeNode<T>>? _children;
         private HashSet<ISymbol>? _referencedBy;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TreeNode"/> class which represents the root node of a tree.
+        /// Initializes a new instance of the <see cref="TreeNode{T}"/> class which represents the root node of a tree.
         /// </summary>
         public TreeNode()
         {
         }
 
-        private TreeNode( TreeNode parent, ISymbol symbol ) 
+        private TreeNode( TreeNode<T> parent, ISymbol symbol ) 
         {
             this.Parent = parent;
             this._symbol = symbol;
         }
 
+        /// <summary>
+        /// Extensibility point for the consumer.
+        /// </summary>
+        public T? Data;
+
         public bool IsRoot => this.Parent == null;
 
-        public TreeNode? Parent { get; }
+        public TreeNode<T>? Parent { get; }
 
         /// <summary>
         /// Gets the symbol of the node.
         /// </summary>
-        public ISymbol Symbol => this._symbol ?? throw new NotSupportedException( "The root node does not have a symbol." );
+        /// <exception cref="NotSupportedException"><see cref="IsRoot"/> is <see langword="true"/>.</exception>
+        public ISymbol Symbol => this._symbol ?? throw new NotSupportedException( "The operation is not supported on root nodes." );
 
-        public IReadOnlyCollection<TreeNode> Children => ((IReadOnlyCollection<TreeNode>?) this._children?.Values) ?? Array.Empty<TreeNode>();
+        public IReadOnlyCollection<TreeNode<T>> Children => ((IReadOnlyCollection<TreeNode<T>>?) this._children?.Values) ?? Array.Empty<TreeNode<T>>();
 
         /// <summary>
         /// Gets the members that reference the current node as the final member of an access expression.
         /// </summary>
-        public IReadOnlyCollection<ISymbol> ReferencedBy => ((IReadOnlyCollection<ISymbol>?) this._children) ?? Array.Empty<ISymbol>();
+        public IReadOnlyCollection<ISymbol> ReferencedBy => ((IReadOnlyCollection<ISymbol>?) this._referencedBy) ?? Array.Empty<ISymbol>();
 
-        public TreeNode GetOrAddChild( ISymbol childSymbol )
+        public TreeNode<T> GetOrAddChild( ISymbol childSymbol )
         {
-            TreeNode result;
+            TreeNode<T> result;
 
             if ( this._children == null )
             {
                 this._children = new();
-                result = new TreeNode( this, childSymbol );
+                result = new TreeNode<T>( this, childSymbol );
                 this._children.Add( childSymbol, result );             
             }
             else
             {
                 if ( !this._children.TryGetValue( childSymbol, out result ) )
                 {
-                    result = new TreeNode( this, childSymbol );
+                    result = new TreeNode<T>( this, childSymbol );
                     this._children.Add( childSymbol, result );
                 }
             }
@@ -71,7 +86,10 @@ internal static class DependencyHelper
             return result;
         }
 
-        public TreeNode? GetChild( ISymbol childSymbol ) 
+        ITreeNode ITreeNode.GetOrAddChild( ISymbol childSymbol )
+            => this.GetOrAddChild( childSymbol );
+
+        public TreeNode<T>? GetChild( ISymbol childSymbol ) 
             => this._children == null || !this._children.TryGetValue( childSymbol, out var result )
                 ? null : result;
 
@@ -80,6 +98,61 @@ internal static class DependencyHelper
             this._referencedBy ??= new();
             this._referencedBy.Add( symbol );
         }
+
+        public IEnumerable<TreeNode<T>> DecendantsDepthFirst()
+        {
+            // NB: No loop detection.
+
+            var stack = new Stack<TreeNode<T>>( this.Children );
+
+            while ( stack.Count > 0 )
+            {
+                var current = stack.Pop();
+                
+                yield return current;
+                
+                foreach ( var child in current.Children )
+                {
+                    stack.Push( child );
+                }                
+            }
+        }
+
+        /// <summary>
+        /// Gets the ancestors of the current node in leaf-to-root order.
+        /// </summary>
+        /// <param name="includeRoot"></param>
+        /// <returns></returns>
+        public IEnumerable<TreeNode<T>> Ancestors( bool includeRoot = false )
+            => this.AncestorsCore( includeRoot, false );
+
+        /// <summary>
+        /// Gets the current node and its ancestors in leaf-to-root order.
+        /// </summary>
+        /// <param name="includeRoot"></param>
+        /// <returns></returns>
+        public IEnumerable<TreeNode<T>> AncestorsAndSelf( bool includeRoot = false )
+            => this.AncestorsCore( includeRoot, true );
+
+        private IEnumerable<TreeNode<T>> AncestorsCore( bool includeRoot, bool includeSelf )
+        {
+            var node = includeSelf ? this : this.Parent;
+
+            while ( node != null )
+            {
+                if ( !includeRoot && node.IsRoot )
+                {
+                    break;
+                }
+                yield return node;
+                node = node.Parent;
+            }
+        }
+
+#if DEBUG || LAMADEBUG
+        public string GetPath()
+            => string.Join( ".", this.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ) );
+#endif
 
         public override string ToString()
         {
@@ -110,9 +183,9 @@ internal static class DependencyHelper
         }
     }
 
-    public static TreeNode GetDependencyGraph( INamedType type )
+    public static TreeNode<T> GetDependencyGraph<T>( INamedType type )
     {
-        var tree = new TreeNode();
+        var tree = new TreeNode<T>();
 
         foreach ( var p in type.Properties )
         {
@@ -123,7 +196,7 @@ internal static class DependencyHelper
     }
 
     private static void AddReferencedProperties(
-        TreeNode tree,
+        ITreeNode tree,
         IProperty property )
     {
         var compilation = property.Compilation.GetRoslynCompilation();
@@ -154,7 +227,7 @@ internal static class DependencyHelper
 
     private class Visitor : CSharpSyntaxWalker
     {
-        private readonly TreeNode _tree;
+        private readonly ITreeNode _tree;
         private readonly ISymbol _origin;
         private readonly SemanticModel _semanticModel;
         private readonly List<IPropertySymbol> _properties = new();
@@ -163,7 +236,7 @@ internal static class DependencyHelper
         private int _accessorStartDepth;
 
         public Visitor(
-            TreeNode tree,
+            ITreeNode tree,
             ISymbol origin,
             SemanticModel semanticModel )
         {
