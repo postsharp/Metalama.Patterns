@@ -210,7 +210,35 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                     if ( propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
                     {
-                        // TODO: Requires dependency analysis.
+                        /* TODO: Dependency analysis requirements:
+                         * 
+                         * The current property is a ref type implementing INPC. Other properties of the target class may depend
+                         * on direct (value.child) or indirect children (value.child...child) rooted in the value of this property.
+                         * 
+                         * For the distinct set of parents of all indirect child leaves we must:
+                         *   - Introduce an instance of template `UpdateChildProperty` which will need:
+                         *     - An expression which accesses the leaf-parent from the backing field of the current property,
+                         *       using null conditional access at each level. For example, if there is a dependency on leaf property
+                         *       `A2.B2.C1`, then the expression must be `_a2?.B2`; for `A2.B2.C2.D1` the expression would be
+                         *       `_a2?.B2?.C2`.
+                         *     - A field of the current property type for storing the last value, eg `_lastA2B2` or `_lastA2B2C2`.
+                         *     - A field of type PropertyChangedEventHandler? for caching the delegate registered with the 
+                         *       leaf-parent's PropertyChanged event.
+                         *     - 
+                         * 
+                         * We must introduce a method which calls each of the introduced `UpdateChildProperty` instances, using the
+                         * `UpdateChildren` template. This simply requires a list of `IMethod`. If there is only one `UpdateChildProperty`
+                         * instance, it could be treated as the `UpdateChildren` method.
+                         * 
+                         * 
+                         */
+                        /*
+                         *     private static void UpdateChildProperty( 
+                                [CompileTime] IExpression accessChildExpression, 
+                                [CompileTime] IField lastValueField,
+                                [CompileTime] IField onPropertyChangedHandlerField,
+                                [CompileTime] IMethod onPropertyChangedMethod ) // UpdateA2B2
+                         */
                         // Do any properties depend on a child of this property?
                         var hasDependentProperties = true;
 
@@ -527,5 +555,5 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                 }
             }
         }
-    };
+    }; 
 }

@@ -5,12 +5,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
+    <!-- Support unit testing -->
+    <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
   </PropertyGroup>
 
   <ItemGroup>
     <Using Remove="System.Net.Http" />
     <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-    <PackageReference Include="Metalama.Framework.Sdk" Version="$(MetalamaVersion)" PrivateAssets="all"/>
+    <PackageReference Include="Metalama.Framework.Sdk" Version="$(MetalamaVersion)" PrivateAssets="all" />
+    <InternalsVisibleTo Include="Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests" />
   </ItemGroup>
 
 </Project>
