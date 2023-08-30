@@ -129,11 +129,4 @@ public class GreaterThanAttribute : RangeAttribute
     {
         meta.Target.Project.ContractOptions().Templates.OnGreaterThanContractViolated( value, this.DisplayMinValue );
     }
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5001", nameof(GreaterThanAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
 }

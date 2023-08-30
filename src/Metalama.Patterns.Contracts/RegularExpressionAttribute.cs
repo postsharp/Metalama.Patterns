@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using System.Text.RegularExpressions;
 
@@ -19,29 +20,8 @@ namespace Metalama.Patterns.Contracts;
 /// </remarks>
 [PublicAPI]
 [Inheritable]
-public class RegularExpressionAttribute : ContractAspect
+public abstract class BaseRegularExpressionAttribute : ContractAspect
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RegularExpressionAttribute"/> class.
-    /// </summary>
-    /// <param name="pattern">The regular expression.</param>
-    /// <param name="options">Options.</param>
-    public RegularExpressionAttribute( string pattern, RegexOptions options = RegexOptions.None )
-    {
-        this.Pattern = pattern;
-        this.Options = options | RegexOptions.Compiled;
-    }
-
-    /// <summary>
-    /// Gets the regular expression to match.
-    /// </summary>
-    public string Pattern { get; }
-
-    /// <summary>
-    /// Gets the regular expression options.
-    /// </summary>
-    public RegexOptions Options { get; }
-
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
@@ -55,23 +35,52 @@ public class RegularExpressionAttribute : ContractAspect
         base.BuildEligibility( builder );
         builder.Type().MustBe<string>();
     }
-
-    // TODO: Unlike PostSharp, we don't have per-aspect-instance runtime state, so we can't so easily cache the regex object.
-    // Note that Regex has built-in caching of compiled expressions (see eg Regex.CacheSize).
-    // For now, just using runtime evaluation.
+    
+    protected abstract IExpression GetRegex();
 
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        if ( value != null && !Regex.IsMatch( value, this.Pattern, this.Options ) )
+        var regex = (Regex) this.GetRegex().Value!;
+
+        if ( value != null && !regex.IsMatch( (string) value! ) )
         {
-            this.OnContractViolated( value );
+            this.OnContractViolated( value, regex );
         }
     }
 
     [Template]
-    protected virtual void OnContractViolated( dynamic? value )
+    protected virtual void OnContractViolated( dynamic? value, dynamic regex )
     {
-        meta.Target.Project.ContractOptions().Templates.OnRegularExpressionContractViolated( value, this.Pattern );
+        meta.Target.Project.ContractOptions().Templates.OnRegularExpressionContractViolated( value, regex );
+    }
+}
+
+
+public class RegularExpressionAttribute : BaseRegularExpressionAttribute
+{
+    public string Pattern { get; }
+
+    public RegexOptions Options { get; }
+
+    public RegularExpressionAttribute( string pattern, RegexOptions options = RegexOptions.None )
+    {
+        this.Pattern = pattern;
+        this.Options = options;
+    }
+
+    protected override IExpression GetRegex()
+    {
+        var builder = new ExpressionBuilder();
+        builder.AppendTypeName( typeof(ContractHelpers) );
+        builder.AppendVerbatim( "." );
+        builder.AppendVerbatim( nameof(ContractHelpers.GetRegex) );
+        builder.AppendVerbatim( "(" );
+        builder.AppendLiteral( this.Pattern );
+        builder.AppendVerbatim( ", " );
+        builder.AppendLiteral( (int) this.Options );
+        builder.AppendVerbatim( ")" );
+
+        return builder.ToExpression();
     }
 }

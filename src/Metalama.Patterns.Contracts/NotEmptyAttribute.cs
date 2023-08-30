@@ -30,12 +30,9 @@ public sealed class NotEmptyAttribute : ContractAspect
     {
         base.BuildEligibility( builder );
 
-        // TODO: #33296 Fails during eligibility rule evaluation because TypeFactory.GetType leads to service is not available.
-#if false
         builder.MustSatisfy(
-            f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )), 
+            f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )),
             f => $"the type of {f} must string or implement ICollection, ICollection<T> or IReadOnlyCollection<T>" );
-#endif
     }
 
     /// <inheritdoc/>

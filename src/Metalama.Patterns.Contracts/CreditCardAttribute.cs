@@ -39,7 +39,7 @@ public sealed class CreditCardAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        if ( !CreditCardAttributeHelper.IsValidCreditCardNumber( value ) )
+        if ( !ContractHelpers.IsValidCreditCardNumber( value ) )
         {
             meta.Target.Project.ContractOptions().Templates.OnCreditCardContractViolated( value );
         }

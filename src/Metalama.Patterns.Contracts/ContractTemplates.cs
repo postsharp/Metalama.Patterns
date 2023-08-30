@@ -70,7 +70,7 @@ public class ContractTemplates : ITemplateProvider
     }
 
     [Template]
-    public virtual void OnRegularExpressionContractViolated( dynamic? o, [CompileTime] string pattern )
+    public virtual void OnRegularExpressionContractViolated( dynamic? value, dynamic? pattern )
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {

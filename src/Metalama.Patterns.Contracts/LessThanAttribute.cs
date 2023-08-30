@@ -129,11 +129,4 @@ public class LessThanAttribute : RangeAttribute
     {
         meta.Target.Project.ContractOptions().Templates.OnLessThanContractViolated( value, this.DisplayMaxValue );
     }
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5002", nameof(LessThanAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
 }

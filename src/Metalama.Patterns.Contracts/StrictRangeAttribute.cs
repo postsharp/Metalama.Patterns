@@ -90,11 +90,4 @@ public class StrictRangeAttribute : RangeAttribute
     {
         meta.Target.Project.ContractOptions().Templates.OnStrictRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
     }
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5009", nameof(StrictRangeAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
 }

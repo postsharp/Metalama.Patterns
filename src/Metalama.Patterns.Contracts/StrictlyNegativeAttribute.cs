@@ -22,11 +22,4 @@ public class StrictlyNegativeAttribute : StrictlyLessThanAttribute
     /// Initializes a new instance of the <see cref="StrictlyNegativeAttribute"/> class.
     /// </summary>
     public StrictlyNegativeAttribute() : base( 0 ) { }
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5007", nameof(StrictlyNegativeAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
 }

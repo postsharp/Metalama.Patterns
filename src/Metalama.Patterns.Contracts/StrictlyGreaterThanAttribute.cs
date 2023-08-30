@@ -85,11 +85,4 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
     {
         meta.Target.Project.ContractOptions().Templates.OnStrictlyGreaterThanContractViolated( value, this.DisplayMinValue );
     }
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5005", nameof(StrictlyGreaterThanAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
 }

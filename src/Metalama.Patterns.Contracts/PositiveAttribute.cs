@@ -22,11 +22,4 @@ public class PositiveAttribute : GreaterThanAttribute
     /// Initializes a new instance of the <see cref="PositiveAttribute"/> class.
     /// </summary>
     public PositiveAttribute() : base( 0 ) { }
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5004", nameof(PositiveAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
 }

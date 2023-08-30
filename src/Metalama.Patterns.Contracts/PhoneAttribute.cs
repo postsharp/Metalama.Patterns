@@ -2,6 +2,8 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Contracts;
@@ -13,18 +15,20 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 [PublicAPI]
-public sealed class PhoneAttribute : RegularExpressionAttribute
+public sealed class PhoneAttribute : BaseRegularExpressionAttribute
 {
-    private const string _pattern =
-        "^(\\+\\s?)?((?<!\\+.*)\\(\\+?\\d+([\\s\\-\\.]?\\d+)?\\)|\\d+)([\\s\\-\\.]?(\\(\\d+([\\s\\-\\.]?\\d+)?\\)|\\d+))*(\\s?(x|ext\\.?)\\s?\\d+)?$";
+    protected override IExpression GetRegex()
+    {
+        var builder = new ExpressionBuilder();
+        builder.AppendTypeName( typeof(ContractHelpers) );
+        builder.AppendVerbatim( "." );
+        builder.AppendVerbatim( nameof(ContractHelpers.PhoneRegex) );
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PhoneAttribute"/> class.
-    /// </summary>
-    public PhoneAttribute()
-        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
+        return builder.ToExpression();
+    }
 
-    protected override void OnContractViolated( dynamic? value )
+
+    protected override void OnContractViolated( dynamic? value, dynamic regex )
     {
         meta.Target.Project.ContractOptions().Templates.OnPhoneContractViolated( value );
     }

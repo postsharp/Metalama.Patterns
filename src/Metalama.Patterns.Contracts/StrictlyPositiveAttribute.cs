@@ -22,11 +22,4 @@ public class StrictlyPositiveAttribute : StrictlyGreaterThanAttribute
     /// Initializes a new instance of the <see cref="StrictlyPositiveAttribute"/> class.
     /// </summary>
     public StrictlyPositiveAttribute() : base( 0 ) { }
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5008", nameof(StrictlyPositiveAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
 }
