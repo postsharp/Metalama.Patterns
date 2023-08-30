@@ -3,7 +3,6 @@
 using Flashtrace;
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using System.Collections.Concurrent;
 using System.Reflection;
 using static Flashtrace.Messages.FormattedMessageBuilder;
@@ -26,7 +25,7 @@ public partial class CachingService
     /// </summary>
     /// <param name="dependency">Typically, an <see cref="object"/>. If a <see cref="string"/>, <see cref="Delegate"/> or <see cref="ICacheDependency"/>
     /// is passed, the proper overload of the method is invoked. Otherwise, <paramref name="dependency"/> is wrapped into an <see cref="ObjectDependency"/> object.</param>
-    public void Invalidate( [Required] object dependency )
+    public void Invalidate( object dependency )
     {
         switch ( dependency )
         {
@@ -58,7 +57,7 @@ public partial class CachingService
     /// <param name="dependency">Typically, an <see cref="object"/>. If a <see cref="string"/>, <see cref="Delegate"/> or <see cref="ICacheDependency"/>
     /// is passed, the proper overload of the method is invoked. Otherwise, <paramref name="dependency"/> is wrapped into an <see cref="ObjectDependency"/> object.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public ValueTask InvalidateAsync( [Required] object dependency )
+    public ValueTask InvalidateAsync( object dependency )
     {
         switch ( dependency )
         {
@@ -80,9 +79,9 @@ public partial class CachingService
     /// Invalidates a cache dependency given as an <see cref="ICacheDependency"/>, i.e. removes all cache items that are dependent on this dependency.
     /// </summary>
     /// <param name="dependency">A dependency.</param>
-    public void Invalidate( [Required] ICacheDependency dependency ) => this.Invalidate( dependency, dependency.GetType() );
+    public void Invalidate( ICacheDependency dependency ) => this.Invalidate( dependency, dependency.GetType() );
 
-    private void Invalidate( [Required] ICacheDependency dependency, Type dependencyType )
+    private void Invalidate( ICacheDependency dependency, Type dependencyType )
     {
         using ( var activity =
                this._defaultLogger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
@@ -107,9 +106,9 @@ public partial class CachingService
     /// </summary>
     /// <param name="dependency">A dependency.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public ValueTask InvalidateAsync( [Required] ICacheDependency dependency ) => this.InvalidateAsync( dependency, dependency.GetType() );
+    public ValueTask InvalidateAsync( ICacheDependency dependency ) => this.InvalidateAsync( dependency, dependency.GetType() );
 
-    private async ValueTask InvalidateAsync( [Required] ICacheDependency dependency, Type dependencyType )
+    private async ValueTask InvalidateAsync( ICacheDependency dependency, Type dependencyType )
     {
         using ( var activity =
                this._defaultLogger.Default.OpenAsyncActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
@@ -133,7 +132,7 @@ public partial class CachingService
     /// Invalidates a cache dependency given as <see cref="string"/>, i.e. removes all cache items that are dependent on this dependency key.
     /// </summary>
     /// <param name="dependencyKey"></param>
-    public void Invalidate( [Required] string dependencyKey )
+    public void Invalidate( string dependencyKey )
     {
         foreach ( var backend in this.AllBackends )
         {
@@ -156,7 +155,7 @@ public partial class CachingService
         }
     }
 
-    private void InvalidateImpl( CachingBackend backend, [Required] string dependencyKey )
+    private void InvalidateImpl( CachingBackend backend, string dependencyKey )
     {
         this._defaultLogger.Debug.IfEnabled?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
 
@@ -167,7 +166,7 @@ public partial class CachingService
     /// Asynchronously invalidates a cache dependency given as <see cref="string"/>, i.e. removes all cache items that are dependent on this dependency key.
     /// </summary>
     /// <param name="dependencyKey"></param>
-    public async ValueTask InvalidateAsync( [Required] string dependencyKey )
+    public async ValueTask InvalidateAsync( string dependencyKey )
     {
         foreach ( var backend in this.AllBackends )
         {
@@ -196,7 +195,7 @@ public partial class CachingService
     /// <param name="method">The <see cref="MethodInfo"/> of the method call.</param>
     /// <param name="instance">The value of the <c>this</c> instance, or <c>null</c> for  methods.</param>
     /// <param name="args">The method arguments.</param>
-    public void Invalidate( [Required] MethodInfo method, object? instance, params object?[] args )
+    public void Invalidate( MethodInfo method, object? instance, params object?[] args )
     {
         using ( var activity = this._defaultLogger.Default.OpenActivity( Formatted( "Invalidate( method = {Method} )", method ) ) )
         {
@@ -245,7 +244,7 @@ public partial class CachingService
     /// <param name="method">The <see cref="MethodInfo"/> of the method call.</param>
     /// <param name="instance">The value of the <c>this</c> instance, or <c>null</c> for  methods.</param>
     /// <param name="args">The method arguments.</param>
-    public async ValueTask InvalidateAsync( [Required] MethodInfo method, object? instance, params object[] args )
+    public async ValueTask InvalidateAsync( MethodInfo method, object? instance, params object[] args )
     {
         using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
         {
@@ -297,7 +296,7 @@ public partial class CachingService
     /// </summary>
     /// <typeparam name="TReturn">The return type of the method.</typeparam>
     /// <param name="method">A delegate of the method to invalidate.</param>
-    public void Invalidate<TReturn>( [Required] Func<TReturn> method ) => this.InvalidateDelegate( method );
+    public void Invalidate<TReturn>( Func<TReturn> method ) => this.InvalidateDelegate( method );
 
     /// <summary>
     /// Asynchronously removes a method call result from the cache giving the delegate of the method. This overload is for methods with 0 parameter.
@@ -305,7 +304,7 @@ public partial class CachingService
     /// <typeparam name="TReturn">The return type of the method.</typeparam>
     /// <param name="method">A delegate of the method to invalidate.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public ValueTask InvalidateAsync<TReturn>( [Required] Func<TReturn> method ) => this.InvalidateDelegateAsync( method );
+    public ValueTask InvalidateAsync<TReturn>( Func<TReturn> method ) => this.InvalidateDelegateAsync( method );
 
     private CachingContext OpenRecacheContext( Delegate method, params object[] args )
     {
@@ -324,7 +323,7 @@ public partial class CachingService
     /// <typeparam name="TReturn">The return type of the method.</typeparam>
     /// <param name="method">A delegate of the method to evaluate.</param>
     /// <returns>The return value of <paramref name="method"/>.</returns>
-    public TReturn Recache<TReturn>( [Required] Func<TReturn> method )
+    public TReturn Recache<TReturn>( Func<TReturn> method )
     {
         using ( var activity = this._defaultLogger.Default.OpenActivity( Formatted( "Recache( method = {Method} )", method.Method ) ) )
         {
@@ -356,7 +355,7 @@ public partial class CachingService
     /// <typeparam name="TReturn">The return type of the method.</typeparam>
     /// <param name="method">A delegate of the method to evaluate.</param>
     /// <returns>A <see cref="Task{TResult}"/> that evaluates to the return value of <paramref name="method"/>.</returns>
-    public async Task<TReturn> RecacheAsync<TReturn>( [Required] Func<Task<TReturn>> method )
+    public async Task<TReturn> RecacheAsync<TReturn>( Func<Task<TReturn>> method )
     {
         using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Formatted( "RecacheAsync( method = {Method} )", method.Method ) ) )
         {

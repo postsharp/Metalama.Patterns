@@ -5,7 +5,6 @@ using Azure.Messaging.ServiceBus.Administration;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using System.Text;
 
 namespace Metalama.Patterns.Caching.Backends.Azure
@@ -38,8 +37,8 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
         public static async Task<AzureCacheInvalidator> CreateAsync(
-            [Required] CachingBackend backend,
-            [Required] AzureCacheInvalidatorOptions options,
+            CachingBackend backend,
+            AzureCacheInvalidatorOptions options,
             CancellationToken cancellationToken = default )
         {
             var invalidator = new AzureCacheInvalidator( backend, options );

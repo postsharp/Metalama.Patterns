@@ -4,7 +4,6 @@ using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.ValueAdapters;
-using Metalama.Patterns.Contracts;
 using System.Globalization;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
@@ -118,7 +117,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="key">The key of the cache item.</param>
     /// <param name="item">The cache item.</param>
-    public void SetItem( [Required] string key, [Required] CacheItem item )
+    public void SetItem( string key, CacheItem item )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( """SetItem( backend = "{Backend}" key = "{Key}" )""", this, key ) ) )
         {
@@ -147,7 +146,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="item">The cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async ValueTask SetItemAsync( [Required] string key, [Required] CacheItem item, CancellationToken cancellationToken = default )
+    public async ValueTask SetItemAsync( string key, CacheItem item, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenAsyncActivity( Formatted( """SetItemAsync( backend = "{Backend}" key = "{Key}" )""", this, key ) ) )
         {
@@ -196,7 +195,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="key">The key of the cache item.</param>
     /// <returns><c>true</c> if the cache contains an item whose key is <paramref name="key"/>, otherwise <c>false</c>.</returns>
-    public bool ContainsItem( [Required] string key )
+    public bool ContainsItem( string key )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsItem( \"{Key}\" )", key ) ) )
         {
@@ -224,7 +223,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The key of the cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> that evaluates to <c>true</c> if the cache contains an item whose key is <paramref name="key"/>, otherwise <c>false</c>.</returns>
-    public async ValueTask<bool> ContainsItemAsync( [Required] string key, CancellationToken cancellationToken = default )
+    public async ValueTask<bool> ContainsItemAsync( string key, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenAsyncActivity( Formatted( "ContainsItemAsync( \"{Key}\" )", key ) ) )
         {
@@ -279,7 +278,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="includeDependencies"><c>true</c> if the <see cref="CacheValue.Dependencies"/> properties of the
     /// resulting <see cref="CacheValue"/> should be populated, otherwise <c>false</c>.</param>
     /// <returns>A <see cref="CacheValue"/>, or <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
-    public CacheValue? GetItem( [Required] string key, bool includeDependencies = true )
+    public CacheValue? GetItem( string key, bool includeDependencies = true )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( """GetItem( backend = "{Backend}" key = "{Key}" )""", this, key ) ) )
         {
@@ -327,7 +326,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> evaluating to a <see cref="CacheValue"/>, or evaluating to <c>null</c> if there is no item in cache of the given <paramref name="key"/>.</returns>
     public async ValueTask<CacheValue?> GetItemAsync(
-        [Required] string key,
+        string key,
         bool includeDependencies = true,
         CancellationToken cancellationToken = default )
     {
@@ -392,7 +391,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// Removes a cache item from the cache given its key.
     /// </summary>
     /// <param name="key">The key of the cache item.</param>
-    public void RemoveItem( [Required] string key )
+    public void RemoveItem( string key )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "RemoveItem( \"{Key}\" )", key ) ) )
         {
@@ -418,7 +417,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The key of the cache item.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async ValueTask RemoveItemAsync( [Required] string key, CancellationToken cancellationToken = default )
+    public async ValueTask RemoveItemAsync( string key, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenAsyncActivity( Formatted( "RemoveItemAsync( \"{Key}\" )", key ) ) )
         {
@@ -465,7 +464,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// Removes from the cache all items that have a specific dependency.
     /// </summary>
     /// <param name="key">The dependency key.</param>
-    public void InvalidateDependency( [Required] string key )
+    public void InvalidateDependency( string key )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "InvalidateDependency( \"{Key}\" )", key ) ) )
         {
@@ -493,7 +492,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async ValueTask InvalidateDependencyAsync( [Required] string key, CancellationToken cancellationToken = default )
+    public async ValueTask InvalidateDependencyAsync( string key, CancellationToken cancellationToken = default )
     {
         using ( var activity =
                this.LogSource.Default.OpenAsyncActivity( Formatted( "InvalidateDependencyAsync( Backend=\"{Backend}\", Key=\"{Key}\" )", this, key ) ) )
@@ -543,7 +542,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="key">The dependency key.</param>
     /// <returns><c>true</c> if the cache contains the dependency <paramref name="key"/>, otherwise <c>false</c>.</returns>
-    public bool ContainsDependency( [Required] string key )
+    public bool ContainsDependency( string key )
     {
         using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "ContainsDependency( \"{Key}\" )", key ) ) )
         {
@@ -574,7 +573,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> evaluating to <c>true</c> if the cache contains the dependency <paramref name="key"/>, otherwise <c>false</c>.</returns>
-    public async ValueTask<bool> ContainsDependencyAsync( [Required] string key, CancellationToken cancellationToken = default )
+    public async ValueTask<bool> ContainsDependencyAsync( string key, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.LogSource.Default.OpenAsyncActivity( Formatted( "ContainsDependencyAsync( \"{Key}\" )", key ) ) )
         {
@@ -767,7 +766,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// Raises the <see cref="ItemRemoved"/> event given a <see cref="CacheItemRemovedEventArgs"/>.
     /// </summary>
     /// <param name="args">Event arguments.</param>
-    protected void OnItemRemoved( [Required] CacheItemRemovedEventArgs args )
+    protected void OnItemRemoved( CacheItemRemovedEventArgs args )
     {
         this.LogSource.Debug.Write( Formatted( "OnItemRemoved( backend=\"{Backend}\", Reason={Reason}, Key=\"{Key}\"", this, args.RemovedReason, args.Key ) );
         this._itemRemoved?.Invoke( this, args );
@@ -781,7 +780,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="reason">The reason of the removal.</param>
     /// <param name="sourceId">The <see cref="Guid"/> of the <see cref="CachingBackend"/> instance that removed the item,.
     /// or <see cref="Guid.Empty"/> if the source <see cref="CachingBackend"/> cannot be determined.</param>
-    protected void OnItemRemoved( [Required] string key, CacheItemRemovedReason reason, Guid sourceId )
+    protected void OnItemRemoved( string key, CacheItemRemovedReason reason, Guid sourceId )
     {
         this.LogSource.Debug.Write( Formatted( "OnItemRemoved( Backend=\"{Backend}\", Reason={Reason}, Key=\"{Key}\"", this, reason, key ) );
         this._itemRemoved?.Invoke( this, new CacheItemRemovedEventArgs( key, reason, sourceId ) );
@@ -794,7 +793,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="key">The key of the removed cache item.</param>
     /// <param name="sourceId">The <see cref="Guid"/> of the <see cref="CachingBackend"/> instance that removed the item,.
     /// or <see cref="Guid.Empty"/> if the source <see cref="CachingBackend"/> cannot be determined.</param>
-    protected void OnDependencyInvalidated( [Required] string key, Guid sourceId )
+    protected void OnDependencyInvalidated( string key, Guid sourceId )
     {
         this.LogSource.Debug.Write( Formatted( "OnDependencyInvalidated( Backend=\"{Backend}\", source={SourceId}, Key=\"{Key}\"", this, sourceId, key ) );
         this._dependencyInvalidated?.Invoke( this, new CacheDependencyInvalidatedEventArgs( key, sourceId ) );
@@ -804,7 +803,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// Raises the <see cref="DependencyInvalidated"/> event given a <see cref="CacheDependencyInvalidatedEventArgs"/>.
     /// </summary>
     /// <param name="args">A <see cref="CacheDependencyInvalidatedEventArgs"/>.</param>
-    protected void OnDependencyInvalidated( [Required] CacheDependencyInvalidatedEventArgs args )
+    protected void OnDependencyInvalidated( CacheDependencyInvalidatedEventArgs args )
     {
         this.LogSource.Debug.Write(
             Formatted( "OnDependencyInvalidated( Backend=\"{Backend}\", source={SourceId}, Key=\"{Key}\"", this, args.SourceId, args.Key ) );

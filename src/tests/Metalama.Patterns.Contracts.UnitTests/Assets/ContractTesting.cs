@@ -4,7 +4,7 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 
 public class ContractTesting
 {
-    public bool Method( [Required] string parameter )
+    public bool Method( string parameter )
     {
         return true;
     }

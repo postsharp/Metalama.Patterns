@@ -8,7 +8,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Contracts;
 
-public partial class StrictlyGreaterThanAttribute
+internal partial class FloatingPointHelper
 {
     [RunTimeOrCompileTime]
     internal static class DoubleMinimum
@@ -50,7 +50,7 @@ public partial class StrictlyGreaterThanAttribute
                 return double.Epsilon;
             }
 
-            var step = FloatingPointHelper.GetDoubleStep( min );
+            var step = GetDoubleStep( min );
 
             if ( min >= double.MaxValue - step )
             {
@@ -72,7 +72,7 @@ public partial class StrictlyGreaterThanAttribute
                 return decimal.MinValue;
             }
 
-            var step = FloatingPointHelper.GetDecimalStep( (decimal) min );
+            var step = GetDecimalStep( (decimal) min );
 
             if ( min > (double) decimal.MaxValue - (double) step )
             {

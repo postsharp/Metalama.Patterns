@@ -29,7 +29,7 @@ public static class CacheConfigurationAttributeTest
     }
 }
 
-[CachingConfiguration( UseDependencyInjection = false)]
+[CachingConfiguration( UseDependencyInjection = false )]
 public sealed class LocalChildCachingClass : ReferencedChildCachingClass
 {
     [CachingConfiguration( UseDependencyInjection = false )]

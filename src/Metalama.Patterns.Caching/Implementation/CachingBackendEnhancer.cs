@@ -1,7 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Contracts;
-
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
@@ -20,8 +18,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
     /// </summary>
     /// <param name="underlyingBackend">The next <see cref="CachingBackend"/> in the chain of responsibility.</param>
     /// <param name="enhancerConfiguration"></param>
-    protected CachingBackendEnhancer( [Required] CachingBackend underlyingBackend, CachingBackendConfiguration? enhancerConfiguration ) : base(
-        enhancerConfiguration )
+    protected CachingBackendEnhancer( CachingBackend underlyingBackend, CachingBackendConfiguration? enhancerConfiguration ) : base( enhancerConfiguration )
     {
         this.UnderlyingBackend = underlyingBackend;
 
