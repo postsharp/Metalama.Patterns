@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Patterns.Contracts;
 
 namespace Metalama.Patterns.Caching.Dependencies;
 
@@ -20,7 +19,7 @@ public sealed class StringDependency : ICacheDependency
     /// Initializes a new instance of the <see cref="StringDependency"/> class.
     /// </summary>
     /// <param name="key">The cache dependency.</param>
-    public StringDependency( [Required] string key )
+    public StringDependency( string key )
     {
         this._key = key;
     }

@@ -1,7 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Contracts;
-
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
@@ -20,7 +18,7 @@ internal abstract class CachingBackendEnhancerFeatures : CachingBackendFeatures
     /// Initializes a new <see cref="CachingBackendEnhancerFeatures"/>.
     /// </summary>
     /// <param name="underlyingBackendFeatures">The feature of the underlying <see cref="CachingBackend"/>.</param>
-    protected CachingBackendEnhancerFeatures( [Required] CachingBackendFeatures underlyingBackendFeatures )
+    protected CachingBackendEnhancerFeatures( CachingBackendFeatures underlyingBackendFeatures )
     {
         this.UnderlyingBackendFeatures = underlyingBackendFeatures;
     }

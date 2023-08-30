@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 
@@ -70,9 +69,9 @@ public sealed class RedisCacheInvalidator : CacheInvalidator
     /// <param name="options">Options.</param>
     /// <returns>A new <see cref="RedisCacheInvalidator"/>.</returns>
     public static RedisCacheInvalidator Create(
-        [Required] CachingBackend backend,
-        [Required] IConnectionMultiplexer connection,
-        [Required] RedisCacheInvalidatorOptions options )
+        CachingBackend backend,
+        IConnectionMultiplexer connection,
+        RedisCacheInvalidatorOptions options )
     {
         var invalidator = new RedisCacheInvalidator( backend, connection, options );
         invalidator.Init();
@@ -89,9 +88,9 @@ public sealed class RedisCacheInvalidator : CacheInvalidator
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> returning a new <see cref="RedisCacheInvalidator"/>.</returns>
     public static Task<RedisCacheInvalidator> CreateAsync(
-        [Required] CachingBackend backend,
-        [Required] IConnectionMultiplexer connection,
-        [Required] RedisCacheInvalidatorOptions options,
+        CachingBackend backend,
+        IConnectionMultiplexer connection,
+        RedisCacheInvalidatorOptions options,
         CancellationToken cancellationToken = default )
     {
         var invalidator = new RedisCacheInvalidator( backend, connection, options );

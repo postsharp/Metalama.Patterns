@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Contracts;
 using System.Runtime.Serialization;
 
 namespace Metalama.Patterns.Caching;
@@ -21,14 +20,14 @@ public class InvalidCacheItemException : CachingException
     /// Initializes a new instance of the <see cref="InvalidCacheItemException"/> class with a given error message.
     /// </summary>
     /// <param name="message">The error message.</param>
-    public InvalidCacheItemException( [Required] string message ) : base( message ) { }
+    public InvalidCacheItemException( string message ) : base( message ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InvalidCacheItemException"/> class with a given error message and inner <see cref="Exception"/>.
     /// </summary>
     /// <param name="message">The error message.</param>
     /// <param name="inner">The inner exception.</param>
-    public InvalidCacheItemException( [Required] string message, Exception inner ) : base( message, inner ) { }
+    public InvalidCacheItemException( string message, Exception inner ) : base( message, inner ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InvalidCacheItemException"/> class.

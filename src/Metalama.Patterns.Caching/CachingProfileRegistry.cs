@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Contracts;
 using System.Collections.Immutable;
 using System.ComponentModel;
 
@@ -55,7 +54,7 @@ public sealed class CachingProfileRegistry
     /// </summary>
     /// <param name="profileName">The profile name (a case-insensitive string).</param>
     /// <returns>A <see cref="CachingProfile"/> object with name <paramref name="profileName"/>.</returns>
-    public CachingProfile this[ [Required] string profileName ]
+    public CachingProfile this[ string profileName ]
     {
         get
         {

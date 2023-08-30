@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Contracts;
 
 [RunTimeOrCompileTime]
-internal static class FloatingPointHelper
+internal static partial class FloatingPointHelper
 {
     public static readonly double DoubleTolerance = GetDoubleTolerance();
     public static readonly decimal DecimalTolerance = GetDecimalTolerance();

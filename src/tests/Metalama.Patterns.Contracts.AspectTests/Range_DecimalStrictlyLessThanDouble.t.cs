@@ -1,1 +1,1 @@
-// Error LAMA5006 on `a`: `StrictlyLessThanAttribute cannot be applied to Range_DecimalStrictlyLessThanDouble.MethodWithDecimalStrictlyLessThanDouble(decimal?)/a because the value range cannot be satisfied by the type Decimal.`
+// Error LAMA5001 on `a`: `The [StrictlyLessThan] contract cannot be applied to 'Range_DecimalStrictlyLessThanDouble.MethodWithDecimalStrictlyLessThanDouble(decimal?)/a' because the value range cannot be satisfied by the type Decimal.`

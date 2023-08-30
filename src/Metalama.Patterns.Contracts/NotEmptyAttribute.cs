@@ -16,9 +16,6 @@ namespace Metalama.Patterns.Contracts;
 /// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/> or <see cref="IReadOnlyCollection{T}"/>
 /// (where empty means zero items). 
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotEmptyErrorMessage"/>.</para>
-/// </remarks>
 [PublicAPI]
 [Inheritable]
 public sealed class NotEmptyAttribute : ContractAspect
@@ -28,39 +25,40 @@ public sealed class NotEmptyAttribute : ContractAspect
     /// </summary>
     public NotEmptyAttribute() { }
 
+    public override void BuildAspect( IAspectBuilder<IParameter> builder )
+    {
+        base.BuildAspect( builder );
+
+        builder.WarnIfNullable();
+    }
+
+    public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
+    {
+        base.BuildAspect( builder );
+
+        builder.WarnIfNullable();
+    }
+
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
         base.BuildEligibility( builder );
 
-        // TODO: #33296 Fails during eligibility rule evaluation because TypeFactory.GetType leads to service is not available.
-#if false
         builder.MustSatisfy(
-            f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )), 
+            f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )),
             f => $"the type of {f} must string or implement ICollection, ICollection<T> or IReadOnlyCollection<T>" );
-#endif
     }
 
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
         var targetType = (INamedType) meta.Target.GetTargetType();
 
         if ( targetType.Equals( SpecialType.String ) )
         {
             if ( string.IsNullOrEmpty( value ) )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentNullException),
-                        typeof(NotEmptyAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                meta.Target.Project.ContractOptions().Templates.OnNotEmptyContractViolated( value );
             }
         }
         else if ( TryGetCompatibleTargetInterface( targetType, out var interfaceType, out var requiresCast ) )
@@ -69,30 +67,14 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentNullException),
-                            typeof(NotEmptyAttribute),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                    meta.Target.Project.ContractOptions().Templates.OnNotEmptyContractViolated( value );
                 }
             }
             else
             {
                 if ( value == null || value!.Count <= 0 )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentNullException),
-                            typeof(NotEmptyAttribute),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                    meta.Target.Project.ContractOptions().Templates.OnNotEmptyContractViolated( value );
                 }
             }
         }

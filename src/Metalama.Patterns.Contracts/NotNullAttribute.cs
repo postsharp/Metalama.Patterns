@@ -11,9 +11,6 @@ namespace Metalama.Patterns.Contracts;
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentNullException"/> if the target is assigned a <see langword="null"/> value.
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotNullErrorMessage"/>.</para>
-/// </remarks>
 [PublicAPI]
 [Inheritable]
 public sealed class NotNullAttribute : ContractAspect
@@ -22,6 +19,20 @@ public sealed class NotNullAttribute : ContractAspect
     /// Initializes a new instance of the <see cref="NotNullAttribute"/> class.
     /// </summary>
     public NotNullAttribute() { }
+
+    public override void BuildAspect( IAspectBuilder<IParameter> builder )
+    {
+        base.BuildAspect( builder );
+
+        builder.WarnIfNullable();
+    }
+
+    public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
+    {
+        base.BuildAspect( builder );
+
+        builder.WarnIfNullable();
+    }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -48,15 +59,7 @@ public sealed class NotNullAttribute : ContractAspect
     {
         if ( value == null! )
         {
-            throw ContractsServices.Default.ExceptionFactory.CreateException(
-                ContractExceptionInfo.Create(
-                    typeof(ArgumentNullException),
-                    typeof(NotNullAttribute),
-                    value,
-                    meta.Target.GetTargetName(),
-                    meta.Target.GetTargetKind(),
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.NotNullErrorMessage ) );
+            meta.Target.Project.ContractOptions().Templates.OnNotNullContractViolated( value );
         }
     }
 }

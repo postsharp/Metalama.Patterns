@@ -13,6 +13,8 @@
 		<InternalsVisibleTo Include="Metalama.Patterns.Contracts.UnitTests" />
     </ItemGroup>
 
+
+
 	<Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 	
 </Project>
