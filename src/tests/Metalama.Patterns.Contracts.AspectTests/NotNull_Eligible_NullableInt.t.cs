@@ -1,3 +1,4 @@
+// Warning LAMA5002 on `field`: `The [NotNull] contract has been applied to 'NotNull_Eligible_NullableInt.field', but its type is nullable.`
 namespace Metalama.Patterns.Contracts.AspectTests;
 public class NotNull_Eligible_NullableInt
 {

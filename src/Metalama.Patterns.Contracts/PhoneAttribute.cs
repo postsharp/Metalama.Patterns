@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -15,7 +14,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 [PublicAPI]
-public sealed class PhoneAttribute : BaseRegularExpressionAttribute
+public sealed class PhoneAttribute : RegularExpressionBaseAttribute
 {
     protected override IExpression GetRegex()
     {
@@ -26,8 +25,7 @@ public sealed class PhoneAttribute : BaseRegularExpressionAttribute
 
         return builder.ToExpression();
     }
-
-
+    
     protected override void OnContractViolated( dynamic? value, dynamic regex )
     {
         meta.Target.Project.ContractOptions().Templates.OnPhoneContractViolated( value );

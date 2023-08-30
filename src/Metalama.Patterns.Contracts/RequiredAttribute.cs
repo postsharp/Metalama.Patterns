@@ -27,6 +27,20 @@ public sealed class RequiredAttribute : ContractAspect
     /// </summary>
     public RequiredAttribute() { }
 
+    public override void BuildAspect( IAspectBuilder<IParameter> builder )
+    {
+        base.BuildAspect( builder );
+
+        builder.WarnIfNullable();
+    }
+
+    public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
+    {
+        base.BuildAspect( builder );
+
+        builder.WarnIfNullable();
+    }
+
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {

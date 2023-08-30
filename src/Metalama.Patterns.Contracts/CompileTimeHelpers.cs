@@ -66,4 +66,14 @@ internal static class CompileTimeHelpers
             yield return i;
         }
     }
+
+    public static void WarnIfNullable<T>( this IAspectBuilder<T> aspectBuilder )
+        where T : class, IDeclaration, IHasType
+    {
+        if ( aspectBuilder.Target.Type.IsNullable == true && aspectBuilder.Target.Type.TypeKind != TypeKind.TypeParameter )
+        {
+            aspectBuilder.Diagnostics.Report(
+                ContractDiagnostics.NotNullableOnNullable.WithArguments( (aspectBuilder.Target, aspectBuilder.AspectInstance.AspectClass.ShortName) ) );
+        }
+    }
 }

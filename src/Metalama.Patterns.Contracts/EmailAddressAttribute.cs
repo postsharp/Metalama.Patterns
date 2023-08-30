@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -15,7 +14,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 [PublicAPI]
-public sealed class EmailAddressAttribute : BaseRegularExpressionAttribute
+public sealed class EmailAddressAttribute : RegularExpressionBaseAttribute
 {
     protected override IExpression GetRegex()
     {

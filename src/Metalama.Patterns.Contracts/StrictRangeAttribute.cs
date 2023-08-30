@@ -2,8 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Patterns.Contracts;
 

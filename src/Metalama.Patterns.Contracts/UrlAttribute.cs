@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -16,13 +15,13 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 [PublicAPI]
-public sealed class UrlAttribute : BaseRegularExpressionAttribute
+public sealed class UrlAttribute : RegularExpressionBaseAttribute
 {
     protected override void OnContractViolated( dynamic? value, dynamic regex )
     {
         meta.Target.Project.ContractOptions().Templates.OnUrlContractViolated( value );
     }
-    
+
     protected override IExpression GetRegex()
     {
         var builder = new ExpressionBuilder();
@@ -32,5 +31,4 @@ public sealed class UrlAttribute : BaseRegularExpressionAttribute
 
         return builder.ToExpression();
     }
-
 }
