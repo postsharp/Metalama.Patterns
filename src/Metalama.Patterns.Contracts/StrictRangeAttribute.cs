@@ -21,8 +21,6 @@ namespace Metalama.Patterns.Contracts;
 ///     of the value closest to the bounds according to the precision
 ///     of the respective floating-point numerical data type.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractTextProvider.StrictRangeErrorMessage"/>.</para>
-/// <para>Error message can use additional arguments <value>{4}</value> and <value>{5}</value> to refer to the bounds.</para>
 /// </remarks>
 [PublicAPI]
 public class StrictRangeAttribute : RangeAttribute
@@ -36,17 +34,17 @@ public class StrictRangeAttribute : RangeAttribute
         : base(
             min,
             max,
-            StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
-            StrictlyLessThanAttribute.Int64Maximum.ToInt64( max ),
-            StrictlyGreaterThanAttribute.Int64Minimum.ToUInt64( min ),
-            StrictlyLessThanAttribute.Int64Maximum.ToUInt64( max ),
-            StrictlyGreaterThanAttribute.Int64Minimum.ToDouble( min ),
-            StrictlyLessThanAttribute.Int64Maximum.ToDouble( max ),
-            StrictlyGreaterThanAttribute.Int64Minimum.ToDecimal( min ),
-            StrictlyLessThanAttribute.Int64Maximum.ToDecimal( max ),
+            FloatingPointHelper.Int64Minimum.ToInt64( min ),
+            FloatingPointHelper.Int64Maximum.ToInt64( max ),
+            FloatingPointHelper.Int64Minimum.ToUInt64( min ),
+            FloatingPointHelper.Int64Maximum.ToUInt64( max ),
+            FloatingPointHelper.Int64Minimum.ToDouble( min ),
+            FloatingPointHelper.Int64Maximum.ToDouble( max ),
+            FloatingPointHelper.Int64Minimum.ToDecimal( min ),
+            FloatingPointHelper.Int64Maximum.ToDecimal( max ),
             GetInvalidTypes(
-                StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
-                StrictlyLessThanAttribute.Int64Maximum.ToInt64( max ) ) ) { }
+                FloatingPointHelper.Int64Minimum.ToInt64( min ),
+                FloatingPointHelper.Int64Maximum.ToInt64( max ) ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying unsigned integer bounds.
@@ -57,15 +55,15 @@ public class StrictRangeAttribute : RangeAttribute
         : base(
             min,
             max,
-            StrictlyGreaterThanAttribute.UInt64Minimum.ToInt64( min ),
-            StrictlyLessThanAttribute.UInt64Maximum.ToInt64( max ),
-            StrictlyGreaterThanAttribute.UInt64Minimum.ToUInt64( min ),
-            StrictlyLessThanAttribute.UInt64Maximum.ToUInt64( max ),
-            StrictlyGreaterThanAttribute.UInt64Minimum.ToDouble( min ),
-            StrictlyLessThanAttribute.UInt64Maximum.ToDouble( max ),
-            StrictlyGreaterThanAttribute.UInt64Minimum.ToDecimal( min ),
-            StrictlyLessThanAttribute.UInt64Maximum.ToDecimal( max ),
-            GetInvalidTypes( StrictlyGreaterThanAttribute.UInt64Minimum.ToUInt64( min ) ) ) { }
+            FloatingPointHelper.UInt64Minimum.ToInt64( min ),
+            FloatingPointHelper.UInt64Maximum.ToInt64( max ),
+            FloatingPointHelper.UInt64Minimum.ToUInt64( min ),
+            FloatingPointHelper.UInt64Maximum.ToUInt64( max ),
+            FloatingPointHelper.UInt64Minimum.ToDouble( min ),
+            FloatingPointHelper.UInt64Maximum.ToDouble( max ),
+            FloatingPointHelper.UInt64Minimum.ToDecimal( min ),
+            FloatingPointHelper.UInt64Maximum.ToDecimal( max ),
+            GetInvalidTypes( FloatingPointHelper.UInt64Minimum.ToUInt64( min ) ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying floating-point bounds.
@@ -76,14 +74,14 @@ public class StrictRangeAttribute : RangeAttribute
         : base(
             min,
             max,
-            StrictlyGreaterThanAttribute.DoubleMinimum.ToInt64( min ),
-            StrictlyLessThanAttribute.DoubleMaximum.ToInt64( max ),
-            StrictlyGreaterThanAttribute.DoubleMinimum.ToUInt64( min ),
-            StrictlyLessThanAttribute.DoubleMaximum.ToUInt64( max ),
-            StrictlyGreaterThanAttribute.DoubleMinimum.ToDouble( min ),
-            StrictlyLessThanAttribute.DoubleMaximum.ToDouble( max ),
-            StrictlyGreaterThanAttribute.DoubleMinimum.ToDecimal( min ),
-            StrictlyLessThanAttribute.DoubleMaximum.ToDecimal( max ),
+            FloatingPointHelper.DoubleMinimum.ToInt64( min ),
+            FloatingPointHelper.DoubleMaximum.ToInt64( max ),
+            FloatingPointHelper.DoubleMinimum.ToUInt64( min ),
+            FloatingPointHelper.DoubleMaximum.ToUInt64( max ),
+            FloatingPointHelper.DoubleMinimum.ToDouble( min ),
+            FloatingPointHelper.DoubleMaximum.ToDouble( max ),
+            FloatingPointHelper.DoubleMinimum.ToDecimal( min ),
+            FloatingPointHelper.DoubleMaximum.ToDecimal( max ),
             GetInvalidTypes(
                 min < double.MaxValue - 1 ? min + 1 : double.MaxValue,
                 max > double.MinValue + 1 ? max - 1 : double.MinValue ) ) { }

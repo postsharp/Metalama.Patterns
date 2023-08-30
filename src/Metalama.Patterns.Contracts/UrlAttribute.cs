@@ -13,9 +13,6 @@ namespace Metalama.Patterns.Contracts;
 ///  Null strings are accepted and do not
 /// throw an exception.
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractTextProvider.UrlErrorMessage"/>.</para>
-/// </remarks>
 [PublicAPI]
 public sealed class UrlAttribute : RegularExpressionAttribute
 {

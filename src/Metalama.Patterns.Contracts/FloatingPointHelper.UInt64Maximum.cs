@@ -8,7 +8,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Contracts;
 
-public partial class StrictlyLessThanAttribute
+internal partial class FloatingPointHelper
 {
     [RunTimeOrCompileTime]
     internal static class UInt64Maximum
@@ -33,8 +33,8 @@ public partial class StrictlyLessThanAttribute
             return max - 1;
         }
 
-        public static double ToDouble( ulong max ) => (double) max - FloatingPointHelper.GetDoubleStep( (double) max );
+        public static double ToDouble( ulong max ) => (double) max - GetDoubleStep( (double) max );
 
-        public static decimal ToDecimal( ulong max ) => (decimal) max + FloatingPointHelper.GetDecimalStep( (decimal) max );
+        public static decimal ToDecimal( ulong max ) => (decimal) max + GetDecimalStep( (decimal) max );
     }
 }

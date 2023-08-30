@@ -31,6 +31,7 @@ internal static class CompileTimeCacheConfigurationHelper
 
         return mergedConfiguration;
     }
+
     private static void PopulateConfigurations( INamedType type, List<CompileTimeCacheItemConfiguration> configurations )
     {
         var configuration = GetConfigurationOnDeclaration( type );

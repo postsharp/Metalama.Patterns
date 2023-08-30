@@ -21,7 +21,7 @@ internal static class CompileTimeHelpers
         return expressionBuilder.ToExpression();
     }
 
-    public static string? GetTargetDisplayName( this IMetaTarget target )
+    public static string GetTargetDisplayName( this IMetaTarget target )
     {
         return target.Declaration.DeclarationKind switch
         {
@@ -35,7 +35,7 @@ internal static class CompileTimeHelpers
         };
     }
 
-    public static string? GetTargetParameterName( this IMetaTarget target )
+    public static string GetTargetParameterName( this IMetaTarget target )
     {
         return target.Declaration.DeclarationKind switch
         {

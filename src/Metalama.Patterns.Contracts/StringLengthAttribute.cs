@@ -12,23 +12,6 @@ namespace Metalama.Patterns.Contracts;
 /// an <see cref="ArgumentException"/> if the target is assigned a string of invalid length.
 /// Null strings are accepted and do not throw an exception.
 /// </summary>
-/// <remarks>
-/// <para>Depending on supplied constructor arguments, one of the following holds:
-/// <list type="bullet">
-///     <item><description>
-///         if there is no minimum specified, then the error message is identified by <see cref="ContractTextProvider.StringLengthMaxErrorMessage"/>
-///         and can use additional argument <value>{4}</value> to refer to the maximum value specified,
-///     </description></item>
-///     <item><description>
-///         or if there is maximum is equal to <see cref="int.MaxValue"/>, then the error message is identified by <see cref="ContractTextProvider.StringLengthMinErrorMessage"/>
-///         and can use additional argument <value>{4}</value> to refer to the minimum value specified,
-///     </description></item>
-///     <item><description>
-///         otherwise, the error message is identified by <see cref="ContractTextProvider.StringLengthRangeErrorMessage"/>
-///         and can use additional arguments <value>{4}</value> to refer to the minimum value specified and <value>{5}</value> to refer to the maximum value specified.
-///     </description></item>
-/// </list></para>
-/// </remarks>
 [PublicAPI]
 [Inheritable]
 public sealed class StringLengthAttribute : ContractAspect

@@ -16,9 +16,6 @@ namespace Metalama.Patterns.Contracts;
 /// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/> or <see cref="IReadOnlyCollection{T}"/>
 /// (where empty means zero items). 
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractTextProvider.NotEmptyErrorMessage"/>.</para>
-/// </remarks>
 [PublicAPI]
 [Inheritable]
 public sealed class NotEmptyAttribute : ContractAspect

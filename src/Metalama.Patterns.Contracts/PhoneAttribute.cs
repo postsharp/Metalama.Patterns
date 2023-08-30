@@ -12,9 +12,6 @@ namespace Metalama.Patterns.Contracts;
 /// is not a valid phone number. Null strings are accepted and do not
 /// throw an exception.
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractTextProvider.PhoneErrorMessage"/>.</para>
-/// </remarks>
 [PublicAPI]
 public sealed class PhoneAttribute : RegularExpressionAttribute
 {

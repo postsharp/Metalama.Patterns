@@ -18,9 +18,6 @@ namespace Metalama.Patterns.Contracts;
 ///     </description></item>
 /// </list>
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractTextProvider.RequiredErrorMessage"/>.</para>
-/// </remarks>
 [PublicAPI]
 [Inheritable]
 public sealed class RequiredAttribute : ContractAspect

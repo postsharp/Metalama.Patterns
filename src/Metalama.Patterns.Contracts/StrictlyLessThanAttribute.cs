@@ -23,11 +23,9 @@ namespace Metalama.Patterns.Contracts;
 ///     of the value closest to the maximum value according to the precision
 ///     of the respective floating-point numerical data type.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractTextProvider.StrictlyLessThanErrorMessage"/>.</para>
-/// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
 [PublicAPI]
-public partial class StrictlyLessThanAttribute : RangeAttribute
+public class StrictlyLessThanAttribute : RangeAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an integer bound.
@@ -38,14 +36,14 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             long.MinValue,
             max,
             long.MinValue,
-            Int64Maximum.ToInt64( max ),
+            FloatingPointHelper.Int64Maximum.ToInt64( max ),
             ulong.MinValue,
-            Int64Maximum.ToUInt64( max ),
+            FloatingPointHelper.Int64Maximum.ToUInt64( max ),
             double.MinValue,
-            Int64Maximum.ToDouble( max ),
+            FloatingPointHelper.Int64Maximum.ToDouble( max ),
             decimal.MinValue,
-            Int64Maximum.ToDecimal( max ),
-            GetInvalidTypes( long.MinValue, Int64Maximum.ToInt64( max ) ) ) { }
+            FloatingPointHelper.Int64Maximum.ToDecimal( max ),
+            GetInvalidTypes( long.MinValue, FloatingPointHelper.Int64Maximum.ToInt64( max ) ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an unsigned integer bound.
@@ -56,13 +54,13 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             ulong.MinValue,
             max,
             long.MinValue,
-            UInt64Maximum.ToInt64( max ),
+            FloatingPointHelper.UInt64Maximum.ToInt64( max ),
             ulong.MinValue,
-            UInt64Maximum.ToUInt64( max ),
+            FloatingPointHelper.UInt64Maximum.ToUInt64( max ),
             double.MinValue,
-            UInt64Maximum.ToDouble( max ),
+            FloatingPointHelper.UInt64Maximum.ToDouble( max ),
             decimal.MinValue,
-            UInt64Maximum.ToDecimal( max ),
+            FloatingPointHelper.UInt64Maximum.ToDecimal( max ),
             GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None) ) { }
 
     /// <summary>
@@ -74,13 +72,13 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             double.MinValue,
             max,
             long.MinValue,
-            DoubleMaximum.ToInt64( max ),
+            FloatingPointHelper.DoubleMaximum.ToInt64( max ),
             ulong.MinValue,
-            DoubleMaximum.ToUInt64( max ),
+            FloatingPointHelper.DoubleMaximum.ToUInt64( max ),
             double.MinValue,
-            DoubleMaximum.ToDouble( max ),
+            FloatingPointHelper.DoubleMaximum.ToDouble( max ),
             decimal.MinValue,
-            DoubleMaximum.ToDecimal( max ),
+            FloatingPointHelper.DoubleMaximum.ToDecimal( max ),
             GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) ) { }
 
     protected override void OnContractViolated( dynamic? value )

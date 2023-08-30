@@ -17,8 +17,6 @@ namespace Metalama.Patterns.Contracts;
 /// are matched against enumeration member values.     Null values are accepted and do not
 /// throw exception.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractTextProvider.EnumDataTypeErrorMessage"/>.</para>
-/// <para>Error message can use additional argument <value>{4}</value> to refer to <see cref="EnumType"/> name.</para>
 /// </remarks>
 [PublicAPI]
 [Inheritable]
