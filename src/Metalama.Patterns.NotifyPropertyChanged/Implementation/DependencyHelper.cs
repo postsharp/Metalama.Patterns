@@ -158,7 +158,9 @@ internal static class DependencyHelper
         private readonly ISymbol _origin;
         private readonly SemanticModel _semanticModel;
         private readonly List<IPropertySymbol> _properties = new();
+        private SyntaxNode? _lastVisitedPropertyNode;
         private int _depth = 1;
+        private int _accessorStartDepth;
 
         public Visitor(
             TreeNode tree,
@@ -178,23 +180,30 @@ internal static class DependencyHelper
 
             if ( this._accessorStartDepth == this._depth && this._properties.Count > 0 )
             {
-                var treeNode = this._tree;
-
-                for ( var i = 0; i < this._properties.Count; i++ )
+                if ( this._lastVisitedPropertyNode.GetAccessKind() is AccessKind.Read or AccessKind.ReadWrite )
                 {
-                    treeNode = treeNode.GetOrAddChild( this._properties[i] );
+                    var treeNode = this._tree;
+
+                    for ( var i = 0; i < this._properties.Count; i++ )
+                    {
+                        treeNode = treeNode.GetOrAddChild( this._properties[i] );
+                    }
+
+                    treeNode.AddReferencedBy( this._origin );
                 }
 
-                treeNode.AddReferencedBy( this._origin );
-
-                this._accessorStartDepth = 0;
-                this._properties.Clear();
+                this.ClearCurrentAccessor();
             }
 
             --this._depth;
         }
 
-        private int _accessorStartDepth;
+        private void ClearCurrentAccessor()
+        {
+            this._accessorStartDepth = 0;
+            this._lastVisitedPropertyNode = null;
+            this._properties.Clear();
+        }
 
         public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
@@ -206,22 +215,42 @@ internal static class DependencyHelper
             base.VisitMemberAccessExpression( node );
         }
 
+        public override void VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
+        {
+            if ( this._accessorStartDepth == 0 )
+            {
+                this._accessorStartDepth = this._depth;
+            }
+
+            base.VisitConditionalAccessExpression( node );
+        }
+
         public override void VisitIdentifierName( IdentifierNameSyntax node )
         {
+            if ( this._accessorStartDepth == 0 )
+            {
+                // This happens when an identifier is used without qualification,
+                // eg. X in `int Y => X`
+                if ( node.GetAccessKind() is AccessKind.Read or AccessKind.ReadWrite )
+                {
+                    this._accessorStartDepth = this._depth;
+                }
+            }
+
             if ( this._accessorStartDepth > 0 )
             {
                 var symbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
                 if ( symbol is IPropertySymbol property )
                 {
                     this._properties.Add( property );
+                    this._lastVisitedPropertyNode = node;
                 }
                 else
                 {
                     // Not a property (eg, a method or field).
                     // TODO: Emit error when not supported/allowed.
 
-                    this._accessorStartDepth = 0;
-                    this._properties.Clear();
+                    this.ClearCurrentAccessor();
                 }
             }
         }

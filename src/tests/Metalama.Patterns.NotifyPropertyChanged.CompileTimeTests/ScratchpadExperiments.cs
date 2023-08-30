@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Testing.UnitTesting;
-using Microsoft.CodeAnalysis;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -32,9 +31,29 @@ class A
 
     public int A6 => this.A2 + this.A1.B2;
 
-    public int A7 => this.A3 + this.A4 + this.A5 + this.A6;
+    public int A7 => this.A3 + this.A4 + A5 + this.A6;
 
     public int A8 => this.A1.B1.C2;
+
+    public int? A9 => A1?.B2;
+
+    public int? A10 => this.A1?.B2;
+
+    public int? A11 => (this.A1)?.B2;
+
+    public int A12 => ++A1.B2;
+
+    public int A13
+    {
+        get
+        {
+            A1.B2 = 99; // Write-only to A1.B2, should not be treated as a reference.
+            return A1.B1.C2;
+        }
+    }
+    
+    // Demonstrate non-leaf access:
+    public C A14 => A1.B1;
 }
 
 class B
@@ -63,20 +82,60 @@ class D
         var result = Implementation.DependencyHelper.GetDependencyGraph( type );
 
         this.TestOutput.WriteLine( result.ToString() );
-
-        this.TestOutput.WriteLine( "End of test" );
     }
 
-    private void Dump( IEnumerable<KeyValuePair<(IPropertySymbol? Parent, IPropertySymbol Child), HashSet<IPropertySymbol>>> collection )
+    [Fact]
+    public void Test2()
     {
-        foreach ( var kvp in collection )
+        using var testContext = this.CreateTestContext();
+
+        // A2 accesses A1 without `this.` using expression body.
+        var code = @"
+class A
+{
+    public int A1 { get; set; }
+
+    public int A2 => A1;
+
+    public int A3 => A1 + A1;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var result = Implementation.DependencyHelper.GetDependencyGraph( type );
+
+        this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    [Fact]
+    public void Test3()
+    {
+        using var testContext = this.CreateTestContext();
+
+        // A2 accesses A1 without `this.` using expression body.
+        var code = @"
+class A
+{
+    public int A1 { get; set; }
+
+    public int A2
+    {
+        get
         {
-            this.Dump( kvp );
+            return A1 + A1;
         }
     }
+}";
 
-    private void Dump( KeyValuePair<(IPropertySymbol? Parent, IPropertySymbol Child), HashSet<IPropertySymbol>> kvp )
-    {
-        this.TestOutput.WriteLine( $"{kvp.Key.Parent?.Name}.{kvp.Key.Child.Name} [ {string.Join( ", ", kvp.Value.Select( p => p.Name).OrderBy( s => s ) )} ]" );
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var result = Implementation.DependencyHelper.GetDependencyGraph( type );
+
+        this.TestOutput.WriteLine( result.ToString() );
     }
+
 }
