@@ -4,7 +4,6 @@ using Flashtrace.Contexts;
 using Flashtrace.Options;
 using Flashtrace.Records;
 using JetBrains.Annotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Flashtrace;
 
@@ -12,8 +11,9 @@ namespace Flashtrace;
 /// Abstraction of the Logging facility, through which other components emit their log records.
 /// </summary>
 /// <remarks>
-/// <para>If you want to implement this interface, you should also implement the <see cref="ILoggerFactory"/> interface
-/// and register it to the <see cref="LoggingServiceLocator"/>.</para>
+/// <para>If you want to implement this interface, you should also implement the <see cref="IRoleLoggerFactory"/> interface
+/// and register it to the <see cref="IServiceProvider"/> or, if you use the dependency mechanism, to <see cref="LogSourceFactory"/>.
+/// </para>
 /// </remarks>
 [PublicAPI]
 public partial interface ILogger : ILoggerExceptionHandler
@@ -21,7 +21,7 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// <summary>
     /// Gets a factory that can provide instances of <see cref="ILogger"/>.
     /// </summary>
-    ILoggerFactory Factory { get; }
+    IRoleLoggerFactory Factory { get; }
 
     /// <summary>
     /// Gets the role of records created by this <see cref="ILogger"/>. A list of standard roles is available in the <see cref="LoggingRoles"/> class.
@@ -50,7 +50,7 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// <param name="text">Text of the record.</param>
     /// <param name="exception">The <see cref="Exception"/> associated with the record, or <c>null</c>.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
-    void Write( ILoggingContext? context, LogLevel level, LogRecordKind recordKind, string text, Exception? exception, ref CallerInfo callerInfo );
+    void Write( ILoggingContext? context, LogLevel level, LogRecordKind recordKind, string text, Exception? exception, in CallerInfo callerInfo );
 
     /// <summary>
     /// Writes a log record with a description with an array of parameters.
@@ -69,7 +69,7 @@ public partial interface ILogger : ILoggerExceptionHandler
         string text,
         object[] args,
         Exception? exception,
-        ref CallerInfo callerInfo );
+        in CallerInfo callerInfo );
 
     /// <summary>
     /// Opens an activity.
@@ -77,7 +77,7 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// <param name="options">Options.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
     /// <returns>An <see cref="ILoggingContext"/> representing the new activity.</returns>
-    ILoggingContext OpenActivity( in LogActivityOptions options, ref CallerInfo callerInfo );
+    ILoggingContext OpenActivity( in LogActivityOptions options, in CallerInfo callerInfo );
 
     /// <summary>
     /// Resumes an asynchronous activity suspended by the <see cref="SuspendActivity"/> method.
@@ -85,14 +85,14 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// <param name="context">A context representing an asynchronous activity, created by <see cref="OpenActivity"/>
     /// and suspended by <see cref="SuspendActivity"/>.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
-    void ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo );
+    void ResumeActivity( ILoggingContext context, in CallerInfo callerInfo );
 
     /// <summary>
     /// Suspends an asynchronous activity, which can then be resumed by the <see cref="ResumeActivity"/> method.
     /// </summary>
     /// <param name="context">A context representing an asynchronous activity, created by <see cref="OpenActivity"/>.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
-    void SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo );
+    void SuspendActivity( ILoggingContext context, in CallerInfo callerInfo );
 
     /// <summary>
     /// Sets the wait dependency for a given context, i.e. give information about what the given context is waiting (or awaiting) for.
@@ -110,7 +110,6 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// Gets the logger for the current context.
     /// </summary>
     /// <returns></returns>
-    [SuppressMessage( "Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Expensive to evaluate." )]
     IContextLocalLogger GetContextLocalLogger();
 
     /// <summary>

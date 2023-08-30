@@ -59,6 +59,14 @@ public class FormattersTests : FormattersTestsBase
         Assert.Equal( "Formattable", this.FormatDefault( new FormattableObject() ) );
     }
 
+#if NET6_0_OR_GREATER
+    [Fact]
+    public void SpanFormattable()
+    {
+        Assert.Equal( "SpanFormattable", this.FormatDefault( new SpanFormattableObject() ) );
+    }
+#endif
+
     [Fact]
     public void NullToString()
     {
@@ -202,6 +210,23 @@ public class FormattersTests : FormattersTestsBase
             stringBuilder.Append( "Formattable" );
         }
     }
+
+#if NET6_0_OR_GREATER
+    private sealed class SpanFormattableObject : ISpanFormattable
+    {
+        // ToString should not be invoked.
+        public string ToString( string? format, IFormatProvider? formatProvider ) => throw new NotImplementedException();
+
+        public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+        {
+            const string str = "SpanFormattable";
+            new Span<char>( str.ToCharArray() ).CopyTo( destination );
+            charsWritten = str.Length;
+
+            return true;
+        }
+    }
+#endif
 
     private sealed class NullToStringClass
     {

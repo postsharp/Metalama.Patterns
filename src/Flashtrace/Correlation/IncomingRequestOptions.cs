@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 
 namespace Flashtrace.Correlation;
-#pragma warning disable CA1815 // Override equals and operator equals on value types
 
 /// <summary>
 /// Logging options sent by the caller in a distributed logging transaction.

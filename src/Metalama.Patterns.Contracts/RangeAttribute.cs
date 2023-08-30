@@ -470,7 +470,8 @@ public class RangeAttribute : ContractAspect
     private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
         CreateCannotBeAppliedDiagnosticDefinition( "LAMA5000", nameof(RangeAttribute) );
 
-    protected virtual DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition() => _rangeCannotBeApplied;
+    protected virtual DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
+        => _rangeCannotBeApplied;
 
     private void BuildAspect( IAspectBuilder builder, IType targetType )
     {

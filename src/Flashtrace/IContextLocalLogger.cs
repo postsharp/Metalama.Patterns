@@ -25,8 +25,9 @@ public interface IContextLocalLogger : ILoggerExceptionHandler
     /// </summary>
     /// <param name="options">Options.</param>
     /// <param name="callerInfo">Information about the caller code.</param>
+    /// <param name="isAsync"></param>
     /// <returns>A new context for the activity.</returns>
-    ILoggingContext OpenActivity( in OpenActivityOptions options, ref CallerInfo callerInfo );
+    ILoggingContext OpenActivity( in OpenActivityOptions options, in CallerInfo callerInfo, bool isAsync );
 
     /// <summary>
     /// Gets a record builder.
@@ -35,22 +36,22 @@ public interface IContextLocalLogger : ILoggerExceptionHandler
     /// <param name="callerInfo">Information about the caller code.</param>
     /// <param name="context">The context for which the record will be built, or <c>null</c> for standalone records.</param>
     /// <returns>A record builder.</returns>
-    ILogRecordBuilder GetRecordBuilder( in LogRecordOptions options, ref CallerInfo callerInfo, ILoggingContext? context = null );
+    ILogRecordBuilder GetRecordBuilder( in LogRecordOptions options, in CallerInfo callerInfo, ILoggingContext? context = null );
 
     /// <summary>
-    /// Resumes an asynchronous activity suspended by the <see cref="SuspendActivity(ILoggingContext,ref CallerInfo)"/> method.
+    /// Resumes an asynchronous activity suspended by the <see cref="SuspendActivity"/> method.
     /// </summary>
     /// <param name="context">A context representing an asynchronous activity, created by <see cref="OpenActivity"/>
-    /// and suspended by <see cref="SuspendActivity(ILoggingContext,ref CallerInfo)"/>.</param>
+    /// and suspended by <see cref="SuspendActivity"/>.</param>
     /// <param name="callerInfo">Information about the caller code.</param>
-    void ResumeActivity( ILoggingContext context, ref CallerInfo callerInfo );
+    void ResumeActivity( ILoggingContext context, in CallerInfo callerInfo );
 
     /// <summary>
-    /// Suspends an asynchronous activity, which can then be resumed by the <see cref="ResumeActivity(ILoggingContext,ref CallerInfo)"/> method.
+    /// Suspends an asynchronous activity, which can then be resumed by the <see cref="ResumeActivity"/> method.
     /// </summary>
     /// <param name="context">A context representing an asynchronous activity, created by <see cref="OpenActivity"/>.</param>
     /// <param name="callerInfo">Information about the caller code.</param>
-    void SuspendActivity( ILoggingContext context, ref CallerInfo callerInfo );
+    void SuspendActivity( ILoggingContext context, in CallerInfo callerInfo );
 
     /// <summary>
     /// Sets the wait dependency for a given context, i.e. give information about what the given context is waiting (or awaiting) for.

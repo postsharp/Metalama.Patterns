@@ -2,7 +2,7 @@
 
 using System.Globalization;
 
-namespace Flashtrace.Formatters.UnitTests
+namespace Flashtrace.Formatters.UnitTests.Assets
 {
     internal class DictionaryFormatter<TKey, TValue> : Formatter<IDictionary<TKey, TValue>>
     {

@@ -27,14 +27,13 @@ public readonly struct FormattedMessageArray : IMessage
     {
         recordBuilder.BeginWriteItem( item, new LogRecordTextOptions( this._args.Length ) );
 
-        var parser = new FormattingStringParser( this._formattingString );
+        var parser = new FormattingStringParser( this._formattingString.AsSpan() );
 
         for ( var i = 0; i < this._args.Length; i++ )
         {
-            recordBuilder.WriteString( parser.GetNextSubstring() );
-            var parameter = parser.GetNextParameter();
+            recordBuilder.WriteString( parser.GetNextText() );
 
-            if ( parameter.Array == null )
+            if ( !parser.TryGetNextParameter( out var parameter ) )
             {
                 throw new InvalidFormattingStringException(
                     string.Format( CultureInfo.InvariantCulture, "The formatting string must have exactly {0} parameters.", this._args.Length ) );
@@ -43,9 +42,9 @@ public readonly struct FormattedMessageArray : IMessage
             recordBuilder.WriteParameter( i, parameter, this._args[i], LogParameterOptions.FormattedStringParameter );
         }
 
-        recordBuilder.WriteString( parser.GetNextSubstring() );
+        recordBuilder.WriteString( parser.GetNextText() );
 
-        if ( parser.GetNextParameter().Array != null )
+        if ( parser.TryGetNextParameter( out _ ) )
         {
             throw new InvalidFormattingStringException(
                 string.Format( CultureInfo.InvariantCulture, "The formatting string must have exactly {0} parameters.", this._args.Length ) );

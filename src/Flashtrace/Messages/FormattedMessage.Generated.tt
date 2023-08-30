@@ -1,6 +1,6 @@
 ﻿// THIS FILE IS T4-GENERATED.
 // To edit, go to FormattedMessage.Generated.tt.
-// To transform, run this: "C:\Program Files (x86)\Common Files\Microsoft Shared\TextTemplating\14.0\TextTransform.exe" FormattedMessage.Generated.tt
+// To transform, run RunT4.ps1.
 
 <#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
@@ -38,17 +38,17 @@ public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 	{
 		recordBuilder.BeginWriteItem(item, new LogRecordTextOptions(<#= i #>, null));
 
-		FormattingStringParser parser = new FormattingStringParser( this.formattingString );
-		ArraySegment<char> parameter;
+		FormattingStringParser parser = new FormattingStringParser( this.formattingString.AsSpan() );
+		ReadOnlySpan<char> parameter;
 
 <#
         for (var j = 1; j <= i; j++)
         {
 #>
-		recordBuilder.WriteString( parser.GetNextSubstring() );
-		parameter = parser.GetNextParameter();
+		recordBuilder.WriteString( parser.GetNextText() );
 
-		if ( parameter.Array == null )
+
+		if ( !parser.TryGetNextParameter( out parameter ) )
 		{
 			throw new InvalidFormattingStringException("The formatting string must have exactly <#= i #> parameters.");
 		}
@@ -57,9 +57,9 @@ public readonly struct FormattedMessage<<#= Repeat( "T{0}", i ) #>> : IMessage
 <#
         }
 #>
-		recordBuilder.WriteString( parser.GetNextSubstring() );
+		recordBuilder.WriteString( parser.GetNextText() );
 
-		if ( parser.GetNextParameter().Array != null )
+		if ( parser.TryGetNextParameter( out _ ) )
 		{
 			throw new InvalidFormattingStringException("The formatting string must have exactly <#= i #> parameters.");
 		}

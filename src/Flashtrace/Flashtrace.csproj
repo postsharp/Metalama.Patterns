@@ -49,15 +49,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>LegacySourceLogger.Generated.tt</DependentUpon>
     </Compile>
-    <None Update="SemanticMessageBuilder.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>SemanticMessageBuilder.Generated.cs</LastGenOutput>
-    </None>
-    <Compile Update="SemanticMessageBuilder.Generated.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>SemanticMessageBuilder.Generated.tt</DependentUpon>
-    </Compile>
     <None Update="Messages\FormattedMessage.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>FormattedMessage.Generated.cs</LastGenOutput>
@@ -76,14 +67,23 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>SemanticMessage.Generated.tt</DependentUpon>
     </Compile>
-    <None Update="FormattedMessageBuilder.Generated.tt">
+    <None Update="Messages\FormattedMessageBuilder.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>FormattedMessageBuilder.Generated.cs</LastGenOutput>
     </None>
-    <Compile Update="FormattedMessageBuilder.Generated.cs">
+    <Compile Update="Messages\FormattedMessageBuilder.Generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>FormattedMessageBuilder.Generated.tt</DependentUpon>
+    </Compile>
+    <None Update="Messages\SemanticMessageBuilder.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SemanticMessageBuilder.Generated.cs</LastGenOutput>
+    </None>
+    <Compile Update="Messages\SemanticMessageBuilder.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SemanticMessageBuilder.Generated.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 	
