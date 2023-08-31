@@ -227,7 +227,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
         foreach ( var node in allNodesDepthFirst )
         {            
-            if ( node.ReferencedBy.Count > 0 )
+            if ( node.DirectReferences.Count > 0 )
             {
                 var parent = node.Parent!;
 
@@ -348,6 +348,8 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
             switch ( p.Type.IsReferenceType )
             {
                 case null:
+                    // This might require INPC-type code which is used at runtime only when T implements INPC,
+                    // and non-INPC-type code which is used at runtime when T does not implement INPC.                    
                     throw new NotImplementedException( "Not implemented: unconstrained generic properties" );
 
                 case true:
@@ -453,13 +455,6 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         }
 
         return result;
-    }
-
-    [Template]
-    private static void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
-    {
-        // TODO: Supply a compile-time map of (relevant e.PropertyName) => (list of properties which depend on that e.PropertyName)
-        meta.InsertComment( "Not implemented yet. Will a swich on e.PropertyName where cases call OnPropertyChanged for the affected properties." );
     }
 
     [Template]
@@ -663,7 +658,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                 method.Invoke();
             }
 
-            var affectedPropertyNames = node.Children.SelectMany( c => c.ReferencedBy ).Select( s => s.Name ).Distinct().OrderBy( s => s );
+            var affectedPropertyNames = node.Children.SelectMany( c => c.GetAllReferences() ).Distinct().Select( n => n.Symbol.Name ).OrderBy( s => s );
 
             foreach ( var name in affectedPropertyNames )
             {
@@ -688,7 +683,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         // For now, use if. Also, might use a runtime static readonly dictionary at least for the OnPropertyChanged calls.
         foreach ( var child in node.Children )
         {
-            var hasRefs = child.ReferencedBy.Count > 0;
+            var hasRefs = child.DirectReferences.Count > 0;
             var hasUpdateMethod = child.Data.UpdateMethod != null;
 
             if ( hasRefs || hasUpdateMethod )
@@ -702,7 +697,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                     if ( hasRefs )
                     {
-                        var affectedPropertyNames = child.ReferencedBy.Select( s => s.Name ).OrderBy( s => s );
+                        var affectedPropertyNames = child.GetAllReferences().Select( n => n.Symbol.Name ).OrderBy( s => s );
 
                         foreach ( var name in affectedPropertyNames )
                         {

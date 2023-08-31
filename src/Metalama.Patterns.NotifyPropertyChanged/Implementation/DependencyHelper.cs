@@ -19,7 +19,7 @@ internal static class DependencyHelper
     {
         ITreeNode GetOrAddChild( ISymbol childSymbol );
         
-        void AddReferencedBy( ISymbol symbol );
+        void AddReferencedBy( ITreeNode node );
     }
 
     [CompileTime]
@@ -27,7 +27,7 @@ internal static class DependencyHelper
     {
         private readonly ISymbol? _symbol;
         private Dictionary<ISymbol, TreeNode<T>>? _children;
-        private HashSet<ISymbol>? _referencedBy;
+        private HashSet<TreeNode<T>>? _referencedBy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TreeNode{T}"/> class which represents the root node of a tree.
@@ -62,7 +62,44 @@ internal static class DependencyHelper
         /// <summary>
         /// Gets the members that reference the current node as the final member of an access expression.
         /// </summary>
-        public IReadOnlyCollection<ISymbol> ReferencedBy => ((IReadOnlyCollection<ISymbol>?) this._referencedBy) ?? Array.Empty<ISymbol>();
+        public IReadOnlyCollection<TreeNode<T>> DirectReferences => ((IReadOnlyCollection<TreeNode<T>>?) this._referencedBy) ?? Array.Empty<TreeNode<T>>();
+
+
+        /// <summary>
+        /// Gets the members that reference, directly or indirectly, the current node as the final member of an access expression.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyCollection<TreeNode<T>> GetAllReferences()
+        {
+            // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
+            // However, it's not recusive so there's no risk of stack overflow. So safe, but slow.
+
+            if ( this._referencedBy == null )
+            {
+                return Array.Empty<TreeNode<T>>();
+            }
+
+            var refsToFollow = new Stack<TreeNode<T>>( this._referencedBy );
+            var refsFollowed = new HashSet<TreeNode<T>>();
+
+            while ( refsToFollow.Count > 0 )
+            {
+                var r = refsToFollow.Pop();
+
+                if ( refsFollowed.Add( r ) )
+                {
+                    if ( r._referencedBy != null )
+                    {
+                        foreach ( var indirectRef in r._referencedBy )
+                        {
+                            refsToFollow.Push( indirectRef );
+                        }
+                    }
+                }
+            }
+
+            return refsFollowed;
+        }
 
         public TreeNode<T> GetOrAddChild( ISymbol childSymbol )
         {
@@ -93,11 +130,14 @@ internal static class DependencyHelper
             => childSymbol == null || this._children == null || !this._children.TryGetValue( childSymbol, out var result )
                 ? null : result;
 
-        public void AddReferencedBy( ISymbol symbol )
+        public void AddReferencedBy( TreeNode<T> node )
         {
             this._referencedBy ??= new();
-            this._referencedBy.Add( symbol );
+            this._referencedBy.Add( node );
         }
+
+        void ITreeNode.AddReferencedBy( ITreeNode node )
+            => this.AddReferencedBy( (TreeNode<T>) node );
 
         public IEnumerable<TreeNode<T>> DecendantsDepthFirst()
         {
@@ -188,16 +228,18 @@ internal static class DependencyHelper
             
             appendTo.Append( this._symbol?.Name ?? "<root>" );
 
-            if ( this._referencedBy != null )
+            var allRefs = this.GetAllReferences();
+
+            if ( allRefs.Count > 0 )
             {
-                appendTo.Append( " [ " ).Append( string.Join( ", ", this._referencedBy.Select( s => s.Name ).OrderBy( n => n ) ) ).Append( " ]" );
+                appendTo.Append( " [ " ).Append( string.Join( ", ", allRefs.Select( n => n.Symbol.Name ).OrderBy( n => n ) ) ).Append( " ]" );
             }
 
             appendTo.AppendLine();
 
             if ( this._children != null )
             {
-                indent += 4;
+                indent += 2;
                 foreach ( var child in this._children.Values.OrderBy( c => c.Symbol.Name ) )
                 {
                     child.ToString( appendTo, indent, shouldHighlight );
@@ -285,7 +327,7 @@ internal static class DependencyHelper
                         treeNode = treeNode.GetOrAddChild( this._properties[i] );
                     }
 
-                    treeNode.AddReferencedBy( this._origin );
+                    treeNode.AddReferencedBy( this._tree.GetOrAddChild( this._origin ) );
                 }
 
                 this.ClearCurrentAccessor();
