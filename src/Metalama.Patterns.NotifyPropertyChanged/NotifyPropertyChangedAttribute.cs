@@ -344,17 +344,16 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         foreach ( var p in autoProperties )
         {
             var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
+            var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
 
             switch ( p.Type.IsReferenceType )
             {
                 case null:
                     // This might require INPC-type code which is used at runtime only when T implements INPC,
                     // and non-INPC-type code which is used at runtime when T does not implement INPC.                    
-                    throw new NotImplementedException( "Not implemented: unconstrained generic properties" );
+                    throw new NotSupportedException( "Unconstrained generic properties are not supported." );
 
                 case true:
-
-                    var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
 
                     if ( propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
                     {
@@ -385,15 +384,28 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                     }
                     else
                     {
-                        throw new NotImplementedException( "Not implemented: uninstrumented reference-type properties" );
+                        ctx.Builder.Advice.Override( p, nameof( OverrideUninstrumentedTypeProperty ), tags: new
+                        {
+                            ctx,
+                            node,
+                            compareUsing = EqualityComparisonKind.ReferenceEquals
+                        } );
                     }
                     break;
 
                 case false:
-                    ctx.Builder.Advice.Override( p, nameof( OverrideValueTypeProperty ), tags: new
+
+                    if ( propertyTypeInstrumentationKind is not InpcInstrumentationKind.None )
+                    {
+                        // TODO: Proper error reporting.
+                        throw new NotSupportedException( "structs implementing INotifyPropertyChanged are not supported." );
+                    }
+
+                    ctx.Builder.Advice.Override( p, nameof( OverrideUninstrumentedTypeProperty ), tags: new
                     {
                         ctx,
-                        onPropertyChangedMethodHasCallerMemberNameAttribute                        
+                        node,
+                        compareUsing = EqualityComparisonKind.EqualityOperator
                     } );
                     break;
             }
@@ -537,48 +549,63 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         }
     }
 
-    [Template]
-    private static dynamic? OverrideNonInpcRefTypeProperty
+    [CompileTime]
+    private enum EqualityComparisonKind
     {
-        set
-        {
-            var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
-
-            if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
-            {
-                meta.Target.FieldOrProperty.Value = value;
-                ctx.OnPropertyChangedMethod.Invoke( meta.Target.Property.Name );
-            }
-        }
+        ReferenceEquals,
+        ThisEquals,
+        EqualityOperator,
+        None
     }
 
     [Template]
-    private static dynamic? OverrideValueTypeProperty
+    private static dynamic? OverrideUninstrumentedTypeProperty
     {
         set
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
+            var node = (DependencyHelper.TreeNode<TreeNodeData>?) meta.Tags["node"];
+            var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
 
-            if ( value != meta.Target.FieldOrProperty.Value )
+            meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+
+            switch ( compareUsing )
             {
-                meta.Target.FieldOrProperty.Value = value;
+                case EqualityComparisonKind.EqualityOperator:
+                    if ( meta.Target.FieldOrProperty.Value != value )
+                    {
+                        meta.Target.FieldOrProperty.Value = value;
+                        GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+                    }
 
-                // TODO: IMethod.Invoke is not aware of/does not support default args, so we can't currently emit this idomatic expression.
-                //       If/when supported, update other invocations, this is the only commented example.
-#if true
-                ctx.OnPropertyChangedMethod.Invoke( meta.Target.Property.Name );
-#else
-                if ( false || (bool)meta.Tags["onPropertyChangedMethodHasCallerMemberNameAttribute"]! )
-                {
-                    // Emit human idomatic "OnPropertyChanged()" where the property name will be injected by the C# compiler thanks to [CallerMemberName] on
-                    // the introduced or existing OnPropertyChanged method.
-                    ctx.OnPropertyChangedMethod.Invoke();
-                }
-                else
-                {
-                    ctx.OnPropertyChangedMethod.Invoke( meta.Target.Property.Name );
-                }
-#endif
+                    break;
+
+                case EqualityComparisonKind.ThisEquals:
+                    if ( !meta.Target.FieldOrProperty.Value.Equals( value ) )
+                    {
+                        meta.Target.FieldOrProperty.Value = value;
+                        GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+                    }
+
+                    break;
+
+                case EqualityComparisonKind.ReferenceEquals:
+                    if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
+                    {
+                        meta.Target.FieldOrProperty.Value = value;
+                        GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+                    }
+
+                    break;
+
+                case EqualityComparisonKind.None:
+                    meta.Target.FieldOrProperty.Value = value;
+                    GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+
+                    break;
+
+                default:
+                    throw new NotSupportedException( compareUsing.ToString() );
             }
         }
     }
@@ -658,7 +685,13 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                 method.Invoke();
             }
 
-            var affectedPropertyNames = node.Children.SelectMany( c => c.GetAllReferences() ).Distinct().Select( n => n.Symbol.Name ).OrderBy( s => s );
+            var affectedPropertyNames = 
+                node.Children
+                .SelectMany( c => c.GetAllReferences() )
+                .Concat( node.GetAllReferences() )
+                .Distinct()
+                .Select( n => n.Symbol.Name )
+                .OrderBy( s => s );
 
             foreach ( var name in affectedPropertyNames )
             {
