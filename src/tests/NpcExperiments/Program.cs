@@ -22,6 +22,7 @@ public class A
     public int A5 => A2.B2.C2.D1;
 }
 
+[NotifyPropertyChanged]
 public class D
 {
     public int D1 { get; set; }

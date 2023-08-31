@@ -89,8 +89,8 @@ internal static class DependencyHelper
         ITreeNode ITreeNode.GetOrAddChild( ISymbol childSymbol )
             => this.GetOrAddChild( childSymbol );
 
-        public TreeNode<T>? GetChild( ISymbol childSymbol ) 
-            => this._children == null || !this._children.TryGetValue( childSymbol, out var result )
+        public TreeNode<T>? GetChild( ISymbol? childSymbol ) 
+            => childSymbol == null || this._children == null || !this._children.TryGetValue( childSymbol, out var result )
                 ? null : result;
 
         public void AddReferencedBy( ISymbol symbol )
@@ -161,9 +161,32 @@ internal static class DependencyHelper
             return sb.ToString();
         }
 
-        private void ToString( StringBuilder appendTo, int indent )
+        public string ToString( TreeNode<T>? highlight )
         {
-            appendTo.Append( ' ', indent ).Append( this._symbol?.Name ?? "<root>" );
+            var sb = new StringBuilder();
+            this.ToString( sb, 0, highlight == null ? null : n => n == highlight );
+            return sb.ToString();
+        }
+
+        public string ToString( Func<TreeNode<T>,bool>? shouldHighlight )
+        {
+            var sb = new StringBuilder();
+            this.ToString( sb, 0, shouldHighlight );
+            return sb.ToString();
+        }
+
+        private void ToString( StringBuilder appendTo, int indent, Func<TreeNode<T>,bool>? shouldHighlight = null )
+        {
+            if ( shouldHighlight != null && shouldHighlight( this ) )
+            {
+                appendTo.Append( ' ', indent - 2 ).Append( "* " );
+            }
+            else
+            {
+                appendTo.Append( ' ', indent );
+            }
+            
+            appendTo.Append( this._symbol?.Name ?? "<root>" );
 
             if ( this._referencedBy != null )
             {
@@ -174,10 +197,10 @@ internal static class DependencyHelper
 
             if ( this._children != null )
             {
-                indent += 2;
+                indent += 4;
                 foreach ( var child in this._children.Values.OrderBy( c => c.Symbol.Name ) )
                 {
-                    child.ToString( appendTo, indent );
+                    child.ToString( appendTo, indent, shouldHighlight );
                 }
             }
         }
@@ -320,9 +343,9 @@ internal static class DependencyHelper
                 }
                 else
                 {
-                    // Not a property (eg, a method or field).
-                    // TODO: Emit error when not supported/allowed.
-
+                    // Not a property (eg, it's a method or field).
+                    // TODO: Proper error handling when not supported/allowed.
+                    throw new NotSupportedException( $"Encountered unsupported identifier '{node.Identifier.Text} of kind {(symbol == null ? "<unresolved>" : symbol.Kind)}." );
                     this.ClearCurrentAccessor();
                 }
             }

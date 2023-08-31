@@ -1,16 +1,11 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Code.SyntaxBuilders;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Metalama.Framework.Code.DeclarationBuilders;
-using System.Security.Permissions;
-using System.Xml.Serialization;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -199,7 +194,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         ctx.OnPropertyChangedMethod = onPropertyChangedMethod;
 
         GenerateUpdateMethods( ctx );
-        //ProcessAutoProperties( ctx );
+        ProcessAutoProperties( ctx );
     }
 
     private struct TreeNodeData
@@ -222,15 +217,29 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
         HashSet<string>? usedMemberNames = null;
 
+        /* Iterate all nodes (except root), depth-first, in leaf-to-root order (this is important).
+         * For each node that is directly referenced, we then make sure to build the
+         * update method for the *parent* - this is because the parent object will
+         * notify changes to the child that we are considering.
+         */
+
+        // TODO: I suspect/know some scenarios are not handled yet. Don't assume the logic here is correct or complete.
+
         foreach ( var node in allNodesDepthFirst )
-        {
+        {            
             if ( node.ReferencedBy.Count > 0 )
             {
-                var parent = node.Parent;
+                var parent = node.Parent!;
 
-                if ( parent == null )
+                if ( parent.IsRoot )
                 {
-                    // node is a root property of the target type. Do we need to do anything for it?
+                    // *node* is a root property of the target type. Do we need to do anything for it?
+                    continue;
+                }
+
+                if ( parent.Parent!.IsRoot )
+                {
+                    // *parent* is a root property of the target type. Do we need to do anything for it?
                     continue;
                 }
 
@@ -308,7 +317,6 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                             accessChildExpression,
                             lastValueField,
                             onPropertyChangedHandlerField,
-                            onPropertyChangedMethod = ctx.OnPropertyChangedMethod
                         } );
 
                     parent.Data.UpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
@@ -335,6 +343,8 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
         foreach ( var p in autoProperties )
         {
+            var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
+
             switch ( p.Type.IsReferenceType )
             {
                 case null:
@@ -346,37 +356,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
                     if ( propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
                     {
-                        /* TODO: Dependency analysis requirements:
-                         * 
-                         * The current property is a ref type implementing INPC. Other properties of the target class may depend
-                         * on direct (value.child) or indirect children (value.child...child) rooted in the value of this property.
-                         * 
-                         * For the distinct set of parents of all indirect child leaves we must:
-                         *   - Introduce an instance of template `UpdateChildProperty` which will need:
-                         *     - An expression which accesses the leaf-parent from the backing field of the current property,
-                         *       using null conditional access at each level. For example, if there is a dependency on leaf property
-                         *       `A2.B2.C1`, then the expression must be `_a2?.B2`; for `A2.B2.C2.D1` the expression would be
-                         *       `_a2?.B2?.C2`.
-                         *     - A field of the current property type for storing the last value, eg `_lastA2B2` or `_lastA2B2C2`.
-                         *     - A field of type PropertyChangedEventHandler? for caching the delegate registered with the 
-                         *       leaf-parent's PropertyChanged event.
-                         *     - 
-                         * 
-                         * We must introduce a method which calls each of the introduced `UpdateChildProperty` instances, using the
-                         * `UpdateChildren` template. This simply requires a list of `IMethod`. If there is only one `UpdateChildProperty`
-                         * instance, it could be treated as the `UpdateChildren` method.
-                         * 
-                         * 
-                         */
-                        /*
-                         *     private static void UpdateChildProperty( 
-                                [CompileTime] IExpression accessChildExpression, 
-                                [CompileTime] IField lastValueField,
-                                [CompileTime] IField onPropertyChangedHandlerField,
-                                [CompileTime] IMethod onPropertyChangedMethod ) // UpdateA2B2
-                         */
-                        // Do any properties depend on a child of this property?
-                        var hasDependentProperties = true;
+                        var hasDependentProperties = node != null;
 
                         IField? handlerField = null;
 
@@ -397,7 +377,8 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                         {
                             ctx,
                             onPropertyChangedMethodHasCallerMemberNameAttribute,
-                            handlerField
+                            handlerField,
+                            node
                         } );
                     }
                     else
@@ -410,7 +391,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                     ctx.Builder.Advice.Override( p, nameof( OverrideValueTypeProperty ), tags: new
                     {
                         ctx,
-                        onPropertyChangedMethodHasCallerMemberNameAttribute,
+                        onPropertyChangedMethodHasCallerMemberNameAttribute                        
                     } );
                     break;
             }
@@ -488,46 +469,53 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
             var handlerField = (IField?) meta.Tags["handlerField"];
+            var node = (DependencyHelper.TreeNode<TreeNodeData>?) meta.Tags["node"];
             var eventRequiresCast = ctx.GetInpcInstrumentationKind( meta.Target.Property.Type ) is InpcInstrumentationKind.Explicit;
+
+            meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
             if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
             {
-                var oldValue = meta.Target.FieldOrProperty.Value;
-
-                if ( handlerField != null )
+                if ( node != null )
                 {
-                    if ( oldValue != null )
+                    var oldValue = meta.Target.FieldOrProperty.Value;
+
+                    if ( handlerField != null )
                     {
-                        if ( eventRequiresCast )
+                        if ( oldValue != null )
                         {
-                            meta.Cast( ctx.Type_INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
-                        }
-                        else
-                        {
-                            oldValue.PropertyChanged -= handlerField.Value;
+                            if ( eventRequiresCast )
+                            {
+                                meta.Cast( ctx.Type_INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                            }
+                            else
+                            {
+                                oldValue.PropertyChanged -= handlerField.Value;
+                            }
                         }
                     }
                 }
 
                 meta.Target.FieldOrProperty.Value = value;
+                
+                GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
 
-
-                meta.Target.FieldOrProperty.Value = value;
-                ctx.OnPropertyChangedMethod.Invoke( meta.Target.Property.Name );
-
-                if ( handlerField != null )
+                if ( node != null )
                 {
-                    if ( value != null )
+                    if ( handlerField != null )
                     {
-                        handlerField.Value ??= (PropertyChangedEventHandler) OnSpecificPropertyChanged;
+                        if ( value != null )
+                        {
+                            handlerField.Value ??= (PropertyChangedEventHandler) OnSpecificPropertyChanged;
 
-                        if ( eventRequiresCast )
-                        {
-                            meta.Cast( ctx.Type_INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
-                        }
-                        else
-                        {
-                            value.PropertyChanged += handlerField.Value;
+                            if ( eventRequiresCast )
+                            {
+                                meta.Cast( ctx.Type_INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
+                            }
+                            else
+                            {
+                                value.PropertyChanged += handlerField.Value;
+                            }
                         }
                     }
                 }
@@ -536,8 +524,20 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
             // This must be implemented as a local function because Metalama does not currently support delegates in any other way.
             void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
             {
-                // TODO: Supply a compile-time map of (relevant e.PropertyName) => (list of properties which depend on that e.PropertyName)
-                meta.InsertComment( "Not implemented yet. Will a swich on e.PropertyName where cases call OnPropertyChanged for the affected properties." );
+                // TODO: Don't emit this method at all if not needed.
+                // Currently, by my reckoning, the only way to do this is to have two variants of the OverrideInpcRefTypeProperty
+                // template, one with the local method and one without. Alternatively, richer support for delegates in templates
+                // could provide an cleaner solution.
+                if ( node != null )
+                {
+                    // TODO: Subtemplates emit unwanted extra nesting inside curly braces if the subtemplate defines local vars.
+                    // So for emit the local var here then call the subtemplate to have more idomatic generated code.
+                    // Also see other uses of GenerateBodyOfOnSpecificPropertyChanged.
+                    var propertyName = e.PropertyName;
+                    var getPropertyNameExpression = ExpressionFactory.Capture( propertyName );
+
+                    GenerateBodyOfOnSpecificPropertyChanged( ctx, node, getPropertyNameExpression );
+                }
             }
         }
     }
@@ -615,10 +615,9 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
         [CompileTime] DependencyHelper.TreeNode<TreeNodeData> node,
         [CompileTime] IExpression accessChildExpression, 
         [CompileTime] IField lastValueField,
-        [CompileTime] IField onPropertyChangedHandlerField,
-        [CompileTime] IMethod onPropertyChangedMethod ) // UpdateA2B2
+        [CompileTime] IField onPropertyChangedHandlerField )
     {
-        meta.InsertComment( ctx.DependencyGraph.ToString() );
+        meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
         var newValue = accessChildExpression.Value;
 
@@ -637,6 +636,26 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
             lastValueField.Value = newValue;
 
+            GenerateNotificationsAndCascadingUpdates( ctx, node, node.Symbol.Name );
+        }
+
+        void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )
+        {
+            var propertyName = e.PropertyName;
+            var getPropertyNameExpression = ExpressionFactory.Capture( propertyName );
+
+            GenerateBodyOfOnSpecificPropertyChanged( ctx, node, getPropertyNameExpression );
+        }
+    }
+
+    [Template]
+    private static void GenerateNotificationsAndCascadingUpdates(
+        [CompileTime] BuildAspectContext ctx,
+        [CompileTime] DependencyHelper.TreeNode<TreeNodeData>? node,
+        [CompileTime] string propertyName )
+    {
+        if ( node != null )
+        {
             var cascadeUpdateMethods = node.Children.Select( n => n.Data.UpdateMethod ).Where( m => m != null );
 
             foreach ( var method in cascadeUpdateMethods )
@@ -648,44 +667,52 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
             foreach ( var name in affectedPropertyNames )
             {
-                onPropertyChangedMethod.Invoke( name );
+                ctx.OnPropertyChangedMethod.Invoke( name );
             }
         }
 
-        void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )
+        // node is null for unreferenced (according to static compile time analsysis) root properties.
+        if ( node == null || node.Parent!.IsRoot )
         {
-            var propertyName = e.PropertyName;
+            ctx.OnPropertyChangedMethod.Invoke( propertyName );
+        }
+    }
 
-            // TODO: How to build a switch statement nicely in a template?
-            // For now, use if. Also, might use a runtime static readonly dictionary at least for the OnPropertyChanged calls.
-            foreach ( var child in node.Children )
+    [Template]
+    private static void GenerateBodyOfOnSpecificPropertyChanged(
+        [CompileTime] BuildAspectContext ctx,
+        [CompileTime] DependencyHelper.TreeNode<TreeNodeData> node,        
+        [CompileTime] IExpression getPropertyNameExpression )
+    {
+        // TODO: How to build a switch statement nicely in a template?
+        // For now, use if. Also, might use a runtime static readonly dictionary at least for the OnPropertyChanged calls.
+        foreach ( var child in node.Children )
+        {
+            var hasRefs = child.ReferencedBy.Count > 0;
+            var hasUpdateMethod = child.Data.UpdateMethod != null;
+
+            if ( hasRefs || hasUpdateMethod )
             {
-                var hasRefs = child.ReferencedBy.Count > 0;
-                var hasUpdateMethod = child.Data.UpdateMethod != null;
-
-                if ( hasRefs || hasUpdateMethod )
+                if ( getPropertyNameExpression.Value == child.Symbol.Name )
                 {
-                    if ( propertyName == child.Symbol.Name )
+                    if ( hasUpdateMethod )
                     {
-                        if ( hasUpdateMethod )
+                        child.Data.UpdateMethod.Invoke();
+                    }
+
+                    if ( hasRefs )
+                    {
+                        var affectedPropertyNames = child.ReferencedBy.Select( s => s.Name ).OrderBy( s => s );
+
+                        foreach ( var name in affectedPropertyNames )
                         {
-                            child.Data.UpdateMethod.Invoke();
+                            ctx.OnPropertyChangedMethod.Invoke( name );
                         }
+                    }
 
-                        if ( hasRefs )
-                        {
-                            var affectedPropertyNames = child.ReferencedBy.Select( s => s.Name ).OrderBy( s => s );
-
-                            foreach ( var name in affectedPropertyNames )
-                            {
-                                onPropertyChangedMethod.Invoke( name );
-                            }
-                        }
-
-                        // TODO: How to build an if..else if.. statement nicely in a template?
-                        // For now, use return.
-                        return;
-                    }        
+                    // TODO: How to build an if..else if.. statement nicely in a template?
+                    // For now, use return.
+                    return;
                 }
             }
         }
