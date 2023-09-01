@@ -32,7 +32,11 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
     {
         None,
         Implicit,
-        Explicit
+        Explicit,
+        /// <summary>
+        /// Returned at design time for types other than the current type and its ancestors.
+        /// </summary>
+        Unknown
     }
 
     private sealed class BuildAspectContext
@@ -105,7 +109,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
                                 return result.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Implicit;
                             }
 
-                            throw new InvalidOperationException();
+                            throw new InvalidOperationException("Could not find implementation of interface member.");
                         }
                         else if ( namedType.Enhancements().HasAspect<NotifyPropertyChangedAttribute>() )
                         {
