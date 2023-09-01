@@ -68,11 +68,11 @@ internal sealed class CompileTimeCacheItemConfiguration
             throw new ArgumentNullException( nameof(attribute) );
         }
 
-        if ( !(attribute.Type.Is( typeof(CacheAttribute) ) || attribute.Type.Is( typeof(CachingConfigurationAttribute) )) )
+        if ( !attribute.Type.Is( typeof(ICachingConfigurationAttribute) ) )
         {
             throw new ArgumentOutOfRangeException(
                 nameof(attribute),
-                "Must be a " + nameof(CacheAttribute) + " or a " + nameof(CachingConfigurationAttribute) + "." );
+                $"Must be an {nameof(ICachingConfigurationAttribute)}." );
         }
 
         try
