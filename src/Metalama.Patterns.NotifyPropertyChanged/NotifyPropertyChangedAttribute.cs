@@ -3,8 +3,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Project;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
@@ -98,7 +100,12 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 switch ( type )
                 {
                     case INamedType namedType:
-                        if ( namedType.Equals( this.Type_INotifyPropertyChanged ) )
+                        if ( namedType.SpecialType != SpecialType.None )
+                        {
+                            // None of the special types implement INPC.
+                            return InpcInstrumentationKind.None;
+                        }
+                        else if ( namedType.Equals( this.Type_INotifyPropertyChanged ) )
                         {
                             return InpcInstrumentationKind.Implicit;
                         }
@@ -109,16 +116,22 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                                 return result.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Implicit;
                             }
 
-                            throw new InvalidOperationException("Could not find implementation of interface member.");
+                            throw new InvalidOperationException( "Could not find implementation of interface member." );
                         }
-                        else if ( namedType.Enhancements().HasAspect<NotifyPropertyChangedAttribute>() )
-                        {
-                            // For now, the aspect always introduces implicit implementation.
-                            return InpcInstrumentationKind.Implicit;
-                        }
-                        else
+                        else if ( !namedType.BelongsToCurrentProject )
                         {
                             return InpcInstrumentationKind.None;
+                        }
+                        else 
+                        {
+                            if ( this.Target.Compilation.IsPartial && !this.Target.Compilation.Types.Contains( type ) )
+                            {
+                                return InpcInstrumentationKind.Unknown;
+                            }
+
+                            return namedType.Enhancements().HasAspect<NotifyPropertyChangedAttribute>()
+                                ? InpcInstrumentationKind.Implicit // For now, the aspect always introduces implicit implementation.
+                                : InpcInstrumentationKind.None;
                         }
 
                     case ITypeParameter typeParameter:
@@ -392,14 +405,15 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                         {
                             ctx,
                             node,
-                            compareUsing = EqualityComparisonKind.ReferenceEquals
+                            compareUsing = EqualityComparisonKind.ReferenceEquals,
+                            propertyTypeInstrumentationKind
                         } );
                     }
                     break;
 
                 case false:
 
-                    if ( propertyTypeInstrumentationKind is not InpcInstrumentationKind.None )
+                    if ( propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
                     {
                         // TODO: Proper error reporting.
                         throw new NotSupportedException( "structs implementing INotifyPropertyChanged are not supported." );
@@ -409,7 +423,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     {
                         ctx,
                         node,
-                        compareUsing = EqualityComparisonKind.EqualityOperator
+                        compareUsing = EqualityComparisonKind.EqualityOperator,
+                        propertyTypeInstrumentationKind
                     } );
                     break;
             }

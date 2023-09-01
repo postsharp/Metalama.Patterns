@@ -114,8 +114,16 @@ partial class NotifyPropertyChangedAttribute
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
             var node = (DependencyHelper.TreeNode<TreeNodeData>?) meta.Tags["node"];
             var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
+            var propertyTypeInstrumentationKind = (InpcInstrumentationKind) meta.Tags["propertyTypeInstrumentationKind"]!;
 
             meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+            
+            if ( propertyTypeInstrumentationKind == InpcInstrumentationKind.Unknown )
+            {
+                meta.InsertComment(
+                    "Warning: the type of this property could not be analysed at design time, so it has been treated",
+                    "as not implementing INotifyPropertyChanged. Code generated at compile time may differ." );
+            }
 
             switch ( compareUsing )
             {
