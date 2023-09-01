@@ -18,7 +18,8 @@ public partial class CachingService
         CachedMethodMetadata metadata,
         Func<object?, object?[], object?> func,
         object? instance,
-        object?[] args )
+        object?[] args,
+        CancellationToken cancellationToken )
     {
 #if DEBUG
         if ( metadata == null )
@@ -26,7 +27,7 @@ public partial class CachingService
             throw new ArgumentNullException( nameof(metadata) );
         }
 #endif
-       
+
         var logSource = this.ServiceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
 
         object? result;
@@ -45,7 +46,7 @@ public partial class CachingService
                 }
                 else
                 {
-                    var methodKey = CachingServices.Default.KeyBuilder.BuildMethodKey(
+                    var methodKey = this.KeyBuilder.BuildMethodKey(
                         metadata,
                         args,
                         instance );
@@ -139,7 +140,7 @@ public partial class CachingService
                 }
                 else
                 {
-                    var methodKey = CachingServices.Default.KeyBuilder.BuildMethodKey(
+                    var methodKey = Default.KeyBuilder.BuildMethodKey(
                         metadata,
                         args,
                         instance );
@@ -257,7 +258,7 @@ public partial class CachingService
                 }
                 else
                 {
-                    var methodKey = CachingServices.Default.KeyBuilder.BuildMethodKey(
+                    var methodKey = Default.KeyBuilder.BuildMethodKey(
                         metadata,
                         args,
                         instance );

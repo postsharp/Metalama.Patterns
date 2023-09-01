@@ -15,7 +15,7 @@ internal sealed class UninitializedCachingBackend : CachingBackend
             string.Format(
                 CultureInfo.InvariantCulture,
                 "The caching back-end has not been initialized. Set the {0}.{1} property before accessing a cached method.",
-                nameof(CachingServices),
+                nameof(CachingService),
                 nameof(CachingService.DefaultBackend) ) );
 
     /// <inheritdoc />

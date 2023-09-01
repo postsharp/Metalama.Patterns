@@ -409,10 +409,13 @@ internal class CachingFrontend
 
     private static void AddCacheHitDependencies( CachingBackend backend, string key, CacheValue item )
     {
-        CachingContext.Current.AddDependencies( item.Dependencies );
-
         if ( backend.SupportedFeatures.Dependencies )
         {
+            if ( item.Dependencies != null )
+            {
+                CachingContext.Current.AddDependencies( item.Dependencies );
+            }
+
             CachingContext.Current.AddDependency( key );
         }
     }

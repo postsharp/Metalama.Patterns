@@ -40,8 +40,8 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                var keyBuilder = new MyCacheKeyBuilder( CachingServices.Default.Formatters );
-                CachingServices.Default.KeyBuilder = keyBuilder;
+                var keyBuilder = new MyCacheKeyBuilder( CachingService.Default.Formatters );
+                CachingService.Default.KeyBuilder = keyBuilder;
                 action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
                 Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
@@ -59,8 +59,8 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                var keyBuilder = new MyCacheKeyBuilder( CachingServices.Default.Formatters );
-                CachingServices.Default.KeyBuilder = keyBuilder;
+                var keyBuilder = new MyCacheKeyBuilder( CachingService.Default.Formatters );
+                CachingService.Default.KeyBuilder = keyBuilder;
                 await action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
                 Assert.Equal( expectedKey, keyBuilder.LastMethodKey );

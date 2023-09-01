@@ -51,7 +51,7 @@ public static class ContractExtensions
                 t => t.Properties
                     .Cast<IFieldOrProperty>()
                     .Union( t.Fields ) )
-            .Where( f => IsVisible( f ) && IsNullableType( f ) && !f.Attributes.Any( a => a.Type.Name == "AllowNullAttribute" ) );
+            .Where( f => IsVisible( f ) && IsNullableType( f ) && f.Attributes.All( a => a.Type.Name != "AllowNullAttribute" ) );
 
         fieldsAndProperties
             .Where( f => GetNullableAttribute( f ) == null && f.Writeability is Writeability.InitOnly or Writeability.All )

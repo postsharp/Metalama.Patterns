@@ -10,8 +10,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching;
 
-public sealed partial class CachingService : IDisposable, IAsyncDisposable
+public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICachingService
 {
+    public static CachingService Default { get; set; } = new();
+
     internal IServiceProvider? ServiceProvider { get; }
 
     private volatile CacheKeyBuilder _keyBuilder;
@@ -38,6 +40,14 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable
     /// </summary>
     public ImmutableHashSet<CachingBackend> AllBackends => this.Profiles.AllBackends;
 
+    public void AddDependency( string key ) => CachingContext.Current.AddDependency( key );
+
+    public void AddDependencies( IEnumerable<string> keys ) => CachingContext.Current.AddDependencies( keys );
+
+    public IDisposable SuspendDependencyPropagation() => CachingContext.OpenSuspendedCacheContext();
+
+    string ICachingService.GetDependencyKey( object o ) => this.KeyBuilder.BuildDependencyKey( o );
+
     /// <summary>
     /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
     /// </summary>
@@ -47,7 +57,7 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable
         get => this._keyBuilder;
         set => this._keyBuilder = value ?? new CacheKeyBuilder( this.Formatters );
     }
-
+    
     /// <summary>
     /// Gets or sets the default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
     /// </summary>

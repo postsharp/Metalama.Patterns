@@ -6,6 +6,7 @@ using Metalama.Extensions.DependencyInjection;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -131,7 +132,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             if ( !builder.TryIntroduceDependency(
                     new DependencyProperties(
                         builder.Target.DeclaringType,
-                        typeof(CachingService),
+                        typeof(ICachingService),
                         "_cachingService" ),
                     out cachingServiceField ) )
             {
@@ -192,13 +193,15 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         IType returnType /* not used */,
         IField? cachingServiceField )
     {
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingService.Default );
+
         var result = meta.Proceed();
 
         var index = meta.CompileTime( 0 );
 
         foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            CachingServices.Default.Invalidate(
+            ((ICachingService) cachingServiceExpression.Value!).Invalidate(
                 methodsInvalidatedByField.Value![index],
                 invalidatedMethod.Method.IsStatic ? null : meta.This,
                 MapArguments( invalidatedMethod ).Value );
@@ -209,6 +212,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         return result;
     }
 
+    private static IParameter? GetCancellationTokenParameter()
+    {
+        return meta.Target.Method.Parameters.OfParameterType( typeof(CancellationToken) ).LastOrDefault();
+    }
+
     [Template]
     private static async Task<dynamic?> OverrideMethodAsyncTaskOfT(
         IEnumerable<InvalidatedMethodInfo> invalidatedMethods,
@@ -216,9 +224,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         IType returnType,
         IField? cachingServiceField )
     {
-        // TODO: Automagically accept CancellationToken parameter?
+        var cancellationTokenExpression = GetCancellationTokenParameter() ?? ExpressionFactory.Capture( default(CancellationToken) );
 
-        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingService.Default );
 
         // ReSharper disable once RedundantAssignment
         var result = await meta.ProceedAsync();
@@ -226,10 +234,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            await ((CachingService) cachingServiceExpression.Value!).InvalidateAsync(
+            await ((ICachingService) cachingServiceExpression.Value!).InvalidateAsync(
                 methodsInvalidatedByField.Value![index],
                 invalidatedMethod.Method.IsStatic ? null : meta.This,
-                MapArguments( invalidatedMethod ).Value );
+                MapArguments( invalidatedMethod ).Value,
+                cancellationTokenExpression.Value );
 
             ++index;
         }
@@ -244,7 +253,9 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         IType returnType /* not used */,
         IField? cachingServiceField )
     {
-        // TODO: Automagically accept CancellationToken parameter?
+        var cancellationTokenExpression = GetCancellationTokenParameter() ?? ExpressionFactory.Capture( default(CancellationToken) );
+
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingService.Default );
 
         await meta.ProceedAsync();
 
@@ -252,10 +263,11 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
         foreach ( var invalidatedMethod in invalidatedMethods )
         {
-            await CachingServices.Default.InvalidateAsync(
+            await ((ICachingService) cachingServiceExpression.Value!).InvalidateAsync(
                 methodsInvalidatedByField.Value![index],
                 invalidatedMethod.Method.IsStatic ? null : meta.This,
-                MapArguments( invalidatedMethod ).Value );
+                MapArguments( invalidatedMethod ).Value,
+                cancellationTokenExpression.Value );
 
             ++index;
         }

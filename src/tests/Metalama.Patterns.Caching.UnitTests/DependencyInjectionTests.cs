@@ -18,7 +18,7 @@ public sealed class DependencyInjectionTests : BaseCachingTests
         var cachingService = new CachingService( this.ServiceProvider );
         var backend = new TestingCacheBackend( "test", this.ServiceProvider );
         cachingService.DefaultBackend = backend;
-        serviceCollection.AddSingleton( cachingService );
+        serviceCollection.AddSingleton<ICachingService>( cachingService );
         serviceCollection.AddSingleton<C>();
         var c = (C) serviceCollection.BuildServiceProvider().GetService( typeof(C) )!;
         _ = c.Method();

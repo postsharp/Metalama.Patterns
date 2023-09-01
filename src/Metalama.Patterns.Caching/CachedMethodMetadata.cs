@@ -73,7 +73,7 @@ public sealed class CachedMethodMetadata
     {
         get
         {
-            if ( this._profile == null || this._profileRevision < CachingServices.Default.Profiles.RevisionNumber || this._mergedConfiguration == null )
+            if ( this._profile == null || this._profileRevision < CachingService.Default.Profiles.RevisionNumber || this._mergedConfiguration == null )
             {
                 var initializeLockTaken = false;
 
@@ -81,12 +81,12 @@ public sealed class CachedMethodMetadata
                 {
                     this._initializeLock.Enter( ref initializeLockTaken );
 
-                    if ( this._profile == null || this._profileRevision < CachingServices.Default.Profiles.RevisionNumber
+                    if ( this._profile == null || this._profileRevision < CachingService.Default.Profiles.RevisionNumber
                                                || this._mergedConfiguration == null )
                     {
                         var profileName = this.BuildTimeConfiguration.ProfileName ?? CachingProfile.DefaultName;
 
-                        var localProfile = CachingServices.Default.Profiles[profileName];
+                        var localProfile = CachingService.Default.Profiles[profileName];
 
                         this._mergedConfiguration = this.BuildTimeConfiguration.AsCacheItemConfiguration().ApplyFallback( localProfile );
 
@@ -94,7 +94,7 @@ public sealed class CachedMethodMetadata
 
                         // Need to set this after setting mergedConfiguration to prevent data races.
                         this._profile = localProfile;
-                        this._profileRevision = CachingServices.Default.Profiles.RevisionNumber;
+                        this._profileRevision = CachingService.Default.Profiles.RevisionNumber;
                     }
                 }
                 finally
