@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Caching;
 
 /// <summary>
 /// Allows to configure caching profiles (<see cref="CachingProfile"/>), and therefore influence the behavior
-/// of the <see cref="CacheAttribute"/> aspect at run-time. Exposed on the <see cref="CachingService.Profiles"/> property.
+/// the caching of methods that are bound to this profile. Exposed on the <see cref="CachingService.Profiles"/> property.
 /// </summary>
 [PublicAPI]
 public sealed class CachingProfileRegistry

@@ -3,8 +3,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Patterns.Caching.Implementation;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Aspects;
 
 /// <summary>
 /// Configuration of a <see cref="CacheItem"/>.

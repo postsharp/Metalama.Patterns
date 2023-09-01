@@ -10,7 +10,7 @@ using static Flashtrace.Messages.FormattedMessageBuilder;
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// An abstraction of the physical implementation of the cache, where the <see cref="CacheAttribute"/> ends up writing to and reading from.
+/// An abstraction of the physical implementation of the cache.
 /// </summary>
 [PublicAPI]
 public abstract class CachingBackend : ITestableCachingComponent

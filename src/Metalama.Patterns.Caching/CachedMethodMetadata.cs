@@ -3,9 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Caching;
 
@@ -44,9 +42,9 @@ public sealed partial class CachedMethodMetadata
     /// Gets the build time configuration that applies to the method.
     /// </summary>
     /// <remarks>
-    /// This already takes account of the any <see cref="CachingConfigurationAttribute"/> instances applied to parent classes and the assembly.
+    /// This already takes account of the any configuration custom attribute applied to parent classes and the assembly.
     /// </remarks>
-    internal ICacheItemConfiguration BuildTimeConfiguration { get; }
+    internal CacheItemConfiguration BuildTimeConfiguration { get; }
 
     /// <summary>
     /// Gets the awaitable result type for awaitable (eg, async) methods, or <see langword="null"/> where not applicable.
@@ -64,7 +62,7 @@ public sealed partial class CachedMethodMetadata
         MethodInfo method,
         ImmutableArray<Parameter> parameters,
         Type? awaitableResultType,
-        ICacheItemConfiguration buildTimeConfiguration,
+        CacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         this.Method = method;
@@ -76,7 +74,7 @@ public sealed partial class CachedMethodMetadata
 
     public static CachedMethodMetadata Register(
         MethodInfo method,
-        ICacheItemConfiguration buildTimeConfiguration,
+        CacheItemConfiguration buildTimeConfiguration,
         Type? awaitableResultType,
         bool returnValueCanBeNull )
     {

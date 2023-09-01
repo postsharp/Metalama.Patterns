@@ -5,7 +5,7 @@ using System.Reflection;
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
-/// Interface used by the <see cref="CacheAttribute"/> and <see cref="InvalidateCacheAttribute"/> aspects.
+/// Interface used by the caching aspects.
 /// </summary>
 public interface ICachingService
 {

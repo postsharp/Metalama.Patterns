@@ -1,11 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Implementation;
+
+namespace Metalama.Patterns.Caching;
 
 /// <summary>
 /// Configuration of a <see cref="CacheItem"/>.
 /// </summary>
-internal sealed record CacheItemConfiguration : ICacheItemConfiguration
+public sealed record CacheItemConfiguration : ICacheItemConfiguration
 {
     /// <inheritdoc />
     public bool? IsEnabled { get; init; }
@@ -28,7 +30,7 @@ internal sealed record CacheItemConfiguration : ICacheItemConfiguration
     /// <inheritdoc />
     public bool? IgnoreThisParameter { get; init; }
 
-    public CacheItemConfiguration ApplyFallback( ICacheItemConfiguration fallback )
+    internal CacheItemConfiguration ApplyFallback( ICacheItemConfiguration fallback )
     {
         return new CacheItemConfiguration
         {

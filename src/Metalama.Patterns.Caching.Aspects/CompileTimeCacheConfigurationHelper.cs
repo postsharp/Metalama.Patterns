@@ -3,7 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Aspects;
 
 [CompileTime]
 internal static class CompileTimeCacheConfigurationHelper

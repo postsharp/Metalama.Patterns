@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
-/// Allows for centralized and run-time configuration of several instances of the <see cref="CacheAttribute"/> aspect.
+/// Allows for centralized and run-time configuration several methods.
 /// </summary>
 [PublicAPI]
 public sealed class CachingProfile : ICacheItemConfiguration, INotifyPropertyChanged

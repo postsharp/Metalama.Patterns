@@ -9,14 +9,11 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.RunTime;
 using Metalama.Patterns.Caching.Implementation;
 using System.Diagnostics;
 
-#if NET6_0_OR_GREATER
-using Metalama.Framework.RunTime;
-#endif
-
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Aspects;
 
 // TODO: #33663 make local functions in templates static where possible
 // ReSharper disable LocalFunctionCanBeMadeStatic 
@@ -285,7 +282,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         field.Value = CachedMethodMetadata.Register(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
-            new CacheAttributeProperties()
+            new CacheItemConfiguration()
             {
                 AbsoluteExpiration = effectiveConfiguration.AbsoluteExpiration,
                 AutoReload = effectiveConfiguration.AutoReload,
