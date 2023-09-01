@@ -10,7 +10,7 @@ using static Flashtrace.Messages.FormattedMessageBuilder;
 namespace Metalama.Patterns.Caching.Implementation;
 
 [EditorBrowsable( EditorBrowsableState.Never )]
-internal class CachingFrontend
+internal sealed class CachingFrontend
 {
     private readonly CachingService _cachingService;
 
@@ -67,7 +67,7 @@ internal class CachingFrontend
 
                 if ( item != null )
                 {
-                    var valueAdapter = backend.ValueAdapters.Get( valueType );
+                    var valueAdapter = this._cachingService.ValueAdapters.Get( valueType );
 
                     if ( valueAdapter != null )
                     {
@@ -115,7 +115,7 @@ internal class CachingFrontend
                 {
                     value = invokeOriginalMethod( instance, args );
 
-                    value = SetItem( profile.Backend, key, value, valueType, configuration, context );
+                    value = this.SetItem( profile.Backend, key, value, valueType, configuration, context );
 
                     context.AddDependenciesToParent( profile.Backend, method );
                 }
@@ -194,7 +194,7 @@ internal class CachingFrontend
 
                 if ( item != null )
                 {
-                    var valueAdapter = backend.ValueAdapters.Get( valueType );
+                    var valueAdapter = this._cachingService.ValueAdapters.Get( valueType );
 
                     if ( valueAdapter != null )
                     {
@@ -245,7 +245,7 @@ internal class CachingFrontend
 
                     value = await invokeValueProviderTask;
 
-                    var invokeSetItemAsyncTask = SetItemAsync( profile.Backend, key, value, valueType, configuration, context, cancellationToken );
+                    var invokeSetItemAsyncTask = this.SetItemAsync( profile.Backend, key, value, valueType, configuration, context, cancellationToken );
 
                     value = await invokeSetItemAsyncTask;
 
@@ -326,7 +326,7 @@ internal class CachingFrontend
 
                 if ( item != null )
                 {
-                    var valueAdapter = backend.ValueAdapters.Get( valueType );
+                    var valueAdapter = this._cachingService.ValueAdapters.Get( valueType );
 
                     if ( valueAdapter != null )
                     {
@@ -377,7 +377,7 @@ internal class CachingFrontend
 
                     value = await invokeValueProviderTask;
 
-                    var invokeSetItemAsyncTask = SetItemAsync( profile.Backend, key, value, valueType, configuration, context, cancellationToken );
+                    var invokeSetItemAsyncTask = this.SetItemAsync( profile.Backend, key, value, valueType, configuration, context, cancellationToken );
 
                     value = await invokeSetItemAsyncTask;
 
@@ -420,7 +420,7 @@ internal class CachingFrontend
         }
     }
 
-    public static object? SetItem(
+    public object? SetItem(
         CachingBackend backend,
         string key,
         object? value,
@@ -432,7 +432,7 @@ internal class CachingFrontend
 
         if ( value != null )
         {
-            var valueAdapter = backend.ValueAdapters.Get( valueType );
+            var valueAdapter = this._cachingService.ValueAdapters.Get( valueType );
 
             if ( valueAdapter != null )
             {
@@ -448,7 +448,7 @@ internal class CachingFrontend
         return exposedValue;
     }
 
-    public static async Task<object?> SetItemAsync(
+    public async Task<object?> SetItemAsync(
         CachingBackend backend,
         string key,
         object? value,
@@ -461,7 +461,7 @@ internal class CachingFrontend
 
         if ( value != null )
         {
-            var valueAdapter = backend.ValueAdapters.Get( valueType );
+            var valueAdapter = this._cachingService.ValueAdapters.Get( valueType );
 
             if ( valueAdapter != null )
             {

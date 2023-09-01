@@ -208,8 +208,8 @@ public partial class CachingService
                 var key = this.KeyBuilder.BuildMethodKey(
                     CachedMethodMetadataRegistry.Instance.Get( method )
                     ?? throw new CachingAssertionFailedException( $"The method '{method}' is not registered." ),
-                    args,
-                    instance );
+                    instance,
+                    args );
 
                 this._defaultLogger.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
@@ -258,8 +258,8 @@ public partial class CachingService
                 var key = this.KeyBuilder.BuildMethodKey(
                     CachedMethodMetadataRegistry.Instance.Get( method )
                     ?? throw new CachingAssertionFailedException( $"The method '{method}' is not registered." ),
-                    args,
-                    instance );
+                    instance,
+                    args );
 
                 this._defaultLogger.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
@@ -319,8 +319,8 @@ public partial class CachingService
         var key = this.KeyBuilder.BuildMethodKey(
             CachedMethodMetadataRegistry.Instance.Get( method.Method )
             ?? throw new CachingAssertionFailedException( $"The method '{method.Method}' is not registered." ),
-            args,
-            method.Target );
+            method.Target,
+            args );
 
         return CachingContext.OpenRecacheContext( key, this );
     }

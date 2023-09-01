@@ -11,23 +11,26 @@ public interface ICachingService
 {
     TResult? GetFromCacheOrExecute<TResult>(
         CachedMethodMetadata metadata,
-        Func<object?, object?[], object?> func,
         object? instance,
         object?[] args,
+        Func<object?, object?[], object?> func,
+        CacheItemConfiguration? configuration = null,
         CancellationToken cancellationToken = default );
 
     Task<TTaskResultType?> GetFromCacheOrExecuteTaskAsync<TTaskResultType>(
         CachedMethodMetadata metadata,
-        Func<object?, object?[], CancellationToken, Task<object?>> func,
         object? instance,
         object?[] args,
+        Func<object?, object?[], CancellationToken, Task<object?>> func,
+        CacheItemConfiguration? configuration = null,
         CancellationToken cancellationToken = default );
 
     ValueTask<TTaskResultType?> GetFromCacheOrExecuteValueTaskAsync<TTaskResultType>(
         CachedMethodMetadata metadata,
-        Func<object?, object?[], CancellationToken, ValueTask<object?>> func,
         object? instance,
         object?[] args,
+        Func<object?, object?[], CancellationToken, ValueTask<object?>> func,
+        CacheItemConfiguration? configuration = null,
         CancellationToken cancellationToken = default );
 
     void Invalidate( MethodInfo method, object? instance, object?[] args );

@@ -1,11 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Implementation;
 
 internal sealed class CachingContext : IDisposable, ICachingContext
 {

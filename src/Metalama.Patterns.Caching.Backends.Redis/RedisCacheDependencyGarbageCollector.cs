@@ -3,7 +3,6 @@
 using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
-using Metalama.Patterns.Caching.Utilities;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 using static Flashtrace.Messages.FormattedMessageBuilder;

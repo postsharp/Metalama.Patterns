@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.TestHelpe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Caching.Aspects", "src\Metalama.Patterns.Caching.Aspects\Metalama.Patterns.Caching.Aspects.csproj", "{292E6D16-1677-46CE-BB82-7084E8DEC33C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Caching.Backend", "src\Metalama.Patterns.Caching.Backend\Metalama.Patterns.Caching.Backend.csproj", "{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -140,6 +142,12 @@ Global
 		{292E6D16-1677-46CE-BB82-7084E8DEC33C}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{292E6D16-1677-46CE-BB82-7084E8DEC33C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{292E6D16-1677-46CE-BB82-7084E8DEC33C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

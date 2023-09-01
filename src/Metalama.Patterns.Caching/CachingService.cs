@@ -5,6 +5,7 @@ using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.ValueAdapters;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -24,6 +25,8 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
     internal AutoReloadManager AutoReloadManager { get; }
 
     internal CachingFrontend Frontend { get; }
+
+    public ValueAdapterFactory ValueAdapters { get; } = new();
 
     public CachingService( IServiceProvider? serviceProvider = null )
     {
@@ -57,7 +60,7 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
         get => this._keyBuilder;
         set => this._keyBuilder = value ?? new CacheKeyBuilder( this.Formatters );
     }
-    
+
     /// <summary>
     /// Gets or sets the default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
     /// </summary>

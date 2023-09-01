@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
@@ -8,6 +9,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// Configuration of a cached method determined at compile time.
 /// </summary>
 [PublicAPI]
+[RunTimeOrCompileTime]
 public interface ICacheItemConfiguration
 {
     /// <summary>
@@ -37,12 +39,6 @@ public interface ICacheItemConfiguration
     /// added to or accessed from the cache. The expiration is extended every time the value is accessed from the cache.
     /// </summary>
     TimeSpan? SlidingExpiration { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the <c>this</c> instance should be a part of the cache key. The default value of this property is <c>false</c>,
-    /// which means that by default the <c>this</c> instance is a part of the cache key.
-    /// </summary>
-    bool? IgnoreThisParameter { get; }
 
     /// <summary>
     /// Gets a value indicating whether caching is enabled.

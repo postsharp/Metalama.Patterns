@@ -25,10 +25,10 @@ namespace Metalama.Patterns.Caching.Tests
 
             public override string BuildMethodKey(
                 CachedMethodMetadata metadata,
-                IList<object?> arguments,
-                object? instance = null )
+                object? instance,
+                IList<object?> arguments )
             {
-                return this.LastMethodKey = base.BuildMethodKey( metadata, arguments, instance );
+                return this.LastMethodKey = base.BuildMethodKey( metadata, instance, arguments );
             }
 
             public MyCacheKeyBuilder( IFormatterRepository formatterRepository ) : base( formatterRepository ) { }

@@ -10,6 +10,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.RunTime;
+using Metalama.Patterns.Caching.Aspects.Helpers;
 using Metalama.Patterns.Caching.Implementation;
 using System.Diagnostics;
 
@@ -282,7 +283,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         field.Value = CachedMethodMetadata.Register(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
-            new CacheItemConfiguration()
+            new CachedMethodConfiguration()
             {
                 AbsoluteExpiration = effectiveConfiguration.AbsoluteExpiration,
                 AutoReload = effectiveConfiguration.AutoReload,
@@ -290,9 +291,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
                 Priority = effectiveConfiguration.Priority,
                 ProfileName = effectiveConfiguration.ProfileName,
                 SlidingExpiration = effectiveConfiguration.SlidingExpiration
-            },
-            awaitableResultType == null ? null : awaitableResultType.ToTypeOfExpression().Value,
-            method.ReturnType.IsReferenceType == true || method.ReturnType.IsNullable == true );
+            } );
     }
 #pragma warning restore IDE0031
 
@@ -328,9 +327,9 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         return ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecute<TReturnType>(
             (CachedMethodMetadata) registrationField.Value!,
-            Invoke,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
-            (object[]) meta.Target.Method.Parameters.ToValueArray() );
+            (object[]) meta.Target.Method.Parameters.ToValueArray(),
+            Invoke );
     }
 
     [Template]
@@ -351,9 +350,10 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         return ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
-            InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            InvokeAsync,
+            null,
             (CancellationToken) cancellationTokenExpression.Value! );
     }
 
@@ -375,9 +375,10 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         return ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
-            InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            InvokeAsync,
+            null,
             (CancellationToken) cancellationTokenExpression.Value! );
     }
 
@@ -410,9 +411,10 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         var task = ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
-            InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            InvokeAsync,
+            null,
             (CancellationToken) cancellationTokenExpression.Value! );
 
         // Avoid extension method form due to current Metalama framework issue.
@@ -449,9 +451,10 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         var task = ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
-            InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            InvokeAsync,
+            null,
             (CancellationToken) cancellationTokenExpression.Value! );
 
         // Avoid extension method form due to current Metalama framework issue.
@@ -470,16 +473,15 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     /// attributes on ancestor types and the declaring assembly.
     /// </summary>
     [CompileTime]
-    private CompileTimeCacheItemConfiguration GetEffectiveConfiguration( IMethod method )
+    private CachingAspectConfiguration GetEffectiveConfiguration( IMethod method )
     {
         var mergedConfiguration = this.ToCompileTimeCacheItemConfiguration();
-        mergedConfiguration.ApplyEffectiveConfiguration( method );
 
-        return mergedConfiguration;
+        return mergedConfiguration.ApplyEffectiveConfiguration( method );
     }
 
     [CompileTime]
-    internal CompileTimeCacheItemConfiguration ToCompileTimeCacheItemConfiguration()
+    internal CachingAspectConfiguration ToCompileTimeCacheItemConfiguration()
         => new()
         {
             AbsoluteExpiration = this._absoluteExpiration,

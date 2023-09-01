@@ -11,7 +11,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Aspects;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Aspects.Helpers;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -350,7 +350,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             var cacheAspectConfiguration =
                 invalidatedMethod.BelongsToCurrentProject
                     ? invalidatedMethod.Enhancements().GetAspects<CacheAttribute>().SingleOrDefault()?.ToCompileTimeCacheItemConfiguration()
-                    : invalidatedMethod.Attributes.OfAttributeType( cacheAttributeType ).SingleOrDefault()?.ToCompileTimeCacheItemConfiguration();
+                    : invalidatedMethod.Attributes.OfAttributeType( cacheAttributeType ).SingleOrDefault()?.ParseAttribute();
 
             if ( cacheAspectConfiguration == null )
             {
@@ -361,7 +361,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                 continue;
             }
 
-            cacheAspectConfiguration.ApplyEffectiveConfiguration( invalidatedMethod );
+            cacheAspectConfiguration = cacheAspectConfiguration.ApplyEffectiveConfiguration( invalidatedMethod );
 
             // Check that the 'this' parameter is compatible.
             if ( !invalidatedMethod.IsStatic && !cacheAspectConfiguration.IgnoreThisParameter.GetValueOrDefault() &&

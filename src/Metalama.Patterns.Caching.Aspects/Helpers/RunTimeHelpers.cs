@@ -3,7 +3,7 @@
 using JetBrains.Annotations;
 using System.Reflection;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Aspects.Helpers;
 
 [PublicAPI]
 public static class RunTimeHelpers

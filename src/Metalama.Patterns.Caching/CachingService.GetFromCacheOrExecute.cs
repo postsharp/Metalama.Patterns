@@ -12,23 +12,17 @@ namespace Metalama.Patterns.Caching;
 public partial class CachingService
 {
     private ICacheItemConfiguration GetMergedMethodConfiguration( CachedMethodMetadata methodMetadata )
-        => this.Profiles[methodMetadata.BuildTimeConfiguration.ProfileName].GetMergedConfiguration( methodMetadata );
+        => this.Profiles[methodMetadata.Configuration.ProfileName].GetMergedConfiguration( methodMetadata );
 
     [EditorBrowsable( EditorBrowsableState.Never )]
     public TResult? GetFromCacheOrExecute<TResult>(
         CachedMethodMetadata metadata,
-        Func<object?, object?[], object?> func,
         object? instance,
         object?[] args,
-        CancellationToken cancellationToken )
+        Func<object?, object?[], object?> func,
+        CacheItemConfiguration? configuration = null,
+        CancellationToken cancellationToken = default )
     {
-#if DEBUG
-        if ( metadata == null )
-        {
-            throw new ArgumentNullException( nameof(metadata) );
-        }
-#endif
-
         var logSource = this.ServiceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
 
         object? result;
@@ -37,7 +31,7 @@ public partial class CachingService
         {
             try
             {
-                var mergedConfiguration = this.GetMergedMethodConfiguration( metadata );
+                var mergedConfiguration = configuration ?? this.GetMergedMethodConfiguration( metadata );
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {
@@ -49,8 +43,8 @@ public partial class CachingService
                 {
                     var methodKey = this.KeyBuilder.BuildMethodKey(
                         metadata,
-                        args,
-                        instance );
+                        instance,
+                        args );
 
                     logSource.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
@@ -88,18 +82,12 @@ public partial class CachingService
     [EditorBrowsable( EditorBrowsableState.Never )]
     public async Task<TTaskResultType?> GetFromCacheOrExecuteTaskAsync<TTaskResultType>(
         CachedMethodMetadata metadata,
-        Func<object?, object?[], CancellationToken, Task<object?>> func,
         object? instance,
         object?[] args,
-        CancellationToken cancellationToken )
+        Func<object?, object?[], CancellationToken, Task<object?>> func,
+        CacheItemConfiguration? configuration = null,
+        CancellationToken cancellationToken = default )
     {
-#if DEBUG
-        if ( metadata == null )
-        {
-            throw new ArgumentNullException( nameof(metadata) );
-        }
-#endif
-
         // TODO: What about ConfigureAwait( false )?
 
         var logSource = this.ServiceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
@@ -110,7 +98,7 @@ public partial class CachingService
         {
             try
             {
-                var mergedConfiguration = this.GetMergedMethodConfiguration( metadata );
+                var mergedConfiguration = configuration ?? this.GetMergedMethodConfiguration( metadata );
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {
@@ -143,8 +131,8 @@ public partial class CachingService
                 {
                     var methodKey = Default.KeyBuilder.BuildMethodKey(
                         metadata,
-                        args,
-                        instance );
+                        instance,
+                        args );
 
                     logSource.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
@@ -204,31 +192,23 @@ public partial class CachingService
     [EditorBrowsable( EditorBrowsableState.Never )]
     public async ValueTask<TTaskResultType?> GetFromCacheOrExecuteValueTaskAsync<TTaskResultType>(
         CachedMethodMetadata metadata,
-        Func<object?, object?[], CancellationToken, ValueTask<object?>> func,
         object? instance,
         object?[] args,
-        CancellationToken cancellationToken )
+        Func<object?, object?[], CancellationToken, ValueTask<object?>> func,
+        CacheItemConfiguration? configuration = null,
+        CancellationToken cancellationToken = default )
     {
-#if DEBUG
-        if ( metadata == null )
-        {
-            throw new ArgumentNullException( nameof(metadata) );
-        }
-#endif
-
         // TODO: What about ConfigureAwait( false )?
 
         var logSource = this.ServiceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
 
         object? result;
 
-        // TODO: PostSharp passes an otherwise uninitialized CallerInfo with the CallerAttributes.IsAsync flag set.
-
         using ( var activity = logSource.Default.OpenAsyncActivity( Formatted( "Processing invocation of async method {Method}", metadata.Method ) ) )
         {
             try
             {
-                var mergedConfiguration = this.GetMergedMethodConfiguration( metadata );
+                var mergedConfiguration = configuration ?? this.GetMergedMethodConfiguration( metadata );
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {
@@ -261,8 +241,8 @@ public partial class CachingService
                 {
                     var methodKey = Default.KeyBuilder.BuildMethodKey(
                         metadata,
-                        args,
-                        instance );
+                        instance,
+                        args );
 
                     logSource.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 

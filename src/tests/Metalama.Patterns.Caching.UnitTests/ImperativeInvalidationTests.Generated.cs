@@ -2,10 +2,11 @@
 // To edit, go to CacheInvalidation.Generated.tt.
 // To transform, run RunT4.ps1.
 
-using Metalama.Patterns.Caching.Aspects;
+
 using System.Threading.Tasks;
 using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.Aspects;
 
 namespace Metalama.Patterns.Caching.Tests
 {

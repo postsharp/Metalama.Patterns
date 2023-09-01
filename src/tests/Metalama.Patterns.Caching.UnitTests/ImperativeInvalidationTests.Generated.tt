@@ -8,6 +8,7 @@
 using System.Threading.Tasks;
 using Xunit;
 using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.Aspects;
 
 namespace Metalama.Patterns.Caching.Tests
 {

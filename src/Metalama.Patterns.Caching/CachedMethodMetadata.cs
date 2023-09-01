@@ -3,7 +3,9 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Caching;
 
@@ -39,12 +41,12 @@ public sealed partial class CachedMethodMetadata
     internal bool ReturnValueCanBeNull { get; }
 
     /// <summary>
-    /// Gets the build time configuration that applies to the method.
+    /// Gets the configuration that applies to the method and supplied by configuration custom attributes.
     /// </summary>
     /// <remarks>
     /// This already takes account of the any configuration custom attribute applied to parent classes and the assembly.
     /// </remarks>
-    internal CacheItemConfiguration BuildTimeConfiguration { get; }
+    internal CachedMethodConfiguration Configuration { get; }
 
     /// <summary>
     /// Gets the awaitable result type for awaitable (eg, async) methods, or <see langword="null"/> where not applicable.
@@ -54,40 +56,59 @@ public sealed partial class CachedMethodMetadata
     /// </remarks>
     internal Type? AwaitableResultType { get; }
 
-    public bool IgnoreThisParameter => this.BuildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault( false );
+    public bool IgnoreThisParameter => this.Configuration.IgnoreThisParameter.GetValueOrDefault( false );
 
     public bool IsParameterIgnored( int index ) => this.Parameters[index].IsIgnored;
 
     private CachedMethodMetadata(
         MethodInfo method,
         ImmutableArray<Parameter> parameters,
-        Type? awaitableResultType,
-        CacheItemConfiguration buildTimeConfiguration,
-        bool returnValueCanBeNull )
+        CachedMethodConfiguration? buildTimeConfiguration )
     {
         this.Method = method;
         this.Parameters = parameters;
-        this.BuildTimeConfiguration = buildTimeConfiguration.AsCacheItemConfiguration();
-        this.ReturnValueCanBeNull = returnValueCanBeNull;
-        this.AwaitableResultType = awaitableResultType;
+        this.Configuration = buildTimeConfiguration ?? CachedMethodConfiguration.Empty;
+
+        this.ReturnValueCanBeNull = !method.ReturnType.IsValueType
+                                    || (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Nullable<>));
+
+        if ( method.ReturnType.IsGenericType )
+        {
+            var genericType = method.ReturnType.GetGenericTypeDefinition();
+
+            if ( genericType == typeof(Task<>) || genericType == typeof(ValueTask<>) )
+            {
+                this.AwaitableResultType = genericType.GenericTypeArguments[0];
+            }
+        }
     }
 
     public static CachedMethodMetadata Register(
         MethodInfo method,
-        CacheItemConfiguration buildTimeConfiguration,
-        Type? awaitableResultType,
-        bool returnValueCanBeNull )
+        CachedMethodConfiguration? buildTimeConfiguration = null )
     {
         var metadata = new CachedMethodMetadata(
             method,
             GetCachedParameterInfos( method ),
-            awaitableResultType,
-            buildTimeConfiguration,
-            returnValueCanBeNull );
+            buildTimeConfiguration );
 
         CachedMethodMetadataRegistry.Instance.Register( metadata );
 
         return metadata;
+    }
+
+    [MethodImpl( MethodImplOptions.NoInlining )]
+    public static CachedMethodMetadata ForCallingMethod( CachedMethodConfiguration? configuration = null, int skipFrames = 0 )
+    {
+        var stackFrame = new StackFrame( 1 + skipFrames );
+        var methodInfo = (MethodInfo?) stackFrame.GetMethod();
+
+        if ( methodInfo == null )
+        {
+            throw new InvalidOperationException( "Cannot get the calling method." );
+        }
+
+        return Register( methodInfo, configuration );
     }
 
     private static ImmutableArray<Parameter> GetCachedParameterInfos( MethodInfo method )

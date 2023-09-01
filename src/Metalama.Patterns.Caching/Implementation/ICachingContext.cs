@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
 /// Represents the context in which a method being cached is executing. 

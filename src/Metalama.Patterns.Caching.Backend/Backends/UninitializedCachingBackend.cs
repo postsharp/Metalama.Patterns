@@ -1,22 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Implementation;
-using System.Globalization;
 
 namespace Metalama.Patterns.Caching.Backends;
 
 /// <summary>
-/// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend until you see <see cref="CachingService.DefaultBackend"/> to something else.
+/// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend.
 /// </summary>
-internal sealed class UninitializedCachingBackend : CachingBackend
+public sealed class UninitializedCachingBackend : CachingBackend
 {
-    private static void Throw()
-        => throw new CachingException(
-            string.Format(
-                CultureInfo.InvariantCulture,
-                "The caching back-end has not been initialized. Set the {0}.{1} property before accessing a cached method.",
-                nameof(CachingService),
-                nameof(CachingService.DefaultBackend) ) );
+    private static void Throw() => throw new CachingException( "The caching service has not been initialized." );
 
     /// <inheritdoc />
     protected override void ClearCore() => Throw();

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching;
@@ -7,7 +8,8 @@ namespace Metalama.Patterns.Caching;
 /// <summary>
 /// Configuration of a <see cref="CacheItem"/>.
 /// </summary>
-public sealed record CacheItemConfiguration : ICacheItemConfiguration
+[RunTimeOrCompileTime]
+public record CacheItemConfiguration : ICacheItemConfiguration
 {
     /// <inheritdoc />
     public bool? IsEnabled { get; init; }
@@ -27,10 +29,7 @@ public sealed record CacheItemConfiguration : ICacheItemConfiguration
     /// <inheritdoc />
     public CacheItemPriority? Priority { get; init; }
 
-    /// <inheritdoc />
-    public bool? IgnoreThisParameter { get; init; }
-
-    internal CacheItemConfiguration ApplyFallback( ICacheItemConfiguration fallback )
+    public virtual CacheItemConfiguration ApplyFallbackValues( ICacheItemConfiguration fallback )
     {
         return new CacheItemConfiguration
         {
@@ -39,8 +38,7 @@ public sealed record CacheItemConfiguration : ICacheItemConfiguration
             SlidingExpiration = this.SlidingExpiration ?? fallback.SlidingExpiration,
             Priority = this.Priority ?? fallback.Priority,
             ProfileName = this.ProfileName ?? fallback.ProfileName,
-            IsEnabled = this.IsEnabled ?? fallback.IsEnabled,
-            IgnoreThisParameter = this.IgnoreThisParameter ?? fallback.IgnoreThisParameter
+            IsEnabled = this.IsEnabled ?? fallback.IsEnabled
         };
     }
 }

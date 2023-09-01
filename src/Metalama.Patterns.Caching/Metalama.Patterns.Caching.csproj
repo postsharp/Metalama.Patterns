@@ -33,6 +33,7 @@
     <ProjectReference Include="..\Flashtrace.Formatters\Flashtrace.Formatters.csproj" />
     <ProjectReference Include="..\Flashtrace\Flashtrace.csproj" />
     <ProjectReference Include="..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Metalama.Patterns.Caching.Backend\Metalama.Patterns.Caching.Backend.csproj"  />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,7 +45,9 @@
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+
   </ItemGroup>
+
 
 
 

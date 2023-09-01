@@ -17,6 +17,8 @@
         <ProjectReference Include="..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
     </ItemGroup>
 
+
+
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
     
 </Project>

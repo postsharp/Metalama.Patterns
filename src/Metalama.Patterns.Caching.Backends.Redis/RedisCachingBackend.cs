@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
-using Metalama.Patterns.Caching.Utilities;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -35,7 +34,7 @@ public class RedisCachingBackend : CachingBackend
     /// Gets <see cref="_notificationQueue"/> if not null, otherwise throws <see cref="RedisCachingBackendAssertionFailedException"/>.
     /// </summary>
     private RedisNotificationQueue NotificationQueue
-        => this._notificationQueue ?? throw new RedisCachingBackendAssertionFailedException( nameof(this._notificationQueue) + " has not been initialized." );
+        => this._notificationQueue ?? throw new CachingAssertionFailedException( nameof(this._notificationQueue) + " has not been initialized." );
 
     /// <summary>
     /// Gets the Redis database used by the current <see cref="RedisCachingBackend"/>.
