@@ -54,10 +54,11 @@ public sealed class CachingProfileRegistry
     /// </summary>
     /// <param name="profileName">The profile name (a case-insensitive string).</param>
     /// <returns>A <see cref="CachingProfile"/> object with name <paramref name="profileName"/>.</returns>
-    public CachingProfile this[ string profileName ]
+    public CachingProfile this[ string? profileName ]
     {
         get
         {
+            profileName ??= CachingProfile.DefaultName;
             CachingProfile? profile;
 
             ImmutableDictionary<string, CachingProfile> oldDictionary;

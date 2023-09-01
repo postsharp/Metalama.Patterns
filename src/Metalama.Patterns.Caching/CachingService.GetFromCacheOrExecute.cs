@@ -2,6 +2,7 @@
 
 using Flashtrace;
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Implementation;
 using System.ComponentModel;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
@@ -13,6 +14,9 @@ namespace Metalama.Patterns.Caching;
 [PublicAPI]
 public partial class CachingService
 {
+    private ICacheItemConfiguration GetMergedMethodConfiguration( CachedMethodMetadata methodMetadata )
+        => this.Profiles[methodMetadata.BuildTimeConfiguration.ProfileName].GetMergedConfiguration( methodMetadata );
+
     [EditorBrowsable( EditorBrowsableState.Never )]
     public TResult? GetFromCacheOrExecute<TResult>(
         CachedMethodMetadata metadata,
@@ -36,7 +40,7 @@ public partial class CachingService
         {
             try
             {
-                var mergedConfiguration = metadata.MergedConfiguration;
+                var mergedConfiguration = this.GetMergedMethodConfiguration( metadata );
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {
@@ -109,7 +113,7 @@ public partial class CachingService
         {
             try
             {
-                var mergedConfiguration = metadata.MergedConfiguration;
+                var mergedConfiguration = this.GetMergedMethodConfiguration( metadata );
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {
@@ -227,7 +231,7 @@ public partial class CachingService
         {
             try
             {
-                var mergedConfiguration = metadata.MergedConfiguration;
+                var mergedConfiguration = this.GetMergedMethodConfiguration( metadata );
 
                 if ( !mergedConfiguration.IsEnabled.GetValueOrDefault() )
                 {

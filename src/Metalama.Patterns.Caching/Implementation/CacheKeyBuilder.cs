@@ -83,7 +83,7 @@ public class CacheKeyBuilder : IDisposable
 
         var addComma = false;
 
-        if ( !method.IsStatic && !metadata.IsThisParameterIgnored )
+        if ( !method.IsStatic && !metadata.IgnoreThisParameter )
         {
             // We need a 'this' specifier to differentiate an instance method
             // from a static method whose first parameter is of the declaring type.
@@ -96,7 +96,7 @@ public class CacheKeyBuilder : IDisposable
         {
             var argument = arguments[i];
 
-            if ( metadata.Parameters[i].IsIgnored )
+            if ( metadata.IsParameterIgnored( i ) )
             {
                 this.AppendArgument( stringBuilder, parameters[i].ParameterType, this.IgnoredParameterSentinel, ref addComma );
             }

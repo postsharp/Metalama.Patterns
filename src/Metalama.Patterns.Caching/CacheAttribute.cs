@@ -285,7 +285,6 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         field.Value = CachedMethodMetadata.Register(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
-            awaitableResultType == null ? null : awaitableResultType.ToTypeOfExpression().Value,
             new CacheAttributeProperties()
             {
                 AbsoluteExpiration = effectiveConfiguration.AbsoluteExpiration,
@@ -295,6 +294,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
                 ProfileName = effectiveConfiguration.ProfileName,
                 SlidingExpiration = effectiveConfiguration.SlidingExpiration
             },
+            awaitableResultType == null ? null : awaitableResultType.ToTypeOfExpression().Value,
             method.ReturnType.IsReferenceType == true || method.ReturnType.IsNullable == true );
     }
 #pragma warning restore IDE0031

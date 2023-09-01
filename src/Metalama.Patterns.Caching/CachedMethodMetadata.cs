@@ -5,34 +5,30 @@ using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
-/// Encapsulates information about a method being cached. This class should only be used by the caching framework and the code it generates.
+/// Encapsulates information about a method being cached. This cached is used by the implementation of <see cref="ICachingService"/>
+/// and you can use it if you override the <see cref="CacheKeyBuilder"/> class.
 /// </summary>
-/// <remarks>
-/// The implementation of <see cref="CachedMethodMetadata"/> is intentionally opaque (ie, internal) as it should be used only by the caching framework runtime.
-/// </remarks>
 [PublicAPI]
-[EditorBrowsable( EditorBrowsableState.Never )]
-public sealed class CachedMethodMetadata
+public sealed partial class CachedMethodMetadata
 {
+    private static int _nextId;
+
+    internal int Id { get; } = Interlocked.Increment( ref _nextId );
+
     /// <summary>
     /// Gets the <see cref="MethodInfo"/> of the method.
     /// </summary>
-    internal MethodInfo Method { get; }
+    public MethodInfo Method { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the value of the <c>this</c> parameter
-    /// (for non-static methods) should be included in the cache key.
+    /// Gets an array of <see cref="Parameter"/>.
     /// </summary>
-    internal bool IsThisParameterIgnored { get; }
-
-    /// <summary>
-    /// Gets an array of <see cref="CachedParameterInfo"/>.
-    /// </summary>
-    internal ImmutableArray<CachedParameterInfo> Parameters { get; }
+    private ImmutableArray<Parameter> Parameters { get; }
 
     /// <summary>
     /// Gets a value indicating whether the return type of the method can be <see langword="null"/>.
@@ -60,67 +56,19 @@ public sealed class CachedMethodMetadata
     /// </remarks>
     internal Type? AwaitableResultType { get; }
 
-    private CachingProfile? _profile;
-    private int _profileRevision;
-    private CacheItemConfiguration? _mergedConfiguration;
-    private SpinLock _initializeLock;
+    public bool IgnoreThisParameter => this.BuildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault( false );
 
-    /// <summary>
-    /// Gets the effective configuration which is determined by merging the build-time configuration with any applicable 
-    /// profile-based configuration. This property always reflects any runtime changes to profile configuration.
-    /// </summary>
-    internal ICacheItemConfiguration MergedConfiguration
-    {
-        get
-        {
-            if ( this._profile == null || this._profileRevision < CachingService.Default.Profiles.RevisionNumber || this._mergedConfiguration == null )
-            {
-                var initializeLockTaken = false;
+    public bool IsParameterIgnored( int index ) => this.Parameters[index].IsIgnored;
 
-                try
-                {
-                    this._initializeLock.Enter( ref initializeLockTaken );
-
-                    if ( this._profile == null || this._profileRevision < CachingService.Default.Profiles.RevisionNumber
-                                               || this._mergedConfiguration == null )
-                    {
-                        var profileName = this.BuildTimeConfiguration.ProfileName ?? CachingProfile.DefaultName;
-
-                        var localProfile = CachingService.Default.Profiles[profileName];
-
-                        this._mergedConfiguration = this.BuildTimeConfiguration.AsCacheItemConfiguration().ApplyFallback( localProfile );
-
-                        Thread.MemoryBarrier();
-
-                        // Need to set this after setting mergedConfiguration to prevent data races.
-                        this._profile = localProfile;
-                        this._profileRevision = CachingService.Default.Profiles.RevisionNumber;
-                    }
-                }
-                finally
-                {
-                    if ( initializeLockTaken )
-                    {
-                        this._initializeLock.Exit();
-                    }
-                }
-            }
-
-            return this._mergedConfiguration;
-        }
-    }
-
-    internal CachedMethodMetadata(
+    private CachedMethodMetadata(
         MethodInfo method,
-        ImmutableArray<CachedParameterInfo> parameters,
+        ImmutableArray<Parameter> parameters,
         Type? awaitableResultType,
-        bool isThisParameterIgnored,
         ICacheItemConfiguration buildTimeConfiguration,
         bool returnValueCanBeNull )
     {
         this.Method = method;
         this.Parameters = parameters;
-        this.IsThisParameterIgnored = isThisParameterIgnored;
         this.BuildTimeConfiguration = buildTimeConfiguration.AsCacheItemConfiguration();
         this.ReturnValueCanBeNull = returnValueCanBeNull;
         this.AwaitableResultType = awaitableResultType;
@@ -128,15 +76,14 @@ public sealed class CachedMethodMetadata
 
     public static CachedMethodMetadata Register(
         MethodInfo method,
-        Type? awaitableResultType,
         ICacheItemConfiguration buildTimeConfiguration,
+        Type? awaitableResultType,
         bool returnValueCanBeNull )
     {
         var metadata = new CachedMethodMetadata(
             method,
             GetCachedParameterInfos( method ),
             awaitableResultType,
-            buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
             buildTimeConfiguration,
             returnValueCanBeNull );
 
@@ -145,16 +92,16 @@ public sealed class CachedMethodMetadata
         return metadata;
     }
 
-    private static ImmutableArray<CachedParameterInfo> GetCachedParameterInfos( MethodInfo method )
+    private static ImmutableArray<Parameter> GetCachedParameterInfos( MethodInfo method )
     {
         var parameterInfos = method.GetParameters();
-        var cachedParameterInfos = new CachedParameterInfo[parameterInfos.Length];
+        var cachedParameterInfos = new Parameter[parameterInfos.Length];
 
         for ( var i = 0; i < parameterInfos.Length; i++ )
         {
             var isIgnored = parameterInfos[i].IsDefined( typeof(NotCacheKeyAttribute) );
 
-            cachedParameterInfos[i] = new CachedParameterInfo( isIgnored );
+            cachedParameterInfos[i] = new Parameter( isIgnored );
         }
 
         return cachedParameterInfos.ToImmutableArray();

@@ -26,7 +26,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
     private HashSet<string>? _dependencies;
     private ImmutableHashSet<string>? _immutableDependencies;
 
-    private CachingContext( string key, CachingContextKind options, CachingContext? parent, CachingService cachingService )
+    private CachingContext( string key, CachingContextKind options, ICachingContext parent, CachingService cachingService )
     {
         this._key = key;
         this.Kind = options;
@@ -55,13 +55,13 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         }
     }
 
-    public CachingContext? Parent { get; }
+    public ICachingContext? Parent { get; }
 
     ICachingContext? ICachingContext.Parent => this.Parent;
 
     internal static CachingContext OpenRecacheContext( string key, CachingService cachingService )
     {
-        var context = new CachingContext( key, CachingContextKind.Recache, Current as CachingContext, cachingService );
+        var context = new CachingContext( key, CachingContextKind.Recache, Current, cachingService );
         Current = context;
 
         return context;
@@ -69,7 +69,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
 
     internal static CachingContext OpenCacheContext( string key, CachingService cachingService )
     {
-        var context = new CachingContext( key, CachingContextKind.Cache, Current as CachingContext, cachingService );
+        var context = new CachingContext( key, CachingContextKind.Cache, Current, cachingService );
         Current = context;
 
         return context;

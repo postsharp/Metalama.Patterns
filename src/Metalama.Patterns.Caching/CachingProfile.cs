@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Locking;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -16,6 +17,7 @@ namespace Metalama.Patterns.Caching;
 public sealed class CachingProfile : ICacheItemConfiguration, INotifyPropertyChanged
 {
     private readonly CachingService _cachingService;
+    private readonly ConcurrentDictionary<int, ICacheItemConfiguration> _mergedMethodConfigurations = new();
 
     /// <summary>
     /// The name of the default profile.
@@ -183,5 +185,19 @@ public sealed class CachingProfile : ICacheItemConfiguration, INotifyPropertyCha
     private void OnPropertyChanged( [CallerMemberName] string? propertyName = null )
     {
         this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
+    }
+
+    public ICacheItemConfiguration GetMergedConfiguration( CachedMethodMetadata metadata )
+    {
+        if ( this._mergedMethodConfigurations.TryGetValue( metadata.Id, out var configuration ) )
+        {
+            return configuration;
+        }
+        else
+        {
+            return this._mergedMethodConfigurations.GetOrAdd(
+                metadata.Id,
+                _ => metadata.BuildTimeConfiguration.AsCacheItemConfiguration().ApplyFallback( this ) );
+        }
     }
 }
