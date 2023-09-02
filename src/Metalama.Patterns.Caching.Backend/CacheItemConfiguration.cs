@@ -29,16 +29,17 @@ public record CacheItemConfiguration : ICacheItemConfiguration
     /// <inheritdoc />
     public CacheItemPriority? Priority { get; init; }
 
-    public virtual CacheItemConfiguration ApplyFallbackValues( ICacheItemConfiguration fallback )
+    public CacheItemConfiguration() { }
+
+    protected CacheItemConfiguration( CacheItemConfiguration overrideValue, ICacheItemConfiguration fallbackValue )
     {
-        return new CacheItemConfiguration
-        {
-            AutoReload = this.AutoReload ?? fallback.AutoReload,
-            AbsoluteExpiration = this.AbsoluteExpiration ?? fallback.AbsoluteExpiration,
-            SlidingExpiration = this.SlidingExpiration ?? fallback.SlidingExpiration,
-            Priority = this.Priority ?? fallback.Priority,
-            ProfileName = this.ProfileName ?? fallback.ProfileName,
-            IsEnabled = this.IsEnabled ?? fallback.IsEnabled
-        };
+        this.AutoReload = overrideValue.AutoReload ?? fallbackValue.AutoReload;
+        this.AbsoluteExpiration = overrideValue.AbsoluteExpiration ?? fallbackValue.AbsoluteExpiration;
+        this.SlidingExpiration = overrideValue.SlidingExpiration ?? fallbackValue.SlidingExpiration;
+        this.Priority = overrideValue.Priority ?? fallbackValue.Priority;
+        this.ProfileName = overrideValue.ProfileName ?? fallbackValue.ProfileName;
+        this.IsEnabled = overrideValue.IsEnabled ?? fallbackValue.IsEnabled;
     }
+
+    public CacheItemConfiguration ApplyFallbackValues( ICacheItemConfiguration fallback ) => new( this, fallback );
 }

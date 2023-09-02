@@ -72,29 +72,30 @@ public sealed partial class CachedMethodMetadata
         this.ReturnValueCanBeNull = !method.ReturnType.IsValueType
                                     || (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Nullable<>));
 
+        this.AwaitableResultType = method.ReturnType;
+
         if ( method.ReturnType.IsGenericType )
         {
             var genericType = method.ReturnType.GetGenericTypeDefinition();
 
             if ( genericType == typeof(Task<>) || genericType == typeof(ValueTask<>) )
             {
-                this.AwaitableResultType = genericType.GenericTypeArguments[0];
+                this.AwaitableResultType = method.ReturnType.GenericTypeArguments[0];
             }
         }
     }
 
     public static CachedMethodMetadata Register(
         MethodInfo method,
-        CachedMethodConfiguration? buildTimeConfiguration = null )
+        CachedMethodConfiguration? buildTimeConfiguration = null,
+        bool throwIfAlreadyRegistered = true )
     {
         var metadata = new CachedMethodMetadata(
             method,
             GetCachedParameterInfos( method ),
             buildTimeConfiguration );
 
-        CachedMethodMetadataRegistry.Instance.Register( metadata );
-
-        return metadata;
+        return CachedMethodMetadataRegistry.Instance.Register( metadata, throwIfAlreadyRegistered );
     }
 
     [MethodImpl( MethodImplOptions.NoInlining )]
@@ -108,7 +109,14 @@ public sealed partial class CachedMethodMetadata
             throw new InvalidOperationException( "Cannot get the calling method." );
         }
 
-        return Register( methodInfo, configuration );
+        var existingMetadata = CachedMethodMetadataRegistry.Instance.Get( methodInfo );
+
+        if ( existingMetadata != null )
+        {
+            return existingMetadata;
+        }
+
+        return Register( methodInfo, configuration, false );
     }
 
     private static ImmutableArray<Parameter> GetCachedParameterInfos( MethodInfo method )

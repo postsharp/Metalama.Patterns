@@ -246,8 +246,6 @@ public partial class CachingService
 
                     logSource.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
-                    // TODO: Pass CancellationToken (note from original code)
-
                     var task = this.Frontend.GetOrAddAsync(
                         metadata.Method,
                         methodKey,

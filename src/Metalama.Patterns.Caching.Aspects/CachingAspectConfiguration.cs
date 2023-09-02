@@ -9,18 +9,14 @@ internal sealed record CachingAspectConfiguration : CachedMethodConfiguration
 {
     public bool? UseDependencyInjection { get; init; }
 
-    public CachingAspectConfiguration ApplyFallbackValues( CachingAspectConfiguration fallback )
+    public CachingAspectConfiguration() { }
+
+    public CachingAspectConfiguration( CachingAspectConfiguration overrideValue, CachingAspectConfiguration fallbackValue ) : base(
+        overrideValue,
+        fallbackValue )
     {
-        return new CachingAspectConfiguration
-        {
-            AutoReload = this.AutoReload ?? fallback.AutoReload,
-            AbsoluteExpiration = this.AbsoluteExpiration ?? fallback.AbsoluteExpiration,
-            SlidingExpiration = this.SlidingExpiration ?? fallback.SlidingExpiration,
-            Priority = this.Priority ?? fallback.Priority,
-            ProfileName = this.ProfileName ?? fallback.ProfileName,
-            IsEnabled = this.IsEnabled ?? fallback.IsEnabled,
-            IgnoreThisParameter = this.IgnoreThisParameter ?? fallback.IgnoreThisParameter,
-            UseDependencyInjection = this.UseDependencyInjection ?? fallback.UseDependencyInjection
-        };
+        this.UseDependencyInjection = overrideValue.UseDependencyInjection ?? fallbackValue.UseDependencyInjection;
     }
+
+    public CachingAspectConfiguration ApplyFallbackValues( CachingAspectConfiguration fallback ) => new( this, fallback );
 }

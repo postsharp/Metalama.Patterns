@@ -7,7 +7,16 @@ namespace Metalama.Patterns.Caching;
 [RunTimeOrCompileTime]
 public record CachedMethodConfiguration : CacheItemConfiguration
 {
+    public CachedMethodConfiguration() { }
+
     public static CachedMethodConfiguration Empty { get; } = new();
 
     public bool? IgnoreThisParameter { get; init; }
+
+    protected CachedMethodConfiguration( CachedMethodConfiguration overrideValue, CachedMethodConfiguration fallbackValue ) : base(
+        overrideValue,
+        fallbackValue )
+    {
+        this.IgnoreThisParameter = overrideValue.IgnoreThisParameter ?? fallbackValue.IgnoreThisParameter;
+    }
 }

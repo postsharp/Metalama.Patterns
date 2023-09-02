@@ -96,7 +96,8 @@ internal static class CachingAspectConfigurationHelper
 
         try
         {
-            T? GetAttributeValue<T>( string name )
+            T? GetAttributeValueType<T>( string name )
+                where T : struct
             {
                 if ( attribute.TryGetNamedArgument( name, out var value ) )
                 {
@@ -104,11 +105,24 @@ internal static class CachingAspectConfigurationHelper
                 }
                 else
                 {
-                    return default;
+                    return null;
                 }
             }
 
-            TimeSpan? GetAttributeValueTimeSpan( string name )
+            T? GetAttributeReferenceType<T>( string name )
+                where T : class
+            {
+                if ( attribute.TryGetNamedArgument( name, out var value ) )
+                {
+                    return (T?) value.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            TimeSpan? GetAttributeTimeSpan( string name )
             {
                 if ( attribute.TryGetNamedArgument( name, out var value ) )
                 {
@@ -122,13 +136,13 @@ internal static class CachingAspectConfigurationHelper
 
             return new CachingAspectConfiguration
             {
-                ProfileName = GetAttributeValue<string>( nameof(ICachingConfigurationAttribute.ProfileName) ),
-                AutoReload = GetAttributeValue<bool>( nameof(ICachingConfigurationAttribute.AutoReload) ),
-                AbsoluteExpiration = GetAttributeValueTimeSpan( nameof(ICachingConfigurationAttribute.AbsoluteExpiration) ),
-                SlidingExpiration = GetAttributeValueTimeSpan( nameof(ICachingConfigurationAttribute.SlidingExpiration) ),
-                Priority = GetAttributeValue<CacheItemPriority>( nameof(ICachingConfigurationAttribute.Priority) ),
-                IgnoreThisParameter = GetAttributeValue<bool>( nameof(ICachingConfigurationAttribute.IgnoreThisParameter) ),
-                UseDependencyInjection = GetAttributeValue<bool>( nameof(ICachingConfigurationAttribute.UseDependencyInjection) )
+                ProfileName = GetAttributeReferenceType<string>( nameof(ICachingConfigurationAttribute.ProfileName) ),
+                AutoReload = GetAttributeValueType<bool>( nameof(ICachingConfigurationAttribute.AutoReload) ),
+                AbsoluteExpiration = GetAttributeTimeSpan( nameof(ICachingConfigurationAttribute.AbsoluteExpiration) ),
+                SlidingExpiration = GetAttributeTimeSpan( nameof(ICachingConfigurationAttribute.SlidingExpiration) ),
+                Priority = GetAttributeValueType<CacheItemPriority>( nameof(ICachingConfigurationAttribute.Priority) ),
+                IgnoreThisParameter = GetAttributeValueType<bool>( nameof(ICachingConfigurationAttribute.IgnoreThisParameter) ),
+                UseDependencyInjection = GetAttributeValueType<bool>( nameof(ICachingConfigurationAttribute.UseDependencyInjection) )
             };
         }
         catch ( Exception e )

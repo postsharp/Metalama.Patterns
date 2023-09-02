@@ -45,11 +45,27 @@ internal sealed class CachedMethodMetadataRegistry
         return cachedMethodInfo;
     }
 
-    public void Register( CachedMethodMetadata metadata )
+    public CachedMethodMetadata Register( CachedMethodMetadata metadata, bool throwIfAlreadyRegistered = false )
     {
         if ( !this._methodInfoCache.TryAdd( metadata.Method, metadata ) )
         {
-            throw new InvalidOperationException( $"The method '{metadata.Method}' has already been registered." );
+            if ( throwIfAlreadyRegistered )
+            {
+                throw new InvalidOperationException( $"The method '{metadata.Method}' has already been registered." );
+            }
+            else
+            {
+                if ( !this._methodInfoCache.TryGetValue( metadata.Method, out var existingData ) )
+                {
+                    throw new CachingAssertionFailedException();
+                }
+
+                return existingData;
+            }
+        }
+        else
+        {
+            return metadata;
         }
     }
 }
