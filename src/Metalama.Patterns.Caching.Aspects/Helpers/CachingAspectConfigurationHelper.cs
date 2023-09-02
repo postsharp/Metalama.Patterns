@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Caching.Aspects.Helpers;
 internal static class CachingAspectConfigurationHelper
 {
     // TODO: Consider caching this method at compile time once compile-time user caching is supported by the framework.
-    public static CachingAspectConfiguration GetConfigurationFromAttributes( IMethod method )
+    private static CachingAspectConfiguration GetConfigurationFromAttributes( IMethod method )
     {
         var configurations = new List<CachingAspectConfiguration>();
 

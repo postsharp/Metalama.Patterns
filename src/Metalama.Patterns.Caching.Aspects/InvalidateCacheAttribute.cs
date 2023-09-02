@@ -513,7 +513,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     }
 
     [CompileTime]
-    public sealed class InvalidatedMethodInfo
+    private sealed class InvalidatedMethodInfo
     {
         public InvalidatedMethodInfo( IMethod method, bool usesDependencyInjection )
         {

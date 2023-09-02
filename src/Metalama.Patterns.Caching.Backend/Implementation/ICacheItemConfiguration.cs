@@ -30,7 +30,7 @@ public interface ICacheItemConfiguration
     CacheItemPriority? Priority { get; }
 
     /// <summary>
-    /// Gets the name of the <see cref="CachingProfile"/>  that contains the configuration of the cached methods.
+    /// Gets the name of the caching profile that contains the configuration of the cached methods.
     /// </summary>
     string? ProfileName { get; }
 

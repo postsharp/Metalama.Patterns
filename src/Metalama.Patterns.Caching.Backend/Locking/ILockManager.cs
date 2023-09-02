@@ -7,7 +7,6 @@ namespace Metalama.Patterns.Caching.Locking;
 /// </summary>
 /// <remarks>
 /// Two implementations are provided: <see cref="NullLockManager"/> and <see cref="LocalLockManager"/>.
-/// To change the lock manager, set the <see cref="CachingProfile.LockManager"/> property.
 /// </remarks>
 public interface ILockManager
 {

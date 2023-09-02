@@ -11,12 +11,14 @@ internal sealed record CachingAspectConfiguration : CachedMethodConfiguration
 
     public CachingAspectConfiguration() { }
 
-    public CachingAspectConfiguration( CachingAspectConfiguration overrideValue, CachingAspectConfiguration fallbackValue ) : base(
+#pragma warning disable IDE0051
+    private CachingAspectConfiguration( CachingAspectConfiguration overrideValue, CachingAspectConfiguration fallbackValue ) : base(
         overrideValue,
         fallbackValue )
     {
         this.UseDependencyInjection = overrideValue.UseDependencyInjection ?? fallbackValue.UseDependencyInjection;
     }
+#pragma warning restore IDE0051
 
     public CachingAspectConfiguration ApplyFallbackValues( CachingAspectConfiguration fallback ) => new( this, fallback );
 }

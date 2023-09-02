@@ -135,6 +135,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
         }
         else
         {
+            // ReSharper disable once HeapView.CanAvoidClosure
             return this._mergedMethodConfigurations.GetOrAdd(
                 metadata.Id,
                 _ => metadata.Configuration.ApplyFallbackValues( this ) );
