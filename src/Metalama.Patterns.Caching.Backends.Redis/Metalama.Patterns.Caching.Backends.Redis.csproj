@@ -12,6 +12,7 @@
     <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />
     <PackageReference Include="StackExchange.Redis" Version="$(StackExchangeRedisVersion)" />
     <ProjectReference Include="..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
+    <ProjectReference Include="..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" PrivateAssets="all" />
     <InternalsVisibleTo Include="Metalama.Patterns.Caching.UnitTests" />
   </ItemGroup>
   

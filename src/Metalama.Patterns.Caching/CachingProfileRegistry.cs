@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Caching;
 
 /// <summary>
 /// Allows to configure caching profiles (<see cref="CachingProfile"/>), and therefore influence the behavior
-/// of the <see cref="CacheAttribute"/> aspect at run-time. Exposed on the <see cref="CachingService.Profiles"/> property.
+/// the caching of methods that are bound to this profile. Exposed on the <see cref="CachingService.Profiles"/> property.
 /// </summary>
 [PublicAPI]
 public sealed class CachingProfileRegistry
@@ -54,10 +54,11 @@ public sealed class CachingProfileRegistry
     /// </summary>
     /// <param name="profileName">The profile name (a case-insensitive string).</param>
     /// <returns>A <see cref="CachingProfile"/> object with name <paramref name="profileName"/>.</returns>
-    public CachingProfile this[ string profileName ]
+    public CachingProfile this[ string? profileName ]
     {
         get
         {
+            profileName ??= CachingProfile.DefaultName;
             CachingProfile? profile;
 
             ImmutableDictionary<string, CachingProfile> oldDictionary;

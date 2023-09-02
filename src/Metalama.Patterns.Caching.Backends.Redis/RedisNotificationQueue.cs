@@ -182,7 +182,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
     {
         if ( state is not WeakReference<RedisNotificationQueue> queueRef )
         {
-            throw new RedisCachingBackendAssertionFailedException( "null was not expected." );
+            throw new CachingAssertionFailedException( "null was not expected." );
         }
 
         if ( !queueRef.TryGetTarget( out var queue ) )

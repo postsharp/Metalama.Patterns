@@ -7,16 +7,6 @@
         <Configurations>Debug;Release;LamaDebug</Configurations>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Compile Remove="CacheAttributeTests\Diagnostics\OutParameter - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="CacheAttributeTests\Diagnostics\MultipleInstances.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>MultipleInstances.cs</DependentUpon>
-      </None>
-    </ItemGroup>
 
     <ItemGroup>        
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
@@ -26,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
+      <ProjectReference Include="..\..\Metalama.Patterns.Caching.Aspects\Metalama.Patterns.Caching.Aspects.csproj" />
       <ProjectReference Include="..\Metalama.Patterns.Caching.TestHelpers\Metalama.Patterns.Caching.TestHelpers.csproj" />
     </ItemGroup>
 
