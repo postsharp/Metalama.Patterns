@@ -15,6 +15,7 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
     PublicArtifacts = Pattern.Create( 
         "Metalama.Patterns.Caching.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Aspects.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Caching.Backend.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Backends.Azure.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Backends.Redis.$(PackageVersion).nupkg",
         "Metalama.Patterns.Contracts.$(PackageVersion).nupkg" , 
