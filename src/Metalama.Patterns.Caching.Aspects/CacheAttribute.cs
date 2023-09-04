@@ -46,7 +46,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/>  that contains the configuration of the cached methods.
     /// </summary>
-    public string? ProfileName { get; set; }
+    public string? ProfileName { get; init; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
@@ -55,7 +55,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     public bool AutoReload
     {
         get => this._autoReload.GetValueOrDefault();
-        set => this._autoReload = value;
+        init => this._autoReload = value;
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     public double AbsoluteExpiration
     {
         get => this._absoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
-        set => this._absoluteExpiration = TimeSpan.FromMinutes( value );
+        init => this._absoluteExpiration = TimeSpan.FromMinutes( value );
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     public double SlidingExpiration
     {
         get => this._slidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
-        set => this._slidingExpiration = TimeSpan.FromMinutes( value );
+        init => this._slidingExpiration = TimeSpan.FromMinutes( value );
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     public CacheItemPriority Priority
     {
         get => this._priority.GetValueOrDefault( CacheItemPriority.Default );
-        set => this._priority = value;
+        init => this._priority = value;
     }
 
     /// <summary>
@@ -94,13 +94,13 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     public bool IgnoreThisParameter
     {
         get => this._ignoreThisParameter.GetValueOrDefault();
-        set => this._ignoreThisParameter = value;
+        init => this._ignoreThisParameter = value;
     }
 
     public bool UseDependencyInjection
     {
         get => this._useDependencyInjection.GetValueOrDefault( true );
-        set => this._useDependencyInjection = value;
+        init => this._useDependencyInjection = value;
     }
 
     public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
@@ -493,3 +493,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
             UseDependencyInjection = this._useDependencyInjection
         };
 }
+
+/*
+ *  This is a test this is a test this is a test
+ * */

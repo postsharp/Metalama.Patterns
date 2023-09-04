@@ -26,7 +26,7 @@ public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigura
     public string? ProfileName
     {
         get;
-        set;
+        init;
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigura
     public bool AutoReload
     {
         get;
-        set;
+        init;
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigura
     public double AbsoluteExpiration
     {
         get;
-        set;
+        init;
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigura
     public double SlidingExpiration
     {
         get;
-        set;
+        init;
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigura
     public CacheItemPriority Priority
     {
         get;
-        set;
+        init;
     }
 
     /// <summary>
@@ -75,8 +75,8 @@ public sealed class CachingConfigurationAttribute : Attribute, ICachingConfigura
     public bool IgnoreThisParameter
     {
         get;
-        set;
+        init;
     }
 
-    public bool UseDependencyInjection { get; set; }
+    public bool UseDependencyInjection { get; init; }
 }
