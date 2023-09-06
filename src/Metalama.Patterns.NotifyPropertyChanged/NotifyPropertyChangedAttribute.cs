@@ -3,10 +3,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Project;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
@@ -51,6 +49,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             this.Type_INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof( INotifyPropertyChanged ) );
             this.Event_INotifyPropertyChanged_PropertyChanged = this.Type_INotifyPropertyChanged.Events.First();
             this.Type_PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof( PropertyChangedEventHandler ) );
+            this.Type_Nullable_PropertyChangedEventHandler = this.Type_PropertyChangedEventHandler.ToNullableType();
             this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
         }
 
@@ -63,6 +62,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         public IEvent Event_INotifyPropertyChanged_PropertyChanged { get; }
 
         public INamedType Type_PropertyChangedEventHandler { get; }
+
+        public INamedType Type_Nullable_PropertyChangedEventHandler { get; }
 
         public INamedType Type_IgnoreAutoChangeNotificationAttribute { get; }
 
@@ -243,101 +244,98 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         // TODO: I suspect/know some scenarios are not handled yet. Don't assume the logic here is correct or complete.
 
         foreach ( var node in allNodesDepthFirst )
-        {            
-            if ( node.DirectReferences.Count > 0 )
+        {
+            var parent = node.Parent!;
+
+            if ( parent.IsRoot )
             {
-                var parent = node.Parent!;
+                // *node* is a root property of the target type. Do we need to do anything for it?
+                continue;
+            }
 
-                if ( parent.IsRoot )
-                {
-                    // *node* is a root property of the target type. Do we need to do anything for it?
-                    continue;
-                }
+            if ( parent.Parent!.IsRoot )
+            {
+                // *parent* is a root property of the target type. Do we need to do anything for it?
+                continue;
+            }
 
-                if ( parent.Parent!.IsRoot )
-                {
-                    // *parent* is a root property of the target type. Do we need to do anything for it?
-                    continue;
-                }
+            if ( parent.Data.UpdateMethod == null )
+            {
+                // eg, for node X.Y.Z, parentElementNames is [X,Y]
+                var parentElementNames = parent.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ).ToList();
 
-                if ( parent.Data.UpdateMethod == null )
-                {
-                    // eg, for node X.Y.Z, parentElementNames is [X,Y]
-                    var parentElementNames = parent.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ).ToList();
+                var pathForMemberNames = string.Join( "", parentElementNames );
 
-                    var pathForMemberNames = string.Join( "", parentElementNames );
+                var lastValueFieldName = GetUnusedMemberName(
+                    ctx.Target,
+                    $"_last{pathForMemberNames}",
+                    ref usedMemberNames );
 
-                    var lastValueFieldName = GetUnusedMemberName(
-                        ctx.Target,
-                        $"_last{pathForMemberNames}",
-                        ref usedMemberNames );
-                   
-                    var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
-                        ctx.Target,
-                        lastValueFieldName,
-                        parent.Data.FieldOrProperty.Type,
-                        IntroductionScope.Instance,
-                        OverrideStrategy.Fail,
-                        b => b.Accessibility = Accessibility.Private );
+                var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
+                    ctx.Target,
+                    lastValueFieldName,
+                    parent.Data.FieldOrProperty.Type.ToNullableType(),
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b => b.Accessibility = Accessibility.Private );
 
-                    var lastValueField = introduceLastValueFieldResult.Declaration;
+                var lastValueField = introduceLastValueFieldResult.Declaration;
 
-                    var onPropertyChangedHandlerFieldName = GetUnusedMemberName(
-                        ctx.Target,
-                        $"_on{pathForMemberNames}ChangedHandler",
-                        ref usedMemberNames );
+                var onPropertyChangedHandlerFieldName = GetUnusedMemberName(
+                    ctx.Target,
+                    $"_on{pathForMemberNames}ChangedHandler",
+                    ref usedMemberNames );
 
-                    var introduceOnPropertyChangedHandlerFieldName = ctx.Builder.Advice.IntroduceField(
-                        ctx.Target,
-                        onPropertyChangedHandlerFieldName,
-                        ctx.Type_PropertyChangedEventHandler,
-                        IntroductionScope.Instance,
-                        OverrideStrategy.Fail,
-                        b => b.Accessibility = Accessibility.Private );
+                var introduceOnPropertyChangedHandlerFieldName = ctx.Builder.Advice.IntroduceField(
+                    ctx.Target,
+                    onPropertyChangedHandlerFieldName,
+                    ctx.Type_Nullable_PropertyChangedEventHandler,
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b => b.Accessibility = Accessibility.Private );
 
-                    var onPropertyChangedHandlerField = introduceOnPropertyChangedHandlerFieldName.Declaration;
+                var onPropertyChangedHandlerField = introduceOnPropertyChangedHandlerFieldName.Declaration;
 
-                    var methodName = GetUnusedMemberName(
-                                            ctx.Target,
-                                            $"Update{pathForMemberNames}",
-                                            ref usedMemberNames );
+                var methodName = GetUnusedMemberName(
+                                    ctx.Target,
+                                    $"Update{pathForMemberNames}",
+                                    ref usedMemberNames );
 
-                    var accessChildExprBuilder = new ExpressionBuilder();
-                    // TODO: Assuming all ref types, which is probably a correct requirement, but we don't actaully check anywhere (I think).
-                    accessChildExprBuilder.AppendVerbatim( string.Join( "?.", parentElementNames ) );
+                var accessChildExprBuilder = new ExpressionBuilder();
+                // TODO: Assuming all ref types, which is probably a correct requirement, but we don't actaully check anywhere (I think).
+                accessChildExprBuilder.AppendVerbatim( string.Join( "?.", parentElementNames ) );
 
-                    var accessChildExpression = accessChildExprBuilder.ToExpression();
+                var accessChildExpression = accessChildExprBuilder.ToExpression();
 
-                    var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
-                        ctx.Target,
-                        nameof( UpdateChildProperty ),
-                        IntroductionScope.Instance,
-                        OverrideStrategy.Fail,
-                        b =>
+                var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
+                    ctx.Target,
+                    nameof( UpdateChildProperty ),
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b =>
+                    {
+                        b.Name = methodName;
+
+                        if ( ctx.Target.IsSealed )
                         {
-                            b.Name = methodName;
-
-                            if ( ctx.Target.IsSealed )
-                            {
-                                b.Accessibility = Accessibility.Private;
-                            }
-                            else
-                            {
-                                b.Accessibility = Accessibility.Protected;
-                                b.IsVirtual = true;
-                            }
-                        },
-                        args: new
+                            b.Accessibility = Accessibility.Private;
+                        }
+                        else
                         {
-                            ctx,
-                            node = parent,
-                            accessChildExpression,
-                            lastValueField,
-                            onPropertyChangedHandlerField,
-                        } );
+                            b.Accessibility = Accessibility.Protected;
+                            b.IsVirtual = true;
+                        }
+                    },
+                    args: new
+                    {
+                        ctx,
+                        node = parent,
+                        accessChildExpression,
+                        lastValueField,
+                        onPropertyChangedHandlerField,
+                    } );
 
-                    parent.Data.UpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
-                }
+                parent.Data.UpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
             }
         }
     }
@@ -385,7 +383,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             var introduceHandlerFieldResult = ctx.Builder.Advice.IntroduceField(
                                 ctx.Target,
                                 handlerFieldName,
-                                ctx.Type_PropertyChangedEventHandler,
+                                ctx.Type_Nullable_PropertyChangedEventHandler,
                                 whenExists: OverrideStrategy.Fail );
 
                             handlerField = introduceHandlerFieldResult.Declaration;

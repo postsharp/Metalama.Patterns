@@ -13,6 +13,7 @@
     <!-- Set the default versions of dependencies -->
     <PropertyGroup>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
+        <FluentAssertionsVersion>6.12.0</FluentAssertionsVersion>
         <xUnitVersion>2.4.1</xUnitVersion>
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
 		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
