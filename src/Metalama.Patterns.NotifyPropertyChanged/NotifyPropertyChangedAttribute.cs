@@ -372,6 +372,12 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                     if ( propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
                     {
+                        if ( p.InitializerExpression != null )
+                        {
+                            ctx.Builder.Diagnostics.Report( DiagnosticDescriptors.NotifyPropertyChanged.FieldOrPropertyHasAnInitializerExpression.WithArguments( (p.DeclarationKind, p) ), p );
+                            continue;
+                        }
+
                         var hasDependentProperties = node != null;
 
                         IField? handlerField = null;
