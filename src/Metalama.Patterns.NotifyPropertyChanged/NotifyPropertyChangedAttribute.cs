@@ -167,7 +167,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
         var target = builder.Target;
 
-        var implementsInpc = target.Is( ctx.Type_INotifyPropertyChanged );
+        var implementsInpc =
+            target.Is( ctx.Type_INotifyPropertyChanged )
+            || (target.BaseType is { BelongsToCurrentProject: true } && target.BaseType.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) ));
 
         IMethod? onPropertyChangedMethod = null;
 
