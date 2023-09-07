@@ -343,6 +343,18 @@ internal static class DependencyHelper
             this._properties.Clear();
         }
 
+        public override void VisitBinaryExpression( BinaryExpressionSyntax node )
+        {
+            if ( node.IsKind( SyntaxKind.CoalesceExpression ) )
+            {
+                // This creates multiple potential access expressions.
+                // TODO: Proper error reporting
+                throw new NotSupportedException( "Coalesce expressions are not supported." );
+            }
+
+            base.VisitBinaryExpression( node );
+        }
+
         public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
             if ( this._accessorStartDepth == 0 )

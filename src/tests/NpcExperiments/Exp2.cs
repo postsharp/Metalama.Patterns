@@ -34,14 +34,19 @@ class A
     public int A13
     {
         get
-        {
-            A1.B2 = 99; // Write-only to A1.B2, should not be treated as a reference.
+        {            
+            this.A1.B2 = 99; // Write-only to A1.B2, should not be treated as a reference.
             return A1.B1.C2;
         }
     }
 
     // Demonstrate non-leaf access:
     public C A14 => A1.B1;
+
+    public B A15 { get; set; }
+
+    // Coalesce expressions are not supported yet.
+    //public int A16 => (A1 ?? A15).B2;
 }
 
 [NotifyPropertyChanged]
