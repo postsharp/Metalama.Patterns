@@ -16,4 +16,6 @@
     <InternalsVisibleTo Include="Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests" />
   </ItemGroup>
 
+  <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
+  
 </Project>

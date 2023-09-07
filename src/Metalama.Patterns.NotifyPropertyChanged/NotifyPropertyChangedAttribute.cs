@@ -32,15 +32,26 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     {
         var ctx = new BuildAspectContext( builder );
 
-        var target = builder.Target;
+        try
+        {
+            PreparePropertyChangedMethod( ctx );
+            GenerateUpdateMethods( ctx );
+            ProcessAutoProperties( ctx );
+        }
+        catch ( DiagnosticErrorReportedException )
+        {
+            // Diagnostic already raised, do nothing.
+        }
+    }
 
-        var implementsInpc =
-            target.Is( ctx.Type_INotifyPropertyChanged )
-            || (target.BaseType is { BelongsToCurrentProject: true } && target.BaseType.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) ));
+    private static void PreparePropertyChangedMethod( BuildAspectContext ctx )
+    {
+        var builder = ctx.Builder;
+        var target = builder.Target;
 
         IMethod? onPropertyChangedMethod = null;
 
-        if ( implementsInpc )
+        if ( ctx.TargetImplementsInpc )
         {
             onPropertyChangedMethod = GetOnPropertyChangedMethod( target );
 
@@ -50,7 +61,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     DiagnosticDescriptors.NotifyPropertyChanged.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
                     .WithArguments( target ) );
 
-                return;
+                throw new DiagnosticErrorReportedException();
             }
         }
         else
@@ -59,7 +70,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
             var introduceOnPropertyChangedMethodResult = builder.Advice.IntroduceMethod(
                 builder.Target,
-                nameof( this.OnPropertyChanged ),
+                nameof( OnPropertyChanged ),
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
                 b =>
@@ -79,9 +90,6 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         }
 
         ctx.OnPropertyChangedMethod = onPropertyChangedMethod;
-
-        GenerateUpdateMethods( ctx );
-        ProcessAutoProperties( ctx );
     }
 
     private static void GenerateUpdateMethods( BuildAspectContext ctx )
@@ -115,83 +123,135 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 continue;
             }
 
-            if ( parent.Data.UpdateMethod == null )
+            if ( !parent.Data.MethodsHaveBeenSet )
             {
                 // eg, for node X.Y.Z, parentElementNames is [X,Y]
                 var parentElementNames = parent.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ).ToList();
 
                 var pathForMemberNames = string.Join( "", parentElementNames );
+                var pathForMetadataLookup = string.Join( ".", parentElementNames );
 
-                var lastValueFieldName = GetUnusedMemberName(
-                    ctx.Target,
-                    $"_last{pathForMemberNames}",
-                    ref usedMemberNames );
+                var hasBaseChangeMethods = ctx.TryGetBaseChangeMethods( pathForMetadataLookup, out var baseChangeMethods );
 
-                var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
-                    ctx.Target,
-                    lastValueFieldName,
-                    parent.Data.FieldOrProperty.Type.ToNullableType(),
-                    IntroductionScope.Instance,
-                    OverrideStrategy.Fail,
-                    b => b.Accessibility = Accessibility.Private );
+                IMethod? thisUpdateMethod = null;
+                IMethod? thisOnChangedMethod = null;
+                IMethod? thisOnChildChangedMethod = null;
 
-                var lastValueField = introduceLastValueFieldResult.Declaration;
-
-                var onPropertyChangedHandlerFieldName = GetUnusedMemberName(
-                    ctx.Target,
-                    $"_on{pathForMemberNames}ChangedHandler",
-                    ref usedMemberNames );
-
-                var introduceOnPropertyChangedHandlerFieldName = ctx.Builder.Advice.IntroduceField(
-                    ctx.Target,
-                    onPropertyChangedHandlerFieldName,
-                    ctx.Type_Nullable_PropertyChangedEventHandler,
-                    IntroductionScope.Instance,
-                    OverrideStrategy.Fail,
-                    b => b.Accessibility = Accessibility.Private );
-
-                var onPropertyChangedHandlerField = introduceOnPropertyChangedHandlerFieldName.Declaration;
-
-                var methodName = GetUnusedMemberName(
-                                    ctx.Target,
-                                    $"Update{pathForMemberNames}",
-                                    ref usedMemberNames );
-
-                var accessChildExprBuilder = new ExpressionBuilder();
-                // TODO: Assuming all ref types, which is probably a correct requirement, but we don't actaully check anywhere (I think).
-                accessChildExprBuilder.AppendVerbatim( string.Join( "?.", parentElementNames ) );
-
-                var accessChildExpression = accessChildExprBuilder.ToExpression();
-
-                var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
-                    ctx.Target,
-                    nameof( UpdateChildProperty ),
-                    IntroductionScope.Instance,
-                    OverrideStrategy.Fail,
-                    b =>
-                    {
-                        b.Name = methodName;
-
-                        if ( ctx.Target.IsSealed )
+                if ( hasBaseChangeMethods || !ctx.Target.IsSealed )
+                {
+                    var introduceOnChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
+                        ctx.Target,
+                        nameof( GenerateOnChangedBody ),
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Override,
+                        b =>
                         {
-                            b.Accessibility = Accessibility.Private;
-                        }
-                        else
-                        {
+                            b.Name = hasBaseChangeMethods
+                                ? baseChangeMethods!.OnChangedMethod.Name
+                                : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}Changed", ref usedMemberNames );
                             b.Accessibility = Accessibility.Protected;
                             b.IsVirtual = true;
-                        }
-                    },
-                    args: new
-                    {
-                        ctx,
-                        node = parent,
-                        accessChildExpression,
-                        lastValueField,
-                        onPropertyChangedHandlerField,
-                    } );
+                        },
+                        args: new
+                        {
+                            ctx,
+                            node = parent,
+                            propertyName = (string?) null,
+                            proceedAtEnd = true
+                        } );
 
-                parent.Data.UpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
+                    thisOnChangedMethod = introduceOnChangedMethodResult.Declaration;
+
+                    var introduceOnChildChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
+                        ctx.Target,
+                        nameof( GenerateOnChildChangedOverride ),
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Override,
+                        b =>
+                        {
+                            b.Name = hasBaseChangeMethods
+                                ? baseChangeMethods!.OnChildChangedMethod.Name
+                                : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}ChildChanged", ref usedMemberNames );
+                            b.Accessibility = Accessibility.Protected;
+                            b.IsVirtual = true;
+                        },
+                        args: new
+                        {
+                            ctx,
+                            node = parent
+                        } );
+
+                    thisOnChildChangedMethod = introduceOnChildChangedMethodResult.Declaration;
+                }
+
+                if ( !hasBaseChangeMethods )
+                {
+                    var lastValueFieldName = GetUnusedMemberName(
+                        ctx.Target,
+                        $"_last{pathForMemberNames}",
+                        ref usedMemberNames );
+
+                    var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
+                        ctx.Target,
+                        lastValueFieldName,
+                        parent.Data.FieldOrProperty.Type.ToNullableType(),
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Fail,
+                        b => b.Accessibility = Accessibility.Private );
+
+                    var lastValueField = introduceLastValueFieldResult.Declaration;
+
+                    var onPropertyChangedHandlerFieldName = GetUnusedMemberName(
+                        ctx.Target,
+                        $"_on{pathForMemberNames}ChangedHandler",
+                        ref usedMemberNames );
+
+                    var introduceOnPropertyChangedHandlerFieldName = ctx.Builder.Advice.IntroduceField(
+                        ctx.Target,
+                        onPropertyChangedHandlerFieldName,
+                        ctx.Type_Nullable_PropertyChangedEventHandler,
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Fail,
+                        b => b.Accessibility = Accessibility.Private );
+
+                    var onPropertyChangedHandlerField = introduceOnPropertyChangedHandlerFieldName.Declaration;
+
+                    var methodName = GetUnusedMemberName(
+                                        ctx.Target,
+                                        $"Update{pathForMemberNames}",
+                                        ref usedMemberNames );
+
+                    var accessChildExprBuilder = new ExpressionBuilder();
+
+                    accessChildExprBuilder.AppendVerbatim( string.Join( "?.", parentElementNames ) );
+
+                    var accessChildExpression = accessChildExprBuilder.ToExpression();
+
+                    var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
+                        ctx.Target,
+                        nameof( UpdateChildProperty ),
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Fail,
+                        b =>
+                        {
+                            b.Name = methodName;
+                            b.Accessibility = Accessibility.Private;
+                        },
+                        args: new
+                        {
+                            ctx,
+                            node = parent,
+                            accessChildExpression,
+                            lastValueField,
+                            onPropertyChangedHandlerField,
+                            discreteOnChangedMethod = thisOnChangedMethod,
+                            discreteOnChildChangedMethod = thisOnChildChangedMethod
+                        } );
+
+                    thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
+                }
+
+                parent.Data.SetMethods( thisUpdateMethod, thisOnChangedMethod, thisOnChildChangedMethod );
             }
         }
     }

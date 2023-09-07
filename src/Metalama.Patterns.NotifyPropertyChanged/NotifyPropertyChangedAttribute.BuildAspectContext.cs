@@ -1,7 +1,9 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
+using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -20,6 +22,15 @@ public sealed partial class NotifyPropertyChangedAttribute
             this.Type_PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof( PropertyChangedEventHandler ) );
             this.Type_Nullable_PropertyChangedEventHandler = this.Type_PropertyChangedEventHandler.ToNullableType();
             this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
+
+            var target = builder.Target;
+
+            this.BaseImplementsInpc =
+                target.BaseType != null && (
+                    target.BaseType.Is( this.Type_INotifyPropertyChanged )
+                    || (target.BaseType is { BelongsToCurrentProject: true } && target.BaseType.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
+
+            this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Type_INotifyPropertyChanged );
         }
 
         public IAspectBuilder<INamedType> Builder { get; }
@@ -36,7 +47,127 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public INamedType Type_IgnoreAutoChangeNotificationAttribute { get; }
 
+        public bool TargetImplementsInpc { get; }
+
+        public bool BaseImplementsInpc { get; }
+
         public IMethod OnPropertyChangedMethod { get; set; } = null!;
+
+        internal interface IBaseChangeMethods
+        {
+            IMethod OnChangedMethod { get; }
+
+            IMethod OnChildChangedMethod { get;  }
+        }
+
+        private class BaseChangeMethods : IBaseChangeMethods
+        {
+            public IMethod OnChangedMethod { get; set; } = null!;
+
+            public IMethod OnChildChangedMethod { get; set; } = null!;
+        }
+
+        private IReadOnlyDictionary<string, BaseChangeMethods> _baseChangeMethodsLookup;
+
+        private IReadOnlyDictionary<string, BaseChangeMethods> GetBaseChangeMethodLookup()
+        {            
+            var immediateBase = this.Target.BaseType;
+
+            if ( immediateBase != null )
+            {
+                Dictionary<string, BaseChangeMethods> lookup = new();
+
+                var typeOfMetadataAttribute = (INamedType) TypeFactory.GetType( typeof( MetadataAttribute ) );
+                var typeOfOnChangedAttribute = (INamedType) TypeFactory.GetType( typeof( OnChangedAttribute ) );
+                var typeOfOnChildChangedAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildChangedAttribute ) );
+
+                foreach ( var m in immediateBase.AllMethods )
+                {
+                    foreach ( var attr in m.Attributes.OfAttributeType( typeOfMetadataAttribute) )
+                    {
+                        var args = attr.ConstructorArguments;
+
+                        if ( args.Length != 1 )
+                        {
+                            throw new InvalidOperationException( $"Expected {attr.Type} to have exactly one constructor argument." );
+                        }
+
+                        if ( args[0].Type.SpecialType != SpecialType.String )
+                        {
+                            throw new InvalidOperationException( $"Expected {attr.Type} to have exactly one constructor argument of type string." );
+                        }
+
+                        var name = args[0].Value as string;
+
+                        if ( string.IsNullOrWhiteSpace( name ) )
+                        {
+                            throw new InvalidOperationException( $"Expected {attr.Type} to have exactly one constructor argument of type string which must not be null or whitespace." );
+                        }
+
+                        if ( !lookup.TryGetValue( name, out var entry ) )
+                        {
+                            entry = new();
+                            lookup[name] = entry;
+                        }
+                        
+                        if ( attr.Type.Is( typeOfOnChangedAttribute ) )
+                        {
+                            if ( entry.OnChangedMethod != null )
+                            {
+                                // TODO: Report diagnostic error?
+                                throw new InvalidOperationException( $"Found duplicate OnChanged methods for name '{name}'." );
+                            }
+                            entry.OnChangedMethod = m;
+                        }
+                        else if ( attr.Type.Is( typeOfOnChildChangedAttribute ) )
+                        {
+                            if ( entry.OnChildChangedMethod != null )
+                            {
+                                // TODO: Report diagnostic error?
+                                throw new InvalidOperationException( $"Found duplicate OnChildChanged methods for name '{name}'." );
+                            }
+                            entry.OnChildChangedMethod = m;
+                        }
+                        else
+                        {
+                            throw new NotSupportedException( attr.Type.ToDisplayString() );
+                        }
+                    }
+                }
+
+                foreach ( var kvp in lookup )
+                {
+                    if ( kvp.Value.OnChangedMethod == null != (kvp.Value.OnChildChangedMethod == null ))
+                    {
+                        // TODO: Report diagnostic error?
+                        throw new InvalidOperationException( $"The {(kvp.Value.OnChangedMethod == null ? "OnChanged" : "OnChildChanged")} method for property path {kvp.Key} is not defined." );
+                    }
+                }
+
+                return lookup;
+            }
+            else
+            {
+                return new Dictionary<string, BaseChangeMethods>();
+            }
+        }
+    
+        public bool TryGetBaseChangeMethods( string metadataPropertyPath, [NotNullWhen(true)] out IBaseChangeMethods? baseChangeMethods )
+        {
+            if ( this.BaseImplementsInpc )
+            {
+                this._baseChangeMethodsLookup ??= this.GetBaseChangeMethodLookup();
+
+                if ( this._baseChangeMethodsLookup.TryGetValue( metadataPropertyPath, out var result ) )
+                {
+                    baseChangeMethods = result;
+                    return true;
+                }
+            }
+
+            baseChangeMethods = null;
+            return false;
+        }
 
         private DependencyGraph.Node<NodeData>? _dependencyGraph;
 

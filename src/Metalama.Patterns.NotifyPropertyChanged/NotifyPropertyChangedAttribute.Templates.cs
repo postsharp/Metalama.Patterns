@@ -4,6 +4,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -45,7 +46,7 @@ public partial class NotifyPropertyChangedAttribute
 
                 meta.Target.FieldOrProperty.Value = value;
                 
-                GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+                GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
 
                 if ( node != null )
                 {
@@ -81,21 +82,12 @@ public partial class NotifyPropertyChangedAttribute
                     // So for emit the local var here then call the subtemplate to have more idomatic generated code.
                     // Also see other uses of GenerateBodyOfOnSpecificPropertyChanged.
                     var propertyName = e.PropertyName;
-                    var getPropertyNameExpression = ExpressionFactory.Capture( propertyName );
+                    var propertyNameExpression = ExpressionFactory.Capture( propertyName );
 
-                    GenerateBodyOfOnSpecificPropertyChanged( ctx, node, getPropertyNameExpression );
+                    GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
                 }
             }
         }
-    }
-
-    [CompileTime]
-    private enum EqualityComparisonKind
-    {
-        ReferenceEquals,
-        ThisEquals,
-        EqualityOperator,
-        None
     }
 
     [Template]
@@ -123,7 +115,7 @@ public partial class NotifyPropertyChangedAttribute
                     if ( meta.Target.FieldOrProperty.Value != value )
                     {
                         meta.Target.FieldOrProperty.Value = value;
-                        GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+                        GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
                     }
 
                     break;
@@ -132,7 +124,7 @@ public partial class NotifyPropertyChangedAttribute
                     if ( !meta.Target.FieldOrProperty.Value.Equals( value ) )
                     {
                         meta.Target.FieldOrProperty.Value = value;
-                        GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+                        GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
                     }
 
                     break;
@@ -141,14 +133,14 @@ public partial class NotifyPropertyChangedAttribute
                     if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
                     {
                         meta.Target.FieldOrProperty.Value = value;
-                        GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+                        GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
                     }
 
                     break;
 
                 case EqualityComparisonKind.None:
                     meta.Target.FieldOrProperty.Value = value;
-                    GenerateNotificationsAndCascadingUpdates( ctx, node, meta.Target.Property.Name );
+                    GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
 
                     break;
 
@@ -165,18 +157,8 @@ public partial class NotifyPropertyChangedAttribute
     [Template]
     private void OnPropertyChanged( [CallerMemberName] string? propertyName = null )
     {
+        meta.InsertComment( "Template: " + nameof( this.OnPropertyChanged ) );
         this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
-    }
-
-    [Template]
-    private static void UpdateChildren( [CompileTime] IEnumerable<IMethod> updateChildPropertyMethods ) // UpdateA2Children
-    {
-        // UpdateA2B2();
-        // ...
-        foreach ( var method in updateChildPropertyMethods )
-        {
-            method.Invoke();
-        }
     }
 
     [Template]
@@ -185,8 +167,11 @@ public partial class NotifyPropertyChangedAttribute
         [CompileTime] DependencyGraph.Node<NodeData> node,
         [CompileTime] IExpression accessChildExpression, 
         [CompileTime] IField lastValueField,
-        [CompileTime] IField onPropertyChangedHandlerField )
+        [CompileTime] IField onPropertyChangedHandlerField,
+        [CompileTime] IMethod? discreteOnChangedMethod,
+        [CompileTime] IMethod? discreteOnChildChangedMethod)
     {
+        meta.InsertComment( "Template: " + nameof( UpdateChildProperty ) );
         meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
         var newValue = accessChildExpression.Value;
@@ -206,24 +191,41 @@ public partial class NotifyPropertyChangedAttribute
 
             lastValueField.Value = newValue;
 
-            GenerateNotificationsAndCascadingUpdates( ctx, node, node.Symbol.Name );
+            if ( discreteOnChangedMethod != null )
+            {
+                discreteOnChangedMethod.Invoke();
+            }
+            else
+            {
+                GenerateOnChangedBody( ctx, node, node.Symbol.Name );
+            }
         }
-
+        
         void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )
         {
-            var propertyName = e.PropertyName;
-            var getPropertyNameExpression = ExpressionFactory.Capture( propertyName );
+            if ( discreteOnChildChangedMethod != null )
+            {
+                discreteOnChildChangedMethod.Invoke( e.PropertyName );
+            }
+            else
+            {
+                var propertyName = e.PropertyName;
+                var propertyNameExpression = ExpressionFactory.Capture( propertyName );
 
-            GenerateBodyOfOnSpecificPropertyChanged( ctx, node, getPropertyNameExpression );
+                GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
+            }
         }
     }
 
     [Template]
-    private static void GenerateNotificationsAndCascadingUpdates(
+    private static void GenerateOnChangedBody(
         [CompileTime] BuildAspectContext ctx,
         [CompileTime] DependencyGraph.Node<NodeData>? node,
-        [CompileTime] string propertyName )
+        [CompileTime] string? propertyName,
+        [CompileTime] bool proceedAtEnd = false )
     {
+        meta.InsertComment( $"Template: {nameof( GenerateOnChangedBody )} for {propertyName}" );
+
         if ( node != null )
         {
             var cascadeUpdateMethods = node.Children.Select( n => n.Data.UpdateMethod ).Where( m => m != null );
@@ -250,16 +252,40 @@ public partial class NotifyPropertyChangedAttribute
         // node is null for unreferenced (according to static compile time analsysis) root properties.
         if ( node == null || node.Parent!.IsRoot )
         {
+            if ( propertyName == null )
+            {
+                throw new InvalidOperationException( "Template: must specify node and/or propertyName." );
+            }
+
             ctx.OnPropertyChangedMethod.Invoke( propertyName );
+        }
+
+        if ( proceedAtEnd )
+        {
+            meta.Proceed();
         }
     }
 
     [Template]
-    private static void GenerateBodyOfOnSpecificPropertyChanged(
+    private static void GenerateOnChildChangedOverride(
+        string propertyName,
+        [CompileTime] BuildAspectContext ctx,
+        [CompileTime] DependencyGraph.Node<NodeData> node )
+    {
+        meta.InsertComment( "Template: " + nameof( GenerateOnChildChangedOverride ) );
+
+        GenerateOnChildChangedBody( ctx, node, ExpressionFactory.Capture( propertyName ), (IExpression?) meta.Proceed() );
+    }
+
+    [Template]
+    private static void GenerateOnChildChangedBody(
         [CompileTime] BuildAspectContext ctx,
         [CompileTime] DependencyGraph.Node<NodeData> node,        
-        [CompileTime] IExpression getPropertyNameExpression )
+        [CompileTime] IExpression propertyNameExpression,
+        [CompileTime] IExpression? statementBeforeReturn = null )
     {
+        meta.InsertComment( "Template: " + nameof( GenerateOnChildChangedBody ) );
+
         // TODO: How to build a switch statement nicely in a template?
         // For now, use if. Also, might use a runtime static readonly dictionary at least for the OnPropertyChanged calls.
         foreach ( var child in node.Children )
@@ -269,7 +295,7 @@ public partial class NotifyPropertyChangedAttribute
 
             if ( hasRefs || hasUpdateMethod )
             {
-                if ( getPropertyNameExpression.Value == child.Symbol.Name )
+                if ( propertyNameExpression.Value == child.Symbol.Name )
                 {
                     if ( hasUpdateMethod )
                     {
@@ -288,9 +314,19 @@ public partial class NotifyPropertyChangedAttribute
 
                     // TODO: How to build an if..else if.. statement nicely in a template?
                     // For now, use return.
+                    if ( statementBeforeReturn != null )
+                    {
+                        meta.InsertStatement( statementBeforeReturn );
+                    }
+
                     return;
                 }
             }
+        }
+
+        if ( statementBeforeReturn != null )
+        {
+            meta.InsertStatement( statementBeforeReturn );
         }
     }
 }
