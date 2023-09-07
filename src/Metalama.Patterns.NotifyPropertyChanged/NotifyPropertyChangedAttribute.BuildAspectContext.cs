@@ -7,6 +7,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged;
 
 public sealed partial class NotifyPropertyChangedAttribute
 {
+    [CompileTime]
     private sealed class BuildAspectContext
     {
         private readonly Dictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();

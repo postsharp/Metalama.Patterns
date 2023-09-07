@@ -1,7 +1,10 @@
-﻿namespace Metalama.Patterns.NotifyPropertyChanged;
+﻿using Metalama.Framework.Aspects;
+
+namespace Metalama.Patterns.NotifyPropertyChanged;
 
 public sealed partial class NotifyPropertyChangedAttribute
 {
+    [CompileTime]
     private enum InpcInstrumentationKind
     {
         None,
