@@ -79,7 +79,7 @@ class D
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyHelper.GetDependencyGraph<int>( type );
+        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type );
 
         this.TestOutput.WriteLine( result.ToString() );
 
@@ -111,7 +111,7 @@ class A
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyHelper.GetDependencyGraph<int>( type );
+        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type );
 
         this.TestOutput.WriteLine( result.ToString() );
     }
@@ -140,7 +140,7 @@ class A
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyHelper.GetDependencyGraph<int>( type );
+        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type );
 
         this.TestOutput.WriteLine( result.ToString() );
     }

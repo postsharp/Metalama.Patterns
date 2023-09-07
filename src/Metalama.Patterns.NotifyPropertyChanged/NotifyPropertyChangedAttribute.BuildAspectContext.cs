@@ -38,11 +38,11 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public IMethod OnPropertyChangedMethod { get; set; } = null!;
 
-        private DependencyHelper.TreeNode<NodeData>? _dependencyGraph;
+        private DependencyGraph.Node<NodeData>? _dependencyGraph;
 
-        private DependencyHelper.TreeNode<NodeData> PrepareDependencyGraph()
+        private DependencyGraph.Node<NodeData> PrepareDependencyGraph()
         {
-            var graph = DependencyHelper.GetDependencyGraph<NodeData>( this.Target );
+            var graph = Implementation.DependencyGraph.GetDependencyGraph<NodeData>( this.Target );
             foreach ( var node in graph.DecendantsDepthFirst() )
             {
                 node.Data.Initialize( this, node );
@@ -50,7 +50,7 @@ public sealed partial class NotifyPropertyChangedAttribute
             return graph;
         }
 
-        public DependencyHelper.TreeNode<NodeData> DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
+        public DependencyGraph.Node<NodeData> DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
 
         public InpcInstrumentationKind GetInpcInstrumentationKind( IType type )
         {

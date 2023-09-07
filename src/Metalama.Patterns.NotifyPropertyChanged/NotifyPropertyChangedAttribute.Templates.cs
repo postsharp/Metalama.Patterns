@@ -16,7 +16,7 @@ public partial class NotifyPropertyChangedAttribute
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
             var handlerField = (IField?) meta.Tags["handlerField"];
-            var node = (DependencyHelper.TreeNode<NodeData>?) meta.Tags["node"];
+            var node = (DependencyGraph.Node<NodeData>?) meta.Tags["node"];
             var eventRequiresCast = ctx.GetInpcInstrumentationKind( meta.Target.Property.Type ) is InpcInstrumentationKind.Explicit;
 
             meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
@@ -104,7 +104,7 @@ public partial class NotifyPropertyChangedAttribute
         set
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
-            var node = (DependencyHelper.TreeNode<NodeData>?) meta.Tags["node"];
+            var node = (DependencyGraph.Node<NodeData>?) meta.Tags["node"];
             var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
             var propertyTypeInstrumentationKind = (InpcInstrumentationKind) meta.Tags["propertyTypeInstrumentationKind"]!;
 
@@ -182,7 +182,7 @@ public partial class NotifyPropertyChangedAttribute
     [Template]
     private static void UpdateChildProperty(
         [CompileTime] BuildAspectContext ctx,
-        [CompileTime] DependencyHelper.TreeNode<NodeData> node,
+        [CompileTime] DependencyGraph.Node<NodeData> node,
         [CompileTime] IExpression accessChildExpression, 
         [CompileTime] IField lastValueField,
         [CompileTime] IField onPropertyChangedHandlerField )
@@ -221,7 +221,7 @@ public partial class NotifyPropertyChangedAttribute
     [Template]
     private static void GenerateNotificationsAndCascadingUpdates(
         [CompileTime] BuildAspectContext ctx,
-        [CompileTime] DependencyHelper.TreeNode<NodeData>? node,
+        [CompileTime] DependencyGraph.Node<NodeData>? node,
         [CompileTime] string propertyName )
     {
         if ( node != null )
@@ -257,7 +257,7 @@ public partial class NotifyPropertyChangedAttribute
     [Template]
     private static void GenerateBodyOfOnSpecificPropertyChanged(
         [CompileTime] BuildAspectContext ctx,
-        [CompileTime] DependencyHelper.TreeNode<NodeData> node,        
+        [CompileTime] DependencyGraph.Node<NodeData> node,        
         [CompileTime] IExpression getPropertyNameExpression )
     {
         // TODO: How to build a switch statement nicely in a template?
