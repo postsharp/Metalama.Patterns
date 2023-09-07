@@ -56,7 +56,10 @@ class D
  * Using a separator would not solve the problem, eg, use underscore, then apply to
  * 
  *  A_.BA => UpdateA__BA
- *  A._BA => UpdateA__BA
+ *  A._BA => UpdateA__BA_2()
+ * 
+ * We could use an exotic escaping pattern, but it's still possible that the user has defined
+ * a conflicting name.
  * 
  * When a derived class is looking for methods to overload in the base class, we need to determine
  * unambiguously which OnXXChanged etc method is which. Because of the above scenarios, this is made clear
@@ -67,7 +70,8 @@ class A_Desired : INotifyPropertyChanged
 {
     private int _a1;
 
-    //[Origin( "A1" )] - not strictly required as the property won't be renamed, but would increase robustness wrt obfuscation - but that's ouside current requirements.
+    // Not strictly required as the property won't be renamed, but would increase robustness wrt obfuscation - but that's ouside current requirements.
+    // [Origin( "A1" )] 
     public int A1
     {
         get
