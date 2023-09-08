@@ -1,5 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
@@ -35,7 +36,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         try
         {
             PreparePropertyChangedMethod( ctx );
-            GenerateUpdateMethods( ctx );
+            IntroduceUpdateMethods( ctx );
             ProcessAutoProperties( ctx );
         }
         catch ( DiagnosticErrorReportedException )
@@ -92,7 +93,82 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         ctx.OnPropertyChangedMethod = onPropertyChangedMethod;
     }
 
-    private static void GenerateUpdateMethods( BuildAspectContext ctx )
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <param name="onChangedMethodName"></param>
+    /// <param name="onChildChangedMethodName"></param>
+    /// <param name="node">
+    /// The graph node, when defined. Nodes are not defined for root properties of the target type which have no references.
+    /// </param>
+    /// <param name="propertyName">
+    /// If <paramref name="node"/> is not specified, this implies that the change methods are being introduced for a root
+    /// property of the target type, in which case <paramref name="propertyName"/> must be the name of the property.
+    /// </param>
+    /// <param name="propertyPathForMetadataAttributes"></param>
+    /// <returns></returns>
+    private static (IMethod OnChangedMethod, IMethod OnChildChangedMethod) IntroduceDiscreteChangeMethods( 
+        BuildAspectContext ctx,         
+        string onChangedMethodName, 
+        string onChildChangedMethodName,
+        DependencyGraph.Node<NodeData>? node,
+        string? propertyName,
+        string? propertyPathForMetadataAttributes )
+    {
+        if ( node == null && propertyName == null )
+        {
+            throw new ArgumentException( $"At least one of {nameof( node )} and {nameof( propertyName )} must be specified." );
+        }
+
+        var introduceOnChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
+            ctx.Target,
+            nameof( GenerateOnChangedBody ),
+            IntroductionScope.Instance,
+            OverrideStrategy.Override,
+            b =>
+            {
+                b.Name = onChangedMethodName;
+                b.Accessibility = Accessibility.Protected;
+                b.IsVirtual = true;
+                if ( propertyPathForMetadataAttributes != null )
+                {
+                    b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChangedAttribute, new[] { propertyPathForMetadataAttributes } ) );
+                }
+            },
+            args: new
+            {
+                ctx,
+                node,
+                propertyName,
+                proceedAtEnd = true
+            } );
+
+        var introduceOnChildChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
+            ctx.Target,
+            nameof( GenerateOnChildChangedOverride ),
+            IntroductionScope.Instance,
+            OverrideStrategy.Override,
+            b =>
+            {
+                b.Name = onChildChangedMethodName;
+                b.Accessibility = Accessibility.Protected;
+                b.IsVirtual = true;
+                if ( propertyPathForMetadataAttributes != null )
+                {
+                    b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChildChangedAttribute, new[] { propertyPathForMetadataAttributes } ) );
+                }
+            },
+            args: new
+            {
+                ctx,
+                node
+            } );
+
+        return (introduceOnChangedMethodResult.Declaration, introduceOnChildChangedMethodResult.Declaration);
+    }
+
+    private static void IntroduceUpdateMethods( BuildAspectContext ctx )
     {
         var allNodesDepthFirst = ctx.DependencyGraph.DecendantsDepthFirst().ToList();
         allNodesDepthFirst.Reverse();
@@ -139,49 +215,17 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 if ( hasBaseChangeMethods || !ctx.Target.IsSealed )
                 {
-                    var introduceOnChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
-                        ctx.Target,
-                        nameof( GenerateOnChangedBody ),
-                        IntroductionScope.Instance,
-                        OverrideStrategy.Override,
-                        b =>
-                        {
-                            b.Name = hasBaseChangeMethods
-                                ? baseChangeMethods!.OnChangedMethod.Name
-                                : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}Changed", ref usedMemberNames );
-                            b.Accessibility = Accessibility.Protected;
-                            b.IsVirtual = true;
-                        },
-                        args: new
-                        {
-                            ctx,
-                            node = parent,
-                            propertyName = (string?) null,
-                            proceedAtEnd = true
-                        } );
-
-                    thisOnChangedMethod = introduceOnChangedMethodResult.Declaration;
-
-                    var introduceOnChildChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
-                        ctx.Target,
-                        nameof( GenerateOnChildChangedOverride ),
-                        IntroductionScope.Instance,
-                        OverrideStrategy.Override,
-                        b =>
-                        {
-                            b.Name = hasBaseChangeMethods
-                                ? baseChangeMethods!.OnChildChangedMethod.Name
-                                : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}ChildChanged", ref usedMemberNames );
-                            b.Accessibility = Accessibility.Protected;
-                            b.IsVirtual = true;
-                        },
-                        args: new
-                        {
-                            ctx,
-                            node = parent
-                        } );
-
-                    thisOnChildChangedMethod = introduceOnChildChangedMethodResult.Declaration;
+                    (thisOnChangedMethod, thisOnChildChangedMethod) = IntroduceDiscreteChangeMethods(
+                        ctx,
+                        hasBaseChangeMethods
+                            ? baseChangeMethods!.OnChangedMethod.Name
+                            : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}Changed", ref usedMemberNames ),
+                        hasBaseChangeMethods
+                            ? baseChangeMethods!.OnChildChangedMethod.Name
+                            : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}ChildChanged", ref usedMemberNames ),
+                        parent,
+                        null,
+                        pathForMetadataLookup );
                 }
 
                 if ( !hasBaseChangeMethods )
@@ -276,6 +320,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         {
             var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
             var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
+            var hasBaseChangeMethods = ctx.TryGetBaseChangeMethods( p.Name, out var baseChangeMethods );
 
             switch ( p.Type.IsReferenceType )
             {
@@ -316,7 +361,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             ctx,
                             onPropertyChangedMethodHasCallerMemberNameAttribute,
                             handlerField,
-                            node
+                            node,
+                            discreteOnChangedMethod = baseChangeMethods?.OnChangedMethod,
+                            discreteOnChildChangedMethod = baseChangeMethods?.OnChildChangedMethod
                         } );
                     }
                     else

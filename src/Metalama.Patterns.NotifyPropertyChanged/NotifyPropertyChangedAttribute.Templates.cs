@@ -4,7 +4,6 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -19,7 +18,11 @@ public partial class NotifyPropertyChangedAttribute
             var handlerField = (IField?) meta.Tags["handlerField"];
             var node = (DependencyGraph.Node<NodeData>?) meta.Tags["node"];
             var eventRequiresCast = ctx.GetInpcInstrumentationKind( meta.Target.Property.Type ) is InpcInstrumentationKind.Explicit;
+            var discreteOnChangedMethod = (IMethod?) meta.Tags["discreteOnChangedMethod"];
+            var discreteOnChildChangedMethod = (IMethod?) meta.Tags["discreteOnChildChangedMethod"];
 
+            meta.InsertComment( "Template: " + nameof( OverrideInpcRefTypeProperty ) );
+            meta.InsertComment( $"discreteOnChangedMethod:{discreteOnChangedMethod != null}, discreteOnChildChangedMethod:{discreteOnChildChangedMethod != null}" );
             meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
             if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
@@ -45,8 +48,15 @@ public partial class NotifyPropertyChangedAttribute
                 }
 
                 meta.Target.FieldOrProperty.Value = value;
-                
-                GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
+
+                if ( discreteOnChangedMethod != null )
+                {
+                    discreteOnChangedMethod.Invoke();
+                }
+                else
+                {
+                    GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
+                }
 
                 if ( node != null )
                 {
@@ -72,19 +82,26 @@ public partial class NotifyPropertyChangedAttribute
             // This must be implemented as a local function because Metalama does not currently support delegates in any other way.
             void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
             {
-                // TODO: Don't emit this method at all if not needed.
-                // Currently, by my reckoning, the only way to do this is to have two variants of the OverrideInpcRefTypeProperty
-                // template, one with the local method and one without. Alternatively, richer support for delegates in templates
-                // could provide an cleaner solution.
-                if ( node != null )
+                if ( discreteOnChildChangedMethod != null )
                 {
-                    // TODO: Subtemplates emit unwanted extra nesting inside curly braces if the subtemplate defines local vars.
-                    // So for emit the local var here then call the subtemplate to have more idomatic generated code.
-                    // Also see other uses of GenerateBodyOfOnSpecificPropertyChanged.
-                    var propertyName = e.PropertyName;
-                    var propertyNameExpression = ExpressionFactory.Capture( propertyName );
+                    discreteOnChildChangedMethod.Invoke( e.PropertyName );
+                }
+                else
+                {
+                    // TODO: Don't emit this method at all if not needed.
+                    // Currently, by my reckoning, the only way to do this is to have two variants of the OverrideInpcRefTypeProperty
+                    // template, one with the local method and one without. Alternatively, richer support for delegates in templates
+                    // could provide an cleaner solution.
+                    if ( node != null )
+                    {
+                        // TODO: Subtemplates emit unwanted extra nesting inside curly braces if the subtemplate defines local vars.
+                        // So for emit the local var here then call the subtemplate to have more idomatic generated code.
+                        // Also see other uses of GenerateBodyOfOnSpecificPropertyChanged.
+                        var propertyName = e.PropertyName;
+                        var propertyNameExpression = ExpressionFactory.Capture( propertyName );
 
-                    GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
+                        GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
+                    }
                 }
             }
         }
@@ -172,6 +189,7 @@ public partial class NotifyPropertyChangedAttribute
         [CompileTime] IMethod? discreteOnChildChangedMethod)
     {
         meta.InsertComment( "Template: " + nameof( UpdateChildProperty ) );
+        meta.InsertComment( $"discreteOnChangedMethod:{discreteOnChangedMethod != null}, discreteOnChildChangedMethod:{discreteOnChildChangedMethod != null}" );
         meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
         var newValue = accessChildExpression.Value;
@@ -280,46 +298,49 @@ public partial class NotifyPropertyChangedAttribute
     [Template]
     private static void GenerateOnChildChangedBody(
         [CompileTime] BuildAspectContext ctx,
-        [CompileTime] DependencyGraph.Node<NodeData> node,        
+        [CompileTime] DependencyGraph.Node<NodeData>? node,        
         [CompileTime] IExpression propertyNameExpression,
         [CompileTime] IExpression? statementBeforeReturn = null )
     {
         meta.InsertComment( "Template: " + nameof( GenerateOnChildChangedBody ) );
 
-        // TODO: How to build a switch statement nicely in a template?
-        // For now, use if. Also, might use a runtime static readonly dictionary at least for the OnPropertyChanged calls.
-        foreach ( var child in node.Children )
+        if ( node != null )
         {
-            var hasRefs = child.DirectReferences.Count > 0;
-            var hasUpdateMethod = child.Data.UpdateMethod != null;
-
-            if ( hasRefs || hasUpdateMethod )
+            // TODO: How to build a switch statement nicely in a template?
+            // For now, use if. Also, might use a runtime static readonly dictionary at least for the OnPropertyChanged calls.
+            foreach ( var child in node.Children )
             {
-                if ( propertyNameExpression.Value == child.Symbol.Name )
+                var hasRefs = child.DirectReferences.Count > 0;
+                var hasUpdateMethod = child.Data.UpdateMethod != null;
+
+                if ( hasRefs || hasUpdateMethod )
                 {
-                    if ( hasUpdateMethod )
+                    if ( propertyNameExpression.Value == child.Symbol.Name )
                     {
-                        child.Data.UpdateMethod.Invoke();
-                    }
-
-                    if ( hasRefs )
-                    {
-                        var affectedPropertyNames = child.GetAllReferences().Select( n => n.Symbol.Name ).OrderBy( s => s );
-
-                        foreach ( var name in affectedPropertyNames )
+                        if ( hasUpdateMethod )
                         {
-                            ctx.OnPropertyChangedMethod.Invoke( name );
+                            child.Data.UpdateMethod.Invoke();
                         }
-                    }
 
-                    // TODO: How to build an if..else if.. statement nicely in a template?
-                    // For now, use return.
-                    if ( statementBeforeReturn != null )
-                    {
-                        meta.InsertStatement( statementBeforeReturn );
-                    }
+                        if ( hasRefs )
+                        {
+                            var affectedPropertyNames = child.GetAllReferences().Select( n => n.Symbol.Name ).OrderBy( s => s );
 
-                    return;
+                            foreach ( var name in affectedPropertyNames )
+                            {
+                                ctx.OnPropertyChangedMethod.Invoke( name );
+                            }
+                        }
+
+                        // TODO: How to build an if..else if.. statement nicely in a template?
+                        // For now, use return.
+                        if ( statementBeforeReturn != null )
+                        {
+                            meta.InsertStatement( statementBeforeReturn );
+                        }
+
+                        return;
+                    }
                 }
             }
         }

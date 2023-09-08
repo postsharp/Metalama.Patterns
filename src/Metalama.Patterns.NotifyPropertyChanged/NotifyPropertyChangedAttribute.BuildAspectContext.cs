@@ -22,6 +22,8 @@ public sealed partial class NotifyPropertyChangedAttribute
             this.Type_PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof( PropertyChangedEventHandler ) );
             this.Type_Nullable_PropertyChangedEventHandler = this.Type_PropertyChangedEventHandler.ToNullableType();
             this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
+            this.Type_OnChangedAttribute= (INamedType) TypeFactory.GetType( typeof( OnChangedAttribute ) );
+            this.Type_OnChildChangedAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildChangedAttribute ) );
 
             var target = builder.Target;
 
@@ -46,6 +48,10 @@ public sealed partial class NotifyPropertyChangedAttribute
         public INamedType Type_Nullable_PropertyChangedEventHandler { get; }
 
         public INamedType Type_IgnoreAutoChangeNotificationAttribute { get; }
+
+        public INamedType Type_OnChangedAttribute { get; }
+
+        public INamedType Type_OnChildChangedAttribute { get; }
 
         public bool TargetImplementsInpc { get; }
 
@@ -78,8 +84,6 @@ public sealed partial class NotifyPropertyChangedAttribute
                 Dictionary<string, BaseChangeMethods> lookup = new();
 
                 var typeOfMetadataAttribute = (INamedType) TypeFactory.GetType( typeof( MetadataAttribute ) );
-                var typeOfOnChangedAttribute = (INamedType) TypeFactory.GetType( typeof( OnChangedAttribute ) );
-                var typeOfOnChildChangedAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildChangedAttribute ) );
 
                 foreach ( var m in immediateBase.AllMethods )
                 {
@@ -110,7 +114,7 @@ public sealed partial class NotifyPropertyChangedAttribute
                             lookup[name] = entry;
                         }
                         
-                        if ( attr.Type.Is( typeOfOnChangedAttribute ) )
+                        if ( attr.Type.Is( this.Type_OnChangedAttribute ) )
                         {
                             if ( entry.OnChangedMethod != null )
                             {
@@ -119,7 +123,7 @@ public sealed partial class NotifyPropertyChangedAttribute
                             }
                             entry.OnChangedMethod = m;
                         }
-                        else if ( attr.Type.Is( typeOfOnChildChangedAttribute ) )
+                        else if ( attr.Type.Is( this.Type_OnChildChangedAttribute ) )
                         {
                             if ( entry.OnChildChangedMethod != null )
                             {
