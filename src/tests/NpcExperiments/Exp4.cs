@@ -40,6 +40,8 @@ class C<T> where T : struct
 interface IFoo
 {
     int X { get; }
+
+    int Y { get; }
 }
 
 [NotifyPropertyChanged]
@@ -49,3 +51,11 @@ class D<T> where T : class, INotifyPropertyChanged, IFoo
 
     public int FooX => A1.X;
 }
+
+// TODO: Pending #33751
+#if false
+class DD<T> : D<T> where T : class, INotifyPropertyChanged, IFoo
+{
+    public int FooY => A1.Y;
+}
+#endif

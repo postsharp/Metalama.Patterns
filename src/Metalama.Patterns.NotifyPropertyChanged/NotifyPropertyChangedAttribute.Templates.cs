@@ -3,13 +3,16 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
 public partial class NotifyPropertyChangedAttribute
 {
+    [CompileTime]
+    static void CompileTimeThrow( Exception e )
+        => throw e;
+
     [Template]
     private static dynamic? OverrideInpcRefTypeProperty
     {
@@ -135,6 +138,7 @@ public partial class NotifyPropertyChangedAttribute
                 EqualityComparisonKind.EqualityOperator => (IExpression) (meta.Target.FieldOrProperty.Value != value),
                 EqualityComparisonKind.ThisEquals => (IExpression) !meta.Target.FieldOrProperty.Value.Equals( value ),
                 EqualityComparisonKind.ReferenceEquals => (IExpression) !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ),
+                EqualityComparisonKind.DefaultEqualityComparer => (IExpression) !ctx.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value.Equals( value, meta.Target.FieldOrProperty.Value ),
                 _ => null
             };
 
@@ -167,47 +171,6 @@ public partial class NotifyPropertyChangedAttribute
                     }
                 }
             }
-
-#if false
-            switch ( compareUsing )
-            {
-                case EqualityComparisonKind.EqualityOperator:
-                    if ( meta.Target.FieldOrProperty.Value != value )
-                    {
-                        meta.Target.FieldOrProperty.Value = value;
-                        GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
-                    }
-
-                    break;
-
-                case EqualityComparisonKind.ThisEquals:
-                    if ( !meta.Target.FieldOrProperty.Value.Equals( value ) )
-                    {
-                        meta.Target.FieldOrProperty.Value = value;
-                        GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
-                    }
-
-                    break;
-
-                case EqualityComparisonKind.ReferenceEquals:
-                    if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
-                    {
-                        meta.Target.FieldOrProperty.Value = value;
-                        GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
-                    }
-
-                    break;
-
-                case EqualityComparisonKind.None:
-                    meta.Target.FieldOrProperty.Value = value;
-                    GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
-
-                    break;
-
-                default:
-                    throw new NotSupportedException( compareUsing.ToString() );
-            }
-#endif
         }
     }
 
@@ -287,6 +250,7 @@ public partial class NotifyPropertyChangedAttribute
         [CompileTime] bool proceedAtEnd = false )
     {
         meta.InsertComment( $"Template: {nameof( GenerateOnChangedBody )} for {propertyName}" );
+        meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
         if ( node != null )
         {
@@ -314,9 +278,12 @@ public partial class NotifyPropertyChangedAttribute
         // node is null for unreferenced (according to static compile time analsysis) root properties.
         if ( node == null || node.Parent!.IsRoot )
         {
+            propertyName ??= node?.Symbol.Name;
+
             if ( propertyName == null )
             {
-                throw new InvalidOperationException( "Template: must specify node and/or propertyName." );
+                meta.InsertComment( "Error: must specify node and/or propertyName." );
+                CompileTimeThrow( new InvalidOperationException( "Template: must specify node and/or propertyName." ) );
             }
 
             ctx.OnPropertyChangedMethod.Invoke( propertyName );
@@ -336,7 +303,7 @@ public partial class NotifyPropertyChangedAttribute
     {
         meta.InsertComment( "Template: " + nameof( GenerateOnChildChangedOverride ) );
 
-        GenerateOnChildChangedBody( ctx, node, ExpressionFactory.Capture( propertyName ), (IExpression?) meta.Proceed() );
+        GenerateOnChildChangedBody( ctx, node, ExpressionFactory.Capture( propertyName ), true );
     }
 
     [Template]
@@ -344,9 +311,10 @@ public partial class NotifyPropertyChangedAttribute
         [CompileTime] BuildAspectContext ctx,
         [CompileTime] DependencyGraph.Node<NodeData>? node,        
         [CompileTime] IExpression propertyNameExpression,
-        [CompileTime] IExpression? statementBeforeReturn = null )
-    {
+        [CompileTime] bool proceedBeforeReturn = false )
+    {        
         meta.InsertComment( "Template: " + nameof( GenerateOnChildChangedBody ) );
+        meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
         if ( node != null )
         {
@@ -378,9 +346,9 @@ public partial class NotifyPropertyChangedAttribute
 
                         // TODO: How to build an if..else if.. statement nicely in a template?
                         // For now, use return.
-                        if ( statementBeforeReturn != null )
+                        if ( proceedBeforeReturn )
                         {
-                            meta.InsertStatement( statementBeforeReturn );
+                            meta.Proceed();
                         }
 
                         return;
@@ -389,9 +357,9 @@ public partial class NotifyPropertyChangedAttribute
             }
         }
 
-        if ( statementBeforeReturn != null )
+        if ( proceedBeforeReturn )
         {
-            meta.InsertStatement( statementBeforeReturn );
+            meta.Proceed();
         }
     }
 }

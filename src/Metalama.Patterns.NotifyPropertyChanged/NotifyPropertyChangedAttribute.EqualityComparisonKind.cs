@@ -12,6 +12,7 @@ public partial class NotifyPropertyChangedAttribute
         ReferenceEquals,
         ThisEquals,
         EqualityOperator,
+        DefaultEqualityComparer,
         None
     }
 }

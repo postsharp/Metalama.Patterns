@@ -24,6 +24,7 @@ public sealed partial class NotifyPropertyChangedAttribute
             this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
             this.Type_OnChangedAttribute= (INamedType) TypeFactory.GetType( typeof( OnChangedAttribute ) );
             this.Type_OnChildChangedAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildChangedAttribute ) );
+            this.Type_EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof( EqualityComparer<> ) );
 
             var target = builder.Target;
 
@@ -53,11 +54,16 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public INamedType Type_OnChildChangedAttribute { get; }
 
+        public INamedType Type_EqualityComparerOfT { get; }
+
         public bool TargetImplementsInpc { get; }
 
         public bool BaseImplementsInpc { get; }
 
         public IMethod OnPropertyChangedMethod { get; set; } = null!;
+
+        public IProperty GetDefaultEqualityComparerForType( IType type )
+            => this.Type_EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
 
         internal interface IBaseChangeMethods
         {

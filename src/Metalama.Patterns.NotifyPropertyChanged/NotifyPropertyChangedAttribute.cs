@@ -100,7 +100,10 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     /// </summary>
     /// <param name="ctx"></param>
     /// <param name="onChangedMethodName"></param>
-    /// <param name="onChildChangedMethodName"></param>
+    /// <param name="onChildChangedMethodName">
+    /// The name to use for the <c>OnChildChangedMethod</c>, or <see langword="null"/> if the
+    /// <c>OnChildChangedMethod</c> should not be introduced.
+    /// </param>
     /// <param name="node">
     /// The graph node, when defined. Nodes are not defined for root properties of the target type which have no references.
     /// </param>
@@ -113,11 +116,10 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     private static (IMethod OnChangedMethod, IMethod? OnChildChangedMethod) IntroduceDiscreteChangeMethods( 
         BuildAspectContext ctx,         
         string onChangedMethodName, 
-        string onChildChangedMethodName,
+        string? onChildChangedMethodName,
         DependencyGraph.Node<NodeData>? node,
         string? propertyName,
-        string? propertyPathForMetadataAttributes,
-        bool disableOnChildChangedMethod = false )
+        string propertyPathForMetadataAttributes )
     {
         if ( node == null && propertyName == null )
         {
@@ -133,8 +135,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             {
                 b.Name = onChangedMethodName;
                 b.Accessibility = Accessibility.Protected;
-                b.IsVirtual = true;
-                if ( propertyPathForMetadataAttributes != null )
+                b.IsVirtual = !ctx.Target.IsSealed && !b.IsOverride;
+
+                if ( !ctx.Target.IsSealed && !b.IsOverride )
                 {
                     b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChangedAttribute, new[] { propertyPathForMetadataAttributes } ) );
                 }
@@ -149,7 +152,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
         IMethod? onChildChangedMethod = null;
 
-        if ( !disableOnChildChangedMethod )
+        if ( onChildChangedMethodName != null )
         {
             var introduceOnChildChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
                 ctx.Target,
@@ -160,8 +163,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 {
                     b.Name = onChildChangedMethodName;
                     b.Accessibility = Accessibility.Protected;
-                    b.IsVirtual = true;
-                    if ( propertyPathForMetadataAttributes != null )
+                    b.IsVirtual = !ctx.Target.IsSealed && !b.IsOverride;
+
+                    if ( !ctx.Target.IsSealed && !b.IsOverride )
                     {
                         b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChildChangedAttribute, new[] { propertyPathForMetadataAttributes } ) );
                     }
@@ -195,24 +199,27 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
         foreach ( var node in allNodesDepthFirst )
         {
-            var parent = node.Parent!;
+            var nodeToProcess = node.Parent!;
 
-            if ( parent.IsRoot )
+            if ( nodeToProcess.IsRoot )
             {
-                // *node* is a root property of the target type. Do we need to do anything for it?
-                continue;
+                // *node* is a root property of the target type. Always consider processing these, in case
+                // they have not been processed already.
+                nodeToProcess = node;
             }
 
-            if ( parent.Parent!.IsRoot )
+            /*
+            if ( nodeToProcess.Parent!.IsRoot )
             {
                 // *parent* is a root property of the target type. Do we need to do anything for it?
                 continue;
             }
+            */
 
-            if ( !parent.Data.MethodsHaveBeenSet )
+            if ( !nodeToProcess.Data.MethodsHaveBeenSet )
             {
                 // eg, for node X.Y.Z, parentElementNames is [X,Y]
-                var parentElementNames = parent.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ).ToList();
+                var parentElementNames = nodeToProcess.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ).ToList();
 
                 var pathForMemberNames = string.Join( "", parentElementNames );
                 var pathForMetadataLookup = string.Join( ".", parentElementNames );
@@ -231,14 +238,17 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             ? baseChangeMethods!.OnChangedMethod.Name
                             : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}Changed", ref usedMemberNames ),
                         hasBaseChangeMethods
-                            ? baseChangeMethods!.OnChildChangedMethod.Name
+                            ? baseChangeMethods!.OnChildChangedMethod?.Name
                             : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}ChildChanged", ref usedMemberNames ),
-                        parent,
+                        nodeToProcess,
                         null,
                         pathForMetadataLookup );
                 }
 
-                if ( !hasBaseChangeMethods )
+                // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
+                if ( !hasBaseChangeMethods 
+                    && !nodeToProcess.Parent!.IsRoot 
+                    && ctx.GetInpcInstrumentationKind( nodeToProcess.Data.FieldOrProperty.Type ) is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
                 {
                     var lastValueFieldName = GetUnusedMemberName(
                         ctx.Target,
@@ -248,7 +258,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
                         ctx.Target,
                         lastValueFieldName,
-                        parent.Data.FieldOrProperty.Type.ToNullableType(),
+                        nodeToProcess.Data.FieldOrProperty.Type.ToNullableType(),
                         IntroductionScope.Instance,
                         OverrideStrategy.Fail,
                         b => b.Accessibility = Accessibility.Private );
@@ -294,7 +304,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                         args: new
                         {
                             ctx,
-                            node = parent,
+                            node = nodeToProcess,
                             accessChildExpression,
                             lastValueField,
                             onPropertyChangedHandlerField,
@@ -305,7 +315,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
                 }
 
-                parent.Data.SetMethods( thisUpdateMethod, thisOnChangedMethod, thisOnChildChangedMethod );
+                nodeToProcess.Data.SetMethods( thisUpdateMethod, thisOnChangedMethod, thisOnChildChangedMethod );
             }
         }
     }
@@ -333,17 +343,17 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 // TODO: Proper error reporting.
                 throw new NotSupportedException( "Virtual properties are not supported." );
             }
-            
+
             if ( p.IsNew )
             {
                 // TODO: Proper error reporting.
                 throw new NotSupportedException( "'new' properties are not supported." );
             }
 
-            var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
             var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
-           
+            var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
+
             var considerIntroducingOnChangedMethod = false;
             var considerIntroducingOnChildChangedMethod = false;
 
@@ -397,11 +407,10 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 (discreteOnChangedMethod, discreteOnChildChangedMethod) = IntroduceDiscreteChangeMethods(
                     ctx,
                     $"On{p.Name}Changed",
-                    $"On{p.Name}ChildChanged",
+                    considerIntroducingOnChildChangedMethod ? $"On{p.Name}ChildChanged" : null,
                     node,
                     p.Name,
-                    p.Name,
-                    disableOnChildChangedMethod: !considerIntroducingOnChildChangedMethod );
+                    p.Name );
 
                 node?.Data.SetMethods( null, discreteOnChangedMethod, discreteOnChildChangedMethod );
             }
@@ -454,11 +463,15 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 case false:
 
+                    var comparisonKind = p.Type is INamedType nt && nt.SpecialType != SpecialType.ValueTask_T
+                        ? EqualityComparisonKind.EqualityOperator
+                        : EqualityComparisonKind.DefaultEqualityComparer;
+
                     ctx.Builder.Advice.Override( p, nameof( OverrideUninstrumentedTypeProperty ), tags: new
                     {
                         ctx,
                         node,
-                        compareUsing = EqualityComparisonKind.EqualityOperator,
+                        compareUsing = comparisonKind,
                         propertyTypeInstrumentationKind,
                         discreteOnChangedMethod
                     } );
