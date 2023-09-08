@@ -2,6 +2,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
+using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -17,7 +18,7 @@ public sealed partial class NotifyPropertyChangedAttribute
         }
 
         public IFieldOrProperty FieldOrProperty { get; private set; }
-
+        
         /// <summary>
         /// Gets a method like <c>void UpdateA2C2()</c>. 
         /// </summary>
@@ -30,7 +31,8 @@ public sealed partial class NotifyPropertyChangedAttribute
         /// OnA2C2Changed and OnA2C2ChildChanged - and these are called from <see cref="UpdateMethod"/>.
         /// 
         /// When processing a derived type, we first search base types for the corresponding <see cref="OnChangedMethod"/>
-        /// and <see cref="OnChildChangedMethod"/>. Both or neither of these two must be present. If both are present,
+        /// and <see cref="OnChildChangedMethod"/>. <see cref="OnChildChangedMethod"/> is only defined for property
+        /// types that implement <see cref="INotifyPropertyChanged"/>. If present,
         /// the derived type will override these methods if required, tail-calling the base method. If neither are present,
         /// then <see cref="UpdateMethod"/> must be generated (see the first paragraph above).
         /// </remarks>
@@ -55,14 +57,14 @@ public sealed partial class NotifyPropertyChangedAttribute
                 throw new InvalidOperationException( "Methods have already been set." );
             }
 
-            if ( onChangedMethod == null != (onChildChangedMethod == null) )
+            if ( onChildChangedMethod != null & onChangedMethod == null )
             {
-                throw new ArgumentException( "Both or neither of " + nameof( onChangedMethod ) + " and " + nameof( onChildChangedMethod ) + " must be set." );
+                throw new ArgumentException( $"If {nameof( onChildChangedMethod )} is specified, {nameof( onChangedMethod )} must also be specified." );
             }
 
             if ( updateMethod == null && onChangedMethod == null )
             {
-                throw new ArgumentException( "At least one method must be set." );
+                throw new ArgumentException( "At least one method must be specified." );
             }
 
             this.UpdateMethod = updateMethod;

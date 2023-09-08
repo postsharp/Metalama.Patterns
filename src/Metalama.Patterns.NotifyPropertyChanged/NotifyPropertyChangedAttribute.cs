@@ -6,6 +6,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
@@ -31,11 +32,12 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
     void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder )
     {
+        Debugger.Break();
         var ctx = new BuildAspectContext( builder );
 
         try
         {
-            PreparePropertyChangedMethod( ctx );
+            FindOrIntroducePropertyChangedMethod( ctx );
             IntroduceUpdateMethods( ctx );
             ProcessAutoProperties( ctx );
         }
@@ -45,7 +47,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         }
     }
 
-    private static void PreparePropertyChangedMethod( BuildAspectContext ctx )
+    private static void FindOrIntroducePropertyChangedMethod( BuildAspectContext ctx )
     {
         var builder = ctx.Builder;
         var target = builder.Target;
@@ -94,7 +96,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     }
 
     /// <summary>
-    /// 
+    /// Introduces discrete change methods.
     /// </summary>
     /// <param name="ctx"></param>
     /// <param name="onChangedMethodName"></param>
@@ -108,13 +110,14 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     /// </param>
     /// <param name="propertyPathForMetadataAttributes"></param>
     /// <returns></returns>
-    private static (IMethod OnChangedMethod, IMethod OnChildChangedMethod) IntroduceDiscreteChangeMethods( 
+    private static (IMethod OnChangedMethod, IMethod? OnChildChangedMethod) IntroduceDiscreteChangeMethods( 
         BuildAspectContext ctx,         
         string onChangedMethodName, 
         string onChildChangedMethodName,
         DependencyGraph.Node<NodeData>? node,
         string? propertyName,
-        string? propertyPathForMetadataAttributes )
+        string? propertyPathForMetadataAttributes,
+        bool disableOnChildChangedMethod = false )
     {
         if ( node == null && propertyName == null )
         {
@@ -144,28 +147,35 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 proceedAtEnd = true
             } );
 
-        var introduceOnChildChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
-            ctx.Target,
-            nameof( GenerateOnChildChangedOverride ),
-            IntroductionScope.Instance,
-            OverrideStrategy.Override,
-            b =>
-            {
-                b.Name = onChildChangedMethodName;
-                b.Accessibility = Accessibility.Protected;
-                b.IsVirtual = true;
-                if ( propertyPathForMetadataAttributes != null )
-                {
-                    b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChildChangedAttribute, new[] { propertyPathForMetadataAttributes } ) );
-                }
-            },
-            args: new
-            {
-                ctx,
-                node
-            } );
+        IMethod? onChildChangedMethod = null;
 
-        return (introduceOnChangedMethodResult.Declaration, introduceOnChildChangedMethodResult.Declaration);
+        if ( !disableOnChildChangedMethod )
+        {
+            var introduceOnChildChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
+                ctx.Target,
+                nameof( GenerateOnChildChangedOverride ),
+                IntroductionScope.Instance,
+                OverrideStrategy.Override,
+                b =>
+                {
+                    b.Name = onChildChangedMethodName;
+                    b.Accessibility = Accessibility.Protected;
+                    b.IsVirtual = true;
+                    if ( propertyPathForMetadataAttributes != null )
+                    {
+                        b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChildChangedAttribute, new[] { propertyPathForMetadataAttributes } ) );
+                    }
+                },
+                args: new
+                {
+                    ctx,
+                    node
+                } );
+
+            onChildChangedMethod = introduceOnChildChangedMethodResult.Declaration;
+        }
+
+        return (introduceOnChangedMethodResult.Declaration, onChildChangedMethod);
     }
 
     private static void IntroduceUpdateMethods( BuildAspectContext ctx )
@@ -318,9 +328,24 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
         foreach ( var p in autoProperties )
         {
+            if ( p.IsVirtual )
+            {
+                // TODO: Proper error reporting.
+                throw new NotSupportedException( "Virtual properties are not supported." );
+            }
+            
+            if ( p.IsNew )
+            {
+                // TODO: Proper error reporting.
+                throw new NotSupportedException( "'new' properties are not supported." );
+            }
+
             var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
             var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
-            var hasBaseChangeMethods = ctx.TryGetBaseChangeMethods( p.Name, out var baseChangeMethods );
+            var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
+           
+            var considerIntroducingOnChangedMethod = false;
+            var considerIntroducingOnChildChangedMethod = false;
 
             switch ( p.Type.IsReferenceType )
             {
@@ -331,14 +356,62 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 case true:
 
-                    if ( propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
+                    if ( propertyTypeImplementsInpc )
                     {
                         if ( p.InitializerExpression != null )
                         {
+                            // TODO: Support this pattern by moving initializer to ctor.
                             ctx.Builder.Diagnostics.Report( DiagnosticDescriptors.NotifyPropertyChanged.FieldOrPropertyHasAnInitializerExpression.WithArguments( (p.DeclarationKind, p) ), p );
                             continue;
                         }
+                        considerIntroducingOnChangedMethod = true;
+                        considerIntroducingOnChildChangedMethod = true;
+                    }
+                    else
+                    {
+                        considerIntroducingOnChangedMethod = true;
+                    }
+                    break;
 
+                case false:
+
+                    if ( propertyTypeImplementsInpc )
+                    {
+                        // TODO: Proper error reporting.
+                        throw new NotSupportedException( "structs implementing INotifyPropertyChanged are not supported." );
+                    }
+                    considerIntroducingOnChangedMethod = true;
+                    break;
+            }
+
+            IMethod? discreteOnChangedMethod = null;
+            IMethod? discreteOnChildChangedMethod = null;
+
+            if ( node?.Data is { MethodsHaveBeenSet: true } )
+            {
+                discreteOnChangedMethod = node.Data.OnChangedMethod;
+                discreteOnChildChangedMethod = node.Data.OnChildChangedMethod;
+            }
+            else if ( considerIntroducingOnChangedMethod && !ctx.Target.IsSealed )
+            {
+                (discreteOnChangedMethod, discreteOnChildChangedMethod) = IntroduceDiscreteChangeMethods(
+                    ctx,
+                    $"On{p.Name}Changed",
+                    $"On{p.Name}ChildChanged",
+                    node,
+                    p.Name,
+                    p.Name,
+                    disableOnChildChangedMethod: !considerIntroducingOnChildChangedMethod );
+
+                node?.Data.SetMethods( null, discreteOnChangedMethod, discreteOnChildChangedMethod );
+            }
+
+            switch ( p.Type.IsReferenceType )
+            {
+                case true:
+
+                    if ( propertyTypeImplementsInpc )
+                    {
                         var hasDependentProperties = node != null;
 
                         IField? handlerField = null;
@@ -362,8 +435,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             onPropertyChangedMethodHasCallerMemberNameAttribute,
                             handlerField,
                             node,
-                            discreteOnChangedMethod = baseChangeMethods?.OnChangedMethod,
-                            discreteOnChildChangedMethod = baseChangeMethods?.OnChildChangedMethod
+                            discreteOnChangedMethod,
+                            discreteOnChildChangedMethod
                         } );
                     }
                     else
@@ -373,25 +446,21 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             ctx,
                             node,
                             compareUsing = EqualityComparisonKind.ReferenceEquals,
-                            propertyTypeInstrumentationKind
+                            propertyTypeInstrumentationKind,
+                            discreteOnChangedMethod
                         } );
                     }
                     break;
 
                 case false:
 
-                    if ( propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
-                    {
-                        // TODO: Proper error reporting.
-                        throw new NotSupportedException( "structs implementing INotifyPropertyChanged are not supported." );
-                    }
-
                     ctx.Builder.Advice.Override( p, nameof( OverrideUninstrumentedTypeProperty ), tags: new
                     {
                         ctx,
                         node,
                         compareUsing = EqualityComparisonKind.EqualityOperator,
-                        propertyTypeInstrumentationKind
+                        propertyTypeInstrumentationKind,
+                        discreteOnChangedMethod
                     } );
                     break;
             }

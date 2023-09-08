@@ -21,7 +21,7 @@ class A
     public int A4 => A2.C2.D1;
 }
 
-class B : A
+sealed class B : A
 {
     public int B1 { get; set; }
 

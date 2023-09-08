@@ -61,16 +61,23 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         internal interface IBaseChangeMethods
         {
+            /// <summary>
+            /// Gets a method like <c>void OnA1B1Changed()</c>.
+            /// </summary>
             IMethod OnChangedMethod { get; }
 
-            IMethod OnChildChangedMethod { get;  }
+            /// <summary>
+            /// Gets for property types that implement <see cref="INotifyPropertyChanged"/>, a method like <c>void OnA1B1ChildChanged( string propertyName )</c>;
+            /// otherwise, <see langword="null"/>.
+            /// </summary>
+            IMethod? OnChildChangedMethod { get;  }
         }
 
         private class BaseChangeMethods : IBaseChangeMethods
         {
             public IMethod OnChangedMethod { get; set; } = null!;
 
-            public IMethod OnChildChangedMethod { get; set; } = null!;
+            public IMethod? OnChildChangedMethod { get; set; }
         }
 
         private IReadOnlyDictionary<string, BaseChangeMethods> _baseChangeMethodsLookup;
@@ -141,10 +148,10 @@ public sealed partial class NotifyPropertyChangedAttribute
 
                 foreach ( var kvp in lookup )
                 {
-                    if ( kvp.Value.OnChangedMethod == null != (kvp.Value.OnChildChangedMethod == null ))
+                    if ( kvp.Value.OnChangedMethod == null )
                     {
                         // TODO: Report diagnostic error?
-                        throw new InvalidOperationException( $"The {(kvp.Value.OnChangedMethod == null ? "OnChanged" : "OnChildChanged")} method for property path {kvp.Key} is not defined." );
+                        throw new InvalidOperationException( $"The OnChildChanged method for property path {kvp.Key} is defined, but the OnChanged method is not. If OnChildChanged, then OnChanged must also be defined." );
                     }
                 }
 

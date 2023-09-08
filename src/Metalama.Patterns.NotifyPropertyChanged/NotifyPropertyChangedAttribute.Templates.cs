@@ -3,6 +3,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
@@ -116,7 +117,10 @@ public partial class NotifyPropertyChangedAttribute
             var node = (DependencyGraph.Node<NodeData>?) meta.Tags["node"];
             var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
             var propertyTypeInstrumentationKind = (InpcInstrumentationKind) meta.Tags["propertyTypeInstrumentationKind"]!;
+            var discreteOnChangedMethod = (IMethod?) meta.Tags["discreteOnChangedMethod"];
 
+            meta.InsertComment( "Template: " + nameof( OverrideUninstrumentedTypeProperty ) );
+            meta.InsertComment( $"discreteOnChangedMethod:{discreteOnChangedMethod != null}" );
             meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             
             if ( propertyTypeInstrumentationKind == InpcInstrumentationKind.Unknown )
@@ -126,6 +130,45 @@ public partial class NotifyPropertyChangedAttribute
                     "as not implementing INotifyPropertyChanged. Code generated at compile time may differ." );
             }
 
+            var compareExpr = compareUsing switch
+            {
+                EqualityComparisonKind.EqualityOperator => (IExpression) (meta.Target.FieldOrProperty.Value != value),
+                EqualityComparisonKind.ThisEquals => (IExpression) !meta.Target.FieldOrProperty.Value.Equals( value ),
+                EqualityComparisonKind.ReferenceEquals => (IExpression) !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ),
+                _ => null
+            };
+
+            if ( compareExpr == null )
+            {
+                meta.Target.FieldOrProperty.Value = value;
+
+                if ( discreteOnChangedMethod != null )
+                {
+                    discreteOnChangedMethod.Invoke();
+                }
+                else
+                {
+                    GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
+                }
+            }
+            else
+            {
+                if ( compareExpr.Value )
+                {
+                    meta.Target.FieldOrProperty.Value = value;
+
+                    if ( discreteOnChangedMethod != null )
+                    {
+                        discreteOnChangedMethod.Invoke();
+                    }
+                    else
+                    {
+                        GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
+                    }
+                }
+            }
+
+#if false
             switch ( compareUsing )
             {
                 case EqualityComparisonKind.EqualityOperator:
@@ -164,6 +207,7 @@ public partial class NotifyPropertyChangedAttribute
                 default:
                     throw new NotSupportedException( compareUsing.ToString() );
             }
+#endif
         }
     }
 
