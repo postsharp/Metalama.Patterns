@@ -168,8 +168,9 @@ public sealed partial class NotifyPropertyChangedAttribute
                 return new Dictionary<string, BaseChangeMethods>();
             }
         }
-    
-        public bool TryGetBaseChangeMethods( string metadataPropertyPath, [NotNullWhen(true)] out IBaseChangeMethods? baseChangeMethods )
+
+        [Obsolete( "To be removed.", true )]
+        public bool TryGetBaseChangeMethods( string metadataPropertyPath, [NotNullWhen( true )] out IBaseChangeMethods? baseChangeMethods )
         {
             if ( this.BaseImplementsInpc )
             {

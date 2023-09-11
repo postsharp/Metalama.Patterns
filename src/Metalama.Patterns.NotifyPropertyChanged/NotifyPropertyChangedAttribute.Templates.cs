@@ -25,11 +25,8 @@ public partial class NotifyPropertyChangedAttribute
                     ? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type )
                     : node.Data.PropertyTypeInpcInstrumentationKind;
             var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
-            var discreteOnChangedMethod = (IMethod?) meta.Tags["discreteOnChangedMethod"];
-            var discreteOnChildChangedMethod = (IMethod?) meta.Tags["discreteOnChildChangedMethod"];
 
             meta.InsertComment( "Template: " + nameof( OverrideInpcRefTypeProperty ) );
-            meta.InsertComment( $"discreteOnChangedMethod:{discreteOnChangedMethod != null}, discreteOnChildChangedMethod:{discreteOnChildChangedMethod != null}" );
             meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
             if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
@@ -56,14 +53,7 @@ public partial class NotifyPropertyChangedAttribute
 
                 meta.Target.FieldOrProperty.Value = value;
 
-                if ( discreteOnChangedMethod != null )
-                {
-                    discreteOnChangedMethod.Invoke();
-                }
-                else
-                {
-                    GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
-                }
+                GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
 
                 if ( node != null )
                 {
@@ -89,26 +79,19 @@ public partial class NotifyPropertyChangedAttribute
             // This must be implemented as a local function because Metalama does not currently support delegates in any other way.
             void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
             {
-                if ( discreteOnChildChangedMethod != null )
+                // TODO: Don't emit this method at all if not needed.
+                // Currently, by my reckoning, the only way to do this is to have two variants of the OverrideInpcRefTypeProperty
+                // template, one with the local method and one without. Alternatively, richer support for delegates in templates
+                // could provide an cleaner solution.
+                if ( node != null )
                 {
-                    discreteOnChildChangedMethod.Invoke( e.PropertyName );
-                }
-                else
-                {
-                    // TODO: Don't emit this method at all if not needed.
-                    // Currently, by my reckoning, the only way to do this is to have two variants of the OverrideInpcRefTypeProperty
-                    // template, one with the local method and one without. Alternatively, richer support for delegates in templates
-                    // could provide an cleaner solution.
-                    if ( node != null )
-                    {
-                        // TODO: Subtemplates emit unwanted extra nesting inside curly braces if the subtemplate defines local vars.
-                        // So for emit the local var here then call the subtemplate to have more idomatic generated code.
-                        // Also see other uses of GenerateBodyOfOnSpecificPropertyChanged.
-                        var propertyName = e.PropertyName;
-                        var propertyNameExpression = ExpressionFactory.Capture( propertyName );
+                    // TODO: Subtemplates emit unwanted extra nesting inside curly braces if the subtemplate defines local vars.
+                    // So for emit the local var here then call the subtemplate to have more idomatic generated code.
+                    // Also see other uses of GenerateBodyOfOnSpecificPropertyChanged.
+                    var propertyName = e.PropertyName;
+                    var propertyNameExpression = ExpressionFactory.Capture( propertyName );
 
-                        GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
-                    }
+                    GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
                 }
             }
         }
@@ -123,10 +106,8 @@ public partial class NotifyPropertyChangedAttribute
             var node = (DependencyGraph.Node<NodeData>?) meta.Tags["node"];
             var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
             var propertyTypeInstrumentationKind = (InpcInstrumentationKind) meta.Tags["propertyTypeInstrumentationKind"]!;
-            var discreteOnChangedMethod = (IMethod?) meta.Tags["discreteOnChangedMethod"];
 
             meta.InsertComment( "Template: " + nameof( OverrideUninstrumentedTypeProperty ) );
-            meta.InsertComment( $"discreteOnChangedMethod:{discreteOnChangedMethod != null}" );
             meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             
             if ( propertyTypeInstrumentationKind == InpcInstrumentationKind.Unknown )
@@ -148,30 +129,14 @@ public partial class NotifyPropertyChangedAttribute
             if ( compareExpr == null )
             {
                 meta.Target.FieldOrProperty.Value = value;
-
-                if ( discreteOnChangedMethod != null )
-                {
-                    discreteOnChangedMethod.Invoke();
-                }
-                else
-                {
-                    GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
-                }
+                GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
             }
             else
             {
                 if ( compareExpr.Value )
                 {
                     meta.Target.FieldOrProperty.Value = value;
-
-                    if ( discreteOnChangedMethod != null )
-                    {
-                        discreteOnChangedMethod.Invoke();
-                    }
-                    else
-                    {
-                        GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
-                    }
+                    GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
                 }
             }
         }
@@ -181,8 +146,10 @@ public partial class NotifyPropertyChangedAttribute
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    // TODO: Using [CallerMemberName] started to cause build errors after Metalama topic/2023.4/npc 1105961a
+    // (but we couldn't make use of it in generated code anyhow because default values are not supported for method invocations)
     [Template]
-    private void OnPropertyChanged( [CallerMemberName] string? propertyName = null )
+    private void OnPropertyChanged( /*[CallerMemberName]*/ string propertyName )
     {
         meta.InsertComment( "Template: " + nameof( this.OnPropertyChanged ) );
         this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
@@ -194,12 +161,9 @@ public partial class NotifyPropertyChangedAttribute
         [CompileTime] DependencyGraph.Node<NodeData> node,
         [CompileTime] IExpression accessChildExpression, 
         [CompileTime] IField lastValueField,
-        [CompileTime] IField onPropertyChangedHandlerField,
-        [CompileTime] IMethod? discreteOnChangedMethod,
-        [CompileTime] IMethod? discreteOnChildChangedMethod)
+        [CompileTime] IField onPropertyChangedHandlerField )
     {
         meta.InsertComment( "Template: " + nameof( UpdateChildProperty ) );
-        meta.InsertComment( $"discreteOnChangedMethod:{discreteOnChangedMethod != null}, discreteOnChildChangedMethod:{discreteOnChildChangedMethod != null}" );
         meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
         var newValue = accessChildExpression.Value;
@@ -219,29 +183,15 @@ public partial class NotifyPropertyChangedAttribute
 
             lastValueField.Value = newValue;
 
-            if ( discreteOnChangedMethod != null )
-            {
-                discreteOnChangedMethod.Invoke();
-            }
-            else
-            {
-                GenerateOnChangedBody( ctx, node, node.Symbol.Name );
-            }
+            GenerateOnChangedBody( ctx, node, node.Symbol.Name );
         }
         
         void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )
         {
-            if ( discreteOnChildChangedMethod != null )
-            {
-                discreteOnChildChangedMethod.Invoke( e.PropertyName );
-            }
-            else
-            {
-                var propertyName = e.PropertyName;
-                var propertyNameExpression = ExpressionFactory.Capture( propertyName );
+            var propertyName = e.PropertyName;
+            var propertyNameExpression = ExpressionFactory.Capture( propertyName );
 
-                GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
-            }
+            GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
         }
     }
 

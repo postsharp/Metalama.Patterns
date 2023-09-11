@@ -169,6 +169,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     /// or <see langword="null"/> if metadata attributes should not be introduced because the method(s) will be derived overrides.
     /// </param>
     /// <returns></returns>
+    [Obsolete("To be removed.", true)]
     private static (IMethod OnChangedMethod, IMethod? OnChildChangedMethod) IntroduceDiscreteChangeMethods( 
         BuildAspectContext ctx,         
         string onChangedMethodName, 
@@ -281,38 +282,10 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 var pathForMemberNames = string.Join( "", parentElementNames );
                 var pathForMetadataLookup = string.Join( ".", parentElementNames );
 
-                var hasBaseChangeMethods = ctx.TryGetBaseChangeMethods( pathForMetadataLookup, out var baseChangeMethods );
-
-                if ( hasBaseChangeMethods && propertyDetails.OnChildChangedMethodIsApplicable != ( baseChangeMethods!.OnChildChangedMethod != null ))
-                {
-                    // TODO: Proper error reporting.
-                    throw new InvalidOperationException( "Unexpected: base defines inapplicable OnChildChangedMethod." );
-                }
-
                 IMethod? thisUpdateMethod = null;
-                IMethod? thisOnChangedMethod = null;
-                IMethod? thisOnChildChangedMethod = null;
-
-                if ( hasBaseChangeMethods || !ctx.Target.IsSealed )
-                {
-                    (thisOnChangedMethod, thisOnChildChangedMethod) = IntroduceDiscreteChangeMethods(
-                        ctx,
-                        hasBaseChangeMethods
-                            ? baseChangeMethods!.OnChangedMethod.Name
-                            : ctx.GetAndReserveUnusedMemberName( $"On{pathForMemberNames}Changed" ),
-                        propertyDetails.OnChildChangedMethodIsApplicable
-                            ? hasBaseChangeMethods
-                                ? baseChangeMethods!.OnChildChangedMethod?.Name
-                                : ctx.GetAndReserveUnusedMemberName( $"On{pathForMemberNames}ChildChanged" )
-                            : null,
-                        nodeToProcess,
-                        null,
-                        hasBaseChangeMethods ? null : pathForMetadataLookup );
-                }
 
                 // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-                if ( !hasBaseChangeMethods 
-                    && !nodeToProcess.Parent!.IsRoot 
+                if ( !nodeToProcess.Parent!.IsRoot 
                     && nodeToProcess.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
                 {
                     var lastValueFieldName = ctx.GetAndReserveUnusedMemberName( $"_last{pathForMemberNames}" );
@@ -363,15 +336,13 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             node = nodeToProcess,
                             accessChildExpression,
                             lastValueField,
-                            onPropertyChangedHandlerField,
-                            discreteOnChangedMethod = thisOnChangedMethod,
-                            discreteOnChildChangedMethod = thisOnChildChangedMethod
+                            onPropertyChangedHandlerField
                         } );
 
                     thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
                 }
 
-                nodeToProcess.Data.SetMethods( thisUpdateMethod, thisOnChangedMethod, thisOnChildChangedMethod );
+                nodeToProcess.Data.SetMethods( thisUpdateMethod );
             }
         }
     }
@@ -412,27 +383,6 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
             var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
 
-            IMethod? discreteOnChangedMethod = null;
-            IMethod? discreteOnChildChangedMethod = null;
-
-            if ( node?.Data is { MethodsHaveBeenSet: true } )
-            {
-                discreteOnChangedMethod = node.Data.OnChangedMethod;
-                discreteOnChildChangedMethod = node.Data.OnChildChangedMethod;
-            }
-            else if ( propertyDetails.OnChangedMethodIsApplicable && !ctx.Target.IsSealed )
-            {
-                (discreteOnChangedMethod, discreteOnChildChangedMethod) = IntroduceDiscreteChangeMethods(
-                    ctx,
-                    $"On{p.Name}Changed",
-                    propertyDetails.OnChildChangedMethodIsApplicable ? $"On{p.Name}ChildChanged" : null,
-                    node,
-                    p.Name,
-                    p.Name );
-
-                node?.Data.SetMethods( null, discreteOnChangedMethod, discreteOnChildChangedMethod );
-            }
-
             switch ( p.Type.IsReferenceType )
             {
                 case true:
@@ -461,9 +411,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             ctx,
                             onPropertyChangedMethodHasCallerMemberNameAttribute,
                             handlerField,
-                            node,
-                            discreteOnChangedMethod,
-                            discreteOnChildChangedMethod
+                            node
                         } );
                     }
                     else
@@ -473,8 +421,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             ctx,
                             node,
                             compareUsing = EqualityComparisonKind.ReferenceEquals,
-                            propertyTypeInstrumentationKind,
-                            discreteOnChangedMethod
+                            propertyTypeInstrumentationKind
                         } );
                     }
                     break;
@@ -490,8 +437,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                         ctx,
                         node,
                         compareUsing = comparisonKind,
-                        propertyTypeInstrumentationKind,
-                        discreteOnChangedMethod
+                        propertyTypeInstrumentationKind
                     } );
                     break;
             }
