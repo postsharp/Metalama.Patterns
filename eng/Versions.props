@@ -17,7 +17,7 @@
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
 		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
-        <PostSharpEngineeringVersion>2023.2.36</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>2023.2.41</PostSharpEngineeringVersion>
     </PropertyGroup>
 
     <!-- Set the deafult versions of auto-updated dependencies -->
