@@ -31,7 +31,7 @@ internal static class DiagnosticDescriptors
         /// <summary>
         /// {0} {1} has an initializer expression and and is of a type that implements INotifyPropertyChanged. This is not supported. Explicit initialization from a constructor is supported.
         /// </summary>
-        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty)> FieldOrPropertyHasAnInitializerExpression =
+        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty)> ErrorFieldOrPropertyHasAnInitializerExpression =
             new(
                 "LAMA5151",
                 Error,

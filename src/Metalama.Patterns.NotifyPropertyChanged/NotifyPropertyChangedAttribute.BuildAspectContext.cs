@@ -200,6 +200,35 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public DependencyGraph.Node<NodeData> DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
 
+        private HashSet<string>? _existingMemberNames;
+
+        /// <summary>
+        /// Gets an unused member name for the target type by adding an numeric suffix until an unused name is found.
+        /// </summary>
+        /// <param name="desiredName"></param>
+        /// <returns></returns>
+        public string GetAndReserveUnusedMemberName( string desiredName )
+        {
+            this._existingMemberNames ??= new( ((IEnumerable<INamedDeclaration>) this.Target.AllMembers()).Concat( this.Target.NestedTypes ).Select( m => m.Name ) );
+
+            if ( this._existingMemberNames.Add( desiredName ) )
+            {
+                return desiredName;
+            }
+            else
+            {
+                for ( var i = 2; true; i++ )
+                {
+                    var adjustedName = $"{desiredName}{i}";
+                    
+                    if ( this._existingMemberNames.Add( adjustedName ) )
+                    {
+                        return adjustedName;
+                    }
+                }
+            }
+        }
+
         public InpcInstrumentationKind GetInpcInstrumentationKind( IType type )
         {
             if ( this._inpcInstrumentationKindLookup.TryGetValue( type, out var result ) )

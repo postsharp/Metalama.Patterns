@@ -15,10 +15,19 @@ public sealed partial class NotifyPropertyChangedAttribute
         {
             // TODO: Better checks/exceptions.
             this.FieldOrProperty = (IFieldOrProperty) ctx.Target.Compilation.GetDeclaration( node.Symbol );
+            this.PropertyTypeInpcInstrumentationKind = ctx.GetInpcInstrumentationKind( this.FieldOrProperty.Type );
         }
 
+        /// <summary>
+        /// Gets the <see cref="IFieldOrProperty"/> for the node.
+        /// </summary>
         public IFieldOrProperty FieldOrProperty { get; private set; }
-        
+
+        /// <summary>
+        /// Gets the <see cref="InpcInstrumentationKind"/> for the <see cref="IHasType.Type"/> of <see cref="FieldOrProperty"/>.
+        /// </summary>
+        public InpcInstrumentationKind PropertyTypeInpcInstrumentationKind { get; private set; }
+
         /// <summary>
         /// Gets a method like <c>void UpdateA2C2()</c>. 
         /// </summary>

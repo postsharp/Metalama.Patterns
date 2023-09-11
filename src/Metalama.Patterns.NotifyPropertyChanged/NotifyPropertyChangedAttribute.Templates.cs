@@ -21,7 +21,10 @@ public partial class NotifyPropertyChangedAttribute
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
             var handlerField = (IField?) meta.Tags["handlerField"];
             var node = (DependencyGraph.Node<NodeData>?) meta.Tags["node"];
-            var eventRequiresCast = ctx.GetInpcInstrumentationKind( meta.Target.Property.Type ) is InpcInstrumentationKind.Explicit;
+            var inpcImplementationKind = node == null
+                    ? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type )
+                    : node.Data.PropertyTypeInpcInstrumentationKind;
+            var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
             var discreteOnChangedMethod = (IMethod?) meta.Tags["discreteOnChangedMethod"];
             var discreteOnChildChangedMethod = (IMethod?) meta.Tags["discreteOnChildChangedMethod"];
 
@@ -247,6 +250,7 @@ public partial class NotifyPropertyChangedAttribute
         [CompileTime] BuildAspectContext ctx,
         [CompileTime] DependencyGraph.Node<NodeData>? node,
         [CompileTime] string? propertyName,
+        [CompileTime] bool disableNotifySelfChanged = false,
         [CompileTime] bool proceedAtEnd = false )
     {
         meta.InsertComment( $"Template: {nameof( GenerateOnChangedBody )} for {propertyName}" );
@@ -276,7 +280,7 @@ public partial class NotifyPropertyChangedAttribute
         }
 
         // node is null for unreferenced (according to static compile time analsysis) root properties.
-        if ( node == null || node.Parent!.IsRoot )
+        if ( !disableNotifySelfChanged && (node == null || node.Parent!.IsRoot) )
         {
             propertyName ??= node?.Symbol.Name;
 

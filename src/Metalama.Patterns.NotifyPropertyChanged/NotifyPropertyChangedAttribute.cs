@@ -95,6 +95,59 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         ctx.OnPropertyChangedMethod = onPropertyChangedMethod;
     }
 
+    private static (bool OnChangedMethodIsApplicable, bool OnChildChangedMethodIsApplicable) ValidateFieldOrProperty(
+        BuildAspectContext ctx,
+        IFieldOrProperty fieldOrProperty )
+    {
+        var propertyTypeImplementsInpc = ctx.GetInpcInstrumentationKind( fieldOrProperty.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
+
+        var onChangedMethodIsApplicable = false;
+        var onChildChangedMethodIsApplicable = false;
+
+        switch ( fieldOrProperty.Type.IsReferenceType )
+        {
+            case null:
+                // This might require INPC-type code which is used at runtime only when T implements INPC,
+                // and non-INPC-type code which is used at runtime when T does not implement INPC.                    
+                throw new NotSupportedException( "Unconstrained generic properties are not supported." );
+
+            case true:
+
+                if ( propertyTypeImplementsInpc )
+                {
+                    if ( fieldOrProperty.InitializerExpression != null )
+                    {
+                        // TODO: Support this pattern by moving initializer to ctor.
+                        ctx.Builder.Diagnostics.Report(
+                            DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyHasAnInitializerExpression.WithArguments( (fieldOrProperty.DeclarationKind, fieldOrProperty) ),
+                            fieldOrProperty );
+
+                        throw new DiagnosticErrorReportedException();
+                    }
+
+                    onChangedMethodIsApplicable = true;
+                    onChildChangedMethodIsApplicable = true;
+                }
+                else
+                {
+                    onChangedMethodIsApplicable = true;
+                }
+                break;
+
+            case false:
+
+                if ( propertyTypeImplementsInpc )
+                {
+                    // TODO: Proper error reporting.
+                    throw new NotSupportedException( "structs implementing INotifyPropertyChanged are not supported." );
+                }
+                onChangedMethodIsApplicable = true;
+                break;
+        }
+
+        return (onChangedMethodIsApplicable, onChildChangedMethodIsApplicable);
+    }
+
     /// <summary>
     /// Introduces discrete change methods.
     /// </summary>
@@ -111,7 +164,10 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     /// If <paramref name="node"/> is not specified, this implies that the change methods are being introduced for a root
     /// property of the target type, in which case <paramref name="propertyName"/> must be the name of the property.
     /// </param>
-    /// <param name="propertyPathForMetadataAttributes"></param>
+    /// <param name="propertyPathForMetadataAttributesOrNullIfIsOverride">
+    /// The property path to use with introduced <see cref="Metadata.OnChangedAttribute"/> and <see cref="Metadata.OnChildChangedAttribute"/>;
+    /// or <see langword="null"/> if metadata attributes should not be introduced because the method(s) will be derived overrides.
+    /// </param>
     /// <returns></returns>
     private static (IMethod OnChangedMethod, IMethod? OnChildChangedMethod) IntroduceDiscreteChangeMethods( 
         BuildAspectContext ctx,         
@@ -119,7 +175,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         string? onChildChangedMethodName,
         DependencyGraph.Node<NodeData>? node,
         string? propertyName,
-        string propertyPathForMetadataAttributes )
+        string? propertyPathForMetadataAttributesOrNullIfIsOverride )
     {
         if ( node == null && propertyName == null )
         {
@@ -137,9 +193,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 b.Accessibility = Accessibility.Protected;
                 b.IsVirtual = !ctx.Target.IsSealed && !b.IsOverride;
 
-                if ( !ctx.Target.IsSealed && !b.IsOverride )
+                if ( propertyPathForMetadataAttributesOrNullIfIsOverride != null )
                 {
-                    b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChangedAttribute, new[] { propertyPathForMetadataAttributes } ) );
+                    b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChangedAttribute, new[] { propertyPathForMetadataAttributesOrNullIfIsOverride } ) );
                 }
             },
             args: new
@@ -147,6 +203,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 ctx,
                 node,
                 propertyName,
+                disableNotifySelfChanged = propertyPathForMetadataAttributesOrNullIfIsOverride == null,
                 proceedAtEnd = true
             } );
 
@@ -165,9 +222,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     b.Accessibility = Accessibility.Protected;
                     b.IsVirtual = !ctx.Target.IsSealed && !b.IsOverride;
 
-                    if ( !ctx.Target.IsSealed && !b.IsOverride )
+                    if ( propertyPathForMetadataAttributesOrNullIfIsOverride != null )
                     {
-                        b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChildChangedAttribute, new[] { propertyPathForMetadataAttributes } ) );
+                        b.AddAttribute( AttributeConstruction.Create( ctx.Type_OnChildChangedAttribute, new[] { propertyPathForMetadataAttributesOrNullIfIsOverride } ) );
                     }
                 },
                 args: new
@@ -186,8 +243,6 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     {
         var allNodesDepthFirst = ctx.DependencyGraph.DecendantsDepthFirst().ToList();
         allNodesDepthFirst.Reverse();
-
-        HashSet<string>? usedMemberNames = null;
 
         /* Iterate all nodes (except root), depth-first, in leaf-to-root order (this is important).
          * For each node that is directly referenced, we then make sure to build the
@@ -218,6 +273,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
             if ( !nodeToProcess.Data.MethodsHaveBeenSet )
             {
+                var propertyDetails = ValidateFieldOrProperty( ctx, nodeToProcess.Data.FieldOrProperty );
+
                 // eg, for node X.Y.Z, parentElementNames is [X,Y]
                 var parentElementNames = nodeToProcess.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ).ToList();
 
@@ -225,6 +282,12 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 var pathForMetadataLookup = string.Join( ".", parentElementNames );
 
                 var hasBaseChangeMethods = ctx.TryGetBaseChangeMethods( pathForMetadataLookup, out var baseChangeMethods );
+
+                if ( hasBaseChangeMethods && propertyDetails.OnChildChangedMethodIsApplicable != ( baseChangeMethods!.OnChildChangedMethod != null ))
+                {
+                    // TODO: Proper error reporting.
+                    throw new InvalidOperationException( "Unexpected: base defines inapplicable OnChildChangedMethod." );
+                }
 
                 IMethod? thisUpdateMethod = null;
                 IMethod? thisOnChangedMethod = null;
@@ -236,24 +299,23 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                         ctx,
                         hasBaseChangeMethods
                             ? baseChangeMethods!.OnChangedMethod.Name
-                            : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}Changed", ref usedMemberNames ),
-                        hasBaseChangeMethods
-                            ? baseChangeMethods!.OnChildChangedMethod?.Name
-                            : GetUnusedMemberName( ctx.Target, $"On{pathForMemberNames}ChildChanged", ref usedMemberNames ),
+                            : ctx.GetAndReserveUnusedMemberName( $"On{pathForMemberNames}Changed" ),
+                        propertyDetails.OnChildChangedMethodIsApplicable
+                            ? hasBaseChangeMethods
+                                ? baseChangeMethods!.OnChildChangedMethod?.Name
+                                : ctx.GetAndReserveUnusedMemberName( $"On{pathForMemberNames}ChildChanged" )
+                            : null,
                         nodeToProcess,
                         null,
-                        pathForMetadataLookup );
+                        hasBaseChangeMethods ? null : pathForMetadataLookup );
                 }
 
                 // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
                 if ( !hasBaseChangeMethods 
                     && !nodeToProcess.Parent!.IsRoot 
-                    && ctx.GetInpcInstrumentationKind( nodeToProcess.Data.FieldOrProperty.Type ) is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
+                    && nodeToProcess.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
                 {
-                    var lastValueFieldName = GetUnusedMemberName(
-                        ctx.Target,
-                        $"_last{pathForMemberNames}",
-                        ref usedMemberNames );
+                    var lastValueFieldName = ctx.GetAndReserveUnusedMemberName( $"_last{pathForMemberNames}" );
 
                     var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
                         ctx.Target,
@@ -265,10 +327,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                     var lastValueField = introduceLastValueFieldResult.Declaration;
 
-                    var onPropertyChangedHandlerFieldName = GetUnusedMemberName(
-                        ctx.Target,
-                        $"_on{pathForMemberNames}ChangedHandler",
-                        ref usedMemberNames );
+                    var onPropertyChangedHandlerFieldName = ctx.GetAndReserveUnusedMemberName( $"_on{pathForMemberNames}ChangedHandler" );
 
                     var introduceOnPropertyChangedHandlerFieldName = ctx.Builder.Advice.IntroduceField(
                         ctx.Target,
@@ -280,10 +339,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                     var onPropertyChangedHandlerField = introduceOnPropertyChangedHandlerFieldName.Declaration;
 
-                    var methodName = GetUnusedMemberName(
-                                        ctx.Target,
-                                        $"Update{pathForMemberNames}",
-                                        ref usedMemberNames );
+                    var methodName = ctx.GetAndReserveUnusedMemberName( $"Update{pathForMemberNames}" );
 
                     var accessChildExprBuilder = new ExpressionBuilder();
 
@@ -350,49 +406,11 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 throw new NotSupportedException( "'new' properties are not supported." );
             }
 
+            var propertyDetails = ValidateFieldOrProperty( ctx, p );
+
             var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
             var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
-
-            var considerIntroducingOnChangedMethod = false;
-            var considerIntroducingOnChildChangedMethod = false;
-
-            switch ( p.Type.IsReferenceType )
-            {
-                case null:
-                    // This might require INPC-type code which is used at runtime only when T implements INPC,
-                    // and non-INPC-type code which is used at runtime when T does not implement INPC.                    
-                    throw new NotSupportedException( "Unconstrained generic properties are not supported." );
-
-                case true:
-
-                    if ( propertyTypeImplementsInpc )
-                    {
-                        if ( p.InitializerExpression != null )
-                        {
-                            // TODO: Support this pattern by moving initializer to ctor.
-                            ctx.Builder.Diagnostics.Report( DiagnosticDescriptors.NotifyPropertyChanged.FieldOrPropertyHasAnInitializerExpression.WithArguments( (p.DeclarationKind, p) ), p );
-                            continue;
-                        }
-                        considerIntroducingOnChangedMethod = true;
-                        considerIntroducingOnChildChangedMethod = true;
-                    }
-                    else
-                    {
-                        considerIntroducingOnChangedMethod = true;
-                    }
-                    break;
-
-                case false:
-
-                    if ( propertyTypeImplementsInpc )
-                    {
-                        // TODO: Proper error reporting.
-                        throw new NotSupportedException( "structs implementing INotifyPropertyChanged are not supported." );
-                    }
-                    considerIntroducingOnChangedMethod = true;
-                    break;
-            }
 
             IMethod? discreteOnChangedMethod = null;
             IMethod? discreteOnChildChangedMethod = null;
@@ -402,12 +420,12 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 discreteOnChangedMethod = node.Data.OnChangedMethod;
                 discreteOnChildChangedMethod = node.Data.OnChildChangedMethod;
             }
-            else if ( considerIntroducingOnChangedMethod && !ctx.Target.IsSealed )
+            else if ( propertyDetails.OnChangedMethodIsApplicable && !ctx.Target.IsSealed )
             {
                 (discreteOnChangedMethod, discreteOnChildChangedMethod) = IntroduceDiscreteChangeMethods(
                     ctx,
                     $"On{p.Name}Changed",
-                    considerIntroducingOnChildChangedMethod ? $"On{p.Name}ChildChanged" : null,
+                    propertyDetails.OnChildChangedMethodIsApplicable ? $"On{p.Name}ChildChanged" : null,
                     node,
                     p.Name,
                     p.Name );
@@ -427,7 +445,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                         if ( hasDependentProperties )
                         {
-                            var handlerFieldName = GetUnusedMemberName( ctx.Target, $"_on{p.Name}PropertyChangedHandler" );
+                            var handlerFieldName = ctx.GetAndReserveUnusedMemberName( $"_on{p.Name}PropertyChangedHandler" );
 
                             var introduceHandlerFieldResult = ctx.Builder.Advice.IntroduceField(
                                 ctx.Target,
@@ -488,52 +506,4 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             && m.Parameters.Count == 1
             && m.Parameters[0].Type.SpecialType == SpecialType.String
             && _onPropertyChangedMethodNames.Contains( m.Name ) );
-
-    private static string GetUnusedMemberName( INamedType type, string desiredName )
-    {
-        HashSet<string>? existingMemberNames = null;
-        return GetUnusedMemberName( type, desiredName, ref existingMemberNames, false );
-    }
-
-    /// <summary>
-    /// Gets an unused member name for the given type by adding an numeric suffix until an unused name is found.
-    /// </summary>
-    /// <param name="type"></param>
-    /// <param name="desiredName"></param>
-    /// <param name="existingMemberNames">
-    /// If not <see langword="null"/> on entry, specifies the known set of member names to consider (the actual member names of <paramref name="type"/>
-    /// will be ignored). If <see langword="null"/> on entry, on exit will be set to the member names of <paramref name="type"/> (including the names of nested types),
-    /// optionally also including the return value according to <paramref name="addResultToExistingMemberNames"/>.
-    /// </param>
-    /// <returns></returns>
-    private static string GetUnusedMemberName( INamedType type, string desiredName, ref HashSet<string>? existingMemberNames, bool addResultToExistingMemberNames = true )
-    {
-        string result;
-
-        existingMemberNames ??= new( ((IEnumerable<INamedDeclaration>) type.AllMembers()).Concat( type.NestedTypes ).Select( m => m.Name ) );
-
-        if ( !existingMemberNames.Contains( desiredName ) )
-        {
-            result = desiredName;
-        }
-        else
-        {
-            for ( var i = 2; true; i++ )
-            {
-                result = $"{desiredName}{i}";
-
-                if ( !existingMemberNames.Contains( result ) )
-                {
-                    break;
-                }
-            }
-        }
-
-        if ( addResultToExistingMemberNames )
-        {
-            existingMemberNames.Add( result );
-        }
-
-        return result;
-    }
 }
