@@ -191,7 +191,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             {
                 b.Name = onChangedMethodName;
                 b.Accessibility = Accessibility.Protected;
-                b.IsVirtual = !ctx.Target.IsSealed && !b.IsOverride;
+                b.IsVirtual = !ctx.Target.IsSealed;
 
                 if ( propertyPathForMetadataAttributesOrNullIfIsOverride != null )
                 {
@@ -206,7 +206,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 disableNotifySelfChanged = propertyPathForMetadataAttributesOrNullIfIsOverride == null,
                 proceedAtEnd = true
             } );
-
+        
         IMethod? onChildChangedMethod = null;
 
         if ( onChildChangedMethodName != null )
@@ -220,7 +220,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 {
                     b.Name = onChildChangedMethodName;
                     b.Accessibility = Accessibility.Protected;
-                    b.IsVirtual = !ctx.Target.IsSealed && !b.IsOverride;
+                    b.IsVirtual = !ctx.Target.IsSealed;
 
                     if ( propertyPathForMetadataAttributesOrNullIfIsOverride != null )
                     {
@@ -496,6 +496,15 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// Introduces a 
+    /// </summary>
+    /// <param name="ctx"></param>
+    private static void IntroduceInitializerMethod( BuildAspectContext ctx )
+    {
+
     }
 
     private static IMethod? GetOnPropertyChangedMethod( INamedType type )
