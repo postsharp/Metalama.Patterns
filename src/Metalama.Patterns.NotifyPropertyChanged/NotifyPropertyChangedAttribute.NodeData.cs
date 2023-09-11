@@ -23,7 +23,7 @@ public sealed partial class NotifyPropertyChangedAttribute
         /// </summary>
         public IFieldOrProperty FieldOrProperty { get; private set; }
 
-        // TODO: Is this worth caching per-node?
+        // TODO: Is this actually worth caching per-node?
         /// <summary>
         /// Gets the <see cref="InpcInstrumentationKind"/> for the <see cref="IHasType.Type"/> of <see cref="FieldOrProperty"/>.
         /// </summary>
@@ -48,18 +48,6 @@ public sealed partial class NotifyPropertyChangedAttribute
         /// </remarks>
         public IMethod? UpdateMethod { get; private set; }
 
-        /// <summary>
-        /// Gets a method like <c>void OnA2C2Changed()</c>.
-        /// </summary>
-        [Obsolete( "To be removed.", true )]
-        public IMethod? OnChangedMethod { get; private set; }
-
-        /// <summary>
-        /// Gets a method like <c>void OnA2C2ChildChanged( string propertyName )</c>.
-        /// </summary>
-        [Obsolete( "To be removed.", true )] 
-        public IMethod? OnChildChangedMethod { get; private set; }
-
         public bool MethodsHaveBeenSet { get; private set; }
 
         public void SetMethods( IMethod? updateMethod )
@@ -70,30 +58,6 @@ public sealed partial class NotifyPropertyChangedAttribute
             }
 
             this.UpdateMethod = updateMethod;
-            this.MethodsHaveBeenSet = true;
-        }
-
-        [Obsolete( "To be removed.", true )]
-        public void SetMethods( IMethod? updateMethod, IMethod? onChangedMethod, IMethod? onChildChangedMethod ) 
-        { 
-            if ( this.MethodsHaveBeenSet )
-            {
-                throw new InvalidOperationException( "Methods have already been set." );
-            }
-
-            if ( onChildChangedMethod != null & onChangedMethod == null )
-            {
-                throw new ArgumentException( $"If {nameof( onChildChangedMethod )} is specified, {nameof( onChangedMethod )} must also be specified." );
-            }
-
-            if ( updateMethod == null && onChangedMethod == null )
-            {
-                throw new ArgumentException( "At least one method must be specified." );
-            }
-
-            this.UpdateMethod = updateMethod;
-            this.OnChangedMethod = onChangedMethod;
-            this.OnChildChangedMethod = onChildChangedMethod;
             this.MethodsHaveBeenSet = true;
         }
     }

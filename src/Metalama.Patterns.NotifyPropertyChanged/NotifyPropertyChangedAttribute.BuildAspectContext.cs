@@ -3,7 +3,6 @@ using Metalama.Framework.Code;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -84,107 +83,6 @@ public sealed partial class NotifyPropertyChangedAttribute
             public IMethod OnChangedMethod { get; set; } = null!;
 
             public IMethod? OnChildChangedMethod { get; set; }
-        }
-
-        private IReadOnlyDictionary<string, BaseChangeMethods> _baseChangeMethodsLookup;
-
-        private IReadOnlyDictionary<string, BaseChangeMethods> GetBaseChangeMethodLookup()
-        {            
-            var immediateBase = this.Target.BaseType;
-
-            if ( immediateBase != null )
-            {
-                Dictionary<string, BaseChangeMethods> lookup = new();
-
-                var typeOfMetadataAttribute = (INamedType) TypeFactory.GetType( typeof( MetadataAttribute ) );
-
-                foreach ( var m in immediateBase.AllMethods )
-                {
-                    foreach ( var attr in m.Attributes.OfAttributeType( typeOfMetadataAttribute) )
-                    {
-                        var args = attr.ConstructorArguments;
-
-                        if ( args.Length != 1 )
-                        {
-                            throw new InvalidOperationException( $"Expected {attr.Type} to have exactly one constructor argument." );
-                        }
-
-                        if ( args[0].Type.SpecialType != SpecialType.String )
-                        {
-                            throw new InvalidOperationException( $"Expected {attr.Type} to have exactly one constructor argument of type string." );
-                        }
-
-                        var name = args[0].Value as string;
-
-                        if ( string.IsNullOrWhiteSpace( name ) )
-                        {
-                            throw new InvalidOperationException( $"Expected {attr.Type} to have exactly one constructor argument of type string which must not be null or whitespace." );
-                        }
-
-                        if ( !lookup.TryGetValue( name, out var entry ) )
-                        {
-                            entry = new();
-                            lookup[name] = entry;
-                        }
-                        
-                        if ( attr.Type.Is( this.Type_OnChangedAttribute ) )
-                        {
-                            if ( entry.OnChangedMethod != null )
-                            {
-                                // TODO: Report diagnostic error?
-                                throw new InvalidOperationException( $"Found duplicate OnChanged methods for name '{name}'." );
-                            }
-                            entry.OnChangedMethod = m;
-                        }
-                        else if ( attr.Type.Is( this.Type_OnChildChangedAttribute ) )
-                        {
-                            if ( entry.OnChildChangedMethod != null )
-                            {
-                                // TODO: Report diagnostic error?
-                                throw new InvalidOperationException( $"Found duplicate OnChildChanged methods for name '{name}'." );
-                            }
-                            entry.OnChildChangedMethod = m;
-                        }
-                        else
-                        {
-                            throw new NotSupportedException( attr.Type.ToDisplayString() );
-                        }
-                    }
-                }
-
-                foreach ( var kvp in lookup )
-                {
-                    if ( kvp.Value.OnChangedMethod == null )
-                    {
-                        // TODO: Report diagnostic error?
-                        throw new InvalidOperationException( $"The OnChildChanged method for property path {kvp.Key} is defined, but the OnChanged method is not. If OnChildChanged, then OnChanged must also be defined." );
-                    }
-                }
-
-                return lookup;
-            }
-            else
-            {
-                return new Dictionary<string, BaseChangeMethods>();
-            }
-        }
-
-        [Obsolete( "To be removed.", true )]
-        public bool TryGetBaseChangeMethods( string metadataPropertyPath, [NotNullWhen( true )] out IBaseChangeMethods? baseChangeMethods )
-        {
-            if ( this.BaseImplementsInpc )
-            {
-                this._baseChangeMethodsLookup ??= this.GetBaseChangeMethodLookup();
-
-                if ( this._baseChangeMethodsLookup.TryGetValue( metadataPropertyPath, out var result ) )
-                {
-                    baseChangeMethods = result;
-                    return true;
-                }
-            }
-
-            baseChangeMethods = null;
-            return false;
         }
 
         private DependencyGraph.Node<NodeData>? _dependencyGraph;
