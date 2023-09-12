@@ -9,18 +9,325 @@ using System.Runtime.CompilerServices;
 
 namespace NpcExperiments.Exp8
 {
+    // NOTE: OnUnmonitoredInpcPropertyChanged solves a specific problem, but expands the contract and would likey be 
+    // opt-in via configuration.
+
+    /// <summary>
+    /// Applied to a method of a class implementing <see cref="INotifyPropertyChanged"/>. The method will be called when a property 
+    /// changes, and where that property is of a type implementing <see cref="INotifyPropertyChanged"/>, and the declaring class
+    /// does not monitor (ie, maintiain a subscription) to the property.
+    /// </summary>
+    /// <remarks>
+    /// To avoid duplicate subscribtions, implementors should only call the base implementation for unhandled properties.
+    /// Implementations must call <c>OnChildPropertyChanged(...)</c> in the subscribed event handler.
+    /// </remarks>
+    public sealed class OnUnmonitoredInpcPropertyChangedAttribute : Attribute { }
+
+
+    public sealed class RefsAttribute : Attribute
+    {
+        public RefsAttribute( params string[] refs ) { }
+    }
+
     [NotifyPropertyChanged]
     class A
     {
-        public B A1 { get; set; }// = new();
+        public B A1 { get; set; }
 
         public int A2 => A1.B1;
+
+        public B A3 { get; set; }
     }
 
     [NotifyPropertyChanged]
     class B
     {
         public int B1 { get; set; }
+
+        public int B2 { get; set; }
+    }
+
+    class C : A
+    {
+        public int C1 {  get; set;}
+        
+        public int C2 => A1.B1;
+
+        public int C3 => A3.B1;
+    }
+
+    namespace Desired_MinimalContract
+    {
+        class A : INotifyPropertyChanged
+        {
+            private B _a1 = default!;
+            public B A1
+            {
+                get
+                {
+                    return this._a1;
+                }
+                set
+                {
+                    if ( !object.ReferenceEquals( value, this._a1 ) )
+                    {
+                        var oldValue = this._a1;
+                        if ( oldValue != null )
+                        {
+                            oldValue.PropertyChanged -= this._onA1PropertyChangedHandler;
+                        }
+
+                        this._a1 = value;
+                        this.OnPropertyChanged( "A1" );
+
+                        if ( value != null )
+                        {
+                            this._onA1PropertyChangedHandler ??= OnSpecificPropertyChanged;
+                            value.PropertyChanged += this._onA1PropertyChangedHandler;
+                        }
+                    }
+
+                    void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
+                    {
+                        OnChildPropertyChanged( "A1", e.PropertyName );
+                    }
+                }
+            }
+
+            public int A2 => A1.B1;
+
+            private PropertyChangedEventHandler? _onA1PropertyChangedHandler;
+
+            private B _a3 = default!;
+
+            // Class A has no refs to child props of A3, so does not maintain a sub to A3.
+            public B A3
+            {
+                get
+                {
+                    return this._a3;
+                }
+                set
+                {
+                    if ( !object.ReferenceEquals( value, this._a3 ) )
+                    {
+                        var oldValue = this._a3;
+                        this._a3 = value;
+
+                        // Call OnUnmonitoredInpcPropertyChanged so that a derived class can maintain a subscription.
+                        this.OnUnmonitoredInpcPropertyChanged( "A3", oldValue, value );
+                        // Also call vanilla OnPropertyChanged to indicate that the ref has changed.
+                        this.OnPropertyChanged( "A3" );
+                    }
+                }
+            }
+
+            /* [Refs] defines which props are reported via OnUnmonitoredInpcPropertyChanged. It's possible to have a non-instrumented
+             * base from which a [NPC] class is derived. Then the base would not have OnUnmonitoredInpcPropertyChanged for any of its
+             * props. Removing OnUnmonitoredInpcPropertyChanged from an existing base class via assy update would be a breaking change.
+             */
+            [Refs("A3")]
+            [OnUnmonitoredInpcPropertyChanged]
+            protected virtual void OnUnmonitoredInpcPropertyChanged( string propertyName, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue )
+            {
+            }
+
+            protected virtual void OnPropertyChanged( string propertyName )
+            {
+                // TODO: Should this be at start or end? Does it matter?
+                this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
+                
+                if ( propertyName == "A1" )
+                {
+                    OnPropertyChanged( "A2" );
+                }                
+            }
+
+            /* A later build of class A might add or remove refs.
+             * Adding refs would cause duplicate events (not so bad).
+             * Removing refs would cause missed events (bad).
+             * 
+             * A mitigation would be to support dynamic subs at runtime, in addition to hard-coded subs at CT.
+             * Each inheritance layer would be responsible for its own properties.
+             * 
+             * A derived class could disable its handling of a particular property at runtime if the base
+             * now handles it.
+             * 
+             * Another mitigation is to store a hash of the refs list and throw at runtime if different.
+             * 
+            */
+            [Refs("A1")] // Class A maintains a subscription to property A1
+            protected virtual void OnChildPropertyChanged( string parentPropertyPath, string propertyName )
+            {
+                if ( parentPropertyPath == "A1" )
+                {
+                    if ( propertyName == "B1" )
+                    {
+                        this.OnPropertyChanged( "A2" );
+                        return;
+                    }
+                }
+            }
+
+            public event PropertyChangedEventHandler? PropertyChanged;
+        }
+
+        class C : A
+        {
+            private int _c1;
+
+            public int C1
+            {
+                get
+                {
+                    return this._c1;
+                }
+                set
+                {
+                    if ( this._c1 != value )
+                    {
+                        this._c1 = value;
+                        this.OnPropertyChanged( "C1" );
+                    }
+                }
+            }
+
+            public int C2 => A1.B1;
+
+            public int C3 => A3.B1;
+
+            private PropertyChangedEventHandler? _onA3PropertyChangedHandler;
+
+#if true // Variation 1: Base implements OnUnmonitoredInpcPropertyChanged, we don't need to track old value, we don't need to use getter to get new value.
+            protected override void OnUnmonitoredInpcPropertyChanged( string propertyName, INotifyPropertyChanged oldValue, INotifyPropertyChanged newValue )
+            {
+                if ( propertyName == "A3" )
+                {
+                    // NOTE: We intentionally DO NOT fire OnPropertyChanged("A3"), because the class A will do that after calling OnUnmonitoredInpcPropertyChanged.
+                    if ( oldValue != null )
+                    {
+                        oldValue.PropertyChanged -= this._onA3PropertyChangedHandler;
+                    }
+
+                    if ( newValue != null )
+                    {
+                        this._onA3PropertyChangedHandler ??= OnSpecificPropertyChanged;
+                        newValue.PropertyChanged += this._onA3PropertyChangedHandler;
+                    }
+
+                    // We've handled it - don't call base impl.
+
+                    void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
+                    {
+                        this.OnChildPropertyChanged( "A3", e.PropertyName );
+                    }
+                }
+                else
+                {
+                    base.OnUnmonitoredInpcPropertyChanged( propertyName, oldValue, newValue );
+                }
+            }
+
+            protected override void OnPropertyChanged( string propertyName )
+            {
+                // NB: Changes to A3 will be notified here, but we will ignore because we see them in OnUnmonitoredInpcPropertyChanged, and [Refs] on ancestor OnUnmonitoredInpcPropertyChanged
+                // confirms that A3 is notified via OnUnmonitoredInpcPropertyChanged.
+                if ( propertyName == "A1" )
+                {
+                    // A1 ref has changed. No false +ve detection, no old value stored, assume changed.
+                    OnPropertyChanged( "C2" );
+                }
+
+                base.OnPropertyChanged( propertyName );
+            }
+
+#else // Variation 2: Base does not impl OnPropertyChanged( string propertyName, INPC oldValue, INPC newValue ), we must keep track, and use the property getter to get the new value, and we may end up with duplicate subs and notifications.
+            private B _lastA3 = default!;
+
+            // Class A does not maintain a sub to A3, so we need to.
+            protected override void OnPropertyChanged( string propertyName )
+            {
+                if ( propertyName == "A1" )
+                {
+                    // A1 ref has changed. No false +ve detection, no old value stored, assume changed.
+                    OnPropertyChanged( "C2" );
+                }
+
+                if ( propertyName == "A3" )
+                {
+                    var oldValue = this._lastA3;
+                    var newValue = this.A3;
+
+                    if ( oldValue != null )
+                    {
+                        oldValue.PropertyChanged -= this._onA3PropertyChangedHandler;
+                    }
+
+                    this._lastA3 = newValue;
+
+                    if ( newValue != null )
+                    {
+                        this._onA3PropertyChangedHandler ??= OnSpecificPropertyChanged;
+                        newValue.PropertyChanged += this._onA3PropertyChangedHandler;
+                    }
+
+                    void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
+                    {
+                        this.OnChildPropertyChanged( "A3", e.PropertyName );
+                    }
+                }
+                base.OnPropertyChanged( propertyName );
+            }
+#endif
+            // Class A does not maintain a sub to A3, but we do.
+            [Refs( "A3" )]
+            protected override void OnChildPropertyChanged( string parentPropertyPath, string propertyName )
+            {
+                if ( parentPropertyPath == "A1" )
+                {
+                    if ( propertyName == "B1" )
+                    {
+                        OnPropertyChanged( "C2" );
+                    }
+                }
+                else if ( parentPropertyPath == "A3" )
+                {
+                    if ( propertyName == "B1" )
+                    {
+                        this.OnPropertyChanged( "C3" );
+                    }
+                }
+
+                base.OnChildPropertyChanged( parentPropertyPath, propertyName );
+            }
+        }
+
+        class B : INotifyPropertyChanged
+        {
+            private int _b1;
+            public int B1
+            {
+                get
+                {
+                    return this._b1;
+                }
+                set
+                {
+                    if ( this._b1 != value )
+                    {
+                        this._b1 = value;
+                        this.OnPropertyChanged( "B1" );
+                    }
+                }
+            }
+
+            protected virtual void OnPropertyChanged( string propertyName )
+            {
+                this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
+            }
+
+            public event PropertyChangedEventHandler? PropertyChanged;
+        }
     }
 
     namespace DesiredV1
@@ -85,12 +392,12 @@ namespace NpcExperiments.Exp8
                         }
                     }
 
-                    /*
+                    
                     void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
                     {
                         this.OnA1ChildChanged( e.PropertyName );
                     }
-                    */
+                    
                 }
             }
 
