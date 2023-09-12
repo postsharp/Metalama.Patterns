@@ -18,12 +18,12 @@ public sealed partial class NotifyPropertyChangedAttribute
             this.Builder = builder;
             this.Type_INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof( INotifyPropertyChanged ) );
             this.Event_INotifyPropertyChanged_PropertyChanged = this.Type_INotifyPropertyChanged.Events.First();
+            this.Type_Nullable_INotifyPropertyChanged = this.Type_INotifyPropertyChanged.ToNullableType();
             this.Type_PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof( PropertyChangedEventHandler ) );
             this.Type_Nullable_PropertyChangedEventHandler = this.Type_PropertyChangedEventHandler.ToNullableType();
             this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
-            this.Type_OnChangedAttribute= (INamedType) TypeFactory.GetType( typeof( OnChangedAttribute ) );
-            this.Type_OnChildChangedAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildChangedAttribute ) );
             this.Type_EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof( EqualityComparer<> ) );
+            this.Type_PropertyPathsAttribute = (INamedType) TypeFactory.GetType( typeof( PropertyPathsAttribute ) );
 
             var target = builder.Target;
 
@@ -41,6 +41,8 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public INamedType Type_INotifyPropertyChanged { get; }
 
+        public INamedType Type_Nullable_INotifyPropertyChanged { get; }
+
         public IEvent Event_INotifyPropertyChanged_PropertyChanged { get; }
 
         public INamedType Type_PropertyChangedEventHandler { get; }
@@ -49,41 +51,38 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public INamedType Type_IgnoreAutoChangeNotificationAttribute { get; }
 
-        public INamedType Type_OnChangedAttribute { get; }
-
-        public INamedType Type_OnChildChangedAttribute { get; }
-
         public INamedType Type_EqualityComparerOfT { get; }
+
+        public INamedType Type_PropertyPathsAttribute { get; }
 
         public bool TargetImplementsInpc { get; }
 
         public bool BaseImplementsInpc { get; }
 
-        public IMethod OnPropertyChangedMethod { get; set; } = null!;
+        public IMethod? BaseOnPropertyChangedMethod { get; set; }
+
+        public IMethod? BaseOnChildPropertyChangedMethod { get; set; }
+
+        public IMethod? BaseOnUnmonitoredInpcPropertyChangedMethod { get; set; }
+
+        public HashSet<string>? InheritedOnChildPropertyChangedPropertyPaths { private get; set; }
+
+        public HashSet<string>? InheritedOnUnmonitoredInpcPropertyChangedPropertyPaths { private get; set; }
+
+        public bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath ) 
+            => this.InheritedOnChildPropertyChangedPropertyPaths?.Contains( parentPropertyPath ) == true;
+
+        public bool HasInheritedOnUnmonitoredInpcPropertyChangedProperty( string propertyName ) 
+            => this.InheritedOnUnmonitoredInpcPropertyChangedPropertyPaths?.Contains( propertyName ) == true;
+
+        public CertainDeferredDeclaration<IMethod> OnPropertyChangedMethod { get; } = new();
+
+        public CertainDeferredDeclaration<IMethod> OnChildPropertyChangedMethod { get; } = new();
+
+        public DeferredDeclaration<IMethod> OnUnmonitoredInpcPropertyChangedMethod { get; } = null!;
 
         public IProperty GetDefaultEqualityComparerForType( IType type )
             => this.Type_EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
-
-        internal interface IBaseChangeMethods
-        {
-            /// <summary>
-            /// Gets a method like <c>void OnA1B1Changed()</c>.
-            /// </summary>
-            IMethod OnChangedMethod { get; }
-
-            /// <summary>
-            /// Gets for property types that implement <see cref="INotifyPropertyChanged"/>, a method like <c>void OnA1B1ChildChanged( string propertyName )</c>;
-            /// otherwise, <see langword="null"/>.
-            /// </summary>
-            IMethod? OnChildChangedMethod { get;  }
-        }
-
-        private class BaseChangeMethods : IBaseChangeMethods
-        {
-            public IMethod OnChangedMethod { get; set; } = null!;
-
-            public IMethod? OnChildChangedMethod { get; set; }
-        }
 
         private DependencyGraph.Node<NodeData>? _dependencyGraph;
 

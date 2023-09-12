@@ -58,6 +58,11 @@ internal static class DependencyGraph
         /// <exception cref="NotSupportedException"><see cref="IsRoot"/> is <see langword="true"/>.</exception>
         public ISymbol Symbol => this._symbol ?? throw new NotSupportedException( "The operation is not supported on root nodes." );
 
+        /// <summary>
+        /// Gets the name of the node. This is a synonym for <c>Symbol.Name</c>.
+        /// </summary>
+        public string Name => this.Symbol.Name;
+
         public IReadOnlyCollection<Node<T>> Children => ((IReadOnlyCollection<Node<T>>?) this._children?.Values) ?? Array.Empty<Node<T>>();
 
         /// <summary>
@@ -192,7 +197,7 @@ internal static class DependencyGraph
 
 #if DEBUG || LAMADEBUG
         public string GetPath()
-            => string.Join( ".", this.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ) );
+            => string.Join( ".", this.AncestorsAndSelf().Reverse().Select( n => n.Name ) );
 #endif
 
         public override string ToString()
@@ -233,7 +238,7 @@ internal static class DependencyGraph
 
             if ( allRefs.Count > 0 )
             {
-                appendTo.Append( " [ " ).Append( string.Join( ", ", allRefs.Select( n => n.Symbol.Name ).OrderBy( n => n ) ) ).Append( " ]" );
+                appendTo.Append( " [ " ).Append( string.Join( ", ", allRefs.Select( n => n.Name ).OrderBy( n => n ) ) ).Append( " ]" );
             }
 
             appendTo.AppendLine();
@@ -241,7 +246,7 @@ internal static class DependencyGraph
             if ( this._children != null )
             {
                 indent += 2;
-                foreach ( var child in this._children.Values.OrderBy( c => c.Symbol.Name ) )
+                foreach ( var child in this._children.Values.OrderBy( c => c.Name ) )
                 {
                     child.ToString( appendTo, indent, shouldHighlight );
                 }

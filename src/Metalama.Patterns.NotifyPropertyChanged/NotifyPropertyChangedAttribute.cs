@@ -1,13 +1,14 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
+using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -37,9 +38,15 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
         try
         {
-            FindOrIntroducePropertyChangedMethod( ctx );
+            AnalyzeBaseAndIntroduceInterfaceIfRequired( ctx );
+            
+            // Introduce methods like UpdateA1B1()
             IntroduceUpdateMethods( ctx );
+
+            // Override auto properties
             ProcessAutoProperties( ctx );
+
+            // Introduce/override OnPropertyChanged
         }
         catch ( DiagnosticErrorReportedException )
         {
@@ -47,16 +54,38 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         }
     }
 
-    private static void FindOrIntroducePropertyChangedMethod( BuildAspectContext ctx )
+    // TODO: Work in progress!
+    private static void TODO_IntroduceOnPropertyChangedMethod( BuildAspectContext ctx )
+    {
+        var introduceOnPropertyChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
+            ctx.Target,
+            nameof( OnPropertyChanged ), // XX this is the version which works with the introduced interface
+            IntroductionScope.Instance,
+            OverrideStrategy.Fail,
+            b =>
+            {
+                if ( ctx.Target.IsSealed )
+                {
+                    b.Accessibility = Accessibility.Private;
+                }
+                else
+                {
+                    b.Accessibility = Accessibility.Protected;
+                    b.IsVirtual = true;
+                }
+            } );
+
+        ctx.OnPropertyChangedMethod.Declaration = introduceOnPropertyChangedMethodResult.Declaration;
+    }
+
+    private static void AnalyzeBaseAndIntroduceInterfaceIfRequired( BuildAspectContext ctx )
     {
         var builder = ctx.Builder;
         var target = builder.Target;
 
-        IMethod? onPropertyChangedMethod = null;
-
         if ( ctx.TargetImplementsInpc )
         {
-            onPropertyChangedMethod = GetOnPropertyChangedMethod( target );
+            var onPropertyChangedMethod = GetOnPropertyChangedMethod( target );
 
             if ( onPropertyChangedMethod == null )
             {
@@ -66,33 +95,74 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 throw new DiagnosticErrorReportedException();
             }
+
+            ctx.OnPropertyChangedMethod.Declaration = onPropertyChangedMethod;
+
+            // TODO: Pending configuration, warn/error as applicable when enhanced methods are missing from the base type.
+            ctx.BaseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod( target );
+            ctx.BaseOnUnmonitoredInpcPropertyChangedMethod = GetOnUnmonitoredInpcPropertyChangedMethod( ctx, target );
         }
         else
         {
-            var implementInterfaceResult = builder.Advice.ImplementInterface( target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
-
-            var introduceOnPropertyChangedMethodResult = builder.Advice.IntroduceMethod(
-                builder.Target,
-                nameof( OnPropertyChanged ),
-                IntroductionScope.Instance,
-                OverrideStrategy.Fail,
-                b =>
-                {
-                    if ( target.IsSealed )
-                    {
-                        b.Accessibility = Accessibility.Private;
-                    }
-                    else
-                    {
-                        b.Accessibility = Accessibility.Protected;
-                        b.IsVirtual = true;
-                    }
-                } );
-
-            onPropertyChangedMethod = introduceOnPropertyChangedMethodResult.Declaration;
+            builder.Advice.ImplementInterface( target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
         }
 
-        ctx.OnPropertyChangedMethod = onPropertyChangedMethod;
+        ctx.InheritedOnChildPropertyChangedPropertyPaths = BuildPropertyPathLookup( GetPropertyPaths( ctx, ctx.BaseOnChildPropertyChangedMethod ) );
+
+        ctx.InheritedOnUnmonitoredInpcPropertyChangedPropertyPaths = BuildPropertyNameLookup( GetPropertyPaths( ctx, ctx.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
+
+        static HashSet<string>? BuildPropertyNameLookup( IEnumerable<string>? propertyNames )
+        {
+            if ( propertyNames == null )
+            {
+                return null;
+            }
+
+            var h = new HashSet<string>();
+
+            foreach ( var s in propertyNames )
+            {
+                if ( s.IndexOf('.') > -1 )
+                {
+                    throw new ArgumentException( "A property name must not contain period characters.", nameof( propertyNames ) );
+                }
+                h.Add( s );
+            }
+
+            return h;
+        }
+
+        // NOTE: This hashset of path stems approach is a simple way to allow path stems to be checked, but
+        // a tree-based structure might scale better if required. Keeping it simple for now.
+        static HashSet<string>? BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
+        {
+            if ( propertyPaths == null )
+            {
+                return null;
+            }
+
+            var h = new HashSet<string>();
+            
+            foreach ( var s in propertyPaths )
+            {
+                AddPropertyPathAndAllAncestorStems( h, s );
+            }
+            
+            return h;
+        }
+
+        static void AddPropertyPathAndAllAncestorStems( HashSet<string> addTo, string propertyPath )
+        {
+            addTo.Add( propertyPath );
+
+            var lastIdx = propertyPath.LastIndexOf( '.' );
+
+            while ( lastIdx > 1 )
+            {
+                addTo.Add( propertyPath.Substring( lastIdx - 1 ) );
+                lastIdx = propertyPath.LastIndexOf( '.', lastIdx - 1 );
+            }
+        }
     }
 
     private static (bool OnChangedMethodIsApplicable, bool OnChildChangedMethodIsApplicable) ValidateFieldOrProperty(
@@ -185,7 +255,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 var propertyDetails = ValidateFieldOrProperty( ctx, nodeToProcess.Data.FieldOrProperty );
 
                 // eg, for node X.Y.Z, parentElementNames is [X,Y]
-                var parentElementNames = nodeToProcess.AncestorsAndSelf().Reverse().Select( n => n.Symbol.Name ).ToList();
+                var parentElementNames = nodeToProcess.AncestorsAndSelf().Reverse().Select( n => n.Name ).ToList();
 
                 var pathForMemberNames = string.Join( "", parentElementNames );
                 var pathForMetadataLookup = string.Join( ".", parentElementNames );
@@ -244,7 +314,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             node = nodeToProcess,
                             accessChildExpression,
                             lastValueField,
-                            onPropertyChangedHandlerField
+                            onPropertyChangedHandlerField,
+                            pathForMetadataLookup
                         } );
 
                     thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
@@ -259,8 +330,6 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     {
         var target = ctx.Target;
         var typeOfInpc = (INamedType) TypeFactory.GetType( typeof( INotifyPropertyChanged ) );
-
-        var onPropertyChangedMethodHasCallerMemberNameAttribute = ctx.OnPropertyChangedMethod.Parameters[0].Attributes.Any( typeof( CallerMemberNameAttribute ) );
 
         // PS appears to consider all instance properties regardless of accessibility.
         var autoProperties =
@@ -317,7 +386,6 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                         ctx.Builder.Advice.Override( p, nameof( OverrideInpcRefTypeProperty ), tags: new
                         {
                             ctx,
-                            onPropertyChangedMethodHasCallerMemberNameAttribute,
                             handlerField,
                             node
                         } );
@@ -369,4 +437,44 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             && m.Parameters.Count == 1
             && m.Parameters[0].Type.SpecialType == SpecialType.String
             && _onPropertyChangedMethodNames.Contains( m.Name ) );
+
+    private static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
+        => type.AllMethods.FirstOrDefault( m =>
+            !m.IsStatic
+            && m.Attributes.Any( typeof( OnChildPropertyChangedMethodAttribute ) )
+            && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
+            && m.ReturnType.SpecialType == SpecialType.Void
+            && m.Parameters.Count == 2
+            && m.Parameters[0].Type.SpecialType == SpecialType.String
+            && m.Parameters[1].Type.SpecialType == SpecialType.String );
+
+    private static IMethod? GetOnUnmonitoredInpcPropertyChangedMethod( BuildAspectContext ctx, INamedType type )
+        => type.AllMethods.FirstOrDefault( m =>
+            !m.IsStatic
+            && m.Attributes.Any( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) )
+            && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
+            && m.ReturnType.SpecialType == SpecialType.Void
+            && m.Parameters.Count == 3
+            && m.Parameters[0].Type.SpecialType == SpecialType.String
+            && m.Parameters[1].Type == ctx.Type_Nullable_INotifyPropertyChanged
+            && m.Parameters[2].Type == ctx.Type_Nullable_INotifyPropertyChanged );
+
+    [return: NotNullIfNotNull( nameof( method ) )]
+    private static IEnumerable<string>? GetPropertyPaths( BuildAspectContext ctx, IMethod? method, bool includeInherited = true )
+    {
+        if ( method == null )
+        {
+            return null;
+        }
+
+        return includeInherited
+            ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPaths( ctx, m ) )
+            : GetPropertyPaths( ctx, method );
+
+        static IEnumerable<string> GetPropertyPaths( BuildAspectContext ctx, IMethod method ) =>
+            method.Attributes
+            .OfAttributeType( ctx.Type_PropertyPathsAttribute )
+            .SelectMany( a => a.ConstructorArguments[0].Values.Select( k => (string?) k.Value ) )
+            .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
+    }
 }

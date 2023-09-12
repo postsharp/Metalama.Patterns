@@ -155,6 +155,10 @@ namespace NpcExperiments.Exp8
              * 
              * Another mitigation is to store a hash of the refs list and throw at runtime if different.
              * 
+             * ---
+             * 
+             * If a class has [Refs("A1.B1.C1")] it must maintain subs all the way along the chain
+             * and raise OnChildPropertyChanged along the chain.
             */
             [Refs("A1")] // Class A maintains a subscription to property A1
             protected virtual void OnChildPropertyChanged( string parentPropertyPath, string propertyName )

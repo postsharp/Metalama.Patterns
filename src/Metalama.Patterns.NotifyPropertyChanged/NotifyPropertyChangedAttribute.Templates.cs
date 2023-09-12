@@ -3,14 +3,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
 public partial class NotifyPropertyChangedAttribute
 {
     [CompileTime]
-    static void CompileTimeThrow( Exception e )
+    private static void CompileTimeThrow( Exception e )
         => throw e;
 
     [Template]
@@ -31,67 +30,57 @@ public partial class NotifyPropertyChangedAttribute
 
             if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
             {
-                if ( node != null )
+                if ( handlerField != null )
                 {
                     var oldValue = meta.Target.FieldOrProperty.Value;
-
-                    if ( handlerField != null )
+                    if ( oldValue != null )
                     {
-                        if ( oldValue != null )
+                        if ( eventRequiresCast )
                         {
-                            if ( eventRequiresCast )
-                            {
-                                meta.Cast( ctx.Type_INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
-                            }
-                            else
-                            {
-                                oldValue.PropertyChanged -= handlerField.Value;
-                            }
+                            meta.Cast( ctx.Type_INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                        }
+                        else
+                        {
+                            oldValue.PropertyChanged -= handlerField.Value;
                         }
                     }
+
+                    meta.Target.FieldOrProperty.Value = value;
+                }
+                else if ( ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration != null )
+                {
+                    var oldValue = meta.Target.FieldOrProperty.Value;
+                    meta.Target.FieldOrProperty.Value = value;
+                    ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
+                }
+                else
+                {
+                    meta.Target.FieldOrProperty.Value = value;
                 }
 
-                meta.Target.FieldOrProperty.Value = value;
+                ctx.OnPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name );
 
-                GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
-
-                if ( node != null )
+                if ( handlerField != null )
                 {
-                    if ( handlerField != null )
+                    if ( value != null )
                     {
-                        if ( value != null )
+                        // This must be implemented as a local function because Metalama does not currently support delegates in any other way.
+                        void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
                         {
-                            handlerField.Value ??= (PropertyChangedEventHandler) OnSpecificPropertyChanged;
+                            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name, e.PropertyName );
+                        }
 
-                            if ( eventRequiresCast )
-                            {
-                                meta.Cast( ctx.Type_INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
-                            }
-                            else
-                            {
-                                value.PropertyChanged += handlerField.Value;
-                            }
+                        handlerField.Value ??= (PropertyChangedEventHandler) OnSpecificPropertyChanged;
+
+                        if ( eventRequiresCast )
+                        {
+                            meta.Cast( ctx.Type_INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
+                        }
+                        else
+                        {
+                            value.PropertyChanged += handlerField.Value;
                         }
                     }
-                }
-            }
-
-            // This must be implemented as a local function because Metalama does not currently support delegates in any other way.
-            void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
-            {
-                // TODO: Don't emit this method at all if not needed.
-                // Currently, by my reckoning, the only way to do this is to have two variants of the OverrideInpcRefTypeProperty
-                // template, one with the local method and one without. Alternatively, richer support for delegates in templates
-                // could provide an cleaner solution.
-                if ( node != null )
-                {
-                    // TODO: Subtemplates emit unwanted extra nesting inside curly braces if the subtemplate defines local vars.
-                    // So for emit the local var here then call the subtemplate to have more idomatic generated code.
-                    // Also see other uses of GenerateBodyOfOnSpecificPropertyChanged.
-                    var propertyName = e.PropertyName;
-                    var propertyNameExpression = ExpressionFactory.Capture( propertyName );
-
-                    GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
                 }
             }
         }
@@ -129,14 +118,14 @@ public partial class NotifyPropertyChangedAttribute
             if ( compareExpr == null )
             {
                 meta.Target.FieldOrProperty.Value = value;
-                GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
+                ctx.OnPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name );
             }
             else
             {
                 if ( compareExpr.Value )
                 {
                     meta.Target.FieldOrProperty.Value = value;
-                    GenerateOnChangedBody( ctx, node, meta.Target.Property.Name );
+                    ctx.OnPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name );
                 }
             }
         }
@@ -146,13 +135,33 @@ public partial class NotifyPropertyChangedAttribute
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    // TODO: Using [CallerMemberName] started to cause build errors after Metalama topic/2023.4/npc 1105961a
-    // (but we couldn't make use of it in generated code anyhow because default values are not supported for method invocations)
     [Template]
-    private void OnPropertyChanged( /*[CallerMemberName]*/ string propertyName )
+    private void OnPropertyChanged( string propertyName, [CompileTime] BuildAspectContext ctx )
     {
         meta.InsertComment( "Template: " + nameof( this.OnPropertyChanged ) );
-        this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
+
+        foreach ( var node in ctx.DependencyGraph.Children )
+        {
+            if ( node.DirectReferences.Count > 0 )
+            {
+                if ( propertyName == node.Name )
+                {
+                    // TODO: Consider replacing with dictionary lookup
+                    foreach ( var depNode in node.DirectReferences )
+                    {
+                        meta.Target.Method.Invoke( depNode.Name );
+                    }
+                }
+            }
+        }
+        if ( ctx.BaseOnPropertyChangedMethod == null )
+        {
+            this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
+        }
+        else
+        {
+            meta.Proceed();
+        }
     }
 
     [Template]
@@ -161,7 +170,8 @@ public partial class NotifyPropertyChangedAttribute
         [CompileTime] DependencyGraph.Node<NodeData> node,
         [CompileTime] IExpression accessChildExpression, 
         [CompileTime] IField lastValueField,
-        [CompileTime] IField onPropertyChangedHandlerField )
+        [CompileTime] IField onPropertyChangedHandlerField,
+        [CompileTime] string parentPropertyPath )
     {
         meta.InsertComment( "Template: " + nameof( UpdateChildProperty ) );
         meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
@@ -183,15 +193,12 @@ public partial class NotifyPropertyChangedAttribute
 
             lastValueField.Value = newValue;
 
-            GenerateOnChangedBody( ctx, node, node.Symbol.Name );
+            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( parentPropertyPath, node.Name );
         }
         
         void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )
         {
-            var propertyName = e.PropertyName;
-            var propertyNameExpression = ExpressionFactory.Capture( propertyName );
-
-            GenerateOnChildChangedBody( ctx, node, propertyNameExpression );
+            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( $"{parentPropertyPath}.{node.Name}", e.PropertyName );
         }
     }
 
@@ -220,19 +227,19 @@ public partial class NotifyPropertyChangedAttribute
                 .SelectMany( c => c.GetAllReferences() )
                 .Concat( node.GetAllReferences() )
                 .Distinct()
-                .Select( n => n.Symbol.Name )
+                .Select( n => n.Name )
                 .OrderBy( s => s );
 
             foreach ( var name in affectedPropertyNames )
             {
-                ctx.OnPropertyChangedMethod.Invoke( name );
+                ctx.OnPropertyChangedMethod.Declaration.Invoke( name );
             }
         }
 
         // node is null for unreferenced (according to static compile time analsysis) root properties.
         if ( !disableNotifySelfChanged && (node == null || node.Parent!.IsRoot) )
         {
-            propertyName ??= node?.Symbol.Name;
+            propertyName ??= node?.Name;
 
             if ( propertyName == null )
             {
@@ -240,7 +247,7 @@ public partial class NotifyPropertyChangedAttribute
                 CompileTimeThrow( new InvalidOperationException( "Template: must specify node and/or propertyName." ) );
             }
 
-            ctx.OnPropertyChangedMethod.Invoke( propertyName );
+            ctx.OnPropertyChangedMethod.Declaration.Invoke( propertyName );
         }
 
         if ( proceedAtEnd )
@@ -281,7 +288,7 @@ public partial class NotifyPropertyChangedAttribute
 
                 if ( hasRefs || hasUpdateMethod )
                 {
-                    if ( propertyNameExpression.Value == child.Symbol.Name )
+                    if ( propertyNameExpression.Value == child.Name )
                     {
                         if ( hasUpdateMethod )
                         {
@@ -290,11 +297,11 @@ public partial class NotifyPropertyChangedAttribute
 
                         if ( hasRefs )
                         {
-                            var affectedPropertyNames = child.GetAllReferences().Select( n => n.Symbol.Name ).OrderBy( s => s );
+                            var affectedPropertyNames = child.GetAllReferences().Select( n => n.Name ).OrderBy( s => s );
 
                             foreach ( var name in affectedPropertyNames )
                             {
-                                ctx.OnPropertyChangedMethod.Invoke( name );
+                                ctx.OnPropertyChangedMethod.Declaration.Invoke( name );
                             }
                         }
 
