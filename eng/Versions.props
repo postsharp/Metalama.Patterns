@@ -38,7 +38,7 @@
         <XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
         <xUnitVersion>2.4.2</xUnitVersion>
-        <PostSharpEngineeringVersion>2023.2.36</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>2023.2.41</PostSharpEngineeringVersion>
         <MetalamaExtensionsVersion></MetalamaExtensionsVersion>
     </PropertyGroup>
 
