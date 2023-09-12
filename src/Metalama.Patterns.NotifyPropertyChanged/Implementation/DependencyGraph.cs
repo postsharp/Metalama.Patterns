@@ -66,26 +66,33 @@ internal static class DependencyGraph
         public IReadOnlyCollection<Node<T>> Children => ((IReadOnlyCollection<Node<T>>?) this._children?.Values) ?? Array.Empty<Node<T>>();
 
         /// <summary>
-        /// Gets the members that reference the current node as the final member of an access expression.
+        /// Gets the members that reference the current node.
         /// </summary>
         public IReadOnlyCollection<Node<T>> DirectReferences => ((IReadOnlyCollection<Node<T>>?) this._referencedBy) ?? Array.Empty<Node<T>>();
 
 
         /// <summary>
-        /// Gets the members that reference, directly or indirectly, the current node as the final member of an access expression.
+        /// Gets the members that reference, directly or indirectly, the current node. By default, the search follows only <see cref="DirectReferences"/>;
+        /// if <paramref name="followDescendants"/> is <see langword="true"/>, the search follows the direct references of the current node and
+        /// the direct references of the current node's decendants.
         /// </summary>
+        /// <param name="followDescendants"></param>
         /// <returns></returns>
-        public IReadOnlyCollection<Node<T>> GetAllReferences()
+        public IReadOnlyCollection<Node<T>> GetAllReferences( bool followDescendants = false )
         {
             // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
             // However, it's not recusive so there's no risk of stack overflow. So safe, but slow.
 
-            if ( this._referencedBy == null )
+            if ( this._referencedBy == null && !followDescendants )
             {
                 return Array.Empty<Node<T>>();
             }
 
-            var refsToFollow = new Stack<Node<T>>( this._referencedBy );
+            var refsToFollow = new Stack<Node<T>>(
+                followDescendants
+                    ? this.DecendantsDepthFirst().SelectMany( n => n.DirectReferences ).Concat( this.DirectReferences )
+                    : this.DirectReferences );
+            
             var refsFollowed = new HashSet<Node<T>>();
 
             while ( refsToFollow.Count > 0 )

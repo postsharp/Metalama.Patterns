@@ -139,17 +139,40 @@ public partial class NotifyPropertyChangedAttribute
     private void OnPropertyChanged( string propertyName, [CompileTime] BuildAspectContext ctx )
     {
         meta.InsertComment( "Template: " + nameof( this.OnPropertyChanged ) );
+        meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString() );
 
         foreach ( var node in ctx.DependencyGraph.Children )
         {
-            if ( node.DirectReferences.Count > 0 )
+            var cascadeUpdateMethods =
+                node.Children
+                .Select( n => n.Data.UpdateMethod )
+                .Where( m => m != null );
+
+            var affectedNodes =
+                node.Children
+                .SelectMany( c => c.GetAllReferences() )
+                .Concat( node.GetAllReferences() );
+            
+            if ( affectedNodes.Any() || cascadeUpdateMethods.Any() )
             {
+                var affectedPropertyNames = affectedNodes
+                    .Distinct()
+                    .Select( n => n.Name )
+                    .OrderBy( s => s );
+
                 if ( propertyName == node.Name )
                 {
-                    // TODO: Consider replacing with dictionary lookup
-                    foreach ( var refNode in node.DirectReferences )
+                    foreach ( var method in cascadeUpdateMethods )
                     {
-                        meta.Target.Method.Invoke( refNode.Name );
+                        method.Invoke();
+                    }
+
+                    // TODO: Consider replacing with dictionary lookup
+                    foreach ( var name in affectedPropertyNames )
+                    {
+                        // TODO: Question: what if the method of the current template is renamed during introduction? Is this the correct way to call the current method recursively?
+                        // meta.Target.Method.Invoke generates OnPropertyChanged_Empty and calls it.
+                        meta.This.OnPropertyChanged( name );
                     }
                 }
             }
@@ -197,7 +220,15 @@ public partial class NotifyPropertyChangedAttribute
 
             lastValueField.Value = newValue;
 
-            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
+            // TODO: Remove unused branch if we end up not allowing root props
+            if ( node.Parent!.IsRoot )
+            {
+                ctx.OnPropertyChangedMethod.Declaration.Invoke( node.Name );
+            }
+            else
+            {
+                ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
+            }
         }
         
         void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )

@@ -37,6 +37,8 @@ namespace NpcExperiments.Exp8
         public int A2 => A1.B1;
 
         public B A3 { get; set; }
+
+        public int A4 => A1.B3.D1;
     }
 
     [NotifyPropertyChanged]
@@ -45,6 +47,14 @@ namespace NpcExperiments.Exp8
         public int B1 { get; set; }
 
         public int B2 { get; set; }
+
+        public D B3 { get; set; }
+    }
+
+    [NotifyPropertyChanged]
+    class D
+    {
+        public int D1 { get; set; }
     }
 
 #if true

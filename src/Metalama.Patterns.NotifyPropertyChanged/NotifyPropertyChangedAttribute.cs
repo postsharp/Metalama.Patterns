@@ -260,6 +260,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         }
     }
 
+    // TODO: Return value is currently unused.
     private static (bool OnChangedMethodIsApplicable, bool OnChildChangedMethodIsApplicable) ValidateFieldOrProperty(
         BuildAspectContext ctx,
         IFieldOrProperty fieldOrProperty )
@@ -318,51 +319,39 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         var allNodesDepthFirst = ctx.DependencyGraph.DecendantsDepthFirst().ToList();
         allNodesDepthFirst.Reverse();
 
-        /* Iterate all nodes (except root), depth-first, in leaf-to-root order (this is important).
-         * For each node that is directly referenced, we then make sure to build the
-         * update method for the *parent* - this is because the parent object will
-         * notify changes to the child that we are considering.
-         */
+        // Process all nodes in depth-first, leaf-to-root order, creating necessary update methods as we go.
+        // The order is important, so that parent nodes test if child node methods were necessary and invoke them.
+        
+        // NB: We might be able do this with DeferredDeclaration<T> and care less about ordering.
 
         // TODO: I suspect/know some scenarios are not handled yet. Don't assume the logic here is correct or complete.
 
         foreach ( var node in allNodesDepthFirst )
         {
-            var nodeToProcess = node.Parent!;
-
-            if ( nodeToProcess.IsRoot )
+            if ( node.Children.Count == 0 || node.Parent!.IsRoot )
             {
-                // *node* is a root property of the target type. Always consider processing these, in case
-                // they have not been processed already.
-                nodeToProcess = node;
-            }
-
-            /*
-            if ( nodeToProcess.Parent!.IsRoot )
-            {
-                // *parent* is a root property of the target type. Do we need to do anything for it?
+                // Don't process leaf nodes or root properties.
                 continue;
             }
-            */
 
-            if ( !nodeToProcess.Data.MethodsHaveBeenSet )
+            if ( !node.Data.MethodsHaveBeenSet ) // TODO: Why would MethodsHaveBeenSet ever be true here?
             {
-                var propertyDetails = ValidateFieldOrProperty( ctx, nodeToProcess.Data.FieldOrProperty );
+                _ = ValidateFieldOrProperty( ctx, node.Data.FieldOrProperty );
 
                 IMethod? thisUpdateMethod = null;
 
                 // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-                if ( !nodeToProcess.Parent!.IsRoot 
-                    && nodeToProcess.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
-                    && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(nodeToProcess.Data.DottedPropertyPath) )
+                if ( //!node.Parent!.IsRoot &&
+                    node.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
+                    && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(node.Data.DottedPropertyPath) )
                 {
-                    var pathForMemberNames = nodeToProcess.Data.ContiguousPropertyPath;
+                    var pathForMemberNames = node.Data.ContiguousPropertyPath;
                     var lastValueFieldName = ctx.GetAndReserveUnusedMemberName( $"_last{pathForMemberNames}" );
 
                     var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
                         ctx.Target,
                         lastValueFieldName,
-                        nodeToProcess.Data.FieldOrProperty.Type.ToNullableType(),
+                        node.Data.FieldOrProperty.Type.ToNullableType(),
                         IntroductionScope.Instance,
                         OverrideStrategy.Fail,
                         b => b.Accessibility = Accessibility.Private );
@@ -385,7 +374,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                     var accessChildExprBuilder = new ExpressionBuilder();
 
-                    accessChildExprBuilder.AppendVerbatim( nodeToProcess.Data.DottedPropertyPath.Replace( ".", "?." ) );
+                    accessChildExprBuilder.AppendVerbatim( node.Data.DottedPropertyPath.Replace( ".", "?." ) );
 
                     var accessChildExpression = accessChildExprBuilder.ToExpression();
 
@@ -402,7 +391,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                         args: new
                         {
                             ctx,
-                            node = nodeToProcess,
+                            node = node,
                             accessChildExpression,
                             lastValueField,
                             onPropertyChangedHandlerField
@@ -411,7 +400,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
                 }
 
-                nodeToProcess.Data.SetMethods( thisUpdateMethod );
+                node.Data.SetMethods( thisUpdateMethod );
             }
         }
     }
@@ -471,6 +460,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                                 whenExists: OverrideStrategy.Fail );
 
                             handlerField = introduceHandlerFieldResult.Declaration;
+
+                            ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( p.Name );
                         }
                         else
                         {
