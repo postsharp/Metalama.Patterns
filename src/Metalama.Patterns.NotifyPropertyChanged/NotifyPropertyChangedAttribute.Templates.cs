@@ -147,9 +147,9 @@ public partial class NotifyPropertyChangedAttribute
                 if ( propertyName == node.Name )
                 {
                     // TODO: Consider replacing with dictionary lookup
-                    foreach ( var depNode in node.DirectReferences )
+                    foreach ( var refNode in node.DirectReferences )
                     {
-                        meta.Target.Method.Invoke( depNode.Name );
+                        meta.Target.Method.Invoke( refNode.Name );
                     }
                 }
             }
@@ -163,17 +163,21 @@ public partial class NotifyPropertyChangedAttribute
             meta.Proceed();
         }
     }
-
+    
     [Template]
-    private static void UpdateChildProperty(
+    private static void UpdateChildInpcProperty(
         [CompileTime] BuildAspectContext ctx,
         [CompileTime] DependencyGraph.Node<NodeData> node,
         [CompileTime] IExpression accessChildExpression, 
         [CompileTime] IField lastValueField,
-        [CompileTime] IField onPropertyChangedHandlerField,
-        [CompileTime] string parentPropertyPath )
+        [CompileTime] IField onPropertyChangedHandlerField )
     {
-        meta.InsertComment( "Template: " + nameof( UpdateChildProperty ) );
+        if ( node.Parent!.IsRoot)
+        {
+            CompileTimeThrow( new InvalidOperationException( $"{nameof( UpdateChildInpcProperty )} template must not be called on a root property node." ) );
+        }
+
+        meta.InsertComment( "Template: " + nameof( UpdateChildInpcProperty ) );
         meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
 
         var newValue = accessChildExpression.Value;
@@ -193,12 +197,12 @@ public partial class NotifyPropertyChangedAttribute
 
             lastValueField.Value = newValue;
 
-            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( parentPropertyPath, node.Name );
+            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
         }
         
         void OnSpecificPropertyChanged( object? sender, PropertyChangedEventArgs e )
         {
-            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( $"{parentPropertyPath}.{node.Name}", e.PropertyName );
+            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Data.DottedPropertyPath, e.PropertyName );
         }
     }
 
@@ -322,5 +326,19 @@ public partial class NotifyPropertyChangedAttribute
         {
             meta.Proceed();
         }
+    }
+
+    [Template]
+    private static void OnChildPropertyChanged( string parentPropertyPath, string propertyName, [CompileTime] BuildAspectContext ctx )
+    {
+        // TODO: Implement!
+        meta.InsertComment( "TODO" );
+    }
+
+    [Template]
+    private static void OnUnmonitoredInpcPropertyChanged( string propertyName, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue, [CompileTime] BuildAspectContext ctx )
+    {
+        meta.InsertComment( "Template: " + nameof( GenerateOnChildChangedBody ) );
+        meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString() );
     }
 }

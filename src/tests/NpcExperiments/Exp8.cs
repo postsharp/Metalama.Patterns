@@ -47,6 +47,7 @@ namespace NpcExperiments.Exp8
         public int B2 { get; set; }
     }
 
+#if true
     class C : A
     {
         public int C1 {  get; set;}
@@ -55,7 +56,7 @@ namespace NpcExperiments.Exp8
 
         public int C3 => A3.B1;
     }
-
+#endif
     namespace Desired_MinimalContract
     {
         class A : INotifyPropertyChanged

@@ -23,7 +23,8 @@ public sealed partial class NotifyPropertyChangedAttribute
             this.Type_Nullable_PropertyChangedEventHandler = this.Type_PropertyChangedEventHandler.ToNullableType();
             this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
             this.Type_EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof( EqualityComparer<> ) );
-            this.Type_PropertyPathsAttribute = (INamedType) TypeFactory.GetType( typeof( PropertyPathsAttribute ) );
+            this.Type_OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildPropertyChangedMethodAttribute ) );
+            this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) );
 
             var target = builder.Target;
 
@@ -53,7 +54,9 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public INamedType Type_EqualityComparerOfT { get; }
 
-        public INamedType Type_PropertyPathsAttribute { get; }
+        public INamedType Type_OnChildPropertyChangedMethodAttribute { get; }
+
+        public INamedType Type_OnUnmonitoredInpcPropertyChangedMethodAttribute { get; }
 
         public bool TargetImplementsInpc { get; }
 
@@ -79,7 +82,11 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public CertainDeferredDeclaration<IMethod> OnChildPropertyChangedMethod { get; } = new();
 
-        public DeferredDeclaration<IMethod> OnUnmonitoredInpcPropertyChangedMethod { get; } = null!;
+        public DeferredDeclaration<IMethod> OnUnmonitoredInpcPropertyChangedMethod { get; } = new( willBeDefined: null ); // TODO: Decide according to configuration.
+
+        public List<string> PropertyPathsForOnChildPropertyChangedMethodAttribute { get; } = new();
+
+        public List<string> PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute { get; } = new();
 
         public IProperty GetDefaultEqualityComparerForType( IType type )
             => this.Type_EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );

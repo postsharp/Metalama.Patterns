@@ -1,6 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
@@ -46,7 +47,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             // Override auto properties
             ProcessAutoProperties( ctx );
 
-            // Introduce/override OnPropertyChanged
+            IntroduceOnPropertyChangedMethod( ctx );
+            IntroduceOnChildPropertyChangedMethod( ctx );
+            IntroduceOnUnmonitoredInpcPropertyChanged( ctx );
         }
         catch ( DiagnosticErrorReportedException )
         {
@@ -55,15 +58,22 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     }
 
     // TODO: Work in progress!
-    private static void TODO_IntroduceOnPropertyChangedMethod( BuildAspectContext ctx )
+    private static void IntroduceOnPropertyChangedMethod( BuildAspectContext ctx )
     {
-        var introduceOnPropertyChangedMethodResult = ctx.Builder.Advice.IntroduceMethod(
+        var isOverride = ctx.BaseOnPropertyChangedMethod != null;
+
+        var result = ctx.Builder.Advice.IntroduceMethod(
             ctx.Target,
-            nameof( OnPropertyChanged ), // XX this is the version which works with the introduced interface
+            nameof( OnPropertyChanged ),
             IntroductionScope.Instance,
-            OverrideStrategy.Fail,
+            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
             b =>
             {
+                if ( isOverride )
+                {
+                    b.Name = ctx.BaseOnPropertyChangedMethod.Name;
+                }
+
                 if ( ctx.Target.IsSealed )
                 {
                     b.Accessibility = Accessibility.Private;
@@ -73,9 +83,96 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     b.Accessibility = Accessibility.Protected;
                     b.IsVirtual = true;
                 }
+            },
+            args: new
+            {
+                ctx
             } );
 
-        ctx.OnPropertyChangedMethod.Declaration = introduceOnPropertyChangedMethodResult.Declaration;
+        ctx.OnPropertyChangedMethod.Declaration = result.Declaration;
+    }
+
+    private static void IntroduceOnChildPropertyChangedMethod( BuildAspectContext ctx )
+    {
+        var isOverride = ctx.BaseOnChildPropertyChangedMethod != null;
+
+        var result = ctx.Builder.Advice.IntroduceMethod(
+            ctx.Target,
+            nameof( OnChildPropertyChanged ),
+            IntroductionScope.Instance,
+            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
+            b =>
+            {
+                b.AddAttribute(
+                    AttributeConstruction.Create(
+                        ctx.Type_OnChildPropertyChangedMethodAttribute,
+                        new[] {
+                                ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s).ToArray()
+                        } ) );
+
+                if ( isOverride )
+                {
+                    b.Name = ctx.BaseOnChildPropertyChangedMethod.Name;
+                }
+
+                if ( ctx.Target.IsSealed )
+                {
+                    b.Accessibility = Accessibility.Private;
+                }
+                else
+                {
+                    b.Accessibility = Accessibility.Protected;
+                    b.IsVirtual = true;
+                }
+            },
+            args: new
+            {
+                ctx
+            } );
+
+        ctx.OnChildPropertyChangedMethod.Declaration = result.Declaration;
+    }
+
+    private static void IntroduceOnUnmonitoredInpcPropertyChanged( BuildAspectContext ctx )
+    {
+        var isOverride = ctx.BaseOnUnmonitoredInpcPropertyChangedMethod != null;
+
+        var result = ctx.Builder.Advice.IntroduceMethod(
+            ctx.Target,
+            nameof( OnUnmonitoredInpcPropertyChanged ),
+            IntroductionScope.Instance,
+            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
+            b =>
+            {
+                b.AddAttribute(
+                    AttributeConstruction.Create(
+                        ctx.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute,
+                        new[]
+                        {
+                                ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray()
+                        } ) );
+
+                if ( isOverride )
+                {
+                    b.Name = ctx.BaseOnUnmonitoredInpcPropertyChangedMethod.Name;
+                }
+
+                if ( ctx.Target.IsSealed )
+                {
+                    b.Accessibility = Accessibility.Private;
+                }
+                else
+                {
+                    b.Accessibility = Accessibility.Protected;
+                    b.IsVirtual = true;
+                }
+            },
+            args: new
+            {
+                ctx
+            } );
+
+        ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration = result.Declaration;
     }
 
     private static void AnalyzeBaseAndIntroduceInterfaceIfRequired( BuildAspectContext ctx )
@@ -83,11 +180,13 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         var builder = ctx.Builder;
         var target = builder.Target;
 
+        ctx.BaseOnPropertyChangedMethod = GetOnPropertyChangedMethod( target );
+        ctx.BaseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod( target );
+        ctx.BaseOnUnmonitoredInpcPropertyChangedMethod = GetOnUnmonitoredInpcPropertyChangedMethod( ctx, target );
+
         if ( ctx.TargetImplementsInpc )
         {
-            var onPropertyChangedMethod = GetOnPropertyChangedMethod( target );
-
-            if ( onPropertyChangedMethod == null )
+            if ( ctx.BaseOnPropertyChangedMethod == null )
             {
                 builder.Diagnostics.Report(
                     DiagnosticDescriptors.NotifyPropertyChanged.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
@@ -95,21 +194,17 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 throw new DiagnosticErrorReportedException();
             }
-
-            ctx.OnPropertyChangedMethod.Declaration = onPropertyChangedMethod;
-
-            // TODO: Pending configuration, warn/error as applicable when enhanced methods are missing from the base type.
-            ctx.BaseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod( target );
-            ctx.BaseOnUnmonitoredInpcPropertyChangedMethod = GetOnUnmonitoredInpcPropertyChangedMethod( ctx, target );
         }
         else
         {
             builder.Advice.ImplementInterface( target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
         }
 
-        ctx.InheritedOnChildPropertyChangedPropertyPaths = BuildPropertyPathLookup( GetPropertyPaths( ctx, ctx.BaseOnChildPropertyChangedMethod ) );
+        ctx.InheritedOnChildPropertyChangedPropertyPaths = 
+            BuildPropertyPathLookup( GetPropertyPaths( ctx.Type_OnChildPropertyChangedMethodAttribute, ctx.BaseOnChildPropertyChangedMethod ) );
 
-        ctx.InheritedOnUnmonitoredInpcPropertyChangedPropertyPaths = BuildPropertyNameLookup( GetPropertyPaths( ctx, ctx.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
+        ctx.InheritedOnUnmonitoredInpcPropertyChangedPropertyPaths = 
+            BuildPropertyNameLookup( GetPropertyPaths( ctx.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute, ctx.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
 
         static HashSet<string>? BuildPropertyNameLookup( IEnumerable<string>? propertyNames )
         {
@@ -254,18 +349,14 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             {
                 var propertyDetails = ValidateFieldOrProperty( ctx, nodeToProcess.Data.FieldOrProperty );
 
-                // eg, for node X.Y.Z, parentElementNames is [X,Y]
-                var parentElementNames = nodeToProcess.AncestorsAndSelf().Reverse().Select( n => n.Name ).ToList();
-
-                var pathForMemberNames = string.Join( "", parentElementNames );
-                var pathForMetadataLookup = string.Join( ".", parentElementNames );
-
                 IMethod? thisUpdateMethod = null;
 
                 // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
                 if ( !nodeToProcess.Parent!.IsRoot 
-                    && nodeToProcess.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit )
+                    && nodeToProcess.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
+                    && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(nodeToProcess.Data.DottedPropertyPath) )
                 {
+                    var pathForMemberNames = nodeToProcess.Data.ContiguousPropertyPath;
                     var lastValueFieldName = ctx.GetAndReserveUnusedMemberName( $"_last{pathForMemberNames}" );
 
                     var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
@@ -294,13 +385,13 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                     var accessChildExprBuilder = new ExpressionBuilder();
 
-                    accessChildExprBuilder.AppendVerbatim( string.Join( "?.", parentElementNames ) );
+                    accessChildExprBuilder.AppendVerbatim( nodeToProcess.Data.DottedPropertyPath.Replace( ".", "?." ) );
 
                     var accessChildExpression = accessChildExprBuilder.ToExpression();
 
                     var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
                         ctx.Target,
-                        nameof( UpdateChildProperty ),
+                        nameof( UpdateChildInpcProperty ),
                         IntroductionScope.Instance,
                         OverrideStrategy.Fail,
                         b =>
@@ -314,8 +405,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                             node = nodeToProcess,
                             accessChildExpression,
                             lastValueField,
-                            onPropertyChangedHandlerField,
-                            pathForMetadataLookup
+                            onPropertyChangedHandlerField
                         } );
 
                     thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
@@ -381,6 +471,10 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                                 whenExists: OverrideStrategy.Fail );
 
                             handlerField = introduceHandlerFieldResult.Declaration;
+                        }
+                        else
+                        {
+                            ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.Add( p.Name );
                         }
 
                         ctx.Builder.Advice.Override( p, nameof( OverrideInpcRefTypeProperty ), tags: new
@@ -460,20 +554,22 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             && m.Parameters[2].Type == ctx.Type_Nullable_INotifyPropertyChanged );
 
     [return: NotNullIfNotNull( nameof( method ) )]
-    private static IEnumerable<string>? GetPropertyPaths( BuildAspectContext ctx, IMethod? method, bool includeInherited = true )
+    private static IEnumerable<string>? GetPropertyPaths( INamedType attributeType, IMethod? method, bool includeInherited = true )
     {
+        // NB: Assumes that attributeType instances will always be constructed with one arg of type string[].
+
         if ( method == null )
         {
             return null;
         }
 
         return includeInherited
-            ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPaths( ctx, m ) )
-            : GetPropertyPaths( ctx, method );
+            ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPaths( attributeType, m ) )
+            : GetPropertyPaths( attributeType, method );
 
-        static IEnumerable<string> GetPropertyPaths( BuildAspectContext ctx, IMethod method ) =>
+        static IEnumerable<string> GetPropertyPaths( INamedType attributeType, IMethod method ) =>
             method.Attributes
-            .OfAttributeType( ctx.Type_PropertyPathsAttribute )
+            .OfAttributeType( attributeType )
             .SelectMany( a => a.ConstructorArguments[0].Values.Select( k => (string?) k.Value ) )
             .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
     }
