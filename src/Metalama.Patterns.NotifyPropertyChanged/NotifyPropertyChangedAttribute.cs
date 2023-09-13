@@ -1,15 +1,12 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
-using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -39,7 +36,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
         try
         {
-            AnalyzeBaseAndIntroduceInterfaceIfRequired( ctx );
+            ExamineBaseAndIntroduceInterfaceIfRequired( ctx );
             
             // Introduce methods like UpdateA1B1()
             IntroduceUpdateMethods( ctx );
@@ -56,7 +53,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             // Diagnostic already raised, do nothing.
         }
     }
-
+    
     // TODO: Work in progress!
     private static void IntroduceOnPropertyChangedMethod( BuildAspectContext ctx )
     {
@@ -90,6 +87,27 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             } );
 
         ctx.OnPropertyChangedMethod.Declaration = result.Declaration;
+
+        // Ensure that all required fields are generated in advance of template execution.
+        // The node selection logic mirrors that of the template's loops and conditons.
+
+        IEnumerable<DependencyGraph.Node<NodeData>> nodes = Array.Empty<DependencyGraph.Node<NodeData>>();
+
+        if ( ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
+        {
+            foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst()
+                .Where( n => n.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
+            {
+                _ = ctx.GetOrCreateHandlerField( node );
+            }
+        }
+
+        foreach ( var node in ctx.DependencyGraph.Children
+            .Where( node => node.Data.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
+        {
+            _ = ctx.GetOrCreateHandlerField( node );
+            _ = ctx.GetOrCreateLastValueField( node );
+        }
     }
 
     private static void IntroduceOnChildPropertyChangedMethod( BuildAspectContext ctx )
@@ -135,6 +153,11 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
     private static void IntroduceOnUnmonitoredInpcPropertyChanged( BuildAspectContext ctx )
     {
+        if ( !ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
+        {
+            return;
+        }
+
         var isOverride = ctx.BaseOnUnmonitoredInpcPropertyChangedMethod != null;
 
         var result = ctx.Builder.Advice.IntroduceMethod(
@@ -175,88 +198,22 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration = result.Declaration;
     }
 
-    private static void AnalyzeBaseAndIntroduceInterfaceIfRequired( BuildAspectContext ctx )
+    private static void ExamineBaseAndIntroduceInterfaceIfRequired( BuildAspectContext ctx )
     {
-        var builder = ctx.Builder;
-        var target = builder.Target;
-
-        ctx.BaseOnPropertyChangedMethod = GetOnPropertyChangedMethod( target );
-        ctx.BaseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod( target );
-        ctx.BaseOnUnmonitoredInpcPropertyChangedMethod = GetOnUnmonitoredInpcPropertyChangedMethod( ctx, target );
-
         if ( ctx.TargetImplementsInpc )
         {
             if ( ctx.BaseOnPropertyChangedMethod == null )
             {
-                builder.Diagnostics.Report(
+                ctx.Builder.Diagnostics.Report(
                     DiagnosticDescriptors.NotifyPropertyChanged.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
-                    .WithArguments( target ) );
+                    .WithArguments( ctx.Target ) );
 
                 throw new DiagnosticErrorReportedException();
             }
         }
         else
         {
-            builder.Advice.ImplementInterface( target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
-        }
-
-        ctx.InheritedOnChildPropertyChangedPropertyPaths = 
-            BuildPropertyPathLookup( GetPropertyPaths( ctx.Type_OnChildPropertyChangedMethodAttribute, ctx.BaseOnChildPropertyChangedMethod ) );
-
-        ctx.InheritedOnUnmonitoredInpcPropertyChangedPropertyPaths = 
-            BuildPropertyNameLookup( GetPropertyPaths( ctx.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute, ctx.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
-
-        static HashSet<string>? BuildPropertyNameLookup( IEnumerable<string>? propertyNames )
-        {
-            if ( propertyNames == null )
-            {
-                return null;
-            }
-
-            var h = new HashSet<string>();
-
-            foreach ( var s in propertyNames )
-            {
-                if ( s.IndexOf('.') > -1 )
-                {
-                    throw new ArgumentException( "A property name must not contain period characters.", nameof( propertyNames ) );
-                }
-                h.Add( s );
-            }
-
-            return h;
-        }
-
-        // NOTE: This hashset of path stems approach is a simple way to allow path stems to be checked, but
-        // a tree-based structure might scale better if required. Keeping it simple for now.
-        static HashSet<string>? BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
-        {
-            if ( propertyPaths == null )
-            {
-                return null;
-            }
-
-            var h = new HashSet<string>();
-            
-            foreach ( var s in propertyPaths )
-            {
-                AddPropertyPathAndAllAncestorStems( h, s );
-            }
-            
-            return h;
-        }
-
-        static void AddPropertyPathAndAllAncestorStems( HashSet<string> addTo, string propertyPath )
-        {
-            addTo.Add( propertyPath );
-
-            var lastIdx = propertyPath.LastIndexOf( '.' );
-
-            while ( lastIdx > 1 )
-            {
-                addTo.Add( propertyPath.Substring( lastIdx - 1 ) );
-                lastIdx = propertyPath.LastIndexOf( '.', lastIdx - 1 );
-            }
+            ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
         }
     }
 
@@ -330,78 +287,60 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         {
             if ( node.Children.Count == 0 || node.Parent!.IsRoot )
             {
-                // Don't process leaf nodes or root properties.
+                // Leaf nodes and root properties should never have update methods.
+                node.Data.SetUpdateMethod( null );
                 continue;
             }
 
-            if ( !node.Data.MethodsHaveBeenSet ) // TODO: Why would MethodsHaveBeenSet ever be true here?
+            // TODO: Remove this check, just confirming something.
+            if ( node.Data.UpdateMethodHasBeenSet )
             {
-                _ = ValidateFieldOrProperty( ctx, node.Data.FieldOrProperty );
-
-                IMethod? thisUpdateMethod = null;
-
-                // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-                if ( //!node.Parent!.IsRoot &&
-                    node.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
-                    && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(node.Data.DottedPropertyPath) )
-                {
-                    var pathForMemberNames = node.Data.ContiguousPropertyPath;
-                    var lastValueFieldName = ctx.GetAndReserveUnusedMemberName( $"_last{pathForMemberNames}" );
-
-                    var introduceLastValueFieldResult = ctx.Builder.Advice.IntroduceField(
-                        ctx.Target,
-                        lastValueFieldName,
-                        node.Data.FieldOrProperty.Type.ToNullableType(),
-                        IntroductionScope.Instance,
-                        OverrideStrategy.Fail,
-                        b => b.Accessibility = Accessibility.Private );
-
-                    var lastValueField = introduceLastValueFieldResult.Declaration;
-
-                    var onPropertyChangedHandlerFieldName = ctx.GetAndReserveUnusedMemberName( $"_on{pathForMemberNames}ChangedHandler" );
-
-                    var introduceOnPropertyChangedHandlerFieldName = ctx.Builder.Advice.IntroduceField(
-                        ctx.Target,
-                        onPropertyChangedHandlerFieldName,
-                        ctx.Type_Nullable_PropertyChangedEventHandler,
-                        IntroductionScope.Instance,
-                        OverrideStrategy.Fail,
-                        b => b.Accessibility = Accessibility.Private );
-
-                    var onPropertyChangedHandlerField = introduceOnPropertyChangedHandlerFieldName.Declaration;
-
-                    var methodName = ctx.GetAndReserveUnusedMemberName( $"Update{pathForMemberNames}" );
-
-                    var accessChildExprBuilder = new ExpressionBuilder();
-
-                    accessChildExprBuilder.AppendVerbatim( node.Data.DottedPropertyPath.Replace( ".", "?." ) );
-
-                    var accessChildExpression = accessChildExprBuilder.ToExpression();
-
-                    var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
-                        ctx.Target,
-                        nameof( UpdateChildInpcProperty ),
-                        IntroductionScope.Instance,
-                        OverrideStrategy.Fail,
-                        b =>
-                        {
-                            b.Name = methodName;
-                            b.Accessibility = Accessibility.Private;
-                        },
-                        args: new
-                        {
-                            ctx,
-                            node = node,
-                            accessChildExpression,
-                            lastValueField,
-                            onPropertyChangedHandlerField
-                        } );
-
-                    thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
-                }
-
-                node.Data.SetMethods( thisUpdateMethod );
+                throw new InvalidOperationException( "Why???" );
             }
+
+            _ = ValidateFieldOrProperty( ctx, node.Data.FieldOrProperty );
+
+            IMethod? thisUpdateMethod = null;
+
+            // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
+            if ( //!node.Parent!.IsRoot &&
+                node.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
+                && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(node.Data.DottedPropertyPath) )
+            {
+                var lastValueField = ctx.GetOrCreateLastValueField( node );
+                var onPropertyChangedHandlerField = ctx.GetOrCreateHandlerField( node );
+
+                var methodName = ctx.GetAndReserveUnusedMemberName( $"Update{node.Data.ContiguousPropertyPath}" );
+
+                var accessChildExprBuilder = new ExpressionBuilder();
+
+                accessChildExprBuilder.AppendVerbatim( node.Data.DottedPropertyPath.Replace( ".", "?." ) );
+
+                var accessChildExpression = accessChildExprBuilder.ToExpression();
+
+                var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
+                    ctx.Target,
+                    nameof( UpdateChildInpcProperty ),
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b =>
+                    {
+                        b.Name = methodName;
+                        b.Accessibility = Accessibility.Private;
+                    },
+                    args: new
+                    {
+                        ctx,
+                        node = node,
+                        accessChildExpression,
+                        lastValueField,
+                        onPropertyChangedHandlerField
+                    } );
+
+                thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
+            }
+
+            node.Data.SetUpdateMethod( thisUpdateMethod );
         }
     }
 
@@ -451,16 +390,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                         if ( hasDependentProperties )
                         {
-                            var handlerFieldName = ctx.GetAndReserveUnusedMemberName( $"_on{p.Name}PropertyChangedHandler" );
+                            handlerField = ctx.GetOrCreateHandlerField( node! );
 
-                            var introduceHandlerFieldResult = ctx.Builder.Advice.IntroduceField(
-                                ctx.Target,
-                                handlerFieldName,
-                                ctx.Type_Nullable_PropertyChangedEventHandler,
-                                whenExists: OverrideStrategy.Fail );
-
-                            handlerField = introduceHandlerFieldResult.Declaration;
-
+                            // TODO: Is this the right place to do this, or should it be in GetOrCreateHandlerField?
                             ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( p.Name );
                         }
                         else
@@ -512,56 +444,5 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     private static void IntroduceInitializerMethod( BuildAspectContext ctx )
     {
 
-    }
-
-    private static IMethod? GetOnPropertyChangedMethod( INamedType type )
-        => type.AllMethods.FirstOrDefault( m =>
-            !m.IsStatic
-            && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
-            && m.ReturnType.SpecialType == SpecialType.Void
-            && m.Parameters.Count == 1
-            && m.Parameters[0].Type.SpecialType == SpecialType.String
-            && _onPropertyChangedMethodNames.Contains( m.Name ) );
-
-    private static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
-        => type.AllMethods.FirstOrDefault( m =>
-            !m.IsStatic
-            && m.Attributes.Any( typeof( OnChildPropertyChangedMethodAttribute ) )
-            && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
-            && m.ReturnType.SpecialType == SpecialType.Void
-            && m.Parameters.Count == 2
-            && m.Parameters[0].Type.SpecialType == SpecialType.String
-            && m.Parameters[1].Type.SpecialType == SpecialType.String );
-
-    private static IMethod? GetOnUnmonitoredInpcPropertyChangedMethod( BuildAspectContext ctx, INamedType type )
-        => type.AllMethods.FirstOrDefault( m =>
-            !m.IsStatic
-            && m.Attributes.Any( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) )
-            && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
-            && m.ReturnType.SpecialType == SpecialType.Void
-            && m.Parameters.Count == 3
-            && m.Parameters[0].Type.SpecialType == SpecialType.String
-            && m.Parameters[1].Type == ctx.Type_Nullable_INotifyPropertyChanged
-            && m.Parameters[2].Type == ctx.Type_Nullable_INotifyPropertyChanged );
-
-    [return: NotNullIfNotNull( nameof( method ) )]
-    private static IEnumerable<string>? GetPropertyPaths( INamedType attributeType, IMethod? method, bool includeInherited = true )
-    {
-        // NB: Assumes that attributeType instances will always be constructed with one arg of type string[].
-
-        if ( method == null )
-        {
-            return null;
-        }
-
-        return includeInherited
-            ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPaths( attributeType, m ) )
-            : GetPropertyPaths( attributeType, method );
-
-        static IEnumerable<string> GetPropertyPaths( INamedType attributeType, IMethod method ) =>
-            method.Attributes
-            .OfAttributeType( attributeType )
-            .SelectMany( a => a.ConstructorArguments[0].Values.Select( k => (string?) k.Value ) )
-            .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
     }
 }

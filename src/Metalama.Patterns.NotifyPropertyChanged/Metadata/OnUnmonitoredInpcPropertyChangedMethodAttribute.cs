@@ -12,5 +12,5 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Metadata;
 [AttributeUsage( AttributeTargets.Method )]
 public sealed class OnUnmonitoredInpcPropertyChangedMethodAttribute : MetadataAttribute
 {
-    public OnUnmonitoredInpcPropertyChangedMethodAttribute( params string[] propertyNames ) { }
+    public OnUnmonitoredInpcPropertyChangedMethodAttribute( params string[] propertyPaths ) { }
 }

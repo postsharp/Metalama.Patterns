@@ -226,13 +226,13 @@ namespace NpcExperiments.Exp8
 
                     if ( newValue != null )
                     {
-                        this._onA3PropertyChangedHandler ??= OnSpecificPropertyChanged;
+                        this._onA3PropertyChangedHandler ??= OnChildPropertyChanged;
                         newValue.PropertyChanged += this._onA3PropertyChangedHandler;
                     }
 
                     // We've handled it - don't call base impl.
 
-                    void OnSpecificPropertyChanged( object sender, PropertyChangedEventArgs e )
+                    void OnChildPropertyChanged( object sender, PropertyChangedEventArgs e )
                     {
                         this.OnChildPropertyChanged( "A3", e.PropertyName );
                     }

@@ -71,6 +71,8 @@ internal static class DependencyGraph
 
         public IReadOnlyCollection<Node<T>> Children => ((IReadOnlyCollection<Node<T>>?) this._children?.Values) ?? Array.Empty<Node<T>>();
 
+        public bool HasChildren => this._children != null;
+
         /// <summary>
         /// Gets the members that reference the current node.
         /// </summary>

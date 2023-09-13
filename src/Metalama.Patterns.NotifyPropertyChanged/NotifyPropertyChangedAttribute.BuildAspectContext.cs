@@ -1,8 +1,10 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -12,6 +14,12 @@ public sealed partial class NotifyPropertyChangedAttribute
     private sealed class BuildAspectContext
     {
         private readonly Dictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
+        private readonly Lazy<IMethod?> _baseOnPropertyChangedMethod;
+        private readonly Lazy<IMethod?> _baseOnChildPropertyChangedMethod;
+        private readonly Lazy<IMethod?> _baseOnUnmonitoredInpcPropertyChangedMethod;
+
+        private HashSet<string>? _inheritedOnChildPropertyChangedPropertyPaths;
+        private HashSet<string>? _inheritedOnUnmonitoredInpcPropertyChangedPropertyNames;
 
         public BuildAspectContext( IAspectBuilder<INamedType> builder )
         {
@@ -34,6 +42,10 @@ public sealed partial class NotifyPropertyChangedAttribute
                     || (target.BaseType is { BelongsToCurrentProject: true } && target.BaseType.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
 
             this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Type_INotifyPropertyChanged );
+
+            this._baseOnPropertyChangedMethod = new( () => GetOnPropertyChangedMethod( target ) );
+            this._baseOnChildPropertyChangedMethod = new( () => GetOnChildPropertyChangedMethod( target ) );
+            this._baseOnUnmonitoredInpcPropertyChangedMethod = new( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
         }
 
         public IAspectBuilder<INamedType> Builder { get; }
@@ -62,32 +74,44 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         public bool BaseImplementsInpc { get; }
 
-        public IMethod? BaseOnPropertyChangedMethod { get; set; }
+        public IMethod? BaseOnPropertyChangedMethod => this._baseOnPropertyChangedMethod.Value;
 
-        public IMethod? BaseOnChildPropertyChangedMethod { get; set; }
+        public IMethod? BaseOnChildPropertyChangedMethod => this._baseOnChildPropertyChangedMethod.Value;
 
-        public IMethod? BaseOnUnmonitoredInpcPropertyChangedMethod { get; set; }
+        public IMethod? BaseOnUnmonitoredInpcPropertyChangedMethod => this._baseOnUnmonitoredInpcPropertyChangedMethod.Value;
 
-        public HashSet<string>? InheritedOnChildPropertyChangedPropertyPaths { private get; set; }
+        public bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath )
+        {
+            this._inheritedOnChildPropertyChangedPropertyPaths ??=
+                BuildPropertyPathLookup( GetPropertyPaths( this.Type_OnChildPropertyChangedMethodAttribute, this.BaseOnChildPropertyChangedMethod ) );
 
-        public HashSet<string>? InheritedOnUnmonitoredInpcPropertyChangedPropertyPaths { private get; set; }
+            return this._inheritedOnChildPropertyChangedPropertyPaths.Contains( parentPropertyPath );
+        }
 
-        public bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath ) 
-            => this.InheritedOnChildPropertyChangedPropertyPaths?.Contains( parentPropertyPath ) == true;
+        public bool HasInheritedOnUnmonitoredInpcPropertyChangedProperty( string propertyName )
+        {
+            this._inheritedOnUnmonitoredInpcPropertyChangedPropertyNames ??=
+                /*BuildPropertyNameLookup*/ // TODO: Decide, clean up.
+                BuildPropertyPathLookup( GetPropertyPaths( this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute, this.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
 
-        public bool HasInheritedOnUnmonitoredInpcPropertyChangedProperty( string propertyName ) 
-            => this.InheritedOnUnmonitoredInpcPropertyChangedPropertyPaths?.Contains( propertyName ) == true;
+            return this._inheritedOnUnmonitoredInpcPropertyChangedPropertyNames.Contains( propertyName );
+        }
 
         public CertainDeferredDeclaration<IMethod> OnPropertyChangedMethod { get; } = new();
 
         public CertainDeferredDeclaration<IMethod> OnChildPropertyChangedMethod { get; } = new();
 
-        public DeferredDeclaration<IMethod> OnUnmonitoredInpcPropertyChangedMethod { get; } = new( willBeDefined: null ); // TODO: Decide according to configuration.
+        public DeferredDeclaration<IMethod> OnUnmonitoredInpcPropertyChangedMethod { get; } = new( willBeDefined: true ); // TODO: Decide according to configuration.
 
         public List<string> PropertyPathsForOnChildPropertyChangedMethodAttribute { get; } = new();
 
         public List<string> PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute { get; } = new();
 
+        /// <summary>
+        /// Gets the <see cref="IProperty"/> for property <c>EqualityComparer<paramref name="type"/>>.Default</c>.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public IProperty GetDefaultEqualityComparerForType( IType type )
             => this.Type_EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
 
@@ -99,11 +123,90 @@ public sealed partial class NotifyPropertyChangedAttribute
             foreach ( var node in graph.DecendantsDepthFirst() )
             {
                 node.Data.Initialize( this, node );
+                node.Data.Initialize2( this.DetermineInpcBaseHandling( node ) );
             }
             return graph;
         }
 
+        private InpcBaseHandling DetermineInpcBaseHandling( DependencyGraph.Node<NodeData> node )
+        {
+            switch ( node.Data.PropertyTypeInpcInstrumentationKind )
+            {
+                case InpcInstrumentationKind.Unknown:
+                    return InpcBaseHandling.Unknown;
+
+                case InpcInstrumentationKind.None:
+                    return InpcBaseHandling.NA;
+
+                case InpcInstrumentationKind.Implicit:
+                case InpcInstrumentationKind.Explicit:
+                    if ( node.Depth == 1 )
+                    {
+                        // Root property
+                        return node.Data.FieldOrProperty.DeclaringType == this.Target
+                            ? InpcBaseHandling.NA
+                            : this.HasInheritedOnChildPropertyChangedPropertyPath( node.Name )
+                                ? InpcBaseHandling.OnChildPropertyChanged
+                                : this.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( node.Name )
+                                    ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
+                                    : InpcBaseHandling.OnPropertyChanged;
+                    }
+                    else
+                    {
+                        // Child property
+                        return this.HasInheritedOnChildPropertyChangedPropertyPath( node.Data.DottedPropertyPath )
+                            ? InpcBaseHandling.OnChildPropertyChanged
+                            : this.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( node.Data.DottedPropertyPath )
+                                ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
+                                : InpcBaseHandling.None;
+                    }
+
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
         public DependencyGraph.Node<NodeData> DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
+
+        public IField GetOrCreateLastValueField( DependencyGraph.Node<NodeData> node )
+        {
+            if ( node.Data.LastValueField == null )
+            {
+                var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.Data.ContiguousPropertyPath}" );
+
+                var introduceLastValueFieldResult = this.Builder.Advice.IntroduceField(
+                    this.Target,
+                    lastValueFieldName,
+                    node.Data.FieldOrProperty.Type.ToNullableType(),
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b => b.Accessibility = Accessibility.Private );
+
+                node.Data.SetLastValueField( introduceLastValueFieldResult.Declaration );
+            }
+
+            return node.Data.LastValueField!;
+        }
+
+        public IField GetOrCreateHandlerField( DependencyGraph.Node<NodeData> node )
+        {
+            if ( node.Data.HandlerField == null )
+            {
+                var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.Data.ContiguousPropertyPath}PropertyChangedHandler" );
+
+                var introduceHandlerFieldResult = this.Builder.Advice.IntroduceField(
+                    this.Target,
+                    handlerFieldName,
+                    this.Type_Nullable_PropertyChangedEventHandler,
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b => b.Accessibility = Accessibility.Private );
+
+                node.Data.SetHandlerField( introduceHandlerFieldResult.Declaration );
+            }
+
+            return node.Data.HandlerField!;
+        }
 
         private HashSet<string>? _existingMemberNames;
 
@@ -122,9 +225,9 @@ public sealed partial class NotifyPropertyChangedAttribute
             }
             else
             {
-                for ( var i = 2; true; i++ )
+                for ( var i = 1; true; i++ )
                 {
-                    var adjustedName = $"{desiredName}{i}";
+                    var adjustedName = $"{desiredName}_{i}";
                     
                     if ( this._existingMemberNames.Add( adjustedName ) )
                     {
@@ -210,5 +313,105 @@ public sealed partial class NotifyPropertyChangedAttribute
                 }
             }
         }
+
+        private static HashSet<string> BuildPropertyNameLookup( IEnumerable<string>? propertyNames )
+        {
+            var h = new HashSet<string>();
+
+            if ( propertyNames != null )
+            {
+                foreach ( var s in propertyNames )
+                {
+                    if ( s.IndexOf( '.' ) > -1 )
+                    {
+                        throw new ArgumentException( "A property name must not contain period characters.", nameof( propertyNames ) );
+                    }
+                    h.Add( s );
+                }
+            }
+
+            return h;
+        }
+
+        // NOTE: This hashset of path stems approach is a simple way to allow path stems to be checked, but
+        // a tree-based structure might scale better if required. Keeping it simple for now.
+        private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
+        {
+            var h = new HashSet<string>();
+
+            if ( propertyPaths != null )
+            {
+                foreach ( var s in propertyPaths )
+                {
+                    AddPropertyPathAndAllAncestorStems( h, s );
+                }
+            }
+
+            return h;
+
+            static void AddPropertyPathAndAllAncestorStems( HashSet<string> addTo, string propertyPath )
+            {
+                addTo.Add( propertyPath );
+
+                var lastIdx = propertyPath.LastIndexOf( '.' );
+
+                while ( lastIdx > 1 )
+                {
+                    addTo.Add( propertyPath.Substring( lastIdx - 1 ) );
+                    lastIdx = propertyPath.LastIndexOf( '.', lastIdx - 1 );
+                }
+            }
+        }
+
+        [return: NotNullIfNotNull( nameof( method ) )]
+        private static IEnumerable<string>? GetPropertyPaths( INamedType attributeType, IMethod? method, bool includeInherited = true )
+        {
+            // NB: Assumes that attributeType instances will always be constructed with one arg of type string[].
+
+            if ( method == null )
+            {
+                return null;
+            }
+
+            return includeInherited
+                ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPaths( attributeType, m ) )
+                : GetPropertyPaths( attributeType, method );
+
+            static IEnumerable<string> GetPropertyPaths( INamedType attributeType, IMethod method ) =>
+                method.Attributes
+                .OfAttributeType( attributeType )
+                .SelectMany( a => a.ConstructorArguments[0].Values.Select( k => (string?) k.Value ) )
+                .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
+        }
+
+        private static IMethod? GetOnPropertyChangedMethod( INamedType type )
+            => type.AllMethods.FirstOrDefault( m =>
+                !m.IsStatic
+                && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters.Count == 1
+                && m.Parameters[0].Type.SpecialType == SpecialType.String
+                && _onPropertyChangedMethodNames.Contains( m.Name ) );
+
+        private static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
+            => type.AllMethods.FirstOrDefault( m =>
+                !m.IsStatic
+                && m.Attributes.Any( typeof( OnChildPropertyChangedMethodAttribute ) )
+                && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters.Count == 2
+                && m.Parameters[0].Type.SpecialType == SpecialType.String
+                && m.Parameters[1].Type.SpecialType == SpecialType.String );
+
+        private IMethod? GetOnUnmonitoredInpcPropertyChangedMethod( INamedType type )
+            => type.AllMethods.FirstOrDefault( m =>
+                !m.IsStatic
+                && m.Attributes.Any( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) )
+                && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters.Count == 3
+                && m.Parameters[0].Type.SpecialType == SpecialType.String
+                && m.Parameters[1].Type == this.Type_Nullable_INotifyPropertyChanged
+                && m.Parameters[2].Type == this.Type_Nullable_INotifyPropertyChanged );
     }
 }
