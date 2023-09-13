@@ -39,6 +39,7 @@ internal static class DependencyGraph
         {
             this.Parent = parent;
             this._symbol = symbol;
+            this.Depth = parent.Depth + 1;
         }
 
         /// <summary>
@@ -51,6 +52,11 @@ internal static class DependencyGraph
         public bool IsRoot => this.Parent == null;
 
         public Node<T>? Parent { get; }
+
+        /// <summary>
+        /// Gets the depth of the current node. The unparented root node has depth zero.
+        /// </summary>
+        public int Depth { get; }
 
         /// <summary>
         /// Gets the symbol of the node.

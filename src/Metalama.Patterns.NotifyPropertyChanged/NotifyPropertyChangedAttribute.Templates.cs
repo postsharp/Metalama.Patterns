@@ -177,6 +177,7 @@ public partial class NotifyPropertyChangedAttribute
                 }
             }
         }
+
         if ( ctx.BaseOnPropertyChangedMethod == null )
         {
             this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
@@ -360,16 +361,62 @@ public partial class NotifyPropertyChangedAttribute
     }
 
     [Template]
-    private static void OnChildPropertyChanged( string parentPropertyPath, string propertyName, [CompileTime] BuildAspectContext ctx )
+    private static void OnChildPropertyChanged(
+        string parentPropertyPath,
+        string propertyName,
+        [CompileTime] BuildAspectContext ctx )
     {
-        // TODO: Implement!
-        meta.InsertComment( "TODO" );
+        meta.InsertComment( "Template: " + nameof( OnChildPropertyChanged ) );
+        meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString() );
+
+        foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.Depth > 1 ) )
+        {
+            var cascadeUpdateMethods =
+                node.Children
+                .Select( n => n.Data.UpdateMethod )
+                .Where( m => m != null );
+
+            var affectedNodes =
+                node.Children
+                .SelectMany( c => c.GetAllReferences() )
+                .Concat( node.GetAllReferences() );
+
+            if ( affectedNodes.Any() || cascadeUpdateMethods.Any() )
+            {
+                var affectedPropertyNames = affectedNodes
+                    .Distinct()
+                    .Select( n => n.Name )
+                    .OrderBy( s => s );
+
+                if ( parentPropertyPath == node.Parent!.Data.DottedPropertyPath && propertyName == node.Name )
+                {
+                    foreach ( var method in cascadeUpdateMethods )
+                    {
+                        method.Invoke();
+                    }
+
+                    // TODO: Consider replacing with dictionary lookup
+                    foreach ( var name in affectedPropertyNames )
+                    {
+                        // TODO: Question: what if the method of the current template is renamed during introduction? Is this the correct way to call the current method recursively?
+                        // meta.Target.Method.Invoke generates OnPropertyChanged_Empty and calls it.
+                        meta.This.OnPropertyChanged( name );
+                    }
+                }
+            }
+        }
+
+        meta.Proceed();
     }
 
     [Template]
-    private static void OnUnmonitoredInpcPropertyChanged( string propertyName, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue, [CompileTime] BuildAspectContext ctx )
+    private static void OnUnmonitoredInpcPropertyChanged(
+        string propertyName,
+        INotifyPropertyChanged? oldValue,
+        INotifyPropertyChanged? newValue,
+        [CompileTime] BuildAspectContext ctx )
     {
-        meta.InsertComment( "Template: " + nameof( GenerateOnChildChangedBody ) );
+        meta.InsertComment( "Template: " + nameof( OnUnmonitoredInpcPropertyChanged ) );
         meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString() );
     }
 }
