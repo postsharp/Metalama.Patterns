@@ -36,10 +36,35 @@ public sealed partial class NotifyPropertyChangedAttribute
 
             var target = builder.Target;
 
+            // TODO: Remove workaround pending fix for Enhancements() not including inherited aspects.
+
+#if false // Original
             this.BaseImplementsInpc =
                 target.BaseType != null && (
                     target.BaseType.Is( this.Type_INotifyPropertyChanged )
                     || (target.BaseType is { BelongsToCurrentProject: true } && target.BaseType.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
+#else // Workaround
+
+            static bool AnyAncestorOrSelfInCompilationHasAspect( INamedType? type, Type aspectType )
+            {
+                while ( type != null )
+                {
+                    if ( type.BelongsToCurrentProject && type.Enhancements().HasAspect( aspectType ) )
+                    {
+                        return true;
+                    }
+
+                    type = type.BaseType;
+                }
+
+                return false;
+            }
+
+            this.BaseImplementsInpc =
+                target.BaseType != null && (
+                    target.BaseType.Is( this.Type_INotifyPropertyChanged )
+                    || AnyAncestorOrSelfInCompilationHasAspect( target.BaseType, typeof( NotifyPropertyChangedAttribute ) ));
+#endif
 
             this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Type_INotifyPropertyChanged );
 

@@ -68,17 +68,17 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             {
                 if ( isOverride )
                 {
-                    b.Name = ctx.BaseOnPropertyChangedMethod.Name;
+                    b.Name = ctx.BaseOnPropertyChangedMethod!.Name;
                 }
 
                 if ( ctx.Target.IsSealed )
                 {
-                    b.Accessibility = Accessibility.Private;
+                    b.Accessibility = isOverride ? ctx.BaseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
                 else
                 {
-                    b.Accessibility = Accessibility.Protected;
-                    b.IsVirtual = true;
+                    b.Accessibility = isOverride ? ctx.BaseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                    b.IsVirtual = !isOverride;
                 }
             },
             args: new
@@ -135,12 +135,12 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 if ( ctx.Target.IsSealed )
                 {
-                    b.Accessibility = Accessibility.Private;
+                    b.Accessibility = isOverride ? ctx.BaseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
                 else
                 {
-                    b.Accessibility = Accessibility.Protected;
-                    b.IsVirtual = true;
+                    b.Accessibility = isOverride ? ctx.BaseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                    b.IsVirtual = !isOverride;
                 }
             },
             args: new
@@ -177,17 +177,17 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 if ( isOverride )
                 {
-                    b.Name = ctx.BaseOnUnmonitoredInpcPropertyChangedMethod.Name;
+                    b.Name = ctx.BaseOnUnmonitoredInpcPropertyChangedMethod!.Name;
                 }
 
                 if ( ctx.Target.IsSealed )
                 {
-                    b.Accessibility = Accessibility.Private;
+                    b.Accessibility = isOverride ? ctx.BaseOnUnmonitoredInpcPropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
                 else
                 {
-                    b.Accessibility = Accessibility.Protected;
-                    b.IsVirtual = true;
+                    b.Accessibility = isOverride ? ctx.BaseOnUnmonitoredInpcPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                    b.IsVirtual = !isOverride;
                 }
             },
             args: new

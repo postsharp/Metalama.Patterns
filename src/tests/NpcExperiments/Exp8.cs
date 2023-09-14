@@ -57,16 +57,34 @@ namespace NpcExperiments.Exp8
         public int D1 { get; set; }
     }
 
-#if true
+
     class C : A
     {
         public int C1 {  get; set;}
         
-        public int C2 => A1.B1;
+        public int C2_RefExistingMonitoredA1 => A1.B1;
 
-        public int C3 => A3.B1;
+        public int C3_RefNewlyMonitoredA3 => A3.B1;
+
+        public D C4_NewUnmonitoredInC { get; set; }
+
+        public D C5_NewMonitoredInC { get; set; }
+
+        public int C6_Ref_C5NewMonitoredInC => C5_NewMonitoredInC.D1;
     }
-#endif
+
+    class E : C
+    {
+        public int E1_RefExistingMonitoredA1 => A1.B1;
+
+        public int E2_RefExistingMonitoredC5 => C5_NewMonitoredInC.D1;
+
+        public int E3_RefExistingUnmonitoredC4 => C4_NewUnmonitoredInC.D1;
+
+        public int E4_RefRefNewlyMonitoredInC_A3 => A3.B1;
+    }
+
+#if false
     namespace Desired_MinimalContract
     {
         class A : INotifyPropertyChanged
@@ -345,6 +363,7 @@ namespace NpcExperiments.Exp8
         }
     }
 
+#if false
     namespace DesiredV1
     {
         class A : INotifyPropertyChanged
@@ -472,4 +491,6 @@ namespace NpcExperiments.Exp8
         }
 
     }
+#endif
+#endif
 }

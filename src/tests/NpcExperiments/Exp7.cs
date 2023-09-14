@@ -24,7 +24,7 @@ namespace NpcExperiments.Exp7
     {
         int B1 => A1;
     }
-
+#if false
     namespace DesiredOpt1
     {
         /* In this model, all properties have OnXXChanged, whether they are writable properties/fields
@@ -206,4 +206,5 @@ namespace NpcExperiments.Exp7
             }
         }
     }
+#endif
 }

@@ -44,6 +44,7 @@ class D
     public int D1 { get; set; }
 }
 
+#if false
 /* Regarding metadata atrributes (OnChanged, OnChildChanged etc):
  * 
  * When introducing methods, we append a numeric suffix if the user has already defined the desired name.
@@ -369,3 +370,4 @@ class D_Desired : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 
 }
+#endif
