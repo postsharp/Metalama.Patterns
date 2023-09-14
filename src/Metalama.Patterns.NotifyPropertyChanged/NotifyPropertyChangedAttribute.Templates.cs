@@ -113,7 +113,7 @@ public partial class NotifyPropertyChangedAttribute
                         {                            
                             var propertyName = e.PropertyName;
 
-                            // TODO: If this can be similar to [Frag2] and/or [Frag5] and/or [Frag7], refactor
+                            // TODO: If this can be similar to [Frag2] and/or [Frag5] and/or [Frag7] and/or [Frag9], refactor
                             // XXX [Frag1]
                             // NB: If handlerField is not null, node must also be non-null.
                             foreach ( var childNode in node.Children )
@@ -192,7 +192,7 @@ public partial class NotifyPropertyChangedAttribute
                 {
                     var propertyName = e.PropertyName;
 
-                    // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag7], refactor
+                    // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag7] and/or [Frag9], refactor
                     // XXX [Frag2]
                     foreach ( var childNode in node.Children )
                     {
@@ -243,7 +243,15 @@ public partial class NotifyPropertyChangedAttribute
             }
             // XXX
 
-            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
+            // Don't notify if we're joining on to existing NCPC support from a base type, or we'll be stuck in a loop.
+            if ( node.Parent!.Data.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
+            {
+                ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
+            }
+            else if ( ctx.InsertDiagnosticComments )
+            {
+                meta.InsertComment( $"Not calling OnChildPropertyChanged('{node.Parent!.Data.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
+            }
         }
     }
 
@@ -445,7 +453,7 @@ public partial class NotifyPropertyChangedAttribute
                                         {
                                             var propertyName = e.PropertyName;
 
-                                            // TODO: If this can be similar to [Frag1] and/or [Frag2] and/or [Frag7], refactor
+                                            // TODO: If this can be similar to [Frag1] and/or [Frag2] and/or [Frag7] and/or [Frag9], refactor
                                             // XXX [Frag5]
                                             foreach ( var childNode in node.Children )
                                             {
@@ -535,49 +543,72 @@ public partial class NotifyPropertyChangedAttribute
             if ( rootPropertyNode.Data.FieldOrProperty.DeclaringType == ctx.Target )
             {
                 if ( ctx.InsertDiagnosticComments )
-                {
+                {                    
                     meta.InsertComment( $"Skipping '{node.Data.DottedPropertyPath}': Root property '{rootPropertyNode.Name}' is defined by the current type." );
                 }
                 continue;
             }
 
-            if ( node.Parent!.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged && ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
+            var firstAncestorWithNotNoneHandling = node.Ancestors().FirstOrDefault( n => n.Data.InpcBaseHandling != InpcBaseHandling.None );
+
+            if ( firstAncestorWithNotNoneHandling != null )
             {
-                if ( ctx.InsertDiagnosticComments )
+                switch ( firstAncestorWithNotNoneHandling.Data.InpcBaseHandling )
                 {
-                    meta.InsertComment( $"Skipping '{node.Data.DottedPropertyPath}': A base type supports OnUnmonitoredInpcPropertyChanged for the parent property, and the current type is configured to use that feature." );
+                    case InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined:
+                        if ( ctx.InsertDiagnosticComments )
+                        {
+                            meta.InsertComment( $"Skipping '{node.Data.DottedPropertyPath}': A base type supports OnUnmonitoredInpcPropertyChanged for an ancestor of this property, and the current type is configured to use that feature." );
+                        }
+                        continue;
+
+                    case InpcBaseHandling.OnChildPropertyChanged when node.Depth - firstAncestorWithNotNoneHandling.Depth > 1:
+                        if ( ctx.InsertDiagnosticComments )
+                        {
+                            meta.InsertComment( $"Skipping '{node.Data.DottedPropertyPath}': A base type supports OnChildPropertyChanged for a non-immediate ancestor of this property." );
+                        }
+                        continue;
                 }
-                continue;
             }
 
-            var cascadeUpdateMethods = node.Data.CascadeUpdateMethods;
-            var affectedNodes = node.Data.ImmediateReferences;
+            // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag2] and/or [Frag7], refactor
+            // XXX [Frag9]
+            var hasUpdateMethod = node.Data.UpdateMethod != null;
+            var hasRefs = node.DirectReferences.Count > 0;
 
-            if ( affectedNodes.Count > 0 || cascadeUpdateMethods.Count > 0 )
+            if ( hasUpdateMethod || hasRefs )
             {
-                var affectedPropertyNames = affectedNodes
-                    .Select( n => n.Name )
-                    .OrderBy( s => s );
-
                 if ( parentPropertyPath == node.Parent!.Data.DottedPropertyPath && propertyName == node.Name )
                 {
-                    foreach ( var method in cascadeUpdateMethods )
+                    if ( hasUpdateMethod )
                     {
-                        method.Invoke();
+                        // Update method will deal with notifications
+                        node.Data.UpdateMethod.Invoke();
+                    }
+                    else
+                    {
+                        // No update method, notify here.
+                        foreach ( var refName in node.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
+                        {
+                            ctx.OnPropertyChangedMethod.Declaration.Invoke( refName );
+                        }
+                        ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
                     }
 
-                    // TODO: Consider replacing with dictionary lookup
-                    foreach ( var name in affectedPropertyNames )
+                    if ( ctx.BaseOnChildPropertyChangedMethod != null )
                     {
-                        // TODO: Question: what if the method of the current template is renamed during introduction? Is this the correct way to call the current method recursively?
-                        // meta.Target.Method.Invoke generates OnPropertyChanged_Empty and calls it.
-                        meta.This.OnPropertyChanged( name );
+                        meta.Proceed();
                     }
+                    return;
                 }
             }
+            // XXX
         }
 
-        meta.Proceed();
+        if ( ctx.BaseOnChildPropertyChangedMethod != null )
+        {
+            meta.Proceed();
+        }
     }
 
     [Template]
@@ -634,7 +665,7 @@ public partial class NotifyPropertyChangedAttribute
                     {
                         var propertyName = e.PropertyName;
 
-                        // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag2], refactor
+                        // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag2] and/or [Frag9], refactor
                         // XXX [Frag7]
                         foreach ( var childNode in node.Children )
                         {
