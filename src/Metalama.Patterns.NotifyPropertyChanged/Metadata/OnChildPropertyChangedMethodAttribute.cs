@@ -12,5 +12,12 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Metadata;
 [AttributeUsage( AttributeTargets.Method )]
 public sealed class OnChildPropertyChangedMethodAttribute : MetadataAttribute
 {
-    public OnChildPropertyChangedMethodAttribute( params string[] propertyPaths ) { }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OnChildPropertyChangedMethodAttribute"/> class.
+    /// </summary>
+    /// <param name="parentPropertyPaths">
+    /// The parent property paths which the declaring class monitors for reference and child property changes,
+    /// and for which <c>OnChildPropertyChanged</c> will be called.
+    /// </param>
+    public OnChildPropertyChangedMethodAttribute( params string[] parentPropertyPaths ) { }
 }

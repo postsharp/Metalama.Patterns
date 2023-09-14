@@ -34,8 +34,11 @@ public partial class NotifyPropertyChangedAttribute
                     : node.Data.PropertyTypeInpcInstrumentationKind;
             var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
-            meta.InsertComment( "Template: " + nameof( OverrideInpcRefTypeProperty ) );
-            meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+            if ( ctx.InsertDiagnosticComments )
+            {
+                meta.InsertComment( "Template: " + nameof( OverrideInpcRefTypeProperty ) );
+                meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+            }
 
             if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
             {
@@ -104,8 +107,11 @@ public partial class NotifyPropertyChangedAttribute
             var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
             var propertyTypeInstrumentationKind = (InpcInstrumentationKind) meta.Tags["propertyTypeInstrumentationKind"]!;
 
-            meta.InsertComment( "Template: " + nameof( OverrideUninstrumentedTypeProperty ) );
-            meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+            if ( ctx.InsertDiagnosticComments )
+            {
+                meta.InsertComment( "Template: " + nameof( OverrideUninstrumentedTypeProperty ) );
+                meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+            }
 
             if ( propertyTypeInstrumentationKind == InpcInstrumentationKind.Unknown )
             {
@@ -142,14 +148,20 @@ public partial class NotifyPropertyChangedAttribute
     [Template]
     private void OnPropertyChanged( string propertyName, [CompileTime] BuildAspectContext ctx )
     {
-        meta.InsertComment( "Template: " + nameof( this.OnPropertyChanged ) );
-        meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString() );
+        if ( ctx.InsertDiagnosticComments )
+        {
+            meta.InsertComment( "Template: " + nameof( this.OnPropertyChanged ) );
+            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( ( ref NodeData data ) => $"ibh:{data.InpcBaseHandling}" ) );
+        }
 
         foreach ( var node in ctx.DependencyGraph.Children )
         {
             if ( node.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged && ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
             {
-                meta.InsertComment( $"Skipping '{node.Name}', InpcBaseHandling = {node.Data.InpcBaseHandling}, and OnUnmonitoredInpcPropertyChangedMethod will be defined." );
+                if ( ctx.InsertDiagnosticComments )
+                {
+                    meta.InsertComment( $"Skipping '{node.Name}': InpcBaseHandling = {node.Data.InpcBaseHandling}, and OnUnmonitoredInpcPropertyChangedMethod will be defined." );
+                }
                 continue;
             }
 
@@ -166,7 +178,10 @@ public partial class NotifyPropertyChangedAttribute
 
                 if ( propertyName == node.Name )
                 {
-                    meta.InsertComment( $"InpcBaseHandling = {node.Data.InpcBaseHandling}" );
+                    if ( ctx.InsertDiagnosticComments )
+                    {
+                        meta.InsertComment( $"InpcBaseHandling = {node.Data.InpcBaseHandling}" );
+                    }
 
                     switch ( node.Data.InpcBaseHandling )
                     {
@@ -273,8 +288,11 @@ public partial class NotifyPropertyChangedAttribute
             CompileTimeThrow( new InvalidOperationException( $"{nameof( UpdateChildInpcProperty )} template must not be called on a root property node." ) );
         }
 
-        meta.InsertComment( "Template: " + nameof( UpdateChildInpcProperty ) );
-        meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+        if ( ctx.InsertDiagnosticComments )
+        {
+            meta.InsertComment( "Template: " + nameof( UpdateChildInpcProperty ) );
+            meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+        }
 
         var newValue = accessChildExpression.Value;
 
@@ -316,8 +334,11 @@ public partial class NotifyPropertyChangedAttribute
         string propertyName,
         [CompileTime] BuildAspectContext ctx )
     {
-        meta.InsertComment( "Template: " + nameof( OnChildPropertyChanged ) );
-        meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString() );
+        if ( ctx.InsertDiagnosticComments )
+        {
+            meta.InsertComment( "Template: " + nameof( OnChildPropertyChanged ) );
+            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString() );
+        }
 
         foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.Depth > 1 ) )
         {
@@ -358,14 +379,24 @@ public partial class NotifyPropertyChangedAttribute
         INotifyPropertyChanged? newValue,
         [CompileTime] BuildAspectContext ctx )
     {
-        meta.InsertComment( "Template: " + nameof( OnUnmonitoredInpcPropertyChanged ) );
-        meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString() );
+        if ( ctx.InsertDiagnosticComments )
+        {
+            meta.InsertComment( "Template: " + nameof( OnUnmonitoredInpcPropertyChanged ) );
+            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( ( ref NodeData data ) => $"ibh:{data.InpcBaseHandling}" ) );
+        }
 
         // NB: OnUnmonitoredInpcPropertyChanged is only called when a ref has changed - the caller checks this first.
+        // NB: Nodes only appear in the graph if they are relevant to the current class.        
+
+        // NB: The logic which selects nodes for which support will be generated must be kept in sync with the logic in
+        // AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties.
 
         foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
         {
-            meta.InsertComment( $"Node '{node.Data.DottedPropertyPath}'" );
+            if ( ctx.InsertDiagnosticComments )
+            {
+                meta.InsertComment( $"Node '{node.Data.DottedPropertyPath}'" );
+            }
             
             if ( propertyPath == node.Data.DottedPropertyPath )
             {

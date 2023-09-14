@@ -73,6 +73,8 @@ public sealed partial class NotifyPropertyChangedAttribute
             this._baseOnUnmonitoredInpcPropertyChangedMethod = new( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
         }
 
+        public bool InsertDiagnosticComments { get; set; } // TODO: Set by configuration? Discuss.
+
         public IAspectBuilder<INamedType> Builder { get; }
 
         public INamedType Target => this.Builder.Target;
@@ -148,8 +150,11 @@ public sealed partial class NotifyPropertyChangedAttribute
             foreach ( var node in graph.DecendantsDepthFirst() )
             {
                 node.Data.Initialize( this, node );
-                node.Data.Initialize2( this.DetermineInpcBaseHandling( node ) );
+
+                var baseHandling = this.DetermineInpcBaseHandling( node );
+                node.Data.Initialize2( baseHandling );
             }
+
             return graph;
         }
 

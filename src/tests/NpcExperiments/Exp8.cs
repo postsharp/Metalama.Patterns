@@ -62,26 +62,37 @@ namespace NpcExperiments.Exp8
     {
         public int C1 {  get; set;}
         
-        public int C2_RefExistingMonitoredA1 => A1.B1;
+        // A1 is already monitored by class A
+        public int C2 => A1.B1;
 
-        public int C3_RefNewlyMonitoredA3 => A3.B1;
+        // A3 is not monitored by any base class.
+        public int C3 => A3.B1;
 
-        public D C4_NewUnmonitoredInC { get; set; }
+        // No child of C4 is referenced in this class, so C4 is not monitored here.
+        public D C4 { get; set; }
 
-        public D C5_NewMonitoredInC { get; set; }
+        // A child of C5 is referenced in this class, so C5 is monitored here.
+        public D C5 { get; set; }
 
-        public int C6_Ref_C5NewMonitoredInC => C5_NewMonitoredInC.D1;
+        // References a child of C5.
+        public int C6 => C5.D1;
     }
 
     class E : C
     {
-        public int E1_RefExistingMonitoredA1 => A1.B1;
+        // Class E should introduce monitoring only of C4.
 
-        public int E2_RefExistingMonitoredC5 => C5_NewMonitoredInC.D1;
+        // A1 is monitored in class A.
+        public int E1 => A1.B1;
 
-        public int E3_RefExistingUnmonitoredC4 => C4_NewUnmonitoredInC.D1;
+        // C5 is monitored in class C.
+        public int E2 => C5.D1;
 
-        public int E4_RefRefNewlyMonitoredInC_A3 => A3.B1;
+        // C4 is not monitored by any base class.
+        public int E3 => C4.D1;
+
+        // A3 is defined in class A, but is first monitored in class C.
+        public int E4 => A3.B1;
     }
 
 #if false

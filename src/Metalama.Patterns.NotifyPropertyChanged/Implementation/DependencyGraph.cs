@@ -222,21 +222,30 @@ internal static class DependencyGraph
             return sb.ToString();
         }
 
-        public string ToString( Node<T>? highlight )
+        public string ToString( GetDisplayStringForData? displayData )
         {
             var sb = new StringBuilder();
-            this.ToString( sb, 0, highlight == null ? null : n => n == highlight );
+            this.ToString( sb, 0, displayData: displayData );
             return sb.ToString();
         }
 
-        public string ToString( Func<Node<T>,bool>? shouldHighlight )
+        public string ToString( Node<T>? highlight, GetDisplayStringForData? displayData = null )
         {
             var sb = new StringBuilder();
-            this.ToString( sb, 0, shouldHighlight );
+            this.ToString( sb, 0, highlight == null ? null : n => n == highlight, displayData );
             return sb.ToString();
         }
 
-        private void ToString( StringBuilder appendTo, int indent, Func<Node<T>,bool>? shouldHighlight = null )
+        public string ToString( Func<Node<T>,bool>? shouldHighlight, GetDisplayStringForData? displayData = null )
+        {
+            var sb = new StringBuilder();
+            this.ToString( sb, 0, shouldHighlight, displayData );
+            return sb.ToString();
+        }
+
+        public delegate string GetDisplayStringForData( ref T? data );
+
+        private void ToString( StringBuilder appendTo, int indent, Func<Node<T>,bool>? shouldHighlight = null, GetDisplayStringForData? displayData = null )
         {
             if ( shouldHighlight != null && shouldHighlight( this ) )
             {
@@ -256,6 +265,15 @@ internal static class DependencyGraph
                 appendTo.Append( " [ " ).Append( string.Join( ", ", allRefs.Select( n => n.Name ).OrderBy( n => n ) ) ).Append( " ]" );
             }
 
+            if ( displayData != null )
+            {
+                var dd = displayData( ref this.Data );
+                if ( !string.IsNullOrEmpty( dd ) )
+                {
+                    appendTo.Append( ' ' ).Append( dd );
+                }
+            }
+
             appendTo.AppendLine();
 
             if ( this._children != null )
@@ -263,7 +281,7 @@ internal static class DependencyGraph
                 indent += 2;
                 foreach ( var child in this._children.Values.OrderBy( c => c.Name ) )
                 {
-                    child.ToString( appendTo, indent, shouldHighlight );
+                    child.ToString( appendTo, indent, shouldHighlight, displayData );
                 }
             }
         }

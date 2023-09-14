@@ -36,6 +36,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
         try
         {
+            // The order of method calls here is significant.
+
             ExamineBaseAndIntroduceInterfaceIfRequired( ctx );
             
             // Introduce methods like UpdateA1B1()
@@ -43,6 +45,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
             // Override auto properties
             ProcessAutoProperties( ctx );
+
+            AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties( ctx );
 
             IntroduceOnPropertyChangedMethod( ctx );
             IntroduceOnChildPropertyChangedMethod( ctx );
@@ -54,7 +58,16 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         }
     }
     
-    // TODO: Work in progress!
+    private static void AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties( BuildAspectContext ctx )
+    {
+        // NB: The selection logic here must be kept in sync with the logic in the OnUnmonitoredInpcPropertyChanged template.
+
+        ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.AddRange(
+            ctx.DependencyGraph.DecendantsDepthFirst()
+            .Where( n => n.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged )
+            .Select( n => n.Data.DottedPropertyPath ) );
+    }
+
     private static void IntroduceOnPropertyChangedMethod( BuildAspectContext ctx )
     {
         var isOverride = ctx.BaseOnPropertyChangedMethod != null;
@@ -172,7 +185,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                         ctx.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute,
                         new[]
                         {
-                                ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray()
+                            ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray()
                         } ) );
 
                 if ( isOverride )
@@ -391,8 +404,6 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                         if ( hasDependentProperties )
                         {
                             handlerField = ctx.GetOrCreateHandlerField( node! );
-
-                            // TODO: Is this the right place to do this, or should it be in GetOrCreateHandlerField?
                             ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( p.Name );
                         }
                         else

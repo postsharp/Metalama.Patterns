@@ -12,5 +12,12 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Metadata;
 [AttributeUsage( AttributeTargets.Method )]
 public sealed class OnUnmonitoredInpcPropertyChangedMethodAttribute : MetadataAttribute
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OnUnmonitoredInpcPropertyChangedMethodAttribute"/> class.
+    /// </summary>
+    /// <param name="propertyPaths">
+    /// The property paths which the declaring class monitors for reference changes only and for which
+    /// <c>OnUnmonitoredInpcPropertyChanged</c> will be called.
+    /// </param>
     public OnUnmonitoredInpcPropertyChangedMethodAttribute( params string[] propertyPaths ) { }
 }

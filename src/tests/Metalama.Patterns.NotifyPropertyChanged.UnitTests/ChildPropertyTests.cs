@@ -46,7 +46,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
         // beacuse we have to store the last value of the parent object anyhow, and we detect that it is the
         // same ref.
 
-        var c2 = new C() { C2 = c.C2 };
+        var c2 = new C() { C2 = a.A2.B2.C2 };
 
         a.A2.B2 = c2;
 
