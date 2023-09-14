@@ -351,6 +351,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     } );
 
                 thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
+
+                // This type will raise OnChildPropertyChanged for the current node, let derived types know.
+                ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( node.Data.DottedPropertyPath );
             }
 
             node.Data.SetUpdateMethod( thisUpdateMethod );

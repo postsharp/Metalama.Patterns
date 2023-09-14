@@ -18,6 +18,9 @@ internal sealed class CertainDeferredDeclaration<T> : DeferredDeclaration<T>
     { 
     }
 
+    [Obsolete( "The value will always be true for " + nameof( CertainDeferredDeclaration<T> ) + ", avoid uncessary conditions." )]
+    public new bool WillBeDefined => true;
+
     /// <summary>
     /// Gets or sets the declaration. Template code will always see the final value,
     /// which will not be <see langword="null"/>.
