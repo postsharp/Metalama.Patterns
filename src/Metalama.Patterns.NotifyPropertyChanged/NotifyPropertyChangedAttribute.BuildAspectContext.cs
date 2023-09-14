@@ -73,7 +73,7 @@ public sealed partial class NotifyPropertyChangedAttribute
             this._baseOnUnmonitoredInpcPropertyChangedMethod = new( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
         }
 
-        public bool InsertDiagnosticComments { get; set; } // TODO: Set by configuration? Discuss.
+        public bool InsertDiagnosticComments { get; set; } = true; // TODO: Set by configuration? Discuss.
 
         public IAspectBuilder<INamedType> Builder { get; }
 

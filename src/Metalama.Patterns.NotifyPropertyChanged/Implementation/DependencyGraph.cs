@@ -58,6 +58,23 @@ internal static class DependencyGraph
         /// </summary>
         public int Depth { get; }
 
+        public Node<T> GetAncestorOrSelfAtDepth( int depth )
+        {
+            if ( depth > this.Depth || depth < 0 )
+            {
+                throw new ArgumentOutOfRangeException( nameof( depth ), "Must be greater than zero and less than or equal to the depth of the current node." );
+            }
+
+            var n = this;
+
+            while ( n!.Depth != depth )
+            {
+                n = n.Parent;
+            }
+
+            return n;
+        }
+
         /// <summary>
         /// Gets the symbol of the node.
         /// </summary>
@@ -80,26 +97,26 @@ internal static class DependencyGraph
 
 
         /// <summary>
-        /// Gets the members that reference, directly or indirectly, the current node. By default, the search follows only <see cref="DirectReferences"/>;
-        /// if <paramref name="followDescendants"/> is <see langword="true"/>, the search follows the direct references of the current node and
-        /// the direct references of the current node's decendants.
+        /// Gets the distinct set of members that reference, directly or indirectly, the current node. By default, the search follows only <see cref="DirectReferences"/>;
+        /// if <paramref name="includeImmediateChild"/> is specified, the search follows the direct references of the current node and
+        /// the direct references of the current node's children matching the given predicate.
         /// </summary>
-        /// <param name="followDescendants"></param>
+        /// <param name="includeImmediateChild"></param>
         /// <returns></returns>
-        public IReadOnlyCollection<Node<T>> GetAllReferences( bool followDescendants = false )
+        public IReadOnlyCollection<Node<T>> GetAllReferences( Func<Node<T>,bool>? includeImmediateChild = null )
         {
             // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
             // However, it's not recusive so there's no risk of stack overflow. So safe, but slow.
 
-            if ( this._referencedBy == null && !followDescendants )
+            if ( this._referencedBy == null && includeImmediateChild == null )
             {
                 return Array.Empty<Node<T>>();
             }
 
             var refsToFollow = new Stack<Node<T>>(
-                followDescendants
-                    ? this.DecendantsDepthFirst().SelectMany( n => n.DirectReferences ).Concat( this.DirectReferences )
-                    : this.DirectReferences );
+                includeImmediateChild == null
+                    ? this.DirectReferences
+                    : this.Children.Where( n => includeImmediateChild( n ) ).SelectMany( n => n.DirectReferences ).Concat( this.DirectReferences ) );
             
             var refsFollowed = new HashSet<Node<T>>();
 

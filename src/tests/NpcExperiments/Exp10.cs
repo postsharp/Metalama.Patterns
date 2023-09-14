@@ -58,7 +58,7 @@ public partial class A : INotifyPropertyChanged
 
                 this._a2 = value;
 
-                // + cascade updates for children of A2
+                // + cascade updates for children of A2, and notify all refs to self (not children)
                 this.UpdateA2B2();
 
                 this.OnPropertyChanged( "A2" );

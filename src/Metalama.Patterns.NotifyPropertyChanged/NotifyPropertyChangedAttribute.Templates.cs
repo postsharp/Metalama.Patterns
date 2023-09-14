@@ -70,7 +70,26 @@ public partial class NotifyPropertyChangedAttribute
                     meta.Target.FieldOrProperty.Value = value;
                 }
 
+                // TODO: Is this similar to [Frag4]? Can we refactor?
+                // XXX [Frag3]
+                if ( node != null )
+                {
+                    // Update methods will deal with notifications - *for those children which have update methods*
+                    foreach ( var method in node.Data.CascadeUpdateMethods )
+                    {
+                        method.Invoke();
+                    }
+                    
+                    // Notify refs to the current node and any children without an update method.
+                    foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                    {
+                        ctx.OnPropertyChangedMethod.Declaration.Invoke( name );
+                    }
+                }
+                // XXX
+
                 ctx.OnPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name );
+
 
                 if ( handlerField != null )
                 {
@@ -88,14 +107,140 @@ public partial class NotifyPropertyChangedAttribute
                         }
 
                         void OnChildPropertyChanged( object sender, PropertyChangedEventArgs e )
-                        {
-                            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name, e.PropertyName );
+                        {                            
+                            var propertyName = e.PropertyName;
+
+                            // TODO: If this can be indentical to [Frag2], refactor
+                            // XXX [Frag1]
+                            // NB: If handlerField is not null, node must also be non-null.
+                            foreach ( var childNode in node.Children )
+                            {
+                                var hasUpdateMethod = childNode.Data.UpdateMethod != null;
+                                var hasRefs = childNode.DirectReferences.Count > 0;
+
+                                if ( hasUpdateMethod || hasRefs )
+                                {
+                                    if ( propertyName == childNode.Name )
+                                    {
+                                        if ( hasUpdateMethod )
+                                        {
+                                            // Update method will deal with notifications
+                                            childNode.Data.UpdateMethod.Invoke();
+                                        }
+                                        else
+                                        {
+                                            // No update method, notify here.
+                                            foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
+                                            {
+                                                ctx.OnPropertyChangedMethod.Declaration.Invoke( refName );
+                                            }
+                                            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name, propertyName );
+                                        }
+                                        return;
+                                    }
+                                }
+                            }
+                            // XXX
+                            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name, propertyName );
                         }
                     }
                 }
             }
         }
     }
+
+    [Template]
+    private static void UpdateChildInpcProperty(
+        [CompileTime] BuildAspectContext ctx,
+        [CompileTime] DependencyGraph.Node<NodeData> node,
+        [CompileTime] IExpression accessChildExpression,
+        [CompileTime] IField lastValueField,
+        [CompileTime] IField onPropertyChangedHandlerField )
+    {
+        if ( node.Depth <= 1 )
+        {
+            CompileTimeThrow( new InvalidOperationException( $"{nameof( UpdateChildInpcProperty )} template must not be called on a root property node." ) );
+        }
+
+        if ( ctx.InsertDiagnosticComments )
+        {
+            meta.InsertComment( "Template: " + nameof( UpdateChildInpcProperty ) );
+            meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+        }
+
+        var newValue = accessChildExpression.Value;
+
+        if ( !ReferenceEquals( newValue, lastValueField.Value ) )
+        {
+            if ( !ReferenceEquals( lastValueField.Value, null ) )
+            {
+                lastValueField.Value.PropertyChanged -= onPropertyChangedHandlerField.Value;
+            }
+
+            if ( newValue != null )
+            {
+                onPropertyChangedHandlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
+                newValue.PropertyChanged += onPropertyChangedHandlerField.Value;
+
+                void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+                {
+                    var propertyName = e.PropertyName;
+
+                    // TODO: If this can be indentical to [Frag1], refactor
+                    // XXX [Frag2]
+                    foreach ( var childNode in node.Children )
+                    {
+                        var hasUpdateMethod = childNode.Data.UpdateMethod != null;
+                        var hasRefs = childNode.DirectReferences.Count > 0;
+                        
+                        if ( hasUpdateMethod || hasRefs )
+                        {
+                            if ( propertyName == childNode.Name )
+                            {
+                                if ( hasUpdateMethod )
+                                {
+                                    // Update method will deal with notifications
+                                    childNode.Data.UpdateMethod.Invoke();
+                                }
+                                else
+                                {
+                                    // No update method, notify here.
+                                    foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
+                                    {
+                                        ctx.OnPropertyChangedMethod.Declaration.Invoke( refName );
+                                    }
+                                    ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Data.DottedPropertyPath, e.PropertyName );
+                                }
+                                return;
+                            }
+                        }
+                    }
+                    // XXX                    
+                    ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Data.DottedPropertyPath, e.PropertyName );
+                }
+            }
+
+            lastValueField.Value = newValue;
+
+            // TODO: Is this similar to [Frag3]? Can we refactor?
+            // XXX [Frag4]
+            // Update methods will deal with notifications - *for those children which have update methods*
+            foreach ( var method in node.Data.CascadeUpdateMethods )
+            {
+                method.Invoke();
+            }
+
+            // Notify refs to the current node and any children without an update method.
+            foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+            {
+                ctx.OnPropertyChangedMethod.Declaration.Invoke( name );
+            }
+            // XXX
+
+            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
+        }
+    }
+
 
     [Template]
     private static dynamic? OverrideUninstrumentedTypeProperty
@@ -156,6 +301,15 @@ public partial class NotifyPropertyChangedAttribute
 
         foreach ( var node in ctx.DependencyGraph.Children )
         {
+            if ( node.Data.FieldOrProperty.DeclaringType == ctx.Target )
+            {
+                if ( ctx.InsertDiagnosticComments )
+                {
+                    meta.InsertComment( $"Skipping '{node.Name}': Property is defined by the current type, will be handled by setter override." );
+                }
+                continue;
+            }
+
             if ( node.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged && ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
             {
                 if ( ctx.InsertDiagnosticComments )
@@ -166,13 +320,17 @@ public partial class NotifyPropertyChangedAttribute
             }
 
             var cascadeUpdateMethods = node.Data.CascadeUpdateMethods;
-            var affectedNodes = node.Data.ImmediateReferences;
 
-            if ( affectedNodes.Count > 0 
+            // Notify refs to the current node and any children without an update method.
+            var refsToNotify = node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null );
+
+                //node.Data.ImmediateReferences;
+
+            if ( refsToNotify.Count > 0 
                 || cascadeUpdateMethods.Count > 0 
                 || ( node.HasChildren && node.Data.InpcBaseHandling is InpcBaseHandling.OnUnmonitoredInpcPropertyChanged or InpcBaseHandling.OnPropertyChanged ) )
             {
-                var affectedPropertyNames = affectedNodes
+                var rootPropertyNamesToNotify = refsToNotify
                     .Select( n => n.Name )
                     .OrderBy( s => s );
 
@@ -254,11 +412,8 @@ public partial class NotifyPropertyChangedAttribute
                         method.Invoke();
                     }
 
-                    // TODO: Consider replacing with dictionary lookup
-                    foreach ( var name in affectedPropertyNames )
+                    foreach ( var name in rootPropertyNamesToNotify )
                     {
-                        // TODO: Question: what if the method of the current template is renamed during introduction? Is this the correct way to call the current method recursively?
-                        // meta.Target.Method.Invoke generates OnPropertyChanged_Empty and calls it.
                         meta.This.OnPropertyChanged( name );
                     }
                 }
@@ -276,59 +431,6 @@ public partial class NotifyPropertyChangedAttribute
     }
 
     [Template]
-    private static void UpdateChildInpcProperty(
-        [CompileTime] BuildAspectContext ctx,
-        [CompileTime] DependencyGraph.Node<NodeData> node,
-        [CompileTime] IExpression accessChildExpression,
-        [CompileTime] IField lastValueField,
-        [CompileTime] IField onPropertyChangedHandlerField )
-    {
-        if ( node.Parent!.IsRoot )
-        {
-            CompileTimeThrow( new InvalidOperationException( $"{nameof( UpdateChildInpcProperty )} template must not be called on a root property node." ) );
-        }
-
-        if ( ctx.InsertDiagnosticComments )
-        {
-            meta.InsertComment( "Template: " + nameof( UpdateChildInpcProperty ) );
-            meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
-        }
-
-        var newValue = accessChildExpression.Value;
-
-        if ( !ReferenceEquals( newValue, lastValueField.Value ) )
-        {
-            if ( !ReferenceEquals( lastValueField.Value, null ) )
-            {
-                lastValueField.Value.PropertyChanged -= onPropertyChangedHandlerField.Value;
-            }
-
-            if ( newValue != null )
-            {
-                onPropertyChangedHandlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
-                newValue.PropertyChanged += onPropertyChangedHandlerField.Value;
-
-                void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
-                {
-                    ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Data.DottedPropertyPath, e.PropertyName );
-                }
-            }
-
-            lastValueField.Value = newValue;
-
-            // TODO: Remove unused branch if we end up not allowing root props
-            if ( node.Parent!.IsRoot )
-            {
-                ctx.OnPropertyChangedMethod.Declaration.Invoke( node.Name );
-            }
-            else
-            {
-                ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
-            }
-        }
-    }
-
-    [Template]
     private static void OnChildPropertyChanged(
         string parentPropertyPath,
         string propertyName,
@@ -342,6 +444,17 @@ public partial class NotifyPropertyChangedAttribute
 
         foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.Depth > 1 ) )
         {
+            var rootPropertyNode = node.GetAncestorOrSelfAtDepth( 1 );
+
+            if ( rootPropertyNode.Data.FieldOrProperty.DeclaringType == ctx.Target )
+            {
+                if ( ctx.InsertDiagnosticComments )
+                {
+                    meta.InsertComment( $"Skipping '{node.Data.DottedPropertyPath}': Root property '{rootPropertyNode.Name}' is defined by the current type, will be handled by setter override and Update methods." );
+                }
+                continue;
+            }
+
             var cascadeUpdateMethods = node.Data.CascadeUpdateMethods;
             var affectedNodes = node.Data.ImmediateReferences;
 
