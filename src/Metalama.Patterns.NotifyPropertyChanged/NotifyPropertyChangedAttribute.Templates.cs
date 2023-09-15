@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
 
@@ -63,7 +64,7 @@ public partial class NotifyPropertyChangedAttribute
                 {
                     var oldValue = meta.Target.FieldOrProperty.Value;
                     meta.Target.FieldOrProperty.Value = value;
-                    ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
+                    ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
                 }
                 else
                 {
@@ -77,18 +78,18 @@ public partial class NotifyPropertyChangedAttribute
                     // Update methods will deal with notifications - *for those children which have update methods*
                     foreach ( var method in node.Data.CascadeUpdateMethods )
                     {
-                        method.Invoke();
+                        method.With( InvokerOptions.Final ).Invoke();
                     }
                     
                     // Notify refs to the current node and any children without an update method.
                     foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
                     {
-                        ctx.OnPropertyChangedMethod.Declaration.Invoke( name );
+                        ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                     }
                 }
                 // XXX
 
-                ctx.OnPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name );
+                ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
 
 
                 if ( handlerField != null )
@@ -135,16 +136,16 @@ public partial class NotifyPropertyChangedAttribute
                                             // No update method, notify here.
                                             foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
                                             {
-                                                ctx.OnPropertyChangedMethod.Declaration.Invoke( refName );
+                                                ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
                                             }
-                                            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name, childNode.Name );
+                                            ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name, childNode.Name );
                                         }
                                         return;
                                     }
                                 }
                             }
                             // XXX
-                            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name, propertyName );
+                            ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name, propertyName );
                         }
                     }
                 }
@@ -206,23 +207,23 @@ public partial class NotifyPropertyChangedAttribute
                                 if ( hasUpdateMethod )
                                 {
                                     // Update method will deal with notifications
-                                    childNode.Data.UpdateMethod.Invoke();
+                                    childNode.Data.UpdateMethod.With( InvokerOptions.Final ).Invoke();
                                 }
                                 else
                                 {
                                     // No update method, notify here.
                                     foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
                                     {
-                                        ctx.OnPropertyChangedMethod.Declaration.Invoke( refName );
+                                        ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
                                     }
-                                    ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Data.DottedPropertyPath, childNode.Name );
+                                    ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Data.DottedPropertyPath, childNode.Name );
                                 }
                                 return;
                             }
                         }
                     }
                     // XXX                    
-                    ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Data.DottedPropertyPath, e.PropertyName );
+                    ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Data.DottedPropertyPath, e.PropertyName );
                 }
             }
 
@@ -233,20 +234,20 @@ public partial class NotifyPropertyChangedAttribute
             // Update methods will deal with notifications - *for those children which have update methods*
             foreach ( var method in node.Data.CascadeUpdateMethods )
             {
-                method.Invoke();
+                method.With( InvokerOptions.Final ).Invoke();
             }
 
             // Notify refs to the current node and any children without an update method.
             foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
             {
-                ctx.OnPropertyChangedMethod.Declaration.Invoke( name );
+                ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
             }
             // XXX
 
             // Don't notify if we're joining on to existing NCPC support from a base type, or we'll be stuck in a loop.
             if ( node.Parent!.Data.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
             {
-                ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
+                ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
             }
             else if ( ctx.InsertDiagnosticComments )
             {
@@ -290,14 +291,14 @@ public partial class NotifyPropertyChangedAttribute
             if ( compareExpr == null )
             {
                 meta.Target.FieldOrProperty.Value = value;
-                ctx.OnPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name );
+                ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
             }
             else
             {
                 if ( compareExpr.Value )
                 {
                     meta.Target.FieldOrProperty.Value = value;
-                    ctx.OnPropertyChangedMethod.Declaration.Invoke( meta.Target.FieldOrProperty.Name );
+                    ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
                 }
             }
         }
@@ -368,6 +369,8 @@ public partial class NotifyPropertyChangedAttribute
 
                 if ( propertyName == node.Name )
                 {
+                    //var emitDefaultNotifications = meta.CompileTime( true );
+
                     if ( ctx.InsertDiagnosticComments )
                     {
                         meta.InsertComment( $"InpcBaseHandling = {node.Data.InpcBaseHandling}" );
@@ -423,13 +426,13 @@ public partial class NotifyPropertyChangedAttribute
                                     // Update methods will deal with notifications - *for those children which have update methods*
                                     foreach ( var method in node.Data.CascadeUpdateMethods )
                                     {
-                                        method.Invoke();
+                                        method.With( InvokerOptions.Final ).Invoke();
                                     }
 
-                                    // Notify refs to the current node and any children without an update method.
+                                    // Notify about refs to the current node and any children without an update method.
                                     foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
                                     {
-                                        ctx.OnPropertyChangedMethod.Declaration.Invoke( name );
+                                        ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                                     }
                                     // XXX
 
@@ -467,42 +470,64 @@ public partial class NotifyPropertyChangedAttribute
                                                         if ( hasUpdateMethod )
                                                         {
                                                             // Update method will deal with notifications
-                                                            childNode.Data.UpdateMethod.Invoke();
+                                                            childNode.Data.UpdateMethod.With( InvokerOptions.Final ).Invoke();
                                                         }
                                                         else
                                                         {
                                                             // No update method, notify here.
                                                             foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
                                                             {
-                                                                ctx.OnPropertyChangedMethod.Declaration.Invoke( refName );
+                                                                ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
                                                             }
-                                                            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Name, childNode.Name );
+                                                            ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Name, childNode.Name );
                                                         }
                                                         return;
                                                     }
                                                 }
                                             }
                                             // XXX                    
-                                            ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Name, e.PropertyName );
+                                            ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Name, e.PropertyName );
                                         }
+                                    }
+
+                                    // In this `case`, the notification needs to take place inside the `if value has changed` block.
+                                    foreach ( var method in cascadeUpdateMethods )
+                                    {
+                                        method.With( InvokerOptions.Final ).Invoke();
+                                    }
+
+                                    foreach ( var name in rootPropertyNamesToNotify )
+                                    {
+                                        ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
+                                    }
+
+                                    // TODO: Fix 
+                                    if ( ctx.InsertDiagnosticComments )
+                                    {
+                                        meta.InsertComment( "WARNING: Duplicate notifications will occur below due to ML limitation." );
                                     }
                                 }
                             }
+                            
+                            //emitDefaultNotifications = false;
                             break;
                         default:
                             CompileTimeThrow( new InvalidOperationException( $"InpcBaseHandling '{node.Data.InpcBaseHandling}' was not expected here." ) );
                             break;
                     }
 
-                    foreach ( var method in cascadeUpdateMethods )
-                    {
-                        method.Invoke();
-                    }
+                    //if ( emitDefaultNotifications )
+                    //{
+                        foreach ( var method in cascadeUpdateMethods )
+                        {
+                            method.With( InvokerOptions.Final ).Invoke();
+                        }
 
-                    foreach ( var name in rootPropertyNamesToNotify )
-                    {
-                        meta.This.OnPropertyChanged( name );
-                    }
+                        foreach ( var name in rootPropertyNamesToNotify )
+                        {
+                            ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
+                        }
+                    //}
                 }
             }
             else
@@ -568,6 +593,13 @@ public partial class NotifyPropertyChangedAttribute
                             meta.InsertComment( $"Skipping '{node.Data.DottedPropertyPath}': A base type supports OnChildPropertyChanged for a non-immediate ancestor of this property." );
                         }
                         continue;
+
+                    case InpcBaseHandling.OnPropertyChanged:
+                        if ( ctx.InsertDiagnosticComments )
+                        {
+                            meta.InsertComment( $"Skipping '{node.Data.DottedPropertyPath}': A base type supports OnPropertyChanged for root property '{rootPropertyNode.Name}'." );
+                        }
+                        continue;
                 }
             }
 
@@ -583,16 +615,15 @@ public partial class NotifyPropertyChangedAttribute
                     if ( hasUpdateMethod )
                     {
                         // Update method will deal with notifications
-                        node.Data.UpdateMethod.Invoke();
+                        node.Data.UpdateMethod.With( InvokerOptions.Final ).Invoke();
                     }
                     else
                     {
                         // No update method, notify here.
                         foreach ( var refName in node.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
                         {
-                            ctx.OnPropertyChangedMethod.Declaration.Invoke( refName );
+                            ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
                         }
-                        ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Parent!.Data.DottedPropertyPath, node.Name );
                     }
 
                     if ( ctx.BaseOnChildPropertyChangedMethod != null )
@@ -624,14 +655,26 @@ public partial class NotifyPropertyChangedAttribute
             meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( ( ref NodeData data ) => $"ibh:{data.InpcBaseHandling}" ) );
         }
 
-        // Think of the generated OnUnmonitoredInpcPropertyChanged method as an enhanced overload of OnPropertyChanged, the difference being that
-        // the caller provides the old and new values, and it only applies to property types which implement INotifyPropertyChanged.
 
-        // NB: OnUnmonitoredInpcPropertyChanged is only called when a ref has changed - the caller checks this first.
-        // NB: Nodes only appear in the graph if they are relevant to the current class.        
-
-        // NB: The logic which selects nodes for which support will be generated must be kept in sync with the logic in
-        // AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties.
+        /* 
+         * Think of the generated OnUnmonitoredInpcPropertyChanged method as an enhanced overload of OnPropertyChanged, the differences
+         * being that  the caller provides the old and new values, the method recieves a property path rather than a root property name,
+         * and it only applies to property types which implement INotifyPropertyChanged.
+         * 
+         * NB:
+         * 
+         * - In the current implementation (outside this template), the gererated OnUnmonitoredInpcPropertyChanged 
+         *   method is only called for root properties. As/when false positive detection is implmeneted and enabled, 
+         *   then the generated OnUnmonitoredInpcPropertyChanged method will recieve calls for leaf INotifyPropertyChanged 
+         *   properties.
+         * 
+         * - OnUnmonitoredInpcPropertyChanged is only called when a ref has changed - the caller checks this first.
+         * 
+         * - Nodes only appear in the graph if they are relevant to the current class.
+         * 
+         * - The logic which selects nodes for which support will be generated must be kept in sync with the logic in
+         *   AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties.
+        */
 
         foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
         {
@@ -679,16 +722,16 @@ public partial class NotifyPropertyChangedAttribute
                                     if ( hasUpdateMethod )
                                     {
                                         // Update method will deal with notifications
-                                        childNode.Data.UpdateMethod.Invoke();
+                                        childNode.Data.UpdateMethod.With( InvokerOptions.Final ).Invoke();
                                     }
                                     else
                                     {
                                         // No update method, notify here.
                                         foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
                                         {
-                                            ctx.OnPropertyChangedMethod.Declaration.Invoke( refName );
+                                            ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
                                         }
-                                        ctx.OnChildPropertyChangedMethod.Declaration.Invoke( node.Data.DottedPropertyPath, childNode.Name );
+                                        ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Data.DottedPropertyPath, childNode.Name );
                                     }
                                     return;
                                 }
@@ -703,13 +746,13 @@ public partial class NotifyPropertyChangedAttribute
                 // Update methods will deal with notifications - *for those children which have update methods*
                 foreach ( var method in node.Data.CascadeUpdateMethods )
                 {
-                    method.Invoke();
+                    method.With( InvokerOptions.Final ).Invoke();
                 }
 
                 // Notify refs to the current node and any children without an update method.
                 foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
                 {
-                    ctx.OnPropertyChangedMethod.Declaration.Invoke( name );
+                    ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                 }
                 // XXX                
             }

@@ -46,7 +46,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             // Override auto properties
             ProcessAutoProperties( ctx );
 
-            AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties( ctx );
+            AddPropertyPathsForOnChildPropertyChangedMethodAttribute( ctx );
 
             IntroduceOnPropertyChangedMethod( ctx );
             IntroduceOnChildPropertyChangedMethod( ctx );
@@ -58,13 +58,18 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         }
     }
     
-    private static void AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties( BuildAspectContext ctx )
+    private static void AddPropertyPathsForOnChildPropertyChangedMethodAttribute( BuildAspectContext ctx )
     {
         // NB: The selection logic here must be kept in sync with the logic in the OnUnmonitoredInpcPropertyChanged template.
 
         ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.AddRange(
             ctx.DependencyGraph.DecendantsDepthFirst()
-            .Where( n => n.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged )
+            .Where( n => n.Data.InpcBaseHandling switch
+            {
+                InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined => true,
+                InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
+                _ => false
+            } )
             .Select( n => n.Data.DottedPropertyPath ) );
     }
 

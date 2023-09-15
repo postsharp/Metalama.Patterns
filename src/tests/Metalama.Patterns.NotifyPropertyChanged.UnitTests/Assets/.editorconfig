@@ -22,6 +22,9 @@ dotnet_diagnostic.SA1623.severity = none
 # SA1402: File may only contain a single type
 dotnet_diagnostic.SA1402.severity = none
 
+# IDE0051: Remove unused private members
+dotnet_diagnostic.IDE0051.severity = none
+
 resharper_arrange_static_member_qualifier_highlighting=none
 resharper_check_namespace_highlighting=none
 resharper_class_can_be_sealed_global_highlighting=none
