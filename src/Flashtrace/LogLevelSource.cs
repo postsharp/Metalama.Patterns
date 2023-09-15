@@ -116,7 +116,7 @@ public sealed class LogLevelSource
     /// <param name="options">Options.</param>
     /// <returns>A <see cref="Activities.LogActivity{TActivityDescription}"/> representing the new activity.</returns>
     /// <remarks>The activity must be closed using
-    /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in SetSuccess)"/>,
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>,
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetResult{TResult}(TResult,in CloseActivityOptions)"/>,
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
     /// or <see cref="Activities.LogActivity{TActivityDescription}.SetException(Exception,in CloseActivityOptions)"/>.
@@ -137,7 +137,7 @@ public sealed class LogLevelSource
     /// <param name="options">Options.</param>
     /// <returns>A <see cref="Activities.LogActivity{TActivityDescription}"/> representing the new activity.</returns>
     /// <remarks>The activity must be closed using
-    /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in SetSuccess)"/>,
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetResult{TResult}(TResult,in CloseActivityOptions)"/>,
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
     /// or <see cref="Activities.LogActivity{TActivityDescription}.SetException(Exception,in CloseActivityOptions)"/>.
