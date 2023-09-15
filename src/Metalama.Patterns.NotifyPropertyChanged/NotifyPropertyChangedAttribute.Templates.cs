@@ -369,7 +369,7 @@ public partial class NotifyPropertyChangedAttribute
 
                 if ( propertyName == node.Name )
                 {
-                    //var emitDefaultNotifications = meta.CompileTime( true );
+                    var emitDefaultNotifications = meta.CompileTime( true );
 
                     if ( ctx.InsertDiagnosticComments )
                     {
@@ -509,15 +509,15 @@ public partial class NotifyPropertyChangedAttribute
                                 }
                             }
                             
-                            //emitDefaultNotifications = false;
+                            emitDefaultNotifications = false;
                             break;
                         default:
                             CompileTimeThrow( new InvalidOperationException( $"InpcBaseHandling '{node.Data.InpcBaseHandling}' was not expected here." ) );
                             break;
                     }
 
-                    //if ( emitDefaultNotifications )
-                    //{
+                    if ( emitDefaultNotifications )
+                    {
                         foreach ( var method in cascadeUpdateMethods )
                         {
                             method.With( InvokerOptions.Final ).Invoke();
@@ -527,7 +527,7 @@ public partial class NotifyPropertyChangedAttribute
                         {
                             ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                         }
-                    //}
+                    }
                 }
             }
             else
