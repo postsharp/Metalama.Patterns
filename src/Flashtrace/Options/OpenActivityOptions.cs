@@ -12,7 +12,8 @@ namespace Flashtrace.Options;
 // TODO: Modernize. Consider readonly (record) struct and 'with' pattern for non-destructive mutability.
 // ReSharper disable InvalidXmlDocComment
 /// <summary>
-/// Argument of the  <see cref="LogLevelSource.OpenActivity{T}(in T,in OpenActivity)"/> method.
+/// Argument of the <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> method and
+/// related overloads.
 /// </summary>
 [PublicAPI]
 public readonly struct OpenActivityOptions
