@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FluentAssertions;
+using FluentAssertions.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -11,7 +13,7 @@ public abstract class InpcTestsBase : IDisposable
 {
     // NB: For now assumes single-thread use.
 
-    public sealed class Subscription : IDisposable
+    public sealed class Subscription : IDisposable, IEquatable<Subscription>
     {
         private int _disposed;
 
@@ -58,15 +60,49 @@ public abstract class InpcTestsBase : IDisposable
 
         public override string ToString()
             => this.Origin;
+
+        public bool Equals( Subscription? other )
+            => ReferenceEquals( this, other ) || ReferenceEquals( this, AnySubscription ) || ReferenceEquals( other, AnySubscription );
+
+        public override bool Equals( object? obj )
+            => this.Equals( obj as Subscription );
     }
 
-    protected List<(Subscription Subscription, string PropertyName)> Events { get; } = new();
+    protected static readonly Subscription AnySubscription = new Subscription( "<any>", null! );
+
+    protected record struct Event( Subscription Subscription, string PropertyName )
+    {    
+        public static implicit operator Event( string propertyName )
+            => new Event( AnySubscription, propertyName );
+
+        public static implicit operator Event( (Subscription Subscription, string PropertyName) tuple )
+            => new Event( tuple.Subscription, tuple.PropertyName );
+    }
+
+    protected Event[] EventsFrom( Action action )
+    {
+        var list = this.Events;
+        list.Should().BeEmpty();
+        
+        try
+        {
+            action();
+            return list.ToArray();
+        }
+        finally
+        {
+            this.Events.Clear();
+        }
+    }
+
+    protected List<Event> Events { get; } = new();
+
     private readonly Dictionary<string,Subscription> _subscriptions = new();
 
     protected Subscription SubscribeTo<TInpc>( TInpc source, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = -1 )
         where TInpc : class, INotifyPropertyChanged
     {
-        var type = typeof( TInpc );
+        var type = source.GetType();
 
         var key = $"{type.Name} ({callerMemberName}#{callerLineNumber})";
 
@@ -93,7 +129,7 @@ public abstract class InpcTestsBase : IDisposable
             sender.Should().BeSameAs( source );
             args.PropertyName.Should().NotBeNullOrEmpty();
             type.GetProperty( args.PropertyName!, BindingFlags.Instance | BindingFlags.Public ).Should().NotBeNull( "because the notified property name should be a public property of the notifying type." );
-            eventsList.Add( (sub, args.PropertyName!) );
+            eventsList.Add( new Event( sub, args.PropertyName! ) );
         });
 
         sub.SetHandler( handler );

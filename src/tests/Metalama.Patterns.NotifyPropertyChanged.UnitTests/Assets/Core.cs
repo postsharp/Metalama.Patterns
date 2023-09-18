@@ -4,34 +4,50 @@ using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core
 {
+    /// <summary>
+    /// A base class with three int auto-properties.
+    /// </summary>
     [NotifyPropertyChanged]
     public partial class Simple
     {
+        /// <summary>
+        /// Auto
+        /// </summary>
         public int S1 { get; set; }
 
+        /// <summary>
+        /// Auto
+        /// </summary>
         public int S2 { get; set; }
 
+        /// <summary>
+        /// Auto
+        /// </summary>
         public int S3 { get; set; }
     }
 
-    public class ExistingInpcImplWithoutNPCMethod : INotifyPropertyChanged
+    [NotifyPropertyChanged]
+    public partial class SimpleWithInpcProperties
     {
-        private int _ex1;
+        /// <summary>
+        /// Auto
+        /// </summary>
+        public int A1 { get; set; }
 
-        public int EX1
-        {
-            get => this._ex1;
-            set
-            {
-                if ( value != this._ex1 )
-                {
-                    this._ex1 = value;
-                    this.PropertyChanged?.Invoke( this, new( nameof( this.EX1 ) ) );
-                }
-            }
-        }
+        /// <summary>
+        /// Ref to R1.S1. Will throw if R1 is null.
+        /// </summary>
+        public int A2 => this.R1!.S1;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        /// <summary>
+        /// Property type implements <see cref="INotifyPropertyChanged"/>. <c>R1.S1</c> is referenced by <see cref="A2"/>.
+        /// </summary>
+        public Simple? R1 { get; set; }
+
+        /// <summary>
+        /// Property type implements <see cref="INotifyPropertyChanged"/>, is not referenced in the current class.
+        /// </summary>
+        public Simple? R2 { get; set; }
     }
 
     public class ExistingInpcImplWithValidOPCMethod : INotifyPropertyChanged
@@ -53,7 +69,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core
 
         private Simple _ex2 = new();
 
-        public Simple EX2
+        public Simple? EX2
         {
             get => this._ex2;
 
@@ -75,7 +91,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core
         }
     }
 
-    public class ExistingInpcImplWithValidOPCMethodNamedNotifyOfPropertyChange : INotifyPropertyChanged
+    public abstract class ExistingAbstractInpcImplWithValidOPCMethod : INotifyPropertyChanged
     {
         private int _ex1;
 
@@ -92,66 +108,27 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core
             }
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        private Simple _ex2 = new();
 
-        protected virtual void NotifyOfPropertyChange( string propertyName )
+        public Simple? EX2
         {
-            this.PropertyChanged?.Invoke( this, new( propertyName ) );
-        }
-    }
+            get => this._ex2;
 
-    public class ExistingInpcImplWithValidOPCMethodNamedRaisePropertyChanged : INotifyPropertyChanged
-    {
-        private int _ex1;
-
-        public int EX1
-        {
-            get => this._ex1;
             set
             {
-                if ( value != this._ex1 )
+                if ( this._ex2 != value )
                 {
-                    this._ex1 = value;
-                    this.PropertyChanged?.Invoke( this, new( nameof( this.EX1 ) ) );
+                    this._ex2 = value;
+                    this.OnPropertyChanged( nameof( this.EX2 ) );
                 }
             }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void RaisePropertyChanged( string propertyName )
+        protected virtual void OnPropertyChanged( string propertyName )
         {
             this.PropertyChanged?.Invoke( this, new( propertyName ) );
         }
     }
-
-    public class ExistingInpcImplWithOPCMethodThatIsPrivate : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        private void OnPropertyChanged( string propertyName ) { }
-    }
-
-    public class ExistingInpcImplWithOPCMethodThatIsNotVirtual : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected void OnPropertyChanged( string propertyName ) { }
-    }
-
-    public class ExistingInpcImplWithOPCMethodWithWrongParamType : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged( int propertyIdx ) { }
-    }
-
-    public class ExistingInpcImplWithOPCMethodWithWrongParamCount : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged( string propertyName, int propertyIdx ) { }
-    }
-
-
 }

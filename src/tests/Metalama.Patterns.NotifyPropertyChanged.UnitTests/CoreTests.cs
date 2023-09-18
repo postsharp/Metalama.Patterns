@@ -1,0 +1,128 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using FluentAssertions;
+using Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
+using Xunit;
+
+namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests;
+public sealed class CoreTests : InpcTestsBase
+{
+    [Fact]
+    public void SimpleIsCorrect()
+    {
+        var v = new Simple();
+
+        v.S1.Should().Be( 0 );
+        v.S2.Should().Be( 0 );
+        v.S3.Should().Be( 0 );
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.S1 = 0 )
+            .Should().BeEmpty();
+
+        this.EventsFrom( () => v.S2 = 0 )
+            .Should().BeEmpty();
+
+        this.EventsFrom( () => v.S3 = 0 )
+            .Should().BeEmpty();
+
+        this.EventsFrom( () => v.S1 = 1 )
+            .Should().Equal( "S1" );
+
+        this.EventsFrom( () => v.S2 = 1 )
+            .Should().Equal( "S2" );
+
+        this.EventsFrom( () => v.S3 = 1 )
+            .Should().Equal( "S3" );
+    }
+
+    [Fact]
+    public void SimpleWithInpcPropertiesIsCorrect()
+    {
+        var v = new SimpleWithInpcProperties();
+
+        v.A1.Should().Be( 0 );
+        v.R1.Should().BeNull();
+        v.R2.Should().BeNull();
+
+        v.Invoking( v => v.A2 ).Should().Throw<NullReferenceException>();
+
+        var sv = this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.A1 = 1 )
+            .Should().Equal( "A1" );
+
+        var a = new Simple();
+
+        var sa = this.SubscribeTo( a );
+
+        this.EventsFrom( () => v.R1 = a )
+            .Should().Equal( (sv, "A2"), ( sv, "R1") );
+
+        this.EventsFrom( () => v.R1!.S1 = 1 )
+            .Should().Equal( (sa, "S1"), (sv, "A2") );
+
+        this.EventsFrom( () => v.R1!.S2 = 1 )
+            .Should().Equal( (sa, "S2") );
+
+        this.EventsFrom( () => v.R1!.S3 = 1 )
+            .Should().Equal( (sa, "S3") );
+    }
+
+    [Fact]
+    public void HandCodedExistingInpcImplWithValidOPCMethodIsCorrect()
+    {        
+        // Sanity check that hand-coded class behaves as expected.
+        var v = new ExistingInpcImplWithValidOPCMethod();
+
+        v.EX1.Should().Be( 0 );
+        v.EX2.Should().NotBeNull();
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.EX1 = v.EX1 )
+            .Should().BeEmpty();
+
+        this.EventsFrom( () => v.EX2 = v.EX2 )
+            .Should().BeEmpty();
+
+        this.EventsFrom( () => v.EX1 = 1 )
+            .Should().Equal( "EX1" );
+
+        this.EventsFrom( () => v.EX2 = null )
+            .Should().Equal( "EX2" );
+
+        this.EventsFrom( () => v.EX2 = new() )
+            .Should().Equal( "EX2" );
+    }
+
+    private class DerivedFromExistingAbstractInpcImplWithValidOPCMethod : ExistingAbstractInpcImplWithValidOPCMethod { }
+
+    [Fact]
+    public void HandCodedExistingAbstractInpcImplWithValidOPCMethodIsCorrect()
+    {
+        // Sanity check that hand-coded class behaves as expected.
+        var v = new DerivedFromExistingAbstractInpcImplWithValidOPCMethod();
+
+        v.EX1.Should().Be( 0 );
+        v.EX2.Should().NotBeNull();
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.EX1 = v.EX1 )
+            .Should().BeEmpty();
+
+        this.EventsFrom( () => v.EX2 = v.EX2 )
+            .Should().BeEmpty();
+
+        this.EventsFrom( () => v.EX1 = 1 )
+            .Should().Equal( "EX1" );
+
+        this.EventsFrom( () => v.EX2 = null )
+            .Should().Equal( "EX2" );
+
+        this.EventsFrom( () => v.EX2 = new() )
+            .Should().Equal( "EX2" );
+    }
+}

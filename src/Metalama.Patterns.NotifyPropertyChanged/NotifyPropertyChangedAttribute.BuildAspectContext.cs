@@ -339,7 +339,7 @@ public sealed partial class NotifyPropertyChangedAttribute
 
             return h;
         }
-
+        
         // NOTE: This hashset of path stems approach is a simple way to allow path stems to be checked, but
         // a tree-based structure might scale better if required. Keeping it simple for now.
         private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
@@ -355,6 +355,8 @@ public sealed partial class NotifyPropertyChangedAttribute
             }
 
             return h;
+
+            // TODO: Don't add ancestor stems!
 
             static void AddPropertyPathAndAllAncestorStems( HashSet<string> addTo, string propertyPath )
             {

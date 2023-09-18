@@ -1,97 +1,214 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
 {
     #region Basic Cases
 
-    public partial class InheritsSimpleAddsNothing : Simple
+    /// <summary>
+    /// C1 : Simple
+    /// </summary>
+    public partial class C1 : Simple
     {
     }
-
-    public partial class I1_InheritsSimpleAddsProperty : Simple
+    
+    /// <summary>
+    /// C2 : Simple
+    /// </summary>
+    public partial class C2 : Simple
     {
-        public int I1P1 { get; set; }
+        public int C2P1 { get; set; }
     }
 
-    public partial class I2_InheritsI1AddsProperty : I1_InheritsSimpleAddsProperty
+    /// <summary>
+    /// C3 : C2 : Simple
+    /// </summary>
+    public partial class C3 : C2
     {
-        public int I2P1 { get; set; }
+        public int C3P1 { get; set; }
     }
 
-    public partial class I3_InheritsI2AddsProperty : I2_InheritsI1AddsProperty
+    /// <summary>
+    /// C4 : C3 : C2 : C1 : Simple
+    /// </summary>
+    public partial class C4 : C3
     {
-        public int I3P1 { get; set; }
+        public int C4P1 { get; set; }
     }
 
-    public partial class I4_InheritsI3AddsProperty : I3_InheritsI2AddsProperty
+    /// <summary>
+    /// C5: C4 : C3 : C2 : C1 : Simple
+    /// </summary>
+    public partial class C5 : C4
     {
-        public int I4P1 { get; set; }
+        public int C5P1 { get; set; }
     }
 
-    public partial class I10_InheritsSimpleAddsPropertyRefS1 : Simple
+    /// <summary>
+    /// C6 : Simple, has ref to <see cref="Simple.S1"/>.
+    /// </summary>
+    public partial class C6 : Simple
     {
-        public int I10P1 => this.S1;
+        public int C6P1 => this.S1;
     }
 
-    public partial class I11_InheritsI10AddsPropertyRefS1 : I10_InheritsSimpleAddsPropertyRefS1
+    /// <summary>
+    /// C7 : C6 : Simple, has ref to <see cref="Simple.S1"/>.
+    /// </summary>
+    public partial class C7 : C6
     {
-        public int I11P1 => this.S1;
+        public int C7P1 => this.S1;
+    }
+
+    #endregion
+
+    #region Child properties (particularly in the context of inheritance)
+
+    public partial class C16 : SimpleWithInpcProperties
+    {
+        /// <summary>
+        /// References a child prop of <see cref="SimpleWithInpcProperties.R1"/>, which
+        /// child is not referenced by <see cref="SimpleWithInpcProperties"/>.
+        /// </summary>
+        public int C16P1 => this.R1!.S2;
     }
 
     #endregion
 
     #region Inherit from existing non-aspect base
 
+    /// <summary>
+    /// C8 : ExistingInpcImplWithValidOPCMethod
+    /// </summary>
     [NotifyPropertyChanged]
-    public partial class I20_InheritsExistingInpcImplWithValidOPCMethod : ExistingInpcImplWithValidOPCMethod
+    public partial class C8 : ExistingInpcImplWithValidOPCMethod
     {
-        public int I20P1 { get; set; }
+        /// <summary>
+        /// Auto
+        /// </summary>
+        public int C8P1 { get; set; }
 
-        public int I20P2 => this.EX1 * 2;
+        /// <summary>
+        /// Ref to <see cref="ExistingInpcImplWithValidOPCMethod.EX1"/>.
+        /// </summary>
+        public int C8P2 => this.EX1 * 2;
 
-        // Ref to EX2.S1 requires [NPC] to provide monitoring of EX2 within this class.
-        public int I20P3 => this.EX2.S1;
+        /// <summary>
+        /// Ref to <see cref="ExistingInpcImplWithValidOPCMethod.EX2"/>/<see cref="Simple.S1"/>. EX2 is not monitored by its declaring class.
+        /// </summary>
+        public int C8P3 => this.EX2.S1;
+    }
+
+    /// <summary>
+    /// C9 : C8
+    /// </summary>
+    public partial class C9 : C8
+    {
+        /// <summary>
+        /// Ref to <see cref="C8.C8P1"/>.
+        /// </summary>
+        public int C9P1 => this.C8P1;
+
+        /// <summary>
+        /// Ref to <see cref="ExistingInpcImplWithValidOPCMethod.EX2"/>/<see cref="Simple.S2"/>.
+        /// Monitoring of EX2 is provided by C8.
+        /// </summary>
+        public int C9P3 => this.EX2.S2;
     }
 
     #endregion
 
-    // TODO: Move to AspectTests
-#if false
+    #region Abstract base
+
+    /// <summary>
+    /// Abstract [NPC] base class.
+    /// </summary>
     [NotifyPropertyChanged]
-    public partial class InheritsExistingInpcImplWithValidOPCMethodNamedNotifyOfPropertyChange : ExistingInpcImplWithValidOPCMethodNamedNotifyOfPropertyChange
+    public abstract partial class C10
     {
+        /// <summary>
+        /// Auto
+        /// </summary>
+        public int C10P1 { get; set; }
     }
 
-    [NotifyPropertyChanged]
-    public partial class InheritsExistingInpcImplWithValidOPCMethodNamedRaisePropertyChanged : ExistingInpcImplWithValidOPCMethodNamedRaisePropertyChanged
+    /// <summary>
+    /// C11 : C10
+    /// </summary>
+    public partial class C11 : C10
     {
+        /// <summary>
+        /// Ref to <see cref="C10.C10P1"/>.
+        /// </summary>
+        public int C11P1 => this.C10P1;
     }
 
-    [NotifyPropertyChanged]
-    public partial class InheritsExistingInpcImplWithOPCMethodThatIsNotVirtual : ExistingInpcImplWithOPCMethodThatIsNotVirtual
+    /// <summary>
+    /// I12 : ExistingAbstractInpcImplWithValidOPCMethod
+    /// </summary>
+    public partial class C12 : ExistingAbstractInpcImplWithValidOPCMethod
     {
+        /// <summary>
+        /// Ref to <see cref="ExistingAbstractInpcImplWithValidOPCMethod.EX1"/>.
+        /// </summary>
+        public int C12P1 => this.EX1;
     }
 
-    [NotifyPropertyChanged]
-    public partial class InheritsExistingInpcImplWithOPCMethodThatIsPrivate : ExistingInpcImplWithOPCMethodThatIsPrivate
+    #endregion
+
+    #region UserImpl => [NPC] => UserImpl => [NPC]
+
+    /// <summary>
+    /// C13 : ExistingInpcImplWithValidOPCMethod
+    /// </summary>
+    public partial class C13 : ExistingInpcImplWithValidOPCMethod
     {
+        /// <summary>
+        /// Auto
+        /// </summary>
+        public int C13P1 { get; set; }
     }
 
-    [NotifyPropertyChanged]
-    public partial class InheritsExistingInpcImplWithOPCMethodWithWrongParamCount : ExistingInpcImplWithOPCMethodWithWrongParamCount
+    /// <summary>
+    /// C14 : C13, NotifyPropertyChangedAttribute excluded, hand-coded.
+    /// </summary>
+    [ExcludeAspect( typeof( NotifyPropertyChangedAttribute ) )]
+    public class C14 : C13
     {
+        private int _c14P1;
+
+        public int C14P1
+        {
+            get => this._c14P1;
+            set
+            {
+                if ( value != this._c14P1 )
+                {
+                    this._c14P1 = value;
+                    this.OnPropertyChanged( nameof( this.C14P1 ) );
+                }
+            }
+        }
     }
 
+    /// <summary>
+    /// C15 : C14, has [NotifyPropertyChanged].
+    /// </summary>
     [NotifyPropertyChanged]
-    public partial class InheritsExistingInpcImplWithOPCMethodWithWrongParamType : ExistingInpcImplWithOPCMethodWithWrongParamType
+    public class C15 : C14
     {
+        /// <summary>
+        /// Ref to <see cref="C13.C13P1"/>.
+        /// </summary>
+        public int C15P1 => this.C13P1;
+
+        /// <summary>
+        /// Ref to <see cref="C14.C14P1"/>.
+        /// </summary>
+        public int C15P2 => this.C14P1;
     }
 
-    [NotifyPropertyChanged]
-    public partial class InheritsExistingInpcImplWithoutNPCMethod : ExistingInpcImplWithoutNPCMethod
-    {
-    }
-#endif
+    #endregion
 }
