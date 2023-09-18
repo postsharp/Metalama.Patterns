@@ -39,7 +39,9 @@ public sealed partial class NotifyPropertyChangedAttribute
             this.BaseImplementsInpc =
                 target.BaseType != null && (
                     target.BaseType.Is( this.Type_INotifyPropertyChanged )
-                    || (target.BaseType is { BelongsToCurrentProject: true } && target.BaseType.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
+                    || (target.BaseType is { BelongsToCurrentProject: true } 
+                        && ( !this.Target.Compilation.IsPartial || this.Target.Compilation.Types.Contains( target.BaseType ) ) 
+                        && target.BaseType.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
 
             this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Type_INotifyPropertyChanged );
 
@@ -392,7 +394,7 @@ public sealed partial class NotifyPropertyChangedAttribute
         private static IMethod? GetOnPropertyChangedMethod( INamedType type )
             => type.AllMethods.FirstOrDefault( m =>
                 !m.IsStatic
-                && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters.Count == 1
                 && m.Parameters[0].Type.SpecialType == SpecialType.String
@@ -402,7 +404,7 @@ public sealed partial class NotifyPropertyChangedAttribute
             => type.AllMethods.FirstOrDefault( m =>
                 !m.IsStatic
                 && m.Attributes.Any( typeof( OnChildPropertyChangedMethodAttribute ) )
-                && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters.Count == 2
                 && m.Parameters[0].Type.SpecialType == SpecialType.String
@@ -412,7 +414,7 @@ public sealed partial class NotifyPropertyChangedAttribute
             => type.AllMethods.FirstOrDefault( m =>
                 !m.IsStatic
                 && m.Attributes.Any( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) )
-                && (type.IsSealed || m.Accessibility is Accessibility.Public or Accessibility.Protected)
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters.Count == 3
                 && m.Parameters[0].Type.SpecialType == SpecialType.String

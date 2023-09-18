@@ -24,7 +24,7 @@ internal static class DiagnosticDescriptors
                 "LAMA5150",
                 Error,
                 "Class {0} implements INotifyPropertyChanged but does not define a public or protected OnPropertyChanged method with the following signature: " +
-                "void OnPropertyChanged(string propertyName). The method name can also be NotifyOfPropertyChange or RaisePropertyChanged.",
+                "virtual void OnPropertyChanged(string propertyName). The method name can also be NotifyOfPropertyChange or RaisePropertyChanged.",
                 "OnPropertyChanged is not defined.",
                 _category );
 
