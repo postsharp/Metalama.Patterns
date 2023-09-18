@@ -70,11 +70,29 @@ public sealed class CoreTests : InpcTestsBase
             .Should().Equal( (sa, "S3") );
     }
 
+    private class DerivedFromExistingInpcImplWithValidOPCMethod : ExistingInpcImplWithValidOPCMethod
+    {
+        private readonly Action<string> _onPropertyChanged;
+
+        public DerivedFromExistingInpcImplWithValidOPCMethod( Action<string> onPropertyChanged)
+        {
+            this._onPropertyChanged = onPropertyChanged;
+        }
+
+        protected override void OnPropertyChanged( string propertyName )
+        {
+            this._onPropertyChanged( propertyName );
+            base.OnPropertyChanged( propertyName );
+        }
+    }
+
     [Fact]
     public void HandCodedExistingInpcImplWithValidOPCMethodIsCorrect()
-    {        
+    {
+        List<string> opc = new();
+
         // Sanity check that hand-coded class behaves as expected.
-        var v = new ExistingInpcImplWithValidOPCMethod();
+        var v = new DerivedFromExistingInpcImplWithValidOPCMethod( opc.Add );
 
         v.EX1.Should().Be( 0 );
         v.EX2.Should().NotBeNull();
@@ -95,15 +113,33 @@ public sealed class CoreTests : InpcTestsBase
 
         this.EventsFrom( () => v.EX2 = new() )
             .Should().Equal( "EX2" );
+
+        opc.Should().Equal( "EX1", "EX2", "EX2" );
     }
 
-    private class DerivedFromExistingAbstractInpcImplWithValidOPCMethod : ExistingAbstractInpcImplWithValidOPCMethod { }
+    private class DerivedFromExistingAbstractInpcImplWithValidOPCMethod : ExistingAbstractInpcImplWithValidOPCMethod 
+    {
+        private readonly Action<string> _onPropertyChanged;
+
+        public DerivedFromExistingAbstractInpcImplWithValidOPCMethod( Action<string> onPropertyChanged )
+        {
+            this._onPropertyChanged = onPropertyChanged;
+        }
+
+        protected override void OnPropertyChanged( string propertyName )
+        {
+            this._onPropertyChanged( propertyName );
+            base.OnPropertyChanged( propertyName );
+        }
+    }
 
     [Fact]
     public void HandCodedExistingAbstractInpcImplWithValidOPCMethodIsCorrect()
     {
+        List<string> opc = new();
+
         // Sanity check that hand-coded class behaves as expected.
-        var v = new DerivedFromExistingAbstractInpcImplWithValidOPCMethod();
+        var v = new DerivedFromExistingAbstractInpcImplWithValidOPCMethod( opc.Add );
 
         v.EX1.Should().Be( 0 );
         v.EX2.Should().NotBeNull();
@@ -124,5 +160,7 @@ public sealed class CoreTests : InpcTestsBase
 
         this.EventsFrom( () => v.EX2 = new() )
             .Should().Equal( "EX2" );
+
+        opc.Should().Equal( "EX1", "EX2", "EX2" );
     }
 }

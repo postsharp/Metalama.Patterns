@@ -69,10 +69,28 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     public partial class C16 : SimpleWithInpcProperties
     {
         /// <summary>
-        /// References a child prop of <see cref="SimpleWithInpcProperties.R1"/>, which
+        /// References child prop S2 of <see cref="SimpleWithInpcProperties.R1"/>, where that
         /// child is not referenced by <see cref="SimpleWithInpcProperties"/>.
         /// </summary>
         public int C16P1 => this.R1!.S2;
+    }
+
+    public partial class C17 : SimpleWithInpcProperties
+    {
+        /// <summary>
+        /// References child prop S1 of <see cref="SimpleWithInpcProperties.R1"/>, where that
+        /// child is also referenced by <see cref="SimpleWithInpcProperties"/>.
+        /// </summary>
+        public int C17P1 => this.R1!.S1;
+    }
+
+    public partial class C18 : SimpleWithInpcProperties
+    {
+        /// <summary>
+        /// References child prop S1 of <see cref="SimpleWithInpcProperties.R2"/>, where neither
+        /// R2, or R2.S1, is referenced by the <see cref="SimpleWithInpcProperties"/>.
+        /// </summary>
+        public int C18P1 => this.R2!.S1;
     }
 
     #endregion
@@ -98,7 +116,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
         /// <summary>
         /// Ref to <see cref="ExistingInpcImplWithValidOPCMethod.EX2"/>/<see cref="Simple.S1"/>. EX2 is not monitored by its declaring class.
         /// </summary>
-        public int C8P3 => this.EX2.S1;
+        public int C8P3 => this.EX2!.S1 * 3;
     }
 
     /// <summary>
@@ -115,7 +133,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
         /// Ref to <see cref="ExistingInpcImplWithValidOPCMethod.EX2"/>/<see cref="Simple.S2"/>.
         /// Monitoring of EX2 is provided by C8.
         /// </summary>
-        public int C9P3 => this.EX2.S2;
+        public int C9P2 => this.EX2!.S2;
     }
 
     #endregion

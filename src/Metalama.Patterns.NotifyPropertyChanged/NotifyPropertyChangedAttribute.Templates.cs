@@ -315,11 +315,11 @@ public partial class NotifyPropertyChangedAttribute
 
         foreach ( var node in ctx.DependencyGraph.Children )
         {
-            if ( node.Data.FieldOrProperty.DeclaringType == ctx.Target )
+            if ( node.Data.FieldOrProperty.IsAutoPropertyOrField == true && node.Data.FieldOrProperty.DeclaringType == ctx.Target )
             {
                 if ( ctx.InsertDiagnosticComments )
                 {
-                    meta.InsertComment( $"Skipping '{node.Name}': The property is defined by the current type." );
+                    meta.InsertComment( $"Skipping '{node.Name}': The field or auto property is defined by the current type." );
                 }
                 continue;
             }
@@ -335,7 +335,11 @@ public partial class NotifyPropertyChangedAttribute
 
             IReadOnlyCollection<DependencyGraph.Node<NodeData>> refsToNotify;
 
-            if ( node.Data.InpcBaseHandling == InpcBaseHandling.OnChildPropertyChanged )
+            // When a base supports OnChildPropertyChanged for a root property, changes to the ref itself will
+            // be notified by OnPropertyChanged (the base won't call OnChildPropertyChanged for each child property
+            // when the ref changes).
+
+            if ( node.Data.InpcBaseHandling == InpcBaseHandling.OnChildPropertyChanged && node.Depth > 1 )
             {
                 if ( node.DirectReferences.Count == 0 )
                 {
@@ -423,14 +427,12 @@ public partial class NotifyPropertyChangedAttribute
 
                                     // TODO: Is this similar to [Frag3] and/or [Frag4] and/or [Frag8]? Can we refactor?
                                     // XXX [Frag6]
-                                    // Update methods will deal with notifications - *for those children which have update methods*
-                                    foreach ( var method in node.Data.CascadeUpdateMethods )
+                                    foreach ( var method in cascadeUpdateMethods )
                                     {
                                         method.With( InvokerOptions.Final ).Invoke();
                                     }
 
-                                    // Notify about refs to the current node and any children without an update method.
-                                    foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                                    foreach ( var name in rootPropertyNamesToNotify )
                                     {
                                         ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                                     }
@@ -489,23 +491,6 @@ public partial class NotifyPropertyChangedAttribute
                                             ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Name, e.PropertyName );
                                         }
                                     }
-
-                                    // In this `case`, the notification needs to take place inside the `if value has changed` block.
-                                    foreach ( var method in cascadeUpdateMethods )
-                                    {
-                                        method.With( InvokerOptions.Final ).Invoke();
-                                    }
-
-                                    foreach ( var name in rootPropertyNamesToNotify )
-                                    {
-                                        ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
-                                    }
-
-                                    // TODO: Fix 
-                                    if ( ctx.InsertDiagnosticComments )
-                                    {
-                                        meta.InsertComment( "WARNING: Duplicate notifications will occur below due to ML limitation." );
-                                    }
                                 }
                             }
                             
@@ -534,7 +519,7 @@ public partial class NotifyPropertyChangedAttribute
             {
                 if ( ctx.InsertDiagnosticComments )
                 {
-                    meta.InsertComment( $"Skipping '{node.Name}': Because there is nothing to do." );
+                    meta.InsertComment( $"Skipping '{node.Name}' because there is nothing to do." );
                 }
             }
         }

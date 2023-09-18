@@ -62,12 +62,12 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core
                 if ( value != this._ex1 )
                 {
                     this._ex1 = value;
-                    this.PropertyChanged?.Invoke( this, new( nameof( this.EX1 ) ) );
+                    this.OnPropertyChanged( nameof( this.EX1 ) );
                 }
             }
         }
 
-        private Simple _ex2 = new();
+        private Simple? _ex2 = new();
 
         public Simple? EX2
         {
@@ -103,12 +103,12 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core
                 if ( value != this._ex1 )
                 {
                     this._ex1 = value;
-                    this.PropertyChanged?.Invoke( this, new( nameof( this.EX1 ) ) );
+                    this.OnPropertyChanged( nameof( this.EX1 ) );
                 }
             }
         }
 
-        private Simple _ex2 = new();
+        private Simple? _ex2 = new();
 
         public Simple? EX2
         {

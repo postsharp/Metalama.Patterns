@@ -163,14 +163,141 @@ public sealed class InheritanceTests : InpcTestsBase
 
         var sa = this.SubscribeTo( a );
 
-        // TODO: C16 does not look OPC R1 (and then fire C16P1).
         this.EventsFrom( () => v.R1 = a )
-            .Should().Equal( (sv, "C16P1"), (sv, "A2"), (sv, "R1") );
+            .Should().Equal( (sv, "A2"), (sv, "C16P1"), (sv, "R1") );
 
         this.EventsFrom( () => a.S1 = 1 )
-            .Should().Equal( (sv, "A2"), (sa, "S1") );
+            .Should().Equal( (sa, "S1"), (sv, "A2") );
 
         this.EventsFrom( () => a.S2 = 1 )
-            .Should().Equal( (sv, "C16P1"), (sa, "S2") );
+            .Should().Equal( (sa, "S2"), ( sv, "C16P1") );
+
+        this.EventsFrom( () => v.R2 = new() )
+            .Should().Equal( (sv, "R2") );
+    }
+
+    [Fact]
+    public void DerivedReferencesReferencedChildOfBaseInpcProperty()
+    {
+        var v = new C17();
+
+        var sv = this.SubscribeTo( v );
+
+        var a = new Simple();
+
+        var sa = this.SubscribeTo( a );
+
+        this.EventsFrom( () => v.R1 = a )
+            .Should().Equal( (sv, "A2"), (sv, "C17P1"), (sv, "R1") );
+
+        this.EventsFrom( () => a.S1 = 1 )
+            .Should().Equal( (sa, "S1"), (sv, "A2"), (sv, "C17P1") );
+
+        this.EventsFrom( () => a.S2 = 1 )
+            .Should().Equal( (sa, "S2") );
+
+        this.EventsFrom( () => v.R2 = new() )
+            .Should().Equal( (sv, "R2") );
+    }
+
+    [Fact]
+    public void DerivedReferencesUnmonitoredBaseInpcProperty()
+    {
+        var v = new C18();
+
+        var sv = this.SubscribeTo( v );
+
+        var a = new Simple();
+
+        var sa = this.SubscribeTo( a );
+
+        this.EventsFrom( () => v.R1 = a )
+            .Should().Equal( (sv, "A2"), (sv, "R1") );
+
+        this.EventsFrom( () => a.S1 = 1 )
+            .Should().Equal( (sa, "S1"), (sv, "A2") );
+
+        this.EventsFrom( () => a.S2 = 1 )
+            .Should().Equal( (sa, "S2") );
+
+        var b = new Simple();
+
+        var sb = this.SubscribeTo( b );
+
+        this.EventsFrom( () => v.R2 = b )
+            .Should().Equal( (sv, "C18P1"), (sv, "R2") );
+
+        this.EventsFrom( () => b.S2 = 1 )
+            .Should().Equal( (sb, "S2") );
+    }
+
+    [Fact]
+    public void InheritFromExistingInpcImpl()
+    {
+        var v = new C8();
+
+        var sv = this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.C8P1 = 1 )
+            .Should().Equal( "C8P1" );
+
+        this.EventsFrom( () => v.EX1 = 3 )
+            .Should().Equal( "C8P2", "EX1" );
+
+        v.C8P2.Should().Be( 6 );
+
+        var a = new Simple();
+
+        var sa = this.SubscribeTo( a );
+
+        this.EventsFrom( () => v.EX2 = a )
+            .Should().Equal( (sv, "C8P3"), (sv, "EX2") );
+
+        this.EventsFrom( () => a.S1 = 6 )
+            .Should().Equal( (sa, "S1"), (sv, "C8P3") );
+
+        v.C8P3.Should().Be( 18 );
+
+        this.EventsFrom( () => a.S2 = 1 )
+            .Should().Equal( (sa, "S2") );
+
+        this.EventsFrom( () => a.S3 = 1 )
+            .Should().Equal( (sa, "S3") );
+    }
+
+    [Fact]
+    public void InheritFromExistingInpcImplDepth2()
+    {
+        var v = new C9();
+
+        var sv = this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.C8P1 = 1 )
+            .Should().Equal( "C9P1", "C8P1" );
+
+        this.EventsFrom( () => v.EX1 = 3 )
+            .Should().Equal( "C8P2", "EX1" );
+
+        v.C8P2.Should().Be( 6 );
+
+        var a = new Simple();
+
+        var sa = this.SubscribeTo( a );
+
+        this.EventsFrom( () => v.EX2 = a )
+            .Should().Equal( (sv, "C9P2"), (sv, "C8P3"), (sv, "EX2") );
+
+        this.EventsFrom( () => a.S1 = 6 )
+            .Should().Equal( (sa, "S1"), (sv, "C8P3") );
+
+        v.C8P3.Should().Be( 18 );
+
+        this.EventsFrom( () => a.S2 = 42 )
+            .Should().Equal( (sa, "S2"), (sv, "C9P2") );
+
+        v.C9P2.Should().Be( 42 );
+
+        this.EventsFrom( () => a.S3 = 1 )
+            .Should().Equal( (sa, "S3") );
     }
 }
