@@ -166,6 +166,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     /// <summary>
     /// I12 : ExistingAbstractInpcImplWithValidOPCMethod
     /// </summary>
+    [NotifyPropertyChanged]
     public partial class C12 : ExistingAbstractInpcImplWithValidOPCMethod
     {
         /// <summary>
@@ -181,6 +182,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     /// <summary>
     /// C13 : ExistingInpcImplWithValidOPCMethod
     /// </summary>
+    [NotifyPropertyChanged]
     public partial class C13 : ExistingInpcImplWithValidOPCMethod
     {
         /// <summary>
@@ -197,6 +199,9 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     {
         private int _c14P1;
 
+        /// <summary>
+        /// Hand-coded auto.
+        /// </summary>
         public int C14P1
         {
             get => this._c14P1;
@@ -215,7 +220,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     /// C15 : C14, has [NotifyPropertyChanged].
     /// </summary>
     [NotifyPropertyChanged]
-    public class C15 : C14
+    public partial class C15 : C14
     {
         /// <summary>
         /// Ref to <see cref="C13.C13P1"/>.
@@ -226,6 +231,16 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
         /// Ref to <see cref="C14.C14P1"/>.
         /// </summary>
         public int C15P2 => this.C14P1;
+
+        /// <summary>
+        /// Ref to <see cref="ExistingAbstractInpcImplWithValidOPCMethod.EX1"/>.
+        /// </summary>
+        public int C15P3 => this.EX1;
+
+        /// <summary>
+        /// Ref to <see cref="ExistingAbstractInpcImplWithValidOPCMethod.EX2"/>.S1.
+        /// </summary>
+        public int C15P4 => this.EX2!.S1;
     }
 
     #endregion

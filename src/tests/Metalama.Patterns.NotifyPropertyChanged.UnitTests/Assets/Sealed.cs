@@ -23,7 +23,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Sealed
         /// <summary>
         /// Ref to C1P2.S1.
         /// </summary>
-        public int I16P3 => this.C1P2.S1;
+        public int C1P3 => this.C1P2.S1;
     }
 
     /// <summary>

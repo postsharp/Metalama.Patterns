@@ -300,4 +300,53 @@ public sealed class InheritanceTests : InpcTestsBase
         this.EventsFrom( () => a.S3 = 1 )
             .Should().Equal( (sa, "S3") );
     }
+
+    [Fact]
+    public void InheritFromAbstractBase()
+    {
+        var v = new C11();
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.C10P1 = 1 )
+            .Should().Equal( "C11P1", "C10P1" );
+    }
+
+    [Fact]
+    public void InheritFromExistingAbstractInpcImpl()
+    {
+        var v = new C12();
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.EX1 = 1 )
+            .Should().Equal( "C12P1", "EX1" );
+    }
+
+    [Fact]
+    public void UserThenNpcThenUserThenNpc()
+    {
+        var v = new C15();
+
+        var sv = this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.EX1 = 1 )
+            .Should().Equal( "C15P3", "EX1" );
+
+        this.EventsFrom( () => v.C13P1 = 1 )
+            .Should().Equal( "C15P1", "C13P1" );
+
+        this.EventsFrom( () => v.C14P1 = 1 )
+            .Should().Equal( "C15P2", "C14P1" );
+
+        var a = new Simple();
+
+        var sa = this.SubscribeTo( a );
+
+        this.EventsFrom( () => v.EX2 = a )
+            .Should().Equal( (sv, "C15P4"), (sv, "EX2") );
+
+        this.EventsFrom( () => a.S1 = 1 )
+            .Should().Equal( (sa, "S1"), (sv, "C15P4") );
+    }
 }

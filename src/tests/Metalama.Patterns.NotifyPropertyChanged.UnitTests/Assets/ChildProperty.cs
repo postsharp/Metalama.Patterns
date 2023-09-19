@@ -12,7 +12,6 @@ public partial class A
 
     public int A1 { get; set; }
 
-    // TODO: Can't use public B A2 { get; set; } = new(); because transformed property has `new()` assigned to the backing field bypassing the setter.
     public B A2 { get; set; }
 
     /// <summary>

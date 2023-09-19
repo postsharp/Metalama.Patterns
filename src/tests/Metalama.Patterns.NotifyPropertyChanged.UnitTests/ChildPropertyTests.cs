@@ -12,74 +12,75 @@ public sealed class ChildPropertyTests : InpcTestsBase
     public void FourDeep()
     {
         var a = new A();
-        var b = a.A2;
-        var c = b.B2;
-        var d = c.C2;
 
-        var subA = this.SubscribeTo( a );
+        var sa = this.SubscribeTo( a );
+        var sA2 = this.SubscribeTo( a.A2 );
+        var sB2 = this.SubscribeTo( a.A2.B2 );
+        var sC2 = this.SubscribeTo( a.A2.B2.C2 );
 
         // Reminder:
-        // public int A3 => this.A2?.B2?.C2?.D1 ?? -1;
+        // public int A3 => this.A2.B2.C2.D1;
 
         // 1. Change leaf value D1
 
-        d.D1 = 1;
+        this.EventsFrom( () => a.A2.B2.C2.D1 = 1 )
+            .Should().Equal( (sa, "A3"), (sC2, "D1") );
 
-        this.Events.Should().Equal(
-            (subA, "A3") );
-
-        this.Events.Clear();
-
-        // 2. Change leaf parent ref, but leaf value is the same. This is notified as a change because
+        // 2. Change leaf parent ref, but leaf value is the same. This is notified as a change to A3 because
         // there is no false positive detection (we don't store a copy of the value of D1)
 
-        var d2 = new D() { D1 = d.D1 };
+        var newD = new D() { D1 = a.A2.B2.C2.D1 };
 
-        a.A2.B2.C2 = d2;
+        var sNewD = this.SubscribeTo( newD );
 
-        this.Events.Should().Equal(
-            (subA, "A3") );
+        this.EventsFrom( () => a.A2.B2.C2 = newD )
+            .Should().Equal( (sa, "A3"), (sB2, "C2") );
 
-        this.Events.Clear();
+        sC2.Dispose();
+        sC2 = sNewD;
 
         // 3. Change leaf parent-parent ref, but parent is the same object. This is not notified as a change
-        // beacuse we have to store the last value of the parent object anyhow, and we detect that it is the
+        // to A3 beacuse we have to store the last value of the parent object anyhow, and we detect that it is the
         // same ref.
 
-        var c2 = new C() { C2 = a.A2.B2.C2 };
+        var newC = new C() { C2 = a.A2.B2.C2 };
 
-        a.A2.B2 = c2;
+        var sNewC = this.SubscribeTo( newC );
 
-        this.Events.Should().BeEmpty();
+        this.EventsFrom( () => a.A2.B2 = newC )
+            .Should().Equal( (sA2, "B2") );
 
-        this.Events.Clear();
+        sB2.Dispose();
+        sB2 = sNewC;
 
         // 4. Change leaf parent-parent ref, parent is a different object, but leaf value D1 is the same.
-        // This is notified as a change beacuse we have to store the last value of the parent object anyhow,
+        // This is notified as a change to A3 beacuse we have to store the last value of the parent object anyhow,
         // and we detect that it is a different ref. But we don't have false positive detection so we
         // can't tell that leaf value D1 is actually the same value.
 
-        var c3 = new C() { C2 = new D() { D1 = c.C2.D1 } };
+        var newC_2 = new C() { C2 = new D() { D1 = a.A2.B2.C2.D1 } };
 
-        a.A2.B2 = c3;
+        var sNewC_2 = this.SubscribeTo( newC_2 );
 
-        this.Events.Should().Equal(
-            (subA, "A3") );
+        this.EventsFrom( () => a.A2.B2 = newC_2 )
+            .Should().Equal( (sa, "A3"), (sA2, "B2") );
 
-        this.Events.Clear();
+        sB2.Dispose();
+        sB2 = sNewC_2;
 
         // 5. Change leaf parent-parent ref, parent is a different object, and leaf value D1 is a different value.
-        // This is notified as a change beacuse we have to store the last value of the parent object anyhow, and
+        // This is notified as a change to A3 beacuse we have to store the last value of the parent object anyhow, and
         // we detect that it is a different ref.
 
-        var c4 = new C() { C2 = new D() };
+        var newC_3 = new C() { C2 = new D() };
 
-        a.A2.B2 = c4;
+        var sNewC_3 = this.SubscribeTo( newC_3 );
 
-        this.Events.Should().Equal(
-            (subA, "A3") );
+        this.EventsFrom( () => a.A2.B2 = newC_3 )
+            .Should().Equal( (sa, "A3"), (sA2, "B2") );
 
-        this.Events.Clear();
+        sB2.Dispose();
+        sB2 = sNewC_3;
 
         // 6. Change leaf parent-parent-parent ref. As per above comments, because we don't have false
         // positive detection, it does not matter if leaf value D1 is changed or not, a change is
@@ -89,25 +90,25 @@ public sealed class ChildPropertyTests : InpcTestsBase
         // 6.1 Change leaf parent-parent-parent ref and parent-parent ref, but keep same parent ref.
         // No change of A3 is notified, but A2 change is notified.
 
-        var b2 = new B() { B2 = new C() { C2 = a.A2.B2.C2 } };
+        var newB = new B() { B2 = new C() { C2 = a.A2.B2.C2 } };
 
-        a.A2 = b2;
+        var sNewB = this.SubscribeTo( newB );
 
-        this.Events.Should().Equal(
-            (subA, "A2") );
+        this.EventsFrom( () => a.A2 = newB )
+            .Should().Equal( (sa, "A2") );
 
-        this.Events.Clear();
+        sA2.Dispose();
+        sA2 = sNewB;
 
-        // 6.1 Change leaf parent-parent-parent ref, parent-parent ref, and parent ref.
-        // Change of both A3 and A2 is notified. Order is expected to be leaf-to-root.
+        // 6.2 Change leaf parent-parent-parent ref, parent-parent ref, and parent ref.
+        // Change of both A3 and A2 is notified.
 
-        var b3 = new B() { B2 = new C() { C2 = new D() } };
+        var newB_2 = new B() { B2 = new C() { C2 = new D() } };
 
-        a.A2 = b3;
+        var sNewB_2 = this.SubscribeTo( newB_2 );
 
-        this.Events.Should().Equal(
-            (subA, "A3"),
-            (subA, "A2") );
+        this.EventsFrom( () => a.A2 = newB_2 )
+            .Should().Equal( (sa, "A3"), (sa, "A2") );
     }
 
     [Fact]
@@ -117,38 +118,18 @@ public sealed class ChildPropertyTests : InpcTestsBase
 
         var e = new E();
 
-        var sub = this.SubscribeTo( e );
+        this.SubscribeTo( e );
 
-        e.E2.B2.C2.D1 = 1;
+        this.EventsFrom( () => e.E2.B2.C2.D1 = 1 )
+            .Should().Equal( "LR" );
 
-        this.Events.Should().Equal(
-            (sub, "LR" ) );
+        this.EventsFrom( () => e.E2.B2.C2 = new D() )
+            .Should().Equal( "LR" );
 
-        this.Events.Clear();
+        this.EventsFrom( () => e.E2.B2 = new C() )
+            .Should().Equal( "LR", "LP1R" );
 
-        e.E2.B2.C2 = new D();
-
-        this.Events.Should().Equal(
-            (sub, "LR") );
-
-        this.Events.Clear();
-
-        e.E2.B2 = new C();
-
-        this.Events.Should().Equal(
-            (sub, "LR"),
-            (sub, "LP1R") );
-
-        this.Events.Clear();
-
-        e.E2 = new B();
-
-        this.Events.Should().Equal(
-            (sub, "LR"),
-            (sub, "LP1R"),
-            (sub, "LP2R"),
-            (sub, "E2") );
-
-        this.Events.Clear();
+        this.EventsFrom( () => e.E2 = new B() )
+            .Should().Equal( "LR", "LP1R", "LP2R", "E2" );
     }
 }
