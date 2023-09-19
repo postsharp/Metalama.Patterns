@@ -3,7 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Aspects;
 
 /// <summary>
 /// Custom attribute that, when applied on a type, configures the <see cref="CacheAttribute"/> aspects applied to the methods of this type

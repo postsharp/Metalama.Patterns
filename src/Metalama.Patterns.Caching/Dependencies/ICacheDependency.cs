@@ -4,7 +4,7 @@ namespace Metalama.Patterns.Caching.Dependencies;
 
 /// <summary>
 /// Interface that must be implemented by classes that need to be used as cache dependencies,
-/// for use with the <see cref="ICachingContext.AddDependency(ICacheDependency)"/> method.
+/// for use with the <see cref="ICachingService.AddDependency"/> method.
 /// Alternatively, custom classes may implement the <see cref="Flashtrace.Formatters.IFormattable"/> interface or simply
 /// the <see cref="object.ToString"/> method.
 /// </summary>

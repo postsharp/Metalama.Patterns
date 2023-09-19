@@ -1,11 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
-using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Concurrent;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Implementation;
 
 internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
 {
@@ -81,7 +80,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
                 {
                     var value = subscription.ValueProvider.Invoke();
 
-                    CachingFrontend.SetItem( backend, key, value, subscription.ReturnType, subscription.Configuration, context );
+                    this._cachingService.Frontend.SetItem( backend, key, value, subscription.ReturnType, subscription.Configuration, context );
                 }
 
                 activity?.SetSuccess();
@@ -104,7 +103,14 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
                     var invokeValueProviderTask = (Task<object?>?) subscription.ValueProvider.Invoke();
                     var value = invokeValueProviderTask == null ? null : await invokeValueProviderTask;
 
-                    await CachingFrontend.SetItemAsync( backend, key, value, subscription.ReturnType, subscription.Configuration, context, cancellationToken );
+                    await this._cachingService.Frontend.SetItemAsync(
+                        backend,
+                        key,
+                        value,
+                        subscription.ReturnType,
+                        subscription.Configuration,
+                        context,
+                        cancellationToken );
                 }
 
                 activity.SetSuccess();

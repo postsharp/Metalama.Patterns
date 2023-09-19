@@ -25,8 +25,7 @@ internal static class CacheItemConfigurationExtensions
             AutoReload = other.AutoReload,
             AbsoluteExpiration = other.AbsoluteExpiration,
             SlidingExpiration = other.SlidingExpiration,
-            Priority = other.Priority,
-            IgnoreThisParameter = other.IgnoreThisParameter
+            Priority = other.Priority
         };
     }
 }

@@ -3,7 +3,7 @@
 #if NETCOREAPP3_0_OR_GREATER
 using JetBrains.Annotations;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Aspects.Helpers;
 
 /// <summary>
 /// Helper methods related to <see cref="IAsyncEnumerable{T}"/> and <see cref="IAsyncEnumerator{T}"/>.

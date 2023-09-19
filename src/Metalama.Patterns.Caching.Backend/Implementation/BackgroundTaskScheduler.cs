@@ -186,7 +186,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         await this._backgroundTasksFinishedEvent.WaitAsync( CancellationToken.None );
     }
 
-    internal static int AllBackgroundTaskExceptions => _allBackgroundTaskExceptions;
+    public static int AllBackgroundTaskExceptions => _allBackgroundTaskExceptions;
 
     public void Dispose()
     {

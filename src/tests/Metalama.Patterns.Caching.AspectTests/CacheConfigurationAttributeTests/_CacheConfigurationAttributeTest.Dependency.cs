@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching;
+using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
 [assembly: CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileNameA )]

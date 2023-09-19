@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using static Metalama.Framework.Diagnostics.Severity;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Aspects;
 
 [CompileTime]
 internal static class CachingDiagnosticDescriptors

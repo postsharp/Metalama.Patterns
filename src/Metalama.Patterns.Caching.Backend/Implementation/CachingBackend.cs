@@ -3,14 +3,13 @@
 using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Caching.ValueAdapters;
 using System.Globalization;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// An abstraction of the physical implementation of the cache, where the <see cref="CacheAttribute"/> ends up writing to and reading from.
+/// An abstraction of the physical implementation of the cache.
 /// </summary>
 [PublicAPI]
 public abstract class CachingBackend : ITestableCachingComponent
@@ -40,7 +39,7 @@ public abstract class CachingBackend : ITestableCachingComponent
         this.DebugName = this.Id.ToString();
     }
 
-    internal string DebugName { get; set; }
+    public string? DebugName { get; set; }
 
     /// <summary>
     /// Gets the <see cref="Flashtrace.LogSource"/> that implementations can use to emit
@@ -52,12 +51,6 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// Gets the <see cref="Guid"/> of the current <see cref="CachingBackend"/>.
     /// </summary>
     public Guid Id { get; } = Guid.NewGuid();
-
-    /// <summary>
-    /// Gets the factory of value adapters (<see cref="IValueAdapter"/>), which allow for instance to cache things like <see cref="System.IO.Stream"/> or <see cref="System.Collections.IEnumerable"/>,
-    /// which could not be otherwise cached.
-    /// </summary>
-    public ValueAdapterFactory ValueAdapters { get; } = new();
 
     /// <summary>
     /// Creates a <see cref="CachingBackendFeatures"/> object, which describes set of features implemented by the back-end.

@@ -15,7 +15,7 @@ public abstract class BaseCachingTests
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton<ILoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
         this.ServiceProvider = serviceCollection.BuildServiceProvider();
-        CachingServices.Default = new CachingService( this.ServiceProvider );
+        CachingService.Default = new CachingService( this.ServiceProvider );
     }
 
     protected ServiceProvider ServiceProvider { get; }

@@ -3,36 +3,32 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
-using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
-/// Encapsulates information about a method being cached. This class should only be used by the caching framework and the code it generates.
+/// Encapsulates information about a method being cached. This cached is used by the implementation of <see cref="ICachingService"/>
+/// and you can use it if you override the <see cref="CacheKeyBuilder"/> class.
 /// </summary>
-/// <remarks>
-/// The implementation of <see cref="CachedMethodMetadata"/> is intentionally opaque (ie, internal) as it should be used only by the caching framework runtime.
-/// </remarks>
 [PublicAPI]
-[EditorBrowsable( EditorBrowsableState.Never )]
-public sealed class CachedMethodMetadata
+public sealed partial class CachedMethodMetadata
 {
+    private static int _nextId;
+
+    internal int Id { get; } = Interlocked.Increment( ref _nextId );
+
     /// <summary>
     /// Gets the <see cref="MethodInfo"/> of the method.
     /// </summary>
-    internal MethodInfo Method { get; }
+    public MethodInfo Method { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the value of the <c>this</c> parameter
-    /// (for non-static methods) should be included in the cache key.
+    /// Gets an array of <see cref="Parameter"/>.
     /// </summary>
-    internal bool IsThisParameterIgnored { get; }
-
-    /// <summary>
-    /// Gets an array of <see cref="CachedParameterInfo"/>.
-    /// </summary>
-    internal ImmutableArray<CachedParameterInfo> Parameters { get; }
+    private ImmutableArray<Parameter> Parameters { get; }
 
     /// <summary>
     /// Gets a value indicating whether the return type of the method can be <see langword="null"/>.
@@ -45,12 +41,12 @@ public sealed class CachedMethodMetadata
     internal bool ReturnValueCanBeNull { get; }
 
     /// <summary>
-    /// Gets the build time configuration that applies to the method.
+    /// Gets the configuration that applies to the method and supplied by configuration custom attributes.
     /// </summary>
     /// <remarks>
-    /// This already takes account of the any <see cref="CachingConfigurationAttribute"/> instances applied to parent classes and the assembly.
+    /// This already takes account of the any configuration custom attribute applied to parent classes and the assembly.
     /// </remarks>
-    internal ICacheItemConfiguration BuildTimeConfiguration { get; }
+    internal CachedMethodConfiguration Configuration { get; }
 
     /// <summary>
     /// Gets the awaitable result type for awaitable (eg, async) methods, or <see langword="null"/> where not applicable.
@@ -60,101 +56,79 @@ public sealed class CachedMethodMetadata
     /// </remarks>
     internal Type? AwaitableResultType { get; }
 
-    private CachingProfile? _profile;
-    private int _profileRevision;
-    private CacheItemConfiguration? _mergedConfiguration;
-    private SpinLock _initializeLock;
+    public bool IgnoreThisParameter => this.Configuration.IgnoreThisParameter.GetValueOrDefault( false );
 
-    /// <summary>
-    /// Gets the effective configuration which is determined by merging the build-time configuration with any applicable 
-    /// profile-based configuration. This property always reflects any runtime changes to profile configuration.
-    /// </summary>
-    internal ICacheItemConfiguration MergedConfiguration
-    {
-        get
-        {
-            if ( this._profile == null || this._profileRevision < CachingServices.Default.Profiles.RevisionNumber || this._mergedConfiguration == null )
-            {
-                var initializeLockTaken = false;
+    public bool IsParameterIgnored( int index ) => this.Parameters[index].IsIgnored;
 
-                try
-                {
-                    this._initializeLock.Enter( ref initializeLockTaken );
-
-                    if ( this._profile == null || this._profileRevision < CachingServices.Default.Profiles.RevisionNumber
-                                               || this._mergedConfiguration == null )
-                    {
-                        var profileName = this.BuildTimeConfiguration.ProfileName ?? CachingProfile.DefaultName;
-
-                        var localProfile = CachingServices.Default.Profiles[profileName];
-
-                        this._mergedConfiguration = this.BuildTimeConfiguration.AsCacheItemConfiguration().ApplyFallback( localProfile );
-
-                        Thread.MemoryBarrier();
-
-                        // Need to set this after setting mergedConfiguration to prevent data races.
-                        this._profile = localProfile;
-                        this._profileRevision = CachingServices.Default.Profiles.RevisionNumber;
-                    }
-                }
-                finally
-                {
-                    if ( initializeLockTaken )
-                    {
-                        this._initializeLock.Exit();
-                    }
-                }
-            }
-
-            return this._mergedConfiguration;
-        }
-    }
-
-    internal CachedMethodMetadata(
+    private CachedMethodMetadata(
         MethodInfo method,
-        ImmutableArray<CachedParameterInfo> parameters,
-        Type? awaitableResultType,
-        bool isThisParameterIgnored,
-        ICacheItemConfiguration buildTimeConfiguration,
-        bool returnValueCanBeNull )
+        ImmutableArray<Parameter> parameters,
+        CachedMethodConfiguration? buildTimeConfiguration )
     {
         this.Method = method;
         this.Parameters = parameters;
-        this.IsThisParameterIgnored = isThisParameterIgnored;
-        this.BuildTimeConfiguration = buildTimeConfiguration.AsCacheItemConfiguration();
-        this.ReturnValueCanBeNull = returnValueCanBeNull;
-        this.AwaitableResultType = awaitableResultType;
+        this.Configuration = buildTimeConfiguration ?? CachedMethodConfiguration.Empty;
+
+        this.ReturnValueCanBeNull = !method.ReturnType.IsValueType
+                                    || (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Nullable<>));
+
+        this.AwaitableResultType = method.ReturnType;
+
+        if ( method.ReturnType.IsGenericType )
+        {
+            var genericType = method.ReturnType.GetGenericTypeDefinition();
+
+            if ( genericType == typeof(Task<>) || genericType == typeof(ValueTask<>) )
+            {
+                this.AwaitableResultType = method.ReturnType.GenericTypeArguments[0];
+            }
+        }
     }
 
     public static CachedMethodMetadata Register(
         MethodInfo method,
-        Type? awaitableResultType,
-        ICacheItemConfiguration buildTimeConfiguration,
-        bool returnValueCanBeNull )
+        CachedMethodConfiguration? buildTimeConfiguration = null,
+        bool throwIfAlreadyRegistered = true )
     {
         var metadata = new CachedMethodMetadata(
             method,
             GetCachedParameterInfos( method ),
-            awaitableResultType,
-            buildTimeConfiguration.IgnoreThisParameter.GetValueOrDefault(),
-            buildTimeConfiguration,
-            returnValueCanBeNull );
+            buildTimeConfiguration );
 
-        CachedMethodMetadataRegistry.Instance.Register( metadata );
-
-        return metadata;
+        return CachedMethodMetadataRegistry.Instance.Register( metadata, throwIfAlreadyRegistered );
     }
 
-    private static ImmutableArray<CachedParameterInfo> GetCachedParameterInfos( MethodInfo method )
+    [MethodImpl( MethodImplOptions.NoInlining )]
+    public static CachedMethodMetadata ForCallingMethod( CachedMethodConfiguration? configuration = null, int skipFrames = 0 )
+    {
+        var stackFrame = new StackFrame( 1 + skipFrames );
+        var methodInfo = (MethodInfo?) stackFrame.GetMethod();
+
+        if ( methodInfo == null )
+        {
+            throw new InvalidOperationException( "Cannot get the calling method." );
+        }
+
+        var existingMetadata = CachedMethodMetadataRegistry.Instance.Get( methodInfo );
+
+        if ( existingMetadata != null )
+        {
+            return existingMetadata;
+        }
+
+        return Register( methodInfo, configuration, false );
+    }
+
+    private static ImmutableArray<Parameter> GetCachedParameterInfos( MethodInfo method )
     {
         var parameterInfos = method.GetParameters();
-        var cachedParameterInfos = new CachedParameterInfo[parameterInfos.Length];
+        var cachedParameterInfos = new Parameter[parameterInfos.Length];
 
         for ( var i = 0; i < parameterInfos.Length; i++ )
         {
             var isIgnored = parameterInfos[i].IsDefined( typeof(NotCacheKeyAttribute) );
 
-            cachedParameterInfos[i] = new CachedParameterInfo( isIgnored );
+            cachedParameterInfos[i] = new Parameter( isIgnored );
         }
 
         return cachedParameterInfos.ToImmutableArray();

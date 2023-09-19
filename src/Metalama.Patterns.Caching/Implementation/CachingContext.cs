@@ -1,12 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Dependencies;
-using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Implementation;
 
 internal sealed class CachingContext : IDisposable, ICachingContext
 {
@@ -16,7 +14,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
     [AllowNull]
     public static ICachingContext Current
     {
-        get => _currentContext.Value ??= new NullCachingContext();
+        get => _currentContext.Value ??= NullCachingContext.Instance;
         internal set => _currentContext.Value = value;
     }
 
@@ -27,7 +25,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
     private HashSet<string>? _dependencies;
     private ImmutableHashSet<string>? _immutableDependencies;
 
-    private CachingContext( string key, CachingContextKind options, ICachingContext? parent, CachingService cachingService )
+    private CachingContext( string key, CachingContextKind options, ICachingContext parent, CachingService cachingService )
     {
         this._key = key;
         this.Kind = options;
@@ -58,6 +56,8 @@ internal sealed class CachingContext : IDisposable, ICachingContext
 
     public ICachingContext? Parent { get; }
 
+    ICachingContext? ICachingContext.Parent => this.Parent;
+
     internal static CachingContext OpenRecacheContext( string key, CachingService cachingService )
     {
         var context = new CachingContext( key, CachingContextKind.Recache, Current, cachingService );
@@ -82,27 +82,6 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         return context;
     }
 
-    public void AddDependency( ICacheDependency dependency )
-    {
-        if ( string.IsNullOrEmpty( this._key ) )
-        {
-            throw new InvalidOperationException( "This method can be invoked only in the context of a cached method." );
-        }
-
-        if ( this._disposed )
-        {
-            this.Parent?.AddDependency( dependency );
-
-            return;
-        }
-
-        lock ( this._dependenciesSync )
-        {
-            this.PrepareAddDependency();
-            this._dependencies.Add( dependency.GetCacheKey() );
-        }
-    }
-
     [MemberNotNull( nameof(_dependencies) )]
     private void PrepareAddDependency()
     {
@@ -110,38 +89,28 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         this._immutableDependencies = null;
     }
 
-    public void AddDependency( object dependency )
+    public void AddDependency( string key )
     {
-        switch ( dependency )
+        if ( string.IsNullOrEmpty( this._key ) )
         {
-            case ICacheDependency cacheDependency:
-                this.AddDependency( cacheDependency );
-
-                return;
-
-            case string str:
-                this.AddDependency( str );
-
-                return;
-
-            default:
-                this.AddDependency( new ObjectDependency( dependency, this._cachingService ) );
-
-                return;
+            throw new InvalidOperationException( "This method can be invoked only in the context of a cached method." );
         }
-    }
-
-    public void AddDependency( string dependency )
-    {
-        this.AddDependency( new StringDependency( dependency ) );
 
         if ( this._disposed )
         {
-            this.Parent?.AddDependency( dependency );
+            this.Parent?.AddDependency( key );
+
+            return;
+        }
+
+        lock ( this._dependenciesSync )
+        {
+            this.PrepareAddDependency();
+            this._dependencies.Add( key );
         }
     }
 
-    public void AddDependencies( IEnumerable<ICacheDependency>? dependencies )
+    public void AddDependencies( IEnumerable<string> dependencies )
     {
         if ( string.IsNullOrEmpty( this._key ) )
         {
@@ -155,39 +124,13 @@ internal sealed class CachingContext : IDisposable, ICachingContext
             return;
         }
 
-        if ( dependencies != null )
+        lock ( this._dependenciesSync )
         {
-            lock ( this._dependenciesSync )
+            this.PrepareAddDependency();
+
+            foreach ( var dependency in dependencies )
             {
-                this.PrepareAddDependency();
-
-                foreach ( var dependency in dependencies )
-                {
-                    this._dependencies.Add( dependency.GetCacheKey() );
-                }
-            }
-        }
-    }
-
-    public void AddDependencies( IEnumerable<string>? dependencies )
-    {
-        if ( this._disposed )
-        {
-            this.Parent?.AddDependencies( dependencies );
-
-            return;
-        }
-
-        if ( dependencies != null )
-        {
-            lock ( this._dependenciesSync )
-            {
-                this.PrepareAddDependency();
-
-                foreach ( var dependency in dependencies )
-                {
-                    this._dependencies.Add( dependency );
-                }
+                this._dependencies.Add( dependency );
             }
         }
     }

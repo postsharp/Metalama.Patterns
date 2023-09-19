@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Contracts;
 [CompileTime]
 internal static class ContractDiagnostics
 {
-    public static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType, string AspectType)> RangeCannotBeApplied { get; set; }
+    public static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType, string AspectType)> RangeCannotBeApplied {get; }
         = new(
             "LAMA5001",
             Severity.Error,
@@ -17,7 +17,7 @@ internal static class ContractDiagnostics
             $"The Range contract cannot be applied because the range cannot be satisfied by the type of the target declaration.",
             "Metalama.Patterns.Contracts" );
 
-    public static DiagnosticDefinition<(IDeclaration Declaration, string AspectType)> NotNullableOnNullable { get; set; }
+    public static DiagnosticDefinition<(IDeclaration Declaration, string AspectType)> NotNullableOnNullable {get; }
         = new(
             "LAMA5002",
             Severity.Warning,
@@ -25,7 +25,7 @@ internal static class ContractDiagnostics
             $"A non-nullable contract has been applied to a declaration of nullable type.",
             "Metalama.Patterns.Contracts" );
 
-    public static DiagnosticDefinition<(IDeclaration Declaration, string AspectType)> ContractRedundant { get; set; }
+    public static DiagnosticDefinition<(IDeclaration Declaration, string AspectType)> ContractRedundant {get; }
         = new(
             "LAMA5003",
             Severity.Warning,

@@ -9,6 +9,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Patterns.Caching.Aspects.Helpers;
 using Metalama.Patterns.Caching.Implementation;
 using System.Diagnostics;
 
@@ -16,7 +17,7 @@ using System.Diagnostics;
 using Metalama.Framework.RunTime;
 #endif
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Aspects;
 
 // TODO: #33663 make local functions in templates static where possible
 // ReSharper disable LocalFunctionCanBeMadeStatic 
@@ -31,9 +32,9 @@ namespace Metalama.Patterns.Caching;
 /// <see cref="CacheAttribute"/> class, such as <see cref="AbsoluteExpiration"/> or <see cref="SlidingExpiration"/>. You can
 /// add the <see cref="CachingConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
 /// Finally, you can define a profile by setting the <see cref="ProfileName"/> property and configure the profile at run time
-/// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="CachingService"/> class.</para>
+/// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="ICachingService"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
-/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="CachingService.Invalidate(object)"/> method.</para>
+/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="ICachingService.Invalidate"/> method.</para>
 /// </remarks>
 [PublicAPI]
 public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
@@ -120,7 +121,7 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
             if ( !builder.TryIntroduceDependency(
                     new DependencyProperties(
                         builder.Target.DeclaringType,
-                        typeof(CachingService),
+                        typeof(ICachingService),
                         "_cachingService" ),
                     out cachingServiceField ) )
             {
@@ -217,8 +218,7 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
     public void CachedMethodRegistrationInitializer( IMethod method, IField field, IType? awaitableResultType, [CompileTime] CachingOptions options )
         => field.Value = CachedMethodMetadata.Register(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
-            awaitableResultType == null ? null : awaitableResultType.ToTypeOfExpression().Value,
-            new CacheAttributeProperties()
+            new CachedMethodConfiguration()
             {
                 AbsoluteExpiration = options.AbsoluteExpiration,
                 AutoReload = options.AutoReload,
@@ -254,13 +254,13 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), null ) );
         }
 
-        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingService.Default );
 
-        return ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecute<TReturnType>(
+        return ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecute<TReturnType>(
             (CachedMethodMetadata) registrationField.Value!,
-            Invoke,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
-            (object[]) meta.Target.Method.Parameters.ToValueArray() );
+            (object[]) meta.Target.Method.Parameters.ToValueArray(),
+            Invoke );
     }
 
     [Template]
@@ -277,13 +277,14 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
         }
 
-        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingService.Default );
 
-        return ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteTaskAsync<TValue>(
+        return ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
-            InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            InvokeAsync,
+            null,
             (CancellationToken) cancellationTokenExpression.Value! );
     }
 
@@ -301,13 +302,14 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
         }
 
-        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingService.Default );
 
-        return ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<TValue>(
+        return ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<TValue>(
             (CachedMethodMetadata) registrationField.Value!,
-            InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            InvokeAsync,
+            null,
             (CancellationToken) cancellationTokenExpression.Value! );
     }
 
@@ -336,13 +338,14 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
             }
         }
 
-        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingService.Default );
 
-        var task = ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
+        var task = ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerable<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
-            InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            InvokeAsync,
+            null,
             (CancellationToken) cancellationTokenExpression.Value! );
 
         // Avoid extension method form due to current Metalama framework issue.
@@ -375,13 +378,14 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
             return buffer;
         }
 
-        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingServices.Default );
+        var cachingServiceExpression = cachingServiceField ?? ExpressionFactory.Capture( CachingService.Default );
 
-        var task = ((CachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
+        var task = ((ICachingService) cachingServiceExpression.Value!).GetFromCacheOrExecuteValueTaskAsync<IAsyncEnumerator<TValue>>(
             (CachedMethodMetadata) registrationField.Value!,
-            InvokeAsync,
             meta.Target.Method.IsStatic ? null : (object) meta.This,
             (object?[]) meta.Target.Method.Parameters.ToValueArray(),
+            InvokeAsync,
+            null,
             (CancellationToken) cancellationTokenExpression.Value! );
 
         // Avoid extension method form due to current Metalama framework issue.

@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 
-namespace Metalama.Patterns.Caching.Utilities;
+namespace Metalama.Patterns.Caching.Implementation;
 
 [PublicAPI]
 public ref struct StringTokenizer

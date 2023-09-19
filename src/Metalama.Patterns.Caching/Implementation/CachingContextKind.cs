@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
 /// Enumerates the kinds of <see cref="ICachingContext"/>.
 /// </summary>
 [Flags]
-public enum CachingContextKind
+internal enum CachingContextKind
 {
     /// <summary>
     /// None (a null implementation of <see cref="ICachingContext"/>).

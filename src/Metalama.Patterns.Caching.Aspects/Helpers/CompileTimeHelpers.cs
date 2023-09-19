@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Aspects.Helpers;
 
 // TODO: Consider moving CompileTimeHelpers to common project and/or Metalama.Extensions
 [CompileTime]
