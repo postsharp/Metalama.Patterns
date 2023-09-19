@@ -36,12 +36,14 @@ public sealed partial class NotifyPropertyChangedAttribute
 
             var target = builder.Target;
 
+            // TODO: Consider using BaseType.TypeDefinition where possible for better performance.
+            
             this.BaseImplementsInpc =
                 target.BaseType != null && (
                     target.BaseType.Is( this.Type_INotifyPropertyChanged )
                     || (target.BaseType is { BelongsToCurrentProject: true } 
                         && ( !this.Target.Compilation.IsPartial || this.Target.Compilation.Types.Contains( target.BaseType ) ) 
-                        && target.BaseType.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
+                        && target.BaseType.TypeDefinition.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
 
             this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Type_INotifyPropertyChanged );
 
@@ -291,7 +293,7 @@ public sealed partial class NotifyPropertyChangedAttribute
                                 return InpcInstrumentationKind.Unknown;
                             }
 
-                            return namedType.Enhancements().HasAspect<NotifyPropertyChangedAttribute>()
+                            return namedType.TypeDefinition.Enhancements().HasAspect<NotifyPropertyChangedAttribute>()
                                 ? InpcInstrumentationKind.Implicit // For now, the aspect always introduces implicit implementation.
                                 : InpcInstrumentationKind.None;
                         }

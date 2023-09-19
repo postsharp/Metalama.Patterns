@@ -80,3 +80,34 @@ public partial class E
     /// </summary>
     public int LP2R => this.E2.B1;
 }
+
+[NotifyPropertyChanged]
+public partial class F
+{
+    public F()
+    {
+        this.F1 = new();
+    }
+
+    /// <summary>
+    /// Auto
+    /// </summary>
+    public B F1 { get; set; }
+
+    /// <summary>
+    /// Ref to F1.B2.
+    /// </summary>
+    public C F2 => this.F1.B2;
+}
+
+/// <summary>
+/// G : F. Has ref to F1.B2.C2.D1 where the base class F only
+/// has a ref to F1.B2 as a leaf, and no ref to C2 or deeper.
+/// </summary>
+public partial class G : F
+{
+    /// <summary>
+    /// Ref to F1.B2.C2.D1. Note, class F does not register with F1.B2.
+    /// </summary>
+    public int G1 => this.F1.B2.C2.D1;
+}

@@ -231,7 +231,12 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         }
         else
         {
-            ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
+            var result = ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
+
+            if ( result.Outcome == Framework.Advising.AdviceOutcome.Error )
+            {
+                Debugger.Break();
+            }
         }
     }
 
@@ -249,8 +254,13 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         {
             case null:
                 // This might require INPC-type code which is used at runtime only when T implements INPC,
-                // and non-INPC-type code which is used at runtime when T does not implement INPC.                    
-                throw new NotSupportedException( "Unconstrained generic properties are not supported." );
+                // and non-INPC-type code which is used at runtime when T does not implement INPC.
+
+                ctx.Builder.Diagnostics.Report(
+                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments( (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
+                    fieldOrProperty );
+
+                throw new DiagnosticErrorReportedException();
 
             case true:
 
@@ -279,8 +289,11 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 if ( propertyTypeImplementsInpc )
                 {
-                    // TODO: Proper error reporting.
-                    throw new NotSupportedException( "structs implementing INotifyPropertyChanged are not supported." );
+                    ctx.Builder.Diagnostics.Report(
+                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingINPC.WithArguments( (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
+                        fieldOrProperty );
+
+                    throw new DiagnosticErrorReportedException();
                 }
                 onChangedMethodIsApplicable = true;
                 break;

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using FluentAssertions;
 using Metalama.Testing.UnitTesting;
 using Xunit;
 using Xunit.Abstractions;
@@ -7,13 +8,15 @@ using Xunit.Abstractions;
 namespace Metalama.Patterns.NotifyPropertyChanged.CompileTimeUnitTests;
 
 // Experimental tests used during development. Some may become formal tests later in development.
-public class ScratchpadExperiments : UnitTestClass
+public class DependencyGraphTests : UnitTestClass
 {
-    public ScratchpadExperiments( ITestOutputHelper testOutput ) : base( testOutput, false ) { }
+    public DependencyGraphTests( ITestOutputHelper testOutput ) : base( testOutput, false ) { }
 
     [Fact]
-    public void Test1()
+    public void CommonPatterns()
     {
+        // A general test of common class and expression patterns that should work.
+        
         using var testContext = this.CreateTestContext();
 
         var code = @"
@@ -54,6 +57,8 @@ class A
     
     // Demonstrate non-leaf access:
     public C A14 => A1.B1;
+
+    public B A15 { get; set; }
 }
 
 class B
@@ -81,14 +86,31 @@ class D
 
         var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type );
 
-        this.TestOutput.WriteLine( result.ToString() );
+        const string expected = 
+@"<root>
+  A1
+    B1 [ A14 ]
+      C1
+        D1 [ A3, A7 ]
+      C2 [ A13, A8 ]
+    B2 [ A10, A11, A12, A5, A6, A7, A9 ]
+  A10
+  A11
+  A12
+  A13
+  A14
+  A2 [ A4, A6, A7 ]
+  A3 [ A7 ]
+  A4 [ A7 ]
+  A5 [ A7 ]
+  A6 [ A7 ]
+  A7
+  A8
+  A9
+";
+        result.ToString().Should().Be( expected );
 
-        this.TestOutput.WriteLine("");
-
-        foreach ( var node in result.DecendantsDepthFirst() )
-        {
-            this.TestOutput.WriteLine( node.GetPath() );
-        }
+        // this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Fact]

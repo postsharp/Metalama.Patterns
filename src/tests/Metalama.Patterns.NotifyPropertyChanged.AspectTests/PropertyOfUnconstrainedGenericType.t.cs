@@ -1,0 +1,1 @@
+// Error LAMA5153 on `C1`: `The type T of property PropertyOfUnconstrainedGenericType<T>.C1 is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.`

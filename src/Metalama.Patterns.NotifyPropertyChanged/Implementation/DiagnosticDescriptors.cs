@@ -38,5 +38,27 @@ internal static class DiagnosticDescriptors
                 "{0} {1} has an initializer expression and is of a type that implements INotifyPropertyChanged. This is not supported. Explicit initialization from a constructor is supported.",
                 "INotifyPropertyChanged auto-property has an initializer expression.",
                 _category );
+
+        /// <summary>
+        /// The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.
+        /// </summary>
+        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)> ErrorFieldOrPropertyTypeIsStructImplementingINPC =
+            new(
+                "LAMA5152",
+                Error,
+                "The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.",
+                "Property type is struct implementing INotifyPropertyChanged.",
+                _category );
+
+        /// <summary>
+        /// The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotitfyPropertyChanged'.
+        /// </summary>
+        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)> ErrorFieldOrPropertyTypeIsUnconstrainedGeneric =
+            new(
+                "LAMA5153",
+                Error,
+                "The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.",
+                "Property type is struct implementing INotifyPropertyChanged.",
+                _category );
     }
 }

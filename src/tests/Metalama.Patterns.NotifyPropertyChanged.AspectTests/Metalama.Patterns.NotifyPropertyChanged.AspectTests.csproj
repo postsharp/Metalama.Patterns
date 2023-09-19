@@ -6,6 +6,17 @@
         <Configurations>Debug;Release;LamaDebug</Configurations>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="InheritsExistingInpcImplWithoutNPCMethod - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="PropertyOfGenericTypeThatIsStructAndINPC.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>PropertyOfGenericTypeThatIsStructAndINPC.cs</DependentUpon>
+      </None>
+    </ItemGroup>
+
     <ItemGroup>        
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />

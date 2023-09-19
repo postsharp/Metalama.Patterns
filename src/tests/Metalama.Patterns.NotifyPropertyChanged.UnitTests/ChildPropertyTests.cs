@@ -132,4 +132,54 @@ public sealed class ChildPropertyTests : InpcTestsBase
         this.EventsFrom( () => e.E2 = new B() )
             .Should().Equal( "LR", "LP1R", "LP2R", "E2" );
     }
+
+    [Fact]
+    public void ChildRefFirstMonitoredInDerivedClass()
+    {
+        var g = new G();
+
+        var sf = this.SubscribeTo( g );
+
+        this.EventsFrom( () => g.F1.B2.C2.D1 = 1 )
+            .Should().Equal( "G1" );
+
+        // New D, but with existing D1 value. A change is reported because we don't
+        // have false +ve detection so don't store a copy of leaf value D1 and can't
+        // tell if it has really changed.
+
+        var newD = new D() { D1 = g.F1.B2.C2.D1 };
+
+        this.EventsFrom( () => g.F1.B2.C2 = newD )
+            .Should().Equal( "G1" );
+
+        // New C, but with exsting D:
+
+        var newC = new C() { C2 = g.F1.B2.C2 };
+
+        this.EventsFrom( () => g.F1.B2 = newC )
+            .Should().Equal( "F2" );
+
+        // New C, with new D:
+
+        var newC_2 = new C();
+
+        this.EventsFrom( () => g.F1.B2 = newC_2 )
+            .Should().Equal( "F2", "G1" );
+
+        // New B, but with existing C. Because we don't have false +ve detection, class F does
+        // not store the current value of F1.B2, so any change in F1 is assumed to be a change
+        // to B2.
+
+        var newB = new B() { B2 = g.F1.B2 };
+
+        this.EventsFrom( () => g.F1 = newB )
+            .Should().Equal( "F2", "F1" );
+
+        // New B, with new C:
+
+        var newB_2 = new B();
+
+        this.EventsFrom( () => g.F1 = newB_2 )
+            .Should().Equal( "F2", "G1", "F1" );
+    }
 }

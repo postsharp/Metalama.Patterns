@@ -5,6 +5,7 @@ using Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
 using Xunit;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests;
+
 public sealed class CoreTests : InpcTestsBase
 {
     [Fact]
