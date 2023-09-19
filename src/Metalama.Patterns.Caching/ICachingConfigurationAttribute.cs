@@ -6,7 +6,7 @@ using Metalama.Patterns.Caching.Implementation;
 namespace Metalama.Patterns.Caching;
 
 [RunTimeOrCompileTime]
-internal interface ICachingConfigurationAttribute
+public interface ICachingConfigurationAttribute
 {
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the cached methods.

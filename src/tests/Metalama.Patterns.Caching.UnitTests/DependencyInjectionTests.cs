@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -18,7 +19,7 @@ public sealed class DependencyInjectionTests : BaseCachingTests
         var cachingService = new CachingService( this.ServiceProvider );
         var backend = new TestingCacheBackend( "test", this.ServiceProvider );
         cachingService.DefaultBackend = backend;
-        serviceCollection.AddSingleton( cachingService );
+        serviceCollection.AddSingleton<ICachingService>( cachingService );
         serviceCollection.AddSingleton<C>();
         var c = (C) serviceCollection.BuildServiceProvider().GetService( typeof(C) )!;
         _ = c.Method();

@@ -44,10 +44,10 @@ public class CacheKeyBuilder : IDisposable
     /// Builds a cache key for a given method call.
     /// </summary>
     /// <param name="metadata">The <see cref="CachedMethodMetadata"/> representing the method.</param>
-    /// <param name="arguments">The arguments passed to the method call.</param>
     /// <param name="instance">The <c>this</c> instance of the method call, or <c>null</c> if the method is static.</param>
+    /// <param name="arguments">The arguments passed to the method call.</param>
     /// <returns>A string uniquely representing the method call.</returns>
-    public virtual string BuildMethodKey( CachedMethodMetadata metadata, IList<object?> arguments, object? instance = null )
+    public virtual string BuildMethodKey( CachedMethodMetadata metadata, object? instance, IList<object?> arguments )
     {
         var method = metadata.Method;
 
@@ -83,7 +83,7 @@ public class CacheKeyBuilder : IDisposable
 
         var addComma = false;
 
-        if ( !method.IsStatic && !metadata.IsThisParameterIgnored )
+        if ( !method.IsStatic && !metadata.IgnoreThisParameter )
         {
             // We need a 'this' specifier to differentiate an instance method
             // from a static method whose first parameter is of the declaring type.
@@ -96,7 +96,7 @@ public class CacheKeyBuilder : IDisposable
         {
             var argument = arguments[i];
 
-            if ( metadata.Parameters[i].IsIgnored )
+            if ( metadata.IsParameterIgnored( i ) )
             {
                 this.AppendArgument( stringBuilder, parameters[i].ParameterType, this.IgnoredParameterSentinel, ref addComma );
             }

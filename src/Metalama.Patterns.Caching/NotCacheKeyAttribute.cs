@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
-/// Custom attribute that, when applied to a parameter of a cached method (i.e. a method enhanced by the <see cref="CacheAttribute"/> aspect),
+/// Custom attribute that, when applied to a parameter of a cached method (i.e. a method enhanced by the caching aspect),
 /// excludes this parameter from being a part of the cache key.
 /// </summary>
 [PublicAPI]

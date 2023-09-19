@@ -5,13 +5,16 @@ using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.ValueAdapters;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching;
 
-public sealed partial class CachingService : IDisposable, IAsyncDisposable
+public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICachingService
 {
+    public static CachingService Default { get; set; } = new();
+
     internal IServiceProvider? ServiceProvider { get; }
 
     private volatile CacheKeyBuilder _keyBuilder;
@@ -22,6 +25,8 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable
     internal AutoReloadManager AutoReloadManager { get; }
 
     internal CachingFrontend Frontend { get; }
+
+    public ValueAdapterFactory ValueAdapters { get; } = new();
 
     public CachingService( IServiceProvider? serviceProvider = null )
     {
@@ -37,6 +42,14 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable
     /// Gets the set of distinct backends used in the service.
     /// </summary>
     public ImmutableHashSet<CachingBackend> AllBackends => this.Profiles.AllBackends;
+
+    public void AddDependency( string key ) => CachingContext.Current.AddDependency( key );
+
+    public void AddDependencies( IEnumerable<string> keys ) => CachingContext.Current.AddDependencies( keys );
+
+    public IDisposable SuspendDependencyPropagation() => CachingContext.OpenSuspendedCacheContext();
+
+    string ICachingService.GetDependencyKey( object o ) => this.KeyBuilder.BuildDependencyKey( o );
 
     /// <summary>
     /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
@@ -79,7 +80,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        using ( CachingServices.Default.DefaultBackend = RedisFactory.CreateBackend(
+        using ( CachingService.Default.DefaultBackend = RedisFactory.CreateBackend(
                    this.TestContext,
                    this._redisSetupFixture,
                    prefix: redisKeyPrefix,
@@ -96,7 +97,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
             }
         }
 
-        using ( CachingServices.Default.DefaultBackend = RedisFactory.CreateBackend(
+        using ( CachingService.Default.DefaultBackend = RedisFactory.CreateBackend(
                    this.TestContext,
                    this._redisSetupFixture,
                    prefix: redisKeyPrefix,

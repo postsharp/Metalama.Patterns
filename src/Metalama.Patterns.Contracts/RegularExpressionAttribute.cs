@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System.Text.RegularExpressions;
@@ -15,6 +16,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the regular expression used.</para>
 /// </remarks>
+[PublicAPI]
 public class RegularExpressionAttribute : RegularExpressionBaseAttribute
 {
     public string Pattern { get; }
