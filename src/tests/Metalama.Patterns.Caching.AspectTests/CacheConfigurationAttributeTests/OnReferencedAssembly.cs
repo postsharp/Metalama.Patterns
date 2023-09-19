@@ -20,10 +20,10 @@ public class Program
         Console.WriteLine( "Test started." );
 
         var backend =
-            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestValues.CacheConfigurationAttributeProfileName1, null );
+            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestValues.CacheConfigurationAttributeProfileNameA, null );
 
-        TestProfileConfigurationFactory.CreateProfile( TestValues.CacheConfigurationAttributeProfileName1 );
-        TestProfileConfigurationFactory.CreateProfile( TestValues.CacheConfigurationAttributeProfileName2 );
+        TestProfileConfigurationFactory.CreateProfile( TestValues.CacheConfigurationAttributeProfileNameA );
+        TestProfileConfigurationFactory.CreateProfile( TestValues.CacheConfigurationAttributeProfileNameB );
 
         var cachingClass = new LocalChildCachingClass();
 
@@ -67,7 +67,7 @@ public class Program
                 "referenced base",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName1 );
+                TestValues.CacheConfigurationAttributeProfileNameA );
 
             cachingClass.GetValueReferencedChild();
 
@@ -75,7 +75,7 @@ public class Program
                 "referenced child",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName1 );
+                TestValues.CacheConfigurationAttributeProfileNameA );
 
             cachingClass.GetValueLocalChild();
 
@@ -91,7 +91,7 @@ public class Program
                 "overridden referenced base",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName2 );
+                TestValues.CacheConfigurationAttributeProfileNameB );
 
             cachingClassOverridden.GetValueReferencedChild();
 
@@ -99,7 +99,7 @@ public class Program
                 "overridden referenced child",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName2 );
+                TestValues.CacheConfigurationAttributeProfileNameB );
 
             cachingClassOverridden.GetValueLocalChild();
 
@@ -107,7 +107,7 @@ public class Program
                 "overridden local child",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName2 );
+                TestValues.CacheConfigurationAttributeProfileNameB );
 
             referencedInnerCachingClassInBase.GetValueReferencedInnerBase();
 
@@ -115,7 +115,7 @@ public class Program
                 "referenced inner base",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName1 );
+                TestValues.CacheConfigurationAttributeProfileNameA );
 
             referencedInnerCachingClassInChild.GetValueReferencedInnerChild();
 
@@ -123,7 +123,7 @@ public class Program
                 "referenced inner child",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName1 );
+                TestValues.CacheConfigurationAttributeProfileNameA );
 
             localInnerCachingClassInChild.GetValueLocalInnerChild();
 
@@ -139,7 +139,7 @@ public class Program
                 "overridden referenced inner base",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName1 );
+                TestValues.CacheConfigurationAttributeProfileNameA );
 
             referencedInnerCachingClassInChildOverridden.GetValueReferencedInnerChild();
 
@@ -147,7 +147,7 @@ public class Program
                 "overridden referenced inner child",
                 backend,
                 ref previousCachedKey,
-                TestValues.CacheConfigurationAttributeProfileName1 );
+                TestValues.CacheConfigurationAttributeProfileNameA );
 
             localInnerCachingClassInChildOverridden.GetValueLocalInnerChild();
 

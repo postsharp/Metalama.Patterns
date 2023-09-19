@@ -3,15 +3,15 @@
 using Metalama.Patterns.Caching;
 using Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
-[assembly: CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName1 )]
+[assembly: CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileNameA )]
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheConfigurationAttributeTests;
 
 public static class TestValues
 {
     public const string DefaultProfileName = CachingProfile.DefaultName;
-    public const string CacheConfigurationAttributeProfileName1 = "[A]";
-    public const string CacheConfigurationAttributeProfileName2 = "[B]";
+    public const string CacheConfigurationAttributeProfileNameA = "[A]";
+    public const string CacheConfigurationAttributeProfileNameB = "[B]";
 }
 
 [CachingConfiguration( UseDependencyInjection = false )]
@@ -54,7 +54,7 @@ public class ReferencedChildCachingClass : ReferencedParentCachingClass
     }
 }
 
-[CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileName2, UseDependencyInjection = false )]
+[CachingConfiguration( ProfileName = TestValues.CacheConfigurationAttributeProfileNameB, UseDependencyInjection = false )]
 public class ReferencedParentCachingClassOverridden
 {
     [CachingConfiguration( UseDependencyInjection = false )]
