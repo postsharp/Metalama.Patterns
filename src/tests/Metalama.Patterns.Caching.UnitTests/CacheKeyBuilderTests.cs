@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
+using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
@@ -24,10 +25,10 @@ namespace Metalama.Patterns.Caching.Tests
 
             public override string BuildMethodKey(
                 CachedMethodMetadata metadata,
-                IList<object?> arguments,
-                object? instance = null )
+                object? instance,
+                IList<object?> arguments )
             {
-                return this.LastMethodKey = base.BuildMethodKey( metadata, arguments, instance );
+                return this.LastMethodKey = base.BuildMethodKey( metadata, instance, arguments );
             }
 
             public MyCacheKeyBuilder( IFormatterRepository formatterRepository ) : base( formatterRepository ) { }
@@ -40,8 +41,8 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                var keyBuilder = new MyCacheKeyBuilder( CachingServices.Default.Formatters );
-                CachingServices.Default.KeyBuilder = keyBuilder;
+                var keyBuilder = new MyCacheKeyBuilder( CachingService.Default.Formatters );
+                CachingService.Default.KeyBuilder = keyBuilder;
                 action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
                 Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
@@ -59,8 +60,8 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                var keyBuilder = new MyCacheKeyBuilder( CachingServices.Default.Formatters );
-                CachingServices.Default.KeyBuilder = keyBuilder;
+                var keyBuilder = new MyCacheKeyBuilder( CachingService.Default.Formatters );
+                CachingService.Default.KeyBuilder = keyBuilder;
                 await action();
                 Console.WriteLine( keyBuilder.LastMethodKey );
                 Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
