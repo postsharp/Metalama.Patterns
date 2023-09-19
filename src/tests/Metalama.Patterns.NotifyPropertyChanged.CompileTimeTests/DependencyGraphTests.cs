@@ -84,7 +84,7 @@ class D
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type );
+        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
 
         const string expected = 
 @"<root>
@@ -133,7 +133,7 @@ class A
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type );
+        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
 
         this.TestOutput.WriteLine( result.ToString() );
     }
@@ -162,7 +162,7 @@ class A
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type );
+        var result = Implementation.DependencyGraph.GetDependencyGraph<int>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
 
         this.TestOutput.WriteLine( result.ToString() );
     }

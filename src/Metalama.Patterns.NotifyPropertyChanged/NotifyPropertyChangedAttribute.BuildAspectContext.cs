@@ -1,6 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
@@ -125,13 +126,27 @@ public sealed partial class NotifyPropertyChangedAttribute
 
         private DependencyGraph.Node<NodeData> PrepareDependencyGraph()
         {
-            var graph = Implementation.DependencyGraph.GetDependencyGraph<NodeData>( this.Target );
+            var hasReportedDiagnosticError = false;
+
+            var graph = Implementation.DependencyGraph.GetDependencyGraph<NodeData>(
+                this.Target,
+                ( diagnostic, location ) =>
+                {
+                    hasReportedDiagnosticError |= diagnostic.Definition.Severity == Framework.Diagnostics.Severity.Error;
+                    this.Builder.Diagnostics.Report( diagnostic, new LocationWrapper( location ) );
+                } );
+            
             foreach ( var node in graph.DecendantsDepthFirst() )
             {
                 node.Data.Initialize( this, node );
 
                 var baseHandling = this.DetermineInpcBaseHandling( node );
                 node.Data.Initialize2( baseHandling );
+            }
+
+            if ( hasReportedDiagnosticError )
+            {
+                throw new DiagnosticErrorReportedException();
             }
 
             return graph;
@@ -341,38 +356,9 @@ public sealed partial class NotifyPropertyChangedAttribute
 
             return h;
         }
-        
-        // NOTE: This hashset of path stems approach is a simple way to allow path stems to be checked, but
-        // a tree-based structure might scale better if required. Keeping it simple for now.
-        private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
-        {
-            var h = new HashSet<string>();
 
-            if ( propertyPaths != null )
-            {
-                foreach ( var s in propertyPaths )
-                {
-                    AddPropertyPathAndAllAncestorStems( h, s );
-                }
-            }
-
-            return h;
-
-            // TODO: Don't add ancestor stems!
-
-            static void AddPropertyPathAndAllAncestorStems( HashSet<string> addTo, string propertyPath )
-            {
-                addTo.Add( propertyPath );
-
-                var lastIdx = propertyPath.LastIndexOf( '.' );
-
-                while ( lastIdx > 1 )
-                {
-                    addTo.Add( propertyPath.Substring( lastIdx - 1 ) );
-                    lastIdx = propertyPath.LastIndexOf( '.', lastIdx - 1 );
-                }
-            }
-        }
+        private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths ) 
+            => propertyPaths == null ? new() : new( propertyPaths );
 
         [return: NotNullIfNotNull( nameof( method ) )]
         private static IEnumerable<string>? GetPropertyPaths( INamedType attributeType, IMethod? method, bool includeInherited = true )

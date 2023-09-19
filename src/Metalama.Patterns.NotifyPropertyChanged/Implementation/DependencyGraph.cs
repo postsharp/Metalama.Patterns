@@ -2,7 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -94,7 +96,6 @@ internal static class DependencyGraph
         /// Gets the members that reference the current node.
         /// </summary>
         public IReadOnlyCollection<Node<T>> DirectReferences => ((IReadOnlyCollection<Node<T>>?) this._referencedBy) ?? Array.Empty<Node<T>>();
-
 
         /// <summary>
         /// Gets the distinct set of members that reference, directly or indirectly, the current node. By default, the search follows only <see cref="DirectReferences"/>;
@@ -304,13 +305,15 @@ internal static class DependencyGraph
         }
     }
 
-    public static Node<T> GetDependencyGraph<T>( INamedType type )
+    public delegate void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null );
+
+    public static Node<T> GetDependencyGraph<T>( INamedType type, ReportDiagnostic reportDiagnostic )
     {
         var tree = new Node<T>();
 
         foreach ( var p in type.Properties )
         {
-            AddReferencedProperties( tree, p );
+            AddReferencedProperties( tree, p, reportDiagnostic );
         }
 
         return tree;
@@ -318,7 +321,8 @@ internal static class DependencyGraph
 
     private static void AddReferencedProperties(
         INode tree,
-        IProperty property )
+        IProperty property,
+        ReportDiagnostic reportDiagnostic )
     {
         var compilation = property.Compilation.GetRoslynCompilation();
 
@@ -328,6 +332,7 @@ internal static class DependencyGraph
         {
             return;
         }
+
         var body = propertySymbol
             .DeclaringSyntaxReferences
             .Select( r => r.GetSyntax() )
@@ -342,7 +347,7 @@ internal static class DependencyGraph
 
         var semanticModel = property.Compilation.GetSemanticModel( body.SyntaxTree );
 
-        var visitor = new Visitor( tree, propertySymbol, semanticModel );
+        var visitor = new Visitor( tree, propertySymbol, semanticModel, reportDiagnostic );
         visitor.Visit( body );
     }
 
@@ -352,6 +357,7 @@ internal static class DependencyGraph
         private readonly ISymbol _origin;
         private readonly SemanticModel _semanticModel;
         private readonly List<IPropertySymbol> _properties = new();
+        private readonly ReportDiagnostic _reportDiagnostic;
         private SyntaxNode? _lastVisitedPropertyNode;
         private int _depth = 1;
         private int _accessorStartDepth;
@@ -359,15 +365,17 @@ internal static class DependencyGraph
         public Visitor(
             INode tree,
             ISymbol origin,
-            SemanticModel semanticModel )
+            SemanticModel semanticModel,
+            ReportDiagnostic reportDiagnostic )
         {
             this._tree = tree;
             this._origin = origin;
             this._semanticModel = semanticModel;
+            this._reportDiagnostic = reportDiagnostic;
         }
-
+        
         public override void Visit( SyntaxNode? node )
-        {
+        {            
             ++this._depth;
 
             base.Visit( node );
@@ -403,12 +411,18 @@ internal static class DependencyGraph
         {
             if ( node.IsKind( SyntaxKind.CoalesceExpression ) )
             {
-                // This creates multiple potential access expressions.
-                // TODO: Proper error reporting
-                throw new NotSupportedException( "Coalesce expressions are not supported." );
-            }
+                // TODO: This creates multiple potential access expressions.
 
-            base.VisitBinaryExpression( node );
+                this._reportDiagnostic(
+                    DiagnosticDescriptors.DependencyGraph.ErrorMiscUnsupportedExpression.WithArguments( "Coalesce" ),
+                    node.GetLocation() );
+
+                this.ClearCurrentAccessor();
+            }
+            else
+            {
+                base.VisitBinaryExpression( node );
+            }
         }
 
         public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
@@ -454,8 +468,11 @@ internal static class DependencyGraph
                 else
                 {
                     // Not a property (eg, it's a method or field).
-                    // TODO: Proper error handling when not supported/allowed.
-                    throw new NotSupportedException( $"Encountered unsupported identifier '{node.Identifier.Text} of kind {(symbol == null ? "<unresolved>" : symbol.Kind)}." );
+                    this._reportDiagnostic(
+                        DiagnosticDescriptors.DependencyGraph.ErrorMiscUnsupportedIdentifier
+                        .WithArguments( (node.Identifier.Text, symbol == null ? "<unresolved>" : symbol.Kind.ToString()) ),
+                        node.GetLocation() );
+                    
                     this.ClearCurrentAccessor();
                 }
             }

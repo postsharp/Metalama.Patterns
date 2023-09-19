@@ -10,12 +10,12 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 [CompileTime]
 internal static class DiagnosticDescriptors
 {
-    private const string _category = "Metalama.Patterns.NotifyPropertyChanged";
-
-    // Reserved range 5150-5199
+    private const string _category = "Metalama.Patterns.NotifyPropertyChanged";    
 
     public static class NotifyPropertyChanged
     {
+        // Reserved range 5150-5189
+
         /// <summary>
         /// Class {0} implements INotifyPropertyChanged but does not define an OnPropertyChanged method with the following signature: void OnPropertyChanged(string propertyName).
         /// </summary>
@@ -59,6 +59,33 @@ internal static class DiagnosticDescriptors
                 Error,
                 "The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.",
                 "Property type is struct implementing INotifyPropertyChanged.",
+                _category );
+    }
+
+    public static class DependencyGraph
+    {
+        // Reserved range 5190-5199
+
+        /// <summary>
+        /// {0} expressions are not supported for dependency analysis.
+        /// </summary>
+        public static readonly DiagnosticDefinition<string> ErrorMiscUnsupportedExpression =
+            new(
+                "LAMA5190",
+                Error,
+                "{0} expressions are not supported for dependency analysis.",
+                "Expression not supported for dependency analysis.",
+                _category );
+
+        /// <summary>
+        /// The identifier '{0}' of kind {1} is not supported for dependency analysis.
+        /// </summary>
+        public static readonly DiagnosticDefinition<(string Identifier, string Kind)> ErrorMiscUnsupportedIdentifier =
+            new(
+                "LAMA5191",
+                Error,
+                "The identifier '{0}' of kind {1} is not supported for dependency analysis.",
+                "Identifier not supported for dependency analysis.",
                 _category );
     }
 }

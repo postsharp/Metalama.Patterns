@@ -46,7 +46,7 @@ class A
     public B A15 { get; set; }
 
     // Coalesce expressions are not supported yet.
-    //public int A16 => (A1 ?? A15).B2;
+    // public int A16 => (A1 ?? A15).B2;
 }
 
 [NotifyPropertyChanged]
