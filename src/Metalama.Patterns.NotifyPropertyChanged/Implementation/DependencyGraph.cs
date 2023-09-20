@@ -410,10 +410,10 @@ internal static class DependencyGraph
         {
             if ( node.IsKind( SyntaxKind.CoalesceExpression ) )
             {
-                // TODO: This creates multiple potential access expressions.
+                // This creates multiple potential access expressions.
 
                 this._reportDiagnostic(
-                    DiagnosticDescriptors.DependencyGraph.ErrorMiscUnsupportedExpression.WithArguments( "Coalesce" ),
+                    DiagnosticDescriptors.DependencyAnalysis.ErrorMiscUnsupportedExpression.WithArguments( "Coalesce" ),
                     node.GetLocation() );
 
                 this.ClearCurrentAccessor();
@@ -468,7 +468,7 @@ internal static class DependencyGraph
                 {
                     // Not a property (eg, it's a method or field).
                     this._reportDiagnostic(
-                        DiagnosticDescriptors.DependencyGraph.ErrorMiscUnsupportedIdentifier
+                        DiagnosticDescriptors.DependencyAnalysis.ErrorMiscUnsupportedIdentifier
                         .WithArguments( (node.Identifier.Text, symbol == null ? "<unresolved>" : symbol.Kind.ToString()) ),
                         node.GetLocation() );
                     

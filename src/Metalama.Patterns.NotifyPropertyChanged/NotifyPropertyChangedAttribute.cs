@@ -293,8 +293,6 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         
         // NB: We might be able do this with DeferredDeclaration<T> and care less about ordering.
 
-        // TODO: I suspect/know some scenarios are not handled yet. Don't assume the logic here is correct or complete.
-
         foreach ( var node in allNodesDepthFirst )
         {
             if ( node.Children.Count == 0 || node.Parent!.IsRoot )
@@ -302,12 +300,6 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 // Leaf nodes and root properties should never have update methods.
                 node.Data.SetUpdateMethod( null );
                 continue;
-            }
-
-            // TODO: Remove this check, just confirming something.
-            if ( node.Data.UpdateMethodHasBeenSet )
-            {
-                throw new InvalidOperationException( "Why???" );
             }
 
             ValidateFieldOrProperty( ctx, node.Data.FieldOrProperty );
@@ -378,14 +370,20 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         {
             if ( p.IsVirtual )
             {
-                // TODO: Proper error reporting.
-                throw new NotSupportedException( "Virtual properties are not supported." );
+                ctx.Builder.Diagnostics.Report(
+                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorVirtualMemberIsNotSupported.WithArguments( (p.DeclarationKind, p) ),
+                    p );
+
+                throw new DiagnosticErrorReportedException();
             }
 
             if ( p.IsNew )
             {
-                // TODO: Proper error reporting.
-                throw new NotSupportedException( "'new' properties are not supported." );
+                ctx.Builder.Diagnostics.Report(
+                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorNewMemberIsNotSupported.WithArguments( (p.DeclarationKind, p) ),
+                    p );
+
+                throw new DiagnosticErrorReportedException();
             }
 
             ValidateFieldOrProperty( ctx, p );

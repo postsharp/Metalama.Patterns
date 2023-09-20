@@ -100,7 +100,6 @@ public sealed partial class NotifyPropertyChangedAttribute
         public bool HasInheritedOnUnmonitoredInpcPropertyChangedProperty( string propertyName )
         {
             this._inheritedOnUnmonitoredInpcPropertyChangedPropertyNames ??=
-                /*BuildPropertyNameLookup*/ // TODO: Decide, clean up.
                 BuildPropertyPathLookup( GetPropertyPaths( this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute, this.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
 
             return this._inheritedOnUnmonitoredInpcPropertyChangedPropertyNames.Contains( propertyName );

@@ -60,9 +60,31 @@ internal static class DiagnosticDescriptors
                 "The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.",
                 "Property type is struct implementing INotifyPropertyChanged.",
                 _category );
+
+        /// <summary>
+        /// The {0} {1} is virtual. This is not supported.
+        /// </summary>
+        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty)> ErrorVirtualMemberIsNotSupported =
+            new(
+                "LAMA5154",
+                Error,
+                "The {0} {1} is virtual. This is not supported.",
+                "Virtual member is not supported.",
+                _category );
+
+        /// <summary>
+        /// The {0} {1} is 'new'. This is not supported.
+        /// </summary>
+        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty)> ErrorNewMemberIsNotSupported =
+            new(
+                "LAMA5155",
+                Error,
+                "The {0} {1} is 'new'. This is not supported.",
+                "'new' member is not supported.",
+                _category );
     }
 
-    public static class DependencyGraph
+    public static class DependencyAnalysis
     {
         // Reserved range 5190-5199
 
