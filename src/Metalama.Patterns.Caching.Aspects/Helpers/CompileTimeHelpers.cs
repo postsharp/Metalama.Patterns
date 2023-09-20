@@ -51,7 +51,7 @@ internal static class CompileTimeHelpers
     /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <c>TResult</c>.</param>
     public static bool IsTaskOrValueTask( this IType type, bool? hasResult = default )
     {
-        var unboundType = (type as INamedType)?.GetOriginalDefinition();
+        var unboundType = (type as INamedType)?.Definition;
 
         if ( unboundType == null )
         {
@@ -77,7 +77,7 @@ internal static class CompileTimeHelpers
     /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <c>TResult</c>.</param>
     public static bool IsTask( this IType type, bool? withResult = default )
     {
-        var unboundType = (type as INamedType)?.GetOriginalDefinition();
+        var unboundType = (type as INamedType)?.Definition;
 
         if ( unboundType == null )
         {
@@ -104,7 +104,7 @@ internal static class CompileTimeHelpers
     /// types without <c>TResult</c>. If <see langword="true"/>, only matches types with <c>TResult</c>.</param>
     public static bool IsValueTask( this IType type, bool? withResult = default )
     {
-        var unboundType = (type as INamedType)?.GetOriginalDefinition();
+        var unboundType = (type as INamedType)?.Definition;
 
         if ( unboundType == null )
         {
@@ -130,7 +130,7 @@ internal static class CompileTimeHelpers
     /// <returns></returns>
     public static bool IsEnumerator( this IType type )
     {
-        var unboundType = (type as INamedType)?.GetOriginalDefinition();
+        var unboundType = (type as INamedType)?.Definition;
 
         if ( unboundType == null )
         {

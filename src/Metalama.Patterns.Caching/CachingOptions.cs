@@ -8,6 +8,8 @@ using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching;
 
+#pragma warning disable SA1623
+
 [RunTimeOrCompileTime]
 public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchicalOptions<INamedType>, IHierarchicalOptions<INamespace>,
                                       IHierarchicalOptions<ICompilation>, ICacheItemConfiguration

@@ -10,8 +10,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Aspects.Helpers;
-using Metalama.Patterns.Caching.Implementation;
-using System.Diagnostics;
 
 #if NET6_0_OR_GREATER
 using Metalama.Framework.RunTime;
@@ -29,9 +27,9 @@ namespace Metalama.Patterns.Caching.Aspects;
 /// </summary>
 /// <remarks>
 /// <para>There are several ways to configure the behavior of the <see cref="CacheAttribute"/> aspect: you can set the properties of the
-/// <see cref="CacheAttribute"/> class, such as <see cref="AbsoluteExpiration"/> or <see cref="SlidingExpiration"/>. You can
+/// <see cref="CacheAttribute"/> class, such as <see cref="BaseCachingAttribute.AbsoluteExpiration"/> or <see cref="BaseCachingAttribute.SlidingExpiration"/>. You can
 /// add the <see cref="CachingConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
-/// Finally, you can define a profile by setting the <see cref="ProfileName"/> property and configure the profile at run time
+/// Finally, you can define a profile by setting the <see cref="BaseCachingAttribute.ProfileName"/> property and configure the profile at run time
 /// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="ICachingService"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
 /// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="ICachingService.Invalidate"/> method.</para>
@@ -213,7 +211,7 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
     // ReSharper disable once MergeConditionalExpression
 #pragma warning disable IDE0031
     [Template]
-    public void CachedMethodRegistrationInitializer( IMethod method, IField field, IType? awaitableResultType, [CompileTime] CachingOptions options )
+    private static void CachedMethodRegistrationInitializer( IMethod method, IField field, IType? awaitableResultType, [CompileTime] CachingOptions options )
         => field.Value = CachedMethodMetadata.Register(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
             new CachedMethodConfiguration()
@@ -396,14 +394,4 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
     // ReSharper restore InconsistentNaming
     // ReSharper restore UnusedParameter.Global
 #pragma warning restore SA1313
-}
-
-internal class CachedMethodAnnotation : IAnnotation<IMethod>
-{
-    public CachingOptions Options { get; }
-
-    public CachedMethodAnnotation( CachingOptions options )
-    {
-        this.Options = options;
-    }
 }
