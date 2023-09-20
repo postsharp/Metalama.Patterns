@@ -1,7 +1,6 @@
 using System.Reflection;
 using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.Aspects.Helpers;
-using Metalama.Patterns.Caching.Implementation;
 namespace Metalama.Patterns.Caching.AspectTests.CacheAttributeTests.DependencyInjection;
 public class C
 {
@@ -19,7 +18,7 @@ public class C
     private ICachingService _cachingService;
     static C()
     {
-        C._cacheRegistration_M = CachedMethodMetadata.Register(RunTimeHelpers.ThrowIfMissing(typeof(C).GetMethod("M", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null)!, "C.M()"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = false, IgnoreThisParameter = false, Priority = CacheItemPriority.Default, ProfileName = (string? )null, SlidingExpiration = null }, false);
+        C._cacheRegistration_M = CachedMethodMetadata.Register(RunTimeHelpers.ThrowIfMissing(typeof(C).GetMethod("M", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null)!, "C.M()"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, false);
     }
     public C(ICachingService? cachingService = default)
     {
