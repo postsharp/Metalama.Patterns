@@ -64,7 +64,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
                 _ => false
             } )
-            .Select( n => n.Data.DottedPropertyPath ) );
+            .Select( n => n.DottedPropertyPath ) );
     }
 
     private static void IntroduceOnPropertyChangedMethod( BuildAspectContext ctx )
@@ -302,23 +302,23 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 continue;
             }
 
-            ValidateFieldOrProperty( ctx, node.Data.FieldOrProperty );
+            ValidateFieldOrProperty( ctx, node.FieldOrProperty );
 
             IMethod? thisUpdateMethod = null;
 
             // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
             if ( node.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
-                && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(node.Data.DottedPropertyPath) )
+                && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(node.DottedPropertyPath) )
             {
                 var lastValueField = ctx.GetOrCreateLastValueField( node );
                 var onPropertyChangedHandlerField = ctx.GetOrCreateHandlerField( node );
 
-                var methodName = ctx.GetAndReserveUnusedMemberName( $"Update{node.Data.ContiguousPropertyPath}" );
+                var methodName = ctx.GetAndReserveUnusedMemberName( $"Update{node.ContiguousPropertyPath}" );
 
                 var accessChildExprBuilder = new ExpressionBuilder();
 
 #pragma warning disable CA1307 // Specify StringComparison for clarity [Justification: code must remain compatible with netstandard2.0]
-                accessChildExprBuilder.AppendVerbatim( node.Data.DottedPropertyPath.Replace( ".", "?." ) );
+                accessChildExprBuilder.AppendVerbatim( node.DottedPropertyPath.Replace( ".", "?." ) );
 #pragma warning restore CA1307 // Specify StringComparison for clarity
 
                 var accessChildExpression = accessChildExprBuilder.ToExpression();
@@ -345,7 +345,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
 
                 // This type will raise OnChildPropertyChanged for the current node, let derived types know.
-                ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( node.Data.DottedPropertyPath );
+                ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( node.DottedPropertyPath );
             }
 
             node.Data.SetUpdateMethod( thisUpdateMethod );

@@ -168,7 +168,7 @@ public sealed partial class NotifyPropertyChangedAttribute
                     if ( node.Depth == 1 )
                     {
                         // Root property
-                        return node.Data.FieldOrProperty.DeclaringType == this.Target
+                        return node.FieldOrProperty.DeclaringType == this.Target
                             ? InpcBaseHandling.NA
                             : this.HasInheritedOnChildPropertyChangedPropertyPath( node.Name )
                                 ? InpcBaseHandling.OnChildPropertyChanged
@@ -179,9 +179,9 @@ public sealed partial class NotifyPropertyChangedAttribute
                     else
                     {
                         // Child property
-                        return this.HasInheritedOnChildPropertyChangedPropertyPath( node.Data.DottedPropertyPath )
+                        return this.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath )
                             ? InpcBaseHandling.OnChildPropertyChanged
-                            : this.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( node.Data.DottedPropertyPath )
+                            : this.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( node.DottedPropertyPath )
                                 ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
                                 : InpcBaseHandling.None;
                     }
@@ -197,12 +197,12 @@ public sealed partial class NotifyPropertyChangedAttribute
         {
             if ( node.Data.LastValueField == null )
             {
-                var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.Data.ContiguousPropertyPath}" );
+                var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.ContiguousPropertyPath}" );
 
                 var introduceLastValueFieldResult = this.Builder.Advice.IntroduceField(
                     this.Target,
                     lastValueFieldName,
-                    node.Data.FieldOrProperty.Type.ToNullableType(),
+                    node.FieldOrProperty.Type.ToNullableType(),
                     IntroductionScope.Instance,
                     OverrideStrategy.Fail,
                     b => b.Accessibility = Accessibility.Private );
@@ -217,7 +217,7 @@ public sealed partial class NotifyPropertyChangedAttribute
         {
             if ( node.Data.HandlerField == null )
             {
-                var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.Data.ContiguousPropertyPath}PropertyChangedHandler" );
+                var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.ContiguousPropertyPath}PropertyChangedHandler" );
 
                 var introduceHandlerFieldResult = this.Builder.Advice.IntroduceField(
                     this.Target,

@@ -2,14 +2,12 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
 public sealed partial class NotifyPropertyChangedAttribute
 {
-    // TODO: Consider merging NodeData.
     // NodeData is currently separated from DependencyGraph.Node to support different future [NPC]
     // implementation strategies. Consider merging common features back into Node, and/or
     // merge the whole of NodeData back into Node.
@@ -31,14 +29,7 @@ public sealed partial class NotifyPropertyChangedAttribute
         public void Initialize( BuildAspectContext ctx, DependencyGraph.Node<NodeData> node )
         {
             this._node = node;
-
-            // TODO: Better checks/exceptions.
-            this.FieldOrProperty = (IFieldOrProperty) ctx.Target.Compilation.GetDeclaration( node.Symbol );
-            this.PropertyTypeInpcInstrumentationKind = ctx.GetInpcInstrumentationKind( this.FieldOrProperty.Type );
-
-            // Parent will have been initialized due to defined init order.
-            this.DottedPropertyPath = node.Parent!.IsRoot ? node.Name : $"{node.Parent.Data.DottedPropertyPath}.{node.Name}";
-            this.ContiguousPropertyPath = node.Parent!.IsRoot ? node.Name : node.Parent.Data.ContiguousPropertyPath + node.Name;
+            this.PropertyTypeInpcInstrumentationKind = ctx.GetInpcInstrumentationKind( node.FieldOrProperty.Type );
         }
 
         public void Initialize2( InpcBaseHandling inpcBaseHandling )
@@ -49,22 +40,7 @@ public sealed partial class NotifyPropertyChangedAttribute
         private DependencyGraph.Node<NodeData> _node;
 
         /// <summary>
-        /// Gets a property path like "A1" or "A1.B1".
-        /// </summary>
-        public string DottedPropertyPath { get; private set; }
-
-        /// <summary>
-        /// Gets a property path like "A1" or "A1B1".
-        /// </summary>
-        public string ContiguousPropertyPath { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="IFieldOrProperty"/> for the node.
-        /// </summary>
-        public IFieldOrProperty FieldOrProperty { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="InpcInstrumentationKind"/> for the <see cref="IHasType.Type"/> of <see cref="FieldOrProperty"/>.
+        /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.
         /// </summary>
         public InpcInstrumentationKind PropertyTypeInpcInstrumentationKind { get; private set; }
 
@@ -96,43 +72,24 @@ public sealed partial class NotifyPropertyChangedAttribute
         public void SetHandlerField( IField field )
             => this.HandlerField = field;
 
-        private IReadOnlyCollection<DependencyGraph.Node<NodeData>>? _immediateReferences;
-
-        /// <summary>
-        /// Gets the distinct set of "immediate family" references - the references to the current node and the children of the current node.
-        /// </summary>
-        public IReadOnlyCollection<DependencyGraph.Node<NodeData>> ImmediateReferences
-        {
-            get
-            {
-                this._immediateReferences ??= this._node.Children
-                    .SelectMany( c => c.GetAllReferences() )
-                    .Concat( this._node.GetAllReferences() )
-                    .Distinct()
-                    .ToList();
-
-                return this._immediateReferences;
-            }
-        }
-
-        private IReadOnlyCollection<IMethod>? _cascadeUpdateMethods;
+        private IReadOnlyCollection<IMethod>? _childUpdateMethods;
 
         /// <summary>
         /// Gets the <see cref="UpdateMethod"/> of the children of the current node.
         /// </summary>
-        public IReadOnlyCollection<IMethod> CascadeUpdateMethods
+        public IReadOnlyCollection<IMethod> ChildUpdateMethods
         {
             get
             {
-                // NB: This will intentionally throw if any encountered node has not yet had UpdateMethod set.
+                // NB: This will intentionally throw if any encountered node has not yet had SetUpdateMethod called.
                 // This ensures that the outcome is consistent and the result can be cached.
 
-                this._cascadeUpdateMethods ??= this._node.Children
+                this._childUpdateMethods ??= this._node.Children
                     .Select( n => n.Data.UpdateMethod )
                     .Where( m => m != null )
                     .ToList()!;
 
-                return this._cascadeUpdateMethods;
+                return this._childUpdateMethods;
             }
         }
 
