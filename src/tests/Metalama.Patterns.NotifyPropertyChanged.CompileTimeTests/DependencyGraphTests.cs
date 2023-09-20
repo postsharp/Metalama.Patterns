@@ -166,5 +166,4 @@ class A
 
         this.TestOutput.WriteLine( result.ToString() );
     }
-
 }

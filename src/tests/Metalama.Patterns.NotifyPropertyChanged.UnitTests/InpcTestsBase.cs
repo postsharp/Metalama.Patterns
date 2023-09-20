@@ -1,13 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FluentAssertions;
-using FluentAssertions.Collections;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests;
+
+// TODO: When the options/configration API is available, refactor all unit tests to support multiple configuration permutations.
+// That is - a shared project and multiple 'concrete' projects. Initally support enabled/disabled OnUnmonitoredInpcPropertyChangedMethod
+// feature.
 
 public abstract class InpcTestsBase : IDisposable
 {
@@ -66,6 +68,9 @@ public abstract class InpcTestsBase : IDisposable
 
         public override bool Equals( object? obj )
             => this.Equals( obj as Subscription );
+
+        public override int GetHashCode()
+            => base.GetHashCode();
     }
 
     protected static readonly Subscription AnySubscription = new Subscription( "<any>", null! );

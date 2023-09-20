@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.Aspects;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -9,14 +11,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
-
-/* Notes
- * 
- * PS impl does not appear to support *explicit* user INPC impl - PropertyChanged must be implicit.
- * 
- * What is supposed to happen with indexers?
- * 
- */
 
 [AttributeUsage( AttributeTargets.Class )]
 [Inheritable]
@@ -148,7 +142,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 if ( isOverride )
                 {
-                    b.Name = ctx.BaseOnChildPropertyChangedMethod.Name;
+                    b.Name = ctx.BaseOnChildPropertyChangedMethod!.Name;
                 }
 
                 if ( ctx.Target.IsSealed )
@@ -240,15 +234,11 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         }
     }
 
-    // TODO: Return value is currently unused.
-    private static (bool OnChangedMethodIsApplicable, bool OnChildChangedMethodIsApplicable) ValidateFieldOrProperty(
+    private static void ValidateFieldOrProperty(
         BuildAspectContext ctx,
         IFieldOrProperty fieldOrProperty )
     {
         var propertyTypeImplementsInpc = ctx.GetInpcInstrumentationKind( fieldOrProperty.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
-
-        var onChangedMethodIsApplicable = false;
-        var onChildChangedMethodIsApplicable = false;
 
         switch ( fieldOrProperty.Type.IsReferenceType )
         {
@@ -269,19 +259,13 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     if ( fieldOrProperty.InitializerExpression != null )
                     {
                         // TODO: Support this pattern by moving initializer to ctor.
+
                         ctx.Builder.Diagnostics.Report(
                             DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyHasAnInitializerExpression.WithArguments( (fieldOrProperty.DeclarationKind, fieldOrProperty) ),
                             fieldOrProperty );
 
                         throw new DiagnosticErrorReportedException();
                     }
-
-                    onChangedMethodIsApplicable = true;
-                    onChildChangedMethodIsApplicable = true;
-                }
-                else
-                {
-                    onChangedMethodIsApplicable = true;
                 }
                 break;
 
@@ -295,11 +279,8 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                     throw new DiagnosticErrorReportedException();
                 }
-                onChangedMethodIsApplicable = true;
                 break;
         }
-
-        return (onChangedMethodIsApplicable, onChildChangedMethodIsApplicable);
     }
 
     private static void IntroduceUpdateMethods( BuildAspectContext ctx )
@@ -329,13 +310,12 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 throw new InvalidOperationException( "Why???" );
             }
 
-            _ = ValidateFieldOrProperty( ctx, node.Data.FieldOrProperty );
+            ValidateFieldOrProperty( ctx, node.Data.FieldOrProperty );
 
             IMethod? thisUpdateMethod = null;
 
             // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-            if ( //!node.Parent!.IsRoot &&
-                node.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
+            if ( node.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
                 && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(node.Data.DottedPropertyPath) )
             {
                 var lastValueField = ctx.GetOrCreateLastValueField( node );
@@ -345,7 +325,9 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
                 var accessChildExprBuilder = new ExpressionBuilder();
 
+#pragma warning disable CA1307 // Specify StringComparison for clarity [Justification: code must remain compatible with netstandard2.0]
                 accessChildExprBuilder.AppendVerbatim( node.Data.DottedPropertyPath.Replace( ".", "?." ) );
+#pragma warning restore CA1307 // Specify StringComparison for clarity
 
                 var accessChildExpression = accessChildExprBuilder.ToExpression();
 
@@ -362,7 +344,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     args: new
                     {
                         ctx,
-                        node = node,
+                        node,
                         accessChildExpression,
                         lastValueField,
                         onPropertyChangedHandlerField
@@ -406,7 +388,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 throw new NotSupportedException( "'new' properties are not supported." );
             }
 
-            var propertyDetails = ValidateFieldOrProperty( ctx, p );
+            ValidateFieldOrProperty( ctx, p );
 
             var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
@@ -467,14 +449,5 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                     break;
             }
         }
-    }
-
-    /// <summary>
-    /// Introduces a 
-    /// </summary>
-    /// <param name="ctx"></param>
-    private static void IntroduceInitializerMethod( BuildAspectContext ctx )
-    {
-
     }
 }

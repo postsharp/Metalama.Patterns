@@ -7,5 +7,5 @@ public class PropertyWithCoalesceExpression
 {
     public int? P1 { get; set; }
 
-    public int P2 => P1 ?? -1;
+    public int P2 => this.P1 ?? -1;
 }

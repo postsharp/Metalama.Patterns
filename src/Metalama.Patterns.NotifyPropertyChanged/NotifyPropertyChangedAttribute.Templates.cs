@@ -91,7 +91,6 @@ public partial class NotifyPropertyChangedAttribute
 
                 ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
 
-
                 if ( handlerField != null )
                 {
                     if ( value != null )
@@ -110,14 +109,14 @@ public partial class NotifyPropertyChangedAttribute
                         // Local Function Alert (it's easy to miss when skimming through the code)
                         // -----------------------------------------------------------------------
 
-                        void OnChildPropertyChanged( object sender, PropertyChangedEventArgs e )
+                        void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                         {                            
                             var propertyName = e.PropertyName;
 
                             // TODO: If this can be similar to [Frag2] and/or [Frag5] and/or [Frag7] and/or [Frag9], refactor
                             // XXX [Frag1]
                             // NB: If handlerField is not null, node must also be non-null.
-                            foreach ( var childNode in node.Children )
+                            foreach ( var childNode in node!.Children )
                             {
                                 var hasUpdateMethod = childNode.Data.UpdateMethod != null;
                                 var hasRefs = childNode.DirectReferences.Count > 0;
@@ -129,7 +128,7 @@ public partial class NotifyPropertyChangedAttribute
                                         if ( hasUpdateMethod )
                                         {
                                             // Update method will deal with notifications
-                                            childNode.Data.UpdateMethod.Invoke();
+                                            childNode.Data.UpdateMethod!.Invoke();
                                         }
                                         else
                                         {
@@ -178,7 +177,7 @@ public partial class NotifyPropertyChangedAttribute
         {
             if ( !ReferenceEquals( lastValueField.Value, null ) )
             {
-                lastValueField.Value.PropertyChanged -= onPropertyChangedHandlerField.Value;
+                lastValueField.Value!.PropertyChanged -= onPropertyChangedHandlerField.Value;
             }
 
             if ( newValue != null )
@@ -207,7 +206,7 @@ public partial class NotifyPropertyChangedAttribute
                                 if ( hasUpdateMethod )
                                 {
                                     // Update method will deal with notifications
-                                    childNode.Data.UpdateMethod.With( InvokerOptions.Final ).Invoke();
+                                    childNode.Data.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
                                 }
                                 else
                                 {
@@ -282,9 +281,9 @@ public partial class NotifyPropertyChangedAttribute
             var compareExpr = compareUsing switch
             {
                 EqualityComparisonKind.EqualityOperator => (IExpression) (meta.Target.FieldOrProperty.Value != value),
-                EqualityComparisonKind.ThisEquals => (IExpression) !meta.Target.FieldOrProperty.Value.Equals( value ),
+                EqualityComparisonKind.ThisEquals => (IExpression) !meta.Target.FieldOrProperty.Value!.Equals( value ),
                 EqualityComparisonKind.ReferenceEquals => (IExpression) !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ),
-                EqualityComparisonKind.DefaultEqualityComparer => (IExpression) !ctx.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value.Equals( value, meta.Target.FieldOrProperty.Value ),
+                EqualityComparisonKind.DefaultEqualityComparer => (IExpression) !ctx.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value!.Equals( value, meta.Target.FieldOrProperty.Value ),
                 _ => null
             };
 
@@ -454,7 +453,7 @@ public partial class NotifyPropertyChangedAttribute
                                         // Local Function Alert (it's easy to miss when skimming through the code)
                                         // -----------------------------------------------------------------------
 
-                                        void OnChildPropertyChanged( object sender, PropertyChangedEventArgs e )
+                                        void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                                         {
                                             var propertyName = e.PropertyName;
 
@@ -472,7 +471,7 @@ public partial class NotifyPropertyChangedAttribute
                                                         if ( hasUpdateMethod )
                                                         {
                                                             // Update method will deal with notifications
-                                                            childNode.Data.UpdateMethod.With( InvokerOptions.Final ).Invoke();
+                                                            childNode.Data.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
                                                         }
                                                         else
                                                         {
@@ -600,7 +599,7 @@ public partial class NotifyPropertyChangedAttribute
                     if ( hasUpdateMethod )
                     {
                         // Update method will deal with notifications
-                        node.Data.UpdateMethod.With( InvokerOptions.Final ).Invoke();
+                        node.Data.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
                     }
                     else
                     {
@@ -639,7 +638,6 @@ public partial class NotifyPropertyChangedAttribute
             meta.InsertComment( "Template: " + nameof( OnUnmonitoredInpcPropertyChanged ) );
             meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( ( ref NodeData data ) => $"ibh:{data.InpcBaseHandling}" ) );
         }
-
 
         /* 
          * Think of the generated OnUnmonitoredInpcPropertyChanged method as an enhanced overload of OnPropertyChanged, the differences
@@ -707,7 +705,7 @@ public partial class NotifyPropertyChangedAttribute
                                     if ( hasUpdateMethod )
                                     {
                                         // Update method will deal with notifications
-                                        childNode.Data.UpdateMethod.With( InvokerOptions.Final ).Invoke();
+                                        childNode.Data.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
                                     }
                                     else
                                     {

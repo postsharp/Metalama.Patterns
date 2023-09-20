@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -142,7 +141,7 @@ internal static class DependencyGraph
 
         public Node<T> GetOrAddChild( ISymbol childSymbol )
         {
-            Node<T> result;
+            Node<T>? result;
 
             if ( this._children == null )
             {

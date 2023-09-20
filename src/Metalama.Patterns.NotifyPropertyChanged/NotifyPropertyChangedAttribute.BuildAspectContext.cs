@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.Aspects;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
@@ -53,7 +55,7 @@ public sealed partial class NotifyPropertyChangedAttribute
             this._baseOnUnmonitoredInpcPropertyChangedMethod = new( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
         }
 
-        public bool InsertDiagnosticComments { get; set; } = false; // TODO: Set by configuration? Discuss.
+        public bool InsertDiagnosticComments { get; set; } // = true; // TODO: Set by configuration? Discuss.
 
         public IAspectBuilder<INamedType> Builder { get; }
 
@@ -336,25 +338,6 @@ public sealed partial class NotifyPropertyChangedAttribute
                         return InpcInstrumentationKind.None;
                 }
             }
-        }
-
-        private static HashSet<string> BuildPropertyNameLookup( IEnumerable<string>? propertyNames )
-        {
-            var h = new HashSet<string>();
-
-            if ( propertyNames != null )
-            {
-                foreach ( var s in propertyNames )
-                {
-                    if ( s.IndexOf( '.' ) > -1 )
-                    {
-                        throw new ArgumentException( "A property name must not contain period characters.", nameof( propertyNames ) );
-                    }
-                    h.Add( s );
-                }
-            }
-
-            return h;
         }
 
         private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths ) 
