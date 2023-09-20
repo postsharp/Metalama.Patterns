@@ -59,7 +59,7 @@ public sealed class NotNullAttribute : ContractAspect
     {
         if ( value == null! )
         {
-            meta.Target.Project.ContractOptions().Templates.OnNotNullContractViolated( value );
+            meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnNotNullContractViolated( value );
         }
     }
 }

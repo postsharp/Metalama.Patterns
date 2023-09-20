@@ -7,8 +7,6 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheAttributeTests.Static;
 [CachingConfiguration( UseDependencyInjection = false )]
 public class C
 {
-    
     [Cache]
     public static int M() => 5;
-    
 }

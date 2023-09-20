@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
-using Metalama.Framework.Project;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -12,8 +11,6 @@ namespace Metalama.Patterns.Contracts;
 [PublicAPI]
 public static class ContractExtensions
 {
-    public static ContractOptions ContractOptions( this IProject project ) => project.Extension<ContractOptions>();
-
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<ICompilation> compilation, bool includeInternalApis = false )
     {
         bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;

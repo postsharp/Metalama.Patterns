@@ -125,6 +125,6 @@ public class LessThanAttribute : RangeAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().Templates.OnLessThanContractViolated( value, this.DisplayMaxValue );
+        meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnLessThanContractViolated( value, this.DisplayMaxValue );
     }
 }

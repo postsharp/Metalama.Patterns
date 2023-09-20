@@ -10,9 +10,15 @@ namespace Metalama.Patterns.Caching;
 
 [RunTimeOrCompileTime]
 public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchicalOptions<INamedType>, IHierarchicalOptions<INamespace>,
-                                      IHierarchicalOptions<ICompilation>
+                                      IHierarchicalOptions<ICompilation>, ICacheItemConfiguration
 {
-    internal static CachingOptions Default { get; } = new() { UseDependencyInjection = true, Priority = CacheItemPriority.Default, AutoReload = false, IgnoreThisParameter = false };
+    // Default compile-time options are all unset (null) because those provided at run-time by the profile must take precedence.
+    internal static CachingOptions DefaultCompileTimeOptions { get; } = new();
+
+    internal static CachingOptions DefaultProfileOptions { get; } = new()
+    {
+        UseDependencyInjection = true, Priority = CacheItemPriority.Default, AutoReload = false, IgnoreThisParameter = false
+    };
 
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the cached methods.
@@ -53,6 +59,8 @@ public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchic
         init;
     }
 
+    public bool? IsEnabled { get; init; }
+
     /// <summary>
     /// Gets or sets the priority of the cached method.
     /// </summary>
@@ -90,5 +98,5 @@ public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchic
         };
     }
 
-    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( IProject project ) => Default;
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( IProject project ) => DefaultCompileTimeOptions;
 }

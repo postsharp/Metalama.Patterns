@@ -57,8 +57,6 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
 
     void IAspect<IMethod>.BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        Debugger.Break();
-        
         if ( builder.AspectInstance.SecondaryInstances.Length > 0 )
         {
             builder.Diagnostics.Report( CachingDiagnosticDescriptors.Cache.ErrorMultipleInstancesOfCachedAttribute );
@@ -66,7 +64,7 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
             return;
         }
 
-        var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.GetOriginalDefinition().SpecialType ?? SpecialType.None;
+        var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.Definition.SpecialType ?? SpecialType.None;
 
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
 

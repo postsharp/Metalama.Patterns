@@ -58,7 +58,7 @@ public sealed class NotEmptyAttribute : ContractAspect
         {
             if ( string.IsNullOrEmpty( value ) )
             {
-                meta.Target.Project.ContractOptions().Templates.OnNotEmptyContractViolated( value );
+                meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnNotEmptyContractViolated( value );
             }
         }
         else if ( TryGetCompatibleTargetInterface( targetType, out var interfaceType, out var requiresCast ) )
@@ -67,14 +67,14 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
-                    meta.Target.Project.ContractOptions().Templates.OnNotEmptyContractViolated( value );
+                    meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnNotEmptyContractViolated( value );
                 }
             }
             else
             {
                 if ( value == null || value!.Count <= 0 )
                 {
-                    meta.Target.Project.ContractOptions().Templates.OnNotEmptyContractViolated( value );
+                    meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnNotEmptyContractViolated( value );
                 }
             }
         }
@@ -117,7 +117,7 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( t.IsGeneric )
                 {
-                    var originalDefinition = t.GetOriginalDefinition();
+                    var originalDefinition = t.Definition;
 
                     if ( originalDefinition.Equals( typeOfIReadOnlyCollection1 ) ||
                          originalDefinition.Equals( typeOfICollection1 ) )

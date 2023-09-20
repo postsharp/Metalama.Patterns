@@ -1,3 +1,5 @@
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Options;
 using Metalama.Patterns.Caching.Implementation;
@@ -7,14 +9,14 @@ namespace Metalama.Patterns.Caching;
 [RunTimeOrCompileTime]
 public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProvider<CachingOptions>
 {
-    private CachingOptions _options = new CachingOptions();
-    
+    private CachingOptions _options = new();
+
     /// <summary>
     /// Gets or sets the name of the <see cref="CachingProfile"/> that contains the configuration of the cached methods.
     /// </summary>
     public string? ProfileName
     {
-        get => this._options.ProfileName ?? CachingOptions.Default.ProfileName;
+        get => this._options.ProfileName ?? CachingOptions.DefaultCompileTimeOptions.ProfileName;
         set => this._options = this._options with { ProfileName = value };
     }
 
@@ -24,7 +26,7 @@ public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProv
     /// </summary>
     public bool AutoReload
     {
-        get => this._options.AutoReload ?? CachingOptions.Default.AutoReload!.Value;
+        get => this._options.AutoReload ?? CachingOptions.DefaultCompileTimeOptions.AutoReload!.Value;
         set => this._options = this._options with { AutoReload = value };
     }
 
@@ -34,7 +36,7 @@ public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProv
     /// </summary>
     public double AbsoluteExpiration
     {
-        get => (this._options.AbsoluteExpiration ?? CachingOptions.Default.AbsoluteExpiration)?.TotalMinutes ?? 0;
+        get => (this._options.AbsoluteExpiration ?? CachingOptions.DefaultCompileTimeOptions.AbsoluteExpiration)?.TotalMinutes ?? 0;
         set => this._options = this._options with { AbsoluteExpiration = TimeSpan.FromMinutes( value ) };
     }
 
@@ -44,7 +46,7 @@ public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProv
     /// </summary>
     public double SlidingExpiration
     {
-        get => (this._options.SlidingExpiration ?? CachingOptions.Default.SlidingExpiration)?.TotalMinutes ?? 0;
+        get => (this._options.SlidingExpiration ?? CachingOptions.DefaultCompileTimeOptions.SlidingExpiration)?.TotalMinutes ?? 0;
         set => this._options = this._options with { SlidingExpiration = TimeSpan.FromMinutes( value ) };
     }
 
@@ -53,7 +55,7 @@ public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProv
     /// </summary>
     public CacheItemPriority Priority
     {
-        get => this._options.Priority ?? CachingOptions.Default.Priority!.Value;
+        get => this._options.Priority ?? CachingOptions.DefaultCompileTimeOptions.Priority!.Value;
         set => this._options = this._options with { Priority = value };
     }
 
@@ -63,13 +65,13 @@ public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProv
     /// </summary>
     public bool IgnoreThisParameter
     {
-        get => this._options.IgnoreThisParameter ?? CachingOptions.Default.IgnoreThisParameter!.Value;
+        get => this._options.IgnoreThisParameter ?? CachingOptions.DefaultCompileTimeOptions.IgnoreThisParameter!.Value;
         set => this._options = this._options with { IgnoreThisParameter = value };
     }
 
     public bool UseDependencyInjection
     {
-        get => this._options.UseDependencyInjection ?? CachingOptions.Default.UseDependencyInjection!.Value;
+        get => this._options.UseDependencyInjection ?? CachingOptions.DefaultCompileTimeOptions.UseDependencyInjection!.Value;
         set => this._options = this._options with { UseDependencyInjection = value };
     }
 

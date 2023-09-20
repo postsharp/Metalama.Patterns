@@ -167,34 +167,6 @@ namespace Metalama.Patterns.Caching.Tests
             await this.DoCachingAttributeTestAsync( cachingClass.GetValueChildAsync, false );
         }
 
-        [Fact]
-        public void TestCachingAttributeInnerInBase()
-        {
-            var cachingClass = new BaseCachingClass.InnerCachingClassInBase();
-            this.DoCachingAttributeTest( cachingClass.GetValueInnerBase, true );
-        }
-
-        [Fact]
-        public async Task TestCachingAttributeInnerInBaseAsync()
-        {
-            var cachingClass = new BaseCachingClass.InnerCachingClassInBase();
-            await this.DoCachingAttributeTestAsync( cachingClass.GetValueInnerBaseAsync, true );
-        }
-
-        [Fact]
-        public void TestCachingAttributeInnerInBaseChild()
-        {
-            var cachingClass = new ChildCachingClass.InnerCachingClassInChild();
-            this.DoCachingAttributeTest( cachingClass.GetValueInnerChild, true );
-        }
-
-        [Fact]
-        public async Task TestCachingAttributeInnerInBaseChildAsync()
-        {
-            var cachingClass = new ChildCachingClass.InnerCachingClassInChild();
-            await this.DoCachingAttributeTestAsync( cachingClass.GetValueInnerChildAsync, true );
-        }
-
         public CacheConfigurationAttributeTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

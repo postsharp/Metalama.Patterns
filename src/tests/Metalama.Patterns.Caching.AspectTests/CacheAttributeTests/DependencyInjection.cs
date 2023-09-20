@@ -6,8 +6,6 @@ namespace Metalama.Patterns.Caching.AspectTests.CacheAttributeTests.DependencyIn
 
 public class C
 {
-    
     [Cache]
     public int M() => 5;
-    
 }
