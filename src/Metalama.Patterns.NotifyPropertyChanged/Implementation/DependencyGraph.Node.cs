@@ -2,23 +2,28 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System.Text;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
-internal static partial class DependencyGraph
+internal partial class DependencyGraph
 {
+    /// <summary>
+    /// Unspecialized <see cref="Node{TDerived}"/>.
+    /// </summary>
+    public sealed class Node : Node<Node> { }
+
     [CompileTime]
-    public class Node<T> : INode
+    public class Node<TDerived>
+        where TDerived : Node<TDerived>, new()
     {
-        private readonly ISymbol? _symbol;
-        private readonly IFieldOrProperty? _fieldOrProperty;
+        private ISymbol? _symbol;
+        private IFieldOrProperty? _fieldOrProperty;
         private string? _dottedPropertyPath;
         private string? _contiguousPropertyPath;
-        private Dictionary<ISymbol, Node<T>>? _children;
-        private HashSet<Node<T>>? _referencedBy;
+        private Dictionary<ISymbol, TDerived>? _children;
+        private HashSet<TDerived>? _referencedBy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Node{T}"/> class which represents the root node of a tree.
@@ -27,25 +32,28 @@ internal static partial class DependencyGraph
         {
         }
 
-        private Node( Node<T> parent, ISymbol symbol, ICompilation compilation ) 
+        private void InitializeBase( TDerived parent, ISymbol symbol, IFieldOrProperty fieldOrProperty )
         {
             this.Parent = parent ?? throw new ArgumentNullException( nameof( parent ) );
             this._symbol = symbol ?? throw new ArgumentNullException( nameof( symbol ) );
-            this._fieldOrProperty = (IFieldOrProperty) compilation.GetDeclaration( symbol );
+            this._fieldOrProperty = fieldOrProperty ?? throw new ArgumentNullException( nameof( fieldOrProperty ) );
             this.Depth = parent.Depth + 1;
+            this.Initialize();
         }
 
-        private static Exception NewNotSupportedOnRootNodeException()
+        protected virtual void Initialize() { }
+
+        protected static Exception NewNotSupportedOnRootNodeException()
             => new InvalidOperationException( "The operation is not supported on a root node." );
 
         public bool IsRoot => this.Parent == null;
 
-        public Node<T>? Parent { get; }
+        public TDerived? Parent { get; private set; }
 
         /// <summary>
         /// Gets the depth of the current node. The unparented root node has depth zero.
         /// </summary>
-        public int Depth { get; }
+        public int Depth { get; private set; }
 
         /// <summary>
         /// Gets the Roslyn symbol of the node. Use <see cref="FieldOrProperty"/> for the Metalama equivalent.
@@ -61,8 +69,8 @@ internal static partial class DependencyGraph
         /// <summary>
         /// Gets a property path like "A1" or "A1.B1".
         /// </summary>
-        public string DottedPropertyPath 
-            => this._dottedPropertyPath ??= 
+        public string DottedPropertyPath
+            => this._dottedPropertyPath ??=
                 this.IsRoot
                 ? throw NewNotSupportedOnRootNodeException()
                 : this.Parent!.IsRoot ? this.Name : $"{this.Parent.DottedPropertyPath}.{this.Name}";
@@ -77,25 +85,18 @@ internal static partial class DependencyGraph
                 : this.Parent!.IsRoot ? this.Name : $"{this.Parent.ContiguousPropertyPath}.{this.Name}";
 
         /// <summary>
-        /// Extensibility point for the consumer.
-        /// </summary>
-#pragma warning disable SA1401 // Fields should be private
-        public T? Data;
-#pragma warning restore SA1401 // Fields should be private
-
-        /// <summary>
         /// Gets the name of the node. This is a synonym for <c>Symbol.Name</c>.
         /// </summary>
         public string Name => this.Symbol.Name;
 
-        public IReadOnlyCollection<Node<T>> Children => ((IReadOnlyCollection<Node<T>>?) this._children?.Values) ?? Array.Empty<Node<T>>();
+        public IReadOnlyCollection<TDerived> Children => ((IReadOnlyCollection<TDerived>?) this._children?.Values) ?? Array.Empty<TDerived>();
 
         public bool HasChildren => this._children != null;
 
         /// <summary>
         /// Gets the members that reference the current node.
         /// </summary>
-        public IReadOnlyCollection<Node<T>> DirectReferences => ((IReadOnlyCollection<Node<T>>?) this._referencedBy) ?? Array.Empty<Node<T>>();
+        public IReadOnlyCollection<TDerived> DirectReferences => ((IReadOnlyCollection<TDerived>?) this._referencedBy) ?? Array.Empty<TDerived>();
 
         /// <summary>
         /// Gets the distinct set of members that reference, directly or indirectly, the current node. By default, the search follows only <see cref="DirectReferences"/>;
@@ -104,22 +105,22 @@ internal static partial class DependencyGraph
         /// </summary>
         /// <param name="includeImmediateChild"></param>
         /// <returns></returns>
-        public IReadOnlyCollection<Node<T>> GetAllReferences( Func<Node<T>,bool>? includeImmediateChild = null )
+        public IReadOnlyCollection<TDerived> GetAllReferences( Func<TDerived, bool>? includeImmediateChild = null )
         {
             // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
             // However, it's not recusive so there's no risk of stack overflow. So safe, but slow.
 
             if ( this._referencedBy == null && includeImmediateChild == null )
             {
-                return Array.Empty<Node<T>>();
+                return Array.Empty<TDerived>();
             }
 
-            var refsToFollow = new Stack<Node<T>>(
+            var refsToFollow = new Stack<TDerived>(
                 includeImmediateChild == null
                     ? this.DirectReferences
                     : this.Children.Where( n => includeImmediateChild( n ) ).SelectMany( n => n.DirectReferences ).Concat( this.DirectReferences ) );
-            
-            var refsFollowed = new HashSet<Node<T>>();
+
+            var refsFollowed = new HashSet<TDerived>();
 
             while ( refsToFollow.Count > 0 )
             {
@@ -140,11 +141,11 @@ internal static partial class DependencyGraph
             return refsFollowed;
         }
 
-        public IEnumerable<Node<T>> DecendantsDepthFirst()
+        public IEnumerable<TDerived> DecendantsDepthFirst()
         {
             // NB: No loop detection.
 
-            var stack = new Stack<Node<T>>( this.Children );
+            var stack = new Stack<TDerived>( this.Children );
 
             while ( stack.Count > 0 )
             {
@@ -164,7 +165,7 @@ internal static partial class DependencyGraph
         /// </summary>
         /// <param name="includeRoot"></param>
         /// <returns></returns>
-        public IEnumerable<Node<T>> Ancestors( bool includeRoot = false )
+        public IEnumerable<TDerived> Ancestors( bool includeRoot = false )
             => this.AncestorsCore( includeRoot, false );
 
         /// <summary>
@@ -172,10 +173,10 @@ internal static partial class DependencyGraph
         /// </summary>
         /// <param name="includeRoot"></param>
         /// <returns></returns>
-        public IEnumerable<Node<T>> AncestorsAndSelf( bool includeRoot = false )
+        public IEnumerable<TDerived> AncestorsAndSelf( bool includeRoot = false )
             => this.AncestorsCore( includeRoot, true );
 
-        private IEnumerable<Node<T>> AncestorsCore( bool includeRoot, bool includeSelf )
+        private IEnumerable<TDerived> AncestorsCore( bool includeRoot, bool includeSelf )
         {
             var node = includeSelf ? this : this.Parent;
 
@@ -185,12 +186,12 @@ internal static partial class DependencyGraph
                 {
                     break;
                 }
-                yield return node;
+                yield return (TDerived) node;
                 node = node.Parent;
             }
         }
 
-        public Node<T> GetAncestorOrSelfAtDepth( int depth )
+        public TDerived GetAncestorOrSelfAtDepth( int depth )
         {
             if ( depth > this.Depth || depth < 0 )
             {
@@ -204,24 +205,26 @@ internal static partial class DependencyGraph
                 n = n.Parent;
             }
 
-            return n;
+            return (TDerived) n;
         }
 
-        public Node<T> GetOrAddChild( ISymbol childSymbol, ICompilation compilation )
+        public TDerived GetOrAddChild( ISymbol childSymbol, IFieldOrProperty fieldOrProperty )
         {
-            Node<T>? result;
+            TDerived? result;
 
             if ( this._children == null )
             {
                 this._children = new();
-                result = new Node<T>( this, childSymbol, compilation );
-                this._children.Add( childSymbol, result );             
+                result = new TDerived();
+                result.InitializeBase( (TDerived)this, childSymbol, fieldOrProperty );
+                this._children.Add( childSymbol, result );
             }
             else
             {
                 if ( !this._children.TryGetValue( childSymbol, out result ) )
                 {
-                    result = new Node<T>( this, childSymbol, compilation );
+                    result = new TDerived();
+                    result.InitializeBase( (TDerived)this, childSymbol, fieldOrProperty );
                     this._children.Add( childSymbol, result );
                 }
             }
@@ -229,21 +232,15 @@ internal static partial class DependencyGraph
             return result;
         }
 
-        INode INode.GetOrAddChild( ISymbol childSymbol, ICompilation compilation )
-            => this.GetOrAddChild( childSymbol, compilation );
-
-        public Node<T>? GetChild( ISymbol? childSymbol ) 
+        public TDerived? GetChild( ISymbol? childSymbol )
             => childSymbol == null || this._children == null || !this._children.TryGetValue( childSymbol, out var result )
                 ? null : result;
 
-        public void AddReferencedBy( Node<T> node )
+        public void AddReferencedBy( TDerived node )
         {
             this._referencedBy ??= new();
             this._referencedBy.Add( node );
         }
-
-        void INode.AddReferencedBy( INode node )
-            => this.AddReferencedBy( (Node<T>) node );
 
         public override string ToString()
         {
@@ -252,32 +249,34 @@ internal static partial class DependencyGraph
             return sb.ToString();
         }
 
-        public string ToString( GetDisplayStringForData? displayData )
+        public string ToString( string? format )
         {
             var sb = new StringBuilder();
-            this.ToString( sb, 0, displayData: displayData );
+            this.ToString( sb, 0, format: format );
             return sb.ToString();
         }
 
-        public string ToString( Node<T>? highlight, GetDisplayStringForData? displayData = null )
+        public string ToString( TDerived? highlight, string? format = null )
         {
             var sb = new StringBuilder();
-            this.ToString( sb, 0, highlight == null ? null : n => n == highlight, displayData );
+            this.ToString( sb, 0, highlight == null ? null : n => n == highlight, format );
             return sb.ToString();
         }
 
-        public string ToString( Func<Node<T>,bool>? shouldHighlight, GetDisplayStringForData? displayData = null )
+        public string ToString( Func<TDerived, bool>? shouldHighlight, string? format = null )
         {
             var sb = new StringBuilder();
-            this.ToString( sb, 0, shouldHighlight, displayData );
+            this.ToString( sb, 0, shouldHighlight, format );
             return sb.ToString();
         }
 
-        public delegate string GetDisplayStringForData( ref T? data );
-
-        private void ToString( StringBuilder appendTo, int indent, Func<Node<T>,bool>? shouldHighlight = null, GetDisplayStringForData? displayData = null )
+        protected virtual void ToStringAppendToLine( StringBuilder appendTo, string? format )
         {
-            if ( shouldHighlight != null && shouldHighlight( this ) )
+        }
+
+        protected virtual void ToString( StringBuilder appendTo, int indent, Func<TDerived, bool>? shouldHighlight = null, string? format = null )
+        {
+            if ( shouldHighlight != null && shouldHighlight( (TDerived) this ) )
             {
                 appendTo.Append( ' ', indent - 2 ).Append( "* " );
             }
@@ -285,7 +284,7 @@ internal static partial class DependencyGraph
             {
                 appendTo.Append( ' ', indent );
             }
-            
+
             appendTo.Append( this._symbol?.Name ?? "<root>" );
 
             var allRefs = this.GetAllReferences();
@@ -295,14 +294,7 @@ internal static partial class DependencyGraph
                 appendTo.Append( " [ " ).Append( string.Join( ", ", allRefs.Select( n => n.Name ).OrderBy( n => n ) ) ).Append( " ]" );
             }
 
-            if ( displayData != null )
-            {
-                var dd = displayData( ref this.Data );
-                if ( !string.IsNullOrEmpty( dd ) )
-                {
-                    appendTo.Append( ' ' ).Append( dd );
-                }
-            }
+            this.ToStringAppendToLine( appendTo, format );
 
             appendTo.AppendLine();
 
@@ -311,7 +303,7 @@ internal static partial class DependencyGraph
                 indent += 2;
                 foreach ( var child in this._children.Values.OrderBy( c => c.Name ) )
                 {
-                    child.ToString( appendTo, indent, shouldHighlight, displayData );
+                    child.ToString( appendTo, indent, shouldHighlight );
                 }
             }
         }

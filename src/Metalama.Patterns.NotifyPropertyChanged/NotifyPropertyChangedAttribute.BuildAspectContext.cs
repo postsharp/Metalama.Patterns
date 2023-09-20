@@ -123,13 +123,13 @@ public sealed partial class NotifyPropertyChangedAttribute
         public IProperty GetDefaultEqualityComparerForType( IType type )
             => this.Type_EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
 
-        private DependencyGraph.Node<NodeData>? _dependencyGraph;
+        private Node? _dependencyGraph;
 
-        private DependencyGraph.Node<NodeData> PrepareDependencyGraph()
+        private Node PrepareDependencyGraph()
         {
             var hasReportedDiagnosticError = false;
 
-            var graph = Implementation.DependencyGraph.GetDependencyGraph<NodeData>(
+            var graph = Implementation.DependencyGraph.GetDependencyGraph<Node>(
                 this.Target,
                 ( diagnostic, location ) =>
                 {
@@ -139,10 +139,7 @@ public sealed partial class NotifyPropertyChangedAttribute
             
             foreach ( var node in graph.DecendantsDepthFirst() )
             {
-                node.Data.Initialize( this, node );
-
-                var baseHandling = this.DetermineInpcBaseHandling( node );
-                node.Data.Initialize2( baseHandling );
+                node.Initialize( this );
             }
 
             if ( hasReportedDiagnosticError )
@@ -153,49 +150,11 @@ public sealed partial class NotifyPropertyChangedAttribute
             return graph;
         }
 
-        private InpcBaseHandling DetermineInpcBaseHandling( DependencyGraph.Node<NodeData> node )
+        public Node DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
+
+        public IField GetOrCreateLastValueField( Node node )
         {
-            switch ( node.Data.PropertyTypeInpcInstrumentationKind )
-            {
-                case InpcInstrumentationKind.Unknown:
-                    return InpcBaseHandling.Unknown;
-
-                case InpcInstrumentationKind.None:
-                    return InpcBaseHandling.NA;
-
-                case InpcInstrumentationKind.Implicit:
-                case InpcInstrumentationKind.Explicit:
-                    if ( node.Depth == 1 )
-                    {
-                        // Root property
-                        return node.FieldOrProperty.DeclaringType == this.Target
-                            ? InpcBaseHandling.NA
-                            : this.HasInheritedOnChildPropertyChangedPropertyPath( node.Name )
-                                ? InpcBaseHandling.OnChildPropertyChanged
-                                : this.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( node.Name )
-                                    ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
-                                    : InpcBaseHandling.OnPropertyChanged;
-                    }
-                    else
-                    {
-                        // Child property
-                        return this.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath )
-                            ? InpcBaseHandling.OnChildPropertyChanged
-                            : this.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( node.DottedPropertyPath )
-                                ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
-                                : InpcBaseHandling.None;
-                    }
-
-                default:
-                    throw new NotSupportedException();
-            }
-        }
-
-        public DependencyGraph.Node<NodeData> DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
-
-        public IField GetOrCreateLastValueField( DependencyGraph.Node<NodeData> node )
-        {
-            if ( node.Data.LastValueField == null )
+            if ( node.LastValueField == null )
             {
                 var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.ContiguousPropertyPath}" );
 
@@ -207,15 +166,15 @@ public sealed partial class NotifyPropertyChangedAttribute
                     OverrideStrategy.Fail,
                     b => b.Accessibility = Accessibility.Private );
 
-                node.Data.SetLastValueField( introduceLastValueFieldResult.Declaration );
+                node.SetLastValueField( introduceLastValueFieldResult.Declaration );
             }
 
-            return node.Data.LastValueField!;
+            return node.LastValueField!;
         }
 
-        public IField GetOrCreateHandlerField( DependencyGraph.Node<NodeData> node )
+        public IField GetOrCreateHandlerField( Node node )
         {
-            if ( node.Data.HandlerField == null )
+            if ( node.HandlerField == null )
             {
                 var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.ContiguousPropertyPath}PropertyChangedHandler" );
 
@@ -227,10 +186,10 @@ public sealed partial class NotifyPropertyChangedAttribute
                     OverrideStrategy.Fail,
                     b => b.Accessibility = Accessibility.Private );
 
-                node.Data.SetHandlerField( introduceHandlerFieldResult.Declaration );
+                node.SetHandlerField( introduceHandlerFieldResult.Declaration );
             }
 
-            return node.Data.HandlerField!;
+            return node.HandlerField!;
         }
 
         private HashSet<string>? _existingMemberNames;

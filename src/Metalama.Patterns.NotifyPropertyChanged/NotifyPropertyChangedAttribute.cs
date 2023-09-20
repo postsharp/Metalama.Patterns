@@ -58,7 +58,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
 
         ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.AddRange(
             ctx.DependencyGraph.DecendantsDepthFirst()
-            .Where( n => n.Data.InpcBaseHandling switch
+            .Where( n => n.InpcBaseHandling switch
             {
                 InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined => true,
                 InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
@@ -103,19 +103,19 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
         // Ensure that all required fields are generated in advance of template execution.
         // The node selection logic mirrors that of the template's loops and conditons.
 
-        IEnumerable<DependencyGraph.Node<NodeData>> nodes = Array.Empty<DependencyGraph.Node<NodeData>>();
+        IEnumerable<Node> nodes = Array.Empty<Node>();
 
         if ( ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
         {
             foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst()
-                .Where( n => n.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
+                .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
             {
                 _ = ctx.GetOrCreateHandlerField( node );
             }
         }
 
         foreach ( var node in ctx.DependencyGraph.Children
-            .Where( node => node.Data.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
+            .Where( node => node.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
         {
             _ = ctx.GetOrCreateHandlerField( node );
             _ = ctx.GetOrCreateLastValueField( node );
@@ -298,7 +298,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             if ( node.Children.Count == 0 || node.Parent!.IsRoot )
             {
                 // Leaf nodes and root properties should never have update methods.
-                node.Data.SetUpdateMethod( null );
+                node.SetUpdateMethod( null );
                 continue;
             }
 
@@ -307,7 +307,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
             IMethod? thisUpdateMethod = null;
 
             // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-            if ( node.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
+            if ( node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
                 && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(node.DottedPropertyPath) )
             {
                 var lastValueField = ctx.GetOrCreateLastValueField( node );
@@ -348,7 +348,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
                 ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( node.DottedPropertyPath );
             }
 
-            node.Data.SetUpdateMethod( thisUpdateMethod );
+            node.SetUpdateMethod( thisUpdateMethod );
         }
     }
 

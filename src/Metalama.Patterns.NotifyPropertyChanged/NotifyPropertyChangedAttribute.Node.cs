@@ -3,41 +3,65 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
+using System.Text;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
 public sealed partial class NotifyPropertyChangedAttribute
 {
-    // NodeData is currently separated from DependencyGraph.Node to support different future [NPC]
-    // implementation strategies. Consider merging common features back into Node, and/or
-    // merge the whole of NodeData back into Node.
-
     /// <summary>
-    /// Per-node data required by the current implementation strategy of <see cref="NotifyPropertyChangedAttribute"/>.
+    /// Dependency graph node specialized for the current implementation strategy of <see cref="NotifyPropertyChangedAttribute"/>.
     /// </summary>
-    /// <remarks>
-    /// Avoid putting complex logic here. Aim for data only, and caching of simple LINQ expression results.
-    /// </remarks>
     [CompileTime]
-    private struct NodeData
+    private class Node : DependencyGraph.Node<Node>
     {
         /// <summary>
-        /// Method called for each node once the graph has been built. Called in <see cref="DependencyGraph.Node{T}.DecendantsDepthFirst"/> order.
+        /// Method called for each node once the graph has been built. Called in <see cref="DependencyGraph.Node{TDerived}.DecendantsDepthFirst"/> order.
         /// </summary>
         /// <param name="ctx"></param>
-        /// <param name="node"></param>
-        public void Initialize( BuildAspectContext ctx, DependencyGraph.Node<NodeData> node )
+        public void Initialize( BuildAspectContext ctx )
         {
-            this._node = node;
-            this.PropertyTypeInpcInstrumentationKind = ctx.GetInpcInstrumentationKind( node.FieldOrProperty.Type );
-        }
+            this.PropertyTypeInpcInstrumentationKind = ctx.GetInpcInstrumentationKind( this.FieldOrProperty.Type );
+            this.InpcBaseHandling = DetermineInpcBaseHandling();
 
-        public void Initialize2( InpcBaseHandling inpcBaseHandling )
-        {
-            this.InpcBaseHandling = inpcBaseHandling;
-        }
+            InpcBaseHandling DetermineInpcBaseHandling()
+            {
+                switch ( this.PropertyTypeInpcInstrumentationKind )
+                {
+                    case InpcInstrumentationKind.Unknown:
+                        return InpcBaseHandling.Unknown;
 
-        private DependencyGraph.Node<NodeData> _node;
+                    case InpcInstrumentationKind.None:
+                        return InpcBaseHandling.NA;
+
+                    case InpcInstrumentationKind.Implicit:
+                    case InpcInstrumentationKind.Explicit:
+                        if ( this.Depth == 1 )
+                        {
+                            // Root property
+                            return this.FieldOrProperty.DeclaringType == ctx.Target
+                                ? InpcBaseHandling.NA
+                                : ctx.HasInheritedOnChildPropertyChangedPropertyPath( this.Name )
+                                    ? InpcBaseHandling.OnChildPropertyChanged
+                                    : ctx.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( this.Name )
+                                        ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
+                                        : InpcBaseHandling.OnPropertyChanged;
+                        }
+                        else
+                        {
+                            // Child property
+                            return ctx.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
+                                ? InpcBaseHandling.OnChildPropertyChanged
+                                : ctx.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( this.DottedPropertyPath )
+                                    ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
+                                    : InpcBaseHandling.None;
+                        }
+
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.
@@ -84,8 +108,8 @@ public sealed partial class NotifyPropertyChangedAttribute
                 // NB: This will intentionally throw if any encountered node has not yet had SetUpdateMethod called.
                 // This ensures that the outcome is consistent and the result can be cached.
 
-                this._childUpdateMethods ??= this._node.Children
-                    .Select( n => n.Data.UpdateMethod )
+                this._childUpdateMethods ??= this.Children
+                    .Select( n => n.UpdateMethod )
                     .Where( m => m != null )
                     .ToList()!;
 
@@ -110,7 +134,7 @@ public sealed partial class NotifyPropertyChangedAttribute
             {
                 if ( !this.UpdateMethodHasBeenSet )
                 {
-                    throw new InvalidOperationException( $"{nameof( this.UpdateMethod )} for node {this._node.Name} has not been set yet, so cannot be read." );
+                    throw new InvalidOperationException( $"{nameof( this.UpdateMethod )} for node {this.Name} has not been set yet, so cannot be read." );
                 }
 
                 return this._updateMethod;
@@ -128,6 +152,16 @@ public sealed partial class NotifyPropertyChangedAttribute
 
             this._updateMethod = updateMethod;
             this.UpdateMethodHasBeenSet = true;
-        }        
+        }
+
+        protected override void ToStringAppendToLine( StringBuilder appendTo, string? format )
+        {
+#pragma warning disable CA1307 // Specify StringComparison for clarity
+            if ( format != null && format.Contains( "[ibh]" ) )
+            {
+                appendTo.Append( " ibh:" ).Append( this.InpcBaseHandling.ToString() );
+            }
+#pragma warning restore CA1307 // Specify StringComparison for clarity
+        }
     }
 }

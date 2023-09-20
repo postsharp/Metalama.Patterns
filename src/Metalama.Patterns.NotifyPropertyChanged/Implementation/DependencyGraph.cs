@@ -15,9 +15,10 @@ internal static partial class DependencyGraph
 {
     public delegate void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null );
 
-    public static Node<T> GetDependencyGraph<T>( INamedType type, ReportDiagnostic reportDiagnostic )
+    public static TNode GetDependencyGraph<TNode>( INamedType type, ReportDiagnostic reportDiagnostic )
+        where TNode : Node<TNode>, new()
     {
-        var tree = new Node<T>();
+        var tree = new TNode();
 
         foreach ( var p in type.Properties )
         {
@@ -27,10 +28,11 @@ internal static partial class DependencyGraph
         return tree;
     }
 
-    private static void AddReferencedProperties(
-        INode tree,
+    private static void AddReferencedProperties<TNode>(
+        TNode tree,
         IProperty property,
         ReportDiagnostic reportDiagnostic )
+        where TNode : Node<TNode>, new()
     {
         var compilation = property.Compilation.GetRoslynCompilation();
 
@@ -55,14 +57,16 @@ internal static partial class DependencyGraph
 
         var semanticModel = property.Compilation.GetSemanticModel( body.SyntaxTree );
 
-        var visitor = new Visitor( tree, propertySymbol, property.Compilation, semanticModel, reportDiagnostic );
+        var visitor = new Visitor<TNode>( tree, property, propertySymbol, property.Compilation, semanticModel, reportDiagnostic );
         visitor.Visit( body );
     }
 
-    private class Visitor : CSharpSyntaxWalker
+    private class Visitor<TNode> : CSharpSyntaxWalker
+        where TNode : Node<TNode>, new()
     {
-        private readonly INode _tree;
-        private readonly ISymbol _origin;
+        private readonly TNode _tree;
+        private readonly IFieldOrProperty _originFieldOrProperty;
+        private readonly ISymbol _originSymbol;
         private readonly ICompilation _compilation;
         private readonly SemanticModel _semanticModel;
         private readonly List<IPropertySymbol> _properties = new();
@@ -72,14 +76,16 @@ internal static partial class DependencyGraph
         private int _accessorStartDepth;
 
         public Visitor(
-            INode tree,
-            ISymbol origin,
+            TNode tree,
+            IFieldOrProperty originFieldOrProperty,
+            ISymbol originSymbol,
             ICompilation compilation,
             SemanticModel semanticModel,            
             ReportDiagnostic reportDiagnostic )
         {
             this._tree = tree;
-            this._origin = origin;
+            this._originSymbol = originSymbol;
+            this._originFieldOrProperty = originFieldOrProperty;
             this._compilation = compilation;
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
@@ -97,12 +103,12 @@ internal static partial class DependencyGraph
                 {
                     var treeNode = this._tree;
 
-                    for ( var i = 0; i < this._properties.Count; i++ )
+                    foreach ( var p in this._properties )
                     {
-                        treeNode = treeNode.GetOrAddChild( this._properties[i], this._compilation );
+                        treeNode = treeNode.GetOrAddChild( p, (IFieldOrProperty) this._compilation.GetDeclaration( p ) );
                     }
 
-                    treeNode.AddReferencedBy( this._tree.GetOrAddChild( this._origin, this._compilation ) );
+                    treeNode.AddReferencedBy( this._tree.GetOrAddChild( this._originSymbol, this._originFieldOrProperty ) );
                 }
 
                 this.ClearCurrentAccessor();

@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
@@ -29,10 +28,10 @@ public partial class NotifyPropertyChangedAttribute
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
             var handlerField = (IField?) meta.Tags["handlerField"];
-            var node = (DependencyGraph.Node<NodeData>?) meta.Tags["node"];
+            var node = (Node?) meta.Tags["node"];
             var inpcImplementationKind = node == null
                     ? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type )
-                    : node.Data.PropertyTypeInpcInstrumentationKind;
+                    : node.PropertyTypeInpcInstrumentationKind;
             var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
             if ( ctx.InsertDiagnosticComments )
@@ -76,13 +75,13 @@ public partial class NotifyPropertyChangedAttribute
                 if ( node != null )
                 {
                     // Update methods will deal with notifications - *for those children which have update methods*
-                    foreach ( var method in node.Data.ChildUpdateMethods )
+                    foreach ( var method in node.ChildUpdateMethods )
                     {
                         method.With( InvokerOptions.Final ).Invoke();
                     }
                     
                     // Notify refs to the current node and any children without an update method.
-                    foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                    foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
                     {
                         ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                     }
@@ -118,7 +117,7 @@ public partial class NotifyPropertyChangedAttribute
                             // NB: If handlerField is not null, node must also be non-null.
                             foreach ( var childNode in node!.Children )
                             {
-                                var hasUpdateMethod = childNode.Data.UpdateMethod != null;
+                                var hasUpdateMethod = childNode.UpdateMethod != null;
                                 var hasRefs = childNode.DirectReferences.Count > 0;
 
                                 if ( hasUpdateMethod || hasRefs )
@@ -128,7 +127,7 @@ public partial class NotifyPropertyChangedAttribute
                                         if ( hasUpdateMethod )
                                         {
                                             // Update method will deal with notifications
-                                            childNode.Data.UpdateMethod!.Invoke();
+                                            childNode.UpdateMethod!.Invoke();
                                         }
                                         else
                                         {
@@ -155,7 +154,7 @@ public partial class NotifyPropertyChangedAttribute
     [Template]
     private static void UpdateChildInpcProperty(
         [CompileTime] BuildAspectContext ctx,
-        [CompileTime] DependencyGraph.Node<NodeData> node,
+        [CompileTime] Node node,
         [CompileTime] IExpression accessChildExpression,
         [CompileTime] IField lastValueField,
         [CompileTime] IField onPropertyChangedHandlerField )
@@ -196,7 +195,7 @@ public partial class NotifyPropertyChangedAttribute
                     // XXX [Frag2]
                     foreach ( var childNode in node.Children )
                     {
-                        var hasUpdateMethod = childNode.Data.UpdateMethod != null;
+                        var hasUpdateMethod = childNode.UpdateMethod != null;
                         var hasRefs = childNode.DirectReferences.Count > 0;
                         
                         if ( hasUpdateMethod || hasRefs )
@@ -206,7 +205,7 @@ public partial class NotifyPropertyChangedAttribute
                                 if ( hasUpdateMethod )
                                 {
                                     // Update method will deal with notifications
-                                    childNode.Data.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
+                                    childNode.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
                                 }
                                 else
                                 {
@@ -231,20 +230,20 @@ public partial class NotifyPropertyChangedAttribute
             // TODO: Is this similar to [Frag3] and/or [Frag6] and/or [Frag8]? Can we refactor?
             // XXX [Frag4]
             // Update methods will deal with notifications - *for those children which have update methods*
-            foreach ( var method in node.Data.ChildUpdateMethods )
+            foreach ( var method in node.ChildUpdateMethods )
             {
                 method.With( InvokerOptions.Final ).Invoke();
             }
 
             // Notify refs to the current node and any children without an update method.
-            foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+            foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
             {
                 ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
             }
             // XXX
 
             // Don't notify if we're joining on to existing NCPC support from a base type, or we'll be stuck in a loop.
-            if ( node.Parent!.Data.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
+            if ( node.Parent!.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
             {
                 ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Parent!.DottedPropertyPath, node.Name );
             }
@@ -261,7 +260,7 @@ public partial class NotifyPropertyChangedAttribute
         set
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
-            var node = (DependencyGraph.Node<NodeData>?) meta.Tags["node"];
+            var node = (Node?) meta.Tags["node"];
             var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
             var propertyTypeInstrumentationKind = (InpcInstrumentationKind) meta.Tags["propertyTypeInstrumentationKind"]!;
 
@@ -309,7 +308,7 @@ public partial class NotifyPropertyChangedAttribute
         if ( ctx.InsertDiagnosticComments )
         {
             meta.InsertComment( "Template: " + nameof( this.OnPropertyChanged ) );
-            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( ( ref NodeData data ) => $"ibh:{data.InpcBaseHandling}" ) );
+            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
         }
 
         foreach ( var node in ctx.DependencyGraph.Children )
@@ -323,7 +322,7 @@ public partial class NotifyPropertyChangedAttribute
                 continue;
             }
 
-            if ( node.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged && ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
+            if ( node.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged && ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
             {
                 if ( ctx.InsertDiagnosticComments )
                 {
@@ -332,13 +331,13 @@ public partial class NotifyPropertyChangedAttribute
                 continue;
             }
 
-            IReadOnlyCollection<DependencyGraph.Node<NodeData>> refsToNotify;
+            IReadOnlyCollection<Node> refsToNotify;
 
             // When a base supports OnChildPropertyChanged for a root property, changes to the ref itself will
             // be notified by OnPropertyChanged (the base won't call OnChildPropertyChanged for each child property
             // when the ref changes).
 
-            if ( node.Data.InpcBaseHandling == InpcBaseHandling.OnChildPropertyChanged && node.Depth > 1 )
+            if ( node.InpcBaseHandling == InpcBaseHandling.OnChildPropertyChanged && node.Depth > 1 )
             {
                 if ( node.DirectReferences.Count == 0 )
                 {
@@ -357,14 +356,14 @@ public partial class NotifyPropertyChangedAttribute
             else
             {
                 // Notify refs to the current node and any children without an update method.
-                refsToNotify = node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null );
+                refsToNotify = node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null );
             }
 
-            var childUpdateMethods = node.Data.ChildUpdateMethods;
+            var childUpdateMethods = node.ChildUpdateMethods;
 
             if ( refsToNotify.Count > 0 
                 || childUpdateMethods.Count > 0 
-                || ( node.HasChildren && node.Data.InpcBaseHandling is InpcBaseHandling.OnUnmonitoredInpcPropertyChanged or InpcBaseHandling.OnPropertyChanged ) )
+                || ( node.HasChildren && node.InpcBaseHandling is InpcBaseHandling.OnUnmonitoredInpcPropertyChanged or InpcBaseHandling.OnPropertyChanged ) )
             {
                 var rootPropertyNamesToNotify = refsToNotify
                     .Select( n => n.Name )
@@ -376,10 +375,10 @@ public partial class NotifyPropertyChangedAttribute
 
                     if ( ctx.InsertDiagnosticComments )
                     {
-                        meta.InsertComment( $"InpcBaseHandling = {node.Data.InpcBaseHandling}" );
+                        meta.InsertComment( $"InpcBaseHandling = {node.InpcBaseHandling}" );
                     }
 
-                    switch ( node.Data.InpcBaseHandling )
+                    switch ( node.InpcBaseHandling )
                     {
                         case InpcBaseHandling.Unknown:
                             meta.InsertComment(
@@ -401,9 +400,9 @@ public partial class NotifyPropertyChangedAttribute
                                 // configured not to use it). So this is like retrospecitvely adding a property setter override. Note that
                                 // the base *must* provide OnPropertyChanged support for each of its properties as a minimum contract.
 
-                                var handlerField = ExpectNotNull( node.Data.HandlerField );
-                                var lastValueField = ExpectNotNull( node.Data.LastValueField );
-                                var eventRequiresCast = node.Data.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
+                                var handlerField = ExpectNotNull( node.HandlerField );
+                                var lastValueField = ExpectNotNull( node.LastValueField );
+                                var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
 
                                 var oldValue = lastValueField.Value;
                                 var newValue = node.FieldOrProperty.Value;
@@ -461,7 +460,7 @@ public partial class NotifyPropertyChangedAttribute
                                             // XXX [Frag5]
                                             foreach ( var childNode in node.Children )
                                             {
-                                                var hasUpdateMethod = childNode.Data.UpdateMethod != null;
+                                                var hasUpdateMethod = childNode.UpdateMethod != null;
                                                 var hasRefs = childNode.DirectReferences.Count > 0;
 
                                                 if ( hasUpdateMethod || hasRefs )
@@ -471,7 +470,7 @@ public partial class NotifyPropertyChangedAttribute
                                                         if ( hasUpdateMethod )
                                                         {
                                                             // Update method will deal with notifications
-                                                            childNode.Data.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
+                                                            childNode.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
                                                         }
                                                         else
                                                         {
@@ -496,7 +495,7 @@ public partial class NotifyPropertyChangedAttribute
                             emitDefaultNotifications = false;
                             break;
                         default:
-                            CompileTimeThrow( new InvalidOperationException( $"InpcBaseHandling '{node.Data.InpcBaseHandling}' was not expected here." ) );
+                            CompileTimeThrow( new InvalidOperationException( $"InpcBaseHandling '{node.InpcBaseHandling}' was not expected here." ) );
                             break;
                     }
 
@@ -542,7 +541,7 @@ public partial class NotifyPropertyChangedAttribute
         if ( ctx.InsertDiagnosticComments )
         {
             meta.InsertComment( "Template: " + nameof( OnChildPropertyChanged ) );
-            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( ( ref NodeData data ) => $"ibh:{data.InpcBaseHandling}" ) );
+            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
         }
 
         foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.Depth > 1 ) )
@@ -558,11 +557,11 @@ public partial class NotifyPropertyChangedAttribute
                 continue;
             }
 
-            var firstAncestorWithNotNoneHandling = node.Ancestors().FirstOrDefault( n => n.Data.InpcBaseHandling != InpcBaseHandling.None );
+            var firstAncestorWithNotNoneHandling = node.Ancestors().FirstOrDefault( n => n.InpcBaseHandling != InpcBaseHandling.None );
 
             if ( firstAncestorWithNotNoneHandling != null )
             {
-                switch ( firstAncestorWithNotNoneHandling.Data.InpcBaseHandling )
+                switch ( firstAncestorWithNotNoneHandling.InpcBaseHandling )
                 {
                     case InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined:
                         if ( ctx.InsertDiagnosticComments )
@@ -589,7 +588,7 @@ public partial class NotifyPropertyChangedAttribute
 
             // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag2] and/or [Frag7], refactor
             // XXX [Frag9]
-            var hasUpdateMethod = node.Data.UpdateMethod != null;
+            var hasUpdateMethod = node.UpdateMethod != null;
             var hasRefs = node.DirectReferences.Count > 0;
 
             if ( hasUpdateMethod || hasRefs )
@@ -599,7 +598,7 @@ public partial class NotifyPropertyChangedAttribute
                     if ( hasUpdateMethod )
                     {
                         // Update method will deal with notifications
-                        node.Data.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
+                        node.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
                     }
                     else
                     {
@@ -636,7 +635,7 @@ public partial class NotifyPropertyChangedAttribute
         if ( ctx.InsertDiagnosticComments )
         {
             meta.InsertComment( "Template: " + nameof( OnUnmonitoredInpcPropertyChanged ) );
-            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( ( ref NodeData data ) => $"ibh:{data.InpcBaseHandling}" ) );
+            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
         }
 
         /* 
@@ -659,7 +658,7 @@ public partial class NotifyPropertyChangedAttribute
          *   AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties.
         */
 
-        foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.Data.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
+        foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
         {
             if ( ctx.InsertDiagnosticComments )
             {
@@ -672,7 +671,7 @@ public partial class NotifyPropertyChangedAttribute
                 // Note that here we may be dealing with a root property defined in another type (so like a setter), or any descendant node (so
                 // like an Update method).
 
-                var handlerField = ExpectNotNull( node.Data.HandlerField );
+                var handlerField = ExpectNotNull( node.HandlerField );
                 
                 if ( oldValue != null )
                 {
@@ -695,7 +694,7 @@ public partial class NotifyPropertyChangedAttribute
                         // XXX [Frag7]
                         foreach ( var childNode in node.Children )
                         {
-                            var hasUpdateMethod = childNode.Data.UpdateMethod != null;
+                            var hasUpdateMethod = childNode.UpdateMethod != null;
                             var hasRefs = childNode.DirectReferences.Count > 0;
 
                             if ( hasUpdateMethod || hasRefs )
@@ -705,7 +704,7 @@ public partial class NotifyPropertyChangedAttribute
                                     if ( hasUpdateMethod )
                                     {
                                         // Update method will deal with notifications
-                                        childNode.Data.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
+                                        childNode.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
                                     }
                                     else
                                     {
@@ -727,13 +726,13 @@ public partial class NotifyPropertyChangedAttribute
                 // TODO: Is this similar to [Frag3] and/or [Frag6] and/or [Frag4]? Can we refactor?
                 // XXX [Frag8]
                 // Update methods will deal with notifications - *for those children which have update methods*
-                foreach ( var method in node.Data.ChildUpdateMethods )
+                foreach ( var method in node.ChildUpdateMethods )
                 {
                     method.With( InvokerOptions.Final ).Invoke();
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.Data.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
                 {
                     ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                 }
