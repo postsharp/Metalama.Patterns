@@ -52,7 +52,7 @@ class D<T> where T : class, INotifyPropertyChanged, IFoo
     public int FooX => A1.X;
 }
 
-// TODO: Pending #33751
+// TODO: Pending #33805
 #if false
 class DD<T> : D<T> where T : class, INotifyPropertyChanged, IFoo
 {

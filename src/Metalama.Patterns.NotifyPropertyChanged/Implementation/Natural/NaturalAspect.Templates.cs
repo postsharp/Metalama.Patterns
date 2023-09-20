@@ -5,9 +5,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.ComponentModel;
 
-namespace Metalama.Patterns.NotifyPropertyChanged;
+namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 
-public partial class NotifyPropertyChangedAttribute
+internal partial class NaturalAspect
 {
     [CompileTime]
     private static void CompileTimeThrow( Exception e )
@@ -17,7 +17,6 @@ public partial class NotifyPropertyChangedAttribute
     private static T ExpectNotNull<T>( T? obj )
         => obj ?? throw new InvalidOperationException( "A null value was not expected here." );
 
-    // TODO: Make this private pending #33686
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -28,7 +27,7 @@ public partial class NotifyPropertyChangedAttribute
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
             var handlerField = (IField?) meta.Tags["handlerField"];
-            var node = (Node?) meta.Tags["node"];
+            var node = (DependencyGraphNode?) meta.Tags["node"];
             var inpcImplementationKind = node == null
                     ? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type )
                     : node.PropertyTypeInpcInstrumentationKind;
@@ -154,7 +153,7 @@ public partial class NotifyPropertyChangedAttribute
     [Template]
     private static void UpdateChildInpcProperty(
         [CompileTime] BuildAspectContext ctx,
-        [CompileTime] Node node,
+        [CompileTime] DependencyGraphNode node,
         [CompileTime] IExpression accessChildExpression,
         [CompileTime] IField lastValueField,
         [CompileTime] IField onPropertyChangedHandlerField )
@@ -260,7 +259,7 @@ public partial class NotifyPropertyChangedAttribute
         set
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
-            var node = (Node?) meta.Tags["node"];
+            var node = (DependencyGraphNode?) meta.Tags["node"];
             var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
             var propertyTypeInstrumentationKind = (InpcInstrumentationKind) meta.Tags["propertyTypeInstrumentationKind"]!;
 
@@ -331,7 +330,7 @@ public partial class NotifyPropertyChangedAttribute
                 continue;
             }
 
-            IReadOnlyCollection<Node> refsToNotify;
+            IReadOnlyCollection<DependencyGraphNode> refsToNotify;
 
             // When a base supports OnChildPropertyChanged for a root property, changes to the ref itself will
             // be notified by OnPropertyChanged (the base won't call OnChildPropertyChanged for each child property
