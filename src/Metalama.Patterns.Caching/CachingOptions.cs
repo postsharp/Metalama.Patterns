@@ -84,7 +84,7 @@ public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchic
 
     public bool? UseDependencyInjection { get; init; }
 
-    object IOverridable.OverrideWith( object options, in HierarchicalOptionsOverrideContext context )
+    object IOverridable.OverrideWith( object options, in OverrideContext context )
     {
         var other = (CachingOptions) options;
 
