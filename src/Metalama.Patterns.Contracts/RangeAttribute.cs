@@ -572,6 +572,6 @@ public class RangeAttribute : ContractAspect
     [Template]
     protected virtual void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().Templates.OnRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
+        meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
     }
 }

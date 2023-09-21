@@ -56,22 +56,23 @@ public partial class CachingService
     /// </summary>
     /// <param name="dependency">Typically, an <see cref="object"/>. If a <see cref="string"/>, <see cref="Delegate"/> or <see cref="ICacheDependency"/>
     /// is passed, the proper overload of the method is invoked. Otherwise, <paramref name="dependency"/> is wrapped into an <see cref="ObjectDependency"/> object.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public ValueTask InvalidateAsync( object dependency )
+    public ValueTask InvalidateAsync( object dependency, CancellationToken cancellationToken = default )
     {
         switch ( dependency )
         {
             case Delegate method:
-                return this.InvalidateDelegateAsync( method );
+                return this.InvalidateDelegateAsync( method, Array.Empty<object?>(), cancellationToken );
 
             case string key:
-                return this.InvalidateAsync( key );
+                return this.InvalidateAsync( key, cancellationToken );
 
             case ICacheDependency cacheDependency:
-                return this.InvalidateAsync( cacheDependency );
+                return this.InvalidateAsync( cacheDependency, cancellationToken );
 
             default:
-                return this.InvalidateAsync( new ObjectDependency( dependency, this ), dependency.GetType() );
+                return this.InvalidateAsync( new ObjectDependency( dependency, this ), dependency.GetType(), cancellationToken );
         }
     }
 
@@ -105,17 +106,19 @@ public partial class CachingService
     /// Asynchronously invalidates a cache dependency given as an <see cref="ICacheDependency"/>, i.e. removes all cache items that are dependent on this dependency.
     /// </summary>
     /// <param name="dependency">A dependency.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public ValueTask InvalidateAsync( ICacheDependency dependency ) => this.InvalidateAsync( dependency, dependency.GetType() );
+    public ValueTask InvalidateAsync( ICacheDependency dependency, CancellationToken cancellationToken = default )
+        => this.InvalidateAsync( dependency, dependency.GetType(), cancellationToken );
 
-    private async ValueTask InvalidateAsync( ICacheDependency dependency, Type dependencyType )
+    private async ValueTask InvalidateAsync( ICacheDependency dependency, Type dependencyType, CancellationToken cancellationToken )
     {
         using ( var activity =
                this._defaultLogger.Default.OpenAsyncActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
         {
             try
             {
-                await this.InvalidateAsync( dependency.GetCacheKey() );
+                await this.InvalidateAsync( dependency.GetCacheKey(), cancellationToken );
 
                 activity.SetSuccess();
             }
@@ -166,7 +169,8 @@ public partial class CachingService
     /// Asynchronously invalidates a cache dependency given as <see cref="string"/>, i.e. removes all cache items that are dependent on this dependency key.
     /// </summary>
     /// <param name="dependencyKey"></param>
-    public async ValueTask InvalidateAsync( string dependencyKey )
+    /// <param name="cancellationToken"></param>
+    public async ValueTask InvalidateAsync( string dependencyKey, CancellationToken cancellationToken = default )
     {
         foreach ( var backend in this.AllBackends )
         {
@@ -175,7 +179,7 @@ public partial class CachingService
             {
                 try
                 {
-                    await backend.InvalidateDependencyAsync( dependencyKey );
+                    await backend.InvalidateDependencyAsync( dependencyKey, cancellationToken );
 
                     activity.SetSuccess();
                 }
@@ -204,8 +208,8 @@ public partial class CachingService
                 var key = this.KeyBuilder.BuildMethodKey(
                     CachedMethodMetadataRegistry.Instance.Get( method )
                     ?? throw new CachingAssertionFailedException( $"The method '{method}' is not registered." ),
-                    args,
-                    instance );
+                    instance,
+                    args );
 
                 this._defaultLogger.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
@@ -244,7 +248,8 @@ public partial class CachingService
     /// <param name="method">The <see cref="MethodInfo"/> of the method call.</param>
     /// <param name="instance">The value of the <c>this</c> instance, or <c>null</c> for  methods.</param>
     /// <param name="args">The method arguments.</param>
-    public async ValueTask InvalidateAsync( MethodInfo method, object? instance, params object[] args )
+    /// <param name="cancellationToken"></param>
+    public async ValueTask InvalidateAsync( MethodInfo method, object? instance, object?[] args, CancellationToken cancellationToken = default )
     {
         using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Formatted( "InvalidateAsync( method = {Method} )", method ) ) )
         {
@@ -253,18 +258,18 @@ public partial class CachingService
                 var key = this.KeyBuilder.BuildMethodKey(
                     CachedMethodMetadataRegistry.Instance.Get( method )
                     ?? throw new CachingAssertionFailedException( $"The method '{method}' is not registered." ),
-                    args,
-                    instance );
+                    instance,
+                    args );
 
                 this._defaultLogger.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", key ) );
 
                 foreach ( var backend in this.AllBackends )
                 {
-                    await backend.RemoveItemAsync( key );
+                    await backend.RemoveItemAsync( key, cancellationToken );
 
                     if ( backend.SupportedFeatures.Dependencies )
                     {
-                        await backend.InvalidateDependencyAsync( key );
+                        await backend.InvalidateDependencyAsync( key, cancellationToken );
                     }
                     else if ( this._nestedCachedMethods.ContainsKey( method ) )
                     {
@@ -287,9 +292,10 @@ public partial class CachingService
         }
     }
 
-    private void InvalidateDelegate( Delegate method, params object[] args ) => this.Invalidate( method.Method, method.Target, args );
+    private void InvalidateDelegate( Delegate method, params object?[] args ) => this.Invalidate( method.Method, method.Target, args );
 
-    private ValueTask InvalidateDelegateAsync( Delegate method, params object[] args ) => this.InvalidateAsync( method.Method, method.Target, args );
+    private ValueTask InvalidateDelegateAsync( Delegate method, object?[] args, CancellationToken cancellationToken = default )
+        => this.InvalidateAsync( method.Method, method.Target, args, cancellationToken );
 
     /// <summary>
     /// Removes a method call result from the cache giving the delegate of the method. This overload is for methods with 0 parameter.
@@ -303,16 +309,18 @@ public partial class CachingService
     /// </summary>
     /// <typeparam name="TReturn">The return type of the method.</typeparam>
     /// <param name="method">A delegate of the method to invalidate.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public ValueTask InvalidateAsync<TReturn>( Func<TReturn> method ) => this.InvalidateDelegateAsync( method );
+    public ValueTask InvalidateAsync<TReturn>( Func<TReturn> method, CancellationToken cancellationToken = default )
+        => this.InvalidateDelegateAsync( method, Array.Empty<object?>(), cancellationToken );
 
-    private CachingContext OpenRecacheContext( Delegate method, params object[] args )
+    private CachingContext OpenRecacheContext( Delegate method, params object?[] args )
     {
         var key = this.KeyBuilder.BuildMethodKey(
             CachedMethodMetadataRegistry.Instance.Get( method.Method )
             ?? throw new CachingAssertionFailedException( $"The method '{method.Method}' is not registered." ),
-            args,
-            method.Target );
+            method.Target,
+            args );
 
         return CachingContext.OpenRecacheContext( key, this );
     }
@@ -354,8 +362,9 @@ public partial class CachingService
     /// </summary>
     /// <typeparam name="TReturn">The return type of the method.</typeparam>
     /// <param name="method">A delegate of the method to evaluate.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task{TResult}"/> that evaluates to the return value of <paramref name="method"/>.</returns>
-    public async Task<TReturn> RecacheAsync<TReturn>( Func<Task<TReturn>> method )
+    public async Task<TReturn> RecacheAsync<TReturn>( Func<Task<TReturn>> method, CancellationToken cancellationToken = default )
     {
         using ( var activity = this._defaultLogger.Default.OpenAsyncActivity( Formatted( "RecacheAsync( method = {Method} )", method.Method ) ) )
         {

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Aspects;
+using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -71,7 +73,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingServices.Default.Invalidate( cachingClass.GetValueDependency );
+                CachingService.Default.Invalidate( cachingClass.GetValueDependency );
 
                 cachingClass.GetValue();
 
@@ -145,7 +147,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -193,7 +195,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             public async Task<Task<CachedValueClass>> GetValueIntermediateAsync()
             {
-                using ( CachingContext.OpenCacheContext( "k", CachingServices.Default ) )
+                using ( CachingContext.OpenCacheContext( "k", CachingService.Default ) )
                 {
                     await Task.Yield();
 
@@ -230,7 +232,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 
@@ -273,7 +275,7 @@ namespace Metalama.Patterns.Caching.Tests
             {
                 this.WasGetValueIntermediateCalled = true;
 
-                using ( CachingServices.SuspendDependencyPropagation() )
+                using ( CachingService.Default.SuspendDependencyPropagation() )
                 {
                     return this.GetValueDependency();
                 }
@@ -305,7 +307,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingServices.Default.Invalidate( cachingClass.GetValueDependency );
+                CachingService.Default.Invalidate( cachingClass.GetValueDependency );
 
                 cachingClass.GetValue();
 
@@ -353,7 +355,7 @@ namespace Metalama.Patterns.Caching.Tests
                 this.WasGetValueIntermediateCalled = true;
                 await Task.Yield();
 
-                using ( CachingServices.SuspendDependencyPropagation() )
+                using ( CachingService.Default.SuspendDependencyPropagation() )
                 {
                     return await this.GetValueDependencyAsync();
                 }
@@ -386,7 +388,7 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.WasGetValueIntermediateCalled = false;
                 cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingServices.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+                await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
                 await cachingClass.GetValueAsync();
 

@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Dependencies;
 [PublicAPI]
 public sealed class ObjectDependency : ICacheDependency
 {
-    private readonly CachingService _cachingService;
+    private readonly ICachingService _cachingService;
 
     /// <summary>
     /// Gets the wrapped object.
@@ -20,9 +20,9 @@ public sealed class ObjectDependency : ICacheDependency
     public object Object { get; }
 
     /// <inheritdoc />
-    public string GetCacheKey() => this._cachingService.KeyBuilder.BuildDependencyKey( this.Object );
+    public string GetCacheKey() => this._cachingService.GetDependencyKey( this.Object );
 
-    internal ObjectDependency( [Required] object dependencyObject, CachingService cachingService )
+    internal ObjectDependency( [Required] object dependencyObject, ICachingService cachingService )
     {
         this.Object = dependencyObject;
         this._cachingService = cachingService;

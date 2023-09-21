@@ -1,17 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
-using Metalama.Framework.Project;
 
 namespace Metalama.Patterns.Contracts;
 
 [CompileTime]
+[PublicAPI]
 public static class ContractExtensions
 {
-    public static ContractOptions ContractOptions( this IProject project ) => project.Extension<ContractOptions>();
-
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<ICompilation> compilation, bool includeInternalApis = false )
     {
         bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
@@ -51,7 +50,7 @@ public static class ContractExtensions
                 t => t.Properties
                     .Cast<IFieldOrProperty>()
                     .Union( t.Fields ) )
-            .Where( f => IsVisible( f ) && IsNullableType( f ) && !f.Attributes.Any( a => a.Type.Name == "AllowNullAttribute" ) );
+            .Where( f => IsVisible( f ) && IsNullableType( f ) && f.Attributes.All( a => a.Type.Name != "AllowNullAttribute" ) );
 
         fieldsAndProperties
             .Where( f => GetNullableAttribute( f ) == null && f.Writeability is Writeability.InitOnly or Writeability.All )
