@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests;
 
 // TODO: When the options/configration API is available, refactor all unit tests to support multiple configuration permutations.
-// That is - a shared project and multiple 'concrete' projects. Initally support enabled/disabled OnUnmonitoredInpcPropertyChangedMethod
+// That is - a shared project and multiple 'concrete' projects. Initially support enabled/disabled OnUnmonitoredInpcPropertyChangedMethod
 // feature.
 
 public abstract class InpcTestsBase : IDisposable
@@ -25,8 +25,10 @@ public abstract class InpcTestsBase : IDisposable
             this.Source = source;
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public string Origin { get; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public INotifyPropertyChanged Source { get; }
 
         internal bool IsDisposed => this._disposed == 1;
@@ -37,7 +39,7 @@ public abstract class InpcTestsBase : IDisposable
         {
             if ( this._disposed == 1 )
             {
-                throw new ObjectDisposedException( "Subsctiption:" + this.Origin );
+                throw new ObjectDisposedException( "Subscription:" + this.Origin );
             }
 
             if ( this._handler != null )
@@ -67,9 +69,10 @@ public abstract class InpcTestsBase : IDisposable
 
         public override bool Equals( object? obj ) => this.Equals( obj as Subscription );
 
-        public override int GetHashCode() => base.GetHashCode();
+        public override int GetHashCode() => 0;
     }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     protected static readonly Subscription AnySubscription = new( "<any>", null! );
 
     protected record struct Event( Subscription Subscription, string PropertyName )

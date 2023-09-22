@@ -75,7 +75,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
         sB2 = sNewC_2;
 
         // 5. Change leaf parent-parent ref, parent is a different object, and leaf value D1 is a different value.
-        // This is notified as a change to A3 beacuse we have to store the last value of the parent object anyhow, and
+        // This is notified as a change to A3 because we have to store the last value of the parent object anyhow, and
         // we detect that it is a different ref.
 
         var newC_3 = new C() { C2 = new D() };
@@ -87,6 +87,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
             .Equal( (sa, "A3"), (sA2, "B2") );
 
         sB2.Dispose();
+        
+        // ReSharper disable once RedundantAssignment
         sB2 = sNewC_3;
 
         // 6. Change leaf parent-parent-parent ref. As per above comments, because we don't have false
@@ -106,6 +108,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
             .Equal( (sa, "A2") );
 
         sA2.Dispose();
+        
+        // ReSharper disable once RedundantAssignment
         sA2 = sNewB;
 
         // 6.2 Change leaf parent-parent-parent ref, parent-parent ref, and parent ref.
@@ -113,6 +117,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
 
         var newB_2 = new B() { B2 = new C() { C2 = new D() } };
 
+        // ReSharper disable once UnusedVariable
         var sNewB_2 = this.SubscribeTo( newB_2 );
 
         this.EventsFrom( () => a.A2 = newB_2 )
@@ -151,6 +156,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
     {
         var g = new G();
 
+        // ReSharper disable once UnusedVariable
         var sf = this.SubscribeTo( g );
 
         this.EventsFrom( () => g.F1.B2.C2.D1 = 1 )
@@ -167,7 +173,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
             .Should()
             .Equal( "G1" );
 
-        // New C, but with exsting D:
+        // New C, but with existing D:
 
         var newC = new C() { C2 = g.F1.B2.C2 };
 

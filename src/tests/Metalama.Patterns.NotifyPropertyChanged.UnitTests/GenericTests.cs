@@ -11,7 +11,7 @@ public sealed class GenericTests : InpcTestsBase
     // TODO: Pending #33805
 #if false
     [Fact]
-    public void PropertyOfGenericTypeThatIsClassAndINPC() 
+    public void PropertyOfGenericTypeThatIsClassAndInpc() 
     {
         var v = new AOfSimple();
 
@@ -26,7 +26,7 @@ public sealed class GenericTests : InpcTestsBase
 #endif
 
     [Fact]
-    public void PropertyofGenericTypeThatIsClassButNotINPC()
+    public void PropertyOfGenericTypeThatIsClassButNotInpc()
     {
         var v = new B<string>();
 
@@ -38,7 +38,7 @@ public sealed class GenericTests : InpcTestsBase
     }
 
     [Fact]
-    public void PropertyOfGenericTypeThatIsStructButNotINPC()
+    public void PropertyOfGenericTypeThatIsStructButNotInpc()
     {
         var v = new C<int>();
 
@@ -50,7 +50,7 @@ public sealed class GenericTests : InpcTestsBase
     }
 
     [Fact]
-    public void PropertyOfGenericTypeThatIsClassAndINPCAndIFoo()
+    public void PropertyOfGenericTypeThatIsClassAndInpcAndIFoo()
     {
         var v = new D<MyFoo>();
 
@@ -72,7 +72,7 @@ public sealed class GenericTests : InpcTestsBase
     // TODO: Pending #33805
 #if false
     [Fact]
-    public void PropertyOfGenericTypeThatIsClassAndINPCAndIFooDepth2()
+    public void PropertyOfGenericTypeThatIsClassAndInpcAndIFooDepth2()
     {
         var v = new DD<MyFoo>();
 

@@ -28,24 +28,25 @@ internal sealed class BuildAspectContext
     {
         public ElementsRecord()
         {
-            this.INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof( INotifyPropertyChanged ) );
+            this.INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof(INotifyPropertyChanged) );
             this.PropertyChangedEventOfINotifyPropertyChanged = this.INotifyPropertyChanged.Events.First();
             this.NullableINotifyPropertyChanged = this.INotifyPropertyChanged.ToNullableType();
-            this.PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof( PropertyChangedEventHandler ) );
+            this.PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof(PropertyChangedEventHandler) );
             this.NullablePropertyChangedEventHandler = this.PropertyChangedEventHandler.ToNullableType();
-            this.IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
-            this.EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof( EqualityComparer<> ) );
-            this.OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildPropertyChangedMethodAttribute ) );
-            this.OnUnmonitoredInpcPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) );
+            this.IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof(IgnoreAutoChangeNotificationAttribute) );
+            this.EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof(EqualityComparer<>) );
+            this.OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnChildPropertyChangedMethodAttribute) );
+            this.OnUnmonitoredInpcPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredInpcPropertyChangedMethodAttribute) );
         }
 
+        // ReSharper disable once InconsistentNaming
         public INamedType INotifyPropertyChanged { get; }
 
         public INamedType NullableINotifyPropertyChanged { get; }
 
         public IEvent PropertyChangedEventOfINotifyPropertyChanged { get; }
 
-        public INamedType PropertyChangedEventHandler { get; }
+        private INamedType PropertyChangedEventHandler { get; }
 
         public INamedType NullablePropertyChangedEventHandler { get; }
 
@@ -86,6 +87,7 @@ internal sealed class BuildAspectContext
         this._baseOnUnmonitoredInpcPropertyChangedMethod = new Lazy<IMethod?>( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
     }
 
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public bool InsertDiagnosticComments { get; set; } // = true; // TODO: Set by configuration? Discuss.
 
     public IAspectBuilder<INamedType> Builder { get; }
@@ -94,6 +96,7 @@ internal sealed class BuildAspectContext
 
     public bool TargetImplementsInpc { get; }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public bool BaseImplementsInpc { get; }
 
     public IMethod? BaseOnPropertyChangedMethod => this._baseOnPropertyChangedMethod.Value;

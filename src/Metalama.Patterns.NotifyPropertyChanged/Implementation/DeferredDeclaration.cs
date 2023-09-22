@@ -11,7 +11,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 /// <typeparam name="T"></typeparam>
 [CompileTime]
 internal class DeferredDeclaration<T> : AmbiguousDeferredDeclaration<T>
-    where T : IDeclaration
+    where T : class, IDeclaration
 {
     public DeferredDeclaration( bool willBeDefined )
         : base( willBeDefined ) { }

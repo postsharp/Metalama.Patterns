@@ -16,6 +16,7 @@ internal partial class NaturalAspect
     [CompileTime]
     private static T ExpectNotNull<T>( T? obj ) => obj ?? throw new InvalidOperationException( "A null value was not expected here." );
 
+    // ReSharper disable once EventNeverSubscribedTo.Global
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
 

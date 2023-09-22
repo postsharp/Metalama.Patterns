@@ -28,7 +28,7 @@ internal partial class DependencyGraph
         /// <summary>
         /// Initializes a new instance of the <see cref="Node{T}"/> class which represents the root node of a tree.
         /// </summary>
-        public Node() { }
+        protected Node() { }
 
         private void InitializeBase( TDerived parent, ISymbol symbol, IFieldOrProperty fieldOrProperty )
         {
@@ -39,8 +39,10 @@ internal partial class DependencyGraph
             this.Initialize();
         }
 
+        // ReSharper disable once VirtualMemberNeverOverridden.Global
         protected virtual void Initialize() { }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         protected static Exception NewNotSupportedOnRootNodeException() => new InvalidOperationException( "The operation is not supported on a root node." );
 
         public bool IsRoot => this.Parent == null;
@@ -52,6 +54,7 @@ internal partial class DependencyGraph
         /// </summary>
         public int Depth { get; private set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         /// <summary>
         /// Gets the Roslyn symbol of the node. Use <see cref="FieldOrProperty"/> for the Metalama equivalent.
         /// </summary>
@@ -119,7 +122,7 @@ internal partial class DependencyGraph
             var refsToFollow = new Stack<TDerived>(
                 includeImmediateChild == null
                     ? this.DirectReferences
-                    : this.Children.Where( n => includeImmediateChild( n ) ).SelectMany( n => n.DirectReferences ).Concat( this.DirectReferences ) );
+                    : this.Children.Where( includeImmediateChild ).SelectMany( n => n.DirectReferences ).Concat( this.DirectReferences ) );
 
             var refsFollowed = new HashSet<TDerived>();
 
@@ -168,6 +171,7 @@ internal partial class DependencyGraph
         /// <returns></returns>
         public IEnumerable<TDerived> Ancestors( bool includeRoot = false ) => this.AncestorsCore( includeRoot, false );
 
+        // ReSharper disable once UnusedMember.Global
         /// <summary>
         /// Gets the current node and its ancestors in leaf-to-root order.
         /// </summary>
@@ -268,6 +272,7 @@ internal partial class DependencyGraph
             return sb.ToString();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public string ToString( Func<TDerived, bool>? shouldHighlight, string? format = null )
         {
             var sb = new StringBuilder();
@@ -278,7 +283,7 @@ internal partial class DependencyGraph
 
         protected virtual void ToStringAppendToLine( StringBuilder appendTo, string? format ) { }
 
-        protected virtual void ToString( StringBuilder appendTo, int indent, Func<TDerived, bool>? shouldHighlight = null, string? format = null )
+        private void ToString( StringBuilder appendTo, int indent, Func<TDerived, bool>? shouldHighlight = null, string? format = null )
         {
             if ( shouldHighlight != null && shouldHighlight( (TDerived) this ) )
             {

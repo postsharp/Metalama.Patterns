@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
 // TODO: Update comment ported from PS once feature is implemented.
@@ -15,6 +17,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged;
 /// found using code analysis will be taken into account. The <see cref="SafeForDependencyAnalysisAttribute"/> only
 /// disables errors, but not the code analysis itself.</para>
 /// </remarks>
+[PublicAPI]
 [AttributeUsage( AttributeTargets.Property )]
 public sealed class SafeForDependencyAnalysisAttribute : Attribute
 {

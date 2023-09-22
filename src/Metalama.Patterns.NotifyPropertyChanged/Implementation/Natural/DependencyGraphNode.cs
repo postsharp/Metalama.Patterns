@@ -10,7 +10,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 /// Dependency graph node specialized for the current implementation strategy of <see cref="NotifyPropertyChangedAttribute"/>.
 /// </summary>
 [CompileTime]
-internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
+internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
 {
     /// <summary>
     /// Method called for each node once the graph has been built. Called in <see cref="DependencyGraph.Node{TDerived}.DescendantsDepthFirst"/> order.
@@ -136,6 +136,7 @@ internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
         }
     }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public bool UpdateMethodHasBeenSet { get; private set; }
 
     public void SetUpdateMethod( IMethod? updateMethod )

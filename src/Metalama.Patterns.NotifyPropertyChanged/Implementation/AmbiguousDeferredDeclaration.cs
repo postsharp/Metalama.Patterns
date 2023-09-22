@@ -12,15 +12,17 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 /// <typeparam name="T"></typeparam>
 [CompileTime]
 internal class AmbiguousDeferredDeclaration<T>
-    where T : IDeclaration
+    where T : class, IDeclaration
 {
     private T? _declaration;
 
+    // ReSharper disable once MemberCanBeProtected.Global
     public AmbiguousDeferredDeclaration( bool? willBeDefined )
     {
         this.WillBeDefined = willBeDefined;
     }
 
+    // ReSharper disable once MemberCanBeProtected.Global
     /// <summary>
     /// Gets a value indicating the future final state of <see cref="Declaration"/>. <see langword="null"/> 
     /// indicates that the declaration may or may not be defined.

@@ -53,7 +53,7 @@ public sealed class CoreTests : InpcTestsBase
         v.R1.Should().BeNull();
         v.R2.Should().BeNull();
 
-        v.Invoking( v => v.A2 ).Should().Throw<NullReferenceException>();
+        v.Invoking( v2 => v2.A2 ).Should().Throw<NullReferenceException>();
 
         var sv = this.SubscribeTo( v );
 
@@ -82,11 +82,12 @@ public sealed class CoreTests : InpcTestsBase
             .Equal( (sa, "S3") );
     }
 
-    private class DerivedFromExistingInpcImplWithValidOPCMethod : ExistingInpcImplWithValidOpcMethod
+    // ReSharper disable once ClassCanBeSealed.Local
+    private class DerivedFromExistingInpcImplWithValidOpcMethod : ExistingInpcImplWithValidOpcMethod
     {
         private readonly Action<string> _onPropertyChanged;
 
-        public DerivedFromExistingInpcImplWithValidOPCMethod( Action<string> onPropertyChanged )
+        public DerivedFromExistingInpcImplWithValidOpcMethod( Action<string> onPropertyChanged )
         {
             this._onPropertyChanged = onPropertyChanged;
         }
@@ -104,7 +105,7 @@ public sealed class CoreTests : InpcTestsBase
         List<string> opc = new();
 
         // Sanity check that hand-coded class behaves as expected.
-        var v = new DerivedFromExistingInpcImplWithValidOPCMethod( opc.Add );
+        var v = new DerivedFromExistingInpcImplWithValidOpcMethod( opc.Add );
 
         v.EX1.Should().Be( 0 );
         v.EX2.Should().NotBeNull();
@@ -134,11 +135,12 @@ public sealed class CoreTests : InpcTestsBase
         opc.Should().Equal( "EX1", "EX2", "EX2" );
     }
 
-    private class DerivedFromExistingAbstractInpcImplWithValidOPCMethod : ExistingAbstractInpcImplWithValidOPCMethod
+    // ReSharper disable once ClassCanBeSealed.Local
+    private class DerivedFromExistingAbstractInpcImplWithValidOpcMethod : ExistingAbstractInpcImplWithValidOPCMethod
     {
         private readonly Action<string> _onPropertyChanged;
 
-        public DerivedFromExistingAbstractInpcImplWithValidOPCMethod( Action<string> onPropertyChanged )
+        public DerivedFromExistingAbstractInpcImplWithValidOpcMethod( Action<string> onPropertyChanged )
         {
             this._onPropertyChanged = onPropertyChanged;
         }
@@ -156,7 +158,7 @@ public sealed class CoreTests : InpcTestsBase
         List<string> opc = new();
 
         // Sanity check that hand-coded class behaves as expected.
-        var v = new DerivedFromExistingAbstractInpcImplWithValidOPCMethod( opc.Add );
+        var v = new DerivedFromExistingAbstractInpcImplWithValidOpcMethod( opc.Add );
 
         v.EX1.Should().Be( 0 );
         v.EX2.Should().NotBeNull();

@@ -296,9 +296,13 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
                 var accessChildExprBuilder = new ExpressionBuilder();
 
+#if NETCOREAPP
 #pragma warning disable CA1307 // Specify StringComparison for clarity [Justification: code must remain compatible with netstandard2.0]
+#endif
                 accessChildExprBuilder.AppendVerbatim( node.DottedPropertyPath.Replace( ".", "?." ) );
+#if NETCOREAPP
 #pragma warning restore CA1307 // Specify StringComparison for clarity
+#endif
 
                 var accessChildExpression = accessChildExprBuilder.ToExpression();
 

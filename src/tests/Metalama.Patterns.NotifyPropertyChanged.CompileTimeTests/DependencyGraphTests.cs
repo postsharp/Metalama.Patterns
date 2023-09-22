@@ -8,7 +8,6 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests;
 
-// Experimental tests used during development. Some may become formal tests later in development.
 public sealed class DependencyGraphTests : UnitTestClass
 {
     public DependencyGraphTests( ITestOutputHelper testOutput ) : base( testOutput, false ) { }
@@ -112,63 +111,5 @@ class D
         result.ToString().Should().Be( expected );
 
         // this.TestOutput.WriteLine( result.ToString() );
-    }
-
-    [Fact]
-    public void Test2()
-    {
-        // TODO: XXX Make this a test!
-        
-        using var testContext = this.CreateTestContext();
-
-        // A2 accesses A1 without `this.` using expression body.
-        const string code = @"
-class A
-{
-    public int A1 { get; set; }
-
-    public int A2 => A1;
-
-    public int A3 => A1 + A1;
-}";
-
-        var compilation = testContext.CreateCompilation( code );
-
-        var type = compilation.Types.OfName( "A" ).Single();
-
-        var result = DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
-
-        this.TestOutput.WriteLine( result.ToString() );
-    }
-
-    [Fact]
-    public void Test3()
-    {
-        // TODO: XXX Make this a test!
-        
-        using var testContext = this.CreateTestContext();
-
-        // A2 accesses A1 without `this.` using expression body.
-        const string code = @"
-class A
-{
-    public int A1 { get; set; }
-
-    public int A2
-    {
-        get
-        {
-            return A1 + A1;
-        }
-    }
-}";
-
-        var compilation = testContext.CreateCompilation( code );
-
-        var type = compilation.Types.OfName( "A" ).Single();
-
-        var result = DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
-
-        this.TestOutput.WriteLine( result.ToString() );
     }
 }

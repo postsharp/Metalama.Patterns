@@ -11,11 +11,12 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 /// <typeparam name="T"></typeparam>
 [CompileTime]
 internal sealed class CertainDeferredDeclaration<T> : DeferredDeclaration<T>
-    where T : IDeclaration
+    where T : class, IDeclaration
 {
     public CertainDeferredDeclaration()
         : base( true ) { }
 
+    // ReSharper disable once UnusedMember.Global
     [Obsolete( "The value will always be true for " + nameof(CertainDeferredDeclaration<T>) + ", avoid unnecessary conditions." )]
     public new bool WillBeDefined => true;
 
