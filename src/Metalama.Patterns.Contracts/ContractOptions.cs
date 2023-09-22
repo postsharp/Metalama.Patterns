@@ -12,9 +12,9 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
 {
     public ContractTemplates? Templates { get; init; }
 
-    public object OverrideWith( object overridingObject, in OverrideContext context )
+    public object ApplyChanges( object changes, in ApplyChangesContext context )
     {
-        var other = (ContractOptions) overridingObject;
+        var other = (ContractOptions) changes;
 
         return new ContractOptions { Templates = other.Templates ?? this.Templates };
     }
