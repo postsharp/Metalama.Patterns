@@ -123,7 +123,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             {
                 b.AddAttribute(
                     AttributeConstruction.Create(
-                        ctx.Type_OnChildPropertyChangedMethodAttribute,
+                        ctx.Elements.OnChildPropertyChangedMethodAttribute,
                         new[] { ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                 if ( isOverride )
@@ -164,7 +164,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             {
                 b.AddAttribute(
                     AttributeConstruction.Create(
-                        ctx.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute,
+                        ctx.Elements.OnUnmonitoredInpcPropertyChangedMethodAttribute,
                         new[] { ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                 if ( isOverride )
@@ -202,7 +202,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         }
         else
         {
-            ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Type_INotifyPropertyChanged );
+            ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Elements.INotifyPropertyChanged );
         }
     }
 
@@ -341,7 +341,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                 .Where(
                     p =>
                         p is { IsStatic: false, IsAutoPropertyOrField: true } 
-                        && !p.Attributes.Any( ctx.Type_IgnoreAutoChangeNotificationAttribute ) )
+                        && !p.Attributes.Any( ctx.Elements.IgnoreAutoChangeNotificationAttribute ) )
                 .ToList();
 
         foreach ( var p in autoProperties )

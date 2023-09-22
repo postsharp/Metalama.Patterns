@@ -48,7 +48,7 @@ internal partial class NaturalAspect
                     {
                         if ( eventRequiresCast )
                         {
-                            meta.Cast( ctx.Type_INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                            meta.Cast( ctx.Elements.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
                         }
                         else
                         {
@@ -96,7 +96,7 @@ internal partial class NaturalAspect
 
                         if ( eventRequiresCast )
                         {
-                            meta.Cast( ctx.Type_INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
+                            meta.Cast( ctx.Elements.INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
                         }
                         else
                         {
@@ -357,7 +357,7 @@ internal partial class NaturalAspect
                                     {
                                         if ( eventRequiresCast )
                                         {
-                                            meta.Cast( ctx.Type_INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                                            meta.Cast( ctx.Elements.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
                                         }
                                         else
                                         {
@@ -386,7 +386,7 @@ internal partial class NaturalAspect
 
                                         if ( eventRequiresCast )
                                         {
-                                            meta.Cast( ctx.Type_INotifyPropertyChanged, newValue ).PropertyChanged += handlerField.Value;
+                                            meta.Cast( ctx.Elements.INotifyPropertyChanged, newValue ).PropertyChanged += handlerField.Value;
                                         }
                                         else
                                         {

@@ -24,31 +24,62 @@ internal sealed class BuildAspectContext
     private HashSet<string>? _inheritedOnChildPropertyChangedPropertyPaths;
     private HashSet<string>? _inheritedOnUnmonitoredInpcPropertyChangedPropertyNames;
 
+    internal sealed class ElementsRecord
+    {
+        public ElementsRecord()
+        {
+            this.INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof( INotifyPropertyChanged ) );
+            this.PropertyChangedEventOfINotifyPropertyChanged = this.INotifyPropertyChanged.Events.First();
+            this.NullableINotifyPropertyChanged = this.INotifyPropertyChanged.ToNullableType();
+            this.PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof( PropertyChangedEventHandler ) );
+            this.NullablePropertyChangedEventHandler = this.PropertyChangedEventHandler.ToNullableType();
+            this.IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
+            this.EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof( EqualityComparer<> ) );
+            this.OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildPropertyChangedMethodAttribute ) );
+            this.OnUnmonitoredInpcPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) );
+        }
+
+        public INamedType INotifyPropertyChanged { get; }
+
+        public INamedType NullableINotifyPropertyChanged { get; }
+
+        public IEvent PropertyChangedEventOfINotifyPropertyChanged { get; }
+
+        public INamedType PropertyChangedEventHandler { get; }
+
+        public INamedType NullablePropertyChangedEventHandler { get; }
+
+        public INamedType IgnoreAutoChangeNotificationAttribute { get; }
+
+        public INamedType EqualityComparerOfT { get; }
+
+        public INamedType OnChildPropertyChangedMethodAttribute { get; }
+
+        public INamedType OnUnmonitoredInpcPropertyChangedMethodAttribute { get; }
+    }
+
+    /// <summary>
+    /// Gets frequently used compilation elements resolved for the current compilation.
+    /// </summary>
+    public ElementsRecord Elements { get; }
+
     public BuildAspectContext( IAspectBuilder<INamedType> builder )
     {
+        this.Elements = new ElementsRecord();
         this.Builder = builder;
-        this.Type_INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof(INotifyPropertyChanged) );
-        this.Event_INotifyPropertyChanged_PropertyChanged = this.Type_INotifyPropertyChanged.Events.First();
-        this.Type_Nullable_INotifyPropertyChanged = this.Type_INotifyPropertyChanged.ToNullableType();
-        this.Type_PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof(PropertyChangedEventHandler) );
-        this.Type_Nullable_PropertyChangedEventHandler = this.Type_PropertyChangedEventHandler.ToNullableType();
-        this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof(IgnoreAutoChangeNotificationAttribute) );
-        this.Type_EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof(EqualityComparer<>) );
-        this.Type_OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnChildPropertyChangedMethodAttribute) );
-        this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredInpcPropertyChangedMethodAttribute) );
-
+        
         var target = builder.Target;
 
         // TODO: Consider using BaseType.TypeDefinition where possible for better performance.
-
+        
         this.BaseImplementsInpc =
             target.BaseType != null && (
-                target.BaseType.Is( this.Type_INotifyPropertyChanged )
+                target.BaseType.Is( this.Elements.INotifyPropertyChanged )
                 || (target.BaseType is { BelongsToCurrentProject: true }
                     && (!this.Target.Compilation.IsPartial || this.Target.Compilation.Types.Contains( target.BaseType ))
                     && target.BaseType.TypeDefinition.Enhancements().HasAspect( typeof(NotifyPropertyChangedAttribute) )));
 
-        this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Type_INotifyPropertyChanged );
+        this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Elements.INotifyPropertyChanged );
 
         this._baseOnPropertyChangedMethod = new Lazy<IMethod?>( () => GetOnPropertyChangedMethod( target ) );
         this._baseOnChildPropertyChangedMethod = new Lazy<IMethod?>( () => GetOnChildPropertyChangedMethod( target ) );
@@ -60,24 +91,6 @@ internal sealed class BuildAspectContext
     public IAspectBuilder<INamedType> Builder { get; }
 
     public INamedType Target => this.Builder.Target;
-
-    public INamedType Type_INotifyPropertyChanged { get; }
-
-    public INamedType Type_Nullable_INotifyPropertyChanged { get; }
-
-    public IEvent Event_INotifyPropertyChanged_PropertyChanged { get; }
-
-    public INamedType Type_PropertyChangedEventHandler { get; }
-
-    public INamedType Type_Nullable_PropertyChangedEventHandler { get; }
-
-    public INamedType Type_IgnoreAutoChangeNotificationAttribute { get; }
-
-    public INamedType Type_EqualityComparerOfT { get; }
-
-    public INamedType Type_OnChildPropertyChangedMethodAttribute { get; }
-
-    public INamedType Type_OnUnmonitoredInpcPropertyChangedMethodAttribute { get; }
 
     public bool TargetImplementsInpc { get; }
 
@@ -92,7 +105,7 @@ internal sealed class BuildAspectContext
     public bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath )
     {
         this._inheritedOnChildPropertyChangedPropertyPaths ??=
-            BuildPropertyPathLookup( GetPropertyPaths( this.Type_OnChildPropertyChangedMethodAttribute, this.BaseOnChildPropertyChangedMethod ) );
+            BuildPropertyPathLookup( GetPropertyPaths( this.Elements.OnChildPropertyChangedMethodAttribute, this.BaseOnChildPropertyChangedMethod ) );
 
         return this._inheritedOnChildPropertyChangedPropertyPaths.Contains( parentPropertyPath );
     }
@@ -101,7 +114,7 @@ internal sealed class BuildAspectContext
     {
         this._inheritedOnUnmonitoredInpcPropertyChangedPropertyNames ??=
             BuildPropertyPathLookup(
-                GetPropertyPaths( this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute, this.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
+                GetPropertyPaths( this.Elements.OnUnmonitoredInpcPropertyChangedMethodAttribute, this.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
 
         return this._inheritedOnUnmonitoredInpcPropertyChangedPropertyNames.Contains( propertyName );
     }
@@ -123,7 +136,7 @@ internal sealed class BuildAspectContext
     /// <param name="type"></param>
     /// <returns></returns>
     public IProperty GetDefaultEqualityComparerForType( IType type )
-        => this.Type_EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
+        => this.Elements.EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
 
     private DependencyGraphNode? _dependencyGraph;
 
@@ -183,7 +196,7 @@ internal sealed class BuildAspectContext
             var introduceHandlerFieldResult = this.Builder.Advice.IntroduceField(
                 this.Target,
                 handlerFieldName,
-                this.Type_Nullable_PropertyChangedEventHandler,
+                this.Elements.NullablePropertyChangedEventHandler,
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
                 b => b.Accessibility = Accessibility.Private );
@@ -249,13 +262,13 @@ internal sealed class BuildAspectContext
                         // None of the special types implement INPC.
                         return InpcInstrumentationKind.None;
                     }
-                    else if ( namedType.Equals( this.Type_INotifyPropertyChanged ) )
+                    else if ( namedType.Equals( this.Elements.INotifyPropertyChanged ) )
                     {
                         return InpcInstrumentationKind.Implicit;
                     }
-                    else if ( namedType.Is( this.Type_INotifyPropertyChanged ) )
+                    else if ( namedType.Is( this.Elements.INotifyPropertyChanged ) )
                     {
-                        if ( namedType.TryFindImplementationForInterfaceMember( this.Event_INotifyPropertyChanged_PropertyChanged, out var member ) )
+                        if ( namedType.TryFindImplementationForInterfaceMember( this.Elements.PropertyChangedEventOfINotifyPropertyChanged, out var member ) )
                         {
                             return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Implicit;
                         }
@@ -355,6 +368,6 @@ internal sealed class BuildAspectContext
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _] 
-                && m.Parameters[1].Type == this.Type_Nullable_INotifyPropertyChanged 
-                && m.Parameters[2].Type == this.Type_Nullable_INotifyPropertyChanged );
+                && m.Parameters[1].Type == this.Elements.NullableINotifyPropertyChanged 
+                && m.Parameters[2].Type == this.Elements.NullableINotifyPropertyChanged );
 }
