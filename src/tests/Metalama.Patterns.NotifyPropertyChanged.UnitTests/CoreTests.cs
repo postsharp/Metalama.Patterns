@@ -82,7 +82,7 @@ public sealed class CoreTests : InpcTestsBase
             .Equal( (sa, "S3") );
     }
 
-    private class DerivedFromExistingInpcImplWithValidOPCMethod : ExistingInpcImplWithValidOPCMethod
+    private class DerivedFromExistingInpcImplWithValidOPCMethod : ExistingInpcImplWithValidOpcMethod
     {
         private readonly Action<string> _onPropertyChanged;
 

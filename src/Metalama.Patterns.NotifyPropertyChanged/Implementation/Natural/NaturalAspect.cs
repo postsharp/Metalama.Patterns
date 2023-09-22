@@ -1,14 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
-using System.ComponentModel;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 
@@ -21,7 +18,6 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
     void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        Debugger.Break();
         var ctx = new BuildAspectContext( builder );
 
         try
@@ -53,7 +49,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         // NB: The selection logic here must be kept in sync with the logic in the OnUnmonitoredInpcPropertyChanged template.
 
         ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.AddRange(
-            ctx.DependencyGraph.DecendantsDepthFirst()
+            ctx.DependencyGraph.DescendantsDepthFirst()
                 .Where(
                     n => n.InpcBaseHandling switch
                     {
@@ -95,13 +91,11 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         ctx.OnPropertyChangedMethod.Declaration = result.Declaration;
 
         // Ensure that all required fields are generated in advance of template execution.
-        // The node selection logic mirrors that of the template's loops and conditons.
-
-        IEnumerable<DependencyGraphNode> nodes = Array.Empty<DependencyGraphNode>();
+        // The node selection logic mirrors that of the template's loops and conditions.
 
         if ( ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
         {
-            foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst()
+            foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst()
                          .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
             {
                 _ = ctx.GetOrCreateHandlerField( node );
@@ -208,12 +202,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         }
         else
         {
-            var result = ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
-
-            if ( result.Outcome == AdviceOutcome.Error )
-            {
-                Debugger.Break();
-            }
+            ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Type_INotifyPropertyChanged );
         }
     }
 
@@ -261,7 +250,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                 if ( propertyTypeImplementsInpc )
                 {
                     ctx.Builder.Diagnostics.Report(
-                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingINPC.WithArguments(
+                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments(
                             (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
                         fieldOrProperty );
 
@@ -274,7 +263,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
     private static void IntroduceUpdateMethods( BuildAspectContext ctx )
     {
-        var allNodesDepthFirst = ctx.DependencyGraph.DecendantsDepthFirst().ToList();
+        var allNodesDepthFirst = ctx.DependencyGraph.DescendantsDepthFirst().ToList();
         allNodesDepthFirst.Reverse();
 
         // Process all nodes in depth-first, leaf-to-root order, creating necessary update methods as we go.
@@ -345,15 +334,13 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
     private static void ProcessAutoProperties( BuildAspectContext ctx )
     {
         var target = ctx.Target;
-        var typeOfInpc = (INamedType) TypeFactory.GetType( typeof(INotifyPropertyChanged) );
 
         // PS appears to consider all instance properties regardless of accessibility.
         var autoProperties =
             target.Properties
                 .Where(
                     p =>
-                        !p.IsStatic
-                        && p.IsAutoPropertyOrField == true
+                        p is { IsStatic: false, IsAutoPropertyOrField: true } 
                         && !p.Attributes.Any( ctx.Type_IgnoreAutoChangeNotificationAttribute ) )
                 .ToList();
 

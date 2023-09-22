@@ -13,6 +13,4 @@ public class ExistingInpcImplWithOPCMethodWithWrongParamCount : INotifyPropertyC
 
 // <target>
 [NotifyPropertyChanged]
-public partial class InheritsExistingInpcImplWithOPCMethodWithWrongParamCount : ExistingInpcImplWithOPCMethodWithWrongParamCount
-{
-}
+public partial class InheritsExistingInpcImplWithOpcMethodWithWrongParamCount : ExistingInpcImplWithOPCMethodWithWrongParamCount { }

@@ -6,10 +6,10 @@ using Metalama.Testing.UnitTesting;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.CompileTimeUnitTests;
+namespace Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests;
 
 // Experimental tests used during development. Some may become formal tests later in development.
-public class DependencyGraphTests : UnitTestClass
+public sealed class DependencyGraphTests : UnitTestClass
 {
     public DependencyGraphTests( ITestOutputHelper testOutput ) : base( testOutput, false ) { }
 
@@ -20,7 +20,7 @@ public class DependencyGraphTests : UnitTestClass
         
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class A
 {
     public B A1 { get; set; }
@@ -85,10 +85,9 @@ class D
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
+        var result = DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
 
-        const string expected = 
-@"<root>
+        const string expected = @"<root>
   A1
     B1 [ A14 ]
       C1
@@ -109,6 +108,7 @@ class D
   A8
   A9
 ";
+
         result.ToString().Should().Be( expected );
 
         // this.TestOutput.WriteLine( result.ToString() );
@@ -117,10 +117,12 @@ class D
     [Fact]
     public void Test2()
     {
+        // TODO: XXX Make this a test!
+        
         using var testContext = this.CreateTestContext();
 
         // A2 accesses A1 without `this.` using expression body.
-        var code = @"
+        const string code = @"
 class A
 {
     public int A1 { get; set; }
@@ -134,7 +136,7 @@ class A
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
+        var result = DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
 
         this.TestOutput.WriteLine( result.ToString() );
     }
@@ -142,10 +144,12 @@ class A
     [Fact]
     public void Test3()
     {
+        // TODO: XXX Make this a test!
+        
         using var testContext = this.CreateTestContext();
 
         // A2 accesses A1 without `this.` using expression body.
-        var code = @"
+        const string code = @"
 class A
 {
     public int A1 { get; set; }
@@ -163,7 +167,7 @@ class A
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = Implementation.DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
+        var result = DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
 
         this.TestOutput.WriteLine( result.ToString() );
     }

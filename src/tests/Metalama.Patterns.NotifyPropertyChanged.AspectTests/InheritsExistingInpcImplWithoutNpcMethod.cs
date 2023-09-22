@@ -1,12 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// @RemoveOutputCode
-
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests;
 
-public class ExistingInpcImplWithValidOPCMethodNamedRaisePropertyChanged : INotifyPropertyChanged
+public class ExistingInpcImplWithoutNPCMethod : INotifyPropertyChanged
 {
     private int _ex1;
 
@@ -18,21 +16,14 @@ public class ExistingInpcImplWithValidOPCMethodNamedRaisePropertyChanged : INoti
             if ( value != this._ex1 )
             {
                 this._ex1 = value;
-                this.PropertyChanged?.Invoke( this, new( nameof( this.EX1 ) ) );
+                this.PropertyChanged?.Invoke( this, new( nameof(this.EX1) ) );
             }
         }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void RaisePropertyChanged( string propertyName )
-    {
-        this.PropertyChanged?.Invoke( this, new( propertyName ) );
-    }
 }
 
 // <target>
 [NotifyPropertyChanged]
-public partial class InheritsExistingInpcImplWithValidOPCMethodNamedRaisePropertyChanged : ExistingInpcImplWithValidOPCMethodNamedRaisePropertyChanged
-{
-}
+public partial class InheritsExistingInpcImplWithoutNpcMethod : ExistingInpcImplWithoutNPCMethod { }

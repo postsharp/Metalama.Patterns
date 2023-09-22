@@ -44,7 +44,7 @@ internal static class DiagnosticDescriptors
         /// The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.
         /// </summary>
         public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)>
-            ErrorFieldOrPropertyTypeIsStructImplementingINPC =
+            ErrorFieldOrPropertyTypeIsStructImplementingInpc =
                 new(
                     "LAMA5152",
                     Error,
@@ -53,7 +53,7 @@ internal static class DiagnosticDescriptors
                     _category );
 
         /// <summary>
-        /// The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotitfyPropertyChanged'.
+        /// The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.
         /// </summary>
         public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)>
             ErrorFieldOrPropertyTypeIsUnconstrainedGeneric =

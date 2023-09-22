@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests;
 
-public class ExistingInpcImplWithValidOPCMethodNamedNotifyOfPropertyChange : INotifyPropertyChanged
+public class ExistingInpcImplWithValidOpcMethodNamedRaisePropertyChanged : INotifyPropertyChanged
 {
     private int _ex1;
 
@@ -18,14 +18,14 @@ public class ExistingInpcImplWithValidOPCMethodNamedNotifyOfPropertyChange : INo
             if ( value != this._ex1 )
             {
                 this._ex1 = value;
-                this.PropertyChanged?.Invoke( this, new( nameof( this.EX1 ) ) );
+                this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof(this.EX1) ) );
             }
         }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void NotifyOfPropertyChange( string propertyName )
+    protected virtual void RaisePropertyChanged( string propertyName )
     {
         this.PropertyChanged?.Invoke( this, new( propertyName ) );
     }
@@ -33,6 +33,4 @@ public class ExistingInpcImplWithValidOPCMethodNamedNotifyOfPropertyChange : INo
 
 // <target>
 [NotifyPropertyChanged]
-public partial class InheritsExistingInpcImplWithValidOPCMethodNamedNotifyOfPropertyChange : ExistingInpcImplWithValidOPCMethodNamedNotifyOfPropertyChange
-{
-}
+public partial class InheritsExistingInpcImplWithValidOpcMethodNamedRaisePropertyChanged : ExistingInpcImplWithValidOpcMethodNamedRaisePropertyChanged { }

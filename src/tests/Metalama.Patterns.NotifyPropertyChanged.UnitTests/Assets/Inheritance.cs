@@ -99,7 +99,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     /// C8 : ExistingInpcImplWithValidOPCMethod
     /// </summary>
     [NotifyPropertyChanged]
-    public partial class C8 : ExistingInpcImplWithValidOPCMethod
+    public partial class C8 : ExistingInpcImplWithValidOpcMethod
     {
         /// <summary>
         /// Auto
@@ -107,12 +107,12 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
         public int C8P1 { get; set; }
 
         /// <summary>
-        /// Ref to <see cref="ExistingInpcImplWithValidOPCMethod.EX1"/>.
+        /// Ref to <see cref="ExistingInpcImplWithValidOpcMethod.EX1"/>.
         /// </summary>
         public int C8P2 => this.EX1 * 2;
 
         /// <summary>
-        /// Ref to <see cref="ExistingInpcImplWithValidOPCMethod.EX2"/>/<see cref="Simple.S1"/>. EX2 is not monitored by its declaring class.
+        /// Ref to <see cref="ExistingInpcImplWithValidOpcMethod.EX2"/>/<see cref="Simple.S1"/>. EX2 is not monitored by its declaring class.
         /// </summary>
         public int C8P3 => this.EX2!.S1 * 3;
     }
@@ -128,7 +128,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
         public int C9P1 => this.C8P1;
 
         /// <summary>
-        /// Ref to <see cref="ExistingInpcImplWithValidOPCMethod.EX2"/>/<see cref="Simple.S2"/>.
+        /// Ref to <see cref="ExistingInpcImplWithValidOpcMethod.EX2"/>/<see cref="Simple.S2"/>.
         /// Monitoring of EX2 is provided by C8.
         /// </summary>
         public int C9P2 => this.EX2!.S2;
@@ -181,7 +181,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     /// C13 : ExistingInpcImplWithValidOPCMethod
     /// </summary>
     [NotifyPropertyChanged]
-    public partial class C13 : ExistingInpcImplWithValidOPCMethod
+    public partial class C13 : ExistingInpcImplWithValidOpcMethod
     {
         /// <summary>
         /// Auto

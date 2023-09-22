@@ -59,7 +59,7 @@ internal partial class DependencyGraph
         public ISymbol Symbol => this._symbol ?? throw NewNotSupportedOnRootNodeException();
 
         /// <summary>
-        /// Gets the Metalama <see cref="IFieldOrProperty"/> for the node. Use <see cref="Symbol"/> for the Rosyln equivalent.
+        /// Gets the Metalama <see cref="IFieldOrProperty"/> for the node. Use <see cref="Symbol"/> for the Roslyn equivalent.
         /// </summary>
         public IFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw NewNotSupportedOnRootNodeException();
 
@@ -90,14 +90,14 @@ internal partial class DependencyGraph
         /// </summary>
         public string Name => this.Symbol.Name;
 
-        public IReadOnlyCollection<TDerived> Children => ((IReadOnlyCollection<TDerived>?) this._children?.Values) ?? Array.Empty<TDerived>();
+        public IReadOnlyCollection<TDerived> Children => (IReadOnlyCollection<TDerived>?) this._children?.Values ?? Array.Empty<TDerived>();
 
         public bool HasChildren => this._children != null;
 
         /// <summary>
         /// Gets the members that reference the current node.
         /// </summary>
-        public IReadOnlyCollection<TDerived> DirectReferences => ((IReadOnlyCollection<TDerived>?) this._referencedBy) ?? Array.Empty<TDerived>();
+        public IReadOnlyCollection<TDerived> DirectReferences => (IReadOnlyCollection<TDerived>?) this._referencedBy ?? Array.Empty<TDerived>();
 
         /// <summary>
         /// Gets the distinct set of members that reference, directly or indirectly, the current node. By default, the search follows only <see cref="DirectReferences"/>;
@@ -109,7 +109,7 @@ internal partial class DependencyGraph
         public IReadOnlyCollection<TDerived> GetAllReferences( Func<TDerived, bool>? includeImmediateChild = null )
         {
             // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
-            // However, it's not recusive so there's no risk of stack overflow. So safe, but slow.
+            // However, it's not recursive so there's no risk of stack overflow. So safe, but slow.
 
             if ( this._referencedBy == null && includeImmediateChild == null )
             {
@@ -142,7 +142,7 @@ internal partial class DependencyGraph
             return refsFollowed;
         }
 
-        public IEnumerable<TDerived> DecendantsDepthFirst()
+        public IEnumerable<TDerived> DescendantsDepthFirst()
         {
             // NB: No loop detection.
 

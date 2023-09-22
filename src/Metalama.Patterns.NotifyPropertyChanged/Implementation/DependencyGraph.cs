@@ -34,8 +34,6 @@ internal static partial class DependencyGraph
         ReportDiagnostic reportDiagnostic )
         where TNode : Node<TNode>, new()
     {
-        var compilation = property.Compilation.GetRoslynCompilation();
-
         var propertySymbol = property.GetSymbol();
 
         if ( propertySymbol == null )
@@ -61,7 +59,7 @@ internal static partial class DependencyGraph
         visitor.Visit( body );
     }
 
-    private class Visitor<TNode> : CSharpSyntaxWalker
+    private sealed class Visitor<TNode> : CSharpSyntaxWalker
         where TNode : Node<TNode>, new()
     {
         private readonly TNode _tree;

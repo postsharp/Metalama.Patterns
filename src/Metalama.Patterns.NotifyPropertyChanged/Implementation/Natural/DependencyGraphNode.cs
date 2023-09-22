@@ -13,7 +13,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
 {
     /// <summary>
-    /// Method called for each node once the graph has been built. Called in <see cref="DependencyGraph.Node{TDerived}.DecendantsDepthFirst"/> order.
+    /// Method called for each node once the graph has been built. Called in <see cref="DependencyGraph.Node{TDerived}.DescendantsDepthFirst"/> order.
     /// </summary>
     /// <param name="ctx"></param>
     public void Initialize( BuildAspectContext ctx )
@@ -29,7 +29,7 @@ internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
                     return InpcBaseHandling.Unknown;
 
                 case InpcInstrumentationKind.None:
-                    return InpcBaseHandling.NA;
+                    return InpcBaseHandling.NotApplicable;
 
                 case InpcInstrumentationKind.Implicit:
                 case InpcInstrumentationKind.Explicit:
@@ -37,7 +37,7 @@ internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
                     {
                         // Root property
                         return this.FieldOrProperty.DeclaringType == ctx.Target
-                            ? InpcBaseHandling.NA
+                            ? InpcBaseHandling.NotApplicable
                             : ctx.HasInheritedOnChildPropertyChangedPropertyPath( this.Name )
                                 ? InpcBaseHandling.OnChildPropertyChanged
                                 : ctx.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( this.Name )
@@ -69,24 +69,24 @@ internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
 
     /// <summary>
     /// Gets the potentially uninitialized field like "B? _lastA2". Typically, use
-    /// <see cref="BuildAspectContext.GetOrCreateLastValueField(DependencyGraph.Node{NodeData})"/> instead.
+    /// <see cref="BuildAspectContext.GetOrCreateLastValueField(DependencyGraphNode)"/> instead.
     /// </summary>
     public IField? LastValueField { get; private set; }
 
     /// <summary>
-    /// Should only be called by <see cref="BuildAspectContext.GetOrCreateLastValueField(DependencyGraph.Node{NodeData})"/>.
+    /// Should only be called by <see cref="BuildAspectContext.GetOrCreateLastValueField(DependencyGraphNode)"/>.
     /// </summary>
     /// <param name="field"></param>
     public void SetLastValueField( IField field ) => this.LastValueField = field;
 
     /// <summary>
     /// Gets the potentially uninitialized field like "PropertyChangedEventHandler? _onA2PropertyChangedHandler".
-    /// Typically, use <see cref="BuildAspectContext.GetOrCreateHandlerField(DependencyGraph.Node{NodeData})"/> instead.
+    /// Typically, use <see cref="BuildAspectContext.GetOrCreateHandlerField(DependencyGraphNode)"/> instead.
     /// </summary>
     public IField? HandlerField { get; private set; }
 
     /// <summary>
-    /// Should only be called by <see cref="BuildAspectContext.GetOrCreateHandlerField(DependencyGraph.Node{NodeData})"/>.
+    /// Should only be called by <see cref="BuildAspectContext.GetOrCreateHandlerField(DependencyGraphNode)"/>.
     /// </summary>
     /// <param name="field"></param>
     public void SetHandlerField( IField field ) => this.HandlerField = field;

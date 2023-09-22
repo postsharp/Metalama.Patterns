@@ -50,7 +50,7 @@ public partial class SimpleWithInpcProperties
     public Simple? R2 { get; set; }
 }
 
-public class ExistingInpcImplWithValidOPCMethod : INotifyPropertyChanged
+public class ExistingInpcImplWithValidOpcMethod : INotifyPropertyChanged
 {
     private int _ex1;
 

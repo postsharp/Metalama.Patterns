@@ -13,6 +13,4 @@ public class ExistingInpcImplWithOPCMethodWithWrongParamType : INotifyPropertyCh
 
 // <target>
 [NotifyPropertyChanged]
-public partial class InheritsExistingInpcImplWithOPCMethodWithWrongParamType : ExistingInpcImplWithOPCMethodWithWrongParamType
-{
-}
+public partial class InheritsExistingInpcImplWithOpcMethodWithWrongParamType : ExistingInpcImplWithOPCMethodWithWrongParamType { }

@@ -4,15 +4,13 @@ using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests;
 
-public class ExistingInpcImplWithOPCMethodThatIsNotVirtual : INotifyPropertyChanged
+public class ExistingInpcImplWithOPCMethodThatIsPrivate : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected void OnPropertyChanged( string propertyName ) { }
+    private void OnPropertyChanged( string propertyName ) { }
 }
 
 // <target>
 [NotifyPropertyChanged]
-public partial class InheritsExistingInpcImplWithOPCMethodThatIsNotVirtual : ExistingInpcImplWithOPCMethodThatIsNotVirtual
-{
-}
+public partial class InheritsExistingInpcImplWithOpcMethodThatIsPrivate : ExistingInpcImplWithOPCMethodThatIsPrivate { }

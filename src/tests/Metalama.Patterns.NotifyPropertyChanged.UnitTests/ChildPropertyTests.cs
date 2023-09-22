@@ -39,10 +39,12 @@ public sealed class ChildPropertyTests : InpcTestsBase
             .Equal( (sa, "A3"), (sB2, "C2") );
 
         sC2.Dispose();
+        
+        // ReSharper disable once RedundantAssignment
         sC2 = sNewD;
 
         // 3. Change leaf parent-parent ref, but parent is the same object. This is not notified as a change
-        // to A3 beacuse we have to store the last value of the parent object anyhow, and we detect that it is the
+        // to A3 because we have to store the last value of the parent object anyhow, and we detect that it is the
         // same ref.
 
         var newC = new C() { C2 = a.A2.B2.C2 };
@@ -57,7 +59,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
         sB2 = sNewC;
 
         // 4. Change leaf parent-parent ref, parent is a different object, but leaf value D1 is the same.
-        // This is notified as a change to A3 beacuse we have to store the last value of the parent object anyhow,
+        // This is notified as a change to A3 because we have to store the last value of the parent object anyhow,
         // and we detect that it is a different ref. But we don't have false positive detection so we
         // can't tell that leaf value D1 is actually the same value.
 

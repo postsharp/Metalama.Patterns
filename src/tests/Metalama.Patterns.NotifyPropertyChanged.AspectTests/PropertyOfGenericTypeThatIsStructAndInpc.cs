@@ -5,7 +5,7 @@ using System.ComponentModel;
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests;
 
 [NotifyPropertyChanged]
-public class PropertyOfGenericTypeThatIsStructAndINPC<T>
+public class PropertyOfGenericTypeThatIsStructAndInpc<T>
     where T : struct, INotifyPropertyChanged
 {
     public T C1 { get; set; }

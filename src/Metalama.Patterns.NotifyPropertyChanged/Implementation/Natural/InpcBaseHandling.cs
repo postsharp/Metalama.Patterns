@@ -19,7 +19,7 @@ internal enum InpcBaseHandling
     /// Not applicable. The property is not an INPC-type property, or the property (or root property of the current property)
     /// is declared in the current target type.
     /// </summary>
-    NA,
+    NotApplicable,
 
     /// <summary>
     /// The base class provides no support for this property.
@@ -34,7 +34,7 @@ internal enum InpcBaseHandling
     None,
 
     /// <summary>
-    /// The INPC property is fully supported by a base class (inlcuding subscribe/unsubscribe), OnChildPropertyChanged will be called for this property.
+    /// The INPC property is fully supported by a base class (including subscribe/unsubscribe), OnChildPropertyChanged will be called for this property.
     /// </summary>
     OnChildPropertyChanged,
 

@@ -28,9 +28,7 @@ internal partial class NaturalAspect
             var handlerField = (IField?) meta.Tags["handlerField"];
             var node = (DependencyGraphNode?) meta.Tags["node"];
 
-            var inpcImplementationKind = node == null
-                ? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type )
-                : node.PropertyTypeInpcInstrumentationKind;
+            var inpcImplementationKind = node?.PropertyTypeInpcInstrumentationKind ?? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type );
 
             var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
@@ -109,6 +107,7 @@ internal partial class NaturalAspect
                         //                Local Function: OnChildPropertyChanged
                         // -----------------------------------------------------------------------
 
+                        // ReSharper disable once LocalFunctionHidesMethod
                         void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                         {
                             // NB: If handlerField is not null, node must also be non-null.
@@ -158,6 +157,7 @@ internal partial class NaturalAspect
                 //                Local Function: OnChildPropertyChanged
                 // -----------------------------------------------------------------------
 
+                // ReSharper disable once LocalFunctionHidesMethod
                 void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                 {
                     OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
@@ -178,7 +178,7 @@ internal partial class NaturalAspect
                 ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
             }
 
-            // Don't notify if we're joining on to existing NCPC support from a base type, or we'll be stuck in a loop.
+            // Don't notify if we're joining on to existing NotifyChildPropertyChanged support from a base type, or we'll be stuck in a loop.
             if ( node.Parent!.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
             {
                 ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Parent!.DottedPropertyPath, node.Name );
@@ -278,7 +278,7 @@ internal partial class NaturalAspect
             // be notified by OnPropertyChanged (the base won't call OnChildPropertyChanged for each child property
             // when the ref changes).
 
-            if ( node.InpcBaseHandling == InpcBaseHandling.OnChildPropertyChanged && node.Depth > 1 )
+            if ( node is { InpcBaseHandling: InpcBaseHandling.OnChildPropertyChanged, Depth: > 1 } )
             {
                 if ( node.DirectReferences.Count == 0 )
                 {
@@ -306,7 +306,7 @@ internal partial class NaturalAspect
 
             if ( refsToNotify.Count > 0
                  || childUpdateMethods.Count > 0
-                 || (node.HasChildren && node.InpcBaseHandling is InpcBaseHandling.OnUnmonitoredInpcPropertyChanged or InpcBaseHandling.OnPropertyChanged) )
+                 || node is { HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredInpcPropertyChanged or InpcBaseHandling.OnPropertyChanged } )
             {
                 var rootPropertyNamesToNotify = refsToNotify
                     .Select( n => n.Name )
@@ -330,7 +330,7 @@ internal partial class NaturalAspect
 
                             break;
 
-                        case InpcBaseHandling.NA:
+                        case InpcBaseHandling.NotApplicable:
                         case InpcBaseHandling.OnChildPropertyChanged:
                             break;
 
@@ -341,7 +341,7 @@ internal partial class NaturalAspect
                             {
                                 // We get here because the current type as a ref to a base property of an INPC type, but we can't use
                                 // OnChildPropertyChanged or OnUnmonitoredInpcPropertyChanged from the base type (the base doesn't provide support, or we're
-                                // configured not to use it). So this is like retrospecitvely adding a property setter override. Note that
+                                // configured not to use it). So this is like retrospectively adding a property setter override. Note that
                                 // the base *must* provide OnPropertyChanged support for each of its properties as a minimum contract.
 
                                 var handlerField = ExpectNotNull( node.HandlerField );
@@ -374,6 +374,7 @@ internal partial class NaturalAspect
                                     }
 
                                     // rootPropertyNamesToNotify excludes children with update methods
+                                    // ReSharper disable once PossibleMultipleEnumeration
                                     foreach ( var name in rootPropertyNamesToNotify )
                                     {
                                         ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
@@ -396,6 +397,7 @@ internal partial class NaturalAspect
                                         //                Local Function: OnChildPropertyChanged
                                         // -----------------------------------------------------------------------
 
+                                        // ReSharper disable once LocalFunctionHidesMethod
                                         void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                                         {
                                             OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
@@ -421,6 +423,7 @@ internal partial class NaturalAspect
                             method.With( InvokerOptions.Final ).Invoke();
                         }
 
+                        // ReSharper disable once PossibleMultipleEnumeration
                         foreach ( var name in rootPropertyNamesToNotify )
                         {
                             ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
@@ -459,7 +462,7 @@ internal partial class NaturalAspect
             meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
         }
 
-        foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.Depth > 1 ) )
+        foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.Depth > 1 ) )
         {
             var rootPropertyNode = node.GetAncestorOrSelfAtDepth( 1 );
 
@@ -562,13 +565,13 @@ internal partial class NaturalAspect
 
         /* 
          * The generated OnUnmonitoredInpcPropertyChanged method is like an enhanced overload of OnPropertyChanged, the differences
-         * being that the caller provides the old and new values, the method recieves a property path rather than a root property name,
+         * being that the caller provides the old and new values, the method receives a property path rather than a root property name,
          * and it only applies to property types which implement INotifyPropertyChanged.
          * 
          * NB:
          * 
-         * - In the current implementation (outside this template), the gererated OnUnmonitoredInpcPropertyChanged 
-         *   method is only called for root properties. As/when false positive detection is implmeneted and enabled, 
+         * - In the current implementation (outside this template), the generated OnUnmonitoredInpcPropertyChanged 
+         *   method is only called for root properties. As/when false positive detection is implemented and enabled, 
          *   then the generated OnUnmonitoredInpcPropertyChanged method could receive calls for leaf INotifyPropertyChanged 
          *   properties.
          * 
@@ -583,7 +586,7 @@ internal partial class NaturalAspect
          *   NaturalAspect.AddPropertyPathsForOnChildPropertyChangedMethodAttribute.
         */
 
-        foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
+        foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
         {
             if ( ctx.InsertDiagnosticComments )
             {
@@ -612,6 +615,7 @@ internal partial class NaturalAspect
                     //                Local Function: OnChildPropertyChanged
                     // -----------------------------------------------------------------------
 
+                    // ReSharper disable once LocalFunctionHidesMethod
                     void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                     {
                         OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );

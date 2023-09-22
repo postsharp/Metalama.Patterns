@@ -13,7 +13,7 @@
     <ItemGroup>
       <None Include="PropertyOfGenericTypeThatIsStructAndINPC.t.cs">
         <SubType>Code</SubType>
-        <DependentUpon>PropertyOfGenericTypeThatIsStructAndINPC.cs</DependentUpon>
+        <DependentUpon>PropertyOfGenericTypeThatIsStructAndInpc.cs</DependentUpon>
       </None>
     </ItemGroup>
 

@@ -12,6 +12,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Metadata;
 [AttributeUsage( AttributeTargets.Method )]
 public sealed class OnUnmonitoredInpcPropertyChangedMethodAttribute : MetadataAttribute
 {
+    // ReSharper disable once UnusedParameter.Local
     /// <summary>
     /// Initializes a new instance of the <see cref="OnUnmonitoredInpcPropertyChangedMethodAttribute"/> class.
     /// </summary>

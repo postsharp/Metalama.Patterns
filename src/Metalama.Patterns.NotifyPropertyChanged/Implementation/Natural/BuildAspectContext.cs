@@ -50,9 +50,9 @@ internal sealed class BuildAspectContext
 
         this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Type_INotifyPropertyChanged );
 
-        this._baseOnPropertyChangedMethod = new Lazy<IMethod>( () => GetOnPropertyChangedMethod( target ) );
-        this._baseOnChildPropertyChangedMethod = new Lazy<IMethod>( () => GetOnChildPropertyChangedMethod( target ) );
-        this._baseOnUnmonitoredInpcPropertyChangedMethod = new Lazy<IMethod>( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
+        this._baseOnPropertyChangedMethod = new Lazy<IMethod?>( () => GetOnPropertyChangedMethod( target ) );
+        this._baseOnChildPropertyChangedMethod = new Lazy<IMethod?>( () => GetOnChildPropertyChangedMethod( target ) );
+        this._baseOnUnmonitoredInpcPropertyChangedMethod = new Lazy<IMethod?>( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
     }
 
     public bool InsertDiagnosticComments { get; set; } // = true; // TODO: Set by configuration? Discuss.
@@ -139,7 +139,7 @@ internal sealed class BuildAspectContext
                 this.Builder.Diagnostics.Report( diagnostic, new LocationWrapper( location ) );
             } );
 
-        foreach ( var node in graph.DecendantsDepthFirst() )
+        foreach ( var node in graph.DescendantsDepthFirst() )
         {
             node.Initialize( this );
         }
@@ -212,7 +212,8 @@ internal sealed class BuildAspectContext
         }
         else
         {
-            for ( var i = 1; true; i++ )
+            // ReSharper disable once BadSemicolonSpaces
+            for ( var i = 1; ; i++ )
             {
                 var adjustedName = $"{desiredName}_{i}";
 
@@ -238,9 +239,9 @@ internal sealed class BuildAspectContext
             return result;
         }
 
-        InpcInstrumentationKind Check( IType type )
+        InpcInstrumentationKind Check( IType type2 )
         {
-            switch ( type )
+            switch ( type2 )
             {
                 case INamedType namedType:
                     if ( namedType.SpecialType != SpecialType.None )
@@ -254,9 +255,9 @@ internal sealed class BuildAspectContext
                     }
                     else if ( namedType.Is( this.Type_INotifyPropertyChanged ) )
                     {
-                        if ( namedType.TryFindImplementationForInterfaceMember( this.Event_INotifyPropertyChanged_PropertyChanged, out var result ) )
+                        if ( namedType.TryFindImplementationForInterfaceMember( this.Event_INotifyPropertyChanged_PropertyChanged, out var member ) )
                         {
-                            return result.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Implicit;
+                            return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Implicit;
                         }
 
                         throw new InvalidOperationException( "Could not find implementation of interface member." );
@@ -267,7 +268,7 @@ internal sealed class BuildAspectContext
                     }
                     else
                     {
-                        if ( this.Target.Compilation.IsPartial && !this.Target.Compilation.Types.Contains( type ) )
+                        if ( this.Target.Compilation.IsPartial && !this.Target.Compilation.Types.Contains( type2 ) )
                         {
                             return InpcInstrumentationKind.Unknown;
                         }
@@ -318,10 +319,10 @@ internal sealed class BuildAspectContext
         }
 
         return includeInherited
-            ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPaths( attributeType, m ) )
-            : GetPropertyPaths( attributeType, method );
+            ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPathsCore( attributeType, m ) )
+            : GetPropertyPathsCore( attributeType, method );
 
-        static IEnumerable<string> GetPropertyPaths( INamedType attributeType, IMethod method )
+        static IEnumerable<string> GetPropertyPathsCore( INamedType attributeType, IMethod method )
             => method.Attributes
                 .OfAttributeType( attributeType )
                 .SelectMany( a => a.ConstructorArguments[0].Values.Select( k => (string?) k.Value ) )
@@ -334,8 +335,7 @@ internal sealed class BuildAspectContext
                 !m.IsStatic
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
-                && m.Parameters.Count == 1
-                && m.Parameters[0].Type.SpecialType == SpecialType.String
+                && m.Parameters is [{ Type.SpecialType: SpecialType.String }] 
                 && _onPropertyChangedMethodNames.Contains( m.Name ) );
 
     private static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
@@ -345,9 +345,7 @@ internal sealed class BuildAspectContext
                 && m.Attributes.Any( typeof(OnChildPropertyChangedMethodAttribute) )
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
-                && m.Parameters.Count == 2
-                && m.Parameters[0].Type.SpecialType == SpecialType.String
-                && m.Parameters[1].Type.SpecialType == SpecialType.String );
+                && m.Parameters is [{ Type.SpecialType: SpecialType.String }, { Type.SpecialType: SpecialType.String }] );
 
     private IMethod? GetOnUnmonitoredInpcPropertyChangedMethod( INamedType type )
         => type.AllMethods.FirstOrDefault(
@@ -356,8 +354,7 @@ internal sealed class BuildAspectContext
                 && m.Attributes.Any( typeof(OnUnmonitoredInpcPropertyChangedMethodAttribute) )
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
-                && m.Parameters.Count == 3
-                && m.Parameters[0].Type.SpecialType == SpecialType.String
-                && m.Parameters[1].Type == this.Type_Nullable_INotifyPropertyChanged
+                && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _] 
+                && m.Parameters[1].Type == this.Type_Nullable_INotifyPropertyChanged 
                 && m.Parameters[2].Type == this.Type_Nullable_INotifyPropertyChanged );
 }

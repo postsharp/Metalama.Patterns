@@ -11,7 +11,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 internal static class RoslynHelper
 {
     /// <summary>
-    /// Deterimines if the current <see cref="SyntaxNode"/> is part of an expression that will be written to and/or read from.
+    /// Determines if the current <see cref="SyntaxNode"/> is part of an expression that will be written to and/or read from.
     /// </summary>
     /// <param name="node">
     /// The current node. If the node is not part of an expression to which the concept of read/write applies 
