@@ -10,7 +10,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 [CompileTime]
 internal static class DiagnosticDescriptors
 {
-    private const string _category = "Metalama.Patterns.NotifyPropertyChanged";    
+    private const string _category = "Metalama.Patterns.NotifyPropertyChanged";
 
     public static class NotifyPropertyChanged
     {
@@ -23,7 +23,8 @@ internal static class DiagnosticDescriptors
             new(
                 "LAMA5150",
                 Error,
-                "Class {0} implements INotifyPropertyChanged but does not define a public or protected OnPropertyChanged method with the following signature: " +
+                "Class {0} implements INotifyPropertyChanged but does not define a public or protected OnPropertyChanged method with the following signature: "
+                +
                 "virtual void OnPropertyChanged(string propertyName). The method name can also be NotifyOfPropertyChange or RaisePropertyChanged.",
                 "OnPropertyChanged is not defined.",
                 _category );
@@ -42,24 +43,26 @@ internal static class DiagnosticDescriptors
         /// <summary>
         /// The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.
         /// </summary>
-        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)> ErrorFieldOrPropertyTypeIsStructImplementingINPC =
-            new(
-                "LAMA5152",
-                Error,
-                "The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.",
-                "Property type is struct implementing INotifyPropertyChanged.",
-                _category );
+        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)>
+            ErrorFieldOrPropertyTypeIsStructImplementingINPC =
+                new(
+                    "LAMA5152",
+                    Error,
+                    "The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.",
+                    "Property type is struct implementing INotifyPropertyChanged.",
+                    _category );
 
         /// <summary>
         /// The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotitfyPropertyChanged'.
         /// </summary>
-        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)> ErrorFieldOrPropertyTypeIsUnconstrainedGeneric =
-            new(
-                "LAMA5153",
-                Error,
-                "The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.",
-                "Property type is struct implementing INotifyPropertyChanged.",
-                _category );
+        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)>
+            ErrorFieldOrPropertyTypeIsUnconstrainedGeneric =
+                new(
+                    "LAMA5153",
+                    Error,
+                    "The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.",
+                    "Property type is struct implementing INotifyPropertyChanged.",
+                    _category );
 
         /// <summary>
         /// The {0} {1} is virtual. This is not supported.

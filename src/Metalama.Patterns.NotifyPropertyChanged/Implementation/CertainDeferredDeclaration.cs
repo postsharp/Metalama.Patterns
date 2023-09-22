@@ -14,11 +14,9 @@ internal sealed class CertainDeferredDeclaration<T> : DeferredDeclaration<T>
     where T : IDeclaration
 {
     public CertainDeferredDeclaration()
-        : base( true )
-    { 
-    }
+        : base( true ) { }
 
-    [Obsolete( "The value will always be true for " + nameof( CertainDeferredDeclaration<T> ) + ", avoid uncessary conditions." )]
+    [Obsolete( "The value will always be true for " + nameof(CertainDeferredDeclaration<T>) + ", avoid uncessary conditions." )]
     public new bool WillBeDefined => true;
 
     /// <summary>

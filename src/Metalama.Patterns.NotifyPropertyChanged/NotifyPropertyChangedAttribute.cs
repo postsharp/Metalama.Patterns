@@ -19,7 +19,7 @@ public sealed partial class NotifyPropertyChangedAttribute : Attribute, IAspect<
     void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // TODO: For future use, select the desired implementation strategy by configuration.
-        
+
         builder.Outbound.AddAspect<NaturalAspect>();
     }
 }

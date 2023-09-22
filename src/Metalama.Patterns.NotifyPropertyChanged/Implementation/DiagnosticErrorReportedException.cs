@@ -10,7 +10,5 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 [CompileTime]
 internal sealed class DiagnosticErrorReportedException : Exception
 {
-    public DiagnosticErrorReportedException() : base( "A diagnostic error has been reported." )
-    {
-    }
+    public DiagnosticErrorReportedException() : base( "A diagnostic error has been reported." ) { }
 }

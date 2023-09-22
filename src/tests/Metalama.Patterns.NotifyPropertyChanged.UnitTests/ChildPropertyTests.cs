@@ -24,7 +24,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
         // 1. Change leaf value D1
 
         this.EventsFrom( () => a.A2.B2.C2.D1 = 1 )
-            .Should().Equal( (sa, "A3"), (sC2, "D1") );
+            .Should()
+            .Equal( (sa, "A3"), (sC2, "D1") );
 
         // 2. Change leaf parent ref, but leaf value is the same. This is notified as a change to A3 because
         // there is no false positive detection (we don't store a copy of the value of D1)
@@ -34,7 +35,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var sNewD = this.SubscribeTo( newD );
 
         this.EventsFrom( () => a.A2.B2.C2 = newD )
-            .Should().Equal( (sa, "A3"), (sB2, "C2") );
+            .Should()
+            .Equal( (sa, "A3"), (sB2, "C2") );
 
         sC2.Dispose();
         sC2 = sNewD;
@@ -48,7 +50,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var sNewC = this.SubscribeTo( newC );
 
         this.EventsFrom( () => a.A2.B2 = newC )
-            .Should().Equal( (sA2, "B2") );
+            .Should()
+            .Equal( (sA2, "B2") );
 
         sB2.Dispose();
         sB2 = sNewC;
@@ -63,7 +66,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var sNewC_2 = this.SubscribeTo( newC_2 );
 
         this.EventsFrom( () => a.A2.B2 = newC_2 )
-            .Should().Equal( (sa, "A3"), (sA2, "B2") );
+            .Should()
+            .Equal( (sa, "A3"), (sA2, "B2") );
 
         sB2.Dispose();
         sB2 = sNewC_2;
@@ -77,7 +81,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var sNewC_3 = this.SubscribeTo( newC_3 );
 
         this.EventsFrom( () => a.A2.B2 = newC_3 )
-            .Should().Equal( (sa, "A3"), (sA2, "B2") );
+            .Should()
+            .Equal( (sa, "A3"), (sA2, "B2") );
 
         sB2.Dispose();
         sB2 = sNewC_3;
@@ -95,7 +100,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var sNewB = this.SubscribeTo( newB );
 
         this.EventsFrom( () => a.A2 = newB )
-            .Should().Equal( (sa, "A2") );
+            .Should()
+            .Equal( (sa, "A2") );
 
         sA2.Dispose();
         sA2 = sNewB;
@@ -108,7 +114,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var sNewB_2 = this.SubscribeTo( newB_2 );
 
         this.EventsFrom( () => a.A2 = newB_2 )
-            .Should().Equal( (sa, "A3"), (sa, "A2") );
+            .Should()
+            .Equal( (sa, "A3"), (sa, "A2") );
     }
 
     [Fact]
@@ -121,16 +128,20 @@ public sealed class ChildPropertyTests : InpcTestsBase
         this.SubscribeTo( e );
 
         this.EventsFrom( () => e.E2.B2.C2.D1 = 1 )
-            .Should().Equal( "LR" );
+            .Should()
+            .Equal( "LR" );
 
         this.EventsFrom( () => e.E2.B2.C2 = new D() )
-            .Should().Equal( "LR" );
+            .Should()
+            .Equal( "LR" );
 
         this.EventsFrom( () => e.E2.B2 = new C() )
-            .Should().Equal( "LR", "LP1R" );
+            .Should()
+            .Equal( "LR", "LP1R" );
 
         this.EventsFrom( () => e.E2 = new B() )
-            .Should().Equal( "LR", "LP1R", "LP2R", "E2" );
+            .Should()
+            .Equal( "LR", "LP1R", "LP2R", "E2" );
     }
 
     [Fact]
@@ -141,7 +152,8 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var sf = this.SubscribeTo( g );
 
         this.EventsFrom( () => g.F1.B2.C2.D1 = 1 )
-            .Should().Equal( "G1" );
+            .Should()
+            .Equal( "G1" );
 
         // New D, but with existing D1 value. A change is reported because we don't
         // have false +ve detection so don't store a copy of leaf value D1 and can't
@@ -150,21 +162,24 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var newD = new D() { D1 = g.F1.B2.C2.D1 };
 
         this.EventsFrom( () => g.F1.B2.C2 = newD )
-            .Should().Equal( "G1" );
+            .Should()
+            .Equal( "G1" );
 
         // New C, but with exsting D:
 
         var newC = new C() { C2 = g.F1.B2.C2 };
 
         this.EventsFrom( () => g.F1.B2 = newC )
-            .Should().Equal( "F2" );
+            .Should()
+            .Equal( "F2" );
 
         // New C, with new D:
 
         var newC_2 = new C();
 
         this.EventsFrom( () => g.F1.B2 = newC_2 )
-            .Should().Equal( "F2", "G1" );
+            .Should()
+            .Equal( "F2", "G1" );
 
         // New B, but with existing C. Because we don't have false +ve detection, class F does
         // not store the current value of F1.B2, so any change in F1 is assumed to be a change
@@ -173,13 +188,15 @@ public sealed class ChildPropertyTests : InpcTestsBase
         var newB = new B() { B2 = g.F1.B2 };
 
         this.EventsFrom( () => g.F1 = newB )
-            .Should().Equal( "F2", "F1" );
+            .Should()
+            .Equal( "F2", "F1" );
 
         // New B, with new C:
 
         var newB_2 = new B();
 
         this.EventsFrom( () => g.F1 = newB_2 )
-            .Should().Equal( "F2", "G1", "F1" );
+            .Should()
+            .Equal( "F2", "G1", "F1" );
     }
 }

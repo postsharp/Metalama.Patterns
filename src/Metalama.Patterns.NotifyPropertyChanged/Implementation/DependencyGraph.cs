@@ -80,7 +80,7 @@ internal static partial class DependencyGraph
             IFieldOrProperty originFieldOrProperty,
             ISymbol originSymbol,
             ICompilation compilation,
-            SemanticModel semanticModel,            
+            SemanticModel semanticModel,
             ReportDiagnostic reportDiagnostic )
         {
             this._tree = tree;
@@ -90,9 +90,9 @@ internal static partial class DependencyGraph
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
         }
-        
+
         public override void Visit( SyntaxNode? node )
-        {            
+        {
             ++this._depth;
 
             base.Visit( node );
@@ -177,6 +177,7 @@ internal static partial class DependencyGraph
             if ( this._accessorStartDepth > 0 )
             {
                 var symbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
+
                 if ( symbol is IPropertySymbol property )
                 {
                     this._properties.Add( property );
@@ -187,9 +188,9 @@ internal static partial class DependencyGraph
                     // Not a property (eg, it's a method or field).
                     this._reportDiagnostic(
                         DiagnosticDescriptors.DependencyAnalysis.ErrorMiscUnsupportedIdentifier
-                        .WithArguments( (node.Identifier.Text, symbol == null ? "<unresolved>" : symbol.Kind.ToString()) ),
+                            .WithArguments( (node.Identifier.Text, symbol == null ? "<unresolved>" : symbol.Kind.ToString()) ),
                         node.GetLocation() );
-                    
+
                     this.ClearCurrentAccessor();
                 }
             }

@@ -77,8 +77,7 @@ internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
     /// Should only be called by <see cref="BuildAspectContext.GetOrCreateLastValueField(DependencyGraph.Node{NodeData})"/>.
     /// </summary>
     /// <param name="field"></param>
-    public void SetLastValueField( IField field )
-        => this.LastValueField = field;
+    public void SetLastValueField( IField field ) => this.LastValueField = field;
 
     /// <summary>
     /// Gets the potentially uninitialized field like "PropertyChangedEventHandler? _onA2PropertyChangedHandler".
@@ -90,8 +89,7 @@ internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
     /// Should only be called by <see cref="BuildAspectContext.GetOrCreateHandlerField(DependencyGraph.Node{NodeData})"/>.
     /// </summary>
     /// <param name="field"></param>
-    public void SetHandlerField( IField field )
-        => this.HandlerField = field;
+    public void SetHandlerField( IField field ) => this.HandlerField = field;
 
     private IReadOnlyCollection<IMethod>? _childUpdateMethods;
 
@@ -131,7 +129,7 @@ internal class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
         {
             if ( !this.UpdateMethodHasBeenSet )
             {
-                throw new InvalidOperationException( $"{nameof( this.UpdateMethod )} for node {this.Name} has not been set yet, so cannot be read." );
+                throw new InvalidOperationException( $"{nameof(this.UpdateMethod)} for node {this.Name} has not been set yet, so cannot be read." );
             }
 
             return this._updateMethod;

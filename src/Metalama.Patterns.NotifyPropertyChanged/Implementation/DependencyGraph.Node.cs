@@ -28,23 +28,20 @@ internal partial class DependencyGraph
         /// <summary>
         /// Initializes a new instance of the <see cref="Node{T}"/> class which represents the root node of a tree.
         /// </summary>
-        public Node()
-        {
-        }
+        public Node() { }
 
         private void InitializeBase( TDerived parent, ISymbol symbol, IFieldOrProperty fieldOrProperty )
         {
-            this.Parent = parent ?? throw new ArgumentNullException( nameof( parent ) );
-            this._symbol = symbol ?? throw new ArgumentNullException( nameof( symbol ) );
-            this._fieldOrProperty = fieldOrProperty ?? throw new ArgumentNullException( nameof( fieldOrProperty ) );
+            this.Parent = parent ?? throw new ArgumentNullException( nameof(parent) );
+            this._symbol = symbol ?? throw new ArgumentNullException( nameof(symbol) );
+            this._fieldOrProperty = fieldOrProperty ?? throw new ArgumentNullException( nameof(fieldOrProperty) );
             this.Depth = parent.Depth + 1;
             this.Initialize();
         }
 
         protected virtual void Initialize() { }
 
-        protected static Exception NewNotSupportedOnRootNodeException()
-            => new InvalidOperationException( "The operation is not supported on a root node." );
+        protected static Exception NewNotSupportedOnRootNodeException() => new InvalidOperationException( "The operation is not supported on a root node." );
 
         public bool IsRoot => this.Parent == null;
 
@@ -72,8 +69,10 @@ internal partial class DependencyGraph
         public string DottedPropertyPath
             => this._dottedPropertyPath ??=
                 this.IsRoot
-                ? throw NewNotSupportedOnRootNodeException()
-                : this.Parent!.IsRoot ? this.Name : $"{this.Parent.DottedPropertyPath}.{this.Name}";
+                    ? throw NewNotSupportedOnRootNodeException()
+                    : this.Parent!.IsRoot
+                        ? this.Name
+                        : $"{this.Parent.DottedPropertyPath}.{this.Name}";
 
         /// <summary>
         /// Gets a property path like "A1" or "A1B1".
@@ -81,8 +80,10 @@ internal partial class DependencyGraph
         public string ContiguousPropertyPath
             => this._contiguousPropertyPath ??=
                 this.IsRoot
-                ? throw NewNotSupportedOnRootNodeException()
-                : this.Parent!.IsRoot ? this.Name : $"{this.Parent.ContiguousPropertyPath}.{this.Name}";
+                    ? throw NewNotSupportedOnRootNodeException()
+                    : this.Parent!.IsRoot
+                        ? this.Name
+                        : $"{this.Parent.ContiguousPropertyPath}.{this.Name}";
 
         /// <summary>
         /// Gets the name of the node. This is a synonym for <c>Symbol.Name</c>.
@@ -165,16 +166,14 @@ internal partial class DependencyGraph
         /// </summary>
         /// <param name="includeRoot"></param>
         /// <returns></returns>
-        public IEnumerable<TDerived> Ancestors( bool includeRoot = false )
-            => this.AncestorsCore( includeRoot, false );
+        public IEnumerable<TDerived> Ancestors( bool includeRoot = false ) => this.AncestorsCore( includeRoot, false );
 
         /// <summary>
         /// Gets the current node and its ancestors in leaf-to-root order.
         /// </summary>
         /// <param name="includeRoot"></param>
         /// <returns></returns>
-        public IEnumerable<TDerived> AncestorsAndSelf( bool includeRoot = false )
-            => this.AncestorsCore( includeRoot, true );
+        public IEnumerable<TDerived> AncestorsAndSelf( bool includeRoot = false ) => this.AncestorsCore( includeRoot, true );
 
         private IEnumerable<TDerived> AncestorsCore( bool includeRoot, bool includeSelf )
         {
@@ -186,7 +185,9 @@ internal partial class DependencyGraph
                 {
                     break;
                 }
+
                 yield return node;
+
                 node = node.Parent;
             }
         }
@@ -195,7 +196,7 @@ internal partial class DependencyGraph
         {
             if ( depth > this.Depth || depth < 0 )
             {
-                throw new ArgumentOutOfRangeException( nameof( depth ), "Must be greater than zero and less than or equal to the depth of the current node." );
+                throw new ArgumentOutOfRangeException( nameof(depth), "Must be greater than zero and less than or equal to the depth of the current node." );
             }
 
             var n = (TDerived) this;
@@ -214,7 +215,7 @@ internal partial class DependencyGraph
 
             if ( this._children == null )
             {
-                this._children = new();
+                this._children = new Dictionary<ISymbol, TDerived>();
                 result = new TDerived();
                 result.InitializeBase( (TDerived) this, childSymbol, fieldOrProperty );
                 this._children.Add( childSymbol, result );
@@ -234,11 +235,12 @@ internal partial class DependencyGraph
 
         public TDerived? GetChild( ISymbol? childSymbol )
             => childSymbol == null || this._children == null || !this._children.TryGetValue( childSymbol, out var result )
-                ? null : result;
+                ? null
+                : result;
 
         public void AddReferencedBy( TDerived node )
         {
-            this._referencedBy ??= new();
+            this._referencedBy ??= new HashSet<TDerived>();
             this._referencedBy.Add( node );
         }
 
@@ -246,6 +248,7 @@ internal partial class DependencyGraph
         {
             var sb = new StringBuilder();
             this.ToString( sb, 0 );
+
             return sb.ToString();
         }
 
@@ -253,6 +256,7 @@ internal partial class DependencyGraph
         {
             var sb = new StringBuilder();
             this.ToString( sb, 0, format: format );
+
             return sb.ToString();
         }
 
@@ -260,6 +264,7 @@ internal partial class DependencyGraph
         {
             var sb = new StringBuilder();
             this.ToString( sb, 0, highlight == null ? null : n => n == highlight, format );
+
             return sb.ToString();
         }
 
@@ -267,12 +272,11 @@ internal partial class DependencyGraph
         {
             var sb = new StringBuilder();
             this.ToString( sb, 0, shouldHighlight, format );
+
             return sb.ToString();
         }
 
-        protected virtual void ToStringAppendToLine( StringBuilder appendTo, string? format )
-        {
-        }
+        protected virtual void ToStringAppendToLine( StringBuilder appendTo, string? format ) { }
 
         protected virtual void ToString( StringBuilder appendTo, int indent, Func<TDerived, bool>? shouldHighlight = null, string? format = null )
         {
@@ -301,6 +305,7 @@ internal partial class DependencyGraph
             if ( this._children != null )
             {
                 indent += 2;
+
                 foreach ( var child in this._children.Values.OrderBy( c => c.Name ) )
                 {
                     child.ToString( appendTo, indent, shouldHighlight );

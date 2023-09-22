@@ -14,20 +14,23 @@ public sealed class SealedTests : InpcTestsBase
     {
         var v = new C1();
 
-        var sv = this.SubscribeTo(v);
+        var sv = this.SubscribeTo( v );
 
         this.EventsFrom( () => v.C1P1 = 1 )
-            .Should().Equal( "C1P1" );
+            .Should()
+            .Equal( "C1P1" );
 
         var a = new Simple();
 
         var sa = this.SubscribeTo( a );
 
         this.EventsFrom( () => v.C1P2 = a )
-            .Should().Equal( (sv, "C1P3"), ( sv, "C1P2" ) );
+            .Should()
+            .Equal( (sv, "C1P3"), (sv, "C1P2") );
 
         this.EventsFrom( () => a.S1 = 1 )
-            .Should().Equal( (sa, "S1"), (sv, "C1P3") );
+            .Should()
+            .Equal( (sa, "S1"), (sv, "C1P3") );
     }
 
     [Fact]
@@ -38,12 +41,15 @@ public sealed class SealedTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.S1 = 1 )
-            .Should().Equal( "C2P3", "S1" );
+            .Should()
+            .Equal( "C2P3", "S1" );
 
         this.EventsFrom( () => v.S2 = 1 )
-            .Should().Equal( "S2" );
+            .Should()
+            .Equal( "S2" );
 
         this.EventsFrom( () => v.C2P1 = 1 )
-            .Should().Equal( "C2P1" );
+            .Should()
+            .Equal( "C2P1" );
     }
 }

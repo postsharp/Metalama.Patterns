@@ -33,7 +33,8 @@ public sealed class GenericTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.B1 = "hello" )
-            .Should().Equal( "B1" );
+            .Should()
+            .Equal( "B1" );
     }
 
     [Fact]
@@ -44,7 +45,8 @@ public sealed class GenericTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.C1 = 123 )
-            .Should().Equal( "C1" );
+            .Should()
+            .Equal( "C1" );
     }
 
     [Fact]
@@ -54,14 +56,17 @@ public sealed class GenericTests : InpcTestsBase
 
         this.SubscribeTo( v );
 
-        this.EventsFrom( () => v.D1 = new() )
-            .Should().Equal( "FooX", "D1" );
+        this.EventsFrom( () => v.D1 = new MyFoo() )
+            .Should()
+            .Equal( "FooX", "D1" );
 
         this.EventsFrom( () => v.D1.X = 1 )
-            .Should().Equal( "FooX" );
+            .Should()
+            .Equal( "FooX" );
 
         this.EventsFrom( () => v.D1.Y = 1 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
     }
 
     // TODO: Pending #33805

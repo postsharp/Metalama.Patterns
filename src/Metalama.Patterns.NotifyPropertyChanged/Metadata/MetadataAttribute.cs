@@ -2,6 +2,4 @@
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Metadata;
 
-public abstract class MetadataAttribute : Attribute
-{
-}
+public abstract class MetadataAttribute : Attribute { }

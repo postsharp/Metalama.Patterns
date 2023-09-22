@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
@@ -26,15 +27,15 @@ internal sealed class BuildAspectContext
     public BuildAspectContext( IAspectBuilder<INamedType> builder )
     {
         this.Builder = builder;
-        this.Type_INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof( INotifyPropertyChanged ) );
+        this.Type_INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof(INotifyPropertyChanged) );
         this.Event_INotifyPropertyChanged_PropertyChanged = this.Type_INotifyPropertyChanged.Events.First();
         this.Type_Nullable_INotifyPropertyChanged = this.Type_INotifyPropertyChanged.ToNullableType();
-        this.Type_PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof( PropertyChangedEventHandler ) );
+        this.Type_PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof(PropertyChangedEventHandler) );
         this.Type_Nullable_PropertyChangedEventHandler = this.Type_PropertyChangedEventHandler.ToNullableType();
-        this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof( IgnoreAutoChangeNotificationAttribute ) );
-        this.Type_EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof( EqualityComparer<> ) );
-        this.Type_OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof( OnChildPropertyChangedMethodAttribute ) );
-        this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) );
+        this.Type_IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof(IgnoreAutoChangeNotificationAttribute) );
+        this.Type_EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof(EqualityComparer<>) );
+        this.Type_OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnChildPropertyChangedMethodAttribute) );
+        this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredInpcPropertyChangedMethodAttribute) );
 
         var target = builder.Target;
 
@@ -45,13 +46,13 @@ internal sealed class BuildAspectContext
                 target.BaseType.Is( this.Type_INotifyPropertyChanged )
                 || (target.BaseType is { BelongsToCurrentProject: true }
                     && (!this.Target.Compilation.IsPartial || this.Target.Compilation.Types.Contains( target.BaseType ))
-                    && target.BaseType.TypeDefinition.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
+                    && target.BaseType.TypeDefinition.Enhancements().HasAspect( typeof(NotifyPropertyChangedAttribute) )));
 
         this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Type_INotifyPropertyChanged );
 
-        this._baseOnPropertyChangedMethod = new( () => GetOnPropertyChangedMethod( target ) );
-        this._baseOnChildPropertyChangedMethod = new( () => GetOnChildPropertyChangedMethod( target ) );
-        this._baseOnUnmonitoredInpcPropertyChangedMethod = new( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
+        this._baseOnPropertyChangedMethod = new Lazy<IMethod>( () => GetOnPropertyChangedMethod( target ) );
+        this._baseOnChildPropertyChangedMethod = new Lazy<IMethod>( () => GetOnChildPropertyChangedMethod( target ) );
+        this._baseOnUnmonitoredInpcPropertyChangedMethod = new Lazy<IMethod>( () => this.GetOnUnmonitoredInpcPropertyChangedMethod( target ) );
     }
 
     public bool InsertDiagnosticComments { get; set; } // = true; // TODO: Set by configuration? Discuss.
@@ -99,7 +100,8 @@ internal sealed class BuildAspectContext
     public bool HasInheritedOnUnmonitoredInpcPropertyChangedProperty( string propertyName )
     {
         this._inheritedOnUnmonitoredInpcPropertyChangedPropertyNames ??=
-            BuildPropertyPathLookup( GetPropertyPaths( this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute, this.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
+            BuildPropertyPathLookup(
+                GetPropertyPaths( this.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute, this.BaseOnUnmonitoredInpcPropertyChangedMethod ) );
 
         return this._inheritedOnUnmonitoredInpcPropertyChangedPropertyNames.Contains( propertyName );
     }
@@ -108,7 +110,8 @@ internal sealed class BuildAspectContext
 
     public CertainDeferredDeclaration<IMethod> OnChildPropertyChangedMethod { get; } = new();
 
-    public DeferredDeclaration<IMethod> OnUnmonitoredInpcPropertyChangedMethod { get; } = new( willBeDefined: true ); // TODO: Decide according to configuration.
+    public DeferredDeclaration<IMethod> OnUnmonitoredInpcPropertyChangedMethod { get; } =
+        new( willBeDefined: true ); // TODO: Decide according to configuration.
 
     public List<string> PropertyPathsForOnChildPropertyChangedMethodAttribute { get; } = new();
 
@@ -132,7 +135,7 @@ internal sealed class BuildAspectContext
             this.Target,
             ( diagnostic, location ) =>
             {
-                hasReportedDiagnosticError |= diagnostic.Definition.Severity == Framework.Diagnostics.Severity.Error;
+                hasReportedDiagnosticError |= diagnostic.Definition.Severity == Severity.Error;
                 this.Builder.Diagnostics.Report( diagnostic, new LocationWrapper( location ) );
             } );
 
@@ -200,7 +203,8 @@ internal sealed class BuildAspectContext
     /// <returns></returns>
     public string GetAndReserveUnusedMemberName( string desiredName )
     {
-        this._existingMemberNames ??= new( ((IEnumerable<INamedDeclaration>) this.Target.AllMembers()).Concat( this.Target.NestedTypes ).Select( m => m.Name ) );
+        this._existingMemberNames ??= new HashSet<string>(
+            ((IEnumerable<INamedDeclaration>) this.Target.AllMembers()).Concat( this.Target.NestedTypes ).Select( m => m.Name ) );
 
         if ( this._existingMemberNames.Add( desiredName ) )
         {
@@ -230,6 +234,7 @@ internal sealed class BuildAspectContext
         {
             result = Check( type );
             this._inpcInstrumentationKindLookup.Add( type, result );
+
             return result;
         }
 
@@ -278,6 +283,7 @@ internal sealed class BuildAspectContext
                     foreach ( var t in typeParameter.TypeConstraints )
                     {
                         var k = this.GetInpcInstrumentationKind( t );
+
                         switch ( k )
                         {
                             case InpcInstrumentationKind.Implicit:
@@ -285,6 +291,7 @@ internal sealed class BuildAspectContext
 
                             case InpcInstrumentationKind.Explicit:
                                 hasImplicit = true;
+
                                 break;
                         }
                     }
@@ -298,9 +305,9 @@ internal sealed class BuildAspectContext
     }
 
     private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
-        => propertyPaths == null ? new() : new( propertyPaths );
+        => propertyPaths == null ? new HashSet<string>() : new HashSet<string>( propertyPaths );
 
-    [return: NotNullIfNotNull( nameof( method ) )]
+    [return: NotNullIfNotNull( nameof(method) )]
     private static IEnumerable<string>? GetPropertyPaths( INamedType attributeType, IMethod? method, bool includeInherited = true )
     {
         // NB: Assumes that attributeType instances will always be constructed with one arg of type string[].
@@ -314,40 +321,43 @@ internal sealed class BuildAspectContext
             ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPaths( attributeType, m ) )
             : GetPropertyPaths( attributeType, method );
 
-        static IEnumerable<string> GetPropertyPaths( INamedType attributeType, IMethod method ) =>
-            method.Attributes
-            .OfAttributeType( attributeType )
-            .SelectMany( a => a.ConstructorArguments[0].Values.Select( k => (string?) k.Value ) )
-            .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
+        static IEnumerable<string> GetPropertyPaths( INamedType attributeType, IMethod method )
+            => method.Attributes
+                .OfAttributeType( attributeType )
+                .SelectMany( a => a.ConstructorArguments[0].Values.Select( k => (string?) k.Value ) )
+                .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
     }
 
     private static IMethod? GetOnPropertyChangedMethod( INamedType type )
-        => type.AllMethods.FirstOrDefault( m =>
-            !m.IsStatic
-            && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
-            && m.ReturnType.SpecialType == SpecialType.Void
-            && m.Parameters.Count == 1
-            && m.Parameters[0].Type.SpecialType == SpecialType.String
-            && _onPropertyChangedMethodNames.Contains( m.Name ) );
+        => type.AllMethods.FirstOrDefault(
+            m =>
+                !m.IsStatic
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters.Count == 1
+                && m.Parameters[0].Type.SpecialType == SpecialType.String
+                && _onPropertyChangedMethodNames.Contains( m.Name ) );
 
     private static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
-        => type.AllMethods.FirstOrDefault( m =>
-            !m.IsStatic
-            && m.Attributes.Any( typeof( OnChildPropertyChangedMethodAttribute ) )
-            && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
-            && m.ReturnType.SpecialType == SpecialType.Void
-            && m.Parameters.Count == 2
-            && m.Parameters[0].Type.SpecialType == SpecialType.String
-            && m.Parameters[1].Type.SpecialType == SpecialType.String );
+        => type.AllMethods.FirstOrDefault(
+            m =>
+                !m.IsStatic
+                && m.Attributes.Any( typeof(OnChildPropertyChangedMethodAttribute) )
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters.Count == 2
+                && m.Parameters[0].Type.SpecialType == SpecialType.String
+                && m.Parameters[1].Type.SpecialType == SpecialType.String );
 
     private IMethod? GetOnUnmonitoredInpcPropertyChangedMethod( INamedType type )
-        => type.AllMethods.FirstOrDefault( m =>
-            !m.IsStatic
-            && m.Attributes.Any( typeof( OnUnmonitoredInpcPropertyChangedMethodAttribute ) )
-            && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
-            && m.ReturnType.SpecialType == SpecialType.Void
-            && m.Parameters.Count == 3
-            && m.Parameters[0].Type.SpecialType == SpecialType.String
-            && m.Parameters[1].Type == this.Type_Nullable_INotifyPropertyChanged
-            && m.Parameters[2].Type == this.Type_Nullable_INotifyPropertyChanged );
+        => type.AllMethods.FirstOrDefault(
+            m =>
+                !m.IsStatic
+                && m.Attributes.Any( typeof(OnUnmonitoredInpcPropertyChangedMethodAttribute) )
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters.Count == 3
+                && m.Parameters[0].Type.SpecialType == SpecialType.String
+                && m.Parameters[1].Type == this.Type_Nullable_INotifyPropertyChanged
+                && m.Parameters[2].Type == this.Type_Nullable_INotifyPropertyChanged );
 }

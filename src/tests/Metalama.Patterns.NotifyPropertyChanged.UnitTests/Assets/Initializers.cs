@@ -3,7 +3,6 @@
 // TODO: Enable when INPC-type properties with initializers are supported.
 
 #if false
-
 using Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Initializers;

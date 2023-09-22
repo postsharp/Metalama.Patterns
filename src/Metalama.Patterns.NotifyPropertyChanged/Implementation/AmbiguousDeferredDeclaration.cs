@@ -17,9 +17,9 @@ internal class AmbiguousDeferredDeclaration<T>
     private T? _declaration;
 
     public AmbiguousDeferredDeclaration( bool? willBeDefined )
-    {        
+    {
         this.WillBeDefined = willBeDefined;
-    }    
+    }
 
     /// <summary>
     /// Gets a value indicating the future final state of <see cref="Declaration"/>. <see langword="null"/> 
@@ -42,14 +42,21 @@ internal class AmbiguousDeferredDeclaration<T>
                 case true:
                     if ( this._declaration == null )
                     {
-                        throw new ArgumentNullException( nameof( this.Declaration ), "The deferred declaration promised to provide a value but a value has not been set." );
+                        throw new ArgumentNullException(
+                            nameof(this.Declaration),
+                            "The deferred declaration promised to provide a value but a value has not been set." );
                     }
+
                     break;
+
                 case false:
                     if ( this._declaration != null )
                     {
-                        throw new ArgumentNullException( nameof( this.Declaration ), "The deferred declaration promised not to provide a value but a value has been set." );
+                        throw new ArgumentNullException(
+                            nameof(this.Declaration),
+                            "The deferred declaration promised not to provide a value but a value has been set." );
                     }
+
                     break;
             }
 
@@ -63,14 +70,21 @@ internal class AmbiguousDeferredDeclaration<T>
                 case true:
                     if ( value == null )
                     {
-                        throw new ArgumentNullException( nameof( this.Declaration ), "The deferred declaration has promised to provide a value, the value cannot be null." );
+                        throw new ArgumentNullException(
+                            nameof(this.Declaration),
+                            "The deferred declaration has promised to provide a value, the value cannot be null." );
                     }
+
                     break;
+
                 case false:
                     if ( this._declaration != null )
                     {
-                        throw new ArgumentNullException( nameof( this.Declaration ), "The deferred declaration has promised not to provide a value, the value must be null." );
+                        throw new ArgumentNullException(
+                            nameof(this.Declaration),
+                            "The deferred declaration has promised not to provide a value, the value must be null." );
                     }
+
                     break;
             }
 

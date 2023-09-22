@@ -10,10 +10,8 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     /// <summary>
     /// C1 : Simple
     /// </summary>
-    public partial class C1 : Simple
-    {
-    }
-    
+    public partial class C1 : Simple { }
+
     /// <summary>
     /// C2 : Simple
     /// </summary>
@@ -194,7 +192,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
     /// <summary>
     /// C14 : C13, NotifyPropertyChangedAttribute excluded, hand-coded.
     /// </summary>
-    [ExcludeAspect( typeof( NotifyPropertyChangedAttribute ) )]
+    [ExcludeAspect( typeof(NotifyPropertyChangedAttribute) )]
     public class C14 : C13
     {
         private int _c14P1;
@@ -210,7 +208,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Inheritance
                 if ( value != this._c14P1 )
                 {
                     this._c14P1 = value;
-                    this.OnPropertyChanged( nameof( this.C14P1 ) );
+                    this.OnPropertyChanged( nameof(this.C14P1) );
                 }
             }
         }

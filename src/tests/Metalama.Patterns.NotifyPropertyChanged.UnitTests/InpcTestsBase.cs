@@ -31,7 +31,7 @@ public abstract class InpcTestsBase : IDisposable
 
         internal bool IsDisposed => this._disposed == 1;
 
-        private PropertyChangedEventHandler? _handler;        
+        private PropertyChangedEventHandler? _handler;
 
         internal void SetHandler( PropertyChangedEventHandler handler )
         {
@@ -60,38 +60,34 @@ public abstract class InpcTestsBase : IDisposable
             }
         }
 
-        public override string ToString()
-            => this.Origin;
+        public override string ToString() => this.Origin;
 
         public bool Equals( Subscription? other )
             => ReferenceEquals( this, other ) || ReferenceEquals( this, AnySubscription ) || ReferenceEquals( other, AnySubscription );
 
-        public override bool Equals( object? obj )
-            => this.Equals( obj as Subscription );
+        public override bool Equals( object? obj ) => this.Equals( obj as Subscription );
 
-        public override int GetHashCode()
-            => base.GetHashCode();
+        public override int GetHashCode() => base.GetHashCode();
     }
 
-    protected static readonly Subscription AnySubscription = new Subscription( "<any>", null! );
+    protected static readonly Subscription AnySubscription = new( "<any>", null! );
 
     protected record struct Event( Subscription Subscription, string PropertyName )
-    {    
-        public static implicit operator Event( string propertyName )
-            => new Event( AnySubscription, propertyName );
+    {
+        public static implicit operator Event( string propertyName ) => new( AnySubscription, propertyName );
 
-        public static implicit operator Event( (Subscription Subscription, string PropertyName) tuple )
-            => new Event( tuple.Subscription, tuple.PropertyName );
+        public static implicit operator Event( (Subscription Subscription, string PropertyName) tuple ) => new( tuple.Subscription, tuple.PropertyName );
     }
 
     protected Event[] EventsFrom( Action action )
     {
         var list = this.Events;
         list.Should().BeEmpty();
-        
+
         try
         {
             action();
+
             return list.ToArray();
         }
         finally
@@ -102,7 +98,7 @@ public abstract class InpcTestsBase : IDisposable
 
     protected List<Event> Events { get; } = new();
 
-    private readonly Dictionary<string,Subscription> _subscriptions = new();
+    private readonly Dictionary<string, Subscription> _subscriptions = new();
 
     protected Subscription SubscribeTo<TInpc>( TInpc source, [CallerMemberName] string? callerMemberName = null, [CallerLineNumber] int callerLineNumber = -1 )
         where TInpc : class, INotifyPropertyChanged
@@ -113,9 +109,9 @@ public abstract class InpcTestsBase : IDisposable
 
         var idx = 2;
 
-        while ( this._subscriptions.ContainsKey(key) )
+        while ( this._subscriptions.ContainsKey( key ) )
         {
-            key = $"{typeof( TInpc ).Name}#{idx} ({callerMemberName}#{callerLineNumber})";
+            key = $"{typeof(TInpc).Name}#{idx} ({callerMemberName}#{callerLineNumber})";
             ++idx;
         }
 
@@ -133,7 +129,11 @@ public abstract class InpcTestsBase : IDisposable
             args.Should().NotBeNull();
             sender.Should().BeSameAs( source );
             args.PropertyName.Should().NotBeNullOrEmpty();
-            type.GetProperty( args.PropertyName!, BindingFlags.Instance | BindingFlags.Public ).Should().NotBeNull( "because the notified property name should be a public property of the notifying type." );
+
+            type.GetProperty( args.PropertyName!, BindingFlags.Instance | BindingFlags.Public )
+                .Should()
+                .NotBeNull( "because the notified property name should be a public property of the notifying type." );
+
             eventsList.Add( new Event( sub, args.PropertyName! ) );
         }
 
@@ -144,7 +144,7 @@ public abstract class InpcTestsBase : IDisposable
         return sub;
     }
 
-    protected virtual void OnDispose() { }    
+    protected virtual void OnDispose() { }
 
     public void Dispose()
     {

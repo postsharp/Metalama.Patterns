@@ -18,32 +18,39 @@ public sealed class InheritanceTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.S1 = 0 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.S2 = 0 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.S3 = 0 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.S1 = 1 )
-            .Should().Equal( "S1" );
+            .Should()
+            .Equal( "S1" );
 
         this.EventsFrom( () => v.S2 = 1 )
-            .Should().Equal( "S2" );
+            .Should()
+            .Equal( "S2" );
 
         this.EventsFrom( () => v.S3 = 1 )
-            .Should().Equal( "S3" );
+            .Should()
+            .Equal( "S3" );
     }
 
     private void Test( C2 v )
     {
         v.C2P1.Should().Be( 0 );
-        
+
         this.Test( (Simple) v );
 
         this.EventsFrom( () => v.C2P1 = 1 )
-            .Should().Equal( "C2P1" );
+            .Should()
+            .Equal( "C2P1" );
     }
 
     private void Test( C3 v )
@@ -53,7 +60,8 @@ public sealed class InheritanceTests : InpcTestsBase
         this.Test( (C2) v );
 
         this.EventsFrom( () => v.C3P1 = 1 )
-            .Should().Equal( "C3P1" );
+            .Should()
+            .Equal( "C3P1" );
     }
 
     private void Test( C4 v )
@@ -63,7 +71,8 @@ public sealed class InheritanceTests : InpcTestsBase
         this.Test( (C3) v );
 
         this.EventsFrom( () => v.C4P1 = 1 )
-            .Should().Equal( "C4P1" );
+            .Should()
+            .Equal( "C4P1" );
     }
 
     private void Test( C5 v )
@@ -73,7 +82,8 @@ public sealed class InheritanceTests : InpcTestsBase
         this.Test( (C4) v );
 
         this.EventsFrom( () => v.C5P1 = 1 )
-            .Should().Equal( "C5P1" );
+            .Should()
+            .Equal( "C5P1" );
     }
 
     [Fact]
@@ -119,13 +129,16 @@ public sealed class InheritanceTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.S1 = 1 )
-            .Should().Equal( "C6P1", "S1" );
+            .Should()
+            .Equal( "C6P1", "S1" );
 
         this.EventsFrom( () => v.S2 = 1 )
-            .Should().Equal( "S2");
+            .Should()
+            .Equal( "S2" );
 
         this.EventsFrom( () => v.S3 = 1 )
-            .Should().Equal( "S3" );
+            .Should()
+            .Equal( "S3" );
     }
 
     [Fact]
@@ -143,13 +156,16 @@ public sealed class InheritanceTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.S1 = 1 )
-            .Should().Equal( "C7P1", "C6P1", "S1" );
+            .Should()
+            .Equal( "C7P1", "C6P1", "S1" );
 
         this.EventsFrom( () => v.S2 = 1 )
-            .Should().Equal( "S2" );
+            .Should()
+            .Equal( "S2" );
 
         this.EventsFrom( () => v.S3 = 1 )
-            .Should().Equal( "S3" );
+            .Should()
+            .Equal( "S3" );
     }
 
     [Fact]
@@ -164,16 +180,20 @@ public sealed class InheritanceTests : InpcTestsBase
         var sa = this.SubscribeTo( a );
 
         this.EventsFrom( () => v.R1 = a )
-            .Should().Equal( (sv, "A2"), (sv, "C16P1"), (sv, "R1") );
+            .Should()
+            .Equal( (sv, "A2"), (sv, "C16P1"), (sv, "R1") );
 
         this.EventsFrom( () => a.S1 = 1 )
-            .Should().Equal( (sa, "S1"), (sv, "A2") );
+            .Should()
+            .Equal( (sa, "S1"), (sv, "A2") );
 
         this.EventsFrom( () => a.S2 = 1 )
-            .Should().Equal( (sa, "S2"), ( sv, "C16P1") );
+            .Should()
+            .Equal( (sa, "S2"), (sv, "C16P1") );
 
-        this.EventsFrom( () => v.R2 = new() )
-            .Should().Equal( (sv, "R2") );
+        this.EventsFrom( () => v.R2 = new Simple() )
+            .Should()
+            .Equal( (sv, "R2") );
     }
 
     [Fact]
@@ -188,16 +208,20 @@ public sealed class InheritanceTests : InpcTestsBase
         var sa = this.SubscribeTo( a );
 
         this.EventsFrom( () => v.R1 = a )
-            .Should().Equal( (sv, "A2"), (sv, "C17P1"), (sv, "R1") );
+            .Should()
+            .Equal( (sv, "A2"), (sv, "C17P1"), (sv, "R1") );
 
         this.EventsFrom( () => a.S1 = 1 )
-            .Should().Equal( (sa, "S1"), (sv, "A2"), (sv, "C17P1") );
+            .Should()
+            .Equal( (sa, "S1"), (sv, "A2"), (sv, "C17P1") );
 
         this.EventsFrom( () => a.S2 = 1 )
-            .Should().Equal( (sa, "S2") );
+            .Should()
+            .Equal( (sa, "S2") );
 
-        this.EventsFrom( () => v.R2 = new() )
-            .Should().Equal( (sv, "R2") );
+        this.EventsFrom( () => v.R2 = new Simple() )
+            .Should()
+            .Equal( (sv, "R2") );
     }
 
     [Fact]
@@ -212,23 +236,28 @@ public sealed class InheritanceTests : InpcTestsBase
         var sa = this.SubscribeTo( a );
 
         this.EventsFrom( () => v.R1 = a )
-            .Should().Equal( (sv, "A2"), (sv, "R1") );
+            .Should()
+            .Equal( (sv, "A2"), (sv, "R1") );
 
         this.EventsFrom( () => a.S1 = 1 )
-            .Should().Equal( (sa, "S1"), (sv, "A2") );
+            .Should()
+            .Equal( (sa, "S1"), (sv, "A2") );
 
         this.EventsFrom( () => a.S2 = 1 )
-            .Should().Equal( (sa, "S2") );
+            .Should()
+            .Equal( (sa, "S2") );
 
         var b = new Simple();
 
         var sb = this.SubscribeTo( b );
 
         this.EventsFrom( () => v.R2 = b )
-            .Should().Equal( (sv, "C18P1"), (sv, "R2") );
+            .Should()
+            .Equal( (sv, "C18P1"), (sv, "R2") );
 
         this.EventsFrom( () => b.S2 = 1 )
-            .Should().Equal( (sb, "S2") );
+            .Should()
+            .Equal( (sb, "S2") );
     }
 
     [Fact]
@@ -239,10 +268,12 @@ public sealed class InheritanceTests : InpcTestsBase
         var sv = this.SubscribeTo( v );
 
         this.EventsFrom( () => v.C8P1 = 1 )
-            .Should().Equal( "C8P1" );
+            .Should()
+            .Equal( "C8P1" );
 
         this.EventsFrom( () => v.EX1 = 3 )
-            .Should().Equal( "C8P2", "EX1" );
+            .Should()
+            .Equal( "C8P2", "EX1" );
 
         v.C8P2.Should().Be( 6 );
 
@@ -251,18 +282,22 @@ public sealed class InheritanceTests : InpcTestsBase
         var sa = this.SubscribeTo( a );
 
         this.EventsFrom( () => v.EX2 = a )
-            .Should().Equal( (sv, "C8P3"), (sv, "EX2") );
+            .Should()
+            .Equal( (sv, "C8P3"), (sv, "EX2") );
 
         this.EventsFrom( () => a.S1 = 6 )
-            .Should().Equal( (sa, "S1"), (sv, "C8P3") );
+            .Should()
+            .Equal( (sa, "S1"), (sv, "C8P3") );
 
         v.C8P3.Should().Be( 18 );
 
         this.EventsFrom( () => a.S2 = 1 )
-            .Should().Equal( (sa, "S2") );
+            .Should()
+            .Equal( (sa, "S2") );
 
         this.EventsFrom( () => a.S3 = 1 )
-            .Should().Equal( (sa, "S3") );
+            .Should()
+            .Equal( (sa, "S3") );
     }
 
     [Fact]
@@ -273,10 +308,12 @@ public sealed class InheritanceTests : InpcTestsBase
         var sv = this.SubscribeTo( v );
 
         this.EventsFrom( () => v.C8P1 = 1 )
-            .Should().Equal( "C9P1", "C8P1" );
+            .Should()
+            .Equal( "C9P1", "C8P1" );
 
         this.EventsFrom( () => v.EX1 = 3 )
-            .Should().Equal( "C8P2", "EX1" );
+            .Should()
+            .Equal( "C8P2", "EX1" );
 
         v.C8P2.Should().Be( 6 );
 
@@ -285,20 +322,24 @@ public sealed class InheritanceTests : InpcTestsBase
         var sa = this.SubscribeTo( a );
 
         this.EventsFrom( () => v.EX2 = a )
-            .Should().Equal( (sv, "C9P2"), (sv, "C8P3"), (sv, "EX2") );
+            .Should()
+            .Equal( (sv, "C9P2"), (sv, "C8P3"), (sv, "EX2") );
 
         this.EventsFrom( () => a.S1 = 6 )
-            .Should().Equal( (sa, "S1"), (sv, "C8P3") );
+            .Should()
+            .Equal( (sa, "S1"), (sv, "C8P3") );
 
         v.C8P3.Should().Be( 18 );
 
         this.EventsFrom( () => a.S2 = 42 )
-            .Should().Equal( (sa, "S2"), (sv, "C9P2") );
+            .Should()
+            .Equal( (sa, "S2"), (sv, "C9P2") );
 
         v.C9P2.Should().Be( 42 );
 
         this.EventsFrom( () => a.S3 = 1 )
-            .Should().Equal( (sa, "S3") );
+            .Should()
+            .Equal( (sa, "S3") );
     }
 
     [Fact]
@@ -309,7 +350,8 @@ public sealed class InheritanceTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.C10P1 = 1 )
-            .Should().Equal( "C11P1", "C10P1" );
+            .Should()
+            .Equal( "C11P1", "C10P1" );
     }
 
     [Fact]
@@ -320,7 +362,8 @@ public sealed class InheritanceTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.EX1 = 1 )
-            .Should().Equal( "C12P1", "EX1" );
+            .Should()
+            .Equal( "C12P1", "EX1" );
     }
 
     [Fact]
@@ -331,22 +374,27 @@ public sealed class InheritanceTests : InpcTestsBase
         var sv = this.SubscribeTo( v );
 
         this.EventsFrom( () => v.EX1 = 1 )
-            .Should().Equal( "C15P3", "EX1" );
+            .Should()
+            .Equal( "C15P3", "EX1" );
 
         this.EventsFrom( () => v.C13P1 = 1 )
-            .Should().Equal( "C15P1", "C13P1" );
+            .Should()
+            .Equal( "C15P1", "C13P1" );
 
         this.EventsFrom( () => v.C14P1 = 1 )
-            .Should().Equal( "C15P2", "C14P1" );
+            .Should()
+            .Equal( "C15P2", "C14P1" );
 
         var a = new Simple();
 
         var sa = this.SubscribeTo( a );
 
         this.EventsFrom( () => v.EX2 = a )
-            .Should().Equal( (sv, "C15P4"), (sv, "EX2") );
+            .Should()
+            .Equal( (sv, "C15P4"), (sv, "EX2") );
 
         this.EventsFrom( () => a.S1 = 1 )
-            .Should().Equal( (sa, "S1"), (sv, "C15P4") );
+            .Should()
+            .Equal( (sa, "S1"), (sv, "C15P4") );
     }
 }

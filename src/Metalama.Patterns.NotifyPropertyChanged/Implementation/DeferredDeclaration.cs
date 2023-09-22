@@ -14,9 +14,7 @@ internal class DeferredDeclaration<T> : AmbiguousDeferredDeclaration<T>
     where T : IDeclaration
 {
     public DeferredDeclaration( bool willBeDefined )
-        : base( willBeDefined )
-    { 
-    }
+        : base( willBeDefined ) { }
 
     public new bool WillBeDefined => base.WillBeDefined == true;
 

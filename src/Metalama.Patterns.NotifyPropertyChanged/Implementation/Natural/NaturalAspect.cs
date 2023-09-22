@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -28,7 +29,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             // The order of method calls here is significant.
 
             ExamineBaseAndIntroduceInterfaceIfRequired( ctx );
-            
+
             // Introduce methods like UpdateA1B1()
             IntroduceUpdateMethods( ctx );
 
@@ -46,20 +47,21 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             // Diagnostic already raised, do nothing.
         }
     }
-    
+
     private static void AddPropertyPathsForOnChildPropertyChangedMethodAttribute( BuildAspectContext ctx )
     {
         // NB: The selection logic here must be kept in sync with the logic in the OnUnmonitoredInpcPropertyChanged template.
 
         ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.AddRange(
             ctx.DependencyGraph.DecendantsDepthFirst()
-            .Where( n => n.InpcBaseHandling switch
-            {
-                InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined => true,
-                InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
-                _ => false
-            } )
-            .Select( n => n.DottedPropertyPath ) );
+                .Where(
+                    n => n.InpcBaseHandling switch
+                    {
+                        InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined => true,
+                        InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
+                        _ => false
+                    } )
+                .Select( n => n.DottedPropertyPath ) );
     }
 
     private static void IntroduceOnPropertyChangedMethod( BuildAspectContext ctx )
@@ -68,7 +70,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
         var result = ctx.Builder.Advice.IntroduceMethod(
             ctx.Target,
-            nameof( OnPropertyChanged ),
+            nameof(OnPropertyChanged),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
             b =>
@@ -88,10 +90,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                     b.IsVirtual = !isOverride;
                 }
             },
-            args: new
-            {
-                ctx
-            } );
+            args: new { ctx } );
 
         ctx.OnPropertyChangedMethod.Declaration = result.Declaration;
 
@@ -103,14 +102,14 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         if ( ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
         {
             foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst()
-                .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
+                         .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
             {
                 _ = ctx.GetOrCreateHandlerField( node );
             }
         }
 
         foreach ( var node in ctx.DependencyGraph.Children
-            .Where( node => node.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
+                     .Where( node => node.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
         {
             _ = ctx.GetOrCreateHandlerField( node );
             _ = ctx.GetOrCreateLastValueField( node );
@@ -123,7 +122,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
         var result = ctx.Builder.Advice.IntroduceMethod(
             ctx.Target,
-            nameof( OnChildPropertyChanged ),
+            nameof(OnChildPropertyChanged),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
             b =>
@@ -131,9 +130,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                 b.AddAttribute(
                     AttributeConstruction.Create(
                         ctx.Type_OnChildPropertyChangedMethodAttribute,
-                        new[] {
-                                ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s).ToArray()
-                        } ) );
+                        new[] { ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                 if ( isOverride )
                 {
@@ -150,10 +147,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                     b.IsVirtual = !isOverride;
                 }
             },
-            args: new
-            {
-                ctx
-            } );
+            args: new { ctx } );
 
         ctx.OnChildPropertyChangedMethod.Declaration = result.Declaration;
     }
@@ -169,7 +163,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
         var result = ctx.Builder.Advice.IntroduceMethod(
             ctx.Target,
-            nameof( OnUnmonitoredInpcPropertyChanged ),
+            nameof(OnUnmonitoredInpcPropertyChanged),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
             b =>
@@ -177,10 +171,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                 b.AddAttribute(
                     AttributeConstruction.Create(
                         ctx.Type_OnUnmonitoredInpcPropertyChangedMethodAttribute,
-                        new[]
-                        {
-                            ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray()
-                        } ) );
+                        new[] { ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                 if ( isOverride )
                 {
@@ -197,10 +188,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                     b.IsVirtual = !isOverride;
                 }
             },
-            args: new
-            {
-                ctx
-            } );
+            args: new { ctx } );
 
         ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration = result.Declaration;
     }
@@ -213,7 +201,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             {
                 ctx.Builder.Diagnostics.Report(
                     DiagnosticDescriptors.NotifyPropertyChanged.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
-                    .WithArguments( ctx.Target ) );
+                        .WithArguments( ctx.Target ) );
 
                 throw new DiagnosticErrorReportedException();
             }
@@ -222,7 +210,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         {
             var result = ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Type_INotifyPropertyChanged, OverrideStrategy.Fail );
 
-            if ( result.Outcome == Framework.Advising.AdviceOutcome.Error )
+            if ( result.Outcome == AdviceOutcome.Error )
             {
                 Debugger.Break();
             }
@@ -233,7 +221,8 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         BuildAspectContext ctx,
         IFieldOrProperty fieldOrProperty )
     {
-        var propertyTypeImplementsInpc = ctx.GetInpcInstrumentationKind( fieldOrProperty.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
+        var propertyTypeImplementsInpc =
+            ctx.GetInpcInstrumentationKind( fieldOrProperty.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
 
         switch ( fieldOrProperty.Type.IsReferenceType )
         {
@@ -242,7 +231,8 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                 // and non-INPC-type code which is used at runtime when T does not implement INPC.
 
                 ctx.Builder.Diagnostics.Report(
-                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments( (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
+                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments(
+                        (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
                     fieldOrProperty );
 
                 throw new DiagnosticErrorReportedException();
@@ -256,12 +246,14 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                         // TODO: Support this pattern by moving initializer to ctor.
 
                         ctx.Builder.Diagnostics.Report(
-                            DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyHasAnInitializerExpression.WithArguments( (fieldOrProperty.DeclarationKind, fieldOrProperty) ),
+                            DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyHasAnInitializerExpression.WithArguments(
+                                (fieldOrProperty.DeclarationKind, fieldOrProperty) ),
                             fieldOrProperty );
 
                         throw new DiagnosticErrorReportedException();
                     }
                 }
+
                 break;
 
             case false:
@@ -269,11 +261,13 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                 if ( propertyTypeImplementsInpc )
                 {
                     ctx.Builder.Diagnostics.Report(
-                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingINPC.WithArguments( (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
+                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingINPC.WithArguments(
+                            (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
                         fieldOrProperty );
 
                     throw new DiagnosticErrorReportedException();
                 }
+
                 break;
         }
     }
@@ -285,7 +279,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
         // Process all nodes in depth-first, leaf-to-root order, creating necessary update methods as we go.
         // The order is important, so that parent nodes test if child node methods were necessary and invoke them.
-        
+
         // NB: We might be able do this with DeferredDeclaration<T> and care less about ordering.
 
         foreach ( var node in allNodesDepthFirst )
@@ -294,6 +288,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             {
                 // Leaf nodes and root properties should never have update methods.
                 node.SetUpdateMethod( null );
+
                 continue;
             }
 
@@ -302,8 +297,8 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             IMethod? thisUpdateMethod = null;
 
             // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-            if ( node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit 
-                && !ctx.HasInheritedOnChildPropertyChangedPropertyPath(node.DottedPropertyPath) )
+            if ( node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit
+                 && !ctx.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath ) )
             {
                 var lastValueField = ctx.GetOrCreateLastValueField( node );
                 var onPropertyChangedHandlerField = ctx.GetOrCreateHandlerField( node );
@@ -320,7 +315,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
                 var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
                     ctx.Target,
-                    nameof( UpdateChildInpcProperty ),
+                    nameof(UpdateChildInpcProperty),
                     IntroductionScope.Instance,
                     OverrideStrategy.Fail,
                     b =>
@@ -350,16 +345,17 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
     private static void ProcessAutoProperties( BuildAspectContext ctx )
     {
         var target = ctx.Target;
-        var typeOfInpc = (INamedType) TypeFactory.GetType( typeof( INotifyPropertyChanged ) );
+        var typeOfInpc = (INamedType) TypeFactory.GetType( typeof(INotifyPropertyChanged) );
 
         // PS appears to consider all instance properties regardless of accessibility.
         var autoProperties =
             target.Properties
-            .Where( p =>
-                !p.IsStatic
-                && p.IsAutoPropertyOrField == true
-                && !p.Attributes.Any( ctx.Type_IgnoreAutoChangeNotificationAttribute ) )
-            .ToList();
+                .Where(
+                    p =>
+                        !p.IsStatic
+                        && p.IsAutoPropertyOrField == true
+                        && !p.Attributes.Any( ctx.Type_IgnoreAutoChangeNotificationAttribute ) )
+                .ToList();
 
         foreach ( var p in autoProperties )
         {
@@ -407,23 +403,16 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                             ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.Add( p.Name );
                         }
 
-                        ctx.Builder.Advice.Override( p, nameof( OverrideInpcRefTypeProperty ), tags: new
-                        {
-                            ctx,
-                            handlerField,
-                            node
-                        } );
+                        ctx.Builder.Advice.Override( p, nameof(OverrideInpcRefTypeProperty), tags: new { ctx, handlerField, node } );
                     }
                     else
                     {
-                        ctx.Builder.Advice.Override( p, nameof( OverrideUninstrumentedTypeProperty ), tags: new
-                        {
-                            ctx,
-                            node,
-                            compareUsing = EqualityComparisonKind.ReferenceEquals,
-                            propertyTypeInstrumentationKind
-                        } );
+                        ctx.Builder.Advice.Override(
+                            p,
+                            nameof(OverrideUninstrumentedTypeProperty),
+                            tags: new { ctx, node, compareUsing = EqualityComparisonKind.ReferenceEquals, propertyTypeInstrumentationKind } );
                     }
+
                     break;
 
                 case false:
@@ -432,13 +421,11 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                         ? EqualityComparisonKind.EqualityOperator
                         : EqualityComparisonKind.DefaultEqualityComparer;
 
-                    ctx.Builder.Advice.Override( p, nameof( OverrideUninstrumentedTypeProperty ), tags: new
-                    {
-                        ctx,
-                        node,
-                        compareUsing = comparisonKind,
-                        propertyTypeInstrumentationKind
-                    } );
+                    ctx.Builder.Advice.Override(
+                        p,
+                        nameof(OverrideUninstrumentedTypeProperty),
+                        tags: new { ctx, node, compareUsing = comparisonKind, propertyTypeInstrumentationKind } );
+
                     break;
             }
         }

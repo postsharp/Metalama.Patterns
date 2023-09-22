@@ -20,22 +20,28 @@ public sealed class CoreTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.S1 = 0 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.S2 = 0 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.S3 = 0 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.S1 = 1 )
-            .Should().Equal( "S1" );
+            .Should()
+            .Equal( "S1" );
 
         this.EventsFrom( () => v.S2 = 1 )
-            .Should().Equal( "S2" );
+            .Should()
+            .Equal( "S2" );
 
         this.EventsFrom( () => v.S3 = 1 )
-            .Should().Equal( "S3" );
+            .Should()
+            .Equal( "S3" );
     }
 
     [Fact]
@@ -52,30 +58,35 @@ public sealed class CoreTests : InpcTestsBase
         var sv = this.SubscribeTo( v );
 
         this.EventsFrom( () => v.A1 = 1 )
-            .Should().Equal( "A1" );
+            .Should()
+            .Equal( "A1" );
 
         var a = new Simple();
 
         var sa = this.SubscribeTo( a );
 
         this.EventsFrom( () => v.R1 = a )
-            .Should().Equal( (sv, "A2"), ( sv, "R1") );
+            .Should()
+            .Equal( (sv, "A2"), (sv, "R1") );
 
         this.EventsFrom( () => v.R1!.S1 = 1 )
-            .Should().Equal( (sa, "S1"), (sv, "A2") );
+            .Should()
+            .Equal( (sa, "S1"), (sv, "A2") );
 
         this.EventsFrom( () => v.R1!.S2 = 1 )
-            .Should().Equal( (sa, "S2") );
+            .Should()
+            .Equal( (sa, "S2") );
 
         this.EventsFrom( () => v.R1!.S3 = 1 )
-            .Should().Equal( (sa, "S3") );
+            .Should()
+            .Equal( (sa, "S3") );
     }
 
     private class DerivedFromExistingInpcImplWithValidOPCMethod : ExistingInpcImplWithValidOPCMethod
     {
         private readonly Action<string> _onPropertyChanged;
 
-        public DerivedFromExistingInpcImplWithValidOPCMethod( Action<string> onPropertyChanged)
+        public DerivedFromExistingInpcImplWithValidOPCMethod( Action<string> onPropertyChanged )
         {
             this._onPropertyChanged = onPropertyChanged;
         }
@@ -101,24 +112,29 @@ public sealed class CoreTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.EX1 = v.EX1 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.EX2 = v.EX2 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.EX1 = 1 )
-            .Should().Equal( "EX1" );
+            .Should()
+            .Equal( "EX1" );
 
         this.EventsFrom( () => v.EX2 = null )
-            .Should().Equal( "EX2" );
+            .Should()
+            .Equal( "EX2" );
 
-        this.EventsFrom( () => v.EX2 = new() )
-            .Should().Equal( "EX2" );
+        this.EventsFrom( () => v.EX2 = new Simple() )
+            .Should()
+            .Equal( "EX2" );
 
         opc.Should().Equal( "EX1", "EX2", "EX2" );
     }
 
-    private class DerivedFromExistingAbstractInpcImplWithValidOPCMethod : ExistingAbstractInpcImplWithValidOPCMethod 
+    private class DerivedFromExistingAbstractInpcImplWithValidOPCMethod : ExistingAbstractInpcImplWithValidOPCMethod
     {
         private readonly Action<string> _onPropertyChanged;
 
@@ -148,19 +164,24 @@ public sealed class CoreTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.EX1 = v.EX1 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.EX2 = v.EX2 )
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
 
         this.EventsFrom( () => v.EX1 = 1 )
-            .Should().Equal( "EX1" );
+            .Should()
+            .Equal( "EX1" );
 
         this.EventsFrom( () => v.EX2 = null )
-            .Should().Equal( "EX2" );
+            .Should()
+            .Equal( "EX2" );
 
-        this.EventsFrom( () => v.EX2 = new() )
-            .Should().Equal( "EX2" );
+        this.EventsFrom( () => v.EX2 = new Simple() )
+            .Should()
+            .Equal( "EX2" );
 
         opc.Should().Equal( "EX1", "EX2", "EX2" );
     }

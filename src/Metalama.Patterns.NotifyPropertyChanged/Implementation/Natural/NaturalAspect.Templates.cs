@@ -11,12 +11,10 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 internal partial class NaturalAspect
 {
     [CompileTime]
-    private static void CompileTimeThrow( Exception e )
-        => throw e;
+    private static void CompileTimeThrow( Exception e ) => throw e;
 
     [CompileTime]
-    private static T ExpectNotNull<T>( T? obj )
-        => obj ?? throw new InvalidOperationException( "A null value was not expected here." );
+    private static T ExpectNotNull<T>( T? obj ) => obj ?? throw new InvalidOperationException( "A null value was not expected here." );
 
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -29,14 +27,16 @@ internal partial class NaturalAspect
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
             var handlerField = (IField?) meta.Tags["handlerField"];
             var node = (DependencyGraphNode?) meta.Tags["node"];
+
             var inpcImplementationKind = node == null
-                    ? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type )
-                    : node.PropertyTypeInpcInstrumentationKind;
+                ? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type )
+                : node.PropertyTypeInpcInstrumentationKind;
+
             var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
             if ( ctx.InsertDiagnosticComments )
             {
-                meta.InsertComment( "Template: " + nameof( OverrideInpcRefTypeProperty ) );
+                meta.InsertComment( "Template: " + nameof(OverrideInpcRefTypeProperty) );
                 meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             }
 
@@ -45,6 +45,7 @@ internal partial class NaturalAspect
                 if ( handlerField != null )
                 {
                     var oldValue = meta.Target.FieldOrProperty.Value;
+
                     if ( oldValue != null )
                     {
                         if ( eventRequiresCast )
@@ -63,7 +64,9 @@ internal partial class NaturalAspect
                 {
                     var oldValue = meta.Target.FieldOrProperty.Value;
                     meta.Target.FieldOrProperty.Value = value;
-                    ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
+
+                    ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration.With( InvokerOptions.Final )
+                        .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
                 }
                 else
                 {
@@ -77,7 +80,7 @@ internal partial class NaturalAspect
                     {
                         method.With( InvokerOptions.Final ).Invoke();
                     }
-                    
+
                     // Notify refs to the current node and any children without an update method.
                     foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
                     {
@@ -107,7 +110,7 @@ internal partial class NaturalAspect
                         // -----------------------------------------------------------------------
 
                         void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
-                        {                            
+                        {
                             // NB: If handlerField is not null, node must also be non-null.
 
                             OnChildPropertyChangedDelegateBody( ctx, node!, ExpressionFactory.Capture( e ) );
@@ -128,12 +131,12 @@ internal partial class NaturalAspect
     {
         if ( node.Depth <= 1 )
         {
-            CompileTimeThrow( new InvalidOperationException( $"{nameof( UpdateChildInpcProperty )} template must not be called on a root property node." ) );
+            CompileTimeThrow( new InvalidOperationException( $"{nameof(UpdateChildInpcProperty)} template must not be called on a root property node." ) );
         }
 
         if ( ctx.InsertDiagnosticComments )
         {
-            meta.InsertComment( "Template: " + nameof( UpdateChildInpcProperty ) );
+            meta.InsertComment( "Template: " + nameof(UpdateChildInpcProperty) );
             meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
         }
 
@@ -182,7 +185,8 @@ internal partial class NaturalAspect
             }
             else if ( ctx.InsertDiagnosticComments )
             {
-                meta.InsertComment( $"Not calling OnChildPropertyChanged('{node.Parent!.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
+                meta.InsertComment(
+                    $"Not calling OnChildPropertyChanged('{node.Parent!.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
             }
         }
     }
@@ -199,7 +203,7 @@ internal partial class NaturalAspect
 
             if ( ctx.InsertDiagnosticComments )
             {
-                meta.InsertComment( "Template: " + nameof( OverrideUninstrumentedTypeProperty ) );
+                meta.InsertComment( "Template: " + nameof(OverrideUninstrumentedTypeProperty) );
                 meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             }
 
@@ -215,7 +219,8 @@ internal partial class NaturalAspect
                 EqualityComparisonKind.EqualityOperator => (IExpression) (meta.Target.FieldOrProperty.Value != value),
                 EqualityComparisonKind.ThisEquals => (IExpression) !meta.Target.FieldOrProperty.Value!.Equals( value ),
                 EqualityComparisonKind.ReferenceEquals => (IExpression) !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ),
-                EqualityComparisonKind.DefaultEqualityComparer => (IExpression) !ctx.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value!.Equals( value, meta.Target.FieldOrProperty.Value ),
+                EqualityComparisonKind.DefaultEqualityComparer => (IExpression)
+                    !ctx.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value!.Equals( value, meta.Target.FieldOrProperty.Value ),
                 _ => null
             };
 
@@ -240,7 +245,7 @@ internal partial class NaturalAspect
     {
         if ( ctx.InsertDiagnosticComments )
         {
-            meta.InsertComment( "Template: " + nameof( this.OnPropertyChanged ) );
+            meta.InsertComment( "Template: " + nameof(this.OnPropertyChanged) );
             meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
         }
 
@@ -252,6 +257,7 @@ internal partial class NaturalAspect
                 {
                     meta.InsertComment( $"Skipping '{node.Name}': The field or auto property is defined by the current type." );
                 }
+
                 continue;
             }
 
@@ -259,8 +265,10 @@ internal partial class NaturalAspect
             {
                 if ( ctx.InsertDiagnosticComments )
                 {
-                    meta.InsertComment( $"Skipping '{node.Name}': A base type supports OnUnmonitoredInpcPropertyChanged for this property, and the current type is configured to use that feature." );
+                    meta.InsertComment(
+                        $"Skipping '{node.Name}': A base type supports OnUnmonitoredInpcPropertyChanged for this property, and the current type is configured to use that feature." );
                 }
+
                 continue;
             }
 
@@ -276,8 +284,10 @@ internal partial class NaturalAspect
                 {
                     if ( ctx.InsertDiagnosticComments )
                     {
-                        meta.InsertComment( $"Skipping '{node.Name}': A base type supports OnChildPropertyChanged for this property, and the property itself has no references." );
+                        meta.InsertComment(
+                            $"Skipping '{node.Name}': A base type supports OnChildPropertyChanged for this property, and the property itself has no references." );
                     }
+
                     continue;
                 }
                 else
@@ -294,9 +304,9 @@ internal partial class NaturalAspect
 
             var childUpdateMethods = node.ChildUpdateMethods;
 
-            if ( refsToNotify.Count > 0 
-                || childUpdateMethods.Count > 0 
-                || ( node.HasChildren && node.InpcBaseHandling is InpcBaseHandling.OnUnmonitoredInpcPropertyChanged or InpcBaseHandling.OnPropertyChanged ) )
+            if ( refsToNotify.Count > 0
+                 || childUpdateMethods.Count > 0
+                 || (node.HasChildren && node.InpcBaseHandling is InpcBaseHandling.OnUnmonitoredInpcPropertyChanged or InpcBaseHandling.OnPropertyChanged) )
             {
                 var rootPropertyNamesToNotify = refsToNotify
                     .Select( n => n.Name )
@@ -317,6 +327,7 @@ internal partial class NaturalAspect
                             meta.InsertComment(
                                 $"Warning: the type of property '{node.Name}' could not be analysed at design time, so it has been treated",
                                 "as not implementing INotifyPropertyChanged. Code generated at compile time may differ." );
+
                             break;
 
                         case InpcBaseHandling.NA:
@@ -392,11 +403,14 @@ internal partial class NaturalAspect
                                     }
                                 }
                             }
-                            
+
                             emitDefaultNotifications = false;
+
                             break;
+
                         default:
                             CompileTimeThrow( new InvalidOperationException( $"InpcBaseHandling '{node.InpcBaseHandling}' was not expected here." ) );
+
                             break;
                     }
 
@@ -441,7 +455,7 @@ internal partial class NaturalAspect
     {
         if ( ctx.InsertDiagnosticComments )
         {
-            meta.InsertComment( "Template: " + nameof( OnChildPropertyChanged ) );
+            meta.InsertComment( "Template: " + nameof(OnChildPropertyChanged) );
             meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
         }
 
@@ -452,9 +466,10 @@ internal partial class NaturalAspect
             if ( rootPropertyNode.FieldOrProperty.DeclaringType == ctx.Target )
             {
                 if ( ctx.InsertDiagnosticComments )
-                {                    
+                {
                     meta.InsertComment( $"Skipping '{node.DottedPropertyPath}': Root property '{rootPropertyNode.Name}' is defined by the current type." );
                 }
+
                 continue;
             }
 
@@ -467,22 +482,28 @@ internal partial class NaturalAspect
                     case InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined:
                         if ( ctx.InsertDiagnosticComments )
                         {
-                            meta.InsertComment( $"Skipping '{node.DottedPropertyPath}': A base type supports OnUnmonitoredInpcPropertyChanged for an ancestor of this property, and the current type is configured to use that feature." );
+                            meta.InsertComment(
+                                $"Skipping '{node.DottedPropertyPath}': A base type supports OnUnmonitoredInpcPropertyChanged for an ancestor of this property, and the current type is configured to use that feature." );
                         }
+
                         continue;
 
                     case InpcBaseHandling.OnChildPropertyChanged when node.Depth - firstAncestorWithNotNoneHandling.Depth > 1:
                         if ( ctx.InsertDiagnosticComments )
                         {
-                            meta.InsertComment( $"Skipping '{node.DottedPropertyPath}': A base type supports OnChildPropertyChanged for a non-immediate ancestor of this property." );
+                            meta.InsertComment(
+                                $"Skipping '{node.DottedPropertyPath}': A base type supports OnChildPropertyChanged for a non-immediate ancestor of this property." );
                         }
+
                         continue;
 
                     case InpcBaseHandling.OnPropertyChanged:
                         if ( ctx.InsertDiagnosticComments )
                         {
-                            meta.InsertComment( $"Skipping '{node.DottedPropertyPath}': A base type supports OnPropertyChanged for root property '{rootPropertyNode.Name}'." );
+                            meta.InsertComment(
+                                $"Skipping '{node.DottedPropertyPath}': A base type supports OnPropertyChanged for root property '{rootPropertyNode.Name}'." );
                         }
+
                         continue;
                 }
             }
@@ -514,6 +535,7 @@ internal partial class NaturalAspect
                     {
                         meta.Proceed();
                     }
+
                     return;
                 }
             }
@@ -534,7 +556,7 @@ internal partial class NaturalAspect
     {
         if ( ctx.InsertDiagnosticComments )
         {
-            meta.InsertComment( "Template: " + nameof( OnUnmonitoredInpcPropertyChanged ) );
+            meta.InsertComment( "Template: " + nameof(OnUnmonitoredInpcPropertyChanged) );
             meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
         }
 
@@ -567,7 +589,7 @@ internal partial class NaturalAspect
             {
                 meta.InsertComment( $"Node '{node.DottedPropertyPath}'" );
             }
-            
+
             if ( propertyPath == node.DottedPropertyPath )
             {
                 // This is very similar to an Update... method or a property setter override, except the base type keeps track of the "old" value so we don't have to.
@@ -575,7 +597,7 @@ internal partial class NaturalAspect
                 // like an Update method).
 
                 var handlerField = ExpectNotNull( node.HandlerField );
-                
+
                 if ( oldValue != null )
                 {
                     oldValue.PropertyChanged -= handlerField.Value;
@@ -647,8 +669,10 @@ internal partial class NaturalAspect
                         {
                             ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
                         }
+
                         ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
                     }
+
                     return;
                 }
             }

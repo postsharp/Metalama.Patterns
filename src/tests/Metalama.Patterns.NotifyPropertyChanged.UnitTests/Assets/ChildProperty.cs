@@ -7,7 +7,7 @@ public partial class A
 {
     public A()
     {
-        this.A2 = new();
+        this.A2 = new B();
     }
 
     public int A1 { get; set; }
@@ -23,9 +23,9 @@ public partial class A
 [NotifyPropertyChanged]
 public partial class B
 {
-    public B() 
-    { 
-        this.B2 = new();
+    public B()
+    {
+        this.B2 = new C();
     }
 
     public int B1 { get; set; }
@@ -38,8 +38,9 @@ public partial class C
 {
     public C()
     {
-        this.C2 = new();
+        this.C2 = new D();
     }
+
     public int C1 { get; set; }
 
     public D C2 { get; set; }
@@ -58,7 +59,7 @@ public partial class E
 {
     public E()
     {
-        this.E2 = new();
+        this.E2 = new B();
     }
 
     public int E1 { get; set; }
@@ -86,7 +87,7 @@ public partial class F
 {
     public F()
     {
-        this.F1 = new();
+        this.F1 = new B();
     }
 
     /// <summary>

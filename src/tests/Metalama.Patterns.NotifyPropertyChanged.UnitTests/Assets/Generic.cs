@@ -25,12 +25,10 @@ public partial class A<T>
 
 // TODO: Pending #33805
 #if false
-
 public partial class AOfSimple : A<Simple>
 {
     public int RefA1S1 => this.A1.S1;
 }
-
 #endif
 
 [NotifyPropertyChanged]
@@ -65,13 +63,11 @@ public partial class D<T>
 
 // TODO: Pending #33805
 #if false
-
 public partial class DD<T> : D<T> 
     where T : class, INotifyPropertyChanged, IFoo
 {
     public int FooY => this.D1.Y;
 }
-
 #endif
 
 [NotifyPropertyChanged]

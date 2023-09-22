@@ -71,5 +71,5 @@ internal static class RoslynHelper
         // NB: Returns Read even for nodes where calling this method makes no sense, for example a variable declaration.
         // In current use cases there's no benefit to having accurate Undefined returns, so we don't bother to work it out.
         return AccessKind.Read;
-    }   
+    }
 }

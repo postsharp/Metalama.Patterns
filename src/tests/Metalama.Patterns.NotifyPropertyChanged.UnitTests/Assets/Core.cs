@@ -62,7 +62,7 @@ public class ExistingInpcImplWithValidOPCMethod : INotifyPropertyChanged
             if ( value != this._ex1 )
             {
                 this._ex1 = value;
-                this.OnPropertyChanged( nameof( this.EX1 ) );
+                this.OnPropertyChanged( nameof(this.EX1) );
             }
         }
     }
@@ -78,16 +78,16 @@ public class ExistingInpcImplWithValidOPCMethod : INotifyPropertyChanged
             if ( this._ex2 != value )
             {
                 this._ex2 = value;
-                this.OnPropertyChanged( nameof( this.EX2 ) );
+                this.OnPropertyChanged( nameof(this.EX2) );
             }
         }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void OnPropertyChanged( string propertyName ) 
+    protected virtual void OnPropertyChanged( string propertyName )
     {
-        this.PropertyChanged?.Invoke( this, new( propertyName ) );
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
 }
 
@@ -103,7 +103,7 @@ public abstract class ExistingAbstractInpcImplWithValidOPCMethod : INotifyProper
             if ( value != this._ex1 )
             {
                 this._ex1 = value;
-                this.OnPropertyChanged( nameof( this.EX1 ) );
+                this.OnPropertyChanged( nameof(this.EX1) );
             }
         }
     }
@@ -119,7 +119,7 @@ public abstract class ExistingAbstractInpcImplWithValidOPCMethod : INotifyProper
             if ( this._ex2 != value )
             {
                 this._ex2 = value;
-                this.OnPropertyChanged( nameof( this.EX2 ) );
+                this.OnPropertyChanged( nameof(this.EX2) );
             }
         }
     }
@@ -128,6 +128,6 @@ public abstract class ExistingAbstractInpcImplWithValidOPCMethod : INotifyProper
 
     protected virtual void OnPropertyChanged( string propertyName )
     {
-        this.PropertyChanged?.Invoke( this, new( propertyName ) );
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
 }
