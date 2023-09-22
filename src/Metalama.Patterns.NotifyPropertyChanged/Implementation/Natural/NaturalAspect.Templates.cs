@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Code.SyntaxBuilders;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
@@ -69,11 +70,9 @@ internal partial class NaturalAspect
                     meta.Target.FieldOrProperty.Value = value;
                 }
 
-                // TODO: Is this similar to [Frag4] and/or [Frag6] and/or [Frag8]? Can we refactor?
-                // XXX [Frag3]
                 if ( node != null )
                 {
-                    // Update methods will deal with notifications - *for those children which have update methods*
+                    // Update methods will deal with notifications - * for those children which have update methods *
                     foreach ( var method in node.ChildUpdateMethods )
                     {
                         method.With( InvokerOptions.Final ).Invoke();
@@ -85,7 +84,6 @@ internal partial class NaturalAspect
                         ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                     }
                 }
-                // XXX
 
                 ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
 
@@ -104,45 +102,15 @@ internal partial class NaturalAspect
                             value.PropertyChanged += handlerField.Value;
                         }
 
-                        // Local Function Alert (it's easy to miss when skimming through the code)
+                        // -----------------------------------------------------------------------
+                        //                Local Function: OnChildPropertyChanged
                         // -----------------------------------------------------------------------
 
                         void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                         {                            
-                            var propertyName = e.PropertyName;
-
-                            // TODO: If this can be similar to [Frag2] and/or [Frag5] and/or [Frag7] and/or [Frag9], refactor
-                            // XXX [Frag1]
                             // NB: If handlerField is not null, node must also be non-null.
-                            foreach ( var childNode in node!.Children )
-                            {
-                                var hasUpdateMethod = childNode.UpdateMethod != null;
-                                var hasRefs = childNode.DirectReferences.Count > 0;
 
-                                if ( hasUpdateMethod || hasRefs )
-                                {
-                                    if ( propertyName == childNode.Name )
-                                    {
-                                        if ( hasUpdateMethod )
-                                        {
-                                            // Update method will deal with notifications
-                                            childNode.UpdateMethod!.Invoke();
-                                        }
-                                        else
-                                        {
-                                            // No update method, notify here.
-                                            foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
-                                            {
-                                                ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
-                                            }
-                                            ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name, childNode.Name );
-                                        }
-                                        return;
-                                    }
-                                }
-                            }
-                            // XXX
-                            ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name, propertyName );
+                            OnChildPropertyChangedDelegateBody( ctx, node!, ExpressionFactory.Capture( e ) );
                         }
                     }
                 }
@@ -183,52 +151,19 @@ internal partial class NaturalAspect
                 onPropertyChangedHandlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
                 newValue.PropertyChanged += onPropertyChangedHandlerField.Value;
 
-                // Local Function Alert (it's easy to miss when skimming through the code)
+                // -----------------------------------------------------------------------
+                //                Local Function: OnChildPropertyChanged
                 // -----------------------------------------------------------------------
 
                 void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                 {
-                    var propertyName = e.PropertyName;
-
-                    // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag7] and/or [Frag9], refactor
-                    // XXX [Frag2]
-                    foreach ( var childNode in node.Children )
-                    {
-                        var hasUpdateMethod = childNode.UpdateMethod != null;
-                        var hasRefs = childNode.DirectReferences.Count > 0;
-                        
-                        if ( hasUpdateMethod || hasRefs )
-                        {
-                            if ( propertyName == childNode.Name )
-                            {
-                                if ( hasUpdateMethod )
-                                {
-                                    // Update method will deal with notifications
-                                    childNode.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
-                                }
-                                else
-                                {
-                                    // No update method, notify here.
-                                    foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
-                                    {
-                                        ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
-                                    }
-                                    ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
-                                }
-                                return;
-                            }
-                        }
-                    }
-                    // XXX                    
-                    ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, e.PropertyName );
+                    OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
                 }
             }
 
             lastValueField.Value = newValue;
 
-            // TODO: Is this similar to [Frag3] and/or [Frag6] and/or [Frag8]? Can we refactor?
-            // XXX [Frag4]
-            // Update methods will deal with notifications - *for those children which have update methods*
+            // Update methods will deal with notifications - * for those children which have update methods *
             foreach ( var method in node.ChildUpdateMethods )
             {
                 method.With( InvokerOptions.Final ).Invoke();
@@ -239,7 +174,6 @@ internal partial class NaturalAspect
             {
                 ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
             }
-            // XXX
 
             // Don't notify if we're joining on to existing NCPC support from a base type, or we'll be stuck in a loop.
             if ( node.Parent!.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
@@ -422,18 +356,17 @@ internal partial class NaturalAspect
 
                                     lastValueField.Value = newValue;
 
-                                    // TODO: Is this similar to [Frag3] and/or [Frag4] and/or [Frag8]? Can we refactor?
-                                    // XXX [Frag6]
+                                    // Update methods will deal with notifications - * for those children which have update methods *
                                     foreach ( var method in childUpdateMethods )
                                     {
                                         method.With( InvokerOptions.Final ).Invoke();
                                     }
 
+                                    // rootPropertyNamesToNotify excludes children with update methods
                                     foreach ( var name in rootPropertyNamesToNotify )
                                     {
                                         ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                                     }
-                                    // XXX
 
                                     if ( newValue != null )
                                     {
@@ -448,44 +381,13 @@ internal partial class NaturalAspect
                                             newValue.PropertyChanged += handlerField.Value;
                                         }
 
-                                        // Local Function Alert (it's easy to miss when skimming through the code)
+                                        // -----------------------------------------------------------------------
+                                        //                Local Function: OnChildPropertyChanged
                                         // -----------------------------------------------------------------------
 
                                         void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                                         {
-                                            var propertyName = e.PropertyName;
-
-                                            // TODO: If this can be similar to [Frag1] and/or [Frag2] and/or [Frag7] and/or [Frag9], refactor
-                                            // XXX [Frag5]
-                                            foreach ( var childNode in node.Children )
-                                            {
-                                                var hasUpdateMethod = childNode.UpdateMethod != null;
-                                                var hasRefs = childNode.DirectReferences.Count > 0;
-
-                                                if ( hasUpdateMethod || hasRefs )
-                                                {
-                                                    if ( propertyName == childNode.Name )
-                                                    {
-                                                        if ( hasUpdateMethod )
-                                                        {
-                                                            // Update method will deal with notifications
-                                                            childNode.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
-                                                        }
-                                                        else
-                                                        {
-                                                            // No update method, notify here.
-                                                            foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
-                                                            {
-                                                                ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
-                                                            }
-                                                            ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Name, childNode.Name );
-                                                        }
-                                                        return;
-                                                    }
-                                                }
-                                            }
-                                            // XXX                    
-                                            ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Name, e.PropertyName );
+                                            OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
                                         }
                                     }
                                 }
@@ -585,8 +487,8 @@ internal partial class NaturalAspect
                 }
             }
 
-            // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag2] and/or [Frag7], refactor
-            // XXX [Frag9]
+            // NB: The following code is similar to the OnChildPropertyChangedDelegateBody template. Consider keeping any changes to relevant logic in sync.
+
             var hasUpdateMethod = node.UpdateMethod != null;
             var hasRefs = node.DirectReferences.Count > 0;
 
@@ -615,7 +517,6 @@ internal partial class NaturalAspect
                     return;
                 }
             }
-            // XXX
         }
 
         if ( ctx.BaseOnChildPropertyChangedMethod != null )
@@ -638,23 +539,26 @@ internal partial class NaturalAspect
         }
 
         /* 
-         * Think of the generated OnUnmonitoredInpcPropertyChanged method as an enhanced overload of OnPropertyChanged, the differences
-         * being that  the caller provides the old and new values, the method recieves a property path rather than a root property name,
+         * The generated OnUnmonitoredInpcPropertyChanged method is like an enhanced overload of OnPropertyChanged, the differences
+         * being that the caller provides the old and new values, the method recieves a property path rather than a root property name,
          * and it only applies to property types which implement INotifyPropertyChanged.
          * 
          * NB:
          * 
          * - In the current implementation (outside this template), the gererated OnUnmonitoredInpcPropertyChanged 
          *   method is only called for root properties. As/when false positive detection is implmeneted and enabled, 
-         *   then the generated OnUnmonitoredInpcPropertyChanged method will recieve calls for leaf INotifyPropertyChanged 
+         *   then the generated OnUnmonitoredInpcPropertyChanged method could receive calls for leaf INotifyPropertyChanged 
          *   properties.
          * 
          * - OnUnmonitoredInpcPropertyChanged is only called when a ref has changed - the caller checks this first.
          * 
+         * - For root properties, the caller will also call OnPropertyChanged - this is to maintain compatibility with derivations
+         *   which do not observe OnUnmonitoredInpcPropertyChanged.
+         * 
          * - Nodes only appear in the graph if they are relevant to the current class.
          * 
          * - The logic which selects nodes for which support will be generated must be kept in sync with the logic in
-         *   AddMetadataForNewlyMonitoredBaseOnUnmonitoredInpcPropertyChangedProperties.
+         *   NaturalAspect.AddPropertyPathsForOnChildPropertyChangedMethodAttribute.
         */
 
         foreach ( var node in ctx.DependencyGraph.DecendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
@@ -682,48 +586,16 @@ internal partial class NaturalAspect
                     handlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
                     newValue.PropertyChanged += handlerField.Value;
 
-                    // Local Function Alert (it's easy to miss when skimming through the code)
+                    // -----------------------------------------------------------------------
+                    //                Local Function: OnChildPropertyChanged
                     // -----------------------------------------------------------------------
 
                     void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                     {
-                        var propertyName = e.PropertyName;
-
-                        // TODO: If this can be similar to [Frag1] and/or [Frag5] and/or [Frag2] and/or [Frag9], refactor
-                        // XXX [Frag7]
-                        foreach ( var childNode in node.Children )
-                        {
-                            var hasUpdateMethod = childNode.UpdateMethod != null;
-                            var hasRefs = childNode.DirectReferences.Count > 0;
-
-                            if ( hasUpdateMethod || hasRefs )
-                            {
-                                if ( propertyName == childNode.Name )
-                                {
-                                    if ( hasUpdateMethod )
-                                    {
-                                        // Update method will deal with notifications
-                                        childNode.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
-                                    }
-                                    else
-                                    {
-                                        // No update method, notify here.
-                                        foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
-                                        {
-                                            ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
-                                        }
-                                        ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
-                                    }
-                                    return;
-                                }
-                            }
-                        }
-                        // XXX
+                        OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
                     }
                 }
 
-                // TODO: Is this similar to [Frag3] and/or [Frag6] and/or [Frag4]? Can we refactor?
-                // XXX [Frag8]
                 // Update methods will deal with notifications - *for those children which have update methods*
                 foreach ( var method in node.ChildUpdateMethods )
                 {
@@ -735,7 +607,6 @@ internal partial class NaturalAspect
                 {
                     ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                 }
-                // XXX                
             }
         }
 
@@ -743,5 +614,46 @@ internal partial class NaturalAspect
         {
             meta.Proceed();
         }
+    }
+
+    [Template]
+    private static void OnChildPropertyChangedDelegateBody(
+        [CompileTime] BuildAspectContext ctx,
+        [CompileTime] DependencyGraphNode node,
+        [CompileTime] IExpression propertyChangedEventArgs )
+    {
+        var propertyName = propertyChangedEventArgs.Value!.PropertyName;
+
+        foreach ( var childNode in node.Children )
+        {
+            // NB: The following code is similar to part of the OnChildPropertyChanged template. Consider keeping any changes to relevant logic in sync.
+
+            var hasUpdateMethod = childNode.UpdateMethod != null;
+            var hasRefs = childNode.DirectReferences.Count > 0;
+
+            if ( hasUpdateMethod || hasRefs )
+            {
+                if ( propertyName == childNode.Name )
+                {
+                    if ( hasUpdateMethod )
+                    {
+                        // Update method will deal with notifications
+                        childNode.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
+                    }
+                    else
+                    {
+                        // No update method, notify here.
+                        foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
+                        {
+                            ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( refName );
+                        }
+                        ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
+                    }
+                    return;
+                }
+            }
+        }
+
+        ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Name, propertyName );
     }
 }

@@ -178,7 +178,7 @@ internal partial class DependencyGraph
 
         private IEnumerable<TDerived> AncestorsCore( bool includeRoot, bool includeSelf )
         {
-            var node = includeSelf ? this : this.Parent;
+            var node = includeSelf ? (TDerived) this : this.Parent;
 
             while ( node != null )
             {
@@ -186,7 +186,7 @@ internal partial class DependencyGraph
                 {
                     break;
                 }
-                yield return (TDerived) node;
+                yield return node;
                 node = node.Parent;
             }
         }
@@ -198,14 +198,14 @@ internal partial class DependencyGraph
                 throw new ArgumentOutOfRangeException( nameof( depth ), "Must be greater than zero and less than or equal to the depth of the current node." );
             }
 
-            var n = this;
+            var n = (TDerived) this;
 
             while ( n!.Depth != depth )
             {
                 n = n.Parent;
             }
 
-            return (TDerived) n;
+            return n;
         }
 
         public TDerived GetOrAddChild( ISymbol childSymbol, IFieldOrProperty fieldOrProperty )
@@ -216,7 +216,7 @@ internal partial class DependencyGraph
             {
                 this._children = new();
                 result = new TDerived();
-                result.InitializeBase( (TDerived)this, childSymbol, fieldOrProperty );
+                result.InitializeBase( (TDerived) this, childSymbol, fieldOrProperty );
                 this._children.Add( childSymbol, result );
             }
             else
@@ -224,7 +224,7 @@ internal partial class DependencyGraph
                 if ( !this._children.TryGetValue( childSymbol, out result ) )
                 {
                     result = new TDerived();
-                    result.InitializeBase( (TDerived)this, childSymbol, fieldOrProperty );
+                    result.InitializeBase( (TDerived) this, childSymbol, fieldOrProperty );
                     this._children.Add( childSymbol, result );
                 }
             }
