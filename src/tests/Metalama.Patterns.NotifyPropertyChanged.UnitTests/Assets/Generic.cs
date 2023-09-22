@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Generic;

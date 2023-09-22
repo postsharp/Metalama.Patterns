@@ -122,7 +122,7 @@ public abstract class InpcTestsBase : IDisposable
         var eventsList = this.Events;
         var sub = new Subscription( key, source );
 
-        var handler = (PropertyChangedEventHandler) (( object? sender, PropertyChangedEventArgs args ) =>
+        void Handler( object? sender, PropertyChangedEventArgs args )
         {
             if ( sub.IsDisposed )
             {
@@ -135,9 +135,9 @@ public abstract class InpcTestsBase : IDisposable
             args.PropertyName.Should().NotBeNullOrEmpty();
             type.GetProperty( args.PropertyName!, BindingFlags.Instance | BindingFlags.Public ).Should().NotBeNull( "because the notified property name should be a public property of the notifying type." );
             eventsList.Add( new Event( sub, args.PropertyName! ) );
-        });
+        }
 
-        sub.SetHandler( handler );
+        sub.SetHandler( Handler );
 
         this._subscriptions.Add( key, sub );
 
