@@ -16,8 +16,9 @@ namespace Metalama.Patterns.Caching.Implementation;
 [PublicAPI]
 public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 {
-    private readonly LogSource _logger;
+    private static volatile int _allBackgroundTaskExceptions;
 
+    private readonly LogSource _logger;
     private readonly AwaitableEvent _backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
     private readonly bool _sequential;
     private readonly object _sync = new();
@@ -27,7 +28,6 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 #endif
 
     private volatile int _backgroundTaskExceptions;
-    private static volatile int _allBackgroundTaskExceptions;
     private volatile int _backgroundTaskCount;
     private bool _backgroundTasksForbidden;
 
