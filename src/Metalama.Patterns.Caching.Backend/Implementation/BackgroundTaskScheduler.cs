@@ -3,10 +3,13 @@
 using Flashtrace;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
+using System.Globalization;
+
+#if DEBUG
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+#endif
 
 namespace Metalama.Patterns.Caching.Implementation;
 
