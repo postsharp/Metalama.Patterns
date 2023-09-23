@@ -60,7 +60,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// Gets or sets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
     /// when the cache item is removed from the cache.
     /// </summary>
-    public bool? AutoReload { get; set; }
+    public bool AutoReload { get; set; }
 
     /// <summary>
     /// Gets or sets the total duration during which the result of the current method is stored in cache. The absolute
@@ -81,13 +81,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
 
     /// <inheritdoc />
     bool? ICacheItemConfiguration.IsEnabled => this.IsEnabled;
-
-    /// <inheritdoc />
-    TimeSpan? ICacheItemConfiguration.AbsoluteExpiration => this.AbsoluteExpiration;
-
-    /// <inheritdoc />
-    TimeSpan? ICacheItemConfiguration.SlidingExpiration => this.SlidingExpiration;
-
+    
     /// <inheritdoc />
     bool? ICacheItemConfiguration.AutoReload => this.AutoReload;
 
@@ -138,7 +132,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
             // ReSharper disable once HeapView.CanAvoidClosure
             return this._mergedMethodConfigurations.GetOrAdd(
                 metadata.Id,
-                _ => metadata.Configuration.ApplyFallbackValues( this ) );
+                _ => metadata.Configuration.ApplyBaseValues( this ) );
         }
     }
 }

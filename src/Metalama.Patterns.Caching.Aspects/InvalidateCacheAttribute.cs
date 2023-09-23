@@ -308,7 +308,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             return false;
         }
 
-        if ( attribute._invalidatedMethodNames.Any( s => string.IsNullOrWhiteSpace( s ) ) )
+        if ( attribute._invalidatedMethodNames.Any( string.IsNullOrWhiteSpace ) )
         {
             builder.Diagnostics.Report(
                 CachingDiagnosticDescriptors.InvalidateCache.ErrorInvalidAspectConstructorNullOrWhitespaceString.WithArguments( builder.Target ) );
@@ -328,7 +328,6 @@ public sealed class InvalidateCacheAttribute : MethodAspect
         DictionaryOfLists<string, IDiagnostic> matchingErrorsDictionary = new();
         DictionaryOfLists<string, InvalidatedMethodInfo?> invalidatedMethodsDictionary = new();
 
-        var cacheAttributeType = (INamedType) TypeFactory.GetType( typeof(CacheAttribute) );
         var isValid = true;
 
         foreach ( var invalidatedMethod in candidateInvalidatedMethods )
@@ -345,12 +344,12 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 continue;
             }
-
+            
             // Ensure the method is actually cached.
             var cacheAspectConfiguration =
                 invalidatedMethod.BelongsToCurrentProject
-                    ? invalidatedMethod.Enhancements().GetAspects<CacheAttribute>().SingleOrDefault()?.ToCompileTimeCacheItemConfiguration()
-                    : invalidatedMethod.Attributes.OfAttributeType( cacheAttributeType ).SingleOrDefault()?.ParseAttribute();
+                    ? invalidatedMethod.Enhancements().GetAspectInstances().SingleOrDefault( i => i.Aspect is CacheAttribute )?.GetOptions<CachingOptions>()
+                    : invalidatedMethod.Enhancements().GetAnnotations<CachedMethodAnnotation>().SingleOrDefault()?.Options;
 
             if ( cacheAspectConfiguration == null )
             {
@@ -360,9 +359,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 continue;
             }
-
-            cacheAspectConfiguration = cacheAspectConfiguration.ApplyEffectiveConfiguration( invalidatedMethod );
-
+            
             // Check that the 'this' parameter is compatible.
             if ( !invalidatedMethod.IsStatic && !cacheAspectConfiguration.IgnoreThisParameter.GetValueOrDefault() &&
                  (invalidatingMethod.IsStatic || !(invalidatingMethod.DeclaringType == invalidatedMethod.DeclaringType

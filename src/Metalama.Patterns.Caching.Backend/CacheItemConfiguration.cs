@@ -33,15 +33,15 @@ public record CacheItemConfiguration : ICacheItemConfiguration
 
     public CacheItemConfiguration() { }
 
-    protected CacheItemConfiguration( CacheItemConfiguration overrideValue, ICacheItemConfiguration fallbackValue )
+    protected CacheItemConfiguration( CacheItemConfiguration overrideValue, ICacheItemConfiguration baseValue )
     {
-        this.AutoReload = overrideValue.AutoReload ?? fallbackValue.AutoReload;
-        this.AbsoluteExpiration = overrideValue.AbsoluteExpiration ?? fallbackValue.AbsoluteExpiration;
-        this.SlidingExpiration = overrideValue.SlidingExpiration ?? fallbackValue.SlidingExpiration;
-        this.Priority = overrideValue.Priority ?? fallbackValue.Priority;
-        this.ProfileName = overrideValue.ProfileName ?? fallbackValue.ProfileName;
-        this.IsEnabled = overrideValue.IsEnabled ?? fallbackValue.IsEnabled;
+        this.AutoReload = overrideValue.AutoReload ?? baseValue.AutoReload;
+        this.AbsoluteExpiration = overrideValue.AbsoluteExpiration ?? baseValue.AbsoluteExpiration;
+        this.SlidingExpiration = overrideValue.SlidingExpiration ?? baseValue.SlidingExpiration;
+        this.Priority = overrideValue.Priority ?? baseValue.Priority;
+        this.ProfileName = overrideValue.ProfileName ?? baseValue.ProfileName;
+        this.IsEnabled = overrideValue.IsEnabled ?? baseValue.IsEnabled;
     }
 
-    public CacheItemConfiguration ApplyFallbackValues( ICacheItemConfiguration fallback ) => new( this, fallback );
+    public CacheItemConfiguration ApplyBaseValues( ICacheItemConfiguration fallback ) => new( this, fallback );
 }
