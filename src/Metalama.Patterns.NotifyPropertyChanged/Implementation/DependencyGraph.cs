@@ -10,6 +10,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
+/* TODO: Detect invalid constructs, including:
+ * - Reference to non-INPC property (also INPC property with [IgnoreAutoChangeNotification]), unless the property has [SafeForDependencyAnalysis].
+ */
+
 [CompileTime]
 internal static partial class DependencyGraph
 {

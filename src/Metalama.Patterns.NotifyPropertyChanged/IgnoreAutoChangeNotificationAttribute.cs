@@ -4,8 +4,6 @@ using JetBrains.Annotations;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
-// TODO: Tests required.
-
 /// <summary>
 /// Custom attribute that, when applied to a property, prevents the <see cref="NotifyPropertyChangedAttribute"/> aspect
 /// from raising change notifications for this property.
@@ -16,5 +14,5 @@ namespace Metalama.Patterns.NotifyPropertyChanged;
 /// </para>
 /// </remarks>
 [PublicAPI]
-[AttributeUsage( AttributeTargets.Property )]
+[AttributeUsage( AttributeTargets.Property | AttributeTargets.Field )]
 public sealed class IgnoreAutoChangeNotificationAttribute : Attribute { }
