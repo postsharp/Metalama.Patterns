@@ -75,8 +75,11 @@ public abstract class InpcTestsBase : IDisposable
     // ReSharper disable once MemberCanBePrivate.Global
     protected static readonly Subscription AnySubscription = new( "<any>", null! );
 
+    // ReSharper disable NotAccessedPositionalProperty.Global
     protected record struct Event( Subscription Subscription, string PropertyName )
     {
+        // ReSharper restore NotAccessedPositionalProperty.Global
+
         public static implicit operator Event( string propertyName ) => new( AnySubscription, propertyName );
 
         public static implicit operator Event( (Subscription Subscription, string PropertyName) tuple ) => new( tuple.Subscription, tuple.PropertyName );
@@ -147,6 +150,7 @@ public abstract class InpcTestsBase : IDisposable
         return sub;
     }
 
+    // ReSharper disable once VirtualMemberNeverOverridden.Global
     protected virtual void OnDispose() { }
 
     public void Dispose()

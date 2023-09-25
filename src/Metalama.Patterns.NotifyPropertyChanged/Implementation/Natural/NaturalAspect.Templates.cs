@@ -102,7 +102,7 @@ internal partial class NaturalAspect
 
     [Template]
     internal static void Subscribe<[CompileTime] TValue>(
-        TValue value,
+        TValue? value,
         [CompileTime] BuildAspectContext ctx,
         [CompileTime] DependencyGraphNode node,
         [CompileTime] IField handlerField )
@@ -117,7 +117,9 @@ internal partial class NaturalAspect
 
             if ( eventRequiresCast )
             {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 meta.Cast( ctx.Elements.INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
             else
             {

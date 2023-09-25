@@ -15,6 +15,7 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     protected override void Initialize()
     {
         base.Initialize();
+        
         if ( this.Depth == 1 )
         {
             this._subscribeMethod = new CertainDeferredDeclaration<IMethod>();
@@ -137,7 +138,9 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     /// <summary>
     /// Gets a method like <c>void SubscribeToA1()</c> for applicable root property (depth 1) nodes.
     /// </summary>
-    public CertainDeferredDeclaration<IMethod> SubscribeMethod => this._subscribeMethod ?? throw new InvalidOperationException( nameof( this.SubscribeMethod ) + " is not applicable to this node, access indicates incorrect caller logic." );
+    public CertainDeferredDeclaration<IMethod> SubscribeMethod
+        => this._subscribeMethod ?? throw new InvalidOperationException(
+            nameof(this.SubscribeMethod) + " is not applicable to this node, access indicates incorrect caller logic." );
 
     protected override void ToStringAppendToLine( StringBuilder appendTo, string? format )
     {

@@ -28,6 +28,9 @@ dotnet_diagnostic.IDE0051.severity = none
 # SA1629: Documentation text should end with a period
 dotnet_diagnostic.SA1629.severity = none
 
+# SA1649: File name should match first type name
+dotnet_diagnostic.SA1649.severity = none
+
 resharper_arrange_static_member_qualifier_highlighting=none
 resharper_check_namespace_highlighting=none
 resharper_class_can_be_sealed_global_highlighting=none

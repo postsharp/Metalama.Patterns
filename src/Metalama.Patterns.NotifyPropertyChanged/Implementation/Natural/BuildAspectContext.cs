@@ -68,11 +68,11 @@ internal sealed class BuildAspectContext
     {
         this.Elements = new ElementsRecord();
         this.Builder = builder;
-        
+
         var target = builder.Target;
 
         // TODO: Consider using BaseType.TypeDefinition where possible for better performance.
-        
+
         this.BaseImplementsInpc =
             target.BaseType != null && (
                 target.BaseType.Is( this.Elements.INotifyPropertyChanged )
@@ -214,7 +214,7 @@ internal sealed class BuildAspectContext
     {
         if ( node.Depth != 1 )
         {
-            throw new ArgumentException( "Must be a root property node (depth must be 1).", nameof( node ) );
+            throw new ArgumentException( "Must be a root property node (depth must be 1).", nameof(node) );
         }
 
         if ( !node.SubscribeMethod.DeclarationIsSet )
@@ -225,7 +225,7 @@ internal sealed class BuildAspectContext
 
             var result = this.Builder.Advice.IntroduceMethod(
                 this.Target,
-                nameof( NaturalAspect.Subscribe ),
+                nameof(NaturalAspect.Subscribe),
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
                 b =>
@@ -233,18 +233,12 @@ internal sealed class BuildAspectContext
                     b.Name = subscribeMethodName;
                     b.Accessibility = Accessibility.Private;
                 },
-                args: new
-                {
-                    TValue = node.FieldOrProperty.Type,
-                    ctx = this,
-                    node,
-                    handlerField
-                } );
+                args: new { TValue = node.FieldOrProperty.Type, ctx = this, node, handlerField } );
 
             node.SubscribeMethod.Declaration = result.Declaration;
         }
 
-        return node.SubscribeMethod.Declaration!;
+        return node.SubscribeMethod.Declaration;
     }
 
     private HashSet<string>? _existingMemberNames;
@@ -388,7 +382,7 @@ internal sealed class BuildAspectContext
                 !m.IsStatic
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
-                && m.Parameters is [{ Type.SpecialType: SpecialType.String }] 
+                && m.Parameters is [{ Type.SpecialType: SpecialType.String }]
                 && _onPropertyChangedMethodNames.Contains( m.Name ) );
 
     private static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
@@ -407,7 +401,7 @@ internal sealed class BuildAspectContext
                 && m.Attributes.Any( typeof(OnUnmonitoredInpcPropertyChangedMethodAttribute) )
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
-                && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _] 
-                && m.Parameters[1].Type == this.Elements.NullableINotifyPropertyChanged 
+                && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _]
+                && m.Parameters[1].Type == this.Elements.NullableINotifyPropertyChanged
                 && m.Parameters[2].Type == this.Elements.NullableINotifyPropertyChanged );
 }

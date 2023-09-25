@@ -377,13 +377,9 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                             {
                                 ctx.Builder.Advice.AddInitializer(
                                     ctx.Target,
-                                    nameof( SubscribeInitializer ),
+                                    nameof(SubscribeInitializer),
                                     InitializerKind.BeforeInstanceConstructor,
-                                    args: new
-                                    {
-                                        fieldOrProperty = p,
-                                        subscribeMethod
-                                    });
+                                    args: new { fieldOrProperty = p, subscribeMethod } );
                             }
                         }
                         else

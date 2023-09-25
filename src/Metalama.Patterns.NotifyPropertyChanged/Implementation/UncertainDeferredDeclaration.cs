@@ -55,7 +55,7 @@ internal class UncertainDeferredDeclaration<T>
         {
             if ( this._mustBeSetBeforeGet && !this.DeclarationIsSet )
             {
-                throw new InvalidOperationException( nameof( this.Declaration ) + " must be set before it can be read." );
+                throw new InvalidOperationException( nameof(this.Declaration) + " must be set before it can be read." );
             }
 
             switch ( this.WillBeDefined )
