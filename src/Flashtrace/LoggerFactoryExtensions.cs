@@ -8,20 +8,72 @@ using System.ComponentModel;
 namespace Flashtrace;
 
 /// <summary>
-/// Extension methods for the <see cref="ILoggerFactory"/> interface.
+/// Extension methods for the <see cref="IRoleLoggerFactory"/> interface.
 /// </summary>
 [PublicAPI]
 public static class LoggerFactoryExtensions
 {
     private static readonly ConcurrentDictionary<CacheKey, LogSource> _cache = new();
 
+    public static LogSource GetLogSource( this IServiceProvider? serviceProvider, Type type, string role = LoggingRoles.Default )
+    {
+        var factory = (ILoggerFactory?) serviceProvider?.GetService( typeof(ILoggerFactory) );
+
+        if ( factory == null )
+        {
+            return LogSource.Null;
+        }
+        else
+        {
+            return factory.ForRole( role ).GetLogSource( type );
+        }
+    }
+
+    public static LogSource GetLogSource( this IServiceProvider? serviceProvider, string sourceName, string role = LoggingRoles.Default )
+    {
+        var factory = (ILoggerFactory?) serviceProvider?.GetService( typeof(ILoggerFactory) );
+
+        if ( factory == null )
+        {
+            return LogSource.Null;
+        }
+        else
+        {
+            return factory.ForRole( role ).GetLogSource( sourceName );
+        }
+    }
+
+    public static LogSource GetLogSource( this ILoggerFactory? loggerFactory, Type type, string role = LoggingRoles.Default )
+    {
+        if ( loggerFactory == null )
+        {
+            return LogSource.Null;
+        }
+        else
+        {
+            return loggerFactory.ForRole( role ).GetLogSource( type );
+        }
+    }
+
+    public static LogSource GetLogSource( this ILoggerFactory? loggerFactory, string sourceName, string role = LoggingRoles.Default )
+    {
+        if ( loggerFactory == null )
+        {
+            return LogSource.Null;
+        }
+        else
+        {
+            return loggerFactory.ForRole( role ).GetLogSource( sourceName );
+        }
+    }
+
     /// <summary>
     /// Gets a <see cref="LogSource"/> for a given role and <see cref="Type"/>.
     /// </summary>
-    /// <param name="factory">An <see cref="ILoggerFactory"/>.</param>
+    /// <param name="factory">An <see cref="IRoleLoggerFactory"/>.</param>
     /// <param name="type">The type that will emit the records.</param>
     /// <returns>A <see cref="LogSource"/> for <paramref name="type"/>.</returns>
-    public static LogSource GetLogSource( this ILoggerFactory factory, Type type )
+    public static LogSource GetLogSource( this IRoleLoggerFactory factory, Type type )
     {
         if ( factory == null )
         {
@@ -55,10 +107,10 @@ public static class LoggerFactoryExtensions
     /// <summary>
     /// Gets a <see cref="LogSource"/> for a given role and <paramref name="sourceName"/>.
     /// </summary>
-    /// <param name="factory">An <see cref="ILoggerFactory"/>.</param>
+    /// <param name="factory">An <see cref="IRoleLoggerFactory"/>.</param>
     /// <param name="sourceName">Log source name to be used by the backend. Not all backends support creating sources by name.</param>
     /// <returns>A <see cref="LogSource"/> for <paramref name="sourceName"/>.</returns>
-    public static LogSource GetLogSource( this ILoggerFactory factory, string sourceName )
+    public static LogSource GetLogSource( this IRoleLoggerFactory factory, string sourceName )
     {
         if ( factory == null )
         {
@@ -92,23 +144,21 @@ public static class LoggerFactoryExtensions
     /// <summary>
     /// Gets a <see cref="LogSource"/> for a given role and for the calling type.
     /// </summary>
-    /// <param name="factory">An <see cref="ILoggerFactory"/>.</param>
+    /// <param name="factory">An <see cref="IRoleLoggerFactory"/>.</param>
     /// <returns>A <see cref="LogSource"/> for the calling type.</returns>
-    public static LogSource GetLogSource( this ILoggerFactory factory )
+    public static LogSource GetLogSource( this IRoleLoggerFactory factory )
     {
         if ( factory == null )
         {
             throw new ArgumentNullException( nameof(factory) );
         }
 
-        var callerInfo = CallerInfo.GetDynamic( 1 );
-
-        return factory.GetLogSource( ref callerInfo );
+        return factory.GetLogSource( CallerInfo.GetDynamic( 1 ) );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static LogSource GetLogSource( this ILoggerFactory factory, ref CallerInfo callerInfo )
+    public static LogSource GetLogSource( this IRoleLoggerFactory factory, in CallerInfo callerInfo )
     {
         if ( factory == null )
         {

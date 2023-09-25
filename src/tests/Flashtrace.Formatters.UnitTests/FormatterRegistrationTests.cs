@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Formatters.Implementations;
+using Flashtrace.Formatters.UnitTests.Assets;
 using System.Collections;
 using System.Collections.ObjectModel;
 using Xunit;
@@ -203,7 +205,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<int>();
             }
 
-            this.DefaultRepository.Register( typeof(int?), typeof(NullableFormatter<int>) );
+            this.DefaultRepository.Register( typeof(int?), typeof(Assets.NullableFormatter<int>) );
 
             Assert.Equal( "<null>", this.FormatDefault<int?>( null ) );
             Assert.Equal( "2", this.FormatDefault<int>( 2 ) );
@@ -220,7 +222,7 @@ namespace Flashtrace.Formatters.UnitTests
                 this.DefaultRepository.Get<int>();
             }
 
-            this.DefaultRepository.Register( typeof(Nullable<>), typeof(NullableFormatter<>) );
+            this.DefaultRepository.Register( typeof(Nullable<>), typeof(Assets.NullableFormatter<>) );
 
             Assert.Equal( "<null>", this.FormatDefault<int?>( null ) );
             Assert.Equal( "2", this.FormatDefault<int>( 2 ) );
@@ -259,7 +261,7 @@ namespace Flashtrace.Formatters.UnitTests
 
             AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int), new EnumerableFormatter<int>( this.DefaultRepository ) ) );
 
-            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int), typeof(NullableFormatter<int>) ) );
+            AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int), typeof(Assets.NullableFormatter<int>) ) );
             AssertEx.Throws<ArgumentException>( () => this.DefaultRepository.Register( typeof(int?), typeof(NonNullableFormatter<int>) ) );
         }
 

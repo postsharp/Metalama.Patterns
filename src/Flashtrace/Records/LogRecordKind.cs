@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Activities;
+using Flashtrace.Options;
 using JetBrains.Annotations;
 using System.Collections;
 
@@ -54,7 +55,7 @@ public enum LogRecordKind
     /// </summary>
     /// <remarks>
     /// Emitted by:
-    ///     <see cref="LogLevelSource.Write{T}(in T, in WriteMessageOptions)"/> and related overloads.
+    ///     <see cref="LogLevelSource.Write{T}(in T, in Options.WriteMessageOptions)"/> and related overloads.
     /// </remarks>
     Message = 1 << 7,
 
@@ -63,8 +64,8 @@ public enum LogRecordKind
     /// </summary>
     /// <remarks>
     /// Emitted by:
-    ///     <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> and
-    ///     <see cref="LogLevelSource.LogActivity{TDescription}(in TDescription, Action, in OpenActivityOptions)"/> and related overloads.
+    ///     <see cref="LogLevelSource.OpenActivity{T}(in T, in Options.OpenActivityOptions)"/> and
+    ///     <see cref="LogActivity{TActivityDescription}"/> and related overloads.
     /// </remarks>
     ActivityEntry = 1 << 8,
 
@@ -79,7 +80,7 @@ public enum LogRecordKind
     IteratorMoveNext = 1 << 10,
 
     /// <summary>
-    /// Emitted by <see cref="Logger.WriteExecutionPoint()"/>.
+    /// Emitted by <see cref="LogSource.WriteExecutionPoint()"/>.
     /// </summary>
     /// <remarks>
     /// Emitted by:

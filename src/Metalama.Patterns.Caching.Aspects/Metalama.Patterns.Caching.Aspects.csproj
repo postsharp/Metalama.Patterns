@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Debug;Release;LamaDebug</Configurations>
+        <TransformOnBuild>true</TransformOnBuild>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <PackageReference Include="Metalama.Extensions.DependencyInjection" Version="$(MetalamaExtensionsVersion)" />
+        <!-- We need a non-private reference to Metalama.Patterns.Contracts because it is required by Metalama.-->
+        <ProjectReference Include="..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
+        <ProjectReference Include="..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
+    </ItemGroup>
+
+
+
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
+    
+</Project>

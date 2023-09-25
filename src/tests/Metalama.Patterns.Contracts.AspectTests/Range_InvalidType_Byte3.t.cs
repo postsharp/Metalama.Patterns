@@ -1,1 +1,1 @@
-// Error LAMA5000 on `GetField`: `RangeAttribute cannot be applied to Range_InvalidType_Byte3.GetField()/<return> because the value range cannot be satisfied by the type Byte.`
+// Error LAMA5001 on `GetField`: `The [Range] contract cannot be applied to 'Range_InvalidType_Byte3.GetField()/<return>' because the value range cannot be satisfied by the type Byte.`

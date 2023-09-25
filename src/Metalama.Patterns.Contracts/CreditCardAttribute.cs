@@ -13,9 +13,6 @@ namespace Metalama.Patterns.Contracts;
 /// is not a valid credit card number. Null strings are accepted and do not
 /// throw an exception.
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.CreditCardErrorMessage"/>.</para>
-/// </remarks>
 [PublicAPI]
 [Inheritable]
 public sealed class CreditCardAttribute : ContractAspect
@@ -42,17 +39,9 @@ public sealed class CreditCardAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        if ( !CreditCardAttributeHelper.IsValidCreditCardNumber( value ) )
+        if ( !ContractHelpers.IsValidCreditCardNumber( value ) )
         {
-            throw ContractsServices.Default.ExceptionFactory.CreateException(
-                ContractExceptionInfo.Create(
-                    typeof(ArgumentNullException),
-                    typeof(CreditCardAttribute),
-                    value,
-                    meta.Target.GetTargetName(),
-                    meta.Target.GetTargetKind(),
-                    meta.Target.ContractDirection,
-                    ContractLocalizedTextProvider.CreditCardErrorMessage ) );
+            meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnCreditCardContractViolated( value );
         }
     }
 }

@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
-using Flashtrace.Internal;
+using Flashtrace.Loggers;
 using Flashtrace.Options;
 using Flashtrace.Records;
+using Flashtrace.Transactions;
 using JetBrains.Annotations;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -25,6 +26,8 @@ namespace Flashtrace;
 [PublicAPI]
 public sealed class LogSource
 {
+    public static LogSource Null { get; } = new( new NullLogger(), LogLevel.None, LogLevel.None );
+
     private LogLevelSource? _debugLogLevelSource;
     private LogLevelSource? _traceLogLevelSource;
     private LogLevelSource? _infoLogLevelSource;
@@ -89,7 +92,7 @@ public sealed class LogSource
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public LogSource ForCurrentType( ref CallerInfo callerInfo )
+    public LogSource ForCurrentType( in CallerInfo callerInfo )
     {
         return this.ForType( callerInfo.SourceType! );
     }
@@ -99,21 +102,22 @@ public sealed class LogSource
     /// </summary>
     /// <returns>A <see cref="LogSource"/> for the calling type.</returns>
     [MethodImpl( MethodImplOptions.NoInlining )]
+    [Obsolete( "Use ILoggerFactory.GetLogSource." )]
     public static LogSource Get()
     {
-        var callerInfo = CallerInfo.GetDynamic( 1 );
-
-        return Get( ref callerInfo );
+        return Get( CallerInfo.GetDynamic( 1 ) );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static LogSource Get( ref CallerInfo callerInfo ) => LogSourceFactory.Default.GetLogSource( ref callerInfo );
+    [Obsolete( "Use ILoggerFactory.GetLogSource." )]
+    public static LogSource Get( in CallerInfo callerInfo ) => LogSourceFactory.Default.GetLogSource( callerInfo );
 
     /// <summary>
     /// Gets a log source associated with a specific source name.
     /// </summary>
     /// <param name="sourceName">Name that the logging backend associates with a log source.</param>
+    [Obsolete( "Use ILoggerFactory.GetLogSource." )]
     public static LogSource Get( string sourceName ) => LogSourceFactory.Default.GetLogSource( sourceName );
 
     /// <summary>
@@ -122,6 +126,7 @@ public sealed class LogSource
     /// <param name="sourceName">The source name. A dotted name.</param>
     /// <param name="role">A role name. See <see cref="LoggingRoles"/>.</param>
     /// <returns></returns>
+    [Obsolete( "Use ILoggerFactory.GetLogSource." )]
     public static LogSource Get( string sourceName, string? role )
         => role == null
             ? LogSourceFactory.Default.GetLogSource( sourceName )
@@ -133,6 +138,7 @@ public sealed class LogSource
     /// <param name="type">The type.</param>
     /// <param name="role">See <see cref="LoggingRoles"/>.</param>
     /// <returns></returns>
+    [Obsolete( "Use ILoggerFactory.GetLogSource." )]
     public static LogSource Get( Type type, string? role = null )
         => role == null
             ? LogSourceFactory.Default.GetLogSource( type )
@@ -296,17 +302,17 @@ public sealed class LogSource
 
         if ( !callerInfo.SourceLineInfo.IsNull )
         {
-            this.WriteExecutionPoint( ref callerInfo );
+            this.WriteExecutionPoint( callerInfo );
         }
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void WriteExecutionPoint( ref CallerInfo callerInfo )
+    public void WriteExecutionPoint( in CallerInfo callerInfo )
     {
         if ( this.IsEnabled( LogLevel.Debug ) )
         {
-            this.Logger.Write( null, LogLevel.Debug, LogRecordKind.ExecutionPoint, "Executing", null, ref callerInfo );
+            this.Logger.Write( null, LogLevel.Debug, LogRecordKind.ExecutionPoint, "Executing", null, callerInfo );
         }
     }
 
@@ -331,7 +337,7 @@ public sealed class LogSource
         // ReSharper disable once SuspiciousTypeConversion.Global
         if ( this.Logger.GetContextLocalLogger() is ITransactionAwareContextLocalLogger logger )
         {
-            logger.ApplyTransactionRequirements( ref openActivityOptions );
+            openActivityOptions = logger.ApplyTransactionRequirements( openActivityOptions );
         }
     }
 

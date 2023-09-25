@@ -19,7 +19,13 @@ public interface IFormatterRepository
     /// <summary>
     /// Gets the <see cref="IFormatter"/> for the specified <see cref="Type"/>. 
     /// </summary>
+    /// <exception cref="FormatterNotFoundException">The repository cannot provide a formatter for the specified <paramref name="objectType"/>.</exception>
     IFormatter Get( Type objectType );
+
+    /// <summary>
+    /// Attempts to get the <see cref="IFormatter"/> for the specified <see cref="Type"/>.
+    /// </summary>
+    bool TryGet( Type objectType, out IFormatter? formatter );
 
     /// <summary>
     /// Gets the <see cref="FormattingRole"/> associated with the current formatter repository.

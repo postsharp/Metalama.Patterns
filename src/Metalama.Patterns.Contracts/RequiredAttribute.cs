@@ -18,9 +18,6 @@ namespace Metalama.Patterns.Contracts;
 ///     </description></item>
 /// </list>
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.RequiredErrorMessage"/>.</para>
-/// </remarks>
 [PublicAPI]
 [Inheritable]
 public sealed class RequiredAttribute : ContractAspect
@@ -29,6 +26,20 @@ public sealed class RequiredAttribute : ContractAspect
     /// Initializes a new instance of the <see cref="RequiredAttribute"/> class.
     /// </summary>
     public RequiredAttribute() { }
+
+    public override void BuildAspect( IAspectBuilder<IParameter> builder )
+    {
+        base.BuildAspect( builder );
+
+        builder.WarnIfNullable();
+    }
+
+    public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
+    {
+        base.BuildAspect( builder );
+
+        builder.WarnIfNullable();
+    }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -53,8 +64,6 @@ public sealed class RequiredAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
         var targetType = meta.Target.GetTargetType();
 
         if ( targetType.SpecialType == SpecialType.String )
@@ -63,27 +72,11 @@ public sealed class RequiredAttribute : ContractAspect
             {
                 if ( value == null! )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentNullException),
-                            typeof(RequiredAttribute),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.RequiredErrorMessage ) );
+                    meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnRequiredContractViolated( value );
                 }
                 else
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentOutOfRangeException),
-                            typeof(RequiredAttribute),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.RequiredErrorMessage ) );
+                    meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnRequiredContractViolatedBecauseOfEmptyString( value );
                 }
             }
         }
@@ -91,15 +84,7 @@ public sealed class RequiredAttribute : ContractAspect
         {
             if ( value == null! )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentNullException),
-                        typeof(RequiredAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.RequiredErrorMessage ) );
+                meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnRequiredContractViolated( value );
             }
         }
     }

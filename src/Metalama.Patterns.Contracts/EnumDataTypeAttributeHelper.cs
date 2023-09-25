@@ -31,19 +31,18 @@ public static class EnumDataTypeAttributeHelper
 
     public static bool IsValidEnumValue( object? value, Type enumType )
     {
-        if ( value == null )
+        switch ( value )
         {
-            return true;
-        }
+            case null:
+                return true;
 
-        if ( value is string str )
-        {
-            return IsValidEnumValue( str, enumType );
+            case string str:
+                return IsValidEnumValue( str, enumType );
         }
 
         var type = value.GetType();
 
-        if ( !type.IsEnum || !enumType.Equals( type ) )
+        if ( !type.IsEnum || enumType != type )
         {
             return false;
         }
@@ -72,10 +71,10 @@ public static class EnumDataTypeAttributeHelper
 
     // VS gives incorrect warning at build time, but no squiggly, hence the double suppression.
 #pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable CS8603  // Possible null reference return.
+
+// ReSharper disable once RedundantSuppressNullableWarningExpression
     private static string GetUnderlyingTypeValueString( Type enumType, object enumValue )
         => Convert.ChangeType( enumValue, Enum.GetUnderlyingType( enumType ), CultureInfo.InvariantCulture )
-            .ToString();
-#pragma warning restore CS8603  // Possible null reference return.
+            .ToString()!;
 #pragma warning restore IDE0079 // Remove unnecessary suppression
 }

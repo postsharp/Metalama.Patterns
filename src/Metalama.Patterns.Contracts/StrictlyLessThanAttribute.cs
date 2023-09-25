@@ -1,10 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
-
-#pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+using Metalama.Framework.Aspects;
 
 // Resharper disable RedundantCast
 
@@ -24,11 +21,9 @@ namespace Metalama.Patterns.Contracts;
 ///     of the value closest to the maximum value according to the precision
 ///     of the respective floating-point numerical data type.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.StrictlyLessThanErrorMessage"/>.</para>
-/// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
 [PublicAPI]
-public partial class StrictlyLessThanAttribute : RangeAttribute
+public class StrictlyLessThanAttribute : RangeAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an integer bound.
@@ -39,14 +34,14 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             long.MinValue,
             max,
             long.MinValue,
-            Int64Maximum.ToInt64( max ),
+            FloatingPointHelper.Int64Maximum.ToInt64( max ),
             ulong.MinValue,
-            Int64Maximum.ToUInt64( max ),
+            FloatingPointHelper.Int64Maximum.ToUInt64( max ),
             double.MinValue,
-            Int64Maximum.ToDouble( max ),
+            FloatingPointHelper.Int64Maximum.ToDouble( max ),
             decimal.MinValue,
-            Int64Maximum.ToDecimal( max ),
-            GetInvalidTypes( long.MinValue, Int64Maximum.ToInt64( max ) ) ) { }
+            FloatingPointHelper.Int64Maximum.ToDecimal( max ),
+            GetInvalidTypes( long.MinValue, FloatingPointHelper.Int64Maximum.ToInt64( max ) ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an unsigned integer bound.
@@ -57,13 +52,13 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             ulong.MinValue,
             max,
             long.MinValue,
-            UInt64Maximum.ToInt64( max ),
+            FloatingPointHelper.UInt64Maximum.ToInt64( max ),
             ulong.MinValue,
-            UInt64Maximum.ToUInt64( max ),
+            FloatingPointHelper.UInt64Maximum.ToUInt64( max ),
             double.MinValue,
-            UInt64Maximum.ToDouble( max ),
+            FloatingPointHelper.UInt64Maximum.ToDouble( max ),
             decimal.MinValue,
-            UInt64Maximum.ToDecimal( max ),
+            FloatingPointHelper.UInt64Maximum.ToDecimal( max ),
             GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None) ) { }
 
     /// <summary>
@@ -75,28 +70,17 @@ public partial class StrictlyLessThanAttribute : RangeAttribute
             double.MinValue,
             max,
             long.MinValue,
-            DoubleMaximum.ToInt64( max ),
+            FloatingPointHelper.DoubleMaximum.ToInt64( max ),
             ulong.MinValue,
-            DoubleMaximum.ToUInt64( max ),
+            FloatingPointHelper.DoubleMaximum.ToUInt64( max ),
             double.MinValue,
-            DoubleMaximum.ToDouble( max ),
+            FloatingPointHelper.DoubleMaximum.ToDouble( max ),
             decimal.MinValue,
-            DoubleMaximum.ToDecimal( max ),
+            FloatingPointHelper.DoubleMaximum.ToDecimal( max ),
             GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) ) { }
 
-    /// <inheritdoc/>
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .StrictlyLessThanErrorMessage) ),
-            false,
-            true );
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5006", nameof(StrictlyLessThanAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
+    protected override void OnContractViolated( dynamic? value )
+    {
+        meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnStrictlyLessThanContractViolated( value, this.DisplayMaxValue );
+    }
 }

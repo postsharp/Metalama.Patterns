@@ -10,7 +10,7 @@ namespace Flashtrace.Options;
 /// Options for the <see cref="Exception"/> method.
 /// </summary>
 [PublicAPI]
-public struct WriteMessageOptions
+public readonly struct WriteMessageOptions
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="WriteMessageOptions"/> struct optionally specifying the properties with a CLR object.
@@ -30,7 +30,7 @@ public struct WriteMessageOptions
     }
 
     /// <summary>
-    /// Gets or sets the properties of the <see cref="WriteMessageOptions"/>, typically specified as an instance of a well-known or anonymous CLR type.
+    /// Gets the properties of the <see cref="WriteMessageOptions"/>, typically specified as an instance of a well-known or anonymous CLR type.
     /// </summary>
-    public LogEventData Data { get; set; }
+    public LogEventData Data { get; init; }
 }

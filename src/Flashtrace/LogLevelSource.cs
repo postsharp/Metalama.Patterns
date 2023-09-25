@@ -43,15 +43,15 @@ public sealed class LogLevelSource
         where T : IMessage
     {
         var callerInfo = CallerInfo.GetDynamic( 1 );
-        this.Write( message, null, options, ref callerInfo );
+        this.Write( message, null, options, callerInfo );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void Write<T>( in T message, in WriteMessageOptions options, ref CallerInfo callerInfo )
+    public void Write<T>( in T message, in WriteMessageOptions options, in CallerInfo callerInfo )
         where T : IMessage
     {
-        this.Write( message, null, options, ref callerInfo );
+        this.Write( message, null, options, callerInfo );
     }
 
     /// <summary>
@@ -66,12 +66,12 @@ public sealed class LogLevelSource
         where T : IMessage
     {
         var callerInfo = CallerInfo.GetDynamic( 1 );
-        this.Write( message, exception, options, ref callerInfo );
+        this.Write( message, exception, options, callerInfo );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void Write<T>( in T message, Exception? exception, in WriteMessageOptions options, ref CallerInfo callerInfo )
+    public void Write<T>( in T message, Exception? exception, in WriteMessageOptions options, in CallerInfo callerInfo )
         where T : IMessage
     {
         var (logger, isEnabled) = this.LogSource.Logger.GetContextLocalLogger( this.Level );
@@ -85,7 +85,7 @@ public sealed class LogLevelSource
         {
             using ( var recordBuilder = logger.GetRecordBuilder(
                        new LogRecordOptions( this.Level, LogRecordKind.Message, LogRecordAttributes.WriteMessage, options.Data ),
-                       ref callerInfo ) )
+                       callerInfo ) )
             {
                 MessageHelper.Write( message, recordBuilder, LogRecordItem.Message );
 
@@ -110,13 +110,13 @@ public sealed class LogLevelSource
     // ReSharper disable InvalidXmlDocComment
 
     /// <summary>
-    /// Opens an activity. 
+    /// Opens an activity that cannot be suspended (e.g. does not wait any <c>await</c>).
     /// </summary>
     /// <param name="description">The activity description, typically created using the <see cref="SemanticMessageBuilder"/> or <see cref="FormattedMessageBuilder"/> class.</param>
     /// <param name="options">Options.</param>
     /// <returns>A <see cref="Activities.LogActivity{TActivityDescription}"/> representing the new activity.</returns>
     /// <remarks>The activity must be closed using
-    /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in SetSuccess)"/>,
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>,
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetResult{TResult}(TResult,in CloseActivityOptions)"/>,
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
     /// or <see cref="Activities.LogActivity{TActivityDescription}.SetException(Exception,in CloseActivityOptions)"/>.
@@ -127,14 +127,45 @@ public sealed class LogLevelSource
     {
         var callerInfo = CallerInfo.GetDynamic( 1 );
 
-        return this.OpenActivity( description, options, ref callerInfo );
+        return this.OpenActivity( description, options, callerInfo );
+    }
+
+    /// <summary>
+    /// Opens an activity that contains an <c>await</c>.
+    /// </summary>
+    /// <param name="description">The activity description, typically created using the <see cref="SemanticMessageBuilder"/> or <see cref="FormattedMessageBuilder"/> class.</param>
+    /// <param name="options">Options.</param>
+    /// <returns>A <see cref="Activities.LogActivity{TActivityDescription}"/> representing the new activity.</returns>
+    /// <remarks>The activity must be closed using
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetResult{TResult}(TResult,in CloseActivityOptions)"/>,
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
+    /// or <see cref="Activities.LogActivity{TActivityDescription}.SetException(Exception,in CloseActivityOptions)"/>.
+    /// </remarks>
+    [MethodImpl( MethodImplOptions.NoInlining )]
+    public LogActivity<T> OpenAsyncActivity<T>( in T description, in OpenActivityOptions options = default )
+        where T : IMessage
+    {
+        var callerInfo = CallerInfo.GetDynamic( 1 );
+
+        return this.OpenAsyncActivity( description, options, callerInfo );
     }
 
     // ReSharper restore InvalidXmlDocComment
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public LogActivity<T> OpenActivity<T>( in T description, in OpenActivityOptions options, ref CallerInfo callerInfo )
+    public LogActivity<T> OpenActivity<T>( in T description, in OpenActivityOptions options, in CallerInfo callerInfo )
+        where T : IMessage
+        => this.OpenActivity( description, options, callerInfo, false );
+
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    public LogActivity<T> OpenAsyncActivity<T>( in T description, in OpenActivityOptions options, in CallerInfo callerInfo )
+        where T : IMessage
+        => this.OpenActivity( description, options, callerInfo, true );
+
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    private LogActivity<T> OpenActivity<T>( in T description, in OpenActivityOptions options, in CallerInfo callerInfo, bool isAsync )
         where T : IMessage
     {
         try
@@ -160,9 +191,7 @@ public sealed class LogLevelSource
                 }
 
                 // Do the actual opening:
-                var mutableOptions = options;
-                mutableOptions.Level = this.Level;
-                context = logger.OpenActivity( mutableOptions, ref callerInfo );
+                context = logger.OpenActivity( options with { Level = this.Level }, callerInfo, isAsync );
 
                 // The log source has changed during OpenActivity because we're now within a ".Use()" call so we must update ourselves
                 // to use the new log source:
@@ -176,14 +205,11 @@ public sealed class LogLevelSource
 
                 if ( isEnabled )
                 {
-                    context = logger.OpenActivity( options, ref callerInfo );
+                    context = logger.OpenActivity( options, callerInfo, isAsync );
                 }
                 else
                 {
-                    var mutableOptions = options;
-                    mutableOptions.IsHidden = true;
-
-                    context = logger.OpenActivity( mutableOptions, ref callerInfo );
+                    context = logger.OpenActivity( options with { IsHidden = true }, callerInfo, isAsync );
                 }
             }
             else
@@ -192,7 +218,7 @@ public sealed class LogLevelSource
 
                 if ( isEnabled )
                 {
-                    context = logger.OpenActivity( options, ref callerInfo );
+                    context = logger.OpenActivity( options, callerInfo, isAsync );
                 }
             }
 
@@ -204,7 +230,7 @@ public sealed class LogLevelSource
                                LogRecordKind.ActivityEntry,
                                LogRecordAttributes.WriteActivityDescription,
                                default ),
-                           ref callerInfo,
+                           callerInfo,
                            context ) )
                 {
                     MessageHelper.Write( description, recordBuilder, LogRecordItem.ActivityDescription );
@@ -238,7 +264,7 @@ public sealed class LogLevelSource
         where TDescription : IMessage
     {
         var callerInfo = CallerInfo.GetDynamic( 1 );
-        this.LogActivity( description, action, options, ref callerInfo );
+        this.LogActivity( description, action, options, callerInfo );
     }
 
     /// <excludeOverload />
@@ -247,7 +273,7 @@ public sealed class LogLevelSource
         in TDescription description,
         Action action,
         in OpenActivityOptions options,
-        ref CallerInfo callerInfo )
+        in CallerInfo callerInfo )
         where TDescription : IMessage
     {
         if ( action == null )
@@ -255,16 +281,16 @@ public sealed class LogLevelSource
             throw new ArgumentNullException( nameof(action) );
         }
 
-        var activity = this.OpenActivity( description, options, ref callerInfo );
+        var activity = this.OpenActivity( description, options, callerInfo );
 
         try
         {
             action();
-            activity.SetSuccess( default, ref callerInfo );
+            activity.SetSuccess( default, callerInfo );
         }
         catch ( Exception e )
         {
-            activity.SetException( e, default, ref callerInfo );
+            activity.SetException( e, default, callerInfo );
 
             throw;
         }
@@ -287,7 +313,7 @@ public sealed class LogLevelSource
     {
         var callerInfo = CallerInfo.GetDynamic( 1 );
 
-        return this.LogActivity( description, action, options, ref callerInfo );
+        return this.LogActivity( description, action, options, callerInfo );
     }
 
     /// <excludeOverload />
@@ -296,7 +322,7 @@ public sealed class LogLevelSource
         in TDescription description,
         Func<TResult> action,
         in OpenActivityOptions options,
-        ref CallerInfo callerInfo )
+        in CallerInfo callerInfo )
         where TDescription : IMessage
     {
         if ( action == null )
@@ -304,18 +330,18 @@ public sealed class LogLevelSource
             throw new ArgumentNullException( nameof(action) );
         }
 
-        var activity = this.OpenActivity( description, options, ref callerInfo );
+        var activity = this.OpenActivity( description, options, callerInfo );
 
         try
         {
             var returnValue = action();
-            activity.SetResult( returnValue, default, ref callerInfo );
+            activity.SetResult( returnValue, default, callerInfo );
 
             return returnValue;
         }
         catch ( Exception e )
         {
-            activity.SetException( e, default, ref callerInfo );
+            activity.SetException( e, default, callerInfo );
 
             throw;
         }
@@ -338,7 +364,7 @@ public sealed class LogLevelSource
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public Task LogActivityAsync<TDescription>( in TDescription description, Func<Task> action, in OpenActivityOptions options, ref CallerInfo callerInfo )
+    public Task LogActivityAsync<TDescription>( in TDescription description, Func<Task> action, in OpenActivityOptions options, in CallerInfo callerInfo )
         where TDescription : IMessage
     {
         return this.LogActivityAsyncImpl( description, action, options, callerInfo );
@@ -352,7 +378,7 @@ public sealed class LogLevelSource
             throw new ArgumentNullException( nameof(action) );
         }
 
-        var activity = this.OpenActivity( description, options, ref callerInfo );
+        var activity = this.OpenActivity( description, options, callerInfo );
 
         try
         {
@@ -372,11 +398,11 @@ public sealed class LogLevelSource
                 }
             }
 
-            activity.SetSuccess( default, ref callerInfo );
+            activity.SetSuccess( default, callerInfo );
         }
         catch ( Exception e )
         {
-            activity.SetException( e, default, ref callerInfo );
+            activity.SetException( e, default, callerInfo );
 
             throw;
         }
@@ -407,7 +433,7 @@ public sealed class LogLevelSource
         in TDescription description,
         Func<Task<TResult>> action,
         in OpenActivityOptions options,
-        ref CallerInfo callerInfo )
+        in CallerInfo callerInfo )
         where TDescription : IMessage
     {
         return this.LogActivityAsyncImpl( description, action, options, callerInfo );
@@ -425,7 +451,7 @@ public sealed class LogLevelSource
             throw new ArgumentNullException( nameof(action) );
         }
 
-        var activity = this.OpenActivity( description, options, ref callerInfo );
+        var activity = this.OpenActivity( description, options, callerInfo );
 
         try
         {
@@ -445,13 +471,13 @@ public sealed class LogLevelSource
                 }
             }
 
-            activity.SetResult( task.Result, default, ref callerInfo );
+            activity.SetResult( task.Result, default, callerInfo );
 
             return task.Result;
         }
         catch ( Exception e )
         {
-            activity.SetException( e, default, ref callerInfo );
+            activity.SetException( e, default, callerInfo );
 
             throw;
         }
@@ -473,5 +499,5 @@ public sealed class LogLevelSource
     /// Gets the current <see cref="LogLevelSource"/>, or <c>null</c> if logging is not enabled for the current instance. This
     /// property allows to write conditional logging using the <c>?.</c> operator.
     /// </summary>
-    public LogLevelSource? EnabledOrNull => this.IsEnabled ? this : null;
+    public LogLevelSource? IfEnabled => this.IsEnabled ? this : null;
 }
