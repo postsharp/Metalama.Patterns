@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -71,14 +71,14 @@ internal sealed class BuildAspectContext
 
         var target = builder.Target;
 
-        // TODO: Consider using BaseType.TypeDefinition where possible for better performance.
+        // TODO: Consider using BaseType.Definition where possible for better performance.
 
         this.BaseImplementsInpc =
             target.BaseType != null && (
                 target.BaseType.Is( this.Elements.INotifyPropertyChanged )
                 || (target.BaseType is { BelongsToCurrentProject: true }
                     && (!this.Target.Compilation.IsPartial || this.Target.Compilation.Types.Contains( target.BaseType ))
-                    && target.BaseType.TypeDefinition.Enhancements().HasAspect( typeof(NotifyPropertyChangedAttribute) )));
+                    && target.BaseType.Definition.Enhancements().HasAspect( typeof(NotifyPropertyChangedAttribute) )));
 
         this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Elements.INotifyPropertyChanged );
 
@@ -152,7 +152,7 @@ internal sealed class BuildAspectContext
             ( diagnostic, location ) =>
             {
                 hasReportedDiagnosticError |= diagnostic.Definition.Severity == Severity.Error;
-                this.Builder.Diagnostics.Report( diagnostic, new LocationWrapper( location ) );
+                this.Builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
             } );
 
         foreach ( var node in graph.DescendantsDepthFirst() )
@@ -320,7 +320,7 @@ internal sealed class BuildAspectContext
                             return InpcInstrumentationKind.Unknown;
                         }
 
-                        return namedType.TypeDefinition.Enhancements().HasAspect<NotifyPropertyChangedAttribute>()
+                        return namedType.Definition.Enhancements().HasAspect<NotifyPropertyChangedAttribute>()
                             ? InpcInstrumentationKind.Implicit // For now, the aspect always introduces implicit implementation.
                             : InpcInstrumentationKind.None;
                     }
