@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -226,25 +227,6 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
                 throw new DiagnosticErrorReportedException();
 
-            case true:
-
-                if ( propertyTypeImplementsInpc )
-                {
-                    if ( fieldOrProperty.InitializerExpression != null )
-                    {
-                        // TODO: Support this pattern by moving initializer to ctor.
-
-                        ctx.Builder.Diagnostics.Report(
-                            DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyHasAnInitializerExpression.WithArguments(
-                                (fieldOrProperty.DeclarationKind, fieldOrProperty) ),
-                            fieldOrProperty );
-
-                        throw new DiagnosticErrorReportedException();
-                    }
-                }
-
-                break;
-
             case false:
 
                 if ( propertyTypeImplementsInpc )
@@ -383,18 +365,33 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                         var hasDependentProperties = node != null;
 
                         IField? handlerField = null;
+                        IMethod? subscribeMethod = null;
 
                         if ( hasDependentProperties )
                         {
                             handlerField = ctx.GetOrCreateHandlerField( node! );
+                            subscribeMethod = ctx.GetOrCreateRootPropertySubscribeMethod( node! );
                             ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( p.Name );
+
+                            if ( p.InitializerExpression != null )
+                            {
+                                ctx.Builder.Advice.AddInitializer(
+                                    ctx.Target,
+                                    nameof( SubscribeInitializer ),
+                                    InitializerKind.BeforeInstanceConstructor,
+                                    args: new
+                                    {
+                                        fieldOrProperty = p,
+                                        subscribeMethod
+                                    });
+                            }
                         }
                         else
                         {
                             ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.Add( p.Name );
                         }
-
-                        ctx.Builder.Advice.Override( p, nameof(OverrideInpcRefTypeProperty), tags: new { ctx, handlerField, node } );
+                        
+                        ctx.Builder.Advice.Override( p, nameof(OverrideInpcRefTypeProperty), tags: new { ctx, handlerField, node, subscribeMethod } );
                     }
                     else
                     {

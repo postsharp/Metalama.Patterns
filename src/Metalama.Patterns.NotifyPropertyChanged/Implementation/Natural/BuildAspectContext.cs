@@ -210,6 +210,43 @@ internal sealed class BuildAspectContext
         return node.HandlerField!;
     }
 
+    public IMethod GetOrCreateRootPropertySubscribeMethod( DependencyGraphNode node )
+    {
+        if ( node.Depth != 1 )
+        {
+            throw new ArgumentException( "Must be a root property node (depth must be 1).", nameof( node ) );
+        }
+
+        if ( !node.SubscribeMethod.DeclarationIsSet )
+        {
+            var handlerField = this.GetOrCreateHandlerField( node );
+
+            var subscribeMethodName = this.GetAndReserveUnusedMemberName( $"Subscribe{node.Name}" );
+
+            var result = this.Builder.Advice.IntroduceMethod(
+                this.Target,
+                nameof( NaturalAspect.Subscribe ),
+                IntroductionScope.Instance,
+                OverrideStrategy.Fail,
+                b =>
+                {
+                    b.Name = subscribeMethodName;
+                    b.Accessibility = Accessibility.Private;
+                },
+                args: new
+                {
+                    TValue = node.FieldOrProperty.Type,
+                    ctx = this,
+                    node,
+                    handlerField
+                } );
+
+            node.SubscribeMethod.Declaration = result.Declaration;
+        }
+
+        return node.SubscribeMethod.Declaration!;
+    }
+
     private HashSet<string>? _existingMemberNames;
 
     /// <summary>

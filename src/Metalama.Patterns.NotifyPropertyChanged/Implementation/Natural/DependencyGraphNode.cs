@@ -17,7 +17,7 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
         base.Initialize();
         if ( this.Depth == 1 )
         {
-            this._subscribeMethod = new UncertainDeferredDeclaration<IMethod>();
+            this._subscribeMethod = new CertainDeferredDeclaration<IMethod>();
         }
     }
 
@@ -132,12 +132,12 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     /// </remarks>
     public UncertainDeferredDeclaration<IMethod> UpdateMethod { get; } = new UncertainDeferredDeclaration<IMethod>( mustBeSetBeforeGet: true );
 
-    private UncertainDeferredDeclaration<IMethod>? _subscribeMethod;
+    private CertainDeferredDeclaration<IMethod>? _subscribeMethod;
 
     /// <summary>
     /// Gets a method like <c>void SubscribeToA1()</c> for applicable root property (depth 1) nodes.
     /// </summary>
-    public UncertainDeferredDeclaration<IMethod> SubscribeMethod => this._subscribeMethod ?? throw new InvalidOperationException( nameof( this.SubscribeMethod ) + " is not applicable to this node, inspection indicates incorrect caller logic." );
+    public CertainDeferredDeclaration<IMethod> SubscribeMethod => this._subscribeMethod ?? throw new InvalidOperationException( nameof( this.SubscribeMethod ) + " is not applicable to this node, access indicates incorrect caller logic." );
 
     protected override void ToStringAppendToLine( StringBuilder appendTo, string? format )
     {

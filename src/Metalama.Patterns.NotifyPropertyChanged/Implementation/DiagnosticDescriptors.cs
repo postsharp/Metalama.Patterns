@@ -30,17 +30,6 @@ internal static class DiagnosticDescriptors
                 _category );
 
         /// <summary>
-        /// {0} {1} has an initializer expression and and is of a type that implements INotifyPropertyChanged. This is not supported. Explicit initialization from a constructor is supported.
-        /// </summary>
-        public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty)> ErrorFieldOrPropertyHasAnInitializerExpression =
-            new(
-                "LAMA5151",
-                Error,
-                "{0} {1} has an initializer expression and is of a type that implements INotifyPropertyChanged. This is not supported. Explicit initialization from a constructor is supported.",
-                "INotifyPropertyChanged auto-property has an initializer expression.",
-                _category );
-
-        /// <summary>
         /// The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.
         /// </summary>
         public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)>

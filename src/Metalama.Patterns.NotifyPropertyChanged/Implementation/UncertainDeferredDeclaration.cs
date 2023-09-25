@@ -16,7 +16,6 @@ internal class UncertainDeferredDeclaration<T>
 {
     private readonly bool _mustBeSetBeforeGet;
     private T? _declaration;
-    private bool _declarationSet;
 
     // ReSharper disable once MemberCanBeProtected.Global
     /// <summary>
@@ -40,6 +39,11 @@ internal class UncertainDeferredDeclaration<T>
     public bool? WillBeDefined { get; }    
 
     /// <summary>
+    /// Gets a value indicating whether the <see cref="Declaration"/> setter has been successfully invoked.
+    /// </summary>
+    public bool DeclarationIsSet { get; private set; }
+
+    /// <summary>
     /// Gets or sets the declaration. The declaration defaults to <see langword="null"/>, and can be
     /// set at most once. Code that expects to execute before the value will be set can make preliminary 
     /// decisions according to <see cref="WillBeDefined"/>. Only get the value of <see cref="Declaration"/>
@@ -49,7 +53,7 @@ internal class UncertainDeferredDeclaration<T>
     {
         get
         {
-            if ( this._mustBeSetBeforeGet && !this._declarationSet )
+            if ( this._mustBeSetBeforeGet && !this.DeclarationIsSet )
             {
                 throw new InvalidOperationException( nameof( this.Declaration ) + " must be set before it can be read." );
             }
@@ -82,7 +86,7 @@ internal class UncertainDeferredDeclaration<T>
 
         set
         {
-            if ( this._declarationSet && value != this._declaration )
+            if ( this.DeclarationIsSet && value != this._declaration )
             {
                 throw new InvalidOperationException( "The declaration has already been set, the value cannot be changed." );
             }
@@ -111,7 +115,7 @@ internal class UncertainDeferredDeclaration<T>
             }
 
             this._declaration = value;
-            this._declarationSet = true;
+            this.DeclarationIsSet = true;
         }
     }
 }

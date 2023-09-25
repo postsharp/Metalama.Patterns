@@ -27,6 +27,7 @@ internal partial class NaturalAspect
         {
             var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
             var handlerField = (IField?) meta.Tags["handlerField"];
+            var subscribeMethod = (IMethod?) meta.Tags["subscribeMethod"];
             var node = (DependencyGraphNode?) meta.Tags["node"];
 
             var inpcImplementationKind = node?.PropertyTypeInpcInstrumentationKind ?? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type );
@@ -89,36 +90,58 @@ internal partial class NaturalAspect
 
                 ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
 
-                if ( handlerField != null )
+#pragma warning disable IDE0031 // Use null propagation
+                if ( subscribeMethod != null )
                 {
-                    if ( value != null )
-                    {
-                        handlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
-
-                        if ( eventRequiresCast )
-                        {
-                            meta.Cast( ctx.Elements.INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
-                        }
-                        else
-                        {
-                            value.PropertyChanged += handlerField.Value;
-                        }
-
-                        // -----------------------------------------------------------------------
-                        //                Local Function: OnChildPropertyChanged
-                        // -----------------------------------------------------------------------
-
-                        // ReSharper disable once LocalFunctionHidesMethod
-                        void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
-                        {
-                            // NB: If handlerField is not null, node must also be non-null.
-
-                            OnChildPropertyChangedDelegateBody( ctx, node!, ExpressionFactory.Capture( e ) );
-                        }
-                    }
+                    subscribeMethod.Invoke( value );
                 }
+#pragma warning restore IDE0031 // Use null propagation
             }
         }
+    }
+
+    [Template]
+    internal static void Subscribe<[CompileTime] TValue>(
+        TValue value,
+        [CompileTime] BuildAspectContext ctx,
+        [CompileTime] DependencyGraphNode node,
+        [CompileTime] IField handlerField )
+        where TValue : INotifyPropertyChanged
+    {
+        var inpcImplementationKind = node.PropertyTypeInpcInstrumentationKind;
+        var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
+
+        if ( value != null )
+        {
+            handlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
+
+            if ( eventRequiresCast )
+            {
+                meta.Cast( ctx.Elements.INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
+            }
+            else
+            {
+                value.PropertyChanged += handlerField.Value;
+            }
+        }
+
+        // -----------------------------------------------------------------------
+        //                Local Function: OnChildPropertyChanged
+        // -----------------------------------------------------------------------
+
+        // ReSharper disable once LocalFunctionHidesMethod
+        void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+        {
+            OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
+        }
+    }
+
+    [Template]
+    private static void SubscribeInitializer(
+        [CompileTime] IFieldOrProperty fieldOrProperty,
+        [CompileTime] IMethod subscribeMethod )
+    {
+        subscribeMethod.Invoke( fieldOrProperty.Value );
     }
 
     [Template]
