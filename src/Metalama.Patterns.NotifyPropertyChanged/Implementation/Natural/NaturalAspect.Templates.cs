@@ -81,7 +81,7 @@ internal partial class NaturalAspect
                     }
 
                     // Notify refs to the current node and any children without an update method.
-                    foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                    foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Declaration == null ).Select( n => n.Name ).OrderBy( n => n ) )
                     {
                         ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                     }
@@ -174,7 +174,7 @@ internal partial class NaturalAspect
             }
 
             // Notify refs to the current node and any children without an update method.
-            foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+            foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Declaration == null ).Select( n => n.Name ).OrderBy( n => n ) )
             {
                 ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
             }
@@ -300,7 +300,7 @@ internal partial class NaturalAspect
             else
             {
                 // Notify refs to the current node and any children without an update method.
-                refsToNotify = node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null );
+                refsToNotify = node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Declaration == null );
             }
 
             var childUpdateMethods = node.ChildUpdateMethods;
@@ -514,7 +514,7 @@ internal partial class NaturalAspect
 
             // NB: The following code is similar to the OnChildPropertyChangedDelegateBody template. Consider keeping any changes to relevant logic in sync.
 
-            var hasUpdateMethod = node.UpdateMethod != null;
+            var hasUpdateMethod = node.UpdateMethod.Declaration != null;
             var hasRefs = node.DirectReferences.Count > 0;
 
             if ( hasUpdateMethod || hasRefs )
@@ -524,7 +524,7 @@ internal partial class NaturalAspect
                     if ( hasUpdateMethod )
                     {
                         // Update method will deal with notifications
-                        node.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
+                        node.UpdateMethod.Declaration!.With( InvokerOptions.Final ).Invoke();
                     }
                     else
                     {
@@ -630,7 +630,7 @@ internal partial class NaturalAspect
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Declaration == null ).Select( n => n.Name ).OrderBy( n => n ) )
                 {
                     ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
                 }
@@ -655,7 +655,7 @@ internal partial class NaturalAspect
         {
             // NB: The following code is similar to part of the OnChildPropertyChanged template. Consider keeping any changes to relevant logic in sync.
 
-            var hasUpdateMethod = childNode.UpdateMethod != null;
+            var hasUpdateMethod = childNode.UpdateMethod.Declaration != null;
             var hasRefs = childNode.DirectReferences.Count > 0;
 
             if ( hasUpdateMethod || hasRefs )
@@ -665,7 +665,7 @@ internal partial class NaturalAspect
                     if ( hasUpdateMethod )
                     {
                         // Update method will deal with notifications
-                        childNode.UpdateMethod!.With( InvokerOptions.Final ).Invoke();
+                        childNode.UpdateMethod.Declaration!.With( InvokerOptions.Final ).Invoke();
                     }
                     else
                     {

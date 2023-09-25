@@ -21,14 +21,13 @@ internal sealed class CertainDeferredDeclaration<T> : DeferredDeclaration<T>
     public new bool WillBeDefined => true;
 
     /// <summary>
-    /// Gets or sets the declaration. Template code will always see the final value,
-    /// which will not be <see langword="null"/>.
+    /// Gets or sets the declaration. Code that expects to execute before the value will be set can assume
+    /// that the value will be set. Only get the actual value of <see cref="Declaration"/> from code that is known 
+    /// to execute after the value should have been set.
     /// </summary>
     public new T Declaration
     {
         get => base.Declaration!;
         set => base.Declaration = value;
     }
-
-    public static implicit operator T( CertainDeferredDeclaration<T> d ) => d.Declaration;
 }

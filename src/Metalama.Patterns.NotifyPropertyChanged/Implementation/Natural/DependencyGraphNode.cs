@@ -12,6 +12,15 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 [CompileTime]
 internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
 {
+    protected override void Initialize()
+    {
+        base.Initialize();
+        if ( this.Depth == 1 )
+        {
+            this._subscribeMethod = new UncertainDeferredDeclaration<IMethod>();
+        }
+    }
+
     /// <summary>
     /// Method called for each node once the graph has been built. Called in <see cref="DependencyGraph.Node{TDerived}.DescendantsDepthFirst"/> order.
     /// </summary>
@@ -94,7 +103,7 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     private IReadOnlyCollection<IMethod>? _childUpdateMethods;
 
     /// <summary>
-    /// Gets the <see cref="UpdateMethod"/> of the children of the current node.
+    /// Gets the non-null <see cref="UpdateMethod"/> declarations of the children of the current node.
     /// </summary>
     public IReadOnlyCollection<IMethod> ChildUpdateMethods
     {
@@ -104,15 +113,13 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
             // This ensures that the outcome is consistent and the result can be cached.
 
             this._childUpdateMethods ??= this.Children
-                .Select( n => n.UpdateMethod )
+                .Select( n => n.UpdateMethod.Declaration )
                 .Where( m => m != null )
                 .ToList()!;
 
             return this._childUpdateMethods;
         }
     }
-
-    private IMethod? _updateMethod;
 
     /// <summary>
     /// Gets a method like <c>void UpdateA2C2()</c>. 
@@ -123,40 +130,26 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     /// The method is always private as it is only called by other members of the type where it
     /// is defined.
     /// </remarks>
-    public IMethod? UpdateMethod
-    {
-        get
-        {
-            if ( !this.UpdateMethodHasBeenSet )
-            {
-                throw new InvalidOperationException( $"{nameof(this.UpdateMethod)} for node {this.Name} has not been set yet, so cannot be read." );
-            }
+    public UncertainDeferredDeclaration<IMethod> UpdateMethod { get; } = new UncertainDeferredDeclaration<IMethod>( mustBeSetBeforeGet: true );
 
-            return this._updateMethod;
-        }
-    }
+    private UncertainDeferredDeclaration<IMethod>? _subscribeMethod;
 
-    // ReSharper disable once MemberCanBePrivate.Global
-    public bool UpdateMethodHasBeenSet { get; private set; }
-
-    public void SetUpdateMethod( IMethod? updateMethod )
-    {
-        if ( this.UpdateMethodHasBeenSet )
-        {
-            throw new InvalidOperationException( "Methods have already been set." );
-        }
-
-        this._updateMethod = updateMethod;
-        this.UpdateMethodHasBeenSet = true;
-    }
+    /// <summary>
+    /// Gets a method like <c>void SubscribeToA1()</c> for applicable root property (depth 1) nodes.
+    /// </summary>
+    public UncertainDeferredDeclaration<IMethod> SubscribeMethod => this._subscribeMethod ?? throw new InvalidOperationException( nameof( this.SubscribeMethod ) + " is not applicable to this node, inspection indicates incorrect caller logic." );
 
     protected override void ToStringAppendToLine( StringBuilder appendTo, string? format )
     {
+#if NETCOREAPP
 #pragma warning disable CA1307 // Specify StringComparison for clarity
+#endif
         if ( format != null && format.Contains( "[ibh]" ) )
         {
             appendTo.Append( " ibh:" ).Append( this.InpcBaseHandling.ToString() );
         }
+#if NETCOREAPP
 #pragma warning restore CA1307 // Specify StringComparison for clarity
+#endif
     }
 }

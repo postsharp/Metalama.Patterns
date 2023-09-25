@@ -276,7 +276,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             if ( node.Children.Count == 0 || node.Parent!.IsRoot )
             {
                 // Leaf nodes and root properties should never have update methods.
-                node.SetUpdateMethod( null );
+                node.UpdateMethod.Declaration = null;
 
                 continue;
             }
@@ -331,7 +331,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                 ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( node.DottedPropertyPath );
             }
 
-            node.SetUpdateMethod( thisUpdateMethod );
+            node.UpdateMethod.Declaration = thisUpdateMethod;
         }
     }
 
