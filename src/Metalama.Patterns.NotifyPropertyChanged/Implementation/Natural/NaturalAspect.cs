@@ -37,7 +37,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
             IntroduceOnPropertyChangedMethod( ctx );
             IntroduceOnChildPropertyChangedMethod( ctx );
-            IntroduceOnUnmonitoredInpcPropertyChanged( ctx );
+            IntroduceOnUnmonitoredObservablePropertyChanged( ctx );
         }
         catch ( DiagnosticErrorReportedException )
         {
@@ -47,14 +47,14 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
     private static void AddPropertyPathsForOnChildPropertyChangedMethodAttribute( BuildAspectContext ctx )
     {
-        // NB: The selection logic here must be kept in sync with the logic in the OnUnmonitoredInpcPropertyChanged template.
+        // NB: The selection logic here must be kept in sync with the logic in the OnUnmonitoredObservablePropertyChanged template.
 
         ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.AddRange(
             ctx.DependencyGraph.DescendantsDepthFirst()
                 .Where(
                     n => n.InpcBaseHandling switch
                     {
-                        InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined => true,
+                        InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined => true,
                         InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
                         _ => false
                     } )
@@ -94,10 +94,10 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         // Ensure that all required fields are generated in advance of template execution.
         // The node selection logic mirrors that of the template's loops and conditions.
 
-        if ( ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
+        if ( ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
         {
             foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst()
-                         .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
+                         .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
             {
                 _ = ctx.GetOrCreateHandlerField( node );
             }
@@ -147,45 +147,45 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         ctx.OnChildPropertyChangedMethod.Declaration = result.Declaration;
     }
 
-    private static void IntroduceOnUnmonitoredInpcPropertyChanged( BuildAspectContext ctx )
+    private static void IntroduceOnUnmonitoredObservablePropertyChanged( BuildAspectContext ctx )
     {
-        if ( !ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
+        if ( !ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
         {
             return;
         }
 
-        var isOverride = ctx.BaseOnUnmonitoredInpcPropertyChangedMethod != null;
+        var isOverride = ctx.BaseOnUnmonitoredObservablePropertyChangedMethod != null;
 
         var result = ctx.Builder.Advice.IntroduceMethod(
             ctx.Target,
-            nameof(OnUnmonitoredInpcPropertyChanged),
+            nameof(OnUnmonitoredObservablePropertyChanged),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
             b =>
             {
                 b.AddAttribute(
                     AttributeConstruction.Create(
-                        ctx.Elements.OnUnmonitoredInpcPropertyChangedMethodAttribute,
-                        new[] { ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
+                        ctx.Elements.OnUnmonitoredObservablePropertyChangedMethodAttribute,
+                        new[] { ctx.PropertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                 if ( isOverride )
                 {
-                    b.Name = ctx.BaseOnUnmonitoredInpcPropertyChangedMethod!.Name;
+                    b.Name = ctx.BaseOnUnmonitoredObservablePropertyChangedMethod!.Name;
                 }
 
                 if ( ctx.Target.IsSealed )
                 {
-                    b.Accessibility = isOverride ? ctx.BaseOnUnmonitoredInpcPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    b.Accessibility = isOverride ? ctx.BaseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
                 else
                 {
-                    b.Accessibility = isOverride ? ctx.BaseOnUnmonitoredInpcPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                    b.Accessibility = isOverride ? ctx.BaseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
                     b.IsVirtual = !isOverride;
                 }
             },
             args: new { ctx } );
 
-        ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration = result.Declaration;
+        ctx.OnUnmonitoredObservablePropertyChangedMethod.Declaration = result.Declaration;
     }
 
     private static void ExamineBaseAndIntroduceInterfaceIfRequired( BuildAspectContext ctx )
@@ -274,7 +274,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                 var lastValueField = ctx.GetOrCreateLastValueField( node );
                 var onPropertyChangedHandlerField = ctx.GetOrCreateHandlerField( node );
 
-                var methodName = ctx.GetAndReserveUnusedMemberName( $"Update{node.ContiguousPropertyPath}" );
+                var methodName = ctx.GetAndReserveUnusedMemberName( $"Update{node.ContiguousPropertyPathWithoutDot}" );
 
                 var accessChildExprBuilder = new ExpressionBuilder();
 
@@ -384,7 +384,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                         }
                         else
                         {
-                            ctx.PropertyNamesForOnUnmonitoredInpcPropertyChangedMethodAttribute.Add( p.Name );
+                            ctx.PropertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.Add( p.Name );
                         }
                         
                         ctx.Builder.Advice.Override( p, nameof(OverrideInpcRefTypeProperty), tags: new { ctx, handlerField, node, subscribeMethod } );

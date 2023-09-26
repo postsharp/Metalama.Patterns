@@ -60,12 +60,12 @@ internal partial class NaturalAspect
 
                     meta.Target.FieldOrProperty.Value = value;
                 }
-                else if ( ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration != null )
+                else if ( ctx.OnUnmonitoredObservablePropertyChangedMethod.Declaration != null )
                 {
                     var oldValue = meta.Target.FieldOrProperty.Value;
                     meta.Target.FieldOrProperty.Value = value;
 
-                    ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration.With( InvokerOptions.Final )
+                    ctx.OnUnmonitoredObservablePropertyChangedMethod.Declaration.With( InvokerOptions.Final )
                         .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
                 }
                 else
@@ -287,12 +287,12 @@ internal partial class NaturalAspect
                 continue;
             }
 
-            if ( node.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged && ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined )
+            if ( node.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged && ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
             {
                 if ( ctx.InsertDiagnosticComments )
                 {
                     meta.InsertComment(
-                        $"Skipping '{node.Name}': A base type supports OnUnmonitoredInpcPropertyChanged for this property, and the current type is configured to use that feature." );
+                        $"Skipping '{node.Name}': A base type supports OnUnmonitoredObservablePropertyChanged for this property, and the current type is configured to use that feature." );
                 }
 
                 continue;
@@ -332,7 +332,7 @@ internal partial class NaturalAspect
 
             if ( refsToNotify.Count > 0
                  || childUpdateMethods.Count > 0
-                 || node is { HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredInpcPropertyChanged or InpcBaseHandling.OnPropertyChanged } )
+                 || node is { HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged } )
             {
                 var rootPropertyNamesToNotify = refsToNotify
                     .Select( n => n.Name )
@@ -360,13 +360,13 @@ internal partial class NaturalAspect
                         case InpcBaseHandling.OnChildPropertyChanged:
                             break;
 
-                        // NB: The OnUnmonitoredInpcPropertyChanged case, when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined is true, is handled above.
-                        case InpcBaseHandling.OnUnmonitoredInpcPropertyChanged:
+                        // NB: The OnUnmonitoredObservablePropertyChanged case, when ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined is true, is handled above.
+                        case InpcBaseHandling.OnUnmonitoredObservablePropertyChanged:
                         case InpcBaseHandling.OnPropertyChanged:
                             if ( node.HasChildren )
                             {
                                 // We get here because the current type as a ref to a base property of an INPC type, but we can't use
-                                // OnChildPropertyChanged or OnUnmonitoredInpcPropertyChanged from the base type (the base doesn't provide support, or we're
+                                // OnChildPropertyChanged or OnUnmonitoredObservablePropertyChanged from the base type (the base doesn't provide support, or we're
                                 // configured not to use it). So this is like retrospectively adding a property setter override. Note that
                                 // the base *must* provide OnPropertyChanged support for each of its properties as a minimum contract.
 
@@ -508,11 +508,11 @@ internal partial class NaturalAspect
             {
                 switch ( firstAncestorWithNotNoneHandling.InpcBaseHandling )
                 {
-                    case InpcBaseHandling.OnUnmonitoredInpcPropertyChanged when ctx.OnUnmonitoredInpcPropertyChangedMethod.WillBeDefined:
+                    case InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined:
                         if ( ctx.InsertDiagnosticComments )
                         {
                             meta.InsertComment(
-                                $"Skipping '{node.DottedPropertyPath}': A base type supports OnUnmonitoredInpcPropertyChanged for an ancestor of this property, and the current type is configured to use that feature." );
+                                $"Skipping '{node.DottedPropertyPath}': A base type supports OnUnmonitoredObservablePropertyChanged for an ancestor of this property, and the current type is configured to use that feature." );
                         }
 
                         continue;
@@ -577,7 +577,7 @@ internal partial class NaturalAspect
     }
 
     [Template]
-    private static void OnUnmonitoredInpcPropertyChanged(
+    private static void OnUnmonitoredObservablePropertyChanged(
         string propertyPath,
         INotifyPropertyChanged? oldValue,
         INotifyPropertyChanged? newValue,
@@ -585,26 +585,26 @@ internal partial class NaturalAspect
     {
         if ( ctx.InsertDiagnosticComments )
         {
-            meta.InsertComment( "Template: " + nameof(OnUnmonitoredInpcPropertyChanged) );
+            meta.InsertComment( "Template: " + nameof(OnUnmonitoredObservablePropertyChanged) );
             meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
         }
 
         /* 
-         * The generated OnUnmonitoredInpcPropertyChanged method is like an enhanced overload of OnPropertyChanged, the differences
+         * The generated OnUnmonitoredObservablePropertyChanged method is like an enhanced overload of OnPropertyChanged, the differences
          * being that the caller provides the old and new values, the method receives a property path rather than a root property name,
          * and it only applies to property types which implement INotifyPropertyChanged.
          * 
          * NB:
          * 
-         * - In the current implementation (outside this template), the generated OnUnmonitoredInpcPropertyChanged 
+         * - In the current implementation (outside this template), the generated OnUnmonitoredObservablePropertyChanged 
          *   method is only called for root properties. As/when false positive detection is implemented and enabled, 
-         *   then the generated OnUnmonitoredInpcPropertyChanged method could receive calls for leaf INotifyPropertyChanged 
+         *   then the generated OnUnmonitoredObservablePropertyChanged method could receive calls for leaf INotifyPropertyChanged 
          *   properties.
          * 
-         * - OnUnmonitoredInpcPropertyChanged is only called when a ref has changed - the caller checks this first.
+         * - OnUnmonitoredObservablePropertyChanged is only called when a ref has changed - the caller checks this first.
          * 
          * - For root properties, the caller will also call OnPropertyChanged - this is to maintain compatibility with derivations
-         *   which do not observe OnUnmonitoredInpcPropertyChanged.
+         *   which do not observe OnUnmonitoredObservablePropertyChanged.
          * 
          * - Nodes only appear in the graph if they are relevant to the current class.
          * 
@@ -612,7 +612,7 @@ internal partial class NaturalAspect
          *   NaturalAspect.AddPropertyPathsForOnChildPropertyChangedMethodAttribute.
         */
 
-        foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredInpcPropertyChanged ) )
+        foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
         {
             if ( ctx.InsertDiagnosticComments )
             {
@@ -662,7 +662,7 @@ internal partial class NaturalAspect
             }
         }
 
-        if ( ctx.BaseOnUnmonitoredInpcPropertyChangedMethod != null )
+        if ( ctx.BaseOnUnmonitoredObservablePropertyChangedMethod != null )
         {
             meta.Proceed();
         }
