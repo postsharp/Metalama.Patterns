@@ -5,7 +5,7 @@ using Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Initializers;
 
 [NotifyPropertyChanged]
-public class A
+public partial class A
 {
     /// <summary>
     /// Auto property with initializer 'new()'.

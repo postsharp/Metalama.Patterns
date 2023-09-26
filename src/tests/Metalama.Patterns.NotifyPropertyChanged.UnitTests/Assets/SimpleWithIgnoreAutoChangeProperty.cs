@@ -5,7 +5,7 @@ using Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.IgnoreAutoChangePropertyAttribute;
 
 [NotifyPropertyChanged]
-public class SimpleWithIgnoreAutoChangeProperty
+public partial class SimpleWithIgnoreAutoChangeProperty
 {
     public int P1 { get; set; }
 
