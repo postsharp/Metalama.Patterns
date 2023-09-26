@@ -13,7 +13,7 @@ internal interface ITransactionAwareContextLocalLogger
     /// <summary>
     /// Evaluates whether a transaction needs to be open for a specified <see cref="OpenActivityOptions"/> and updates
     /// its <see cref="OpenActivityOptions.TransactionRequirement"/> property.
-    /// This method must be invoked before calling <see cref="LogLevelSource.OpenActivity{T}(T, OpenActivityOptions)"/>.
+    /// This method must be invoked before calling <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/>.
     /// </summary>
     /// <param name="options">Options of the activity that creates the transaction.</param>
     OpenActivityOptions ApplyTransactionRequirements( in OpenActivityOptions options );

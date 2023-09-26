@@ -5,16 +5,16 @@
     <!-- Properties of NuGet packages-->
     <PropertyGroup>
         <Authors>PostSharp Technologies</Authors>
-        <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/postsharp/Metalama.Patterns</PackageProjectUrl>
         <PackageTags></PackageTags>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-        <PackageIcon>postsharp.png</PackageIcon>
+        <PackageIcon>metalama.png</PackageIcon>
         <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     </PropertyGroup>
 
     <!-- Additional content of NuGet packages -->
     <ItemGroup>
-        <None Include="$(AssetsDirectory)\postsharp.png" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(AssetsDirectory)\metalama.png" Visible="false" Pack="true" PackagePath="" />
         <None Include="$(MSBuildThisFileDirectory)..\LICENSE.md" Visible="false" Pack="true" PackagePath="" />
         <None Include="$(MSBuildThisFileDirectory)..\THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
     </ItemGroup>
