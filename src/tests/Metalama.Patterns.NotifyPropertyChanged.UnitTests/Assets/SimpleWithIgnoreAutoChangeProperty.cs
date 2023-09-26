@@ -9,9 +9,9 @@ public partial class SimpleWithIgnoreAutoChangeProperty
 {
     public int P1 { get; set; }
 
-    [IgnoreAutoChangeNotification]
+    [IgnoreNotifyPropertyChanged]
     public int P2 { get; set; }
 
-    [IgnoreAutoChangeNotification]
+    [IgnoreNotifyPropertyChanged]
     public Simple P3 { get; set; }
 }

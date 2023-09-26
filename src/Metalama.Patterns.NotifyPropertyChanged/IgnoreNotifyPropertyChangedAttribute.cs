@@ -15,4 +15,4 @@ namespace Metalama.Patterns.NotifyPropertyChanged;
 /// </remarks>
 [PublicAPI]
 [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field )]
-public sealed class IgnoreAutoChangeNotificationAttribute : Attribute { }
+public sealed class IgnoreNotifyPropertyChangedAttribute : Attribute { }

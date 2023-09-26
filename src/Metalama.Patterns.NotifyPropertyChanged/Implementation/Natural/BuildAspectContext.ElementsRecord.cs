@@ -17,7 +17,7 @@ internal sealed partial class BuildAspectContext
             this.NullableINotifyPropertyChanged = this.INotifyPropertyChanged.ToNullableType();
             this.PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof(PropertyChangedEventHandler) );
             this.NullablePropertyChangedEventHandler = this.PropertyChangedEventHandler.ToNullableType();
-            this.IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof(IgnoreAutoChangeNotificationAttribute) );
+            this.IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof(IgnoreNotifyPropertyChangedAttribute) );
             this.EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof(EqualityComparer<>) );
             this.OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnChildPropertyChangedMethodAttribute) );
             this.OnUnmonitoredObservablePropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredObservablePropertyChangedMethodAttribute) );
