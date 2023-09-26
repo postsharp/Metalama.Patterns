@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
@@ -16,7 +15,6 @@ internal sealed partial class BuildAspectContext
 {
     private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
 
-    private readonly Dictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
     private readonly Dictionary<IFieldOrProperty, bool> _validateFieldOrPropertyLookup = new();
     private readonly Lazy<IMethod?> _baseOnPropertyChangedMethod;
     private readonly Lazy<IMethod?> _baseOnChildPropertyChangedMethod;
@@ -28,12 +26,15 @@ internal sealed partial class BuildAspectContext
     /// <summary>
     /// Gets frequently used compilation elements resolved for the current compilation.
     /// </summary>
-    public ElementsRecord Elements { get; }
+    public Elements Elements { get; }
+
+    public InpcInstrumentationKindLookup InpcInstrumentationKindLookup { get; }
 
     public BuildAspectContext( IAspectBuilder<INamedType> builder )
     {
-        this.Elements = new ElementsRecord();
         this.Builder = builder;
+        this.Elements = new Elements( builder.Target );
+        this.InpcInstrumentationKindLookup = new( this.Elements );
 
         var target = builder.Target;
 
@@ -43,7 +44,6 @@ internal sealed partial class BuildAspectContext
             target.BaseType != null && (
                 target.BaseType.Is( this.Elements.INotifyPropertyChanged )
                 || (target.BaseType is { BelongsToCurrentProject: true }
-                    && (!this.Target.Compilation.IsPartial || this.Target.Compilation.Types.Contains( target.BaseType ))
                     && target.BaseType.Definition.Enhancements().HasAspect( typeof(NotifyPropertyChangedAttribute) )));
 
         this.TargetImplementsInpc = this.BaseImplementsInpc || target.Is( this.Elements.INotifyPropertyChanged );
@@ -98,14 +98,6 @@ internal sealed partial class BuildAspectContext
     public List<string> PropertyPathsForOnChildPropertyChangedMethodAttribute { get; } = new();
 
     public List<string> PropertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute { get; } = new();
-
-    /// <summary>
-    /// Gets the <see cref="IProperty"/> for property <c>EqualityComparer<paramref name="type"/>>.Default</c>.
-    /// </summary>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    public IProperty GetDefaultEqualityComparerForType( IType type )
-        => this.Elements.EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
 
     private DependencyGraphNode? _dependencyGraph;
     private bool _prepareDependencyGraphReportedErrors;
@@ -195,7 +187,7 @@ internal sealed partial class BuildAspectContext
 
             var result = this.Builder.Advice.IntroduceMethod(
                 this.Target,
-                nameof(NaturalAspect.Subscribe),
+                nameof(ClassicImplementationStrategyBuilder.Subscribe),
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
                 b =>
@@ -238,86 +230,6 @@ internal sealed partial class BuildAspectContext
                 {
                     return adjustedName;
                 }
-            }
-        }
-    }
-
-    public InpcInstrumentationKind GetInpcInstrumentationKind( IType type )
-    {
-        if ( this._inpcInstrumentationKindLookup.TryGetValue( type, out var result ) )
-        {
-            return result;
-        }
-        else
-        {
-            result = Check( type );
-            this._inpcInstrumentationKindLookup.Add( type, result );
-
-            return result;
-        }
-
-        InpcInstrumentationKind Check( IType type2 )
-        {
-            switch ( type2 )
-            {
-                case INamedType namedType:
-                    if ( namedType.SpecialType != SpecialType.None )
-                    {
-                        // None of the special types implement INPC.
-                        return InpcInstrumentationKind.None;
-                    }
-                    else if ( namedType.Equals( this.Elements.INotifyPropertyChanged ) )
-                    {
-                        return InpcInstrumentationKind.Implicit;
-                    }
-                    else if ( namedType.Is( this.Elements.INotifyPropertyChanged ) )
-                    {
-                        if ( namedType.TryFindImplementationForInterfaceMember( this.Elements.PropertyChangedEventOfINotifyPropertyChanged, out var member ) )
-                        {
-                            return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Implicit;
-                        }
-
-                        throw new InvalidOperationException( "Could not find implementation of interface member." );
-                    }
-                    else if ( !namedType.BelongsToCurrentProject )
-                    {
-                        return InpcInstrumentationKind.None;
-                    }
-                    else
-                    {
-                        if ( this.Target.Compilation.IsPartial && !this.Target.Compilation.Types.Contains( type2 ) )
-                        {
-                            return InpcInstrumentationKind.Unknown;
-                        }
-
-                        return namedType.Definition.Enhancements().HasAspect<NotifyPropertyChangedAttribute>()
-                            ? InpcInstrumentationKind.Implicit // For now, the aspect always introduces implicit implementation.
-                            : InpcInstrumentationKind.None;
-                    }
-
-                case ITypeParameter typeParameter:
-                    var hasImplicit = false;
-
-                    foreach ( var t in typeParameter.TypeConstraints )
-                    {
-                        var k = this.GetInpcInstrumentationKind( t );
-
-                        switch ( k )
-                        {
-                            case InpcInstrumentationKind.Implicit:
-                                return InpcInstrumentationKind.Implicit;
-
-                            case InpcInstrumentationKind.Explicit:
-                                hasImplicit = true;
-
-                                break;
-                        }
-                    }
-
-                    return hasImplicit ? InpcInstrumentationKind.Implicit : InpcInstrumentationKind.None;
-
-                default:
-                    return InpcInstrumentationKind.None;
             }
         }
     }
@@ -393,7 +305,7 @@ internal sealed partial class BuildAspectContext
         bool IsValid( IFieldOrProperty fp )
         {
             var typeImplementsInpc =
-                this.GetInpcInstrumentationKind( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
+                this.InpcInstrumentationKindLookup.Get( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
 
             var isValid = true;
 

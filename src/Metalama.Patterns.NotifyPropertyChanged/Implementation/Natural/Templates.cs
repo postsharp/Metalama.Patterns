@@ -8,12 +8,15 @@ using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 
-internal partial class NaturalAspect
+[CompileTime]
+internal sealed class Templates : ITemplateProvider
 {
-    [CompileTime]
+    internal static Templates Instance { get; } = new();
+
+    private Templates() { }
+
     private static void CompileTimeThrow( Exception e ) => throw e;
 
-    [CompileTime]
     private static T ExpectNotNull<T>( T? obj ) => obj ?? throw new InvalidOperationException( "A null value was not expected here." );
 
     // ReSharper disable once EventNeverSubscribedTo.Global
@@ -21,89 +24,90 @@ internal partial class NaturalAspect
     public event PropertyChangedEventHandler? PropertyChanged;
 
     [Template]
-    private static dynamic? OverrideInpcRefTypeProperty
+    internal static void OverrideInpcRefTypePropertySetter(
+        dynamic? value,
+        [CompileTime] TemplateExecutionContext ctx,
+        [CompileTime] IField? handlerField,
+        [CompileTime] IMethod? subscribeMethod,
+        [CompileTime] IReadOnlyDependencyGraphNode? node )
     {
-        set
+        var inpcImplementationKind = node?.PropertyTypeInpcInstrumentationKind ?? ctx.InpcInstrumentationKindLookup.Get( meta.Target.Property.Type );
+
+        var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
+
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
         {
-            var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
-            var handlerField = (IField?) meta.Tags["handlerField"];
-            var subscribeMethod = (IMethod?) meta.Tags["subscribeMethod"];
-            var node = (DependencyGraphNode?) meta.Tags["node"];
+            meta.InsertComment( "Template: " + nameof(OverrideInpcRefTypePropertySetter) );
 
-            var inpcImplementationKind = node?.PropertyTypeInpcInstrumentationKind ?? ctx.GetInpcInstrumentationKind( meta.Target.Property.Type );
-
-            var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
-
-            if ( ctx.InsertDiagnosticComments )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 1 )
             {
-                meta.InsertComment( "Template: " + nameof(OverrideInpcRefTypeProperty) );
                 meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             }
+        }
 
-            if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
+        if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
+        {
+            if ( handlerField != null )
             {
-                if ( handlerField != null )
-                {
-                    var oldValue = meta.Target.FieldOrProperty.Value;
+                var oldValue = meta.Target.FieldOrProperty.Value;
 
-                    if ( oldValue != null )
+                if ( oldValue != null )
+                {
+                    if ( eventRequiresCast )
                     {
-                        if ( eventRequiresCast )
-                        {
-                            meta.Cast( ctx.Elements.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
-                        }
-                        else
-                        {
-                            oldValue.PropertyChanged -= handlerField.Value;
-                        }
+                        meta.Cast( ctx.Elements.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
                     }
-
-                    meta.Target.FieldOrProperty.Value = value;
-                }
-                else if ( ctx.OnUnmonitoredObservablePropertyChangedMethod.Declaration != null )
-                {
-                    var oldValue = meta.Target.FieldOrProperty.Value;
-                    meta.Target.FieldOrProperty.Value = value;
-
-                    ctx.OnUnmonitoredObservablePropertyChangedMethod.Declaration.With( InvokerOptions.Final )
-                        .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
-                }
-                else
-                {
-                    meta.Target.FieldOrProperty.Value = value;
-                }
-
-                if ( node != null )
-                {
-                    // Update methods will deal with notifications - * for those children which have update methods *
-                    foreach ( var method in node.ChildUpdateMethods )
+                    else
                     {
-                        method.With( InvokerOptions.Final ).Invoke();
-                    }
-
-                    // Notify refs to the current node and any children without an update method.
-                    foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Declaration == null ).Select( n => n.Name ).OrderBy( n => n ) )
-                    {
-                        ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
+                        oldValue.PropertyChanged -= handlerField.Value;
                     }
                 }
 
-                ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+                meta.Target.FieldOrProperty.Value = value;
+            }
+            else if ( ctx.OnUnmonitoredObservablePropertyChangedMethod.Declaration != null )
+            {
+                var oldValue = meta.Target.FieldOrProperty.Value;
+                meta.Target.FieldOrProperty.Value = value;
+
+                ctx.OnUnmonitoredObservablePropertyChangedMethod.Declaration.With( InvokerOptions.Final )
+                    .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
+            }
+            else
+            {
+                meta.Target.FieldOrProperty.Value = value;
+            }
+
+            if ( node != null )
+            {
+                // Update methods will deal with notifications - * for those children which have update methods *
+                foreach ( var method in node.ChildUpdateMethods )
+                {
+                    method.With( InvokerOptions.Final ).Invoke();
+                }
+
+                // Notify refs to the current node and any children without an update method.
+                foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Declaration == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                {
+                    ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( name );
+                }
+            }
+
+            ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
 
 #pragma warning disable IDE0031 // Use null propagation
-                if ( subscribeMethod != null )
-                {
-                    subscribeMethod.Invoke( value );
-                }
-#pragma warning restore IDE0031 // Use null propagation
+            if ( subscribeMethod != null )
+            {
+                subscribeMethod.Invoke( value );
             }
+#pragma warning restore IDE0031 // Use null propagation
         }
     }
 
     [Template]
     internal static void Subscribe<[CompileTime] TValue>(
         TValue? value,
-        [CompileTime] BuildAspectContext ctx,
+        [CompileTime] TemplateExecutionContext ctx,
         [CompileTime] DependencyGraphNode node,
         [CompileTime] IField handlerField )
         where TValue : INotifyPropertyChanged
@@ -139,7 +143,7 @@ internal partial class NaturalAspect
     }
 
     [Template]
-    private static void SubscribeInitializer(
+    internal static void SubscribeInitializer(
         [CompileTime] IFieldOrProperty fieldOrProperty,
         [CompileTime] IMethod subscribeMethod )
     {
@@ -147,8 +151,8 @@ internal partial class NaturalAspect
     }
 
     [Template]
-    private static void UpdateChildInpcProperty(
-        [CompileTime] BuildAspectContext ctx,
+    internal static void UpdateChildInpcProperty(
+        [CompileTime] TemplateExecutionContext ctx,
         [CompileTime] DependencyGraphNode node,
         [CompileTime] IExpression accessChildExpression,
         [CompileTime] IField lastValueField,
@@ -159,10 +163,14 @@ internal partial class NaturalAspect
             CompileTimeThrow( new InvalidOperationException( $"{nameof(UpdateChildInpcProperty)} template must not be called on a root property node." ) );
         }
 
-        if ( ctx.InsertDiagnosticComments )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
         {
             meta.InsertComment( "Template: " + nameof(UpdateChildInpcProperty) );
-            meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 1 )
+            {
+                meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
+            }
         }
 
         var newValue = accessChildExpression.Value;
@@ -209,7 +217,7 @@ internal partial class NaturalAspect
             {
                 ctx.OnChildPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( node.Parent!.DottedPropertyPath, node.Name );
             }
-            else if ( ctx.InsertDiagnosticComments )
+            else if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
             {
                 meta.InsertComment(
                     $"Not calling OnChildPropertyChanged('{node.Parent!.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
@@ -218,68 +226,74 @@ internal partial class NaturalAspect
     }
 
     [Template]
-    private static dynamic? OverrideUninstrumentedTypeProperty
+    internal static void OverrideUninstrumentedTypePropertySetter( 
+        dynamic? value,
+        [CompileTime] TemplateExecutionContext ctx,
+        [CompileTime] IReadOnlyDependencyGraphNode? node,
+        [CompileTime] EqualityComparisonKind compareUsing,
+        [CompileTime] InpcInstrumentationKind propertyTypeInstrumentationKind )
     {
-        set
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
         {
-            var ctx = (BuildAspectContext) meta.Tags["ctx"]!;
-            var node = (DependencyGraphNode?) meta.Tags["node"];
-            var compareUsing = (EqualityComparisonKind) meta.Tags["compareUsing"]!;
-            var propertyTypeInstrumentationKind = (InpcInstrumentationKind) meta.Tags["propertyTypeInstrumentationKind"]!;
+            meta.InsertComment( "Template: " + nameof(OverrideUninstrumentedTypePropertySetter) );
 
-            if ( ctx.InsertDiagnosticComments )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 1 )
             {
-                meta.InsertComment( "Template: " + nameof(OverrideUninstrumentedTypeProperty) );
                 meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             }
+        }
 
-            if ( propertyTypeInstrumentationKind == InpcInstrumentationKind.Unknown )
-            {
-                meta.InsertComment(
-                    "Warning: the type of this property could not be analysed at design time, so it has been treated",
-                    "as not implementing INotifyPropertyChanged. Code generated at compile time may differ." );
-            }
+        if ( propertyTypeInstrumentationKind == InpcInstrumentationKind.Unknown )
+        {
+            meta.InsertComment(
+                "Warning: the type of this property could not be analysed at design time, so it has been treated",
+                "as not implementing INotifyPropertyChanged. Code generated at compile time may differ." );
+        }
 
-            var compareExpr = compareUsing switch
-            {
-                EqualityComparisonKind.EqualityOperator => (IExpression) (meta.Target.FieldOrProperty.Value != value),
-                EqualityComparisonKind.ThisEquals => (IExpression) !meta.Target.FieldOrProperty.Value!.Equals( value ),
-                EqualityComparisonKind.ReferenceEquals => (IExpression) !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ),
-                EqualityComparisonKind.DefaultEqualityComparer => (IExpression)
-                    !ctx.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value!.Equals( value, meta.Target.FieldOrProperty.Value ),
-                _ => null
-            };
+        var compareExpr = compareUsing switch
+        {
+            EqualityComparisonKind.EqualityOperator => (IExpression) (meta.Target.FieldOrProperty.Value != value),
+            EqualityComparisonKind.ThisEquals => (IExpression) !meta.Target.FieldOrProperty.Value!.Equals( value ),
+            EqualityComparisonKind.ReferenceEquals => (IExpression) !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ),
+            EqualityComparisonKind.DefaultEqualityComparer => (IExpression)
+                !ctx.Elements.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value!.Equals( value, meta.Target.FieldOrProperty.Value ),
+            _ => null
+        };
 
-            if ( compareExpr == null )
+        if ( compareExpr == null )
+        {
+            meta.Target.FieldOrProperty.Value = value;
+            ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+        }
+        else
+        {
+            if ( compareExpr.Value )
             {
                 meta.Target.FieldOrProperty.Value = value;
                 ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
-            }
-            else
-            {
-                if ( compareExpr.Value )
-                {
-                    meta.Target.FieldOrProperty.Value = value;
-                    ctx.OnPropertyChangedMethod.Declaration.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
-                }
             }
         }
     }
 
     [Template]
-    private void OnPropertyChanged( string propertyName, [CompileTime] BuildAspectContext ctx )
+    internal void OnPropertyChanged( 
+        string propertyName, 
+        [CompileTime] TemplateExecutionContext ctx )
     {
-        if ( ctx.InsertDiagnosticComments )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
         {
             meta.InsertComment( "Template: " + nameof(this.OnPropertyChanged) );
-            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 1 )
+            {
+                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
+            }
         }
 
         foreach ( var node in ctx.DependencyGraph.Children )
         {
-            if ( node.FieldOrProperty.IsAutoPropertyOrField == true && node.FieldOrProperty.DeclaringType == ctx.Target )
+            if ( node.FieldOrProperty.IsAutoPropertyOrField == true && node.FieldOrProperty.DeclaringType == ctx.Elements.Target )
             {
-                if ( ctx.InsertDiagnosticComments )
+                if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                 {
                     meta.InsertComment( $"Skipping '{node.Name}': The field or auto property is defined by the current type." );
                 }
@@ -289,7 +303,7 @@ internal partial class NaturalAspect
 
             if ( node.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged && ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
             {
-                if ( ctx.InsertDiagnosticComments )
+                if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                 {
                     meta.InsertComment(
                         $"Skipping '{node.Name}': A base type supports OnUnmonitoredObservablePropertyChanged for this property, and the current type is configured to use that feature." );
@@ -298,7 +312,7 @@ internal partial class NaturalAspect
                 continue;
             }
 
-            IReadOnlyCollection<DependencyGraphNode> refsToNotify;
+            IReadOnlyCollection<IReadOnlyDependencyGraphNode> refsToNotify;
 
             // When a base supports OnChildPropertyChanged for a root property, changes to the ref itself will
             // be notified by OnPropertyChanged (the base won't call OnChildPropertyChanged for each child property
@@ -308,7 +322,7 @@ internal partial class NaturalAspect
             {
                 if ( node.DirectReferences.Count == 0 )
                 {
-                    if ( ctx.InsertDiagnosticComments )
+                    if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                     {
                         meta.InsertComment(
                             $"Skipping '{node.Name}': A base type supports OnChildPropertyChanged for this property, and the property itself has no references." );
@@ -342,7 +356,7 @@ internal partial class NaturalAspect
                 {
                     var emitDefaultNotifications = meta.CompileTime( true );
 
-                    if ( ctx.InsertDiagnosticComments )
+                    if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                     {
                         meta.InsertComment( $"InpcBaseHandling = {node.InpcBaseHandling}" );
                     }
@@ -459,7 +473,7 @@ internal partial class NaturalAspect
             }
             else
             {
-                if ( ctx.InsertDiagnosticComments )
+                if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                 {
                     meta.InsertComment( $"Skipping '{node.Name}' because there is nothing to do." );
                 }
@@ -477,24 +491,28 @@ internal partial class NaturalAspect
     }
 
     [Template]
-    private static void OnChildPropertyChanged(
+    internal static void OnChildPropertyChanged(
         string parentPropertyPath,
         string propertyName,
-        [CompileTime] BuildAspectContext ctx )
+        [CompileTime] TemplateExecutionContext ctx )
     {
-        if ( ctx.InsertDiagnosticComments )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OnChildPropertyChanged) );
-            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
+
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 1 )
+            {
+                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
+            }
         }
 
         foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.Depth > 1 ) )
         {
             var rootPropertyNode = node.GetAncestorOrSelfAtDepth( 1 );
 
-            if ( rootPropertyNode.FieldOrProperty.DeclaringType == ctx.Target )
+            if ( rootPropertyNode.FieldOrProperty.DeclaringType == ctx.Elements.Target )
             {
-                if ( ctx.InsertDiagnosticComments )
+                if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                 {
                     meta.InsertComment( $"Skipping '{node.DottedPropertyPath}': Root property '{rootPropertyNode.Name}' is defined by the current type." );
                 }
@@ -509,7 +527,7 @@ internal partial class NaturalAspect
                 switch ( firstAncestorWithNotNoneHandling.InpcBaseHandling )
                 {
                     case InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined:
-                        if ( ctx.InsertDiagnosticComments )
+                        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                         {
                             meta.InsertComment(
                                 $"Skipping '{node.DottedPropertyPath}': A base type supports OnUnmonitoredObservablePropertyChanged for an ancestor of this property, and the current type is configured to use that feature." );
@@ -518,7 +536,7 @@ internal partial class NaturalAspect
                         continue;
 
                     case InpcBaseHandling.OnChildPropertyChanged when node.Depth - firstAncestorWithNotNoneHandling.Depth > 1:
-                        if ( ctx.InsertDiagnosticComments )
+                        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                         {
                             meta.InsertComment(
                                 $"Skipping '{node.DottedPropertyPath}': A base type supports OnChildPropertyChanged for a non-immediate ancestor of this property." );
@@ -527,7 +545,7 @@ internal partial class NaturalAspect
                         continue;
 
                     case InpcBaseHandling.OnPropertyChanged:
-                        if ( ctx.InsertDiagnosticComments )
+                        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                         {
                             meta.InsertComment(
                                 $"Skipping '{node.DottedPropertyPath}': A base type supports OnPropertyChanged for root property '{rootPropertyNode.Name}'." );
@@ -577,13 +595,13 @@ internal partial class NaturalAspect
     }
 
     [Template]
-    private static void OnUnmonitoredObservablePropertyChanged(
+    internal static void OnUnmonitoredObservablePropertyChanged(
         string propertyPath,
         INotifyPropertyChanged? oldValue,
         INotifyPropertyChanged? newValue,
-        [CompileTime] BuildAspectContext ctx )
+        [CompileTime] TemplateExecutionContext ctx )
     {
-        if ( ctx.InsertDiagnosticComments )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OnUnmonitoredObservablePropertyChanged) );
             meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
@@ -614,7 +632,7 @@ internal partial class NaturalAspect
 
         foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
         {
-            if ( ctx.InsertDiagnosticComments )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
             {
                 meta.InsertComment( $"Node '{node.DottedPropertyPath}'" );
             }
@@ -669,9 +687,9 @@ internal partial class NaturalAspect
     }
 
     [Template]
-    private static void OnChildPropertyChangedDelegateBody(
-        [CompileTime] BuildAspectContext ctx,
-        [CompileTime] DependencyGraphNode node,
+    internal static void OnChildPropertyChangedDelegateBody(
+        [CompileTime] TemplateExecutionContext ctx,
+        [CompileTime] IReadOnlyDependencyGraphNode node,
         [CompileTime] IExpression propertyChangedEventArgs )
     {
         var propertyName = propertyChangedEventArgs.Value!.PropertyName;

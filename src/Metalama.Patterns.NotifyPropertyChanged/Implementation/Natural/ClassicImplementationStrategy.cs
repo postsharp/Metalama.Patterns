@@ -5,19 +5,35 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 
-internal sealed partial class NaturalAspect : IAspect<INamedType>
+[CompileTime]
+internal interface IImplementationStrategyBuilder : IDisposable
 {
-    void IEligible<INamedType>.BuildEligibility( IEligibilityBuilder<INamedType> builder )
+    /// <summary>
+    /// Build the aspect. This method must be called at most once for a given instance of <see cref="IImplementationStrategyBuilder"/>.
+    /// </summary>
+    public void BuildAspect();
+}
+
+internal sealed partial class ClassicImplementationStrategyBuilder : IImplementationStrategyBuilder
+{
+    void IDisposable.Dispose()
     {
-        builder.MustNotBeStatic();
+        throw new NotImplementedException();
     }
 
-    void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder )
+    private readonly IAspectBuilder<INamedType> _builder;
+
+    public ClassicImplementationStrategyBuilder( IAspectBuilder<INamedType> builder )
+    {
+        this._builder = builder;
+
+    }
+
+    public void BuildAspect()
     {
         var ctx = new BuildAspectContext( builder );
 
@@ -93,9 +109,9 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
     {
         var isOverride = ctx.BaseOnPropertyChangedMethod != null;
 
-        var result = ctx.Builder.Advice.IntroduceMethod(
+        var result = ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).IntroduceMethod(
             ctx.Target,
-            nameof(OnPropertyChanged),
+            nameof( Templates.OnPropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
             b =>
@@ -143,9 +159,9 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
     {
         var isOverride = ctx.BaseOnChildPropertyChangedMethod != null;
 
-        var result = ctx.Builder.Advice.IntroduceMethod(
+        var result = ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).IntroduceMethod(
             ctx.Target,
-            nameof(OnChildPropertyChanged),
+            nameof( Templates.OnChildPropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
             b =>
@@ -184,9 +200,9 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
         var isOverride = ctx.BaseOnUnmonitoredObservablePropertyChangedMethod != null;
 
-        var result = ctx.Builder.Advice.IntroduceMethod(
+        var result = ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).IntroduceMethod(
             ctx.Target,
-            nameof(OnUnmonitoredObservablePropertyChanged),
+            nameof( Templates.OnUnmonitoredObservablePropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
             b =>
@@ -236,7 +252,7 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
     {
         if ( !ctx.TargetImplementsInpc )
         {
-            ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Elements.INotifyPropertyChanged );
+            ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).ImplementInterface( ctx.Target, ctx.Elements.INotifyPropertyChanged );
         }
     }
 
@@ -283,9 +299,9 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
                 var accessChildExpression = accessChildExprBuilder.ToExpression();
 
-                var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.IntroduceMethod(
+                var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).IntroduceMethod(
                     ctx.Target,
-                    nameof(UpdateChildInpcProperty),
+                    nameof( Templates.UpdateChildInpcProperty ),
                     IntroductionScope.Instance,
                     OverrideStrategy.Fail,
                     b =>
@@ -321,13 +337,13 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             target.Properties
                 .Where(
                     p =>
-                        p is { IsStatic: false, IsAutoPropertyOrField: true } 
+                        p is { IsStatic: false, IsAutoPropertyOrField: true }
                         && !p.Attributes.Any( ctx.Elements.IgnoreAutoChangeNotificationAttribute ) )
                 .ToList();
 
         foreach ( var p in autoProperties )
         {
-            var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
+            var propertyTypeInstrumentationKind = ctx.InpcInstrumentationKindLookup.Get( p.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
             var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
 
@@ -350,9 +366,9 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
                             if ( p.InitializerExpression != null )
                             {
-                                ctx.Builder.Advice.AddInitializer(
+                                ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).AddInitializer(
                                     ctx.Target,
-                                    nameof(SubscribeInitializer),
+                                    nameof( Templates.SubscribeInitializer ),
                                     InitializerKind.BeforeInstanceConstructor,
                                     args: new { fieldOrProperty = p, subscribeMethod } );
                             }
@@ -361,15 +377,18 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                         {
                             ctx.PropertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.Add( p.Name );
                         }
-                        
-                        ctx.Builder.Advice.Override( p, nameof(OverrideInpcRefTypeProperty), tags: new { ctx, handlerField, node, subscribeMethod } );
+
+                        ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).OverrideAccessors( 
+                            p, 
+                            setTemplate: nameof( Templates.OverrideInpcRefTypePropertySetter ), 
+                            args: new { ctx, handlerField, node, subscribeMethod } );
                     }
                     else
                     {
-                        ctx.Builder.Advice.Override(
+                        ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).OverrideAccessors(
                             p,
-                            nameof(OverrideUninstrumentedTypeProperty),
-                            tags: new { ctx, node, compareUsing = EqualityComparisonKind.ReferenceEquals, propertyTypeInstrumentationKind } );
+                            setTemplate: nameof( Templates.OverrideUninstrumentedTypePropertySetter ),
+                            args: new { ctx, node, compareUsing = EqualityComparisonKind.ReferenceEquals, propertyTypeInstrumentationKind } );
                     }
 
                     break;
@@ -380,10 +399,10 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
                         ? EqualityComparisonKind.EqualityOperator
                         : EqualityComparisonKind.DefaultEqualityComparer;
 
-                    ctx.Builder.Advice.Override(
+                    ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).OverrideAccessors(
                         p,
-                        nameof(OverrideUninstrumentedTypeProperty),
-                        tags: new { ctx, node, compareUsing = comparisonKind, propertyTypeInstrumentationKind } );
+                        setTemplate: nameof( Templates.OverrideUninstrumentedTypePropertySetter ),
+                        args: new { ctx, node, compareUsing = comparisonKind, propertyTypeInstrumentationKind } );
 
                     break;
             }

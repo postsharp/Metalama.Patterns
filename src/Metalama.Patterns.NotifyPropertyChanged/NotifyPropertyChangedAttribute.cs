@@ -20,6 +20,7 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
     {
         // TODO: For future use, select the desired implementation strategy by configuration.
 
-        builder.Outbound.AddAspect<NaturalAspect>();
+        var implementation = new ClassicImplementationStrategyBuilder()
+        builder.Outbound.AddAspect<ClassicImplementationStrategyBuilder>();
     }
 }

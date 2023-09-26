@@ -10,7 +10,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 [CompileTime]
-internal class DeferredDeclaration<T> : UncertainDeferredDeclaration<T>
+internal class DeferredDeclaration<T> : UncertainDeferredDeclaration<T>, IReadOnlyDeferredDeclaration<T>
     where T : class, IDeclaration
 {
     /// <summary>

@@ -6,11 +6,48 @@ using System.Text;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 
+[CompileTime]
+internal interface IReadOnlyDependencyGraphNode : DependencyGraph.IReadOnlyNode<IReadOnlyDependencyGraphNode>
+{
+    /// <summary>
+    /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.
+    /// </summary>
+    InpcInstrumentationKind PropertyTypeInpcInstrumentationKind { get; }
+
+    /// <summary>
+    /// Gets a method like <c>void UpdateA2C2()</c>. 
+    /// </summary>
+    /// <remarks>
+    /// In a given inheritance hierarchy, for a given property path, this method is defined in
+    /// the type closest to the root type where a reference to a property of A2.C2 first occurs.
+    /// The method is always private as it is only called by other members of the type where it
+    /// is defined.
+    /// </remarks>
+    IReadOnlyUncertainDeferredDeclaration<IMethod> UpdateMethod { get; }
+
+    /// <summary>
+    /// Gets the non-null <see cref="UpdateMethod"/> declarations of the children of the current node.
+    /// </summary>
+    IReadOnlyCollection<IMethod> ChildUpdateMethods { get; }
+
+    InpcBaseHandling InpcBaseHandling { get; }
+
+    /// <summary>
+    /// Gets the field like "PropertyChangedEventHandler? _onA2PropertyChangedHandler", if it has been introduced.
+    /// </summary>
+    IField? HandlerField { get; }
+
+    /// <summary>
+    /// Gets the field like "B? _lastA2", if it has been introduced.
+    /// </summary>
+    public IField? LastValueField { get; }
+}
+
 /// <summary>
 /// Dependency graph node specialized for the current implementation strategy of <see cref="NotifyPropertyChangedAttribute"/>.
 /// </summary>
 [CompileTime]
-internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode>
+internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode, IReadOnlyDependencyGraphNode>, IReadOnlyDependencyGraphNode
 {
     protected override void Initialize()
     {
@@ -29,7 +66,7 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     /// <returns>A value indicating success. <see langword="true"/> if initialized without error, or <see langword="false"/> if diagnostic errors were reported.</returns>
     public bool Initialize( BuildAspectContext ctx )
     {
-        this.PropertyTypeInpcInstrumentationKind = ctx.GetInpcInstrumentationKind( this.FieldOrProperty.Type );
+        this.PropertyTypeInpcInstrumentationKind = ctx.InpcInstrumentationKindLookup.Get( this.FieldOrProperty.Type );
         this.InpcBaseHandling = DetermineInpcBaseHandling();
 
         return ctx.ValidateFieldOrProperty( this.FieldOrProperty );
@@ -125,16 +162,10 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
         }
     }
 
-    /// <summary>
-    /// Gets a method like <c>void UpdateA2C2()</c>. 
-    /// </summary>
-    /// <remarks>
-    /// In a given inheritance hierarchy, for a given property path, this method is defined in
-    /// the type closest to the root type where a reference to a property of A2.C2 first occurs.
-    /// The method is always private as it is only called by other members of the type where it
-    /// is defined.
-    /// </remarks>
+    /// <inheritdoc cref="IReadOnlyDependencyGraphNode"/>
     public UncertainDeferredDeclaration<IMethod> UpdateMethod { get; } = new UncertainDeferredDeclaration<IMethod>( mustBeSetBeforeGet: true );
+
+    IReadOnlyUncertainDeferredDeclaration<IMethod> IReadOnlyDependencyGraphNode.UpdateMethod => this.UpdateMethod;
 
     private CertainDeferredDeclaration<IMethod>? _subscribeMethod;
 
@@ -144,6 +175,7 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     public CertainDeferredDeclaration<IMethod> SubscribeMethod
         => this._subscribeMethod ?? throw new InvalidOperationException(
             nameof(this.SubscribeMethod) + " is not applicable to this node, access indicates incorrect caller logic." );
+    
 
     protected override void ToStringAppendToLine( StringBuilder appendTo, string? format )
     {

@@ -11,7 +11,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 [CompileTime]
-internal class UncertainDeferredDeclaration<T>
+internal class UncertainDeferredDeclaration<T> : IReadOnlyUncertainDeferredDeclaration<T>
     where T : class, IDeclaration
 {
     private readonly bool _mustBeSetBeforeGet;

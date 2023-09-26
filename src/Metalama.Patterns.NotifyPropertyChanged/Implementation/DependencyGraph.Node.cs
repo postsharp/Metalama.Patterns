@@ -9,14 +9,82 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 internal partial class DependencyGraph
 {
+    internal interface IReadOnlyNode<TDerived>
+        where TDerived : IReadOnlyNode<TDerived>
+    {
+        /// <summary>
+        /// Gets the Metalama <see cref="IFieldOrProperty"/> for the node.
+        /// </summary>
+        IFieldOrProperty FieldOrProperty { get; }
+
+        /// <summary>
+        /// Gets the name of the node. This is a synonym for <c>Symbol.Name</c>.
+        /// </summary>
+        string Name { get; }
+
+        TDerived? Parent { get; }
+
+        /// <summary>
+        /// Gets a property path like "A1" or "A1.B1".
+        /// </summary>
+        string DottedPropertyPath { get; }
+
+        /// <summary>
+        /// Gets a property path like "A1" or "A1B1".
+        /// </summary>
+        string ContiguousPropertyPath { get; }
+
+        /// <summary>
+        /// Gets the depth of the current node. The unparented root node has depth zero.
+        /// </summary>
+        int Depth { get; }
+
+        IReadOnlyCollection<TDerived> Children { get; }
+        
+        bool HasChildren { get; }
+
+        /// <summary>
+        /// Gets the members that reference the current node.
+        /// </summary>
+        IReadOnlyCollection<TDerived> DirectReferences { get; }
+
+        /// <summary>
+        /// Gets the distinct set of members that reference, directly or indirectly, the current node. By default, the search follows only <see cref="DirectReferences"/>;
+        /// if <paramref name="includeImmediateChild"/> is specified, the search follows the direct references of the current node and
+        /// the direct references of the current node's children matching the given predicate.
+        /// </summary>
+        /// <param name="includeImmediateChild"></param>
+        /// <returns></returns>
+        IReadOnlyCollection<TDerived> GetAllReferences( Func<TDerived, bool>? includeImmediateChild = null );
+
+        IEnumerable<TDerived> DescendantsDepthFirst();
+
+        /// <summary>
+        /// Gets the ancestors of the current node in leaf-to-root order.
+        /// </summary>
+        IEnumerable<TDerived> Ancestors( bool includeRoot = false );
+
+        TDerived GetAncestorOrSelfAtDepth( int depth );
+
+        string ToString( string? format );
+
+        string ToString( TDerived? highlight, string? format = null );
+    }
+
+    /// <summary>
+    /// Unspecialized <see cref="IReadOnlyNode{TDerived}"/>.
+    /// </summary>
+    internal interface IReadOnlyNode : IReadOnlyNode<IReadOnlyNode> { }
+
     /// <summary>
     /// Unspecialized <see cref="Node{TDerived}"/>.
     /// </summary>
-    public sealed class Node : Node<Node> { }
+    public sealed class Node : Node<Node>, IReadOnlyNode { }
 
     [CompileTime]
-    public class Node<TDerived>
-        where TDerived : Node<TDerived>, new()
+    public class Node<TDerived, TReadOnlyDerivedInterface> : IReadOnlyNode<TReadOnlyDerivedInterface>
+        where TDerived : Node<TDerived, TReadOnlyDerivedInterface>, TReadOnlyDerivedInterface, new()
+        where TReadOnlyDerivedInterface : IReadOnlyNode<TReadOnlyDerivedInterface>
     {
         private ISymbol? _symbol;
         private IFieldOrProperty? _fieldOrProperty;
@@ -26,7 +94,7 @@ internal partial class DependencyGraph
         private HashSet<TDerived>? _referencedBy;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Node{T}"/> class which represents the root node of a tree.
+        /// Initializes a new instance of the <see cref="Node{TDerived, TReadOnlyDerivedInterface}"/> class which represents the root node of a tree.
         /// </summary>
         protected Node() { }
 
@@ -49,9 +117,9 @@ internal partial class DependencyGraph
 
         public TDerived? Parent { get; private set; }
 
-        /// <summary>
-        /// Gets the depth of the current node. The unparented root node has depth zero.
-        /// </summary>
+        TReadOnlyDerivedInterface? IReadOnlyNode<TReadOnlyDerivedInterface>.Parent => this.Parent;
+
+        /// <inheritdoc cref="IReadOnlyNode{TDerived}"/>
         public int Depth { get; private set; }
 
         // ReSharper disable once MemberCanBePrivate.Global
@@ -90,27 +158,21 @@ internal partial class DependencyGraph
 
         public string ContiguousPropertyPathWithoutDot => this.ContiguousPropertyPath.Replace( ".", "" );
 
-        /// <summary>
-        /// Gets the name of the node. This is a synonym for <c>Symbol.Name</c>.
-        /// </summary>
+        /// <inheritdoc cref="IReadOnlyNode{TDerived}"/>
         public string Name => this.Symbol.Name;
 
         public IReadOnlyCollection<TDerived> Children => (IReadOnlyCollection<TDerived>?) this._children?.Values ?? Array.Empty<TDerived>();
 
+        IReadOnlyCollection<TReadOnlyDerivedInterface> IReadOnlyNode<TReadOnlyDerivedInterface>.Children => this.Children;
+
         public bool HasChildren => this._children != null;
 
-        /// <summary>
-        /// Gets the members that reference the current node.
-        /// </summary>
+        /// <inheritdoc cref="IReadOnlyNode{TDerived}"/>
         public IReadOnlyCollection<TDerived> DirectReferences => (IReadOnlyCollection<TDerived>?) this._referencedBy ?? Array.Empty<TDerived>();
 
-        /// <summary>
-        /// Gets the distinct set of members that reference, directly or indirectly, the current node. By default, the search follows only <see cref="DirectReferences"/>;
-        /// if <paramref name="includeImmediateChild"/> is specified, the search follows the direct references of the current node and
-        /// the direct references of the current node's children matching the given predicate.
-        /// </summary>
-        /// <param name="includeImmediateChild"></param>
-        /// <returns></returns>
+        IReadOnlyCollection<TReadOnlyDerivedInterface> IReadOnlyNode<TReadOnlyDerivedInterface>.DirectReferences => this.DirectReferences;
+
+        /// <inheritdoc cref="IReadOnlyNode{TDerived}"/>
         public IReadOnlyCollection<TDerived> GetAllReferences( Func<TDerived, bool>? includeImmediateChild = null )
         {
             // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
@@ -147,6 +209,9 @@ internal partial class DependencyGraph
             return refsFollowed;
         }
 
+        IReadOnlyCollection<TReadOnlyDerivedInterface> IReadOnlyNode<TReadOnlyDerivedInterface>.GetAllReferences( Func<TReadOnlyDerivedInterface, bool>? includeImmediateChild )
+            => this.GetAllReferences( includeImmediateChild == null ? null : node => includeImmediateChild( node ) );
+
         public IEnumerable<TDerived> DescendantsDepthFirst()
         {
             // NB: No loop detection.
@@ -166,12 +231,12 @@ internal partial class DependencyGraph
             }
         }
 
-        /// <summary>
-        /// Gets the ancestors of the current node in leaf-to-root order.
-        /// </summary>
-        /// <param name="includeRoot"></param>
-        /// <returns></returns>
+        IEnumerable<TReadOnlyDerivedInterface> IReadOnlyNode<TReadOnlyDerivedInterface>.DescendantsDepthFirst() => this.DescendantsDepthFirst();
+
+        /// <inheritdoc cref="IReadOnlyNode{TDerived}"/>
         public IEnumerable<TDerived> Ancestors( bool includeRoot = false ) => this.AncestorsCore( includeRoot, false );
+
+        IEnumerable<TReadOnlyDerivedInterface> IReadOnlyNode<TReadOnlyDerivedInterface>.Ancestors( bool includeRoot ) => this.Ancestors( includeRoot );
 
         // ReSharper disable once UnusedMember.Global
         /// <summary>
@@ -214,6 +279,8 @@ internal partial class DependencyGraph
 
             return n;
         }
+
+        TReadOnlyDerivedInterface IReadOnlyNode<TReadOnlyDerivedInterface>.GetAncestorOrSelfAtDepth( int depth ) => this.GetAncestorOrSelfAtDepth( depth );
 
         public TDerived GetOrAddChild( ISymbol childSymbol, IFieldOrProperty fieldOrProperty )
         {
@@ -319,5 +386,8 @@ internal partial class DependencyGraph
                 }
             }
         }
+
+        string IReadOnlyNode<TReadOnlyDerivedInterface>.ToString( TReadOnlyDerivedInterface? highlight, string? format )
+            => this.ToString( highlight as TDerived, format );
     }
 }
