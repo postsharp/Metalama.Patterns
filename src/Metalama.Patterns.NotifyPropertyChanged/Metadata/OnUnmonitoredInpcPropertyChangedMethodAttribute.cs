@@ -5,20 +5,20 @@ using System.ComponentModel;
 namespace Metalama.Patterns.NotifyPropertyChanged.Metadata;
 
 /// <summary>
-/// Indicates compliance with the "OnUnmonitoredInpcPropertyChanged" contract expected by the <see cref="NotifyPropertyChangedAttribute"/> aspect.
+/// Indicates compliance with the "OnUnmonitoredObservablePropertyChanged" contract expected by the <see cref="NotifyPropertyChangedAttribute"/> aspect.
 /// This attribute should only be applied automatically by the <see cref="NotifyPropertyChangedAttribute"/> aspect.
 /// </summary>
 [EditorBrowsable( EditorBrowsableState.Never )]
 [AttributeUsage( AttributeTargets.Method )]
-public sealed class OnUnmonitoredInpcPropertyChangedMethodAttribute : MetadataAttribute
+public sealed class OnUnmonitoredObservablePropertyChangedMethodAttribute : MetadataAttribute
 {
     // ReSharper disable once UnusedParameter.Local
     /// <summary>
-    /// Initializes a new instance of the <see cref="OnUnmonitoredInpcPropertyChangedMethodAttribute"/> class.
+    /// Initializes a new instance of the <see cref="OnUnmonitoredObservablePropertyChangedMethodAttribute"/> class.
     /// </summary>
     /// <param name="propertyPaths">
     /// The property paths which the declaring class monitors for reference changes only and for which
-    /// <c>OnUnmonitoredInpcPropertyChanged</c> will be called.
+    /// <c>OnUnmonitoredObservablePropertyChanged</c> will be called.
     /// </param>
-    public OnUnmonitoredInpcPropertyChangedMethodAttribute( params string[] propertyPaths ) { }
+    public OnUnmonitoredObservablePropertyChangedMethodAttribute( params string[] propertyPaths ) { }
 }

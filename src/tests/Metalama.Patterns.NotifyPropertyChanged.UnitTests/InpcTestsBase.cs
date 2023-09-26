@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests;
 
 // TODO: When the options/configration API is available, refactor all unit tests to support multiple configuration permutations.
-// That is - a shared project and multiple 'concrete' projects. Initially support enabled/disabled OnUnmonitoredInpcPropertyChangedMethod
+// That is - a shared project and multiple 'concrete' projects. Initially support enabled/disabled OnUnmonitoredObservablePropertyChangedMethod
 // feature.
 
 public abstract class InpcTestsBase : IDisposable

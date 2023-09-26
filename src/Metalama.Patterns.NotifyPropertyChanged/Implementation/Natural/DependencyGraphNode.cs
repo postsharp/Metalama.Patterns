@@ -53,8 +53,8 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
                             ? InpcBaseHandling.NotApplicable
                             : ctx.HasInheritedOnChildPropertyChangedPropertyPath( this.Name )
                                 ? InpcBaseHandling.OnChildPropertyChanged
-                                : ctx.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( this.Name )
-                                    ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
+                                : ctx.HasInheritedOnUnmonitoredObservablePropertyChangedProperty( this.Name )
+                                    ? InpcBaseHandling.OnUnmonitoredObservablePropertyChanged
                                     : InpcBaseHandling.OnPropertyChanged;
                     }
                     else
@@ -62,8 +62,8 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
                         // Child property
                         return ctx.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
                             ? InpcBaseHandling.OnChildPropertyChanged
-                            : ctx.HasInheritedOnUnmonitoredInpcPropertyChangedProperty( this.DottedPropertyPath )
-                                ? InpcBaseHandling.OnUnmonitoredInpcPropertyChanged
+                            : ctx.HasInheritedOnUnmonitoredObservablePropertyChangedProperty( this.DottedPropertyPath )
+                                ? InpcBaseHandling.OnUnmonitoredObservablePropertyChanged
                                 : InpcBaseHandling.None;
                     }
 

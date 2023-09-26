@@ -88,6 +88,8 @@ internal partial class DependencyGraph
                         ? this.Name
                         : $"{this.Parent.ContiguousPropertyPath}.{this.Name}";
 
+        public string ContiguousPropertyPathWithoutDot => this.ContiguousPropertyPath.Replace( ".", "" );
+
         /// <summary>
         /// Gets the name of the node. This is a synonym for <c>Symbol.Name</c>.
         /// </summary>
