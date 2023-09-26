@@ -17,6 +17,7 @@ internal sealed class BuildAspectContext
     private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
 
     private readonly Dictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
+    private readonly Dictionary<IFieldOrProperty, bool> _validateFieldOrPropertyLookup = new();
     private readonly Lazy<IMethod?> _baseOnPropertyChangedMethod;
     private readonly Lazy<IMethod?> _baseOnChildPropertyChangedMethod;
     private readonly Lazy<IMethod?> _baseOnUnmonitoredInpcPropertyChangedMethod;
@@ -142,33 +143,37 @@ internal sealed class BuildAspectContext
         => this.Elements.EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
 
     private DependencyGraphNode? _dependencyGraph;
+    private bool _prepareDependencyGraphReportedErrors;
 
-    private DependencyGraphNode PrepareDependencyGraph()
+    public DependencyGraphNode PrepareDependencyGraph()
     {
-        var hasReportedDiagnosticError = false;
-
         var graph = Implementation.DependencyGraph.GetDependencyGraph<DependencyGraphNode>(
             this.Target,
             ( diagnostic, location ) =>
             {
-                hasReportedDiagnosticError |= diagnostic.Definition.Severity == Severity.Error;
+                this._prepareDependencyGraphReportedErrors |= diagnostic.Definition.Severity == Severity.Error;
                 this.Builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
             } );
 
         foreach ( var node in graph.DescendantsDepthFirst() )
         {
-            node.Initialize( this );
-        }
-
-        if ( hasReportedDiagnosticError )
-        {
-            throw new DiagnosticErrorReportedException();
+            this._prepareDependencyGraphReportedErrors |= !node.Initialize( this );
         }
 
         return graph;
     }
 
     public DependencyGraphNode DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
+
+    public bool PrepareDependencyGraphReportedErrors
+    {
+        get
+        {
+            _ = this.DependencyGraph;
+
+            return this._prepareDependencyGraphReportedErrors;
+        }
+    }
 
     public IField GetOrCreateLastValueField( DependencyGraphNode node )
     {
@@ -404,4 +409,78 @@ internal sealed class BuildAspectContext
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _]
                 && m.Parameters[1].Type == this.Elements.NullableINotifyPropertyChanged
                 && m.Parameters[2].Type == this.Elements.NullableINotifyPropertyChanged );
+
+    /// <summary>
+    /// Validates the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. The result is cached
+    /// so that diagnostics are not repeated.
+    /// </summary>
+    /// <returns><see langword="true"/> if valid, or <see langword="false"/> if invalid.</returns>
+    public bool ValidateFieldOrProperty( IFieldOrProperty fieldOrProperty )
+    {
+        if ( !this._validateFieldOrPropertyLookup.TryGetValue( fieldOrProperty, out var result ) )
+        {
+            result = IsValid( fieldOrProperty );
+            this._validateFieldOrPropertyLookup[fieldOrProperty] = result;
+        }
+
+        return result;
+
+        bool IsValid( IFieldOrProperty fp )
+        {
+            var typeImplementsInpc =
+                this.GetInpcInstrumentationKind( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
+
+            var isValid = true;
+
+            switch ( fp.Type.IsReferenceType )
+            {
+                case null:
+                    // This might require INPC-type code which is used at runtime only when T implements INPC,
+                    // and non-INPC-type code which is used at runtime when T does not implement INPC.
+
+                    this.Builder.Diagnostics.Report(
+                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments(
+                            (fp.DeclarationKind, fp, fp.Type) ),
+                        fp );
+
+                    isValid = false;
+
+                    break;
+
+                case false:
+
+                    if ( typeImplementsInpc )
+                    {
+                        this.Builder.Diagnostics.Report(
+                            DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments(
+                                (fp.DeclarationKind, fp, fp.Type) ),
+                            fp );
+
+                        isValid = false;
+                    }
+
+                    break;
+            }
+
+            if ( fp.IsVirtual )
+            {
+                this.Builder.Diagnostics.Report(
+                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorVirtualMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
+                    fp );
+
+                isValid = false;
+            }
+
+            if ( fp.IsNew )
+            {
+                this.Builder.Diagnostics.Report(
+                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorNewMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
+                    fp );
+
+                isValid = false;
+            }
+
+            return isValid;
+        }
+    }
 }

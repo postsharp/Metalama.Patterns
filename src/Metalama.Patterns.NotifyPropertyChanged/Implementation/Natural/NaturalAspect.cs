@@ -21,11 +21,17 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
     {
         var ctx = new BuildAspectContext( builder );
 
-        try
-        {
-            // The order of method calls here is significant.
+        // Validate, maximising the coverage of diagnostic reporting.
 
-            ExamineBaseAndIntroduceInterfaceIfRequired( ctx );
+        var v1 = ValidateBaseImplementation( ctx );
+        var v2 = ValidateDependencyAnalysis( ctx );
+        var v3 = ValidateRootAutoProperties( ctx );
+
+        // Transform, if valid. By design, aim to minimise diagnostic reporting that only occurs during
+        // the transform phase.
+        if ( v1 && v2 && v3 )
+        {
+            IntroduceInterfaceIfRequired( ctx );
 
             // Introduce methods like UpdateA1B1()
             IntroduceUpdateMethods( ctx );
@@ -39,10 +45,32 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
             IntroduceOnChildPropertyChangedMethod( ctx );
             IntroduceOnUnmonitoredInpcPropertyChanged( ctx );
         }
-        catch ( DiagnosticErrorReportedException )
+    }
+
+    private static bool ValidateDependencyAnalysis( BuildAspectContext ctx )
+    {
+        return !ctx.PrepareDependencyGraphReportedErrors;
+    }
+
+    private static bool ValidateRootAutoProperties( BuildAspectContext ctx )
+    {
+        // TODO: Add support for fields.
+
+        var relevantProperties =
+            ctx.Target.Properties
+                .Where(
+                    p =>
+                        p is { IsStatic: false, IsAutoPropertyOrField: true }
+                        && !p.Attributes.Any( ctx.Elements.IgnoreAutoChangeNotificationAttribute ) );
+
+        var allValid = true;
+
+        foreach ( var p in relevantProperties )
         {
-            // Diagnostic already raised, do nothing.
+            allValid &= ctx.ValidateFieldOrProperty( p );
         }
+
+        return allValid;
     }
 
     private static void AddPropertyPathsForOnChildPropertyChangedMethodAttribute( BuildAspectContext ctx )
@@ -188,58 +216,27 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
         ctx.OnUnmonitoredInpcPropertyChangedMethod.Declaration = result.Declaration;
     }
 
-    private static void ExamineBaseAndIntroduceInterfaceIfRequired( BuildAspectContext ctx )
+    private static bool ValidateBaseImplementation( BuildAspectContext ctx )
     {
-        if ( ctx.TargetImplementsInpc )
-        {
-            if ( ctx.BaseOnPropertyChangedMethod == null )
-            {
-                ctx.Builder.Diagnostics.Report(
-                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
-                        .WithArguments( ctx.Target ) );
+        var isValid = true;
 
-                throw new DiagnosticErrorReportedException();
-            }
-        }
-        else
+        if ( ctx is { TargetImplementsInpc: true, BaseOnPropertyChangedMethod: null } )
         {
-            ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Elements.INotifyPropertyChanged );
+            ctx.Builder.Diagnostics.Report(
+                DiagnosticDescriptors.NotifyPropertyChanged.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
+                    .WithArguments( ctx.Target ) );
+
+            isValid = false;
         }
+
+        return isValid;
     }
 
-    private static void ValidateFieldOrProperty(
-        BuildAspectContext ctx,
-        IFieldOrProperty fieldOrProperty )
+    private static void IntroduceInterfaceIfRequired( BuildAspectContext ctx )
     {
-        var propertyTypeImplementsInpc =
-            ctx.GetInpcInstrumentationKind( fieldOrProperty.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
-
-        switch ( fieldOrProperty.Type.IsReferenceType )
+        if ( !ctx.TargetImplementsInpc )
         {
-            case null:
-                // This might require INPC-type code which is used at runtime only when T implements INPC,
-                // and non-INPC-type code which is used at runtime when T does not implement INPC.
-
-                ctx.Builder.Diagnostics.Report(
-                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments(
-                        (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
-                    fieldOrProperty );
-
-                throw new DiagnosticErrorReportedException();
-
-            case false:
-
-                if ( propertyTypeImplementsInpc )
-                {
-                    ctx.Builder.Diagnostics.Report(
-                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments(
-                            (fieldOrProperty.DeclarationKind, fieldOrProperty, fieldOrProperty.Type) ),
-                        fieldOrProperty );
-
-                    throw new DiagnosticErrorReportedException();
-                }
-
-                break;
+            ctx.Builder.Advice.ImplementInterface( ctx.Target, ctx.Elements.INotifyPropertyChanged );
         }
     }
 
@@ -262,8 +259,6 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
                 continue;
             }
-
-            ValidateFieldOrProperty( ctx, node.FieldOrProperty );
 
             IMethod? thisUpdateMethod = null;
 
@@ -332,26 +327,6 @@ internal sealed partial class NaturalAspect : IAspect<INamedType>
 
         foreach ( var p in autoProperties )
         {
-            if ( p.IsVirtual )
-            {
-                ctx.Builder.Diagnostics.Report(
-                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorVirtualMemberIsNotSupported.WithArguments( (p.DeclarationKind, p) ),
-                    p );
-
-                throw new DiagnosticErrorReportedException();
-            }
-
-            if ( p.IsNew )
-            {
-                ctx.Builder.Diagnostics.Report(
-                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorNewMemberIsNotSupported.WithArguments( (p.DeclarationKind, p) ),
-                    p );
-
-                throw new DiagnosticErrorReportedException();
-            }
-
-            ValidateFieldOrProperty( ctx, p );
-
             var propertyTypeInstrumentationKind = ctx.GetInpcInstrumentationKind( p.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
             var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );

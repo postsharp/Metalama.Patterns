@@ -26,10 +26,13 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     /// Method called for each node once the graph has been built. Called in <see cref="DependencyGraph.Node{TDerived}.DescendantsDepthFirst"/> order.
     /// </summary>
     /// <param name="ctx"></param>
-    public void Initialize( BuildAspectContext ctx )
+    /// <returns>A value indicating success. <see langword="true"/> if initialized without error, or <see langword="false"/> if diagnostic errors were reported.</returns>
+    public bool Initialize( BuildAspectContext ctx )
     {
         this.PropertyTypeInpcInstrumentationKind = ctx.GetInpcInstrumentationKind( this.FieldOrProperty.Type );
         this.InpcBaseHandling = DetermineInpcBaseHandling();
+
+        return ctx.ValidateFieldOrProperty( this.FieldOrProperty );
 
         InpcBaseHandling DetermineInpcBaseHandling()
         {
