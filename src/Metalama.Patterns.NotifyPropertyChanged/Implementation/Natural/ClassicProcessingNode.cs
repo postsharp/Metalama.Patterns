@@ -7,7 +7,7 @@ using System.Text;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 
 [CompileTime]
-internal interface IReadOnlyDependencyGraphNode : DependencyGraph.IReadOnlyNode<IReadOnlyDependencyGraphNode>
+internal interface IReadOnlyDependencyGraphNode : IReadOnlyNode<IReadOnlyDependencyGraphNode>
 {
     /// <summary>
     /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.
@@ -47,7 +47,7 @@ internal interface IReadOnlyDependencyGraphNode : DependencyGraph.IReadOnlyNode<
 /// Dependency graph node specialized for the current implementation strategy of <see cref="NotifyPropertyChangedAttribute"/>.
 /// </summary>
 [CompileTime]
-internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraphNode, IReadOnlyDependencyGraphNode>, IReadOnlyDependencyGraphNode
+internal sealed class ClassicProcessingNode : CommonProcessingNode<ClassicProcessingNode, IReadOnlyDependencyGraphNode>, IReadOnlyDependencyGraphNode
 {
     protected override void Initialize()
     {
@@ -119,24 +119,24 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
 
     /// <summary>
     /// Gets the potentially uninitialized field like "B? _lastA2". Typically, use
-    /// <see cref="BuildAspectContext.GetOrCreateLastValueField(DependencyGraphNode)"/> instead.
+    /// <see cref="BuildAspectContext.GetOrCreateLastValueField(ClassicProcessingNode)"/> instead.
     /// </summary>
     public IField? LastValueField { get; private set; }
 
     /// <summary>
-    /// Should only be called by <see cref="BuildAspectContext.GetOrCreateLastValueField(DependencyGraphNode)"/>.
+    /// Should only be called by <see cref="BuildAspectContext.GetOrCreateLastValueField(ClassicProcessingNode)"/>.
     /// </summary>
     /// <param name="field"></param>
     public void SetLastValueField( IField field ) => this.LastValueField = field;
 
     /// <summary>
     /// Gets the potentially uninitialized field like "PropertyChangedEventHandler? _onA2PropertyChangedHandler".
-    /// Typically, use <see cref="BuildAspectContext.GetOrCreateHandlerField(DependencyGraphNode)"/> instead.
+    /// Typically, use <see cref="BuildAspectContext.GetOrCreateHandlerField(ClassicProcessingNode)"/> instead.
     /// </summary>
     public IField? HandlerField { get; private set; }
 
     /// <summary>
-    /// Should only be called by <see cref="BuildAspectContext.GetOrCreateHandlerField(DependencyGraphNode)"/>.
+    /// Should only be called by <see cref="BuildAspectContext.GetOrCreateHandlerField(ClassicProcessingNode)"/>.
     /// </summary>
     /// <param name="field"></param>
     public void SetHandlerField( IField field ) => this.HandlerField = field;

@@ -506,12 +506,12 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         return this._inheritedOnUnmonitoredObservablePropertyChangedPropertyNames.Contains( propertyName );
     }
 
-    private DependencyGraphNode? _dependencyGraph;
+    private ClassicProcessingNode? _dependencyGraph;
     private bool _prepareDependencyGraphReportedErrors;
 
-    private DependencyGraphNode PrepareDependencyGraph()
+    private ClassicProcessingNode PrepareDependencyGraph()
     {
-        var graph = Implementation.DependencyGraph.GetDependencyGraph<DependencyGraphNode>(
+        var graph = Implementation.DependencyGraph.GetDependencyGraph<ClassicProcessingNode>(
             this._builder.Target,
             ( diagnostic, location ) =>
             {
@@ -527,7 +527,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         return graph;
     }
 
-    private DependencyGraphNode DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
+    private ClassicProcessingNode DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
 
     private bool PrepareDependencyGraphReportedErrors
     {
@@ -539,7 +539,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         }
     }
 
-    private IField GetOrCreateLastValueField( DependencyGraphNode node )
+    private IField GetOrCreateLastValueField( ClassicProcessingNode node )
     {
         if ( node.LastValueField == null )
         {
@@ -559,7 +559,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         return node.LastValueField!;
     }
 
-    private IField GetOrCreateHandlerField( DependencyGraphNode node )
+    private IField GetOrCreateHandlerField( ClassicProcessingNode node )
     {
         if ( node.HandlerField == null )
         {
@@ -579,7 +579,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         return node.HandlerField!;
     }
 
-    private IMethod GetOrCreateRootPropertySubscribeMethod( DependencyGraphNode node )
+    private IMethod GetOrCreateRootPropertySubscribeMethod( ClassicProcessingNode node )
     {
         if ( node.Depth != 1 )
         {

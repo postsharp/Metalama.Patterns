@@ -109,7 +109,7 @@ internal sealed class Templates : ITemplateProvider
     internal static void Subscribe<[CompileTime] TValue>(
         TValue? value,
         [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext,
-        [CompileTime] DependencyGraphNode node,
+        [CompileTime] ClassicProcessingNode node,
         [CompileTime] IField handlerField )
         where TValue : INotifyPropertyChanged
     {
@@ -155,7 +155,7 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     internal static void UpdateChildInpcProperty(
         [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext,
-        [CompileTime] DependencyGraphNode node,
+        [CompileTime] ClassicProcessingNode node,
         [CompileTime] IExpression accessChildExpression,
         [CompileTime] IField lastValueField,
         [CompileTime] IField onPropertyChangedHandlerField )
