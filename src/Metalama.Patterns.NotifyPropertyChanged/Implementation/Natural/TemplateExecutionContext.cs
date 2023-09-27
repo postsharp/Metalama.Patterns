@@ -8,23 +8,23 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 
 /*
  * NB: TemplateExecutionContext members must not hold any reference to the IAspectBuilder<> passed
- * to BuildAspect. Members must be immutable, with the exception of cached lookups. Lazy behaviour 
+ * to BuildAspect. Members must be immutable, with the exception of cached computed values. Lazy behaviour 
  * should be avoided.
  */
 
 /// <summary>
-/// Shared context for template execution.
+/// Immutable context for template execution.
 /// </summary>
 [CompileTime]
 internal sealed record TemplateExecutionContext(
-    Elements Elements,
-    ClassicImplementationStrategyOptions Options,
     NotifyPropertyChangedOptions CommonOptions,
+    ClassicImplementationStrategyOptions Options,
+    Elements Elements,
     InpcInstrumentationKindLookup InpcInstrumentationKindLookup,
     IReadOnlyDependencyGraphNode DependencyGraph,
-    IReadOnlyDeferredDeclaration<IMethod> OnUnmonitoredObservablePropertyChangedMethod,
-    IReadOnlyCertainDeferredDeclaration<IMethod> OnPropertyChangedMethod,
-    IReadOnlyCertainDeferredDeclaration<IMethod> OnChildPropertyChangedMethod,
+    IMethod? OnUnmonitoredObservablePropertyChangedMethod,
+    IMethod OnPropertyChangedMethod,
+    IMethod OnChildPropertyChangedMethod,
     IMethod? BaseOnPropertyChangedMethod,
     IMethod? BaseOnChildPropertyChangedMethod,
     IMethod? BaseOnUnmonitoredObservablePropertyChangedMethod )

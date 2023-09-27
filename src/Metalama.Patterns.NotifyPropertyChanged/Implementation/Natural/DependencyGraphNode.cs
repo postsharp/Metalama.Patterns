@@ -23,7 +23,7 @@ internal interface IReadOnlyDependencyGraphNode : DependencyGraph.IReadOnlyNode<
     /// The method is always private as it is only called by other members of the type where it
     /// is defined.
     /// </remarks>
-    IReadOnlyUncertainDeferredDeclaration<IMethod> UpdateMethod { get; }
+    IReadOnlyDeferredYesNoMaybe<IMethod> UpdateMethod { get; }
 
     /// <summary>
     /// Gets the non-null <see cref="UpdateMethod"/> declarations of the children of the current node.
@@ -55,7 +55,7 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
         
         if ( this.Depth == 1 )
         {
-            this._subscribeMethod = new CertainDeferredDeclaration<IMethod>();
+            this._subscribeMethod = new Deferred<IMethod>();
         }
     }
 
@@ -154,7 +154,7 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
             // This ensures that the outcome is consistent and the result can be cached.
 
             this._childUpdateMethods ??= this.Children
-                .Select( n => n.UpdateMethod.Declaration )
+                .Select( n => n.UpdateMethod.Value )
                 .Where( m => m != null )
                 .ToList()!;
 
@@ -163,16 +163,16 @@ internal sealed class DependencyGraphNode : DependencyGraph.Node<DependencyGraph
     }
 
     /// <inheritdoc cref="IReadOnlyDependencyGraphNode"/>
-    public UncertainDeferredDeclaration<IMethod> UpdateMethod { get; } = new UncertainDeferredDeclaration<IMethod>( mustBeSetBeforeGet: true );
+    public DeferredYesNoMaybe<IMethod> UpdateMethod { get; } = new DeferredYesNoMaybe<IMethod>( mustBeSetBeforeGet: true );
 
-    IReadOnlyUncertainDeferredDeclaration<IMethod> IReadOnlyDependencyGraphNode.UpdateMethod => this.UpdateMethod;
+    IReadOnlyDeferredYesNoMaybe<IMethod> IReadOnlyDependencyGraphNode.UpdateMethod => this.UpdateMethod;
 
-    private CertainDeferredDeclaration<IMethod>? _subscribeMethod;
+    private Deferred<IMethod>? _subscribeMethod;
 
     /// <summary>
     /// Gets a method like <c>void SubscribeToA1()</c> for applicable root property (depth 1) nodes.
     /// </summary>
-    public CertainDeferredDeclaration<IMethod> SubscribeMethod
+    public Deferred<IMethod> SubscribeMethod
         => this._subscribeMethod ?? throw new InvalidOperationException(
             nameof(this.SubscribeMethod) + " is not applicable to this node, access indicates incorrect caller logic." );
     

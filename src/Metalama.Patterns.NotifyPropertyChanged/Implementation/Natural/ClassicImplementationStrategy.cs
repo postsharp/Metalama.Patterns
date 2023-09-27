@@ -3,9 +3,15 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Patterns.NotifyPropertyChanged.Metadata;
+using Metalama.Patterns.NotifyPropertyChanged.Options;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 
@@ -20,97 +26,146 @@ internal interface IImplementationStrategyBuilder : IDisposable
 
 internal sealed partial class ClassicImplementationStrategyBuilder : IImplementationStrategyBuilder
 {
+    private readonly DeferredYesNo<IMethod> _onUnmonitoredObservablePropertyChangedMethod;
+
     void IDisposable.Dispose()
     {
         throw new NotImplementedException();
     }
 
+    private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
+
     private readonly IAspectBuilder<INamedType> _builder;
+    private readonly Deferred<TemplateExecutionContext> _deferredTemplateExecutionContext = new();
+    private readonly NotifyPropertyChangedOptions _commonOptions;
+    private readonly ClassicImplementationStrategyOptions _classicOptions;
+    private readonly Dictionary<IFieldOrProperty, bool> _validateFieldOrPropertyResults = new();
+    private readonly IMethod? _baseOnPropertyChangedMethod;
+    private readonly IMethod? _baseOnChildPropertyChangedMethod;
+    private readonly IMethod? _baseOnUnmonitoredObservablePropertyChangedMethod;
+    private readonly Elements _elements;
+    private readonly InpcInstrumentationKindLookup _inpcInstrumentationKindLookup;
+    private readonly bool _targetImplementsInpc;
+    private readonly bool _baseImplementsInpc;
+    private readonly Deferred<IMethod> _onPropertyChangedMethod = new();
+    private readonly Deferred<IMethod> _onChildPropertyChangedMethod = new();
+    private readonly List<string> _propertyPathsForOnChildPropertyChangedMethodAttribute = new();
+    private readonly List<string> _propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute = new();
 
     public ClassicImplementationStrategyBuilder( IAspectBuilder<INamedType> builder )
     {
         this._builder = builder;
+        this._elements = new Elements( builder.Target );
+        this._inpcInstrumentationKindLookup = new( this._elements );
+        this._commonOptions = builder.GetOptions<NotifyPropertyChangedOptions>();
+        this._classicOptions = builder.GetOptions<ClassicImplementationStrategyOptions>();
 
+        this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethodOrDefault );
+        var target = builder.Target;
+
+        // TODO: Consider using BaseType.Definition where possible for better performance.
+
+        this._baseImplementsInpc =
+            target.BaseType != null && (
+                target.BaseType.Is( this._elements.INotifyPropertyChanged )
+                || (target.BaseType is { BelongsToCurrentProject: true }
+                    && target.BaseType.Definition.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
+
+        this._targetImplementsInpc = this._baseImplementsInpc || target.Is( this._elements.INotifyPropertyChanged );
+        this._baseOnPropertyChangedMethod = GetOnPropertyChangedMethod( target );
+        this._baseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod(target);
+        this._baseOnUnmonitoredObservablePropertyChangedMethod = this.GetOnUnmonitoredObservablePropertyChangedMethod(target);
     }
 
     public void BuildAspect()
     {
-        var ctx = new BuildAspectContext( builder );
-
         // Validate, maximising the coverage of diagnostic reporting.
 
-        var v1 = ValidateBaseImplementation( ctx );
-        var v2 = ValidateDependencyAnalysis( ctx );
-        var v3 = ValidateRootAutoProperties( ctx );
+        var v1 = this.ValidateBaseImplementation();
+        var v2 = this.ValidateDependencyAnalysis();
+        var v3 = this.ValidateRootAutoProperties();
 
         // Transform, if valid. By design, aim to minimise diagnostic reporting that only occurs during
         // the transform phase.
         if ( v1 && v2 && v3 )
         {
-            IntroduceInterfaceIfRequired( ctx );
+            this.IntroduceInterfaceIfRequired();
 
             // Introduce methods like UpdateA1B1()
-            IntroduceUpdateMethods( ctx );
+            this.IntroduceUpdateMethods();
 
             // Override auto properties
-            ProcessAutoProperties( ctx );
+            this.ProcessAutoProperties();
 
-            AddPropertyPathsForOnChildPropertyChangedMethodAttribute( ctx );
+            this.AddPropertyPathsForOnChildPropertyChangedMethodAttribute();
 
-            IntroduceOnPropertyChangedMethod( ctx );
-            IntroduceOnChildPropertyChangedMethod( ctx );
-            IntroduceOnUnmonitoredObservablePropertyChanged( ctx );
+            this.IntroduceOnPropertyChangedMethod();
+            this.IntroduceOnChildPropertyChangedMethod();
+            this.IntroduceOnUnmonitoredObservablePropertyChanged();
+
+            this._deferredTemplateExecutionContext.Value = new(
+                this._commonOptions,
+                this._classicOptions,
+                this._elements,
+                this._inpcInstrumentationKindLookup,
+                this.DependencyGraph,
+                this._onUnmonitoredObservablePropertyChangedMethod.Value,
+                this._onPropertyChangedMethod.Value,
+                this._onChildPropertyChangedMethod.Value,
+                this._baseOnPropertyChangedMethod,
+                this._baseOnChildPropertyChangedMethod,
+                this._baseOnUnmonitoredObservablePropertyChangedMethod );
         }
     }
 
-    private static bool ValidateDependencyAnalysis( BuildAspectContext ctx )
+    private bool ValidateDependencyAnalysis()
     {
-        return !ctx.PrepareDependencyGraphReportedErrors;
+        return !this.PrepareDependencyGraphReportedErrors;
     }
 
-    private static bool ValidateRootAutoProperties( BuildAspectContext ctx )
+    private bool ValidateRootAutoProperties()
     {
         // TODO: Add support for fields.
 
         var relevantProperties =
-            ctx.Target.Properties
+            this._builder.Target.Properties
                 .Where(
                     p =>
                         p is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !p.Attributes.Any( ctx.Elements.IgnoreAutoChangeNotificationAttribute ) );
+                        && !p.Attributes.Any( this._elements.IgnoreAutoChangeNotificationAttribute ) );
 
         var allValid = true;
 
         foreach ( var p in relevantProperties )
         {
-            allValid &= ctx.ValidateFieldOrProperty( p );
+            allValid &= this.ValidateFieldOrProperty( p );
         }
 
         return allValid;
     }
 
-    private static void AddPropertyPathsForOnChildPropertyChangedMethodAttribute( BuildAspectContext ctx )
+    private void AddPropertyPathsForOnChildPropertyChangedMethodAttribute()
     {
         // NB: The selection logic here must be kept in sync with the logic in the OnUnmonitoredObservablePropertyChanged template.
 
-        ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.AddRange(
-            ctx.DependencyGraph.DescendantsDepthFirst()
+        this._propertyPathsForOnChildPropertyChangedMethodAttribute.AddRange(
+            this.DependencyGraph.DescendantsDepthFirst()
                 .Where(
                     n => n.InpcBaseHandling switch
                     {
-                        InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined => true,
+                        InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined => true,
                         InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
                         _ => false
                     } )
                 .Select( n => n.DottedPropertyPath ) );
     }
 
-    private static void IntroduceOnPropertyChangedMethod( BuildAspectContext ctx )
+    private void IntroduceOnPropertyChangedMethod()
     {
-        var isOverride = ctx.BaseOnPropertyChangedMethod != null;
+        var isOverride = this._baseOnPropertyChangedMethod != null;
 
-        var result = ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).IntroduceMethod(
-            ctx.Target,
+        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
+            this._builder.Target,
             nameof( Templates.OnPropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -118,49 +173,51 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
             {
                 if ( isOverride )
                 {
-                    b.Name = ctx.BaseOnPropertyChangedMethod!.Name;
+                    b.Name = this._baseOnPropertyChangedMethod!.Name;
                 }
 
-                if ( ctx.Target.IsSealed )
+                if ( this._builder.Target.IsSealed )
                 {
-                    b.Accessibility = isOverride ? ctx.BaseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
                 else
                 {
-                    b.Accessibility = isOverride ? ctx.BaseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                    b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
                     b.IsVirtual = !isOverride;
                 }
             },
-            args: new { ctx } );
+            args: new { 
+                deferredExecutionContext = this._deferredTemplateExecutionContext 
+            } );
 
-        ctx.OnPropertyChangedMethod.Declaration = result.Declaration;
+        this._onPropertyChangedMethod.Value = result.Declaration;
 
         // Ensure that all required fields are generated in advance of template execution.
         // The node selection logic mirrors that of the template's loops and conditions.
 
-        if ( ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
+        if ( this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
         {
-            foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst()
+            foreach ( var node in this.DependencyGraph.DescendantsDepthFirst()
                          .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
             {
-                _ = ctx.GetOrCreateHandlerField( node );
+                _ = this.GetOrCreateHandlerField( node );
             }
         }
 
-        foreach ( var node in ctx.DependencyGraph.Children
+        foreach ( var node in this.DependencyGraph.Children
                      .Where( node => node.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
         {
-            _ = ctx.GetOrCreateHandlerField( node );
-            _ = ctx.GetOrCreateLastValueField( node );
+            _ = this.GetOrCreateHandlerField( node );
+            _ = this.GetOrCreateLastValueField( node );
         }
     }
 
-    private static void IntroduceOnChildPropertyChangedMethod( BuildAspectContext ctx )
+    private void IntroduceOnChildPropertyChangedMethod()
     {
-        var isOverride = ctx.BaseOnChildPropertyChangedMethod != null;
+        var isOverride = this._baseOnChildPropertyChangedMethod != null;
 
-        var result = ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).IntroduceMethod(
-            ctx.Target,
+        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
+            this._builder.Target,
             nameof( Templates.OnChildPropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -168,40 +225,42 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
             {
                 b.AddAttribute(
                     AttributeConstruction.Create(
-                        ctx.Elements.OnChildPropertyChangedMethodAttribute,
-                        new[] { ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
+                        this._elements.OnChildPropertyChangedMethodAttribute,
+                        new[] { this._propertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                 if ( isOverride )
                 {
-                    b.Name = ctx.BaseOnChildPropertyChangedMethod!.Name;
+                    b.Name = this._baseOnChildPropertyChangedMethod!.Name;
                 }
 
-                if ( ctx.Target.IsSealed )
+                if ( this._builder.Target.IsSealed )
                 {
-                    b.Accessibility = isOverride ? ctx.BaseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
                 else
                 {
-                    b.Accessibility = isOverride ? ctx.BaseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                    b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Protected;
                     b.IsVirtual = !isOverride;
                 }
             },
-            args: new { ctx } );
+            args: new {
+                deferredExecutionContext = this._deferredTemplateExecutionContext
+            } );
 
-        ctx.OnChildPropertyChangedMethod.Declaration = result.Declaration;
+        this._onChildPropertyChangedMethod.Value = result.Declaration;
     }
 
-    private static void IntroduceOnUnmonitoredObservablePropertyChanged( BuildAspectContext ctx )
+    private void IntroduceOnUnmonitoredObservablePropertyChanged()
     {
-        if ( !ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
+        if ( !this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
         {
             return;
         }
 
-        var isOverride = ctx.BaseOnUnmonitoredObservablePropertyChangedMethod != null;
+        var isOverride = this._baseOnUnmonitoredObservablePropertyChangedMethod != null;
 
-        var result = ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).IntroduceMethod(
-            ctx.Target,
+        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
+            this._builder.Target,
             nameof( Templates.OnUnmonitoredObservablePropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -209,38 +268,40 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
             {
                 b.AddAttribute(
                     AttributeConstruction.Create(
-                        ctx.Elements.OnUnmonitoredObservablePropertyChangedMethodAttribute,
-                        new[] { ctx.PropertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
+                        this._elements.OnUnmonitoredObservablePropertyChangedMethodAttribute,
+                        new[] { this._propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                 if ( isOverride )
                 {
-                    b.Name = ctx.BaseOnUnmonitoredObservablePropertyChangedMethod!.Name;
+                    b.Name = this._baseOnUnmonitoredObservablePropertyChangedMethod!.Name;
                 }
 
-                if ( ctx.Target.IsSealed )
+                if ( this._builder.Target.IsSealed )
                 {
-                    b.Accessibility = isOverride ? ctx.BaseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
                 else
                 {
-                    b.Accessibility = isOverride ? ctx.BaseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                    b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
                     b.IsVirtual = !isOverride;
                 }
             },
-            args: new { ctx } );
+            args: new {
+                deferredExecutionContext = this._deferredTemplateExecutionContext
+            } );
 
-        ctx.OnUnmonitoredObservablePropertyChangedMethod.Declaration = result.Declaration;
+        this._onUnmonitoredObservablePropertyChangedMethod.Value = result.Declaration;
     }
 
-    private static bool ValidateBaseImplementation( BuildAspectContext ctx )
+    private bool ValidateBaseImplementation()
     {
         var isValid = true;
 
-        if ( ctx is { TargetImplementsInpc: true, BaseOnPropertyChangedMethod: null } )
+        if ( this._targetImplementsInpc && this._baseOnPropertyChangedMethod == null )
         {
-            ctx.Builder.Diagnostics.Report(
+            this._builder.Diagnostics.Report(
                 DiagnosticDescriptors.NotifyPropertyChanged.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
-                    .WithArguments( ctx.Target ) );
+                    .WithArguments( this._builder.Target ) );
 
             isValid = false;
         }
@@ -248,17 +309,17 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         return isValid;
     }
 
-    private static void IntroduceInterfaceIfRequired( BuildAspectContext ctx )
+    private void IntroduceInterfaceIfRequired()
     {
-        if ( !ctx.TargetImplementsInpc )
+        if ( !this._targetImplementsInpc )
         {
-            ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).ImplementInterface( ctx.Target, ctx.Elements.INotifyPropertyChanged );
+            this._builder.Advice.WithTemplateProvider( Templates.Provider ).ImplementInterface( this._builder.Target, this._elements.INotifyPropertyChanged );
         }
     }
 
-    private static void IntroduceUpdateMethods( BuildAspectContext ctx )
+    private void IntroduceUpdateMethods()
     {
-        var allNodesDepthFirst = ctx.DependencyGraph.DescendantsDepthFirst().ToList();
+        var allNodesDepthFirst = this.DependencyGraph.DescendantsDepthFirst().ToList();
         allNodesDepthFirst.Reverse();
 
         // Process all nodes in depth-first, leaf-to-root order, creating necessary update methods as we go.
@@ -271,7 +332,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
             if ( node.Children.Count == 0 || node.Parent!.IsRoot )
             {
                 // Leaf nodes and root properties should never have update methods.
-                node.UpdateMethod.Declaration = null;
+                node.UpdateMethod.Value = null;
 
                 continue;
             }
@@ -280,12 +341,12 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
             // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
             if ( node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit
-                 && !ctx.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath ) )
+                 && !this.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath ) )
             {
-                var lastValueField = ctx.GetOrCreateLastValueField( node );
-                var onPropertyChangedHandlerField = ctx.GetOrCreateHandlerField( node );
+                var lastValueField = this.GetOrCreateLastValueField( node );
+                var onPropertyChangedHandlerField = this.GetOrCreateHandlerField( node );
 
-                var methodName = ctx.GetAndReserveUnusedMemberName( $"Update{node.ContiguousPropertyPathWithoutDot}" );
+                var methodName = this.GetAndReserveUnusedMemberName( $"Update{node.ContiguousPropertyPathWithoutDot}" );
 
                 var accessChildExprBuilder = new ExpressionBuilder();
 
@@ -299,8 +360,8 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
                 var accessChildExpression = accessChildExprBuilder.ToExpression();
 
-                var introduceUpdateChildPropertyMethodResult = ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).IntroduceMethod(
-                    ctx.Target,
+                var introduceUpdateChildPropertyMethodResult = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
+                    this._builder.Target,
                     nameof( Templates.UpdateChildInpcProperty ),
                     IntroductionScope.Instance,
                     OverrideStrategy.Fail,
@@ -311,7 +372,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                     },
                     args: new
                     {
-                        ctx,
+                        deferredExecutionContext = this._deferredTemplateExecutionContext,
                         node,
                         accessChildExpression,
                         lastValueField,
@@ -321,16 +382,16 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
 
                 // This type will raise OnChildPropertyChanged for the current node, let derived types know.
-                ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( node.DottedPropertyPath );
+                this._propertyPathsForOnChildPropertyChangedMethodAttribute.Add( node.DottedPropertyPath );
             }
 
-            node.UpdateMethod.Declaration = thisUpdateMethod;
+            node.UpdateMethod.Value = thisUpdateMethod;
         }
     }
 
-    private static void ProcessAutoProperties( BuildAspectContext ctx )
+    private void ProcessAutoProperties()
     {
-        var target = ctx.Target;
+        var target = this._builder.Target;
 
         // PS appears to consider all instance properties regardless of accessibility.
         var autoProperties =
@@ -338,14 +399,14 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 .Where(
                     p =>
                         p is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !p.Attributes.Any( ctx.Elements.IgnoreAutoChangeNotificationAttribute ) )
+                        && !p.Attributes.Any( this._elements.IgnoreAutoChangeNotificationAttribute ) )
                 .ToList();
 
         foreach ( var p in autoProperties )
         {
-            var propertyTypeInstrumentationKind = ctx.InpcInstrumentationKindLookup.Get( p.Type );
+            var propertyTypeInstrumentationKind = this._inpcInstrumentationKindLookup.Get( p.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
-            var node = ctx.DependencyGraph.GetChild( p.GetSymbol() );
+            var node = this.DependencyGraph.GetChild( p.GetSymbol() );
 
             switch ( p.Type.IsReferenceType )
             {
@@ -360,14 +421,14 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
                         if ( hasDependentProperties )
                         {
-                            handlerField = ctx.GetOrCreateHandlerField( node! );
-                            subscribeMethod = ctx.GetOrCreateRootPropertySubscribeMethod( node! );
-                            ctx.PropertyPathsForOnChildPropertyChangedMethodAttribute.Add( p.Name );
+                            handlerField = this.GetOrCreateHandlerField( node! );
+                            subscribeMethod = this.GetOrCreateRootPropertySubscribeMethod( node! );
+                            this._propertyPathsForOnChildPropertyChangedMethodAttribute.Add( p.Name );
 
                             if ( p.InitializerExpression != null )
                             {
-                                ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).AddInitializer(
-                                    ctx.Target,
+                                this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
+                                    this._builder.Target,
                                     nameof( Templates.SubscribeInitializer ),
                                     InitializerKind.BeforeInstanceConstructor,
                                     args: new { fieldOrProperty = p, subscribeMethod } );
@@ -375,20 +436,30 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                         }
                         else
                         {
-                            ctx.PropertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.Add( p.Name );
+                            this._propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.Add( p.Name );
                         }
 
-                        ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).OverrideAccessors( 
-                            p, 
-                            setTemplate: nameof( Templates.OverrideInpcRefTypePropertySetter ), 
-                            args: new { ctx, handlerField, node, subscribeMethod } );
+                        this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
+                            p,
+                            setTemplate: nameof( Templates.OverrideInpcRefTypePropertySetter ),
+                            args: new {
+                                deferredExecutionContext = this._deferredTemplateExecutionContext, 
+                                handlerField, 
+                                node, 
+                                subscribeMethod 
+                            } );
                     }
                     else
                     {
-                        ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).OverrideAccessors(
+                        this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
                             p,
                             setTemplate: nameof( Templates.OverrideUninstrumentedTypePropertySetter ),
-                            args: new { ctx, node, compareUsing = EqualityComparisonKind.ReferenceEquals, propertyTypeInstrumentationKind } );
+                            args: new { 
+                                deferredExecutionContext = this._deferredTemplateExecutionContext, 
+                                node, 
+                                compareUsing = EqualityComparisonKind.ReferenceEquals, 
+                                propertyTypeInstrumentationKind 
+                            } );
                     }
 
                     break;
@@ -399,13 +470,301 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                         ? EqualityComparisonKind.EqualityOperator
                         : EqualityComparisonKind.DefaultEqualityComparer;
 
-                    ctx.Builder.Advice.WithTemplateProvider( Templates.Instance ).OverrideAccessors(
+                    this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
                         p,
                         setTemplate: nameof( Templates.OverrideUninstrumentedTypePropertySetter ),
-                        args: new { ctx, node, compareUsing = comparisonKind, propertyTypeInstrumentationKind } );
+                        args: new {
+                            deferredExecutionContext = this._deferredTemplateExecutionContext, 
+                            node, 
+                            compareUsing = comparisonKind, 
+                            propertyTypeInstrumentationKind 
+                        } );
 
                     break;
             }
+        }
+    }
+
+    private HashSet<string>? _inheritedOnChildPropertyChangedPropertyPaths;
+
+    private bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath )
+    {
+        this._inheritedOnChildPropertyChangedPropertyPaths ??=
+            BuildPropertyPathLookup( GetPropertyPaths( this._elements.OnChildPropertyChangedMethodAttribute, this._baseOnChildPropertyChangedMethod ) );
+
+        return this._inheritedOnChildPropertyChangedPropertyPaths.Contains( parentPropertyPath );
+    }
+
+    private HashSet<string>? _inheritedOnUnmonitoredObservablePropertyChangedPropertyNames;
+
+    private bool HasInheritedOnUnmonitoredObservablePropertyChangedProperty( string propertyName )
+    {
+        this._inheritedOnUnmonitoredObservablePropertyChangedPropertyNames ??=
+            BuildPropertyPathLookup(
+                GetPropertyPaths( this._elements.OnUnmonitoredObservablePropertyChangedMethodAttribute, this._baseOnUnmonitoredObservablePropertyChangedMethod ) );
+
+        return this._inheritedOnUnmonitoredObservablePropertyChangedPropertyNames.Contains( propertyName );
+    }
+
+    private DependencyGraphNode? _dependencyGraph;
+    private bool _prepareDependencyGraphReportedErrors;
+
+    private DependencyGraphNode PrepareDependencyGraph()
+    {
+        var graph = Implementation.DependencyGraph.GetDependencyGraph<DependencyGraphNode>(
+            this._builder.Target,
+            ( diagnostic, location ) =>
+            {
+                this._prepareDependencyGraphReportedErrors |= diagnostic.Definition.Severity == Severity.Error;
+                this._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
+            } );
+
+        foreach ( var node in graph.DescendantsDepthFirst() )
+        {
+            this._prepareDependencyGraphReportedErrors |= !node.Initialize( this );
+        }
+
+        return graph;
+    }
+
+    private DependencyGraphNode DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
+
+    private bool PrepareDependencyGraphReportedErrors
+    {
+        get
+        {
+            _ = this.DependencyGraph;
+
+            return this._prepareDependencyGraphReportedErrors;
+        }
+    }
+
+    private IField GetOrCreateLastValueField( DependencyGraphNode node )
+    {
+        if ( node.LastValueField == null )
+        {
+            var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.ContiguousPropertyPathWithoutDot}" );
+
+            var introduceLastValueFieldResult = this._builder.Advice.IntroduceField(
+                this._builder.Target,
+                lastValueFieldName,
+                node.FieldOrProperty.Type.ToNullableType(),
+                IntroductionScope.Instance,
+                OverrideStrategy.Fail,
+                b => b.Accessibility = Accessibility.Private );
+
+            node.SetLastValueField( introduceLastValueFieldResult.Declaration );
+        }
+
+        return node.LastValueField!;
+    }
+
+    private IField GetOrCreateHandlerField( DependencyGraphNode node )
+    {
+        if ( node.HandlerField == null )
+        {
+            var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.ContiguousPropertyPathWithoutDot}PropertyChangedHandler" );
+
+            var introduceHandlerFieldResult = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceField(
+                this._builder.Target,
+                handlerFieldName,
+                this._elements.NullablePropertyChangedEventHandler,
+                IntroductionScope.Instance,
+                OverrideStrategy.Fail,
+                b => b.Accessibility = Accessibility.Private );
+
+            node.SetHandlerField( introduceHandlerFieldResult.Declaration );
+        }
+
+        return node.HandlerField!;
+    }
+
+    private IMethod GetOrCreateRootPropertySubscribeMethod( DependencyGraphNode node )
+    {
+        if ( node.Depth != 1 )
+        {
+            throw new ArgumentException( "Must be a root property node (depth must be 1).", nameof( node ) );
+        }
+
+        if ( !node.SubscribeMethod.ValueIsSet )
+        {
+            var handlerField = this.GetOrCreateHandlerField( node );
+
+            var subscribeMethodName = this.GetAndReserveUnusedMemberName( $"SubscribeTo{node.Name}" );
+
+            var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
+                this._builder.Target,
+                nameof( Templates.Subscribe ),
+                IntroductionScope.Instance,
+                OverrideStrategy.Fail,
+                b =>
+                {
+                    b.Name = subscribeMethodName;
+                    b.Accessibility = Accessibility.Private;
+                },
+                args: new { TValue = node.FieldOrProperty.Type, ctx = this, node, handlerField } );
+
+            node.SubscribeMethod.Value = result.Declaration;
+        }
+
+        return node.SubscribeMethod.Value;
+    }
+
+    private HashSet<string>? _existingMemberNames;
+
+    /// <summary>
+    /// Gets an unused member name for the target type by adding an numeric suffix until an unused name is found.
+    /// </summary>
+    /// <param name="desiredName"></param>
+    /// <returns></returns>
+    private string GetAndReserveUnusedMemberName( string desiredName )
+    {
+        this._existingMemberNames ??= new HashSet<string>(
+            ((IEnumerable<INamedDeclaration>) this._builder.Target.AllMembers()).Concat( this._builder.Target.NestedTypes ).Select( m => m.Name ) );
+
+        if ( this._existingMemberNames.Add( desiredName ) )
+        {
+            return desiredName;
+        }
+        else
+        {
+            // ReSharper disable once BadSemicolonSpaces
+            for ( var i = 1; ; i++ )
+            {
+                var adjustedName = $"{desiredName}_{i}";
+
+                if ( this._existingMemberNames.Add( adjustedName ) )
+                {
+                    return adjustedName;
+                }
+            }
+        }
+    }
+
+    private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
+        => propertyPaths == null ? new HashSet<string>() : new HashSet<string>( propertyPaths );
+
+    [return: NotNullIfNotNull( nameof( method ) )]
+    private static IEnumerable<string>? GetPropertyPaths( INamedType attributeType, IMethod? method, bool includeInherited = true )
+    {
+        // NB: Assumes that attributeType instances will always be constructed with one arg of type string[].
+
+        if ( method == null )
+        {
+            return null;
+        }
+
+        return includeInherited
+            ? EnumerableExtensions.SelectRecursive( method, m => m.OverriddenMethod ).SelectMany( m => GetPropertyPathsCore( attributeType, m ) )
+            : GetPropertyPathsCore( attributeType, method );
+
+        static IEnumerable<string> GetPropertyPathsCore( INamedType attributeType, IMethod method )
+            => method.Attributes
+                .OfAttributeType( attributeType )
+                .SelectMany( a => a.ConstructorArguments[0].Values.Select( k => (string?) k.Value ) )
+                .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
+    }
+
+    private static IMethod? GetOnPropertyChangedMethod( INamedType type )
+        => type.AllMethods.FirstOrDefault(
+            m =>
+                !m.IsStatic
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters is [{ Type.SpecialType: SpecialType.String }]
+                && _onPropertyChangedMethodNames.Contains( m.Name ) );
+
+    private static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
+        => type.AllMethods.FirstOrDefault(
+            m =>
+                !m.IsStatic
+                && m.Attributes.Any( typeof( OnChildPropertyChangedMethodAttribute ) )
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters is [{ Type.SpecialType: SpecialType.String }, { Type.SpecialType: SpecialType.String }] );
+
+    private IMethod? GetOnUnmonitoredObservablePropertyChangedMethod( INamedType type )
+        => type.AllMethods.FirstOrDefault(
+            m =>
+                !m.IsStatic
+                && m.Attributes.Any( typeof( OnUnmonitoredObservablePropertyChangedMethodAttribute ) )
+                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
+                && m.ReturnType.SpecialType == SpecialType.Void
+                && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _]
+                && m.Parameters[1].Type == this._elements.NullableINotifyPropertyChanged
+                && m.Parameters[2].Type == this._elements.NullableINotifyPropertyChanged );
+
+    /// <summary>
+    /// Validates the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. The result is cached
+    /// so that diagnostics are not repeated.
+    /// </summary>
+    /// <returns><see langword="true"/> if valid, or <see langword="false"/> if invalid.</returns>
+    private bool ValidateFieldOrProperty( IFieldOrProperty fieldOrProperty )
+    {
+        if ( !this._validateFieldOrPropertyResults.TryGetValue( fieldOrProperty, out var result ) )
+        {
+            result = IsValid( fieldOrProperty );
+            this._validateFieldOrPropertyResults[fieldOrProperty] = result;
+        }
+
+        return result;
+
+        bool IsValid( IFieldOrProperty fp )
+        {
+            var typeImplementsInpc =
+                this._inpcInstrumentationKindLookup.Get( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
+
+            var isValid = true;
+
+            switch ( fp.Type.IsReferenceType )
+            {
+                case null:
+                    // This might require INPC-type code which is used at runtime only when T implements INPC,
+                    // and non-INPC-type code which is used at runtime when T does not implement INPC.
+
+                    this._builder.Diagnostics.Report(
+                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments(
+                            (fp.DeclarationKind, fp, fp.Type) ),
+                        fp );
+
+                    isValid = false;
+
+                    break;
+
+                case false:
+
+                    if ( typeImplementsInpc )
+                    {
+                        this._builder.Diagnostics.Report(
+                            DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments(
+                                (fp.DeclarationKind, fp, fp.Type) ),
+                            fp );
+
+                        isValid = false;
+                    }
+
+                    break;
+            }
+
+            if ( fp.IsVirtual )
+            {
+                this._builder.Diagnostics.Report(
+                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorVirtualMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
+                    fp );
+
+                isValid = false;
+            }
+
+            if ( fp.IsNew )
+            {
+                this._builder.Diagnostics.Report(
+                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorNewMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
+                    fp );
+
+                isValid = false;
+            }
+
+            return isValid;
         }
     }
 }
