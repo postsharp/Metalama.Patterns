@@ -66,7 +66,7 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
 
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
 
-        var options = builder.GetOptions<CachingOptions>();
+        var options = builder.AspectInstance.GetOptions<CachingOptions>();
 
         // Introduce a field of type CachedMethodRegistration.
         var registrationFieldPrefix = $"_cacheRegistration_{builder.Target.Name}";
