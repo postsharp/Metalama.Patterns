@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
+namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
 /// <summary>
 /// Describes the way a property or child property is handled by base types.

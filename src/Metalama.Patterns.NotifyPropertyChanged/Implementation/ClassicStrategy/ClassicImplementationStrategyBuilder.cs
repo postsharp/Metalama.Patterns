@@ -7,31 +7,19 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation.Graph;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using Metalama.Patterns.NotifyPropertyChanged.Options;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
+namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
-[CompileTime]
-internal interface IImplementationStrategyBuilder : IDisposable
-{
-    /// <summary>
-    /// Build the aspect. This method must be called at most once for a given instance of <see cref="IImplementationStrategyBuilder"/>.
-    /// </summary>
-    public void BuildAspect();
-}
-
-internal sealed partial class ClassicImplementationStrategyBuilder : IImplementationStrategyBuilder
+internal sealed class ClassicImplementationStrategyBuilder : IImplementationStrategyBuilder, IClassicProcessingNodeInitializationHelper
 {
     private readonly DeferredYesNo<IMethod> _onUnmonitoredObservablePropertyChangedMethod;
-
-    void IDisposable.Dispose()
-    {
-        throw new NotImplementedException();
-    }
 
     private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
 
@@ -43,7 +31,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
     private readonly IMethod? _baseOnUnmonitoredObservablePropertyChangedMethod;
-    private readonly Elements _elements;
+    private readonly ClassicElements _elements;
     private readonly InpcInstrumentationKindLookup _inpcInstrumentationKindLookup;
     private readonly bool _targetImplementsInpc;
     private readonly bool _baseImplementsInpc;
@@ -51,11 +39,12 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
     private readonly Deferred<IMethod> _onChildPropertyChangedMethod = new();
     private readonly List<string> _propertyPathsForOnChildPropertyChangedMethodAttribute = new();
     private readonly List<string> _propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute = new();
+    private readonly Deferred<ClassicProcessingNode> _dependencyGraph = new();
 
     public ClassicImplementationStrategyBuilder( IAspectBuilder<INamedType> builder )
     {
         this._builder = builder;
-        this._elements = new Elements( builder.Target );
+        this._elements = new ClassicElements( builder.Target );
         this._inpcInstrumentationKindLookup = new( this._elements );
         this._commonOptions = builder.GetOptions<NotifyPropertyChangedOptions>();
         this._classicOptions = builder.GetOptions<ClassicImplementationStrategyOptions>();
@@ -79,10 +68,11 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
     public void BuildAspect()
     {
+        Debugger.Break();
         // Validate, maximising the coverage of diagnostic reporting.
 
         var v1 = this.ValidateBaseImplementation();
-        var v2 = this.ValidateDependencyAnalysis();
+        var v2 = this.BuildAndValidateDependencyGraph();
         var v3 = this.ValidateRootAutoProperties();
 
         // Transform, if valid. By design, aim to minimise diagnostic reporting that only occurs during
@@ -118,14 +108,15 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         }
     }
 
-    private bool ValidateDependencyAnalysis()
-    {
-        return !this.PrepareDependencyGraphReportedErrors;
-    }
-
     private bool ValidateRootAutoProperties()
     {
         // TODO: Add support for fields.
+
+        // Root auto properties that are referenced by other properties will also be validated
+        // when building the dependency graph. Here we make sure to cover unreferenced properties.
+        // The ValidateFieldOrProperty method caches results and will not raise duplicate diagnostics,
+        // so it's simplest to just run though all the root properties regardless of whether they
+        // are covered by the dependency graph.
 
         var relevantProperties =
             this._builder.Target.Properties
@@ -313,7 +304,8 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
     {
         if ( !this._targetImplementsInpc )
         {
-            this._builder.Advice.WithTemplateProvider( Templates.Provider ).ImplementInterface( this._builder.Target, this._elements.INotifyPropertyChanged );
+            // TODO: Remove workaround to #33870
+            this._builder.Advice/*.WithTemplateProvider( Templates.Provider )*/.ImplementInterface( this._builder.Target, this._elements.INotifyPropertyChanged );
         }
     }
 
@@ -329,7 +321,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
         foreach ( var node in allNodesDepthFirst )
         {
-            if ( node.Children.Count == 0 || node.Parent!.IsRoot )
+            if ( node.Children.Count == 0 || node.Parent.IsRoot )
             {
                 // Leaf nodes and root properties should never have update methods.
                 node.UpdateMethod.Value = null;
@@ -346,7 +338,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 var lastValueField = this.GetOrCreateLastValueField( node );
                 var onPropertyChangedHandlerField = this.GetOrCreateHandlerField( node );
 
-                var methodName = this.GetAndReserveUnusedMemberName( $"Update{node.ContiguousPropertyPathWithoutDot}" );
+                var methodName = this.GetAndReserveUnusedMemberName( $"Update{node.ContiguousPropertyPath}" );
 
                 var accessChildExprBuilder = new ExpressionBuilder();
 
@@ -406,7 +398,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         {
             var propertyTypeInstrumentationKind = this._inpcInstrumentationKindLookup.Get( p.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
-            var node = this.DependencyGraph.GetChild( p.GetSymbol() );
+            var node = this.DependencyGraph.Children.FirstOrDefault( n => n.FieldOrProperty == p );
 
             switch ( p.Type.IsReferenceType )
             {
@@ -505,45 +497,44 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
         return this._inheritedOnUnmonitoredObservablePropertyChangedPropertyNames.Contains( propertyName );
     }
-
-    private ClassicProcessingNode? _dependencyGraph;
-    private bool _prepareDependencyGraphReportedErrors;
-
-    private ClassicProcessingNode PrepareDependencyGraph()
+    
+    /// <summary>
+    /// Builds and validates the dependency graph (including validating dependency analysis).
+    /// </summary>
+    /// <returns>Success. <see langword="true"/> if the graph was built wihout diagnostic errors, otherwise <see langword="false"/>.</returns>
+    private bool BuildAndValidateDependencyGraph()
     {
-        var graph = Implementation.DependencyGraph.GetDependencyGraph<ClassicProcessingNode>(
+        var hasErrors = false;
+
+        var structuralGraph = DependencyAnalysis.DependencyGraph.GetDependencyGraph(
             this._builder.Target,
             ( diagnostic, location ) =>
             {
-                this._prepareDependencyGraphReportedErrors |= diagnostic.Definition.Severity == Severity.Error;
+                hasErrors |= diagnostic.Definition.Severity == Severity.Error;
                 this._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
             } );
 
-        foreach ( var node in graph.DescendantsDepthFirst() )
+        var processingGraph =
+            structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>(
+                new( this._builder.Target.Compilation, this ) );
+
+        foreach ( var node in processingGraph.DescendantsDepthFirst() )
         {
-            this._prepareDependencyGraphReportedErrors |= !node.Initialize( this );
+            hasErrors |= !this.ValidateFieldOrProperty( node.FieldOrProperty );
         }
 
-        return graph;
+        this._dependencyGraph.Value = processingGraph;
+
+        return !hasErrors;
     }
 
-    private ClassicProcessingNode DependencyGraph => this._dependencyGraph ??= this.PrepareDependencyGraph();
-
-    private bool PrepareDependencyGraphReportedErrors
-    {
-        get
-        {
-            _ = this.DependencyGraph;
-
-            return this._prepareDependencyGraphReportedErrors;
-        }
-    }
+    private ClassicProcessingNode DependencyGraph => this._dependencyGraph.Value;
 
     private IField GetOrCreateLastValueField( ClassicProcessingNode node )
     {
-        if ( node.LastValueField == null )
+        if ( !node.LastValueField.ValueIsSet )
         {
-            var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.ContiguousPropertyPathWithoutDot}" );
+            var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.ContiguousPropertyPath}" );
 
             var introduceLastValueFieldResult = this._builder.Advice.IntroduceField(
                 this._builder.Target,
@@ -553,17 +544,17 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 OverrideStrategy.Fail,
                 b => b.Accessibility = Accessibility.Private );
 
-            node.SetLastValueField( introduceLastValueFieldResult.Declaration );
+            node.LastValueField.Value = introduceLastValueFieldResult.Declaration;
         }
 
-        return node.LastValueField!;
+        return node.LastValueField.Value;
     }
 
     private IField GetOrCreateHandlerField( ClassicProcessingNode node )
     {
-        if ( node.HandlerField == null )
+        if ( !node.HandlerField.ValueIsSet )
         {
-            var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.ContiguousPropertyPathWithoutDot}PropertyChangedHandler" );
+            var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.ContiguousPropertyPath}PropertyChangedHandler" );
 
             var introduceHandlerFieldResult = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceField(
                 this._builder.Target,
@@ -573,10 +564,10 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 OverrideStrategy.Fail,
                 b => b.Accessibility = Accessibility.Private );
 
-            node.SetHandlerField( introduceHandlerFieldResult.Declaration );
+            node.HandlerField.Value = introduceHandlerFieldResult.Declaration;
         }
 
-        return node.HandlerField!;
+        return node.HandlerField.Value;
     }
 
     private IMethod GetOrCreateRootPropertySubscribeMethod( ClassicProcessingNode node )
@@ -594,7 +585,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
             var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
                 this._builder.Target,
-                nameof( Templates.Subscribe ),
+                nameof( Templates.SubscribeTo ),
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
                 b =>
@@ -602,7 +593,11 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                     b.Name = subscribeMethodName;
                     b.Accessibility = Accessibility.Private;
                 },
-                args: new { TValue = node.FieldOrProperty.Type, ctx = this, node, handlerField } );
+                args: new { 
+                    TValue = node.FieldOrProperty.Type,
+                    deferredExecutionContext = this._deferredTemplateExecutionContext,
+                    node, 
+                    handlerField } );
 
             node.SubscribeMethod.Value = result.Declaration;
         }
@@ -767,4 +762,48 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
             return isValid;
         }
     }
+
+    private InpcBaseHandling DetermineInpcBaseHandlingForNode( ClassicProcessingNode node )
+    {
+        switch ( node.PropertyTypeInpcInstrumentationKind )
+        {
+            case InpcInstrumentationKind.Unknown:
+                return InpcBaseHandling.Unknown;
+
+            case InpcInstrumentationKind.None:
+                return InpcBaseHandling.NotApplicable;
+
+            case InpcInstrumentationKind.Implicit:
+            case InpcInstrumentationKind.Explicit:
+                if ( node.Depth == 1 )
+                {
+                    // Root property
+                    return node.FieldOrProperty.DeclaringType == this._builder.Target
+                        ? InpcBaseHandling.NotApplicable
+                        : this.HasInheritedOnChildPropertyChangedPropertyPath( node.Name )
+                            ? InpcBaseHandling.OnChildPropertyChanged
+                            : this.HasInheritedOnUnmonitoredObservablePropertyChangedProperty( node.Name )
+                                ? InpcBaseHandling.OnUnmonitoredObservablePropertyChanged
+                                : InpcBaseHandling.OnPropertyChanged;
+                }
+                else
+                {
+                    // Child property
+                    return this.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath )
+                        ? InpcBaseHandling.OnChildPropertyChanged
+                        : this.HasInheritedOnUnmonitoredObservablePropertyChangedProperty( node.DottedPropertyPath )
+                            ? InpcBaseHandling.OnUnmonitoredObservablePropertyChanged
+                            : InpcBaseHandling.None;
+                }
+
+            default:
+                throw new NotSupportedException();
+        }
+    }
+
+    InpcInstrumentationKind IClassicProcessingNodeInitializationHelper.GetInpcInstrumentationKind( IType type )
+        => this._inpcInstrumentationKindLookup.Get( type );
+
+    InpcBaseHandling IClassicProcessingNodeInitializationHelper.DetermineInpcBaseHandlingForNode( ClassicProcessingNode node )
+        => this.DetermineInpcBaseHandlingForNode( node );
 }

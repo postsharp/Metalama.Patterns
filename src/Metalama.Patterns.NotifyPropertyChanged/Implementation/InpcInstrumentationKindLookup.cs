@@ -11,9 +11,9 @@ internal sealed class InpcInstrumentationKindLookup
 {
     private readonly ConcurrentDictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
     private readonly Func<IType, InpcInstrumentationKind> _getCore;
-    private readonly CommonElements _elements;
+    private readonly Elements _elements;
 
-    public InpcInstrumentationKindLookup( CommonElements elements )
+    public InpcInstrumentationKindLookup( Elements elements )
     {
         this._getCore = this.GetCore;
         this._elements = elements;

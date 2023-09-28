@@ -4,6 +4,9 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
+/// <summary>
+/// A value that may be defined later, where the potential for <see cref="WillBeDefined"/> as specified at construction can be yes or no.
+/// </summary>
 [CompileTime]
 internal interface IReadOnlyDeferredYesNo<T> : IReadOnlyDeferredYesNoMaybe<T>
     where T : class

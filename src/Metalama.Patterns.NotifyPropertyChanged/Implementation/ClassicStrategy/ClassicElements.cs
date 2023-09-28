@@ -4,12 +4,12 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
+namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal sealed class Elements : CommonElements
+internal sealed class ClassicElements : Elements
 {
-    public Elements( INamedType target ) : base( target )
+    public ClassicElements( INamedType target ) : base( target )
     {
         this.OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnChildPropertyChangedMethodAttribute) );
         this.OnUnmonitoredObservablePropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredObservablePropertyChangedMethodAttribute) );

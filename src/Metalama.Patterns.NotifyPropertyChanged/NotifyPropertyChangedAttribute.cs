@@ -3,7 +3,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
+using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -19,8 +21,17 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
     void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // TODO: For future use, select the desired implementation strategy by configuration.
+        // TODO: Special case for design time. Consider a factory of IImplementationStrategyBuilder.
 
-        var implementation = new ClassicImplementationStrategyBuilder()
-        builder.Outbound.AddAspect<ClassicImplementationStrategyBuilder>();
+        IImplementationStrategyBuilder strategyBuilder = new ClassicImplementationStrategyBuilder( builder );
+
+        strategyBuilder.BuildAspect();
+
+        (strategyBuilder as IDisposable)?.Dispose();
     }
+
+    // TODO: Remove workaround to #33870
+    // Remove this member, use from Classic.Templates instead.
+    [InterfaceMember]
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

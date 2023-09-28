@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FluentAssertions;
-using Metalama.Patterns.NotifyPropertyChanged.Implementation;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 using Metalama.Testing.UnitTesting;
 using Xunit;
 using Xunit.Abstractions;
@@ -84,7 +84,7 @@ class D
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = DependencyGraph.GetDependencyGraph<DependencyGraph.Node>( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
+        var result = DependencyGraph.GetDependencyGraph( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
 
         const string expected = @"<root>
   A1

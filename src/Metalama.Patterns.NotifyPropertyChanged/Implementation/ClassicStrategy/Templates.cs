@@ -4,15 +4,15 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation.Graph;
 using System.ComponentModel;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
+namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
 [CompileTime]
 internal sealed class Templates : ITemplateProvider
 {
-
-    internal static TemplateProvider Provider { get; } = TemplateProvider.FromType<Templates>();
+    internal static TemplateProvider Provider { get; } = TemplateProvider.FromInstance( new Templates() );
 
     private Templates() { }
 
@@ -20,6 +20,7 @@ internal sealed class Templates : ITemplateProvider
 
     private static T ExpectNotNull<T>( T? obj ) => obj ?? throw new InvalidOperationException( "A null value was not expected here." );
 
+    // TODO: Remove workaround to #33870
     // ReSharper disable once EventNeverSubscribedTo.Global
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -27,10 +28,10 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     internal static void OverrideInpcRefTypePropertySetter(
         dynamic? value,
-        [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext,
+        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
         [CompileTime] IField? handlerField,
         [CompileTime] IMethod? subscribeMethod,
-        [CompileTime] IReadOnlyDependencyGraphNode? node )
+        [CompileTime] IReadOnlyClassicProcessingNode? node )
     {
         var ctx = deferredExecutionContext.Value;
         var inpcImplementationKind = node?.PropertyTypeInpcInstrumentationKind ?? ctx.InpcInstrumentationKindLookup.Get( meta.Target.Property.Type );
@@ -88,7 +89,7 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                foreach ( var name in node.GetAllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
                 {
                     ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
                 }
@@ -106,9 +107,9 @@ internal sealed class Templates : ITemplateProvider
     }
 
     [Template]
-    internal static void Subscribe<[CompileTime] TValue>(
+    internal static void SubscribeTo<[CompileTime] TValue>(
         TValue? value,
-        [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext,
+        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
         [CompileTime] ClassicProcessingNode node,
         [CompileTime] IField handlerField )
         where TValue : INotifyPropertyChanged
@@ -154,7 +155,7 @@ internal sealed class Templates : ITemplateProvider
 
     [Template]
     internal static void UpdateChildInpcProperty(
-        [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext,
+        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
         [CompileTime] ClassicProcessingNode node,
         [CompileTime] IExpression accessChildExpression,
         [CompileTime] IField lastValueField,
@@ -211,20 +212,20 @@ internal sealed class Templates : ITemplateProvider
             }
 
             // Notify refs to the current node and any children without an update method.
-            foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+            foreach ( var name in node.GetAllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
             {
                 ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
             }
 
             // Don't notify if we're joining on to existing NotifyChildPropertyChanged support from a base type, or we'll be stuck in a loop.
-            if ( node.Parent!.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
+            if ( node.Parent.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
             {
-                ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.Parent!.DottedPropertyPath, node.Name );
+                ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.Parent.DottedPropertyPath, node.Name );
             }
             else if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
             {
                 meta.InsertComment(
-                    $"Not calling OnChildPropertyChanged('{node.Parent!.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
+                    $"Not calling OnChildPropertyChanged('{node.Parent.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
             }
         }
     }
@@ -232,8 +233,8 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     internal static void OverrideUninstrumentedTypePropertySetter( 
         dynamic? value,
-        [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext,
-        [CompileTime] IReadOnlyDependencyGraphNode? node,
+        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
+        [CompileTime] IReadOnlyClassicProcessingNode? node,
         [CompileTime] EqualityComparisonKind compareUsing,
         [CompileTime] InpcInstrumentationKind propertyTypeInstrumentationKind )
     {
@@ -284,7 +285,7 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     internal void OnPropertyChanged( 
         string propertyName,
-        [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext )
+        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext )
     {
         var ctx = deferredExecutionContext.Value;
 
@@ -320,7 +321,7 @@ internal sealed class Templates : ITemplateProvider
                 continue;
             }
 
-            IReadOnlyCollection<IReadOnlyDependencyGraphNode> refsToNotify;
+            IReadOnlyCollection<IReadOnlyClassicProcessingNode> refsToNotify;
 
             // When a base supports OnChildPropertyChanged for a root property, changes to the ref itself will
             // be notified by OnPropertyChanged (the base won't call OnChildPropertyChanged for each child property
@@ -328,7 +329,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( node is { InpcBaseHandling: InpcBaseHandling.OnChildPropertyChanged, Depth: > 1 } )
             {
-                if ( node.DirectReferences.Count == 0 )
+                if ( node.ReferencedBy.Count == 0 )
                 {
                     if ( ctx.CommonOptions.DiagnosticCommentVerbosityOrDefault > 0 )
                     {
@@ -341,13 +342,13 @@ internal sealed class Templates : ITemplateProvider
                 else
                 {
                     // Only notify references to the node itself, child node changes will be handled via OnChildPropertyChanged.
-                    refsToNotify = node.GetAllReferences();
+                    refsToNotify = node.GetAllReferencedBy();
                 }
             }
             else
             {
                 // Notify refs to the current node and any children without an update method.
-                refsToNotify = node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Value == null );
+                refsToNotify = node.GetAllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null );
             }
 
             var childUpdateMethods = node.ChildUpdateMethods;
@@ -392,8 +393,8 @@ internal sealed class Templates : ITemplateProvider
                                 // configured not to use it). So this is like retrospectively adding a property setter override. Note that
                                 // the base *must* provide OnPropertyChanged support for each of its properties as a minimum contract.
 
-                                var handlerField = ExpectNotNull( node.HandlerField );
-                                var lastValueField = ExpectNotNull( node.LastValueField );
+                                var handlerField = node.HandlerField.Value;
+                                var lastValueField = node.LastValueField.Value;
                                 var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
 
                                 var oldValue = lastValueField.Value;
@@ -502,7 +503,7 @@ internal sealed class Templates : ITemplateProvider
     internal static void OnChildPropertyChanged(
         string parentPropertyPath,
         string propertyName,
-        [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext )
+        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext )
     {
         var ctx = deferredExecutionContext.Value;
 
@@ -568,11 +569,11 @@ internal sealed class Templates : ITemplateProvider
             // NB: The following code is similar to the OnChildPropertyChangedDelegateBody template. Consider keeping any changes to relevant logic in sync.
 
             var hasUpdateMethod = node.UpdateMethod.Value != null;
-            var hasRefs = node.DirectReferences.Count > 0;
+            var hasRefs = node.ReferencedBy.Count > 0;
 
             if ( hasUpdateMethod || hasRefs )
             {
-                if ( parentPropertyPath == node.Parent!.DottedPropertyPath && propertyName == node.Name )
+                if ( parentPropertyPath == node.Parent.DottedPropertyPath && propertyName == node.Name )
                 {
                     if ( hasUpdateMethod )
                     {
@@ -582,7 +583,7 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         // No update method, notify here.
-                        foreach ( var refName in node.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
+                        foreach ( var refName in node.GetAllReferencedBy().Select( n => n.Name ).OrderBy( n => n ) )
                         {
                             ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( refName );
                         }
@@ -609,7 +610,7 @@ internal sealed class Templates : ITemplateProvider
         string propertyPath,
         INotifyPropertyChanged? oldValue,
         INotifyPropertyChanged? newValue,
-        [CompileTime] Deferred<TemplateExecutionContext> deferredExecutionContext )
+        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext )
     {
         var ctx = deferredExecutionContext.Value;
 
@@ -655,7 +656,7 @@ internal sealed class Templates : ITemplateProvider
                 // Note that here we may be dealing with a root property defined in another type (so like a setter), or any descendant node (so
                 // like an Update method).
 
-                var handlerField = ExpectNotNull( node.HandlerField );
+                var handlerField = node.HandlerField.Value;
 
                 if ( oldValue != null )
                 {
@@ -685,7 +686,7 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.GetAllReferences( includeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                foreach ( var name in node.GetAllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
                 {
                     ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
                 }
@@ -701,7 +702,7 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     private static void OnChildPropertyChangedDelegateBody(
         [CompileTime] TemplateExecutionContext ctx,
-        [CompileTime] IReadOnlyDependencyGraphNode node,
+        [CompileTime] IReadOnlyClassicProcessingNode node,
         [CompileTime] IExpression propertyChangedEventArgs )
     {
         var propertyName = propertyChangedEventArgs.Value!.PropertyName;
@@ -711,7 +712,7 @@ internal sealed class Templates : ITemplateProvider
             // NB: The following code is similar to part of the OnChildPropertyChanged template. Consider keeping any changes to relevant logic in sync.
 
             var hasUpdateMethod = childNode.UpdateMethod.Value != null;
-            var hasRefs = childNode.DirectReferences.Count > 0;
+            var hasRefs = childNode.ReferencedBy.Count > 0;
 
             if ( hasUpdateMethod || hasRefs )
             {
@@ -725,7 +726,7 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         // No update method, notify here.
-                        foreach ( var refName in childNode.GetAllReferences().Select( n => n.Name ).OrderBy( n => n ) )
+                        foreach ( var refName in childNode.GetAllReferencedBy().Select( n => n.Name ).OrderBy( n => n ) )
                         {
                             ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( refName );
                         }

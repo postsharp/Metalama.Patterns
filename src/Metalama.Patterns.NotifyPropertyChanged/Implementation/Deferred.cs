@@ -5,9 +5,8 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 /// <summary>
-/// A declaration that will certainly be defined later.
+/// A value that will certainly be defined later.
 /// </summary>
-/// <typeparam name="T"></typeparam>
 [CompileTime]
 internal sealed class Deferred<T> : DeferredYesNo<T>, IReadOnlyDeferred<T>
     where T : class

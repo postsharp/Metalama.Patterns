@@ -7,7 +7,6 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 /// <summary>
 /// A value that may be defined later, where the potential for <see cref="WillBeDefined"/> as specified at construction can be yes, no or maybe.
 /// </summary>
-/// <typeparam name="T"></typeparam>
 [CompileTime]
 internal class DeferredYesNoMaybe<T> : IReadOnlyDeferredYesNoMaybe<T>
     where T : class

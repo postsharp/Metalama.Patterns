@@ -7,9 +7,9 @@ using System.ComponentModel;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 [CompileTime]
-internal class CommonElements
+internal class Elements
 {
-    public CommonElements( INamedType target )
+    public Elements( INamedType target )
     {
         this.Target = target;
         this.INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof(INotifyPropertyChanged) );

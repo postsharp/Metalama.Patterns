@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
+namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 
 /* TODO: Detect invalid constructs, including:
  * - Reference to non-INPC property (also INPC property with [IgnoreAutoChangeNotification]), unless the property has [SafeForDependencyAnalysis].
@@ -17,8 +17,6 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 [CompileTime]
 internal static partial class DependencyGraph
 {
-
-
     public delegate void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null );
 
     public static Node GetDependencyGraph( INamedType type, ReportDiagnostic reportDiagnostic )
@@ -65,7 +63,7 @@ internal static partial class DependencyGraph
 
     private sealed class Visitor : CSharpSyntaxWalker
     {
-        private readonly IConstructionNode _tree;
+        private readonly IGraphBuildingNode _tree;
         private readonly ISymbol _originSymbol;
         private readonly SemanticModel _semanticModel;
         private readonly List<IPropertySymbol> _properties = new();
@@ -75,7 +73,7 @@ internal static partial class DependencyGraph
         private int _accessorStartDepth;
 
         public Visitor(
-            IConstructionNode tree,
+            IGraphBuildingNode tree,
             ISymbol originSymbol,
             SemanticModel semanticModel,
             ReportDiagnostic reportDiagnostic )
@@ -100,10 +98,10 @@ internal static partial class DependencyGraph
 
                     foreach ( var p in this._properties )
                     {
-                        treeNode = treeNode.GetOrAddChild( p ); // (IFieldOrProperty) this._compilation.GetDeclaration( p ) );
+                        treeNode = treeNode.GetOrAddChild( p );
                     }
 
-                    treeNode.AddReferencedBy( this._tree.GetOrAddChild( this._originSymbol ) ); //, this._originFieldOrProperty ) );
+                    treeNode.AddReferencedBy( this._tree.GetOrAddChild( this._originSymbol ) );
                 }
 
                 this.ClearCurrentAccessor();

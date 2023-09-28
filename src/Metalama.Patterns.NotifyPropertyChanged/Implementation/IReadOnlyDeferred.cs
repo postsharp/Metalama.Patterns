@@ -4,6 +4,9 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
+/// <summary>
+/// A value that will certainly be defined later.
+/// </summary>
 [CompileTime]
 internal interface IReadOnlyDeferred<T> : IReadOnlyDeferredYesNo<T>
     where T : class

@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.NotifyPropertyChanged.Options;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
+namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
 /*
  * NB: TemplateExecutionContext members must not hold any reference to the IAspectBuilder<> passed
@@ -19,9 +19,9 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Natural;
 internal sealed record TemplateExecutionContext(
     NotifyPropertyChangedOptions CommonOptions,
     ClassicImplementationStrategyOptions Options,
-    Elements Elements,
+    ClassicElements Elements,
     InpcInstrumentationKindLookup InpcInstrumentationKindLookup,
-    IReadOnlyDependencyGraphNode DependencyGraph,
+    IReadOnlyClassicProcessingNode DependencyGraph,
     IMethod? OnUnmonitoredObservablePropertyChangedMethod,
     IMethod OnPropertyChangedMethod,
     IMethod OnChildPropertyChangedMethod,
