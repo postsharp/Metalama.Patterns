@@ -20,7 +20,6 @@ internal sealed class Templates : ITemplateProvider
 
     private static T ExpectNotNull<T>( T? obj ) => obj ?? throw new InvalidOperationException( "A null value was not expected here." );
 
-    // TODO: Remove workaround to #33870
     // ReSharper disable once EventNeverSubscribedTo.Global
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;

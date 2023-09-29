@@ -22,8 +22,7 @@ internal class DesignTimeImplementationStrategyBuilder : IImplementationStrategy
     protected virtual void BuildAspect()
     {
         // Introduce the INotifyPropertyChanged if it's not already implemented.
-        // TODO: Remove workaround to #33870
-        this.Builder.Advice/*.WithTemplateProvider( this )*/.ImplementInterface( this.Builder.Target, typeof( INotifyPropertyChanged ), OverrideStrategy.Ignore );
+        this.Builder.Advice.WithTemplateProvider( this ).ImplementInterface( this.Builder.Target, typeof( INotifyPropertyChanged ), OverrideStrategy.Ignore );
     }
 
     void IImplementationStrategyBuilder.BuildAspect()
@@ -31,7 +30,6 @@ internal class DesignTimeImplementationStrategyBuilder : IImplementationStrategy
         this.BuildAspect();
     }
 
-    // TODO: Remove workaround to #33870
     // ReSharper disable once EventNeverSubscribedTo.Global
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;

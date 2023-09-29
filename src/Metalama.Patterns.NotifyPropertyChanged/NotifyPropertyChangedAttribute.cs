@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.NotifyPropertyChanged.Options;
-using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
 
@@ -26,9 +25,4 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
         (strategyBuilder as IDisposable)?.Dispose();
     }
-
-    // TODO: Remove workaround to #33870
-    // Remove this member, use from Classic.Templates instead.
-    [InterfaceMember]
-    public event PropertyChangedEventHandler? PropertyChanged;
 }

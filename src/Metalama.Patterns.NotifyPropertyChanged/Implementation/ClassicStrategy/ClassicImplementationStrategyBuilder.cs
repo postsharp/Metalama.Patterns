@@ -304,8 +304,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     {
         if ( !this._targetImplementsInpc )
         {
-            // TODO: Remove workaround to #33870
-            this._builder.Advice/*.WithTemplateProvider( Templates.Provider )*/.ImplementInterface( this._builder.Target, this._elements.INotifyPropertyChanged );
+            this._builder.Advice.WithTemplateProvider( Templates.Provider ).ImplementInterface( this._builder.Target, this._elements.INotifyPropertyChanged );
         }
     }
 
