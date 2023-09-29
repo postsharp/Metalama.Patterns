@@ -12,18 +12,18 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DesignTimeStrat
 [CompileTime]
 internal class DesignTimeImplementationStrategyBuilder : IImplementationStrategyBuilder, ITemplateProvider
 {
-    protected readonly IAspectBuilder<INamedType> _builder;
+    protected IAspectBuilder<INamedType> Builder { get; }
     
     public DesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> aspectBuilder )
     {
-        this._builder = aspectBuilder;
+        this.Builder = aspectBuilder;
     }
 
     protected virtual void BuildAspect()
     {
         // Introduce the INotifyPropertyChanged if it's not already implemented.
         // TODO: Remove workaround to #33870
-        this._builder.Advice/*.WithTemplateProvider( this )*/.ImplementInterface( this._builder.Target, typeof( INotifyPropertyChanged ), OverrideStrategy.Ignore );
+        this.Builder.Advice/*.WithTemplateProvider( this )*/.ImplementInterface( this.Builder.Target, typeof( INotifyPropertyChanged ), OverrideStrategy.Ignore );
     }
 
     void IImplementationStrategyBuilder.BuildAspect()

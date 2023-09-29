@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using System.ComponentModel;
 
@@ -15,7 +14,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 public sealed class ClassicImplementationStrategyOptionsAttribute
     : Attribute, IHierarchicalOptionsProvider
 {
-    IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( IDeclaration targetDeclaration )
+    IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
     {
         return new[] { 
             new ClassicImplementationStrategyOptions
@@ -23,7 +22,7 @@ public sealed class ClassicImplementationStrategyOptionsAttribute
                 EnableOnUnmonitoredObservablePropertyChangedMethod = this._enableOnUnmonitoredObservablePropertyChangedMethod
             } };
     }
-
+    
     private bool? _enableOnUnmonitoredObservablePropertyChangedMethod;
 
     /// <summary>

@@ -124,7 +124,7 @@ internal static partial class DependencyGraph
                 // This creates multiple potential access expressions.
 
                 this._reportDiagnostic(
-                    DiagnosticDescriptors.DependencyAnalysis.ErrorMiscUnsupportedExpression.WithArguments( "Coalesce" ),
+                    DiagnosticDescriptors.ErrorMiscUnsupportedExpression.WithArguments( "Coalesce" ),
                     node.GetLocation() );
 
                 this.ClearCurrentAccessor();
@@ -180,7 +180,7 @@ internal static partial class DependencyGraph
                 {
                     // Not a property (eg, it's a method or field).
                     this._reportDiagnostic(
-                        DiagnosticDescriptors.DependencyAnalysis.ErrorMiscUnsupportedIdentifier
+                        DiagnosticDescriptors.ErrorMiscUnsupportedIdentifier
                             .WithArguments( (node.Identifier.Text, symbol == null ? "<unresolved>" : symbol.Kind.ToString()) ),
                         node.GetLocation() );
 

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
@@ -34,7 +33,7 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
 
     public Type? ImplementationStrategyFactoryType { get; set; }
 
-    IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( IDeclaration targetDeclaration )
+    IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
     {
         IImplementationStrategyFactory? factory = null;
 
@@ -49,12 +48,12 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
                 }
                 else
                 {
-                    // TODO: Report diagnostic, ImplementationStrategyFactoryType must have a public parameterless constructor.
+                    context.Diagnostics.Report( DiagnosticDescriptors.ErrorTypeMustHaveAPublicParameterlessConstructor.WithArguments( nameof( this.ImplementationStrategyFactoryType ) ) );
                 }
             }
             else
             {
-                // TODO: Report diagnostic, ImplementationStrategyFactoryType must implement IImplementationStrategyFactory.
+                context.Diagnostics.Report( DiagnosticDescriptors.ErrorTypeMustImplementInterface.WithArguments( (nameof( this.ImplementationStrategyFactoryType ), nameof( IImplementationStrategyFactory )) ) );
             }
         }
 

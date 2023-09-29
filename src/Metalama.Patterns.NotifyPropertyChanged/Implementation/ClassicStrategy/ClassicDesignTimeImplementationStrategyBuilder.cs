@@ -37,8 +37,8 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
     {
         var isOverride = this._baseOnPropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
-            this._builder.Target,
+        var result = this.Builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
+            this.Builder.Target,
             nameof( OnPropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -49,7 +49,7 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
                     b.Name = this._baseOnPropertyChangedMethod!.Name;
                 }
 
-                if ( this._builder.Target.IsSealed )
+                if ( this.Builder.Target.IsSealed )
                 {
                     b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
@@ -65,8 +65,8 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
     {
         var isOverride = this._baseOnChildPropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
-            this._builder.Target,
+        var result = this.Builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
+            this.Builder.Target,
             nameof( OnChildPropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -77,7 +77,7 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
                     b.Name = this._baseOnChildPropertyChangedMethod!.Name;
                 }
 
-                if ( this._builder.Target.IsSealed )
+                if ( this.Builder.Target.IsSealed )
                 {
                     b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }
@@ -91,15 +91,15 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
 
     private void IntroduceOnUnmonitoredObservablePropertyChanged()
     {
-        if ( !this._builder.Target.Enhancements().GetOptions<Options.ClassicImplementationStrategyOptions>().EnableOnUnmonitoredObservablePropertyChangedMethod == true )
+        if ( !this.Builder.Target.Enhancements().GetOptions<Options.ClassicImplementationStrategyOptions>().EnableOnUnmonitoredObservablePropertyChangedMethod == true )
         {
             return;
         }
 
         var isOverride = this._baseOnUnmonitoredObservablePropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
-            this._builder.Target,
+        var result = this.Builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
+            this.Builder.Target,
             nameof( OnUnmonitoredObservablePropertyChanged ),
             IntroductionScope.Instance,
             isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -110,7 +110,7 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
                     b.Name = this._baseOnUnmonitoredObservablePropertyChangedMethod!.Name;
                 }
 
-                if ( this._builder.Target.IsSealed )
+                if ( this.Builder.Target.IsSealed )
                 {
                     b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
                 }

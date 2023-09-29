@@ -54,7 +54,7 @@ public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompil
             if ( !int.TryParse( verbosityStr, out diagnosticCommentVerbosity ) || diagnosticCommentVerbosity < 0 || diagnosticCommentVerbosity > 3 )
             {
                 context.Diagnostics.Report(
-                    DiagnosticDescriptors.NotifyPropertyChanged.WarningInvalidProjectPropertyValueWillBeIgnored.WithArguments(
+                    DiagnosticDescriptors.WarningInvalidProjectPropertyValueWillBeIgnored.WithArguments(
                         (InpcDiagnosticCommentVerbosity,
                         verbosityStr,
                         "be an integer between 0 and 3 inclusive.") ) );

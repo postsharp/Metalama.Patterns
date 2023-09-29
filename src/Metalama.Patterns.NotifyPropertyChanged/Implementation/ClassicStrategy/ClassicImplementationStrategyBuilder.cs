@@ -291,7 +291,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         if ( this._targetImplementsInpc && this._baseOnPropertyChangedMethod == null )
         {
             this._builder.Diagnostics.Report(
-                DiagnosticDescriptors.NotifyPropertyChanged.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
+                DiagnosticDescriptors.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
                     .WithArguments( this._builder.Target ) );
 
             isValid = false;
@@ -718,7 +718,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                     // and non-INPC-type code which is used at runtime when T does not implement INPC.
 
                     this._builder.Diagnostics.Report(
-                        DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments(
+                        DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments(
                             (fp.DeclarationKind, fp, fp.Type) ),
                         fp );
 
@@ -731,7 +731,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                     if ( typeImplementsInpc )
                     {
                         this._builder.Diagnostics.Report(
-                            DiagnosticDescriptors.NotifyPropertyChanged.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments(
+                            DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments(
                                 (fp.DeclarationKind, fp, fp.Type) ),
                             fp );
 
@@ -744,7 +744,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             if ( fp.IsVirtual )
             {
                 this._builder.Diagnostics.Report(
-                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorVirtualMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
+                    DiagnosticDescriptors.ErrorVirtualMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
                     fp );
 
                 isValid = false;
@@ -753,7 +753,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             if ( fp.IsNew )
             {
                 this._builder.Diagnostics.Report(
-                    DiagnosticDescriptors.NotifyPropertyChanged.ErrorNewMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
+                    DiagnosticDescriptors.ErrorNewMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
                     fp );
 
                 isValid = false;
