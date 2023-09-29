@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using Metalama.Patterns.Caching.Implementation;
 
@@ -75,6 +74,6 @@ public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProv
         get => this._options.UseDependencyInjection ?? CachingOptions.DefaultCompileTimeOptions.UseDependencyInjection!.Value;
         set => this._options = this._options with { UseDependencyInjection = value };
     }
-
-    public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration targetDeclaration ) => new[] { this._options };
+    
+    public IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context ) => new[] { this._options };
 }
