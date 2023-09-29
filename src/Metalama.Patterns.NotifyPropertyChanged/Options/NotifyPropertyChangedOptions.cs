@@ -3,14 +3,14 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
-using Metalama.Framework.Project;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 
 [RunTimeOrCompileTime]
 public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
 {
-    private const int _defaultDiagnosticCommentVerbosity = 0;
+    public IImplementationStrategyFactory? ImplementationStrategyFactory { get; set; }
 
     private int? _diagnosticCommentVerbosity;
 
@@ -31,37 +31,39 @@ public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompil
             this._diagnosticCommentVerbosity = value;
         }
     }
-
-    internal int DiagnosticCommentVerbosityOrDefault => this.DiagnosticCommentVerbosity ?? _defaultDiagnosticCommentVerbosity;
-
-    // TODO: Add property to select the desired implementation once there is more than one.
-
+    
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (NotifyPropertyChangedOptions) changes;
 
         return new NotifyPropertyChangedOptions
         {
+            ImplementationStrategyFactory = other.ImplementationStrategyFactory ?? this.ImplementationStrategyFactory,
             DiagnosticCommentVerbosity = other.DiagnosticCommentVerbosity ?? this.DiagnosticCommentVerbosity
         };
     }
 
-    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( IProject project )
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
     {
-        // TODO: Report diagnostic if out of range if/when a diagnostic adder is available here.
+        const string InpcDiagnosticCommentVerbosity = "InpcDiagnosticCommentVerbosity";
 
-        var diagnosticCommentVerbosity = _defaultDiagnosticCommentVerbosity;
-
-        if ( project.TryGetProperty( "InpcDiagnosticCommentVerbosity", out var verbosityStr ) )
+        var diagnosticCommentVerbosity = 0;
+        
+        if ( context.Project.TryGetProperty( InpcDiagnosticCommentVerbosity, out var verbosityStr ) )
         {
-            if ( int.TryParse( verbosityStr, out diagnosticCommentVerbosity ) )
+            if ( !int.TryParse( verbosityStr, out diagnosticCommentVerbosity ) || diagnosticCommentVerbosity < 0 || diagnosticCommentVerbosity > 3 )
             {
-                diagnosticCommentVerbosity = Math.Max( 0, Math.Min( diagnosticCommentVerbosity, 3 ) );
+                context.Diagnostics.Report(
+                    DiagnosticDescriptors.NotifyPropertyChanged.WarningInvalidProjectPropertyValueWillBeIgnored.WithArguments(
+                        (InpcDiagnosticCommentVerbosity,
+                        verbosityStr,
+                        "be an integer between 0 and 3 inclusive.") ) );
             }
         }
 
         return new NotifyPropertyChangedOptions()
         {
+            ImplementationStrategyFactory = Implementation.ClassicStrategy.ClassicImplementationStrategyFactory.Instance,
             DiagnosticCommentVerbosity = diagnosticCommentVerbosity
         };
     }

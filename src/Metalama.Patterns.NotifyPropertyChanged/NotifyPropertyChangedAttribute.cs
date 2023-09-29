@@ -3,8 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Patterns.NotifyPropertyChanged.Implementation;
-using Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
+using Metalama.Patterns.NotifyPropertyChanged.Options;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged;
@@ -20,10 +19,8 @@ public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedTy
 
     void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        // TODO: For future use, select the desired implementation strategy by configuration.
-        // TODO: Special case for design time. Consider a factory of IImplementationStrategyBuilder.
-
-        IImplementationStrategyBuilder strategyBuilder = new ClassicImplementationStrategyBuilder( builder );
+        var options = builder.Target.Enhancements().GetOptions<NotifyPropertyChangedOptions>();
+        var strategyBuilder = options.ImplementationStrategyFactory!.GetBuilder( builder );
 
         strategyBuilder.BuildAspect();
 

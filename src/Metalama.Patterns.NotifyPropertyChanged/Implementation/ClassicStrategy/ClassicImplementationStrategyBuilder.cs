@@ -46,8 +46,8 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         this._builder = builder;
         this._elements = new ClassicElements( builder.Target );
         this._inpcInstrumentationKindLookup = new( this._elements );
-        this._commonOptions = builder.GetOptions<NotifyPropertyChangedOptions>();
-        this._classicOptions = builder.GetOptions<ClassicImplementationStrategyOptions>();
+        this._commonOptions = builder.Target.Enhancements().GetOptions<NotifyPropertyChangedOptions>();
+        this._classicOptions = builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>();
 
         this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethodOrDefault );
         var target = builder.Target;

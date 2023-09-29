@@ -30,6 +30,17 @@ internal static class DiagnosticDescriptors
                 _category );
 
         /// <summary>
+        /// The project property '{0}' has invalid value '{1}' and will be ignored. The value must {2}.
+        /// </summary>
+        public static readonly DiagnosticDefinition<(string PropertyName, string PropertyValue, string Reason)> WarningInvalidProjectPropertyValueWillBeIgnored =
+            new(
+                "LAMA5151",
+                Warning,
+                "The project property '{0}' has invalid value '{1}' and will be ignored. The value must {2}.",
+                "Invalid project property.",
+                _category );
+
+        /// <summary>
         /// The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.
         /// </summary>
         public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)>

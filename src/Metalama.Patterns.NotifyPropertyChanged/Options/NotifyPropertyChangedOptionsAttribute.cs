@@ -1,13 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Options;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 
 [RunTimeOrCompileTime]
 [AttributeUsage( AttributeTargets.Class | AttributeTargets.Assembly )]
-public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOptionsProvider<NotifyPropertyChangedOptions>
+public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOptionsProvider
 {
     private int? _diagnosticCommentVerbosity;
 
@@ -30,11 +32,38 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
         }
     }
 
-    NotifyPropertyChangedOptions IHierarchicalOptionsProvider<NotifyPropertyChangedOptions>.GetOptions()
+    public Type? ImplementationStrategyFactoryType { get; set; }
+
+    IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( IDeclaration targetDeclaration )
     {
-        return new()
+        IImplementationStrategyFactory? factory = null;
+
+        if ( this.ImplementationStrategyFactoryType != null )
         {
-            DiagnosticCommentVerbosity = this._diagnosticCommentVerbosity
-        };
+            
+            if (typeof(IImplementationStrategyFactory).IsAssignableFrom( this.ImplementationStrategyFactoryType ) )
+            {
+                var ctor = this.ImplementationStrategyFactoryType.GetConstructor( Type.EmptyTypes );
+                if ( ctor != null )
+                {
+                    factory = (IImplementationStrategyFactory) ctor.Invoke( null );
+                }
+                else
+                {
+                    // TODO: Report diagnostic, ImplementationStrategyFactoryType must have a public parameterless constructor.
+                }
+            }
+            else
+            {
+                // TODO: Report diagnostic, ImplementationStrategyFactoryType must implement IImplementationStrategyFactory.
+            }
+        }
+
+        return new[] {
+            new NotifyPropertyChangedOptions()
+            {
+                ImplementationStrategyFactory = factory,
+                DiagnosticCommentVerbosity = this._diagnosticCommentVerbosity
+            } };
     }
 }

@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
-using Metalama.Framework.Project;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Options;
@@ -46,6 +45,6 @@ public sealed class ClassicImplementationStrategyOptions : IHierarchicalOptions<
         };
     }
 
-    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( IProject project )
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
         => DefaultOptions;
 }
