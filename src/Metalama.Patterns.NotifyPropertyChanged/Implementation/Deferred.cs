@@ -5,10 +5,10 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 /// <summary>
-/// A value that will certainly be defined later.
+/// A value that will be defined later.
 /// </summary>
 [CompileTime]
-internal sealed class Deferred<T> : DeferredYesNo<T>, IReadOnlyDeferred<T>
+internal sealed class Deferred<T> : DeferredOptional<T>, IReadOnlyDeferred<T>
     where T : class
 {
     public Deferred()

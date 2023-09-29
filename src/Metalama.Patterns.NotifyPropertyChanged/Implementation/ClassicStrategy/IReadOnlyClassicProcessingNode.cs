@@ -26,7 +26,7 @@ internal interface IReadOnlyClassicProcessingNode : IReadOnlyProcessingNode, INo
     /// will throw if it has not been set. This provides defense against incorrect program design
     /// that could otherwise lead to subtle incorrect behaviour.
     /// </remarks>
-    IReadOnlyDeferredYesNoMaybe<IMethod> UpdateMethod { get; }
+    IReadOnlyDeferredOptional<IMethod> UpdateMethod { get; }
 
     /// <summary>
     /// Gets the non-null <see cref="UpdateMethod"/> declarations of the children of the current node.

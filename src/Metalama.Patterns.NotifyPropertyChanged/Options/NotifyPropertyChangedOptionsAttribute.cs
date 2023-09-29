@@ -39,8 +39,7 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
         IImplementationStrategyFactory? factory = null;
 
         if ( this.ImplementationStrategyFactoryType != null )
-        {
-            
+        {            
             if (typeof(IImplementationStrategyFactory).IsAssignableFrom( this.ImplementationStrategyFactoryType ) )
             {
                 var ctor = this.ImplementationStrategyFactoryType.GetConstructor( Type.EmptyTypes );

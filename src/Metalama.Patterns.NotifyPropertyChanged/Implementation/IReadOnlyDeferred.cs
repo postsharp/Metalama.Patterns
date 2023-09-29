@@ -8,7 +8,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 /// A value that will certainly be defined later.
 /// </summary>
 [CompileTime]
-internal interface IReadOnlyDeferred<T> : IReadOnlyDeferredYesNo<T>
+internal interface IReadOnlyDeferred<T> : IReadOnlyDeferredOptional<T>
     where T : class
 {
     [Obsolete( "The value will always be true for " + nameof( IReadOnlyDeferred<T> ) + ", avoid unnecessary conditions." )]

@@ -5,10 +5,10 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 /// <summary>
-/// A value that may be defined later, where the potential for <see cref="WillBeDefined"/> as specified at construction can be yes, no or maybe.
+/// A value that may be defined later.
 /// </summary>
 [CompileTime]
-internal class DeferredYesNoMaybe<T> : IReadOnlyDeferredYesNoMaybe<T>
+internal class DeferredOptional<T> : IReadOnlyDeferredOptional<T>
     where T : class
 {
     private readonly bool _mustBeSetBeforeGet;
@@ -16,13 +16,13 @@ internal class DeferredYesNoMaybe<T> : IReadOnlyDeferredYesNoMaybe<T>
 
     // ReSharper disable once MemberCanBeProtected.Global
     /// <summary>
-    /// Initializes a new instance of the <see cref="DeferredYesNoMaybe{T}"/> class.
+    /// Initializes a new instance of the <see cref="DeferredOptional{T}"/> class.
     /// </summary>
     /// <param name="willBeDefined">Indicates the future final state of <see cref="Value"/>. The default is <see langword="null"/>, indicating "maybe".</param>
     /// <param name="mustBeSetBeforeGet"> If <see langword="true"/>, the <see cref="Value"/> getter will throw if the
     /// setter has not yet been called (regardless of whether the value was <see langword="null"/> or not). The default is <see langword="false"/>.
     /// Note that the <see cref="Value"/> getter also checks that the current value is compatible with <see cref="WillBeDefined"/>.</param>
-    public DeferredYesNoMaybe( bool? willBeDefined = null, bool mustBeSetBeforeGet = false )
+    public DeferredOptional( bool? willBeDefined = null, bool mustBeSetBeforeGet = false )
     {
         this._mustBeSetBeforeGet = mustBeSetBeforeGet;
         this.WillBeDefined = willBeDefined;

@@ -19,7 +19,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy
 
 internal sealed class ClassicImplementationStrategyBuilder : IImplementationStrategyBuilder, IClassicProcessingNodeInitializationHelper
 {
-    private readonly DeferredYesNo<IMethod> _onUnmonitoredObservablePropertyChangedMethod;
+    private readonly DeferredOptional<IMethod> _onUnmonitoredObservablePropertyChangedMethod;
 
     private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
 
@@ -144,7 +144,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 .Where(
                     n => n.InpcBaseHandling switch
                     {
-                        InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined => true,
+                        InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined == true => true,
                         InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
                         _ => false
                     } )
@@ -186,7 +186,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         // Ensure that all required fields are generated in advance of template execution.
         // The node selection logic mirrors that of the template's loops and conditions.
 
-        if ( this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
+        if ( this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined == true )
         {
             foreach ( var node in this.DependencyGraph.DescendantsDepthFirst()
                          .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
@@ -243,7 +243,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
     private void IntroduceOnUnmonitoredObservablePropertyChanged()
     {
-        if ( !this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined )
+        if ( !this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined == true )
         {
             return;
         }
