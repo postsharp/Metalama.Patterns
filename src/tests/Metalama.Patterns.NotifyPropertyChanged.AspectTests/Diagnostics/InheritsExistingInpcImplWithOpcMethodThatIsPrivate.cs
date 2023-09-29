@@ -2,7 +2,7 @@
 
 using System.ComponentModel;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests;
+namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Diagnostics;
 
 public class ExistingInpcImplWithOPCMethodThatIsPrivate : INotifyPropertyChanged
 {

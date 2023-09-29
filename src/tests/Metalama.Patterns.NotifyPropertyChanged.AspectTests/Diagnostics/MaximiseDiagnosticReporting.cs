@@ -2,7 +2,7 @@
 
 using System.ComponentModel;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.MaximiseErrorReporting;
+namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Diagnostics.MaximiseErrorReporting;
 
 // A class with multiple errors covering different concerns. The aspect should report all of these (ie, it must not give up on error reporting early).
 
