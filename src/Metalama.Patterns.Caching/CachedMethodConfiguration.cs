@@ -13,10 +13,10 @@ public record CachedMethodConfiguration : CacheItemConfiguration
 
     public bool? IgnoreThisParameter { get; init; }
 
-    protected CachedMethodConfiguration( CachedMethodConfiguration overrideValue, CachedMethodConfiguration fallbackValue ) : base(
+    protected CachedMethodConfiguration( CachedMethodConfiguration overrideValue, CachedMethodConfiguration baseValue ) : base(
         overrideValue,
-        fallbackValue )
+        baseValue )
     {
-        this.IgnoreThisParameter = overrideValue.IgnoreThisParameter ?? fallbackValue.IgnoreThisParameter;
+        this.IgnoreThisParameter = overrideValue.IgnoreThisParameter ?? baseValue.IgnoreThisParameter;
     }
 }

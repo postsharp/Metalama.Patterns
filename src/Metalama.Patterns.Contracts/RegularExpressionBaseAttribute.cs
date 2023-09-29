@@ -28,7 +28,7 @@ public abstract class RegularExpressionBaseAttribute : ContractAspect
         base.BuildEligibility( builder );
         builder.Type().MustBe<string>();
     }
-    
+
     protected abstract IExpression GetRegex();
 
     /// <inheritdoc/>
@@ -45,6 +45,6 @@ public abstract class RegularExpressionBaseAttribute : ContractAspect
     [Template]
     protected virtual void OnContractViolated( dynamic? value, dynamic regex )
     {
-        meta.Target.Project.ContractOptions().Templates.OnRegularExpressionContractViolated( value, regex );
+        meta.Target.GetContractOptions().Templates!.OnRegularExpressionContractViolated( value, regex );
     }
 }

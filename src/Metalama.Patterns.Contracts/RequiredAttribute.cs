@@ -72,11 +72,11 @@ public sealed class RequiredAttribute : ContractAspect
             {
                 if ( value == null! )
                 {
-                    meta.Target.Project.ContractOptions().Templates.OnRequiredContractViolated( value );
+                    meta.Target.GetContractOptions().Templates!.OnRequiredContractViolated( value );
                 }
                 else
                 {
-                    meta.Target.Project.ContractOptions().Templates.OnRequiredContractViolatedBecauseOfEmptyString( value );
+                    meta.Target.GetContractOptions().Templates!.OnRequiredContractViolatedBecauseOfEmptyString( value );
                 }
             }
         }
@@ -84,7 +84,7 @@ public sealed class RequiredAttribute : ContractAspect
         {
             if ( value == null! )
             {
-                meta.Target.Project.ContractOptions().Templates.OnRequiredContractViolated( value );
+                meta.Target.GetContractOptions().Templates!.OnRequiredContractViolated( value );
             }
         }
     }

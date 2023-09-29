@@ -2,11 +2,12 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
 
 namespace Metalama.Patterns.Contracts;
 
 [PublicAPI]
-public class ContractTemplates : ITemplateProvider
+public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
 {
     [Template]
     public virtual void OnCreditCardContractViolated( dynamic? value )

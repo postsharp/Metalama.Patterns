@@ -25,9 +25,9 @@ public sealed class PhoneAttribute : RegularExpressionBaseAttribute
 
         return builder.ToExpression();
     }
-    
+
     protected override void OnContractViolated( dynamic? value, dynamic regex )
     {
-        meta.Target.Project.ContractOptions().Templates.OnPhoneContractViolated( value );
+        meta.Target.GetContractOptions().Templates!.OnPhoneContractViolated( value );
     }
 }

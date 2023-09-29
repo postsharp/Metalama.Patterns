@@ -19,7 +19,7 @@ public sealed class UrlAttribute : RegularExpressionBaseAttribute
 {
     protected override void OnContractViolated( dynamic? value, dynamic regex )
     {
-        meta.Target.Project.ContractOptions().Templates.OnUrlContractViolated( value );
+        meta.Target.GetContractOptions().Templates!.OnUrlContractViolated( value );
     }
 
     protected override IExpression GetRegex()

@@ -81,6 +81,6 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.Project.ContractOptions().Templates.OnStrictlyGreaterThanContractViolated( value, this.DisplayMinValue );
+        meta.Target.GetContractOptions().Templates!.OnStrictlyGreaterThanContractViolated( value, this.DisplayMinValue );
     }
 }

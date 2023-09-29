@@ -19,7 +19,7 @@ namespace Metalama.Patterns.Caching.Tests
         private const string _profileNamePrefix = "Caching.Tests.CacheAttributeTests_";
 
         // We don't like timeouts in tests but we need them to avoid test suites to hang in case of issues.
-        private static readonly TimeSpan _timeout = TimeSpan.FromMinutes( 2 );
+        private static readonly TimeSpan _timeout = TimeSpan.FromMinutes( 0.5 );
 
         public CacheAttributeTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 

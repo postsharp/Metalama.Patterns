@@ -10,8 +10,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Caching.Aspects.Helpers;
-using Metalama.Patterns.Caching.Implementation;
-using System.Diagnostics;
 
 #if NET6_0_OR_GREATER
 using Metalama.Framework.RunTime;
@@ -29,100 +27,33 @@ namespace Metalama.Patterns.Caching.Aspects;
 /// </summary>
 /// <remarks>
 /// <para>There are several ways to configure the behavior of the <see cref="CacheAttribute"/> aspect: you can set the properties of the
-/// <see cref="CacheAttribute"/> class, such as <see cref="AbsoluteExpiration"/> or <see cref="SlidingExpiration"/>. You can
+/// <see cref="CacheAttribute"/> class, such as <see cref="BaseCachingAttribute.AbsoluteExpiration"/> or <see cref="BaseCachingAttribute.SlidingExpiration"/>. You can
 /// add the <see cref="CachingConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
-/// Finally, you can define a profile by setting the <see cref="ProfileName"/> property and configure the profile at run time
+/// Finally, you can define a profile by setting the <see cref="BaseCachingAttribute.ProfileName"/> property and configure the profile at run time
 /// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="ICachingService"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
 /// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="ICachingService.Invalidate"/> method.</para>
 /// </remarks>
 [PublicAPI]
-public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribute
+public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
 {
-    private bool? _autoReload;
-    private TimeSpan? _absoluteExpiration;
-    private TimeSpan? _slidingExpiration;
-    private CacheItemPriority? _priority;
-    private bool? _ignoreThisParameter;
-    private bool? _useDependencyInjection;
-
-    /// <summary>
-    /// Gets or sets the name of the <see cref="CachingProfile"/>  that contains the configuration of the cached methods.
-    /// </summary>
-    public string? ProfileName { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the method calls are automatically reloaded (by re-evaluating the target method with the same arguments)
-    /// when the cache item is removed from the cache.
-    /// </summary>
-    public bool AutoReload
+    void IEligible<IMethod>.BuildEligibility( IEligibilityBuilder<IMethod> builder )
     {
-        get => this._autoReload.GetValueOrDefault();
-        set => this._autoReload = value;
-    }
-
-    /// <summary>
-    /// Gets or sets the total duration, in minutes, during which the result of the current method is stored in cache. The absolute
-    /// expiration time is counted from the moment the method is evaluated and cached.
-    /// </summary>
-    public double AbsoluteExpiration
-    {
-        get => this._absoluteExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
-        set => this._absoluteExpiration = TimeSpan.FromMinutes( value );
-    }
-
-    /// <summary>
-    /// Gets or sets he duration, in minutes, during which the result of the current method is stored in cache after it has been
-    /// added to or accessed from the cache. The expiration is extended every time the value is accessed from the cache.
-    /// </summary>
-    public double SlidingExpiration
-    {
-        get => this._slidingExpiration.GetValueOrDefault( TimeSpan.Zero ).TotalMinutes;
-        set => this._slidingExpiration = TimeSpan.FromMinutes( value );
-    }
-
-    /// <summary>
-    /// Gets or sets the priority of the current method.
-    /// </summary>
-    public CacheItemPriority Priority
-    {
-        get => this._priority.GetValueOrDefault( CacheItemPriority.Default );
-        set => this._priority = value;
-    }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the <c>this</c> instance should be a part of the cache key. The default value of this property is <c>false</c>,
-    /// which means that by default the <c>this</c> instance is a part of the cache key.
-    /// </summary>
-    public bool IgnoreThisParameter
-    {
-        get => this._ignoreThisParameter.GetValueOrDefault();
-        set => this._ignoreThisParameter = value;
-    }
-
-    public bool UseDependencyInjection
-    {
-        get => this._useDependencyInjection.GetValueOrDefault( true );
-        set => this._useDependencyInjection = value;
-    }
-
-    public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
-    {
-        base.BuildEligibility( builder );
+        builder.AddRule( EligibilityRuleFactory.GetAdviceEligibilityRule( AdviceKind.OverrideMethod ) );
 
         builder.MustNotHaveRefOrOutParameter();
         builder.ReturnType().MustSatisfy( t => t.SpecialType != SpecialType.Void, _ => $"the return type must not be void" );
 
         builder.ReturnType()
-            .MustSatisfy( t => !t.IsTaskOrValueTask( hasResult: false ), _ => $"the return type must not be a Task or ValueTask without a return value" );
+            .MustSatisfy( t => !t.IsTaskOrValueTask( false ), _ => $"the return type must not be a Task or ValueTask without a return value" );
 
         builder.ReturnType()
             .MustSatisfy(
-                t => !t.GetAsyncInfo().IsAwaitable || t.IsTaskOrValueTask( hasResult: true ),
+                t => !t.GetAsyncInfo().IsAwaitable || t.IsTaskOrValueTask( true ),
                 _ => $"the return type must not be an awaitable type other than Task<TResult> or ValueTask<TResult>" );
     }
 
-    public override void BuildAspect( IAspectBuilder<IMethod> builder )
+    void IAspect<IMethod>.BuildAspect( IAspectBuilder<IMethod> builder )
     {
         if ( builder.AspectInstance.SecondaryInstances.Length > 0 )
         {
@@ -131,11 +62,11 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
             return;
         }
 
-        var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.GetOriginalDefinition().SpecialType ?? SpecialType.None;
+        var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.Definition.SpecialType ?? SpecialType.None;
 
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
 
-        var effectiveConfiguration = this.GetEffectiveConfiguration( builder.Target );
+        var options = builder.Target.Enhancements().GetOptions<CachingOptions>();
 
         // Introduce a field of type CachedMethodRegistration.
         var registrationFieldPrefix = $"_cacheRegistration_{builder.Target.Name}";
@@ -173,10 +104,8 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
         // Introduce the dependency
         IFieldOrProperty? cachingServiceField;
 
-        if ( effectiveConfiguration.UseDependencyInjection.GetValueOrDefault( true ) )
+        if ( options.UseDependencyInjection.GetValueOrDefault( true ) )
         {
-            Debugger.Break();
-
             if ( builder.Target.IsStatic )
             {
                 builder.Diagnostics.Report( CachingDiagnosticDescriptors.MethodCannotBeStaticBecauseItUsesDependencyInjection.WithArguments( builder.Target ) );
@@ -204,14 +133,14 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
 
         // Override the original method.
         var overrideTemplates = new MethodTemplateSelector(
-            defaultTemplate: nameof(OverrideMethod),
-            asyncTemplate: returnTypeIsTask ? nameof(OverrideMethodAsyncTask) : nameof(OverrideMethodAsyncValueTask),
-            enumerableTemplate: nameof(OverrideMethod),
-            enumeratorTemplate: nameof(OverrideMethod),
-            asyncEnumerableTemplate: "OverrideMethodAsyncEnumerable",
-            asyncEnumeratorTemplate: "OverrideMethodAsyncEnumerator",
-            useAsyncTemplateForAnyAwaitable: true,
-            useEnumerableTemplateForAnyEnumerable: true );
+            nameof(OverrideMethod),
+            returnTypeIsTask ? nameof(OverrideMethodAsyncTask) : nameof(OverrideMethodAsyncValueTask),
+            nameof(OverrideMethod),
+            nameof(OverrideMethod),
+            "OverrideMethodAsyncEnumerable",
+            "OverrideMethodAsyncEnumerator",
+            true,
+            true );
 
         var genericValueType =
             unboundReturnSpecialType is SpecialType.Task_T or SpecialType.ValueTask_T or SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T
@@ -221,7 +150,7 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
         builder.Advice.Override(
             builder.Target,
             overrideTemplates,
-            args: new
+            new
             {
                 TValue = genericValueType, TReturnType = builder.Target.ReturnType, registrationField = registrationField.Declaration, cachingServiceField
             } );
@@ -238,16 +167,18 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
             builder.Target.DeclaringType,
             nameof(this.CachedMethodRegistrationInitializer),
             InitializerKind.BeforeTypeConstructor,
-            args: new { method = builder.Target, field = registrationField.Declaration, awaitableResultType } );
+            args: new { method = builder.Target, field = registrationField.Declaration, awaitableResultType, options } );
 
-        // Here we replace (or add, if this aspect was applied eg by fabric) the [Cache]
-        // attribute with a [Cache] attribute initialized with the effective configuration
-        // taking into account [CacheConfiguration]. This "attaches" the effective
-        // configuration to the method itself, which is more robust with respect to
-        // linker trimming, obfuscation, assembly merging and so on. For fabric-applied aspects,
-        // this is how aspect configuration is persisted.
-
-        builder.Advice.IntroduceAttribute( builder.Target, effectiveConfiguration.ToAttributeConstruction(), OverrideStrategy.Override );
+        builder.Advice.AddAnnotation(
+            builder.Target,
+            new CachedMethodAnnotation(
+                new CachingOptions
+                {
+                    ProfileName = options.ProfileName,
+                    IgnoreThisParameter = options.IgnoreThisParameter,
+                    UseDependencyInjection = options.UseDependencyInjection
+                } ),
+            true );
     }
 
     private static IEnumerable<IExpression> GetArgumentExpressions( IMethod method, IExpression arrayExpression, IExpression? cancellationTokenArgument )
@@ -280,38 +211,31 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     // ReSharper disable once MergeConditionalExpression
 #pragma warning disable IDE0031
     [Template]
-    public void CachedMethodRegistrationInitializer( IMethod method, IField field, IType? awaitableResultType )
-    {
-        var effectiveConfiguration = this.GetEffectiveConfiguration( method );
-
-        field.Value = CachedMethodMetadata.Register(
+    private static void CachedMethodRegistrationInitializer( IMethod method, IField field, IType? awaitableResultType, [CompileTime] CachingOptions options )
+        => field.Value = CachedMethodMetadata.Register(
             method.ToMethodInfo().ThrowIfMissing( method.ToDisplayString() ),
             new CachedMethodConfiguration()
             {
-                AbsoluteExpiration = effectiveConfiguration.AbsoluteExpiration,
-                AutoReload = effectiveConfiguration.AutoReload,
-                IgnoreThisParameter = effectiveConfiguration.IgnoreThisParameter,
-                Priority = effectiveConfiguration.Priority,
-                ProfileName = effectiveConfiguration.ProfileName,
-                SlidingExpiration = effectiveConfiguration.SlidingExpiration
-            } );
-    }
+                AbsoluteExpiration = options.AbsoluteExpiration,
+                AutoReload = options.AutoReload,
+                IgnoreThisParameter = options.IgnoreThisParameter,
+                Priority = options.Priority,
+                ProfileName = options.ProfileName,
+                SlidingExpiration = options.SlidingExpiration
+            },
+            method.ReturnType.IsReferenceType == true || method.ReturnType.IsNullable == true );
 #pragma warning restore IDE0031
 
-    private static IParameter? GetCancellationTokenParameter()
-    {
-        return meta.Target.Method.Parameters.OfParameterType( typeof(CancellationToken) ).LastOrDefault();
-    }
+    private static IParameter? GetCancellationTokenParameter() => meta.Target.Method.Parameters.OfParameterType( typeof(CancellationToken) ).LastOrDefault();
 
     private static IExpression GetCancellationTokenExpression()
-    {
-        // TODO: CancellationToken is currently incorrectly handled and must be checked:
-        // 1. The parameter should not be considered cacheable.
-        // 2. With auto-reload, the value should be replaced by a default token.
-        // 3. It is not tested.
+        =>
 
-        return GetCancellationTokenParameter() ?? ExpressionFactory.Parse( "default" );
-    }
+            // TODO: CancellationToken is currently incorrectly handled and must be checked:
+            // 1. The parameter should not be considered cacheable.
+            // 2. With auto-reload, the value should be replaced by a default token.
+            // 3. It is not tested.
+            GetCancellationTokenParameter() ?? ExpressionFactory.Parse( "default" );
 
     // ReSharper disable InconsistentNaming
     // ReSharper disable UnusedParameter.Global
@@ -470,29 +394,4 @@ public sealed class CacheAttribute : MethodAspect, ICachingConfigurationAttribut
     // ReSharper restore InconsistentNaming
     // ReSharper restore UnusedParameter.Global
 #pragma warning restore SA1313
-
-    /// <summary>
-    /// Gets the effective configuration of the method by applying fallback configuration from <see cref="CachingConfigurationAttribute"/>
-    /// attributes on ancestor types and the declaring assembly.
-    /// </summary>
-    [CompileTime]
-    private CachingAspectConfiguration GetEffectiveConfiguration( IMethod method )
-    {
-        var mergedConfiguration = this.ToCompileTimeCacheItemConfiguration();
-
-        return mergedConfiguration.ApplyEffectiveConfiguration( method );
-    }
-
-    [CompileTime]
-    internal CachingAspectConfiguration ToCompileTimeCacheItemConfiguration()
-        => new()
-        {
-            AbsoluteExpiration = this._absoluteExpiration,
-            AutoReload = this._autoReload,
-            IgnoreThisParameter = this._ignoreThisParameter,
-            Priority = this._priority,
-            ProfileName = this.ProfileName,
-            SlidingExpiration = this._slidingExpiration,
-            UseDependencyInjection = this._useDependencyInjection
-        };
 }

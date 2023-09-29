@@ -6,23 +6,23 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Build.Solutions;
 using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using Spectre.Console.Cli;
-using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2023_3;
+using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2023_4;
 
 var product = new Product( MetalamaDependencies.MetalamaPatterns )
 {
     Solutions = new Solution[] { new DotNetSolution( "Metalama.Patterns.sln" ) { CanFormatCode = true } },
-  
-    PublicArtifacts = Pattern.Create( 
+    PublicArtifacts = Pattern.Create(
         "Metalama.Patterns.Caching.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Aspects.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Backend.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Backends.Azure.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Backends.Redis.$(PackageVersion).nupkg",
-        "Metalama.Patterns.Contracts.$(PackageVersion).nupkg" , 
-        "Flashtrace.$(PackageVersion).nupkg"),
+        "Metalama.Patterns.Contracts.$(PackageVersion).nupkg",
+        "Flashtrace.$(PackageVersion).nupkg",
+        "Flashtrace.Formatters.$(PackageVersion).nupkg" ),
     Dependencies = new[] { DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions },
     MainVersionDependency = MetalamaDependencies.Metalama,
-    Configurations = Product.DefaultConfigurations.WithValue( 
+    Configurations = Product.DefaultConfigurations.WithValue(
         BuildConfiguration.Public,
         Product.DefaultConfigurations.Public with
         {

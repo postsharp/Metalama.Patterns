@@ -28,6 +28,6 @@ public sealed class EmailAddressAttribute : RegularExpressionBaseAttribute
 
     protected override void OnContractViolated( dynamic? value, dynamic? regex )
     {
-        meta.Target.Project.ContractOptions().Templates.OnEmailAddressContractViolated( value );
+        meta.Target.GetContractOptions().Templates!.OnEmailAddressContractViolated( value );
     }
 }
