@@ -86,6 +86,6 @@ public class StrictRangeAttribute : RangeAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnStrictRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
+        meta.Target.GetContractOptions().Templates!.OnStrictRangeContractViolated( value, this.DisplayMinValue, this.DisplayMaxValue );
     }
 }

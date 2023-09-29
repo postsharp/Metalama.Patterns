@@ -87,4 +87,12 @@ public static class ContractExtensions
                         .WithCodeFixes( CodeFixFactory.RemoveAttributes( f, nullableAttribute.Type ) );
                 } );
     }
+
+    public static ContractOptions GetContractOptions( this IMetaTarget target )
+        => target.Declaration switch
+        {
+            IParameter parameter => parameter.Enhancements().GetOptions<ContractOptions>(),
+            IFieldOrPropertyOrIndexer field => field.Enhancements().GetOptions<ContractOptions>(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
 }

@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
-using Metalama.Framework.Project;
 using Metalama.Patterns.Caching.Implementation;
 
 namespace Metalama.Patterns.Caching;
@@ -100,5 +99,5 @@ public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchic
         };
     }
 
-    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( IProject project ) => DefaultCompileTimeOptions;
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context ) => DefaultCompileTimeOptions;
 }

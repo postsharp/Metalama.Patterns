@@ -125,6 +125,6 @@ public class GreaterThanAttribute : RangeAttribute
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnGreaterThanContractViolated( value, this.DisplayMinValue );
+        meta.Target.GetContractOptions().Templates!.OnGreaterThanContractViolated( value, this.DisplayMinValue );
     }
 }

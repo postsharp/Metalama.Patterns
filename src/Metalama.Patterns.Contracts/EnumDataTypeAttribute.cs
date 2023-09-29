@@ -77,7 +77,7 @@ public sealed class EnumDataTypeAttribute : ContractAspect
     public override void Validate( dynamic? value )
     {
         var targetType = meta.Target.GetTargetType();
-        var templates = meta.AspectInstance.GetOptions<ContractOptions>().Templates!;
+        var templates = meta.Target.GetContractOptions().Templates!;
 
         if ( targetType.SpecialType is SpecialType.String or SpecialType.Object )
         {
