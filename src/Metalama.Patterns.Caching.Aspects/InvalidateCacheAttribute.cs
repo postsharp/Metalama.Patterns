@@ -348,7 +348,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             // Ensure the method is actually cached.
             var cacheAspectConfiguration =
                 invalidatedMethod.BelongsToCurrentProject
-                    ? invalidatedMethod.Enhancements().GetAspectInstances().SingleOrDefault( i => i.Aspect is CacheAttribute )?.GetOptions<CachingOptions>()
+                    ? invalidatedMethod.Enhancements().GetOptions<CachingOptions>()
                     : invalidatedMethod.Enhancements().GetAnnotations<CachedMethodAnnotation>().SingleOrDefault()?.Options;
 
             if ( cacheAspectConfiguration == null )

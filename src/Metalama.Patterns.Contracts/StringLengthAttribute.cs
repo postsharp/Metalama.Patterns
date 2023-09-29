@@ -72,14 +72,14 @@ public sealed class StringLengthAttribute : ContractAspect
         {
             if ( value != null && value!.Length > this.MaximumLength )
             {
-                meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnStringMaxLengthContractViolated( value, this.MaximumLength );
+                meta.Target.GetContractOptions().Templates!.OnStringMaxLengthContractViolated( value, this.MaximumLength );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength == int.MaxValue )
         {
             if ( value != null && value!.Length < this.MinimumLength )
             {
-                meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnStringMinLengthContractViolated( value, this.MinimumLength );
+                meta.Target.GetContractOptions().Templates!.OnStringMinLengthContractViolated( value, this.MinimumLength );
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength != int.MaxValue )
@@ -88,7 +88,7 @@ public sealed class StringLengthAttribute : ContractAspect
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
             {
-                meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
+                meta.Target.GetContractOptions().Templates!.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
             }
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
