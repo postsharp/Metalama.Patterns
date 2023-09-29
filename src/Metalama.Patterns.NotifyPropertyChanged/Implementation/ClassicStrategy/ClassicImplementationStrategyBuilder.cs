@@ -511,7 +511,8 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             {
                 hasErrors |= diagnostic.Definition.Severity == Severity.Error;
                 this._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
-            } );
+            },
+            this._builder.CancellationToken );
 
         var processingGraph =
             structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>(

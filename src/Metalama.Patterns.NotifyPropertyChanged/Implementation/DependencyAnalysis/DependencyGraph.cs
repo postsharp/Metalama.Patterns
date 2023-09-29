@@ -19,13 +19,13 @@ internal static partial class DependencyGraph
 {
     public delegate void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null );
 
-    public static Node GetDependencyGraph( INamedType type, ReportDiagnostic reportDiagnostic )
+    public static Node GetDependencyGraph( INamedType type, ReportDiagnostic reportDiagnostic, CancellationToken cancellationToken = default )
     {
         var tree = new Node();
 
         foreach ( var p in type.Properties )
         {
-            AddReferencedProperties( tree, p, reportDiagnostic );
+            AddReferencedProperties( tree, p, reportDiagnostic, cancellationToken );
         }
 
         return tree;
@@ -34,7 +34,8 @@ internal static partial class DependencyGraph
     private static void AddReferencedProperties(
         Node tree,
         IProperty property,
-        ReportDiagnostic reportDiagnostic )        
+        ReportDiagnostic reportDiagnostic,
+        CancellationToken cancellationToken )
     {
         var propertySymbol = property.GetSymbol();
 
@@ -45,7 +46,7 @@ internal static partial class DependencyGraph
 
         var body = propertySymbol
             .DeclaringSyntaxReferences
-            .Select( r => r.GetSyntax() )
+            .Select( r => r.GetSyntax( cancellationToken ) )
             .Cast<PropertyDeclarationSyntax>()
             .Select( GetGetterBody )
             .SingleOrDefault();
@@ -57,7 +58,7 @@ internal static partial class DependencyGraph
 
         var semanticModel = property.Compilation.GetSemanticModel( body.SyntaxTree );
 
-        var visitor = new Visitor( tree, propertySymbol, semanticModel, reportDiagnostic );
+        var visitor = new Visitor( tree, propertySymbol, semanticModel, reportDiagnostic, cancellationToken );
         visitor.Visit( body );
     }
 
@@ -68,6 +69,7 @@ internal static partial class DependencyGraph
         private readonly SemanticModel _semanticModel;
         private readonly List<IPropertySymbol> _properties = new();
         private readonly ReportDiagnostic _reportDiagnostic;
+        private readonly CancellationToken _cancellationToken;
         private SyntaxNode? _lastVisitedPropertyNode;
         private int _depth = 1;
         private int _accessorStartDepth;
@@ -76,16 +78,20 @@ internal static partial class DependencyGraph
             IGraphBuildingNode tree,
             ISymbol originSymbol,
             SemanticModel semanticModel,
-            ReportDiagnostic reportDiagnostic )
+            ReportDiagnostic reportDiagnostic,
+            CancellationToken cancellationToken)
         {
             this._tree = tree;
             this._originSymbol = originSymbol;
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
+            this._cancellationToken = cancellationToken;
         }
 
         public override void Visit( SyntaxNode? node )
         {
+            this._cancellationToken.ThrowIfCancellationRequested();
+
             ++this._depth;
 
             base.Visit( node );
