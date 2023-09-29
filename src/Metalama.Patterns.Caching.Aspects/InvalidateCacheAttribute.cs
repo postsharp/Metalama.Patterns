@@ -344,12 +344,10 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 continue;
             }
-            
+
             // Ensure the method is actually cached.
             var cacheAspectConfiguration =
-                invalidatedMethod.BelongsToCurrentProject
-                    ? invalidatedMethod.Enhancements().GetOptions<CachingOptions>()
-                    : invalidatedMethod.Enhancements().GetAnnotations<CachedMethodAnnotation>().SingleOrDefault()?.Options;
+                invalidatedMethod.Enhancements().GetAnnotations<CachedMethodAnnotation>().SingleOrDefault()?.Options;
 
             if ( cacheAspectConfiguration == null )
             {
@@ -359,7 +357,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 continue;
             }
-            
+
             // Check that the 'this' parameter is compatible.
             if ( !invalidatedMethod.IsStatic && !cacheAspectConfiguration.IgnoreThisParameter.GetValueOrDefault() &&
                  (invalidatingMethod.IsStatic || !(invalidatingMethod.DeclaringType == invalidatedMethod.DeclaringType
