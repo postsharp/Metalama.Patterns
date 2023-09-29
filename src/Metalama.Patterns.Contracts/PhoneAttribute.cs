@@ -28,6 +28,6 @@ public sealed class PhoneAttribute : RegularExpressionBaseAttribute
 
     protected override void OnContractViolated( dynamic? value, dynamic regex )
     {
-        meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnPhoneContractViolated( value );
+        meta.Target.GetContractOptions().Templates!.OnPhoneContractViolated( value );
     }
 }

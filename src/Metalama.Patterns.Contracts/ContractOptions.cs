@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
-using Metalama.Framework.Project;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -19,5 +18,5 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
         return new ContractOptions { Templates = other.Templates ?? this.Templates };
     }
 
-    public IHierarchicalOptions GetDefaultOptions( IProject project ) => new ContractOptions { Templates = new ContractTemplates() };
+    public IHierarchicalOptions GetDefaultOptions( OptionsInitializationContext context ) => new ContractOptions { Templates = new ContractTemplates() };
 }

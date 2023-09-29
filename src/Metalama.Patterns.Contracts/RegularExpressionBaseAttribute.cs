@@ -45,6 +45,6 @@ public abstract class RegularExpressionBaseAttribute : ContractAspect
     [Template]
     protected virtual void OnContractViolated( dynamic? value, dynamic regex )
     {
-        meta.AspectInstance.GetOptions<ContractOptions>().Templates!.OnRegularExpressionContractViolated( value, regex );
+        meta.Target.GetContractOptions().Templates!.OnRegularExpressionContractViolated( value, regex );
     }
 }
