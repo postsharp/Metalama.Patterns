@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Project;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
@@ -14,6 +15,10 @@ public sealed class ClassicImplementationStrategyFactory : IImplementationStrate
 
     public IImplementationStrategyBuilder GetBuilder( IAspectBuilder<INamedType> aspectBuilder )
     {
-        return new ClassicImplementationStrategyBuilder( aspectBuilder );
+        var executionScenario = MetalamaExecutionContext.Current.ExecutionScenario;
+
+        return executionScenario.CapturesNonObservableTransformations
+            ? new ClassicImplementationStrategyBuilder( aspectBuilder )
+            : new ClassicDesignTimeImplementationStrategyBuilder( aspectBuilder );
     }
 }

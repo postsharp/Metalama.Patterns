@@ -43,14 +43,14 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
     public ClassicImplementationStrategyBuilder( IAspectBuilder<INamedType> builder )
     {
+        var target = builder.Target;
+
         this._builder = builder;
-        this._elements = new ClassicElements( builder.Target );
+        this._elements = new ClassicElements( target );
         this._inpcInstrumentationKindLookup = new( this._elements );
         this._commonOptions = builder.Target.Enhancements().GetOptions<NotifyPropertyChangedOptions>();
         this._classicOptions = builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>();
-
-        this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethodOrDefault );
-        var target = builder.Target;
+        this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethodOrDefault );        
 
         // TODO: Consider using BaseType.Definition where possible for better performance.
 
@@ -63,7 +63,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         this._targetImplementsInpc = this._baseImplementsInpc || target.Is( this._elements.INotifyPropertyChanged );
         this._baseOnPropertyChangedMethod = GetOnPropertyChangedMethod( target );
         this._baseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod(target);
-        this._baseOnUnmonitoredObservablePropertyChangedMethod = this.GetOnUnmonitoredObservablePropertyChangedMethod(target);
+        this._baseOnUnmonitoredObservablePropertyChangedMethod = GetOnUnmonitoredObservablePropertyChangedMethod( target, this._elements );
     }
 
     public void BuildAspect()
@@ -660,7 +660,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
     }
 
-    private static IMethod? GetOnPropertyChangedMethod( INamedType type )
+    internal static IMethod? GetOnPropertyChangedMethod( INamedType type )
         => type.AllMethods.FirstOrDefault(
             m =>
                 !m.IsStatic
@@ -669,7 +669,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }]
                 && _onPropertyChangedMethodNames.Contains( m.Name ) );
 
-    private static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
+    internal static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
         => type.AllMethods.FirstOrDefault(
             m =>
                 !m.IsStatic
@@ -678,7 +678,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }, { Type.SpecialType: SpecialType.String }] );
 
-    private IMethod? GetOnUnmonitoredObservablePropertyChangedMethod( INamedType type )
+    internal static IMethod? GetOnUnmonitoredObservablePropertyChangedMethod( INamedType type, Elements elements )
         => type.AllMethods.FirstOrDefault(
             m =>
                 !m.IsStatic
@@ -686,8 +686,8 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _]
-                && m.Parameters[1].Type == this._elements.NullableINotifyPropertyChanged
-                && m.Parameters[2].Type == this._elements.NullableINotifyPropertyChanged );
+                && m.Parameters[1].Type == elements.NullableINotifyPropertyChanged
+                && m.Parameters[2].Type == elements.NullableINotifyPropertyChanged );
 
     /// <summary>
     /// Validates the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. The result is cached
