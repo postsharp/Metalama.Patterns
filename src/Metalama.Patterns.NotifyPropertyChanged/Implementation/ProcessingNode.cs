@@ -166,7 +166,7 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
 
         appendTo.Append( this._symbol?.Name ?? "<root>" );
 
-        var allRefs = ((TDerived) this).GetAllReferencedBy();
+        var allRefs = ((TDerived) this).AllReferencedBy();
 
         if ( allRefs.Count > 0 )
         {

@@ -133,7 +133,7 @@ internal static partial class DependencyGraph
 
             appendTo.Append( this.Symbol?.Name ?? "<root>" );
 
-            var allRefs = this.GetAllReferencedBy();
+            var allRefs = this.AllReferencedBy();
 
             if ( allRefs.Count > 0 )
             {

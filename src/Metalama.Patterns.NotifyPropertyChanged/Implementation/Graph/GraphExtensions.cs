@@ -87,7 +87,7 @@ internal static class GraphExtensions
         }
     }
 
-    public static T GetAncestorOrSelfAtDepth<T>( this T node, int depth )
+    public static T AncestorOrSelfAtDepth<T>( this T node, int depth )
         where T : IHasParent<T>, IHasDepth
     {
         if ( depth > node.Depth || depth < 0 )
@@ -115,7 +115,7 @@ internal static class GraphExtensions
     /// itself are always included and followed, regardless of <paramref name="shouldIncludeImmediateChild"/>.
     /// </param>
     /// <returns></returns>
-    public static IReadOnlyCollection<T> GetAllReferencedBy<T>( this T node, Func<T, bool>? shouldIncludeImmediateChild = null )
+    public static IReadOnlyCollection<T> AllReferencedBy<T>( this T node, Func<T, bool>? shouldIncludeImmediateChild = null )
         where T : IHasReferencedBy<T>, IHasChildren<T>
     {
         // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.

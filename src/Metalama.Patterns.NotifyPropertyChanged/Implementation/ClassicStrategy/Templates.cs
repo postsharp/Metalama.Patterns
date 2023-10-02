@@ -88,7 +88,7 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.GetAllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
                 {
                     ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
                 }
@@ -211,7 +211,7 @@ internal sealed class Templates : ITemplateProvider
             }
 
             // Notify refs to the current node and any children without an update method.
-            foreach ( var name in node.GetAllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+            foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
             {
                 ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
             }
@@ -341,13 +341,13 @@ internal sealed class Templates : ITemplateProvider
                 else
                 {
                     // Only notify references to the node itself, child node changes will be handled via OnChildPropertyChanged.
-                    refsToNotify = node.GetAllReferencedBy();
+                    refsToNotify = node.AllReferencedBy();
                 }
             }
             else
             {
                 // Notify refs to the current node and any children without an update method.
-                refsToNotify = node.GetAllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null );
+                refsToNotify = node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null );
             }
 
             var childUpdateMethods = node.ChildUpdateMethods;
@@ -518,7 +518,7 @@ internal sealed class Templates : ITemplateProvider
 
         foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.Depth > 1 ) )
         {
-            var rootPropertyNode = node.GetAncestorOrSelfAtDepth( 1 );
+            var rootPropertyNode = node.AncestorOrSelfAtDepth( 1 );
 
             if ( rootPropertyNode.FieldOrProperty.DeclaringType == ctx.Elements.Target )
             {
@@ -582,7 +582,7 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         // No update method, notify here.
-                        foreach ( var refName in node.GetAllReferencedBy().Select( n => n.Name ).OrderBy( n => n ) )
+                        foreach ( var refName in node.AllReferencedBy().Select( n => n.Name ).OrderBy( n => n ) )
                         {
                             ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( refName );
                         }
@@ -685,7 +685,7 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.GetAllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
                 {
                     ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
                 }
@@ -725,7 +725,7 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         // No update method, notify here.
-                        foreach ( var refName in childNode.GetAllReferencedBy().Select( n => n.Name ).OrderBy( n => n ) )
+                        foreach ( var refName in childNode.AllReferencedBy().Select( n => n.Name ).OrderBy( n => n ) )
                         {
                             ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( refName );
                         }
