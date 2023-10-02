@@ -48,7 +48,7 @@ public class InpcAutoPropertyWithRef : global::System.ComponentModel.INotifyProp
         void OnChildPropertyChanged_1( object? sender, global::System.ComponentModel.PropertyChangedEventArgs e )
         {
             {
-                var propertyName = e.PropertyName;
+                var propertyName = e!.PropertyName;
                 if ( propertyName == "A" )
                 {
                     this.OnPropertyChanged( "Y" );
