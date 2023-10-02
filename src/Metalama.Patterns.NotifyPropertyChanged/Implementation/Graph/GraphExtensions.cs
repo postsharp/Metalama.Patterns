@@ -1,15 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Microsoft.CodeAnalysis;
 using System.Runtime.CompilerServices;
+
+// ReSharper disable UnusedMember.Global
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.Graph;
 
 [CompileTime]
 internal static class GraphExtensions
 {
-    public static Exception NewNotSupportedOnRootNodeException( [CallerMemberName] string? callerMemberName = null ) => new InvalidOperationException( $"The operation is not supported on a root node ({callerMemberName})." );
+    public static Exception NewNotSupportedOnRootNodeException( [CallerMemberName] string? callerMemberName = null )
+        => new InvalidOperationException( $"The operation is not supported on a root node ({callerMemberName})." );
 
     public static IEnumerable<T> DescendantsDepthFirst<T>( this T node )
         where T : IHasChildren<T>
@@ -65,7 +67,7 @@ internal static class GraphExtensions
 
     private static IEnumerable<T> AncestorsCore<T>( T node, bool includeRoot, bool includeSelf )
         where T : IHasParent<T>
-    {        
+    {
         if ( includeSelf )
         {
             if ( !node.IsRoot || includeRoot )
@@ -92,7 +94,7 @@ internal static class GraphExtensions
     {
         if ( depth > node.Depth || depth < 0 )
         {
-            throw new ArgumentOutOfRangeException( nameof( depth ), "Must be greater than zero and less than or equal to the depth of the current node." );
+            throw new ArgumentOutOfRangeException( nameof(depth), "Must be greater than zero and less than or equal to the depth of the current node." );
         }
 
         while ( node.Depth != depth )

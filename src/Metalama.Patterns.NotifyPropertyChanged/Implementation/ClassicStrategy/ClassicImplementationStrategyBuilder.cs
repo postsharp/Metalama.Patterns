@@ -12,7 +12,6 @@ using Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.Graph;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using Metalama.Patterns.NotifyPropertyChanged.Options;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
@@ -34,6 +33,9 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     private readonly ClassicElements _elements;
     private readonly InpcInstrumentationKindLookup _inpcInstrumentationKindLookup;
     private readonly bool _targetImplementsInpc;
+
+    // Useful to see when debugging:
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly bool _baseImplementsInpc;
     private readonly Deferred<IMethod> _onPropertyChangedMethod = new();
     private readonly Deferred<IMethod> _onChildPropertyChangedMethod = new();
@@ -57,23 +59,22 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             target.BaseType != null && (
                 target.BaseType.Is( this._elements.INotifyPropertyChanged )
                 || (target.BaseType is { BelongsToCurrentProject: true }
-                    && target.BaseType.Definition.Enhancements().HasAspect( typeof( NotifyPropertyChangedAttribute ) )));
+                    && target.BaseType.Definition.Enhancements().HasAspect( typeof(NotifyPropertyChangedAttribute) )));
 
         this._targetImplementsInpc = this._baseImplementsInpc || target.Is( this._elements.INotifyPropertyChanged );
         this._baseOnPropertyChangedMethod = GetOnPropertyChangedMethod( target );
-        this._baseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod(target);
+        this._baseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod( target );
         this._baseOnUnmonitoredObservablePropertyChangedMethod = GetOnUnmonitoredObservablePropertyChangedMethod( target, this._elements );
 
         var useOnUnmonitoredObservablePropertyChangedMethod =
             this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethod == true &&
-            ( !target.IsSealed || this._baseOnUnmonitoredObservablePropertyChangedMethod != null );
+            (!target.IsSealed || this._baseOnUnmonitoredObservablePropertyChangedMethod != null);
 
         this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: useOnUnmonitoredObservablePropertyChangedMethod );
     }
 
     public void BuildAspect()
     {
-        Debugger.Break();
         // Validate, maximising the coverage of diagnostic reporting.
 
         var v1 = this.ValidateBaseImplementation();
@@ -149,7 +150,8 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 .Where(
                     n => n.InpcBaseHandling switch
                     {
-                        InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined == true => true,
+                        InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined == true =>
+                            true,
                         InpcBaseHandling.OnPropertyChanged when n.HasChildren => true,
                         _ => false
                     } )
@@ -160,31 +162,30 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     {
         var isOverride = this._baseOnPropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
-            this._builder.Target,
-            nameof( Templates.OnPropertyChanged ),
-            IntroductionScope.Instance,
-            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
-            b =>
-            {
-                if ( isOverride )
+        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            .IntroduceMethod(
+                this._builder.Target,
+                nameof(Templates.OnPropertyChanged),
+                IntroductionScope.Instance,
+                isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
+                b =>
                 {
-                    b.Name = this._baseOnPropertyChangedMethod!.Name;
-                }
+                    if ( isOverride )
+                    {
+                        b.Name = this._baseOnPropertyChangedMethod!.Name;
+                    }
 
-                if ( this._builder.Target.IsSealed )
-                {
-                    b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
-                }
-                else
-                {
-                    b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
-                    b.IsVirtual = !isOverride;
-                }
-            },
-            args: new { 
-                deferredExecutionContext = this._deferredTemplateExecutionContext 
-            } );
+                    if ( this._builder.Target.IsSealed )
+                    {
+                        b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    }
+                    else
+                    {
+                        b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.IsVirtual = !isOverride;
+                    }
+                },
+                args: new { deferredExecutionContext = this._deferredTemplateExecutionContext } );
 
         this._onPropertyChangedMethod.Value = result.Declaration;
 
@@ -212,36 +213,35 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     {
         var isOverride = this._baseOnChildPropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
-            this._builder.Target,
-            nameof( Templates.OnChildPropertyChanged ),
-            IntroductionScope.Instance,
-            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
-            b =>
-            {
-                b.AddAttribute(
-                    AttributeConstruction.Create(
-                        this._elements.OnChildPropertyChangedMethodAttribute,
-                        new[] { this._propertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
+        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            .IntroduceMethod(
+                this._builder.Target,
+                nameof(Templates.OnChildPropertyChanged),
+                IntroductionScope.Instance,
+                isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
+                b =>
+                {
+                    b.AddAttribute(
+                        AttributeConstruction.Create(
+                            this._elements.OnChildPropertyChangedMethodAttribute,
+                            new[] { this._propertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
-                if ( isOverride )
-                {
-                    b.Name = this._baseOnChildPropertyChangedMethod!.Name;
-                }
+                    if ( isOverride )
+                    {
+                        b.Name = this._baseOnChildPropertyChangedMethod!.Name;
+                    }
 
-                if ( this._builder.Target.IsSealed )
-                {
-                    b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
-                }
-                else
-                {
-                    b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Protected;
-                    b.IsVirtual = !isOverride;
-                }
-            },
-            args: new {
-                deferredExecutionContext = this._deferredTemplateExecutionContext
-            } );
+                    if ( this._builder.Target.IsSealed )
+                    {
+                        b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    }
+                    else
+                    {
+                        b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.IsVirtual = !isOverride;
+                    }
+                },
+                args: new { deferredExecutionContext = this._deferredTemplateExecutionContext } );
 
         this._onChildPropertyChangedMethod.Value = result.Declaration;
     }
@@ -255,36 +255,35 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
         var isOverride = this._baseOnUnmonitoredObservablePropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
-            this._builder.Target,
-            nameof( Templates.OnUnmonitoredObservablePropertyChanged ),
-            IntroductionScope.Instance,
-            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
-            b =>
-            {
-                b.AddAttribute(
-                    AttributeConstruction.Create(
-                        this._elements.OnUnmonitoredObservablePropertyChangedMethodAttribute,
-                        new[] { this._propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
+        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            .IntroduceMethod(
+                this._builder.Target,
+                nameof(Templates.OnUnmonitoredObservablePropertyChanged),
+                IntroductionScope.Instance,
+                isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
+                b =>
+                {
+                    b.AddAttribute(
+                        AttributeConstruction.Create(
+                            this._elements.OnUnmonitoredObservablePropertyChangedMethodAttribute,
+                            new[] { this._propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
-                if ( isOverride )
-                {
-                    b.Name = this._baseOnUnmonitoredObservablePropertyChangedMethod!.Name;
-                }
+                    if ( isOverride )
+                    {
+                        b.Name = this._baseOnUnmonitoredObservablePropertyChangedMethod!.Name;
+                    }
 
-                if ( this._builder.Target.IsSealed )
-                {
-                    b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
-                }
-                else
-                {
-                    b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
-                    b.IsVirtual = !isOverride;
-                }
-            },
-            args: new {
-                deferredExecutionContext = this._deferredTemplateExecutionContext
-            } );
+                    if ( this._builder.Target.IsSealed )
+                    {
+                        b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    }
+                    else
+                    {
+                        b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.IsVirtual = !isOverride;
+                    }
+                },
+                args: new { deferredExecutionContext = this._deferredTemplateExecutionContext } );
 
         this._onUnmonitoredObservablePropertyChangedMethod.Value = result.Declaration;
     }
@@ -356,24 +355,25 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
                 var accessChildExpression = accessChildExprBuilder.ToExpression();
 
-                var introduceUpdateChildPropertyMethodResult = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
-                    this._builder.Target,
-                    nameof( Templates.UpdateChildInpcProperty ),
-                    IntroductionScope.Instance,
-                    OverrideStrategy.Fail,
-                    b =>
-                    {
-                        b.Name = methodName;
-                        b.Accessibility = Accessibility.Private;
-                    },
-                    args: new
-                    {
-                        deferredExecutionContext = this._deferredTemplateExecutionContext,
-                        node,
-                        accessChildExpression,
-                        lastValueField,
-                        onPropertyChangedHandlerField
-                    } );
+                var introduceUpdateChildPropertyMethodResult = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                    .IntroduceMethod(
+                        this._builder.Target,
+                        nameof(Templates.UpdateChildInpcProperty),
+                        IntroductionScope.Instance,
+                        OverrideStrategy.Fail,
+                        b =>
+                        {
+                            b.Name = methodName;
+                            b.Accessibility = Accessibility.Private;
+                        },
+                        args: new
+                        {
+                            deferredExecutionContext = this._deferredTemplateExecutionContext,
+                            node,
+                            accessChildExpression,
+                            lastValueField,
+                            onPropertyChangedHandlerField
+                        } );
 
                 thisUpdateMethod = introduceUpdateChildPropertyMethodResult.Declaration;
 
@@ -423,11 +423,12 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
                             if ( p.InitializerExpression != null )
                             {
-                                this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
-                                    this._builder.Target,
-                                    nameof( Templates.SubscribeInitializer ),
-                                    InitializerKind.BeforeInstanceConstructor,
-                                    args: new { fieldOrProperty = p, subscribeMethod } );
+                                this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                                    .AddInitializer(
+                                        this._builder.Target,
+                                        nameof(Templates.SubscribeInitializer),
+                                        InitializerKind.BeforeInstanceConstructor,
+                                        args: new { fieldOrProperty = p, subscribeMethod } );
                             }
                         }
                         else
@@ -435,27 +436,25 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                             this._propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.Add( p.Name );
                         }
 
-                        this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
-                            p,
-                            setTemplate: nameof( Templates.OverrideInpcRefTypePropertySetter ),
-                            args: new {
-                                deferredExecutionContext = this._deferredTemplateExecutionContext, 
-                                handlerField, 
-                                node, 
-                                subscribeMethod 
-                            } );
+                        this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                            .OverrideAccessors(
+                                p,
+                                setTemplate: nameof(Templates.OverrideInpcRefTypePropertySetter),
+                                args: new { deferredExecutionContext = this._deferredTemplateExecutionContext, handlerField, node, subscribeMethod } );
                     }
                     else
                     {
-                        this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
-                            p,
-                            setTemplate: nameof( Templates.OverrideUninstrumentedTypePropertySetter ),
-                            args: new { 
-                                deferredExecutionContext = this._deferredTemplateExecutionContext, 
-                                node, 
-                                compareUsing = EqualityComparisonKind.ReferenceEquals, 
-                                propertyTypeInstrumentationKind 
-                            } );
+                        this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                            .OverrideAccessors(
+                                p,
+                                setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
+                                args: new
+                                {
+                                    deferredExecutionContext = this._deferredTemplateExecutionContext,
+                                    node,
+                                    compareUsing = EqualityComparisonKind.ReferenceEquals,
+                                    propertyTypeInstrumentationKind
+                                } );
                     }
 
                     break;
@@ -466,15 +465,17 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                         ? EqualityComparisonKind.EqualityOperator
                         : EqualityComparisonKind.DefaultEqualityComparer;
 
-                    this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
-                        p,
-                        setTemplate: nameof( Templates.OverrideUninstrumentedTypePropertySetter ),
-                        args: new {
-                            deferredExecutionContext = this._deferredTemplateExecutionContext, 
-                            node, 
-                            compareUsing = comparisonKind, 
-                            propertyTypeInstrumentationKind 
-                        } );
+                    this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                        .OverrideAccessors(
+                            p,
+                            setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
+                            args: new
+                            {
+                                deferredExecutionContext = this._deferredTemplateExecutionContext,
+                                node,
+                                compareUsing = comparisonKind,
+                                propertyTypeInstrumentationKind
+                            } );
 
                     break;
             }
@@ -497,15 +498,17 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     {
         this._inheritedOnUnmonitoredObservablePropertyChangedPropertyNames ??=
             BuildPropertyPathLookup(
-                GetPropertyPaths( this._elements.OnUnmonitoredObservablePropertyChangedMethodAttribute, this._baseOnUnmonitoredObservablePropertyChangedMethod ) );
+                GetPropertyPaths(
+                    this._elements.OnUnmonitoredObservablePropertyChangedMethodAttribute,
+                    this._baseOnUnmonitoredObservablePropertyChangedMethod ) );
 
         return this._inheritedOnUnmonitoredObservablePropertyChangedPropertyNames.Contains( propertyName );
     }
-    
+
     /// <summary>
     /// Builds and validates the dependency graph (including validating dependency analysis).
     /// </summary>
-    /// <returns>Success. <see langword="true"/> if the graph was built wihout diagnostic errors, otherwise <see langword="false"/>.</returns>
+    /// <returns>Success. <see langword="true"/> if the graph was built without diagnostic errors, otherwise <see langword="false"/>.</returns>
     private bool BuildAndValidateDependencyGraph()
     {
         var hasErrors = false;
@@ -514,14 +517,14 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             this._builder.Target,
             ( diagnostic, location ) =>
             {
+                // ReSharper disable once AccessToModifiedClosure
                 hasErrors |= diagnostic.Definition.Severity == Severity.Error;
                 this._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
             },
             this._builder.CancellationToken );
 
         var processingGraph =
-            structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>(
-                new( this._builder.Target.Compilation, this ) );
+            structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>( new( this._builder.Target.Compilation, this ) );
 
         foreach ( var node in processingGraph.DescendantsDepthFirst() )
         {
@@ -561,13 +564,14 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         {
             var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.ContiguousPropertyPath}PropertyChangedHandler" );
 
-            var introduceHandlerFieldResult = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceField(
-                this._builder.Target,
-                handlerFieldName,
-                this._elements.NullablePropertyChangedEventHandler,
-                IntroductionScope.Instance,
-                OverrideStrategy.Fail,
-                b => b.Accessibility = Accessibility.Private );
+            var introduceHandlerFieldResult = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                .IntroduceField(
+                    this._builder.Target,
+                    handlerFieldName,
+                    this._elements.NullablePropertyChangedEventHandler,
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b => b.Accessibility = Accessibility.Private );
 
             node.HandlerField.Value = introduceHandlerFieldResult.Declaration;
         }
@@ -579,7 +583,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     {
         if ( node.Depth != 1 )
         {
-            throw new ArgumentException( "Must be a root property node (depth must be 1).", nameof( node ) );
+            throw new ArgumentException( "Must be a root property node (depth must be 1).", nameof(node) );
         }
 
         if ( !node.SubscribeMethod.ValueIsSet )
@@ -588,21 +592,18 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
             var subscribeMethodName = this.GetAndReserveUnusedMemberName( $"SubscribeTo{node.Name}" );
 
-            var result = this._builder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceMethod(
-                this._builder.Target,
-                nameof( Templates.SubscribeTo ),
-                IntroductionScope.Instance,
-                OverrideStrategy.Fail,
-                b =>
-                {
-                    b.Name = subscribeMethodName;
-                    b.Accessibility = Accessibility.Private;
-                },
-                args: new { 
-                    TValue = node.FieldOrProperty.Type,
-                    deferredExecutionContext = this._deferredTemplateExecutionContext,
-                    node, 
-                    handlerField } );
+            var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                .IntroduceMethod(
+                    this._builder.Target,
+                    nameof(Templates.SubscribeTo),
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b =>
+                    {
+                        b.Name = subscribeMethodName;
+                        b.Accessibility = Accessibility.Private;
+                    },
+                    args: new { TValue = node.FieldOrProperty.Type, deferredExecutionContext = this._deferredTemplateExecutionContext, node, handlerField } );
 
             node.SubscribeMethod.Value = result.Declaration;
         }
@@ -644,7 +645,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
         => propertyPaths == null ? new HashSet<string>() : new HashSet<string>( propertyPaths );
 
-    [return: NotNullIfNotNull( nameof( method ) )]
+    [return: NotNullIfNotNull( nameof(method) )]
     private static IEnumerable<string>? GetPropertyPaths( INamedType attributeType, IMethod? method, bool includeInherited = true )
     {
         // NB: Assumes that attributeType instances will always be constructed with one arg of type string[].
@@ -678,7 +679,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         => type.AllMethods.FirstOrDefault(
             m =>
                 !m.IsStatic
-                && m.Attributes.Any( typeof( OnChildPropertyChangedMethodAttribute ) )
+                && m.Attributes.Any( typeof(OnChildPropertyChangedMethodAttribute) )
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }, { Type.SpecialType: SpecialType.String }] );
@@ -687,7 +688,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         => type.AllMethods.FirstOrDefault(
             m =>
                 !m.IsStatic
-                && m.Attributes.Any( typeof( OnUnmonitoredObservablePropertyChangedMethodAttribute ) )
+                && m.Attributes.Any( typeof(OnUnmonitoredObservablePropertyChangedMethodAttribute) )
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _]
@@ -723,8 +724,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                     // and non-INPC-type code which is used at runtime when T does not implement INPC.
 
                     this._builder.Diagnostics.Report(
-                        DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments(
-                            (fp.DeclarationKind, fp, fp.Type) ),
+                        DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments( (fp.DeclarationKind, fp, fp.Type) ),
                         fp );
 
                     isValid = false;
@@ -736,8 +736,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                     if ( typeImplementsInpc )
                     {
                         this._builder.Diagnostics.Report(
-                            DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments(
-                                (fp.DeclarationKind, fp, fp.Type) ),
+                            DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments( (fp.DeclarationKind, fp, fp.Type) ),
                             fp );
 
                         isValid = false;

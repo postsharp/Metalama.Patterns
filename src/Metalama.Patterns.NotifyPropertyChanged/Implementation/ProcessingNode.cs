@@ -11,14 +11,14 @@ using System.Text;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 [CompileTime]
-internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> : 
-    IReadOnlyProcessingNode, 
+internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
+    IReadOnlyProcessingNode,
     INode<TDerived>,
     IInitializableNode<TDerived, ProcessingNodeInitializationContext>
     where TDerived : ProcessingNode<TDerived, TReadOnlyDerivedInterface>, TReadOnlyDerivedInterface, new()
-    where TReadOnlyDerivedInterface : 
-        IReadOnlyProcessingNode, 
-        INode<TReadOnlyDerivedInterface>
+    where TReadOnlyDerivedInterface :
+    IReadOnlyProcessingNode,
+    INode<TReadOnlyDerivedInterface>
 {
     private TDerived? _parent;
     private ISymbol? _symbol;
@@ -36,11 +36,17 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
     /// <summary>
     /// Initializes the node during duplication from a <see cref="DependencyGraph.Node"/> graph.
     /// </summary>
-    void IInitializableNode<TDerived, ProcessingNodeInitializationContext>.Initialize( ProcessingNodeInitializationContext? initializationContext, int depth, ISymbol? symbol, TDerived? parent, TDerived[]? children, TDerived[]? referencedBy )
+    void IInitializableNode<TDerived, ProcessingNodeInitializationContext>.Initialize(
+        ProcessingNodeInitializationContext? initializationContext,
+        int depth,
+        ISymbol? symbol,
+        TDerived? parent,
+        TDerived[]? children,
+        TDerived[]? referencedBy )
     {
         if ( initializationContext == null )
         {
-            throw new ArgumentNullException( nameof( initializationContext ) );
+            throw new ArgumentNullException( nameof(initializationContext) );
         }
 
         // NB: Nodes are initialized in GraphExtensions.DescendantsDepthFirst{T}(T) order.
@@ -134,6 +140,7 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
         return sb.ToString();
     }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public string ToString( TDerived? highlight, string? format = null )
     {
         var sb = new StringBuilder();
@@ -188,6 +195,5 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
         }
     }
 
-    string IReadOnlyProcessingNode.ToString( object? highlight, string? format )
-        => this.ToString( highlight as TDerived, format );
+    string IReadOnlyProcessingNode.ToString( object? highlight, string? format ) => this.ToString( highlight as TDerived, format );
 }

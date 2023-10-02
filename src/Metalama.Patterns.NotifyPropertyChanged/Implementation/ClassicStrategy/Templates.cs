@@ -18,8 +18,6 @@ internal sealed class Templates : ITemplateProvider
 
     private static void CompileTimeThrow( Exception e ) => throw e;
 
-    private static T ExpectNotNull<T>( T? obj ) => obj ?? throw new InvalidOperationException( "A null value was not expected here." );
-
     // ReSharper disable once EventNeverSubscribedTo.Global
     [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -88,7 +86,9 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
+                             .Select( n => n.Name )
+                             .OrderBy( n => n ) )
                 {
                     ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
                 }
@@ -211,7 +211,9 @@ internal sealed class Templates : ITemplateProvider
             }
 
             // Notify refs to the current node and any children without an update method.
-            foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+            foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
+                         .Select( n => n.Name )
+                         .OrderBy( n => n ) )
             {
                 ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
             }
@@ -230,7 +232,7 @@ internal sealed class Templates : ITemplateProvider
     }
 
     [Template]
-    internal static void OverrideUninstrumentedTypePropertySetter( 
+    internal static void OverrideUninstrumentedTypePropertySetter(
         dynamic? value,
         [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
         [CompileTime] IReadOnlyClassicProcessingNode? node,
@@ -282,7 +284,7 @@ internal sealed class Templates : ITemplateProvider
     }
 
     [Template]
-    internal void OnPropertyChanged( 
+    internal void OnPropertyChanged(
         string propertyName,
         [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext )
     {
@@ -291,6 +293,7 @@ internal sealed class Templates : ITemplateProvider
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(this.OnPropertyChanged) );
+
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
                 meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
@@ -616,7 +619,7 @@ internal sealed class Templates : ITemplateProvider
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OnUnmonitoredObservablePropertyChanged) );
-            
+
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
                 meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
@@ -646,7 +649,8 @@ internal sealed class Templates : ITemplateProvider
          *   NaturalAspect.AddPropertyPathsForOnChildPropertyChangedMethodAttribute.
         */
 
-        foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
+        foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst()
+                     .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
         {
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
             {
@@ -689,7 +693,9 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Select( n => n.Name ).OrderBy( n => n ) )
+                foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
+                             .Select( n => n.Name )
+                             .OrderBy( n => n ) )
                 {
                     ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
                 }
@@ -710,7 +716,7 @@ internal sealed class Templates : ITemplateProvider
     {
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
-            meta.InsertComment( "Template: " + nameof( OnChildPropertyChangedDelegateBody ) );
+            meta.InsertComment( "Template: " + nameof(OnChildPropertyChangedDelegateBody) );
 
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {

@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 
 [CompileTime]
-internal interface IInitializableNode<TNode, in TContext>
+internal interface IInitializableNode<in TNode, in TContext>
 {
     /// <summary>
     /// Sets the data for a node. 

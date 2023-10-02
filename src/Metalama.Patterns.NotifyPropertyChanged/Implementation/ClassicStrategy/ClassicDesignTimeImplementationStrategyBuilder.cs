@@ -8,7 +8,6 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy
 
 internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrategy.DesignTimeImplementationStrategyBuilder
 {
-    private readonly Elements _elements;
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
     private readonly IMethod? _baseOnUnmonitoredObservablePropertyChangedMethod;
@@ -16,10 +15,12 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
     public ClassicDesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> builder ) : base( builder )
     {
         var target = builder.Target;
-        this._elements = new Elements( target );
+        var elements = new Elements( target );
         this._baseOnPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnPropertyChangedMethod( target );
         this._baseOnChildPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnChildPropertyChangedMethod( target );
-        this._baseOnUnmonitoredObservablePropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnUnmonitoredObservablePropertyChangedMethod( target, this._elements );
+
+        this._baseOnUnmonitoredObservablePropertyChangedMethod =
+            ClassicImplementationStrategyBuilder.GetOnUnmonitoredObservablePropertyChangedMethod( target, elements );
     }
 
     protected override void BuildAspect()
@@ -37,90 +38,96 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
     {
         var isOverride = this._baseOnPropertyChangedMethod != null;
 
-        var result = this.Builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
-            this.Builder.Target,
-            nameof( OnPropertyChanged ),
-            IntroductionScope.Instance,
-            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
-            b =>
-            {
-                if ( isOverride )
+        this.Builder.Advice.WithTemplateProvider( this )
+            .IntroduceMethod(
+                this.Builder.Target,
+                nameof(OnPropertyChanged),
+                IntroductionScope.Instance,
+                isOverride ? OverrideStrategy.Override : OverrideStrategy.Ignore,
+                b =>
                 {
-                    b.Name = this._baseOnPropertyChangedMethod!.Name;
-                }
+                    if ( isOverride )
+                    {
+                        b.Name = this._baseOnPropertyChangedMethod!.Name;
+                    }
 
-                if ( this.Builder.Target.IsSealed )
-                {
-                    b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
-                }
-                else
-                {
-                    b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
-                    b.IsVirtual = !isOverride;
-                }
-            } );
+                    if ( this.Builder.Target.IsSealed )
+                    {
+                        b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    }
+                    else
+                    {
+                        b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.IsVirtual = !isOverride;
+                    }
+                } );
     }
 
     private void IntroduceOnChildPropertyChangedMethod()
     {
         var isOverride = this._baseOnChildPropertyChangedMethod != null;
 
-        var result = this.Builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
-            this.Builder.Target,
-            nameof( OnChildPropertyChanged ),
-            IntroductionScope.Instance,
-            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
-            b =>
-            {
-                if ( isOverride )
+        this.Builder.Advice.WithTemplateProvider( this )
+            .IntroduceMethod(
+                this.Builder.Target,
+                nameof(OnChildPropertyChanged),
+                IntroductionScope.Instance,
+                isOverride ? OverrideStrategy.Override : OverrideStrategy.Ignore,
+                b =>
                 {
-                    b.Name = this._baseOnChildPropertyChangedMethod!.Name;
-                }
+                    if ( isOverride )
+                    {
+                        b.Name = this._baseOnChildPropertyChangedMethod!.Name;
+                    }
 
-                if ( this.Builder.Target.IsSealed )
-                {
-                    b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
-                }
-                else
-                {
-                    b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Protected;
-                    b.IsVirtual = !isOverride;
-                }
-            } );
+                    if ( this.Builder.Target.IsSealed )
+                    {
+                        b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    }
+                    else
+                    {
+                        b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.IsVirtual = !isOverride;
+                    }
+                } );
     }
 
     private void IntroduceOnUnmonitoredObservablePropertyChanged()
     {
-        if ( !this.Builder.Target.Enhancements().GetOptions<Options.ClassicImplementationStrategyOptions>().EnableOnUnmonitoredObservablePropertyChangedMethod == true )
+        if ( !this.Builder.Target.Enhancements().GetOptions<Options.ClassicImplementationStrategyOptions>().EnableOnUnmonitoredObservablePropertyChangedMethod
+             == true )
         {
             return;
         }
 
         var isOverride = this._baseOnUnmonitoredObservablePropertyChangedMethod != null;
 
-        var result = this.Builder.Advice.WithTemplateProvider( this ).IntroduceMethod(
-            this.Builder.Target,
-            nameof( OnUnmonitoredObservablePropertyChanged ),
-            IntroductionScope.Instance,
-            isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
-            b =>
-            {
-                if ( isOverride )
+        this.Builder.Advice.WithTemplateProvider( this )
+            .IntroduceMethod(
+                this.Builder.Target,
+                nameof(OnUnmonitoredObservablePropertyChanged),
+                IntroductionScope.Instance,
+                isOverride ? OverrideStrategy.Override : OverrideStrategy.Ignore,
+                b =>
                 {
-                    b.Name = this._baseOnUnmonitoredObservablePropertyChangedMethod!.Name;
-                }
+                    if ( isOverride )
+                    {
+                        b.Name = this._baseOnUnmonitoredObservablePropertyChangedMethod!.Name;
+                    }
 
-                if ( this.Builder.Target.IsSealed )
-                {
-                    b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
-                }
-                else
-                {
-                    b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
-                    b.IsVirtual = !isOverride;
-                }
-            } );
+                    if ( this.Builder.Target.IsSealed )
+                    {
+                        b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
+                    }
+                    else
+                    {
+                        b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.IsVirtual = !isOverride;
+                    }
+                } );
     }
+
+    // ReSharper disable UnusedParameter.Local
 
     [Template]
     private static void OnPropertyChanged( string propertyName ) { }

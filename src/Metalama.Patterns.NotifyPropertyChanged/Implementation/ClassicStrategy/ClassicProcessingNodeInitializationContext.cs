@@ -7,6 +7,4 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy
 
 [CompileTime]
 internal sealed record ClassicProcessingNodeInitializationContext( ICompilation Compilation, IClassicProcessingNodeInitializationHelper Helper )
-    : ProcessingNodeInitializationContext( Compilation )
-{
-}
+    : ProcessingNodeInitializationContext( Compilation );

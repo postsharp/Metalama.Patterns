@@ -25,12 +25,12 @@ internal static class DependencyGraphExtensions
     {
         if ( node == null )
         {
-            throw new ArgumentNullException( nameof( node ) );
+            throw new ArgumentNullException( nameof(node) );
         }
 
         if ( !node.IsRoot )
         {
-            throw new ArgumentException( "Must be a root node.", nameof( node ) );
+            throw new ArgumentException( "Must be a root node.", nameof(node) );
         }
 
         foreach ( var n in node.SelfAndDescendantsDepthFirst() )
@@ -45,9 +45,10 @@ internal static class DependencyGraphExtensions
             if ( n.HasChildren )
             {
                 var nc = n.Children;
-                children = new TNode[ nc.Count ];
+                children = new TNode[nc.Count];
                 var i = 0;
-                foreach ( var c in nc)
+
+                foreach ( var c in nc )
                 {
                     children[i++] = (TNode) c.Tag!;
                 }
@@ -60,6 +61,7 @@ internal static class DependencyGraphExtensions
                 var nr = n.ReferencedBy;
                 referencedBy = new TNode[nr.Count];
                 var i = 0;
+
                 foreach ( var r in nr )
                 {
                     referencedBy[i++] = (TNode) r.Tag!;
@@ -70,7 +72,7 @@ internal static class DependencyGraphExtensions
                 context,
                 n.Depth,
                 n.Symbol,
-                (TNode?) (n.IsRoot ? null : n.Parent?.Tag),
+                (TNode?) (n.IsRoot ? null : n.Parent.Tag),
                 children,
                 referencedBy );
         }

@@ -13,7 +13,7 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
     private int? _diagnosticCommentVerbosity;
 
     /// <summary>
-    /// Gets or sets a value indicating the verbosity of diagnostic comments inserted into genereated code. Must be a value
+    /// Gets or sets a value indicating the verbosity of diagnostic comments inserted into generated code. Must be a value
     /// between 0 and 3 (inclusive). 0 (default) inserts no comments, 3 is the most verbose.
     /// </summary>
     public int DiagnosticCommentVerbosity
@@ -22,7 +22,7 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
 
         set
         {
-            if ( value < 0 || value > 3 )
+            if ( value is < 0 or > 3 )
             {
                 throw new ArgumentOutOfRangeException( nameof(value) );
             }

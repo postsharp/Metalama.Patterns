@@ -13,8 +13,8 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DesignTimeStrat
 internal class DesignTimeImplementationStrategyBuilder : IImplementationStrategyBuilder, ITemplateProvider
 {
     protected IAspectBuilder<INamedType> Builder { get; }
-    
-    public DesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> aspectBuilder )
+
+    protected DesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> aspectBuilder )
     {
         this.Builder = aspectBuilder;
     }
@@ -22,7 +22,7 @@ internal class DesignTimeImplementationStrategyBuilder : IImplementationStrategy
     protected virtual void BuildAspect()
     {
         // Introduce the INotifyPropertyChanged if it's not already implemented.
-        this.Builder.Advice.WithTemplateProvider( this ).ImplementInterface( this.Builder.Target, typeof( INotifyPropertyChanged ), OverrideStrategy.Ignore );
+        this.Builder.Advice.WithTemplateProvider( this ).ImplementInterface( this.Builder.Target, typeof(INotifyPropertyChanged), OverrideStrategy.Ignore );
     }
 
     void IImplementationStrategyBuilder.BuildAspect()
@@ -32,5 +32,7 @@ internal class DesignTimeImplementationStrategyBuilder : IImplementationStrategy
 
     // ReSharper disable once EventNeverSubscribedTo.Global
     [InterfaceMember]
+#pragma warning disable CS0067
     public event PropertyChangedEventHandler? PropertyChanged;
+#pragma warning restore CS0067
 }

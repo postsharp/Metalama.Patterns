@@ -22,7 +22,5 @@ public sealed class NotifyPropertyChangedAttribute : NotifyPropertyChangedOption
         var strategyBuilder = options.ImplementationStrategyFactory!.GetBuilder( builder );
 
         strategyBuilder.BuildAspect();
-
-        (strategyBuilder as IDisposable)?.Dispose();
     }
 }

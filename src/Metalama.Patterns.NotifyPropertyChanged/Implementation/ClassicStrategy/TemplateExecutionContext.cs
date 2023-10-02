@@ -27,6 +27,4 @@ internal sealed record TemplateExecutionContext(
     IMethod OnChildPropertyChangedMethod,
     IMethod? BaseOnPropertyChangedMethod,
     IMethod? BaseOnChildPropertyChangedMethod,
-    IMethod? BaseOnUnmonitoredObservablePropertyChangedMethod )
-{
-}
+    IMethod? BaseOnUnmonitoredObservablePropertyChangedMethod );

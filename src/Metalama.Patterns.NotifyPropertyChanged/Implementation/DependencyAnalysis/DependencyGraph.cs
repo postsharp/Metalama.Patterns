@@ -79,7 +79,7 @@ internal static partial class DependencyGraph
             ISymbol originSymbol,
             SemanticModel semanticModel,
             ReportDiagnostic reportDiagnostic,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken )
         {
             this._tree = tree;
             this._originSymbol = originSymbol;

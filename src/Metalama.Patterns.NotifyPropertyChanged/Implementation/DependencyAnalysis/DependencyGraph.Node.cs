@@ -25,11 +25,9 @@ internal static partial class DependencyGraph
         private Dictionary<ISymbol, Node>? _children;
         private HashSet<Node>? _referencedBy;
 
-        internal Node()
-        {
-        }
+        internal Node() { }
 
-        internal Node( Node parent, ISymbol symbol )
+        private Node( Node parent, ISymbol symbol )
         {
             this._parent = parent;
             this.Symbol = symbol;
@@ -55,18 +53,18 @@ internal static partial class DependencyGraph
         private object? _tag;
 
         /// <summary>
-        /// Gets or sets an arbitary object associated with the current node.
+        /// Gets or sets an arbitrary object associated with the current node.
         /// </summary>
         /// <remarks>
         /// Once set, the value cannot be changed. This enforces a compromise between correctness and performance.
         /// </remarks>
-        public object? Tag 
+        public object? Tag
         {
             get => this._tag;
             set
             {
                 if ( this._tag == null )
-                { 
+                {
                     this._tag = value;
                 }
                 else
@@ -112,6 +110,7 @@ internal static partial class DependencyGraph
             return sb.ToString();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public string ToString( Node? highlight )
         {
             var sb = new StringBuilder();
@@ -120,7 +119,7 @@ internal static partial class DependencyGraph
             return sb.ToString();
         }
 
-        private void ToString( StringBuilder appendTo, int indent, Func<Node, bool>? shouldHighlight = null)
+        private void ToString( StringBuilder appendTo, int indent, Func<Node, bool>? shouldHighlight = null )
         {
             if ( shouldHighlight != null && shouldHighlight( this ) )
             {

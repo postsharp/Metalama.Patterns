@@ -19,7 +19,7 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
 
         if ( initializationContext is not ClassicProcessingNodeInitializationContext ctx )
         {
-            throw new ArgumentException( "Must be a " + nameof( ClassicProcessingNodeInitializationContext ), nameof( initializationContext ) );
+            throw new ArgumentException( "Must be a " + nameof(ClassicProcessingNodeInitializationContext), nameof(initializationContext) );
         }
 
         if ( this.Depth == 1 )
