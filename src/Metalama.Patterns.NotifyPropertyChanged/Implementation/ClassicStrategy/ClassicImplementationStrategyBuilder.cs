@@ -50,7 +50,6 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         this._inpcInstrumentationKindLookup = new( this._elements );
         this._commonOptions = builder.Target.Enhancements().GetOptions<NotifyPropertyChangedOptions>();
         this._classicOptions = builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>();
-        this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethodOrDefault );        
 
         // TODO: Consider using BaseType.Definition where possible for better performance.
 
@@ -64,6 +63,12 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         this._baseOnPropertyChangedMethod = GetOnPropertyChangedMethod( target );
         this._baseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod(target);
         this._baseOnUnmonitoredObservablePropertyChangedMethod = GetOnUnmonitoredObservablePropertyChangedMethod( target, this._elements );
+
+        var useOnUnmonitoredObservablePropertyChangedMethod =
+            this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethod == true &&
+            ( !target.IsSealed || this._baseOnUnmonitoredObservablePropertyChangedMethod != null );
+
+        this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: useOnUnmonitoredObservablePropertyChangedMethod );
     }
 
     public void BuildAspect()
