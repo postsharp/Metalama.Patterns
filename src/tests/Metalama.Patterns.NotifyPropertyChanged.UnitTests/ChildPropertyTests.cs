@@ -39,7 +39,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
             .Equal( (sa, "A3"), (sB2, "C2") );
 
         sC2.Dispose();
-        
+
         // ReSharper disable once RedundantAssignment
         sC2 = sNewD;
 
@@ -87,7 +87,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
             .Equal( (sa, "A3"), (sA2, "B2") );
 
         sB2.Dispose();
-        
+
         // ReSharper disable once RedundantAssignment
         sB2 = sNewC_3;
 
@@ -108,7 +108,7 @@ public sealed class ChildPropertyTests : InpcTestsBase
             .Equal( (sa, "A2") );
 
         sA2.Dispose();
-        
+
         // ReSharper disable once RedundantAssignment
         sA2 = sNewB;
 

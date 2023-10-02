@@ -7,7 +7,5 @@ namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.ConfigureF
 [CompileTime]
 public class FactoryDoesNotImplementInterface { }
 
-[NotifyPropertyChanged( ImplementationStrategyFactoryType = typeof( FactoryDoesNotImplementInterface ) )]
-public class ConfigureFactoryByAttribute_DoesNotImplementInterface
-{
-}
+[NotifyPropertyChanged( ImplementationStrategyFactoryType = typeof(FactoryDoesNotImplementInterface) )]
+public class ConfigureFactoryByAttribute_DoesNotImplementInterface { }

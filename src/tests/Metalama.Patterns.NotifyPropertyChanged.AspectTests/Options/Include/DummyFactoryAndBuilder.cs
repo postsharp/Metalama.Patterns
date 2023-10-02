@@ -25,11 +25,9 @@ public class DummyBuilder : IImplementationStrategyBuilder, ITemplateProvider
 
     public void BuildAspect()
     {
-        this._aspectBuilder.Advice.WithTemplateProvider( this ).IntroduceMethod( this._aspectBuilder.Target, nameof( this.Hello ) );
+        this._aspectBuilder.Advice.WithTemplateProvider( this ).IntroduceMethod( this._aspectBuilder.Target, nameof(this.Hello) );
     }
 
     [Template]
-    public void Hello()
-    {
-    }
+    public void Hello() { }
 }

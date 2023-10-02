@@ -16,7 +16,7 @@ public sealed class DependencyGraphTests : UnitTestClass
     public void CommonPatterns()
     {
         // A general test of common class and expression patterns that should work.
-        
+
         using var testContext = this.CreateTestContext();
 
         const string code = @"

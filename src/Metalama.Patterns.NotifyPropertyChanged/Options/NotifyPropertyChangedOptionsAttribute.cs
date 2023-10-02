@@ -24,7 +24,7 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
         {
             if ( value < 0 || value > 3 )
             {
-                throw new ArgumentOutOfRangeException( nameof( value ) );
+                throw new ArgumentOutOfRangeException( nameof(value) );
             }
 
             this._diagnosticCommentVerbosity = value;
@@ -38,30 +38,33 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
         IImplementationStrategyFactory? factory = null;
 
         if ( this.ImplementationStrategyFactoryType != null )
-        {            
-            if (typeof(IImplementationStrategyFactory).IsAssignableFrom( this.ImplementationStrategyFactoryType ) )
+        {
+            if ( typeof(IImplementationStrategyFactory).IsAssignableFrom( this.ImplementationStrategyFactoryType ) )
             {
                 var ctor = this.ImplementationStrategyFactoryType.GetConstructor( Type.EmptyTypes );
+
                 if ( ctor != null )
                 {
                     factory = (IImplementationStrategyFactory) ctor.Invoke( null );
                 }
                 else
                 {
-                    context.Diagnostics.Report( DiagnosticDescriptors.ErrorTypeMustHaveAPublicParameterlessConstructor.WithArguments( nameof( this.ImplementationStrategyFactoryType ) ) );
+                    context.Diagnostics.Report(
+                        DiagnosticDescriptors.ErrorTypeMustHaveAPublicParameterlessConstructor.WithArguments(
+                            nameof(this.ImplementationStrategyFactoryType) ) );
                 }
             }
             else
             {
-                context.Diagnostics.Report( DiagnosticDescriptors.ErrorTypeMustImplementInterface.WithArguments( (nameof( this.ImplementationStrategyFactoryType ), nameof( IImplementationStrategyFactory )) ) );
+                context.Diagnostics.Report(
+                    DiagnosticDescriptors.ErrorTypeMustImplementInterface.WithArguments(
+                        (nameof(this.ImplementationStrategyFactoryType), nameof(IImplementationStrategyFactory)) ) );
             }
         }
 
-        return new[] {
-            new NotifyPropertyChangedOptions()
-            {
-                ImplementationStrategyFactory = factory,
-                DiagnosticCommentVerbosity = this._diagnosticCommentVerbosity
-            } };
+        return new[]
+        {
+            new NotifyPropertyChangedOptions() { ImplementationStrategyFactory = factory, DiagnosticCommentVerbosity = this._diagnosticCommentVerbosity }
+        };
     }
 }

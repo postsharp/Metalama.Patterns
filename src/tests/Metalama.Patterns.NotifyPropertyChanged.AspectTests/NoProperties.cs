@@ -3,6 +3,4 @@
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests;
 
 [NotifyPropertyChanged]
-public class NoProperties
-{
-}
+public class NoProperties { }

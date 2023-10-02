@@ -7,7 +7,5 @@ using Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.Include;
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.ConfigureFactoryByAttribute;
 
 // <target>
-[NotifyPropertyChanged( ImplementationStrategyFactoryType = typeof( DummyFactory ) )]
-public class ConfigureFactoryByAttribute
-{
-}
+[NotifyPropertyChanged( ImplementationStrategyFactoryType = typeof(DummyFactory) )]
+public class ConfigureFactoryByAttribute { }

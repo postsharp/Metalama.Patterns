@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
+using System;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.ConfigureFactoryByAttribute_MissingCtor;
 
@@ -12,11 +13,9 @@ public class FactoryWithMissingCtor : IImplementationStrategyFactory
 
     public IImplementationStrategyBuilder GetBuilder( IAspectBuilder<INamedType> aspectBuilder )
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }
 
-[NotifyPropertyChanged( ImplementationStrategyFactoryType = typeof( FactoryWithMissingCtor ) )]
-public class ConfigureFactoryByAttribute_MissingCtor
-{
-}
+[NotifyPropertyChanged( ImplementationStrategyFactoryType = typeof(FactoryWithMissingCtor) )]
+public class ConfigureFactoryByAttribute_MissingCtor { }

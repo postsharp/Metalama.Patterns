@@ -11,9 +11,9 @@ public class SimpleInpcByHand : INotifyPropertyChanged
 {
     public SimpleInpcByHand() { }
 
-    public SimpleInpcByHand( int a ) 
-    { 
-        this._a = a; 
+    public SimpleInpcByHand( int a )
+    {
+        this._a = a;
     }
 
     private int _a;
@@ -26,7 +26,7 @@ public class SimpleInpcByHand : INotifyPropertyChanged
             if ( value != this._a )
             {
                 this._a = value;
-                this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( this.A ) ) );
+                this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof(this.A) ) );
             }
         }
     }

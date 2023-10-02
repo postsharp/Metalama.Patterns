@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 
@@ -21,20 +22,20 @@ public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompil
     /// Gets a value indicating the verbosity of diagnostic comments inserted into genereated code. Must be a value
     /// between 0 and 3 (inclusive). 0 (default) inserts no comments, 3 is the most verbose.
     /// </summary>
-    public int? DiagnosticCommentVerbosity 
+    public int? DiagnosticCommentVerbosity
     {
         get => this._diagnosticCommentVerbosity;
         init
         {
             if ( value < 0 || value > 3 )
             {
-                throw new ArgumentOutOfRangeException( nameof( value ) );
+                throw new ArgumentOutOfRangeException( nameof(value) );
             }
 
             this._diagnosticCommentVerbosity = value;
         }
     }
-    
+
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (NotifyPropertyChangedOptions) changes;
@@ -51,7 +52,7 @@ public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompil
         const string InpcDiagnosticCommentVerbosity = "InpcDiagnosticCommentVerbosity";
 
         var diagnosticCommentVerbosity = 0;
-        
+
         if ( context.Project.TryGetProperty( InpcDiagnosticCommentVerbosity, out var verbosityStr ) )
         {
             if ( !int.TryParse( verbosityStr, out diagnosticCommentVerbosity ) || diagnosticCommentVerbosity < 0 || diagnosticCommentVerbosity > 3 )
@@ -59,15 +60,14 @@ public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompil
                 context.Diagnostics.Report(
                     DiagnosticDescriptors.WarningInvalidProjectPropertyValueWillBeIgnored.WithArguments(
                         (InpcDiagnosticCommentVerbosity,
-                        verbosityStr,
-                        "be an integer between 0 and 3 inclusive.") ) );
+                         verbosityStr,
+                         "be an integer between 0 and 3 inclusive.") ) );
             }
         }
 
         return new NotifyPropertyChangedOptions()
         {
-            ImplementationStrategyFactory = Implementation.ClassicStrategy.ClassicImplementationStrategyFactory.Instance,
-            DiagnosticCommentVerbosity = diagnosticCommentVerbosity
+            ImplementationStrategyFactory = ClassicImplementationStrategyFactory.Instance, DiagnosticCommentVerbosity = diagnosticCommentVerbosity
         };
     }
 }

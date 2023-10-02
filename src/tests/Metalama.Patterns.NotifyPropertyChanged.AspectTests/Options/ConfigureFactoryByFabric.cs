@@ -18,6 +18,4 @@ public sealed class Fabric : NamespaceFabric
 
 // <target>
 [NotifyPropertyChanged]
-public class ConfigureFactoryByFabric
-{
-}
+public class ConfigureFactoryByFabric { }

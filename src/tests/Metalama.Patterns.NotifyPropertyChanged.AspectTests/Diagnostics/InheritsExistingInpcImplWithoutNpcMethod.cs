@@ -16,7 +16,7 @@ public class ExistingInpcImplWithoutNPCMethod : INotifyPropertyChanged
             if ( value != this._ex1 )
             {
                 this._ex1 = value;
-                this.PropertyChanged?.Invoke( this, new( nameof(this.EX1) ) );
+                this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof(this.EX1) ) );
             }
         }
     }

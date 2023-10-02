@@ -25,7 +25,7 @@ public class ExistingInpcImplWithValidOpcMethodNamedNotifyOfPropertyChange : INo
 
     protected virtual void NotifyOfPropertyChange( string propertyName )
     {
-        this.PropertyChanged?.Invoke( this, new( propertyName ) );
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
 }
 

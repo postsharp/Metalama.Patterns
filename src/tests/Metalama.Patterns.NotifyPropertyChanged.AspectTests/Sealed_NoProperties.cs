@@ -3,6 +3,4 @@
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests;
 
 [NotifyPropertyChanged]
-public sealed class SealedNoProperties
-{
-}
+public sealed class SealedNoProperties { }

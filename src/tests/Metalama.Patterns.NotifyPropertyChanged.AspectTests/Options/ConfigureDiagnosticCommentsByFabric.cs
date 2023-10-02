@@ -15,6 +15,4 @@ public class Fabric : NamespaceFabric
 
 // <target>
 [NotifyPropertyChanged]
-public class ConfigureDiagnosticCommentsByFabric
-{
-}
+public class ConfigureDiagnosticCommentsByFabric { }

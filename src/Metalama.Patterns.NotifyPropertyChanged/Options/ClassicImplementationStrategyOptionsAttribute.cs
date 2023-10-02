@@ -16,13 +16,15 @@ public sealed class ClassicImplementationStrategyOptionsAttribute
 {
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
     {
-        return new[] { 
+        return new[]
+        {
             new ClassicImplementationStrategyOptions
             {
                 EnableOnUnmonitoredObservablePropertyChangedMethod = this._enableOnUnmonitoredObservablePropertyChangedMethod
-            } };
+            }
+        };
     }
-    
+
     private bool? _enableOnUnmonitoredObservablePropertyChangedMethod;
 
     /// <summary>

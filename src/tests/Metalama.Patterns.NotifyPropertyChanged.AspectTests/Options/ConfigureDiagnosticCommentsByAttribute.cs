@@ -4,6 +4,4 @@ namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.ConfigureDiagnosti
 
 // <target>
 [NotifyPropertyChanged( DiagnosticCommentVerbosity = 1 )]
-public class ConfigureDiagnosticCommentsByAttribute
-{
-}
+public class ConfigureDiagnosticCommentsByAttribute { }

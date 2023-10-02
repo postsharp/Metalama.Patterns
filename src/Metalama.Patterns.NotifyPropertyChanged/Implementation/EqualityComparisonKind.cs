@@ -11,7 +11,7 @@ internal enum EqualityComparisonKind
     ThisEquals,
     EqualityOperator,
     DefaultEqualityComparer,
-    
+
     // ReSharper disable once UnusedMember.Global
     None
 }
