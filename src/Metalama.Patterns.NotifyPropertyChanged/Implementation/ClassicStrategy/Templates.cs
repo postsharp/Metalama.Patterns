@@ -752,6 +752,6 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
-        ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.Name, propertyName );
+        ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
     }
 }
