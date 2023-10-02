@@ -36,11 +36,11 @@ internal sealed class Templates : ITemplateProvider
         var inpcImplementationKind = node?.PropertyTypeInpcInstrumentationKind ?? ctx.InpcInstrumentationKindLookup.Get( meta.Target.Property.Type );
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
-        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OverrideInpcRefTypePropertySetter) );
 
-            if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 1 )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
                 meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             }
@@ -167,11 +167,11 @@ internal sealed class Templates : ITemplateProvider
             CompileTimeThrow( new InvalidOperationException( $"{nameof(UpdateChildInpcProperty)} template must not be called on a root property node." ) );
         }
 
-        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(UpdateChildInpcProperty) );
 
-            if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 1 )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
                 meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             }
@@ -221,7 +221,7 @@ internal sealed class Templates : ITemplateProvider
             {
                 ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.Parent.DottedPropertyPath, node.Name );
             }
-            else if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+            else if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
             {
                 meta.InsertComment(
                     $"Not calling OnChildPropertyChanged('{node.Parent.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
@@ -239,11 +239,11 @@ internal sealed class Templates : ITemplateProvider
     {
         var ctx = deferredExecutionContext.Value;
 
-        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OverrideUninstrumentedTypePropertySetter) );
 
-            if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 1 )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
                 meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyGraph.ToString( node ) );
             }
@@ -288,10 +288,10 @@ internal sealed class Templates : ITemplateProvider
     {
         var ctx = deferredExecutionContext.Value;
 
-        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(this.OnPropertyChanged) );
-            if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 1 )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
                 meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
             }
@@ -301,7 +301,7 @@ internal sealed class Templates : ITemplateProvider
         {
             if ( node.FieldOrProperty.IsAutoPropertyOrField == true && node.FieldOrProperty.DeclaringType == ctx.Elements.Target )
             {
-                if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
                     meta.InsertComment( $"Skipping '{node.Name}': The field or auto property is defined by the current type." );
                 }
@@ -311,7 +311,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( node.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged && ctx.OnUnmonitoredObservablePropertyChangedMethod != null )
             {
-                if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
                     meta.InsertComment(
                         $"Skipping '{node.Name}': A base type supports OnUnmonitoredObservablePropertyChanged for this property, and the current type is configured to use that feature." );
@@ -330,7 +330,7 @@ internal sealed class Templates : ITemplateProvider
             {
                 if ( node.ReferencedBy.Count == 0 )
                 {
-                    if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                    if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                     {
                         meta.InsertComment(
                             $"Skipping '{node.Name}': A base type supports OnChildPropertyChanged for this property, and the property itself has no references." );
@@ -364,7 +364,7 @@ internal sealed class Templates : ITemplateProvider
                 {
                     var emitDefaultNotifications = meta.CompileTime( true );
 
-                    if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                    if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                     {
                         meta.InsertComment( $"InpcBaseHandling = {node.InpcBaseHandling}" );
                     }
@@ -481,7 +481,7 @@ internal sealed class Templates : ITemplateProvider
             }
             else
             {
-                if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
                     meta.InsertComment( $"Skipping '{node.Name}' because there is nothing to do." );
                 }
@@ -506,11 +506,11 @@ internal sealed class Templates : ITemplateProvider
     {
         var ctx = deferredExecutionContext.Value;
 
-        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OnChildPropertyChanged) );
 
-            if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 1 )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
                 meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
             }
@@ -522,7 +522,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( rootPropertyNode.FieldOrProperty.DeclaringType == ctx.Elements.Target )
             {
-                if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
                     meta.InsertComment( $"Skipping '{node.DottedPropertyPath}': Root property '{rootPropertyNode.Name}' is defined by the current type." );
                 }
@@ -537,7 +537,7 @@ internal sealed class Templates : ITemplateProvider
                 switch ( firstAncestorWithNotNoneHandling.InpcBaseHandling )
                 {
                     case InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when ctx.OnUnmonitoredObservablePropertyChangedMethod != null:
-                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                         {
                             meta.InsertComment(
                                 $"Skipping '{node.DottedPropertyPath}': A base type supports OnUnmonitoredObservablePropertyChanged for an ancestor of this property, and the current type is configured to use that feature." );
@@ -546,7 +546,7 @@ internal sealed class Templates : ITemplateProvider
                         continue;
 
                     case InpcBaseHandling.OnChildPropertyChanged when node.Depth - firstAncestorWithNotNoneHandling.Depth > 1:
-                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                         {
                             meta.InsertComment(
                                 $"Skipping '{node.DottedPropertyPath}': A base type supports OnChildPropertyChanged for a non-immediate ancestor of this property." );
@@ -555,7 +555,7 @@ internal sealed class Templates : ITemplateProvider
                         continue;
 
                     case InpcBaseHandling.OnPropertyChanged:
-                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                         {
                             meta.InsertComment(
                                 $"Skipping '{node.DottedPropertyPath}': A base type supports OnPropertyChanged for root property '{rootPropertyNode.Name}'." );
@@ -613,10 +613,14 @@ internal sealed class Templates : ITemplateProvider
     {
         var ctx = deferredExecutionContext.Value;
 
-        if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OnUnmonitoredObservablePropertyChanged) );
-            meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
+            
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
+            {
+                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
+            }
         }
 
         /* 
@@ -644,7 +648,7 @@ internal sealed class Templates : ITemplateProvider
 
         foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
         {
-            if ( ctx.CommonOptions.DiagnosticCommentVerbosity!.Value > 0 )
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
             {
                 meta.InsertComment( $"Node '{node.DottedPropertyPath}'" );
             }
@@ -704,6 +708,16 @@ internal sealed class Templates : ITemplateProvider
         [CompileTime] IReadOnlyClassicProcessingNode node,
         [CompileTime] IExpression propertyChangedEventArgs )
     {
+        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+        {
+            meta.InsertComment( "Template: " + nameof( OnChildPropertyChangedDelegateBody ) );
+
+            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
+            {
+                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( node, "[ibh]" ) );
+            }
+        }
+
         var propertyName = propertyChangedEventArgs.Value!.PropertyName;
 
         foreach ( var childNode in node.Children )
