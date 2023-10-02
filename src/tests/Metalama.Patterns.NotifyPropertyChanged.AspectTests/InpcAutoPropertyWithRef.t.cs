@@ -1,8 +1,8 @@
 [NotifyPropertyChanged]
 public class InpcAutoPropertyWithRef : global::System.ComponentModel.INotifyPropertyChanged
 {
-    private Foo _x = default!;
-    public Foo X
+    private SimpleInpcByHand _x = default!;
+    public SimpleInpcByHand X
     {
         get
         {
@@ -38,7 +38,7 @@ public class InpcAutoPropertyWithRef : global::System.ComponentModel.INotifyProp
     protected virtual void OnUnmonitoredObservablePropertyChanged( global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue )
     {
     }
-    private void SubscribeToX( global::Metalama.Patterns.NotifyPropertyChanged.AspectTests.InpcAutoPropertyWithRef.Foo value )
+    private void SubscribeToX( global::Metalama.Patterns.NotifyPropertyChanged.AspectTests.Include.SimpleInpcByHand value )
     {
         if ( value != null )
         {

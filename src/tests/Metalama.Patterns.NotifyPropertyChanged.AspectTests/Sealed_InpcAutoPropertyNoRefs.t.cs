@@ -1,8 +1,8 @@
 [NotifyPropertyChanged]
 public sealed class SealedInpcAutoPropertyNoRefs : global::System.ComponentModel.INotifyPropertyChanged
 {
-    private Foo _x = default!;
-    public Foo X
+    private SimpleInpcByHand _x = default!;
+    public SimpleInpcByHand X
     {
         get
         {

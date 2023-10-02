@@ -1,8 +1,8 @@
 [NotifyPropertyChanged]
 public sealed class SealedInpcAutoPropertyWithRef : global::System.ComponentModel.INotifyPropertyChanged
 {
-    private Foo _x = default!;
-    public Foo X
+    private SimpleInpcByHand _x = default!;
+    public SimpleInpcByHand X
     {
         get
         {
@@ -34,7 +34,7 @@ public sealed class SealedInpcAutoPropertyWithRef : global::System.ComponentMode
     {
         this.PropertyChanged?.Invoke( this, new global::System.ComponentModel.PropertyChangedEventArgs( propertyName ) );
     }
-    private void SubscribeToX( global::Metalama.Patterns.NotifyPropertyChanged.AspectTests.SealedInpcAutoPropertyWithRef.Foo value )
+    private void SubscribeToX( global::Metalama.Patterns.NotifyPropertyChanged.AspectTests.Include.SimpleInpcByHand value )
     {
         if ( value != null )
         {
