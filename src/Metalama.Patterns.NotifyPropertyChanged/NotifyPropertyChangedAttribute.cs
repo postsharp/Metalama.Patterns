@@ -9,7 +9,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged;
 
 [AttributeUsage( AttributeTargets.Class )]
 [Inheritable]
-public sealed class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedType>
+public sealed class NotifyPropertyChangedAttribute : NotifyPropertyChangedOptionsAttribute, IAspect<INamedType>
 {
     void IEligible<INamedType>.BuildEligibility( IEligibilityBuilder<INamedType> builder )
     {
