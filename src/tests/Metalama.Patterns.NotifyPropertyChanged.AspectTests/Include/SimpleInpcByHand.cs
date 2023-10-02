@@ -9,6 +9,13 @@ namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Include;
 /// </summary>
 public class SimpleInpcByHand : INotifyPropertyChanged
 {
+    public SimpleInpcByHand() { }
+
+    public SimpleInpcByHand( int a ) 
+    { 
+        this._a = a; 
+    }
+
     private int _a;
 
     public int A
