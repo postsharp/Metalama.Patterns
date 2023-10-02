@@ -10,16 +10,9 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 /// <summary>
 /// Options specific to the "natural" implementation.
 /// </summary>
-[RunTimeOrCompileTime]
-public sealed class ClassicImplementationStrategyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
+[CompileTime]
+public sealed record ClassicImplementationStrategyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
 {
-    private const bool _defaultEnableOnUnmonitoredObservablePropertyChangedMethod = true;
-
-    internal static ClassicImplementationStrategyOptions DefaultOptions { get; } = new()
-    {
-        EnableOnUnmonitoredObservablePropertyChangedMethod = _defaultEnableOnUnmonitoredObservablePropertyChangedMethod
-    };
-
     /// <summary>
     /// Gets a value indicating whether the <c>OnUnmonitoredObservablePropertyChanged</c> method should be introduced.
     /// </summary>
@@ -32,9 +25,6 @@ public sealed class ClassicImplementationStrategyOptions : IHierarchicalOptions<
     /// </remarks>
     public bool? EnableOnUnmonitoredObservablePropertyChangedMethod { get; init; }
 
-    internal bool EnableOnUnmonitoredObservablePropertyChangedMethodOrDefault 
-        => this.EnableOnUnmonitoredObservablePropertyChangedMethod ?? _defaultEnableOnUnmonitoredObservablePropertyChangedMethod;
-
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (ClassicImplementationStrategyOptions) changes;
@@ -46,5 +36,8 @@ public sealed class ClassicImplementationStrategyOptions : IHierarchicalOptions<
     }
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => DefaultOptions;
+        => new ClassicImplementationStrategyOptions()
+        {
+            EnableOnUnmonitoredObservablePropertyChangedMethod = true
+        };
 }

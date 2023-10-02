@@ -10,7 +10,10 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 [RunTimeOrCompileTime]
 public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
 {
-    public IImplementationStrategyFactory? ImplementationStrategyFactory { get; set; }
+    /// <summary>
+    /// Gets the <see cref="IImplementationStrategyFactory"/> used to provide <see cref="IImplementationStrategyBuilder"/> instances.
+    /// </summary>
+    public IImplementationStrategyFactory? ImplementationStrategyFactory { get; init; }
 
     private int? _diagnosticCommentVerbosity;
 
