@@ -35,7 +35,8 @@ internal static partial class DependencyGraph
 
     public delegate void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null );
 
-    public static Node GetDependencyGraph( INamedType type, ReportDiagnostic reportDiagnostic, CancellationToken cancellationToken = default )
+    public static Node GetDependencyGraph( INamedType type, ReportDiagnostic reportDiagnostic, CancellationToken cancellationToken = default,
+        Action<string> trace = null )
     {
         var tree = new Node();
 
@@ -48,7 +49,7 @@ internal static partial class DependencyGraph
                 continue;
             }
 
-            AddReferencedProperties( type.Compilation, tree, propertySymbol, reportDiagnostic, cancellationToken );
+            AddReferencedProperties( type.Compilation, tree, propertySymbol, reportDiagnostic, cancellationToken, trace );
         }
 
         return tree;

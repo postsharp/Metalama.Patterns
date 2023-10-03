@@ -5,9 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
+    <InpcDiagnosticCommentVerbosity>3</InpcDiagnosticCommentVerbosity>
   </PropertyGroup>
 
   <ItemGroup>
+    <CompilerVisibleProperty Include="InpcDiagnosticCommentVerbosity"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />

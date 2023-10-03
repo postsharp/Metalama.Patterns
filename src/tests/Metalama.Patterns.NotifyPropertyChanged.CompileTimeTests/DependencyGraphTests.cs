@@ -114,30 +114,72 @@ class D
     }
 
     [Fact]
-    public void DateTimeNow()
+    public void ExternalPropertyThenMethodWithReferencingArgThenMethodWithReferencingArg()
     {
-        // A general test of common class and expression patterns that should work.
-
         using var testContext = this.CreateTestContext();
 
         const string code = @"
 using System;
+using System.Collections.Generic;
 
 public class A
 {
-    public int Offset { get; set; }
+    public int X { get; set; }
 
-    public string Ticks => DateTime.Now.AddTicks( this.Offset ).ToString();
+    public int Y { get; set; }
+
+    public DateTime Z => DateTime.Now.AddTicks( X ).AddMinutes( Y );
 }";
-
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = DependencyGraph.GetDependencyGraph( type, ( d, l ) => this.TestOutput.WriteLine( $"{d} at {l}" ) );
-        
-        //result.ToString().Should().Be( expected );
+        var result = DependencyGraph.GetDependencyGraph( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
 
-        this.TestOutput.WriteLine( result.ToString() );        
+        var expected = @"<root>
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+        
+        result.ToString().Should().Be( expected );
+
+        // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    // TODO: Remove experimental tests before PR.
+    [Fact]
+    public void Exp1()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+using System;
+using System.Collections.Generic;
+
+public class A
+{
+    public int X { get; set; }
+
+    public int Y { get; set; }
+
+    public DateTime Z => DateTime.Now.AddTicks( X ).AddMinutes( Y );
+}";
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var result = DependencyGraph.GetDependencyGraph( type, ( d, l ) => this.TestOutput.WriteLine( $"{d} at {l}" ), trace: s => this.TestOutput.WriteLine( s ) );
+
+        /*
+        var expected = @"<root>
+  X [ Z ]
+  Y [ Z ]
+  Z";
+
+        result.ToString().Should().Be( expected );
+        */
+
+        this.TestOutput.WriteLine( result.ToString() );
     }
 }
