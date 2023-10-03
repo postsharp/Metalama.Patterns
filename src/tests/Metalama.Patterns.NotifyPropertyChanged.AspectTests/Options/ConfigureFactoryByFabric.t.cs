@@ -1,7 +1,7 @@
 [NotifyPropertyChanged]
 public class ConfigureFactoryByFabric
 {
-    public void Hello()
-    {
-    }
+  public void Hello()
+  {
+  }
 }
