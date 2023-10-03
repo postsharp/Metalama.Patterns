@@ -327,7 +327,10 @@ internal static partial class DependencyGraph
             }
             else if ( node.Expression is MemberAccessExpressionSyntax memberAccess )
             {
-                this.ValidateMethodArgumentType( memberAccess.Expression );
+                if ( invocationSymbol?.IsStatic == false )
+                {
+                    this.ValidateMethodArgumentType( memberAccess.Expression );
+                }
             }
             else
             {
@@ -353,18 +356,28 @@ internal static partial class DependencyGraph
 
         public override void VisitVariableDeclaration( VariableDeclarationSyntax node )
         {
+            // TODO: At first glance, variables don't seem to be problematic. Why should they not be supported?
+#if false
             // TODO: Use more correct diagnostic.
             this._reportDiagnostic(
                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments( "Variable declarations are not supported." ),
                 node.GetLocation() );
+
+            // Best effort
+#endif
+            base.VisitVariableDeclaration( node );
         }
 
         public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
         {
+            // TODO: For now we don't try to examine the body of local functions - much as we don't examine the body of
+            // regular methods. Invocations of the local function will warn if they are not supported (primitive arg types only etc).            
+#if false
             // TODO: Use more correct diagnostic.
             this._reportDiagnostic(
                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments( "Local function declarations are not supported." ),
                 node.GetLocation() );
+#endif
         }
 
         public override void VisitBinaryExpression( BinaryExpressionSyntax node )
