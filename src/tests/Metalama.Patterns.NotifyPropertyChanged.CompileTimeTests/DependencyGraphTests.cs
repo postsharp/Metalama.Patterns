@@ -112,4 +112,32 @@ class D
 
         // this.TestOutput.WriteLine( result.ToString() );
     }
+
+    [Fact]
+    public void DateTimeNow()
+    {
+        // A general test of common class and expression patterns that should work.
+
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+using System;
+
+public class A
+{
+    public int Offset { get; set; }
+
+    public string Ticks => DateTime.Now.AddTicks( this.Offset ).ToString();
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var result = DependencyGraph.GetDependencyGraph( type, ( d, l ) => this.TestOutput.WriteLine( $"{d} at {l}" ) );
+        
+        //result.ToString().Should().Be( expected );
+
+        this.TestOutput.WriteLine( result.ToString() );        
+    }
 }
