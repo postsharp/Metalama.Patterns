@@ -1,29 +1,29 @@
 [NotifyPropertyChanged]
 public sealed class SealedInpcAutoPropertyNoRefs : global::System.ComponentModel.INotifyPropertyChanged
 {
-    private SimpleInpcByHand _x = default!;
-    public SimpleInpcByHand X
+  private SimpleInpcByHand _x = default !;
+  public SimpleInpcByHand X
+  {
+    get
     {
-        get
-        {
-            return this._x;
-        }
-        set
-        {
-            if ( !global::System.Object.ReferenceEquals( value, this._x ) )
-            {
-                this._x = value;
-                this.OnPropertyChanged( "X" );
-            }
-        }
+      return this._x;
     }
-    [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute( new global::System.String[] { } )]
-    private void OnChildPropertyChanged( global::System.String parentPropertyPath, global::System.String propertyName )
+    set
     {
+      if (!global::System.Object.ReferenceEquals(value, this._x))
+      {
+        this._x = value;
+        this.OnPropertyChanged("X");
+      }
     }
-    private void OnPropertyChanged( global::System.String propertyName )
-    {
-        this.PropertyChanged?.Invoke( this, new global::System.ComponentModel.PropertyChangedEventArgs( propertyName ) );
-    }
-    public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  }
+  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
+  private void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  {
+  }
+  private void OnPropertyChanged(global::System.String propertyName)
+  {
+    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+  }
+  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 }

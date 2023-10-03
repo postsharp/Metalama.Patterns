@@ -1,7 +1,7 @@
-[NotifyPropertyChanged( ImplementationStrategyFactoryType = typeof( DummyFactory ) )]
+[NotifyPropertyChanged(ImplementationStrategyFactoryType = typeof(DummyFactory))]
 public class ConfigureFactoryByAttribute
 {
-    public void Hello()
-    {
-    }
+  public void Hello()
+  {
+  }
 }
