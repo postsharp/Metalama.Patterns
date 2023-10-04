@@ -849,4 +849,91 @@ public class A
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void CombinedCoalesceAndConditionalExpresions()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class P
+{
+    public static int Fn( int v ) => v * 2;
+}
+
+public class B
+{
+    public int B1 { get; set; }
+
+    public C? B2 { get; set; }
+
+    public C? B3 { get; set; }
+}
+
+public class C
+{
+    public int C1 { get; set; }
+}
+
+public class A
+{
+    public B? A1 { get; set; }
+
+    public B? A2 { get; set; }
+
+    public B? A5 { get; set; }
+
+    public B? A6 { get; set; }
+
+    public B? A7 { get; set; }
+
+    public bool A3 { get; set; }
+
+    public bool A4 { get; set; }
+
+    public int A8 { get; set; }
+
+    // Q and R both reference A3, A4, A8, A1.B2.C1, A2.B2.C1, A5.B3.C1, A6.B3.C1 and A7.B3.C1.
+
+    public int Q => ((A3 ? A1 : A2)?.B2 ?? (A4 ? A5 : A6)?.B3)?.C1 ?? A7?.B3?.C1 ?? A8;
+
+    public int R => (((A3 ? A1 : A2)?.B2 ?? (A4 ? A5 : A6)?.B3) ?? A7?.B3)?.C1 ?? A8;
+}";
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
+
+        var expected = @"<root>
+  A1
+    B2
+      C1 [ Q, R ]
+  A2
+    B2
+      C1 [ Q, R ]
+  A3 [ Q, R ]
+  A4 [ Q, R ]
+  A5
+    B3
+      C1 [ Q, R ]
+  A6
+    B3
+      C1 [ Q, R ]
+  A7
+    B3
+      C1 [ Q, R ]
+  A8 [ Q, R ]
+  Q
+  R
+";
+        diagnostics.Should().BeEmpty();
+        result.ToString().Should().Be( expected );
+    }
 }
