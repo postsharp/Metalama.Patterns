@@ -14,12 +14,12 @@ namespace Metalama.Patterns.Contracts;
 /// </summary>
 /// <remarks>
 ///     <para>Strings are matched against enumeration member names. Integers
-/// are matched against enumeration member values.     Null values are accepted and do not
+/// are matched against enumeration member values. If the target is a nullable type, null values are accepted and do not
 /// throw exception.
 /// </para>
 /// </remarks>
 [PublicAPI]
-public sealed class EnumDataTypeAttribute : BaseContractAttribute
+public sealed class EnumDataTypeAttribute : ContractBaseAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="EnumDataTypeAttribute"/> class.

@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentException"/> if the target is assigned a value that
-/// does not match a given regular expression. Null strings are accepted and do not
+/// does not match a given regular expression. If the target is a nullable type, null strings are accepted and do not
 /// throw an exception.
 /// </summary>
 /// <remarks>

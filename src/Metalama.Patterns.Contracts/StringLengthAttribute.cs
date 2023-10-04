@@ -10,10 +10,10 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentException"/> if the target is assigned a string of invalid length.
-/// Null strings are accepted and do not throw an exception.
+/// If the target is a nullable type, If the target is a nullable type, null strings are accepted and do not throw an exception.
 /// </summary>
 [PublicAPI]
-public sealed class StringLengthAttribute : BaseContractAttribute
+public sealed class StringLengthAttribute : ContractBaseAttribute
 {
     // TODO: Add diagnostics if the aspect construction is invalid (eg, max < min).
 
@@ -67,29 +67,59 @@ public sealed class StringLengthAttribute : BaseContractAttribute
     {
         // TODO: We assume that min and max are sensible (eg, non-negative) here. This should be validated ideally at compile time. See comment at head of class.
 
+        var targetType = meta.Target.GetTargetType();
+        var requiresNullCheck = targetType.IsNullable != false;
+
         if ( this.MinimumLength == 0 && this.MaximumLength != int.MaxValue )
         {
-            if ( value != null && value!.Length > this.MaximumLength )
+            if ( requiresNullCheck )
             {
-                meta.Target.GetContractOptions().Templates!.OnStringMaxLengthContractViolated( value, this.MaximumLength );
+                if ( value != null && value!.Length > this.MaximumLength )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnStringMaxLengthContractViolated( value, this.MaximumLength );
+                }
+            }
+            else
+            {
+                if ( value!.Length > this.MaximumLength )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnStringMaxLengthContractViolated( value, this.MaximumLength );
+                }
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength == int.MaxValue )
         {
-            if ( value != null && value!.Length < this.MinimumLength )
+            if ( requiresNullCheck )
             {
-                meta.Target.GetContractOptions().Templates!.OnStringMinLengthContractViolated( value, this.MinimumLength );
+                if ( value != null && value!.Length < this.MinimumLength )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnStringMinLengthContractViolated( value, this.MinimumLength );
+                }
+            }
+            else
+            {
+                if ( value!.Length < this.MinimumLength )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnStringMinLengthContractViolated( value, this.MinimumLength );
+                }
             }
         }
         else if ( this.MinimumLength > 0 && this.MaximumLength != int.MaxValue )
         {
-            // Incorrect warning dereferencing `value` after checking for null.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            if ( value != null && (value.Length < this.MinimumLength || value.Length > this.MaximumLength) )
+            if ( requiresNullCheck )
             {
-                meta.Target.GetContractOptions().Templates!.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
+                if ( value != null && (value!.Length < this.MinimumLength || value.Length > this.MaximumLength) )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
+                }
             }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            else
+            {
+                if ( value!.Length < this.MinimumLength || value.Length > this.MaximumLength )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
+                }
+            }
         }
 
         // else: min is zero, max is int.MaxVal, all strings are valid, no need to check.

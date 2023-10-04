@@ -156,7 +156,7 @@ public sealed class NotEmptyAttributeTests
     }
 
     [Fact]
-    public void Given_ArrayWithNotEmpty_When_NullPassed_Then_Succeeds()
+    public void Given_ArrayWithNotEmptyAndNotNull_When_NullPassed_Then_ArgumentNullException()
     {
         var cut = new NotEmptyTestClass();
 
@@ -164,7 +164,7 @@ public sealed class NotEmptyAttributeTests
             () =>
                 cut.Array( null ) );
 
-        Assert.Null( e );
+        Assert.IsType<ArgumentNullException>( e );
     }
 
     [Fact]

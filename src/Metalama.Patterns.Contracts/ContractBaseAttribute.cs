@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// A base class for all contracts defined in this library.
 /// </summary>
 [PublicAPI]
-public abstract class BaseContractAttribute : ContractAspect, IConditionallyInheritableAspect
+public abstract class ContractBaseAttribute : ContractAspect, IConditionallyInheritableAspect
 {
     private readonly bool? _isInheritable;
     private readonly ContractDirection? _direction;

@@ -22,7 +22,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used and <value>{5}</value> to refer to the maximum value used.</para>
 /// </remarks>
 [PublicAPI]
-public class RangeAttribute : BaseContractAttribute
+public class RangeAttribute : ContractBaseAttribute
 {
     [Flags]
     internal enum TypeFlag

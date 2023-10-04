@@ -19,7 +19,7 @@ namespace Metalama.Patterns.Contracts;
 /// (where empty means zero items).  Null references or default <see cref="ImmutableArray{T}"/> instances are accepted and do not throw an exception.
 /// </summary>
 [PublicAPI]
-public sealed class NotEmptyAttribute : BaseContractAttribute
+public sealed class NotEmptyAttribute : ContractBaseAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotEmptyAttribute"/> class.
@@ -40,23 +40,30 @@ public sealed class NotEmptyAttribute : BaseContractAttribute
     public override void Validate( dynamic? value )
     {
         var targetType = meta.Target.GetTargetType();
+        var requiresNullCheck = targetType.IsNullable != false;
 
         if ( targetType.Equals( SpecialType.String ) || targetType is IArrayType )
         {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            if ( value != null && value.Length <= 0 )
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            if ( requiresNullCheck )
             {
-                meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                if ( value != null && value!.Length <= 0 )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                }
+            }
+            else
+            {
+                if ( value!.Length <= 0 )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                }
             }
         }
         else if ( targetType is INamedType namedType )
         {
             if ( namedType.Definition.Is( typeof(ImmutableArray<>) ) )
             {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                if ( !value.IsDefault && value.IsEmpty )
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                if ( !value!.IsDefault && value.IsEmpty )
                 {
                     meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
                 }
@@ -65,16 +72,36 @@ public sealed class NotEmptyAttribute : BaseContractAttribute
             {
                 if ( requiresCast )
                 {
-                    if ( value != null && meta.Cast( interfaceType, value )!.Count <= 0 )
+                    if ( requiresNullCheck )
                     {
-                        meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        if ( value != null && meta.Cast( interfaceType, value )!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                    else
+                    {
+                        if ( meta.Cast( interfaceType, value )!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
                     }
                 }
                 else
                 {
-                    if ( value != null && value!.Count <= 0 )
+                    if ( requiresNullCheck )
                     {
-                        meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        if ( value != null && value!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                    else
+                    {
+                        if ( value!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
                     }
                 }
             }
