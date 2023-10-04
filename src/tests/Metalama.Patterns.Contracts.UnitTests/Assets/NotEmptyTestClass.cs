@@ -34,7 +34,7 @@ public class NotEmptyTestClass
 
     public void IReadOnlyCollectionMethod<T>( [NotNull] [NotEmpty] IReadOnlyCollection<T> parameter ) { }
 
-    public void Array( [NotEmpty] int[]? array ) { }
+    public void Array( [NotNull] [NotEmpty] int[] array ) { }
 
     public void ImmutableArray( [NotEmpty] ImmutableArray<int> array ) { }
 }

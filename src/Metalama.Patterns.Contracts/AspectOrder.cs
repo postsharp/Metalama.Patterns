@@ -4,12 +4,13 @@ using Metalama.Framework.Aspects;
 using Metalama.Patterns.Contracts;
 
 [assembly: AspectOrder(
+    typeof(NotNullAttribute),
+    typeof(RequiredAttribute),
     typeof(StringLengthAttribute),
     typeof(NotEmptyAttribute),
     typeof(RegularExpressionAttribute),
     typeof(PhoneAttribute),
     typeof(EmailAddressAttribute),
     typeof(UrlAttribute),
-    typeof(CreditCardAttribute),
-    typeof(NotNullAttribute),
-    typeof(RequiredAttribute) )]
+    typeof(CreditCardAttribute)
+    )]

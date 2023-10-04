@@ -162,7 +162,7 @@ public sealed class NotEmptyAttributeTests
 
         var e = TestHelpers.RecordException<ArgumentException>(
             () =>
-                cut.Array( null ) );
+                cut.Array( null! ) );
 
         Assert.IsType<ArgumentNullException>( e );
     }
