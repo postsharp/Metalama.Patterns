@@ -22,5 +22,10 @@ public partial class Test : Base
     public string? B { get; set; }
 
     // Dependency analysis concern
-    public string HasCoalesce => this.B ?? "n";
+    public string CallsInstanceMethod => this.B ?? this.Method();
+
+    private string Method()
+    {
+        return "hello";
+    }
 }

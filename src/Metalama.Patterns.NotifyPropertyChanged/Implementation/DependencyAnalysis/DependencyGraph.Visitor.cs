@@ -42,180 +42,8 @@ internal static partial class DependencyGraph
     }
 
     [CompileTime]
-    private sealed class Visitor : CSharpSyntaxWalker
+    private sealed class Visitor : CSharpSyntaxWalker, IGatherIdentifiersContextManagerClient
     {
-        private sealed class GatherIdentifiersContext
-        {
-            public readonly record struct SymbolRecord( ISymbol Symbol, SyntaxNode Node, int Depth);
-
-            private sealed class ForkItem
-            {
-                public GatherIdentifiersContext Fork { get; set; } = null!;
-
-                public bool IsJoined { get; set; }
-            }
-
-            private readonly GatherIdentifiersContext _rootContext;
-            private readonly ForkItem? _forkItem;
-            
-            private List<SymbolRecord>? _symbols;
-            private List<ForkItem>? _forks;
-
-            // NB: Only set on _rootContext.
-            private List<ForkItem>? _allForks;
-
-            public GatherIdentifiersContext()
-            {
-                this._rootContext = this;
-            }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="GatherIdentifiersContext"/> class as a fork of
-            /// another <see cref="GatherIdentifiersContext"/>.
-            /// </summary>
-            /// <param name="parent"></param>
-            private GatherIdentifiersContext( GatherIdentifiersContext rootContext, IReadOnlyCollection<SymbolRecord>? parentSymbols, ForkItem forkItem )
-            {
-                this._rootContext = rootContext;
-                this._symbols = parentSymbols == null ? null : new List<SymbolRecord>( parentSymbols );
-                this._forkItem = forkItem;
-            }
-
-            private void ThrowIfJoined()
-            {
-                if ( this._forkItem?.IsJoined == true )
-                {
-                    throw new NotSupportedException( "The " + nameof( GatherIdentifiersContext ) + " fork as been rejoined to its parent and cannot be modified directly." );
-                }
-            }
-
-            private bool HasUnjoinedForks => this._forks != null && this._forks.Any( f => !f.IsJoined );
-
-            public GatherIdentifiersContext Fork( int startDepth )
-            {
-                this.ThrowIfJoined();
-
-                if ( startDepth < this.StartDepth )
-                {
-                    throw new ArgumentException( "Must be greater than or equal to the " + nameof( this.StartDepth ) + " of the current " + nameof( GatherIdentifiersContext ) + "." );
-                }
-
-                var forkItem = new ForkItem();
-                var fork = new GatherIdentifiersContext( this._rootContext, this._symbols, forkItem ) { StartDepth = startDepth };
-                forkItem.Fork = fork;
-
-                (this._rootContext._allForks ??= new List<ForkItem>()).Add( forkItem );
-                (this._forks ??= new List<ForkItem>()).Add( forkItem );
-
-                return fork;
-            }
-
-            /// <summary>
-            /// Join a forked context back to its parent.
-            /// </summary>
-            public void Join()
-            {
-                this.ThrowIfJoined();
-
-                if ( this._forkItem == null )
-                {
-                    throw new InvalidOperationException( "The current " + nameof( GatherIdentifiersContext ) + " is not a fork so cannot be joined." );
-                }
-
-                if ( this.HasUnjoinedForks )
-                {
-                    throw new InvalidOperationException( "The current " + nameof( GatherIdentifiersContext ) + " has unjoined forks, so canot be joined." );
-                }
-
-                this._forkItem.IsJoined = true;
-            }
-
-            public void EnsureInitialized( int startDepth )
-            {
-                this.ThrowIfJoined();
-
-                if ( startDepth <= 0 )
-                {
-                    throw new ArgumentException( "Must be greater than zero." );
-                }
-
-                if ( this.StartDepth == 0 )
-                {
-                    this.StartDepth = startDepth;
-                }
-            }
-
-            public void Reset()
-            {
-                this.ThrowIfJoined();
-                if ( this.HasUnjoinedForks )
-                {
-                    throw new InvalidOperationException( "The current " + nameof( GatherIdentifiersContext ) + " has unjoined forks." );
-                }
-
-                this.StartDepth = 0;
-                this._symbols?.Clear();
-                this._forks?.Clear();
-            }
-
-            public int StartDepth { get; private set; }
-
-            public void AddSymbol( ISymbol symbol, SyntaxNode node, int depth )
-            {
-                this.ThrowIfJoined();
-                var record = new SymbolRecord( symbol, node, depth );
-                this.AddSymbolUnsafe( record );
-            }
-
-            private void AddSymbolUnsafe( in SymbolRecord record )
-            {                
-                (this._symbols ??= new()).Add( record );
-
-                if ( this._forks != null )
-                {
-                    foreach ( var f in this._forks )
-                    {
-                        if ( f.IsJoined )
-                        {
-                            f.Fork.AddSymbolUnsafe( record );
-                        }
-                    }
-                }
-            }
-
-            public IReadOnlyList<SymbolRecord> Symbols
-                => (IReadOnlyList<SymbolRecord>?) this._symbols ?? Array.Empty<SymbolRecord>();
-
-            public IEnumerable<IReadOnlyList<SymbolRecord>> SymbolsForAllForks()
-            {
-                if ( this != this._rootContext )
-                {
-                    throw new InvalidOperationException( nameof( this.SymbolsForAllForks ) + " must only be alled on a root " + nameof( GatherIdentifiersContext ) + "." );
-                }
-
-                if ( this._allForks != null && this._allForks.Any( f => !f.IsJoined ) )
-                {
-                    throw new InvalidOperationException( "The root " + nameof( GatherIdentifiersContext ) + " has unjoined forks." );
-                }
-
-                if ( this._symbols != null && this._symbols.Count > 0 )
-                {
-                    yield return this._symbols;
-                }
-
-                if ( this._allForks != null )
-                {
-                    foreach ( var f in this._allForks )
-                    {
-                        if ( f.Fork._symbols != null && f.Fork._symbols.Count > 0 )
-                        {
-                            yield return f.Fork._symbols;
-                        }
-                    }
-                }
-            }
-        }
-
         private readonly IGraphBuildingNode _tree;
         private readonly INamedTypeSymbol _declaringType;
         private readonly ISymbol _originSymbol;
@@ -224,7 +52,7 @@ internal static partial class DependencyGraph
         private readonly CancellationToken _cancellationToken;
         private readonly Action<string>? _trace;
 
-        private readonly Stack<GatherIdentifiersContext> _gatherIdentifiersContexts;
+        private readonly GatherIdentifiersContextManager _gatherManager;
         
         private int _depth = 1;
 
@@ -243,9 +71,12 @@ internal static partial class DependencyGraph
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
             this._cancellationToken = cancellationToken;
+            this._gatherManager = new GatherIdentifiersContextManager( this );
+        }
 
-            this._gatherIdentifiersContexts = new Stack<GatherIdentifiersContext>();
-            this._gatherIdentifiersContexts.Push(new GatherIdentifiersContext());
+        void IGatherIdentifiersContextManagerClient.OnRootContextPopped( GatherIdentifiersContext context )
+        {
+            this.ProcessAndResetIfApplicable( context );
         }
 
         private void ReportWarningNotImplementedForDependencyAnalysis( Location location, [CallerMemberName] string? name = null, [CallerLineNumber] int line = 0)
@@ -362,17 +193,6 @@ internal static partial class DependencyGraph
             }
         }
 
-        private void PushGatherIdentifiersContext()
-        {
-            this._gatherIdentifiersContexts.Push( new GatherIdentifiersContext() );
-        }
-
-        private void PopGatherIdenfiersContext()
-        {
-            var ctx = this._gatherIdentifiersContexts.Pop();
-            this.ProcessAndResetIfApplicable( ctx );
-        }
-
         private void ProcessAndResetIfApplicable( GatherIdentifiersContext context )
         {
             this._trace?.Invoke( ">> ProcessAndResetIfApplicable" );
@@ -427,7 +247,7 @@ internal static partial class DependencyGraph
 
             base.Visit( node );
 
-            this.ProcessAndResetIfApplicable( this._gatherIdentifiersContexts.Peek() );
+            this.ProcessAndResetIfApplicable( this._gatherManager.Current );
 
             --this._depth;
         }
@@ -479,11 +299,10 @@ internal static partial class DependencyGraph
 
         public override void VisitArgument( ArgumentSyntax node )
         {
-            this.PushGatherIdentifiersContext();
-
-            base.VisitArgument( node );
-
-            this.PopGatherIdenfiersContext();
+            using ( this._gatherManager.UseNewRootContext() )
+            {
+                base.VisitArgument( node );
+            }
         }
 
         public override void VisitVariableDeclaration( VariableDeclarationSyntax node )
@@ -502,101 +321,75 @@ internal static partial class DependencyGraph
 
         public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
         {
-            // TODO: For now we don't try to examine the body of local functions - much as we don't examine the body of
-            // regular methods. Invocations of the local function will warn if they are not supported (primitive arg types only etc).            
-#if false
-            // TODO: Use more correct diagnostic.
-            this._reportDiagnostic(
-                DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments( "Local function declarations are not supported." ),
-                node.GetLocation() );
-#endif
+            // TODO: For now we don't try to examine the body of local functions - much as we don't examine the body of regular methods.
+            // Invocations of the local function will warn if they are not supported (primitive arg types only etc), but as with regular
+            // methods, don't warn on the declaration.
         }
 
         public override void VisitConditionalExpression( ConditionalExpressionSyntax node )
         {
-            this.PushGatherIdentifiersContext();
+            // `Condition` is an isolated expression, use a new root context while visiting it.
+            using ( this._gatherManager.UseNewRootContext() )
+            {
+                base.Visit( node.Condition );
+            }
 
-            base.Visit( node.Condition );
+            var current = this._gatherManager.Current;
+            current.EnsureStarted( this._depth );
 
-            this.PopGatherIdenfiersContext();
+            var forkWhenFalse = current.PrepareFork( this._depth );
 
-            var current = this._gatherIdentifiersContexts.Peek();
-            current.EnsureInitialized( this._depth );
+            // Visit `WhenTrue` using the current context.
+            this.Visit( node.WhenTrue );
 
-            var forkWhenFalse = current.Fork( this._depth );
-
-            this.Visit( node.WhenTrue);
-
-            this._gatherIdentifiersContexts.Push( forkWhenFalse );
-
-            this.Visit( node.WhenFalse );
-
-            this._gatherIdentifiersContexts.Pop();
-
-            forkWhenFalse.Join();
+            // Visit `WhenFalse` using the prepared fork.
+            using ( forkWhenFalse.Use() )
+            {
+                this.Visit( node.WhenFalse );
+            }
         }
 
         public override void VisitBinaryExpression( BinaryExpressionSyntax node )
         {
-#if true
             if ( node.IsKind( SyntaxKind.CoalesceExpression ) )
             {
-                var current = this._gatherIdentifiersContexts.Peek();
-                current.EnsureInitialized( this._depth );
+                var current = this._gatherManager.Current;
+                current.EnsureStarted( this._depth );
 
-                var forkRight = current.Fork( this._depth );
+                var forkRight = current.PrepareFork( this._depth );
 
+                // Visit `Left` using the current context.
                 this.Visit( node.Left );
 
-                this._gatherIdentifiersContexts.Push( forkRight );
-
-                this.Visit( node.Right );
-
-                this._gatherIdentifiersContexts.Pop();
-
-                forkRight.Join();
+                // Visit `Right` using the prepared fork.
+                using ( forkRight.Use() )
+                {
+                    this.Visit( node.Right );
+                }
             }
             else
             {
                 base.VisitBinaryExpression( node );
             }
-
-#else
-            if ( node.IsKind( SyntaxKind.CoalesceExpression ) )
-            {
-                // This creates multiple potential access expressions.
-
-                this._reportDiagnostic(
-                    DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments( "Coalesce expressions are not supported." ),
-                    node.GetLocation() );
-
-                // Best effort
-                this.ProcessAndResetIfApplicable( this._gatherIdentifiersContexts.Peek() );
-            }
-            else
-            {
-                base.VisitBinaryExpression( node );
-            }
-#endif
         }
 
         public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
-            this._gatherIdentifiersContexts.Peek().EnsureInitialized( this._depth );
+            this._gatherManager.Current.EnsureStarted( this._depth );
 
             base.VisitMemberAccessExpression( node );
         }
 
         public override void VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
         {
-            this._gatherIdentifiersContexts.Peek().EnsureInitialized( this._depth );
+            this._gatherManager.Current.EnsureStarted( this._depth );
 
             base.VisitConditionalAccessExpression( node );
         }
 
         public override void VisitIdentifierName( IdentifierNameSyntax node )
         {
-            var ctx = this._gatherIdentifiersContexts.Peek();
+            var ctx = this._gatherManager.Current;
 
             var symbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
 
@@ -610,7 +403,7 @@ internal static partial class DependencyGraph
                     // eg. X in `int Y => X`
                     if ( node.GetAccessKind() is AccessKind.Read or AccessKind.ReadWrite )
                     {
-                        ctx.EnsureInitialized( this._depth );
+                        ctx.EnsureStarted( this._depth );
                     }
                 }
 
@@ -622,34 +415,16 @@ internal static partial class DependencyGraph
                     }
                     else
                     {
-                        // eg, 'var', NameColon in argument list.
                         // TODO: When can this happen?
                         this.ReportWarningNotImplementedForDependencyAnalysis( node.GetLocation() );
 
                         // Best effort
-                        this.ProcessAndResetIfApplicable( this._gatherIdentifiersContexts.Peek() );
+                        this.ProcessAndResetIfApplicable( ctx );
                     }
-                    /*
-                    if ( symbol is IPropertySymbol property )
-                    {
-                        this._accessSymbols.Add( property );
-                        this._lastVisitedNode = node;
-                    }                
-                    else
-                    {
-                        // Not a property (eg, it's a method or field).
-                        this._reportDiagnostic(
-                            DiagnosticDescriptors.ErrorMiscUnsupportedIdentifier
-                                .WithArguments( (node.Identifier.Text, symbol == null ? "<unresolved>" : symbol.Kind.ToString()) ),
-                            node.GetLocation() );
-
-                        this.ClearCurrentAccessor();
-                    }
-                    */
                 }
             }
         }
-    }
+   }
 
     /// <summary>
     /// Gets the body of the property getter, if any.

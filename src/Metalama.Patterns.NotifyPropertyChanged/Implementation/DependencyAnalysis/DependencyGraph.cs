@@ -35,8 +35,11 @@ internal static partial class DependencyGraph
 
     public delegate void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null );
 
-    public static Node GetDependencyGraph( INamedType type, ReportDiagnostic reportDiagnostic, CancellationToken cancellationToken = default,
-        Action<string> trace = null )
+    public static Node GetDependencyGraph(
+        INamedType type,
+        ReportDiagnostic reportDiagnostic,
+        CancellationToken cancellationToken = default,
+        Action<string>? trace = null )
     {
         var tree = new Node();
 
