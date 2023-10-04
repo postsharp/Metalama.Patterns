@@ -55,7 +55,7 @@ public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompil
 
         var diagnosticCommentVerbosity = 0;
 
-        if ( context.Project.TryGetProperty( inpcDiagnosticCommentVerbosity, out var verbosityStr ) )
+        if ( context.Project.TryGetProperty( inpcDiagnosticCommentVerbosity, out var verbosityStr ) && !string.IsNullOrWhiteSpace( verbosityStr ) )
         {
             if ( !int.TryParse( verbosityStr, out diagnosticCommentVerbosity ) || diagnosticCommentVerbosity < 0 || diagnosticCommentVerbosity > 3 )
             {

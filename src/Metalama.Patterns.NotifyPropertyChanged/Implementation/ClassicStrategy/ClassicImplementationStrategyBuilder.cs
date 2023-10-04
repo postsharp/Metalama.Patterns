@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.Graph;
@@ -135,7 +136,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
         foreach ( var p in relevantProperties )
         {
-            allValid &= this.ValidateFieldOrProperty( p );
+            allValid &= this.ValidateFieldOrPropertyIntrinsicCharacteristics( p );
         }
 
         return allValid;
@@ -529,12 +530,33 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
         foreach ( var node in processingGraph.DescendantsDepthFirst() )
         {
-            hasErrors |= !this.ValidateFieldOrProperty( node.FieldOrProperty );
+            hasErrors |= !this.ValidateFieldOrPropertyIntrinsicCharacteristics( node.FieldOrProperty );
+            ValidateFieldOrPropertyInGraph( node );
         }
 
         this._dependencyGraph.Value = processingGraph;
 
         return !hasErrors;
+
+        // Validate the field or property of the node in the context of the graph.
+        void ValidateFieldOrPropertyInGraph( ClassicProcessingNode node )
+        {
+            var isLeaf = !node.HasChildren;
+
+            // Any type is acceptable for leaf nodes. Primitive types are allowed for non-leaf nodes.
+            if ( isLeaf || node.FieldOrProperty.Type.GetSymbol().IsPrimitiveType() )
+            {                
+                return;
+            }
+
+            // Non-leaf nodes must implement INPC otherwise they can't be monitored.
+            // Don't report for InpcInstrumentationKind.Unknown (ie, partial compilation).
+            if ( node.PropertyTypeInpcInstrumentationKind == InpcInstrumentationKind.None )
+            {                
+                this._builder.Diagnostics.Report( 
+                    DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( node.FieldOrProperty.Type ) );
+            }
+        }
     }
 
     private ClassicProcessingNode DependencyGraph => this._dependencyGraph.Value;
@@ -697,11 +719,11 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 && m.Parameters[2].Type == elements.NullableINotifyPropertyChanged );
 
     /// <summary>
-    /// Validates the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. The result is cached
-    /// so that diagnostics are not repeated.
+    /// Validates the the intrinsic characteristics of the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. 
+    /// The result is cached so that diagnostics are not repeated.
     /// </summary>
     /// <returns><see langword="true"/> if valid, or <see langword="false"/> if invalid.</returns>
-    private bool ValidateFieldOrProperty( IFieldOrProperty fieldOrProperty )
+    private bool ValidateFieldOrPropertyIntrinsicCharacteristics( IFieldOrProperty fieldOrProperty )
     {
         if ( !this._validateFieldOrPropertyResults.TryGetValue( fieldOrProperty, out var result ) )
         {

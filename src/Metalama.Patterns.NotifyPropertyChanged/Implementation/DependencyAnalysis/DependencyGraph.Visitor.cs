@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Runtime.CompilerServices;
-using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 
@@ -29,7 +28,7 @@ internal static partial class DependencyGraph
             .DeclaringSyntaxReferences
             .Select( r => r.GetSyntax( cancellationToken ) )
             .Cast<PropertyDeclarationSyntax>()
-            .Select( GetGetterBody )
+            .Select( RoslynExtensions.GetGetterBody )
             .SingleOrDefault();
 
         if ( body == null )
@@ -93,87 +92,7 @@ internal static partial class DependencyGraph
                 location );
         }
 
-        private static bool IsOrInheritsFrom( INamedTypeSymbol type, ITypeSymbol? candidateBaseType )
-        {
-            if ( type == null )
-            {
-                throw new ArgumentNullException( nameof(type) );
-            }
-
-            if ( candidateBaseType == null )
-            {
-                return false;
-            }
-
-            var baseType = type;
-
-            while ( baseType != null )
-            {
-                if ( candidateBaseType.Equals( baseType ) )
-                {
-                    return true;
-                }
-
-                baseType = baseType.BaseType;
-            }
-
-            return false;
-        }
-
-        private bool IsLocalInstanceMember( ISymbol symbol ) => !symbol.IsStatic && IsOrInheritsFrom( this._declaringType, symbol.ContainingType );
-
-        private static ITypeSymbol GetElementaryType( ITypeSymbol type )
-        {
-            while ( true )
-            {
-                var elementType = Get( type );
-
-                if ( elementType == type )
-                {
-                    return elementType;
-                }
-
-                type = elementType;
-            }
-
-            static ITypeSymbol Get( ITypeSymbol t )
-            {
-                if ( t.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T )
-                {
-                    return ((INamedTypeSymbol) t).TypeArguments[0];
-                }
-
-                return t switch
-                {
-                    IArrayTypeSymbol array => array.ElementType,
-                    IPointerTypeSymbol pointer => pointer.PointedAtType,
-                    _ => t
-                };
-            }
-        }
-
-        private static bool IsPrimitiveType( ITypeSymbol? type )
-        {
-            // ReSharper disable once MissingIndent
-            return type is
-                {
-                SpecialType: SpecialType.System_Boolean or
-                SpecialType.System_Byte or
-                SpecialType.System_Char or
-                SpecialType.System_DateTime or
-                SpecialType.System_Decimal or
-                SpecialType.System_Double or
-                SpecialType.System_Int16 or
-                SpecialType.System_Int32 or
-                SpecialType.System_Int64 or
-                SpecialType.System_SByte or
-                SpecialType.System_Single or
-                SpecialType.System_String or
-                SpecialType.System_UInt16 or
-                SpecialType.System_UInt32 or
-                SpecialType.System_UInt64
-            };
-        }
+        private bool IsLocalInstanceMember( ISymbol symbol ) => !symbol.IsStatic && this._declaringType.IsOrInheritsFrom( symbol.ContainingType );
 
         private void ValidateMethodArgumentType( ExpressionSyntax expression )
         {
@@ -193,9 +112,9 @@ internal static partial class DependencyGraph
 
                 default:
                     {
-                        var elementaryType = GetElementaryType( ti.Type );
+                        var elementaryType = ti.Type.GetElementaryType();
 
-                        if ( !IsPrimitiveType( elementaryType ) )
+                        if ( !elementaryType.IsPrimitiveType() )
                         {
                             this._reportDiagnostic(
                                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
@@ -434,32 +353,5 @@ internal static partial class DependencyGraph
                 this.ProcessAndResetIfApplicable( ctx );
             }
         }
-    }
-
-    /// <summary>
-    /// Gets the body of the property getter, if any.
-    /// </summary>
-    private static SyntaxNode? GetGetterBody( PropertyDeclarationSyntax property )
-    {
-        if ( property.ExpressionBody != null )
-        {
-            return property.ExpressionBody;
-        }
-
-        if ( property.AccessorList == null )
-        {
-            return null;
-        }
-
-        // We are not using LINQ to work around a bug (#33676) with lambda expressions in compile-time code.
-        foreach ( var accessor in property.AccessorList.Accessors )
-        {
-            if ( accessor.Keyword.IsKind( SyntaxKind.GetKeyword ) )
-            {
-                return (SyntaxNode?) accessor.ExpressionBody ?? accessor.Body;
-            }
-        }
-
-        return null;
     }
 }

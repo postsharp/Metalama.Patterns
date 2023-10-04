@@ -128,4 +128,15 @@ internal static class DiagnosticDescriptors
             "Handling for this syntax is not implemented and is not supported for dependency analysis (analyzer reference {0}).",
             "Not implemented for dependency analysis.",
             _category );
+
+    /// <summary>
+    /// The children of fields or properties of type '{0}' cannot be observed because the type does not implement INotifyPropertyChanged.
+    /// </summary>
+    public static readonly DiagnosticDefinition<IType> WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable =
+        new(
+            "LAMA5161",
+            Warning,
+            "The children of fields or properties of type '{0}' cannot be observed because the type does not implement INotifyPropertyChanged.",
+            "Field or property type does not implement INotifyPropertyChanged.",
+            _category );
 }
