@@ -11,10 +11,10 @@ namespace Metalama.Patterns.Contracts;
 
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
-/// an <see cref="ArgumentNullException"/> if the target is assigned a null or empty value.
+/// an <see cref="ArgumentException"/> if the target is assigned an empty value.
 /// The custom attributes can be added to locations of type <see cref="string"/> (where empty
 /// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/> or <see cref="IReadOnlyCollection{T}"/>
-/// (where empty means zero items). 
+/// (where empty means zero items).  Null references are accepted and do not throw an exception.
 /// </summary>
 [PublicAPI]
 [Inheritable]
@@ -56,7 +56,9 @@ public sealed class NotEmptyAttribute : ContractAspect
 
         if ( targetType.Equals( SpecialType.String ) )
         {
-            if ( string.IsNullOrEmpty( value ) )
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            if ( value != null && value.Length <= 0 )
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             {
                 meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
             }
@@ -65,14 +67,14 @@ public sealed class NotEmptyAttribute : ContractAspect
         {
             if ( requiresCast )
             {
-                if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
+                if ( value != null && meta.Cast( interfaceType, value )!.Count <= 0 )
                 {
                     meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
                 }
             }
             else
             {
-                if ( value == null || value!.Count <= 0 )
+                if ( value != null && value!.Count <= 0 )
                 {
                     meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
                 }

@@ -41,8 +41,7 @@ public static class ContractExtensions
 
         static IAttribute? GetNullableAttribute( IDeclaration d )
             => d.Attributes.OfAttributeType( typeof(RequiredAttribute) ).FirstOrDefault() ??
-               d.Attributes.OfAttributeType( typeof(NotNullAttribute) ).FirstOrDefault() ??
-               d.Attributes.OfAttributeType( typeof(NotEmptyAttribute) ).FirstOrDefault();
+               d.Attributes.OfAttributeType( typeof(NotNullAttribute) ).FirstOrDefault();
 
         // Add aspects to fields and properties.
         var fieldsAndProperties = types
