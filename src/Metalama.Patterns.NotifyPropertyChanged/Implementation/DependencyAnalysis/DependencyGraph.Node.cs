@@ -78,7 +78,7 @@ internal static partial class DependencyGraph
         {
             if ( childSymbol == null )
             {
-                throw new ArgumentNullException( nameof( childSymbol ) );
+                throw new ArgumentNullException( nameof(childSymbol) );
             }
 
             if ( childSymbol.Equals( this.Symbol ) )
@@ -110,7 +110,7 @@ internal static partial class DependencyGraph
         {
             if ( node == null )
             {
-                throw new ArgumentNullException( nameof( node ) );
+                throw new ArgumentNullException( nameof(node) );
             }
 
             if ( node == this )

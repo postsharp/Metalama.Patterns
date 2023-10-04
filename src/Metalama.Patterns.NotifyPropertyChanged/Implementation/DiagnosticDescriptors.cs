@@ -84,7 +84,7 @@ internal static class DiagnosticDescriptors
             "'new' member is not supported.",
             _category );
 
-    // TODO: Split into multiple diagnostics or keep as one? Which gives the best user experience wrt warnings-as-errors or supressing warnings?
+    // TODO: Split into multiple diagnostics or keep as one? Which gives the best user experience wrt warnings-as-errors or suppressing warnings?
     /// <summary>
     /// [no fixed message] - use messages like `Only method arguments of primary types are supported`.
     /// </summary>
@@ -128,6 +128,4 @@ internal static class DiagnosticDescriptors
             "Handling for this syntax is not implemented and is not supported for dependency analysis (analyzer reference {0}).",
             "Not implemented for dependency analysis.",
             _category );
-
-
 }

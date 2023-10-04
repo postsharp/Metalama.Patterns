@@ -41,6 +41,7 @@ internal static partial class DependencyGraph
         {
             var ctx = new RootGatherIdentifiersContext( this );
             this._contexts.Push( ctx );
+
             return ctx;
         }
 

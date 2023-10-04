@@ -37,11 +37,10 @@ internal static partial class DependencyGraph
 
         public IReadOnlyList<SymbolRecord>? Symbols => this._symbols;
 
-        public virtual IEnumerable<IReadOnlyList<SymbolRecord>> SymbolsForAllForks() => throw new NotSupportedException( nameof( this.SymbolsForAllForks ) + " must only be alled on a root " + nameof( GatherIdentifiersContext ) + "." );
+        public virtual IEnumerable<IReadOnlyList<SymbolRecord>> SymbolsForAllForks()
+            => throw new NotSupportedException( nameof(this.SymbolsForAllForks) + " must only be called on a root " + nameof(GatherIdentifiersContext) + "." );
 
         public abstract bool IsRoot { get; }
-
-        public bool IsFork => !this.IsRoot;
 
         protected virtual void ThrowIfJoined() { }
 
@@ -52,21 +51,23 @@ internal static partial class DependencyGraph
         /// <summary>
         /// Creates and prepares a fork of the current <see cref="GatherIdentifiersContext"/>.
         /// </summary>
-        /// <param name="startDepth">The current depth in the sytax tree being processed.</param>
+        /// <param name="startDepth">The current depth in the syntax tree being processed.</param>
         public PreparedFork PrepareFork( int startDepth )
         {
             this.ThrowIfJoined();
 
             if ( startDepth < this.StartDepth )
             {
-                throw new ArgumentException( "Must be greater than or equal to the " + nameof( this.StartDepth ) + " of the current " + nameof( GatherIdentifiersContext ) + ".", nameof( startDepth ) );
+                throw new ArgumentException(
+                    "Must be greater than or equal to the " + nameof(this.StartDepth) + " of the current " + nameof(GatherIdentifiersContext) + ".",
+                    nameof(startDepth) );
             }
 
             var forkItem = new ForkItem();
             var fork = new ForkedGatherIdentifiersContext( this.RootContext, this._symbols, forkItem ) { StartDepth = startDepth };
             forkItem.Fork = fork;
 
-            this.RootContext.AddToAllForks( forkItem );            
+            this.RootContext.AddToAllForks( forkItem );
             (this._forks ??= new List<ForkItem>()).Add( forkItem );
 
             return new PreparedFork( fork, this.RootContext.Manager );
@@ -89,8 +90,8 @@ internal static partial class DependencyGraph
             {
                 if ( startDepth < this.StartDepth )
                 {
-                    // Inidcates a problem with dependency analysis program design.
-                    throw new InvalidOperationException( nameof( this.EnsureStarted ) + " called with a depth less than the actual StartDepth." );
+                    // Indicates a problem with dependency analysis program design.
+                    throw new InvalidOperationException( nameof(this.EnsureStarted) + " called with a depth less than the actual StartDepth." );
                 }
             }
         }
@@ -98,10 +99,10 @@ internal static partial class DependencyGraph
         public void Reset()
         {
             this.ThrowIfJoined();
-            
+
             if ( this.HasUnjoinedForks )
             {
-                throw new InvalidOperationException( "The current " + nameof( GatherIdentifiersContext ) + " has unjoined forks so cannot be reset." );
+                throw new InvalidOperationException( "The current " + nameof(GatherIdentifiersContext) + " has unjoined forks so cannot be reset." );
             }
 
             this.StartDepth = 0;
@@ -118,7 +119,7 @@ internal static partial class DependencyGraph
 
         private void AddSymbolUnsafe( in SymbolRecord record )
         {
-            (this._symbols ??= new()).Add( record );
+            (this._symbols ??= new List<SymbolRecord>()).Add( record );
 
             if ( this._forks != null )
             {
@@ -130,6 +131,6 @@ internal static partial class DependencyGraph
                     }
                 }
             }
-        }        
+        }
     }
 }

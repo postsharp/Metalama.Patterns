@@ -49,7 +49,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
         this._builder = builder;
         this._elements = new ClassicElements( target );
-        this._inpcInstrumentationKindLookup = new( this._elements );
+        this._inpcInstrumentationKindLookup = new InpcInstrumentationKindLookup( this._elements );
         this._commonOptions = builder.Target.Enhancements().GetOptions<NotifyPropertyChangedOptions>();
         this._classicOptions = builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>();
 
@@ -70,7 +70,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethod == true &&
             (!target.IsSealed || this._baseOnUnmonitoredObservablePropertyChangedMethod != null);
 
-        this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: useOnUnmonitoredObservablePropertyChangedMethod );
+        this._onUnmonitoredObservablePropertyChangedMethod = new DeferredOptional<IMethod>( willBeDefined: useOnUnmonitoredObservablePropertyChangedMethod );
     }
 
     public void BuildAspect()
@@ -99,7 +99,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             this.IntroduceOnChildPropertyChangedMethod();
             this.IntroduceOnUnmonitoredObservablePropertyChanged();
 
-            this._deferredTemplateExecutionContext.Value = new(
+            this._deferredTemplateExecutionContext.Value = new TemplateExecutionContext(
                 this._commonOptions,
                 this._classicOptions,
                 this._elements,
@@ -521,10 +521,11 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 hasErrors |= diagnostic.Definition.Severity == Severity.Error;
                 this._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
             },
-            this._builder.CancellationToken );
+            cancellationToken: this._builder.CancellationToken );
 
         var processingGraph =
-            structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>( new( this._builder.Target.Compilation, this ) );
+            structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>(
+                new ClassicProcessingNodeInitializationContext( this._builder.Target.Compilation, this ) );
 
         foreach ( var node in processingGraph.DescendantsDepthFirst() )
         {

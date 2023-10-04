@@ -12,7 +12,9 @@ internal sealed class ClassicElements : Elements
     public ClassicElements( INamedType target ) : base( target )
     {
         this.OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnChildPropertyChangedMethodAttribute) );
-        this.OnUnmonitoredObservablePropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredObservablePropertyChangedMethodAttribute) );
+
+        this.OnUnmonitoredObservablePropertyChangedMethodAttribute =
+            (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredObservablePropertyChangedMethodAttribute) );
     }
 
     public INamedType OnChildPropertyChangedMethodAttribute { get; }

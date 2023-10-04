@@ -131,6 +131,7 @@ public class A
 
     public DateTime Z => DateTime.Now.AddTicks( X ).AddMinutes( Y );
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -139,7 +140,7 @@ public class A
 
         var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Z ]
   Y [ Z ]
   Z
@@ -177,6 +178,7 @@ public class A
         }
     }
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -188,7 +190,7 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Z ]
   Y [ Z ]
   Z
@@ -218,6 +220,7 @@ public class A
         }
     }
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -229,10 +232,11 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -255,6 +259,7 @@ public class A
         }
     }
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -266,9 +271,10 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   Y
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -295,6 +301,7 @@ public class A
 
     static int Method( int arg1 ) => arg1 * 2;
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -306,10 +313,11 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -328,6 +336,7 @@ public class A
 
     public long Y => DateTime.Now.AddTicks( this.X ).Ticks;
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -339,10 +348,11 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -361,6 +371,7 @@ public class A
 
     public string Y => string.Join( '|', X.Split( ',' ) );
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -372,10 +383,11 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -404,6 +416,7 @@ public class A
         }
     }
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -415,10 +428,11 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -447,6 +461,7 @@ public class A
         }
     }
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -458,10 +473,11 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
+
         diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Calls to local instance methods are not supported.)@(12,19)-(12,31)" );
         result.ToString().Should().Be( expected );
     }
@@ -490,6 +506,7 @@ public class A
         }
     }
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -501,9 +518,12 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
 ";
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
+
+        diagnostics.Should()
+            .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
+
         result.ToString().Should().Be( expected );
     }
 
@@ -527,6 +547,7 @@ public class A
 
     public int Y => this.GetZ() + X;
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -538,11 +559,14 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,20)-(12,24)" );
+
+        diagnostics.Should()
+            .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,20)-(12,24)" );
+
         result.ToString().Should().Be( expected );
     }
 
@@ -570,6 +594,7 @@ public class A
 
     private static int Fn( A v ) => v.Z * 2;
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -581,11 +606,14 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
+
+        diagnostics.Should()
+            .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
+
         result.ToString().Should().Be( expected );
     }
 
@@ -611,6 +639,7 @@ public class A
 
     private static int Fn( int v ) => v * 2;
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -622,10 +651,11 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -657,6 +687,7 @@ public class A
         }
     }
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -668,11 +699,14 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(17,25)-(17,29)" );
+
+        diagnostics.Should()
+            .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(17,25)-(17,29)" );
+
         result.ToString().Should().Be( expected );
     }
 
@@ -700,6 +734,7 @@ public class A
         }
     }
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -711,10 +746,11 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   X [ Y ]
   Y
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -757,6 +793,7 @@ public class A
     // R references A1.B2.C1, A2.B2.C1, A1.B3.C1 and A2.B3.C1.
     public int R => ((this.A1 ?? this.A2)?.B2 ?? (this.A1 ?? this.A2)?.B3!).C1;
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -768,7 +805,7 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   A1
     B1 [ Q ]
     B2
@@ -784,6 +821,7 @@ public class A
   Q
   R
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
@@ -825,6 +863,7 @@ public class A
     // Q references A3, A1.B2.C1 and A2.B2.C1.
     public int? Q => (A3 ? A1 : A2)?.B2?.C1;
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -836,7 +875,7 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   A1
     B2
       C1 [ Q ]
@@ -846,13 +885,14 @@ public class A
   A3 [ Q ]
   Q
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
 
     [Trait( "Supported", "Yes" )]
     [Fact]
-    public void CombinedCoalesceAndConditionalExpresions()
+    public void CombinedCoalesceAndConditionalExpressions()
     {
         using var testContext = this.CreateTestContext();
 
@@ -900,6 +940,7 @@ public class A
 
     public int R => (((A3 ? A1 : A2)?.B2 ?? (A4 ? A5 : A6)?.B3) ?? A7?.B3)?.C1 ?? A8;
 }";
+
         var compilation = testContext.CreateCompilation( code );
 
         var type = compilation.Types.OfName( "A" ).Single();
@@ -911,7 +952,7 @@ public class A
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
-        var expected = @"<root>
+        const string expected = @"<root>
   A1
     B2
       C1 [ Q, R ]
@@ -933,6 +974,7 @@ public class A
   Q
   R
 ";
+
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }

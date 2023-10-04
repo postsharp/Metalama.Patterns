@@ -14,12 +14,11 @@ internal static partial class DependencyGraph
     private sealed class ForkedGatherIdentifiersContext : GatherIdentifiersContext, IDisposable
     {
         private readonly ForkItem _forkItem;
-        private readonly RootGatherIdentifiersContext _rootContext;
 
         public ForkedGatherIdentifiersContext( RootGatherIdentifiersContext rootContext, IReadOnlyCollection<SymbolRecord>? parentSymbols, ForkItem forkItem )
             : base( parentSymbols )
         {
-            this._rootContext = rootContext;            
+            this.RootContext = rootContext;
             this._forkItem = forkItem;
         }
 
@@ -31,20 +30,21 @@ internal static partial class DependencyGraph
 
             if ( this.HasUnjoinedForks )
             {
-                throw new InvalidOperationException( "The current " + nameof( GatherIdentifiersContext ) + " has unjoined forks, so canot be joined." );
+                throw new InvalidOperationException( "The current " + nameof(GatherIdentifiersContext) + " has unjoined forks, so cannot be joined." );
             }
 
             this.RootContext.Manager.Pop( this );
             this._forkItem.IsJoined = true;
         }
 
-        protected override RootGatherIdentifiersContext RootContext => this._rootContext;
+        protected override RootGatherIdentifiersContext RootContext { get; }
 
         protected override void ThrowIfJoined()
         {
-            if ( this._forkItem?.IsJoined == true )
+            if ( this._forkItem.IsJoined )
             {
-                throw new NotSupportedException( "The " + nameof( GatherIdentifiersContext ) + " fork has already been rejoined to its parent and cannot be modified directly." );
+                throw new NotSupportedException(
+                    "The " + nameof(GatherIdentifiersContext) + " fork has already been rejoined to its parent and cannot be modified directly." );
             }
         }
 

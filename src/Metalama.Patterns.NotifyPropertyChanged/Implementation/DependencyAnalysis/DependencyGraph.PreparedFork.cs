@@ -26,10 +26,11 @@ internal static partial class DependencyGraph
         {
             if ( this._manager == null )
             {
-                throw new ArgumentNullException( "The object is not initialized." );
+                throw new InvalidOperationException( "The object is not initialized." );
             }
 
             this._manager.Push( this._fork! );
+
             return this._fork!;
         }
     }

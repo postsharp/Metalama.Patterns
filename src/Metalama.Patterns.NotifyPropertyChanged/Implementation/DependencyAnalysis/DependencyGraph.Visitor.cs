@@ -5,22 +5,25 @@
 // related namespaces.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Runtime.CompilerServices;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 
 internal static partial class DependencyGraph
 {
     private static void AddReferencedProperties(
-        Framework.Code.ICompilation compilation,
+        ICompilation compilation,
         Node tree,
         IPropertySymbol property,
         ReportDiagnostic reportDiagnostic,
-        CancellationToken cancellationToken,
-        Action<string>? trace = null)
+        Action<string>? trace = null,
+        CancellationToken cancellationToken = default )
     {
         var body = property
             .DeclaringSyntaxReferences
@@ -34,10 +37,11 @@ internal static partial class DependencyGraph
             return;
         }
 
-        var semanticModel = Framework.Engine.CodeModel.SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
+        // ReSharper disable once InvokeAsExtensionMethod
+        var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( tree, property, semanticModel, reportDiagnostic, cancellationToken, trace );
-        
+        var visitor = new Visitor( tree, property, semanticModel, reportDiagnostic, trace, cancellationToken );
+
         visitor.Visit( body );
     }
 
@@ -53,7 +57,7 @@ internal static partial class DependencyGraph
         private readonly Action<string>? _trace;
 
         private readonly GatherIdentifiersContextManager _gatherManager;
-        
+
         private int _depth = 1;
 
         public Visitor(
@@ -61,8 +65,8 @@ internal static partial class DependencyGraph
             ISymbol originSymbol,
             SemanticModel semanticModel,
             ReportDiagnostic reportDiagnostic,
-            CancellationToken cancellationToken,
-            Action<string>? trace )
+            Action<string>? trace,
+            CancellationToken cancellationToken )
         {
             this._trace = trace;
             this._tree = tree;
@@ -79,7 +83,10 @@ internal static partial class DependencyGraph
             this.ProcessAndResetIfApplicable( context );
         }
 
-        private void ReportWarningNotImplementedForDependencyAnalysis( Location location, [CallerMemberName] string? name = null, [CallerLineNumber] int line = 0)
+        private void ReportWarningNotImplementedForDependencyAnalysis(
+            Location location,
+            [CallerMemberName] string? name = null,
+            [CallerLineNumber] int line = 0 )
         {
             this._reportDiagnostic(
                 DiagnosticDescriptors.WarningNotImplementedForDependencyAnalysis.WithArguments( $"{name}/{line}" ),
@@ -90,7 +97,7 @@ internal static partial class DependencyGraph
         {
             if ( type == null )
             {
-                throw new ArgumentNullException( nameof( type ) );
+                throw new ArgumentNullException( nameof(type) );
             }
 
             if ( candidateBaseType == null )
@@ -100,9 +107,9 @@ internal static partial class DependencyGraph
 
             var baseType = type;
 
-            while ( baseType != null)
+            while ( baseType != null )
             {
-                if (candidateBaseType.Equals( baseType ) )
+                if ( candidateBaseType.Equals( baseType ) )
                 {
                     return true;
                 }
@@ -113,8 +120,7 @@ internal static partial class DependencyGraph
             return false;
         }
 
-        private bool IsLocalInstanceMember( ISymbol symbol )
-            => !symbol.IsStatic && IsOrInheritsFrom( this._declaringType, symbol.ContainingType );
+        private bool IsLocalInstanceMember( ISymbol symbol ) => !symbol.IsStatic && IsOrInheritsFrom( this._declaringType, symbol.ContainingType );
 
         private static ITypeSymbol GetElementaryType( ITypeSymbol type )
         {
@@ -141,15 +147,17 @@ internal static partial class DependencyGraph
                 {
                     IArrayTypeSymbol array => array.ElementType,
                     IPointerTypeSymbol pointer => pointer.PointedAtType,
-                    _ => t                    
+                    _ => t
                 };
             }
         }
 
         private static bool IsPrimitiveType( ITypeSymbol? type )
         {
-            return type != null && type.SpecialType is
-                SpecialType.System_Boolean or
+            // ReSharper disable once MissingIndent
+            return type is
+                {
+                SpecialType: SpecialType.System_Boolean or
                 SpecialType.System_Byte or
                 SpecialType.System_Char or
                 SpecialType.System_DateTime or
@@ -163,33 +171,40 @@ internal static partial class DependencyGraph
                 SpecialType.System_String or
                 SpecialType.System_UInt16 or
                 SpecialType.System_UInt32 or
-                SpecialType.System_UInt64;
+                SpecialType.System_UInt64
+            };
         }
 
         private void ValidateMethodArgumentType( ExpressionSyntax expression )
         {
             var ti = this._semanticModel.GetTypeInfo( expression );
 
-            if ( ti.Type is IErrorTypeSymbol )
+            switch ( ti.Type )
             {
-                // Don't report, assume that the compiler will report.
-            }
-            else if ( ti.Type == null )
-            {
-                // TODO: Decide how to handle when we have a use case.
-                this.ReportWarningNotImplementedForDependencyAnalysis( expression.GetLocation() );
-            }
-            else
-            {
-                var elementaryType = GetElementaryType( ti.Type );
+                case IErrorTypeSymbol:
+                    // Don't report, assume that the compiler will report.
+                    break;
 
-                if ( !IsPrimitiveType( elementaryType ) )
-                {
-                    this._reportDiagnostic(
-                        DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
-                            .WithArguments( "Method arguments (including 'this') must be of primitive types." ),
-                        expression.GetLocation() );
-                }
+                case null:
+                    // TODO: Decide how to handle when we have a use case.
+                    this.ReportWarningNotImplementedForDependencyAnalysis( expression.GetLocation() );
+
+                    break;
+
+                default:
+                    {
+                        var elementaryType = GetElementaryType( ti.Type );
+
+                        if ( !IsPrimitiveType( elementaryType ) )
+                        {
+                            this._reportDiagnostic(
+                                DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
+                                    .WithArguments( "Method arguments (including 'this') must be of primitive types." ),
+                                expression.GetLocation() );
+                        }
+
+                        break;
+                    }
             }
         }
 
@@ -393,8 +408,6 @@ internal static partial class DependencyGraph
 
             var symbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
 
-            // Ignore identifiers with no symbol
-
             if ( symbol != null )
             {
                 if ( ctx.StartDepth == 0 )
@@ -409,22 +422,19 @@ internal static partial class DependencyGraph
 
                 if ( ctx.StartDepth > 0 )
                 {
-                    if ( symbol != null )
-                    {
-                        ctx.AddSymbol( symbol, node, this._depth );
-                    }
-                    else
-                    {
-                        // TODO: When can this happen?
-                        this.ReportWarningNotImplementedForDependencyAnalysis( node.GetLocation() );
-
-                        // Best effort
-                        this.ProcessAndResetIfApplicable( ctx );
-                    }
+                    ctx.AddSymbol( symbol, node, this._depth );
                 }
             }
+            else
+            {
+                // TODO: When can this happen?
+                this.ReportWarningNotImplementedForDependencyAnalysis( node.GetLocation() );
+
+                // Best effort
+                this.ProcessAndResetIfApplicable( ctx );
+            }
         }
-   }
+    }
 
     /// <summary>
     /// Gets the body of the property getter, if any.

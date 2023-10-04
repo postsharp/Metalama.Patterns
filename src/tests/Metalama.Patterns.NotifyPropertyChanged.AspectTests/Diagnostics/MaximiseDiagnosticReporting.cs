@@ -24,6 +24,7 @@ public partial class Test : Base
     // Dependency analysis concern
     public string CallsInstanceMethod => this.B ?? this.Method();
 
+    // ReSharper disable once MemberCanBeMadeStatic.Local
     private string Method()
     {
         return "hello";

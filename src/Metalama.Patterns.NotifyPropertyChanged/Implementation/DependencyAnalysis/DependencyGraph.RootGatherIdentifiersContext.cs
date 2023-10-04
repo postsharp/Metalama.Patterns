@@ -5,7 +5,6 @@
 // related namespaces.
 
 using Metalama.Framework.Aspects;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 
@@ -16,7 +15,7 @@ internal static partial class DependencyGraph
     {
         private List<ForkItem>? _allForks;
 
-        public RootGatherIdentifiersContext( IGatherIdentifiersContextManagerImpl manager ) 
+        public RootGatherIdentifiersContext( IGatherIdentifiersContextManagerImpl manager )
         {
             this.Manager = manager;
         }
@@ -36,7 +35,7 @@ internal static partial class DependencyGraph
         {
             if ( this._allForks != null && this._allForks.Any( f => !f.IsJoined ) )
             {
-                throw new InvalidOperationException( "The root " + nameof( GatherIdentifiersContext ) + " has unjoined forks." );
+                throw new InvalidOperationException( "The root " + nameof(GatherIdentifiersContext) + " has unjoined forks." );
             }
 
             if ( this.Symbols is { Count: > 0 } )
