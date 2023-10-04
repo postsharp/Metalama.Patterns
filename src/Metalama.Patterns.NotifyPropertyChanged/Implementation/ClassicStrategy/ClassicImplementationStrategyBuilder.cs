@@ -522,6 +522,12 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 hasErrors |= diagnostic.Definition.Severity == Severity.Error;
                 this._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
             },
+            typeSymbol =>
+            {
+                var typeDecl = this._builder.Target.Compilation.GetDeclaration( typeSymbol ) as IType;
+                
+                return typeDecl != null && this._inpcInstrumentationKindLookup.Get( typeDecl ) != InpcInstrumentationKind.None;
+            },
             cancellationToken: this._builder.CancellationToken );
 
         var processingGraph =
@@ -531,32 +537,11 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         foreach ( var node in processingGraph.DescendantsDepthFirst() )
         {
             hasErrors |= !this.ValidateFieldOrPropertyIntrinsicCharacteristics( node.FieldOrProperty );
-            ValidateFieldOrPropertyInGraph( node );
         }
 
         this._dependencyGraph.Value = processingGraph;
 
         return !hasErrors;
-
-        // Validate the field or property of the node in the context of the graph.
-        void ValidateFieldOrPropertyInGraph( ClassicProcessingNode node )
-        {
-            var isLeaf = !node.HasChildren;
-
-            // Any type is acceptable for leaf nodes. Primitive types are allowed for non-leaf nodes.
-            if ( isLeaf || node.FieldOrProperty.Type.GetSymbol().IsPrimitiveType() )
-            {                
-                return;
-            }
-
-            // Non-leaf nodes must implement INPC otherwise they can't be monitored.
-            // Don't report for InpcInstrumentationKind.Unknown (ie, partial compilation).
-            if ( node.PropertyTypeInpcInstrumentationKind == InpcInstrumentationKind.None )
-            {                
-                this._builder.Diagnostics.Report( 
-                    DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( node.FieldOrProperty.Type ) );
-            }
-        }
     }
 
     private ClassicProcessingNode DependencyGraph => this._dependencyGraph.Value;

@@ -3,6 +3,7 @@
 using FluentAssertions;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 using Metalama.Testing.UnitTesting;
+using Microsoft.CodeAnalysis;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -11,6 +12,10 @@ namespace Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests;
 public sealed class GetDependencyGraphTests : UnitTestClass
 {
     public GetDependencyGraphTests( ITestOutputHelper testOutput ) : base( testOutput, false ) { }
+
+    private static bool AlwaysTreatAsInpc( ITypeSymbol type ) => true;
+
+    private static bool NeverTreatAsInpc( ITypeSymbol type ) => false;
 
     [Trait( "Supported", "Yes" )]
     [Fact]
@@ -85,7 +90,9 @@ class D
 
         var type = compilation.Types.OfName( "A" ).Single();
 
-        var result = DependencyGraph.GetDependencyGraph( type, ( _, _ ) => throw new InvalidOperationException( "Unexpected" ) );
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   A1
@@ -109,6 +116,7 @@ class D
   A9
 ";
 
+        diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
 
         // this.TestOutput.WriteLine( result.ToString() );
@@ -138,7 +146,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   X [ Z ]
@@ -185,10 +193,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Z ]
@@ -227,10 +235,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -266,10 +274,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   Y
@@ -308,10 +316,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -343,10 +351,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -378,10 +386,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -423,10 +431,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -468,10 +476,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -513,10 +521,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
 ";
@@ -554,10 +562,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -601,10 +609,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -646,10 +654,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -694,10 +702,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -741,10 +749,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -800,10 +808,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   A1
@@ -870,10 +878,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   A1
@@ -947,10 +955,10 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
 
-        this.TestOutput.WriteLines( diagnostics );
-        this.TestOutput.WriteLine( result.ToString() );
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   A1
@@ -976,6 +984,48 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
+        result.ToString().Should().Be( expected );
+    }
+
+    [Trait( "Supported", "No" )]
+    [Fact]
+    public void ReferenceToChildPropertyOfNonInpcNonPrimitiveProperty()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+// TreatAsImplementsInpc will return false for class B
+public class B
+{
+    public int B1 { get; set; }
+}
+
+public class A
+{
+    public B A1 { get; set; }
+
+    // A1 is of a non-inpc, non-primary type.
+    public int? A2 => A1?.B1;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, NeverTreatAsInpc );
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+
+        const string expected = @"<root>
+  A1
+    B1 [ A2 ]
+  A2
+";
+
+        diagnostics.Should().Equal( "LAMA5161: Field or property type does not implement INotifyPropertyChanged. (B)@(12,22)-(12,24)" );
         result.ToString().Should().Be( expected );
     }
 }

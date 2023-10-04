@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Microsoft.CodeAnalysis;
 using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
@@ -132,7 +133,7 @@ internal static class DiagnosticDescriptors
     /// <summary>
     /// The children of fields or properties of type '{0}' cannot be observed because the type does not implement INotifyPropertyChanged.
     /// </summary>
-    public static readonly DiagnosticDefinition<IType> WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable =
+    public static readonly DiagnosticDefinition<ITypeSymbol> WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable =
         new(
             "LAMA5161",
             Warning,

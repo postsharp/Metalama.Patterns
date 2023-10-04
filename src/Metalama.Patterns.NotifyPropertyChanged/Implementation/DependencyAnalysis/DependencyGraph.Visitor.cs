@@ -21,6 +21,7 @@ internal static partial class DependencyGraph
         Node tree,
         IPropertySymbol property,
         ReportDiagnostic reportDiagnostic,
+        TreatAsImplementingInpc treatAsImplementingInpc,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
@@ -39,7 +40,7 @@ internal static partial class DependencyGraph
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( tree, property, semanticModel, reportDiagnostic, trace, cancellationToken );
+        var visitor = new Visitor( tree, property, semanticModel, reportDiagnostic, treatAsImplementingInpc, trace, cancellationToken );
 
         visitor.Visit( body );
     }
@@ -54,6 +55,7 @@ internal static partial class DependencyGraph
         private readonly ReportDiagnostic _reportDiagnostic;
         private readonly CancellationToken _cancellationToken;
         private readonly Action<string>? _trace;
+        private readonly TreatAsImplementingInpc _implementsInpc;
 
         private readonly GatherIdentifiersContextManager _gatherManager;
 
@@ -64,6 +66,7 @@ internal static partial class DependencyGraph
             ISymbol originSymbol,
             SemanticModel semanticModel,
             ReportDiagnostic reportDiagnostic,
+            TreatAsImplementingInpc implementsInpc,
             Action<string>? trace,
             CancellationToken cancellationToken )
         {
@@ -74,6 +77,7 @@ internal static partial class DependencyGraph
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
             this._cancellationToken = cancellationToken;
+            this._implementsInpc = implementsInpc;
             this._gatherManager = new GatherIdentifiersContextManager( this );
         }
 
@@ -135,7 +139,7 @@ internal static partial class DependencyGraph
             {
                 foreach ( var symbols in context.SymbolsForAllForks() )
                 {
-                    this._trace?.Invoke( $"Processing symbol chain {string.Join( ".", symbols.Select( s => s.Symbol.Name ) )}" );
+                    this._trace?.Invoke( $"Processing symbol chain {string.Join( ".", symbols.Select( sr => sr.Symbol.Name ) )}" );
 
                     // Only consider chains that start with a local member. And for now, only properties.
                     // TODO: Expand logic here to support fields and methods.
@@ -144,7 +148,7 @@ internal static partial class DependencyGraph
 
                     if ( this.IsLocalInstanceMember( firstSymbol ) )
                     {
-                        var stemCount = symbols.Count( s => s.Symbol.Kind == SymbolKind.Property );
+                        var stemCount = symbols.Count( sr => sr.Symbol.Kind == SymbolKind.Property );
 
                         if ( stemCount > 0 )
                         {
@@ -156,9 +160,19 @@ internal static partial class DependencyGraph
 
                                 for ( var i = 0; i < stemCount; ++i )
                                 {
-                                    var s = symbols[i];
+                                    var sr = symbols[i];
 
-                                    treeNode = treeNode.GetOrAddChild( s.Symbol );
+                                    treeNode = treeNode.GetOrAddChild( sr.Symbol );
+
+                                    var propertyType = ((IPropertySymbol) sr.Symbol).Type.GetElementaryType();
+
+                                    // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
+                                    if ( i < stemCount - 1 && !propertyType.IsPrimitiveType() && !this._implementsInpc( propertyType ) )
+                                    {
+                                        this._reportDiagnostic(
+                                            DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( propertyType ),
+                                            sr.Node.GetLocation() );
+                                    }
                                 }
 
                                 treeNode.AddReferencedBy( this._tree.GetOrAddChild( this._originSymbol ) );
