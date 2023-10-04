@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Contracts.UnitTests.Assets;
+using System.Collections.Immutable;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
@@ -152,5 +153,77 @@ public sealed class NotEmptyAttributeTests
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public void Given_ArrayWithNotEmpty_When_NullPassed_Then_Succeeds()
+    {
+        var cut = new NotEmptyTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(
+            () =>
+                cut.Array( null ) );
+
+        Assert.Null( e );
+    }
+
+    [Fact]
+    public void Given_ArrayWithNotEmpty_When_SingletonPassed_Then_Succeeds()
+    {
+        var cut = new NotEmptyTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(
+            () =>
+                cut.Array( new[] { 1 } ) );
+
+        Assert.Null( e );
+    }
+
+    [Fact]
+    public void Given_ArrayWithNotEmpty_When_EmptyPassed_Then_Succeeds()
+    {
+        var cut = new NotEmptyTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(
+            () =>
+                cut.Array( Array.Empty<int>() ) );
+
+        Assert.NotNull( e );
+    }
+
+    [Fact]
+    public void Given_ImmutableArrayWithNotEmpty_When_DefaultPassed_Then_Succeeds()
+    {
+        var cut = new NotEmptyTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(
+            () =>
+                cut.ImmutableArray( default ) );
+
+        Assert.Null( e );
+    }
+
+    [Fact]
+    public void Given_ImmutableArrayWithNotEmpty_When_SingletonPassed_Then_Succeeds()
+    {
+        var cut = new NotEmptyTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(
+            () =>
+                cut.ImmutableArray( ImmutableArray.Create( 1 ) ) );
+
+        Assert.Null( e );
+    }
+
+    [Fact]
+    public void Given_ImmutableArrayWithNotEmpty_When_EmptyPassed_Then_Succeeds()
+    {
+        var cut = new NotEmptyTestClass();
+
+        var e = TestHelpers.RecordException<ArgumentException>(
+            () =>
+                cut.ImmutableArray( ImmutableArray<int>.Empty ) );
+
+        Assert.NotNull( e );
     }
 }

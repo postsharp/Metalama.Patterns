@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System.Collections.Immutable;
+
 namespace Metalama.Patterns.Contracts.UnitTests.Assets;
 
 public class NotEmptyTestClass
@@ -25,4 +27,8 @@ public class NotEmptyTestClass
     public string StringMethodWithRetVal( string retVal ) => retVal;
 
     public void IReadOnlyCollectionMethod<T>( [NotEmpty] IReadOnlyCollection<T> parameter ) { }
+
+    public void Array( [NotEmpty] int[]? array ) { }
+
+    public void ImmutableArray( [NotEmpty] ImmutableArray<int> array ) { }
 }
