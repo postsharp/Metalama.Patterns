@@ -79,6 +79,8 @@ public class StrictlyLessThanAttribute : RangeAttribute
             FloatingPointHelper.DoubleMaximum.ToDecimal( max ),
             GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) ) { }
 
+    protected override bool ShouldTestMinBound => false;
+
     protected override void OnContractViolated( dynamic? value )
     {
         meta.Target.GetContractOptions().Templates!.OnStrictlyLessThanContractViolated( value, this.DisplayMaxValue );

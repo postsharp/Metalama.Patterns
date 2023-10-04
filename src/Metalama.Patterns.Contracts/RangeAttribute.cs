@@ -52,6 +52,16 @@ public class RangeAttribute : ContractAspect
     /// </summary>
     protected object DisplayMaxValue { get; }
 
+    /// <summary>
+    /// Gets a value indicating whether the minimum bound should be tested.
+    /// </summary>
+    protected virtual bool ShouldTestMinBound => true;
+
+    /// <summary>
+    /// Gets a value indicating whether the maximum bound should be tested.
+    /// </summary>
+    protected virtual bool ShouldTestMaxBound => true;
+
     private readonly long _minInt64;
     private readonly long _maxInt64;
 
@@ -77,7 +87,7 @@ public class RangeAttribute : ContractAspect
         double maxDouble,
         decimal minDecimal,
         decimal maxDecimal,
-        TypeFlag invalidTypes )
+        TypeFlag invalidTypes)
     {
         this.DisplayMinValue = displayMin;
         this.DisplayMaxValue = displayMax;
@@ -551,19 +561,62 @@ public class RangeAttribute : ContractAspect
         else
         {
             var (min, max) = this.GetMinAndMaxExpressions( basicType.SpecialType );
+            var testMin = this.ShouldTestMinBound;
+            var testMax = this.ShouldTestMaxBound;
 
             if ( isNullable )
             {
-                if ( value!.HasValue && (value < min.Value || value > max.Value) )
+                if ( testMin && testMax )
                 {
-                    this.OnContractViolated( value );
+                    if ( value!.HasValue && (value < min.Value || value > max.Value) )
+                    {
+                        this.OnContractViolated( value );
+                    }
+                }
+                else if ( testMin )
+                {
+                    if ( value!.HasValue && value < min.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
+                }
+                else if ( testMax )
+                {
+                    if ( value!.HasValue && value > max.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
                 }
             }
+            // TODO: Pending fix for #33920
+#if false
+            // This way, the entire following block is absent/ignored/dropped by the template compiler.
             else
+#else
+            // Workaround - repeat the condition (negated)
+            if ( !isNullable )
+#endif
             {
-                if ( value < min.Value || value > max.Value )
+                if ( testMin && testMax )
                 {
-                    this.OnContractViolated( value );
+                    if ( value < min.Value || value > max.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
+                }
+                else if ( testMin )
+                {
+                    if ( value < min.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
+                }
+                else if ( testMax )
+                {
+                    if ( value > max.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
                 }
             }
         }

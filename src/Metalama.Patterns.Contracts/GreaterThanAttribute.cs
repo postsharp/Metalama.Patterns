@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
 
@@ -74,6 +75,8 @@ public class GreaterThanAttribute : RangeAttribute
             DoubleMinimum.ToDecimal( min ),
             decimal.MaxValue,
             GetInvalidTypes( min, double.MaxValue ) ) { }
+
+    protected override bool ShouldTestMaxBound => false;
 
     private static class DoubleMinimum
     {

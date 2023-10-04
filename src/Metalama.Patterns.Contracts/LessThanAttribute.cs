@@ -75,6 +75,8 @@ public class LessThanAttribute : RangeAttribute
             DoubleMaximum.ToDecimal( max ),
             GetInvalidTypes( double.MinValue, max ) ) { }
 
+    protected override bool ShouldTestMinBound => false;
+
     private static class DoubleMaximum
     {
         public static long ToInt64( double max )

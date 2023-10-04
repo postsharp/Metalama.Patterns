@@ -79,6 +79,8 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
             decimal.MaxValue,
             GetInvalidTypes( min < double.MaxValue - 1 ? min + 1 : double.MaxValue, double.MaxValue ) ) { }
 
+    protected override bool ShouldTestMaxBound => false;
+
     protected override void OnContractViolated( dynamic? value )
     {
         meta.Target.GetContractOptions().Templates!.OnStrictlyGreaterThanContractViolated( value, this.DisplayMinValue );
