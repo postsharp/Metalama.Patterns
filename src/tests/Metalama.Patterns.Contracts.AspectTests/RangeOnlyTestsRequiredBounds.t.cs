@@ -8,7 +8,7 @@ public sealed class RangeOnlyTestsRequiredBounds
       throw new global::System.ArgumentOutOfRangeException("x", "The 'x' parameter must be less than 42.");
     }
   }
-  public void GreatherThan([GreaterThan(42)] int x)
+  public void GreaterThan([GreaterThan(42)] int x)
   {
     if (x < 42)
     {

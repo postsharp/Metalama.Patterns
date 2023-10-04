@@ -6,7 +6,7 @@ public sealed class RangeOnlyTestsRequiredBounds
 {
     public void LessThan( [LessThan( 42 )] int x ) { }
 
-    public void GreatherThan( [GreaterThan( 42 )] int x ) { }
+    public void GreaterThan( [GreaterThan( 42 )] int x ) { }
 
     public void Negative( [Negative] int x ) { }
 

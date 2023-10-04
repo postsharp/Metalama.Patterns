@@ -87,7 +87,7 @@ public class RangeAttribute : ContractAspect
         double maxDouble,
         decimal minDecimal,
         decimal maxDecimal,
-        TypeFlag invalidTypes)
+        TypeFlag invalidTypes )
     {
         this.DisplayMinValue = displayMin;
         this.DisplayMaxValue = displayMax;
@@ -588,11 +588,13 @@ public class RangeAttribute : ContractAspect
                     }
                 }
             }
+
             // TODO: Pending fix for #33920
 #if false
             // This way, the entire following block is absent/ignored/dropped by the template compiler.
             else
 #else
+
             // Workaround - repeat the condition (negated)
             if ( !isNullable )
 #endif
