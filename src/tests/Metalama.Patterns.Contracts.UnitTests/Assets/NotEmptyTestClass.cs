@@ -4,6 +4,8 @@ using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Contracts.UnitTests.Assets;
 
+#pragma warning disable CS8603
+
 public class NotEmptyTestClass
 {
     [NotEmpty]

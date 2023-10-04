@@ -6,6 +6,8 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Patterns.Contracts;
 
+#pragma warning disable SA1623
+
 /// <summary>
 /// A base class for all contracts defined in this library.
 /// </summary>
