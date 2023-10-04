@@ -718,4 +718,135 @@ public class A
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( expected );
     }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void CoalesceExpression()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class P
+{
+    public static int Fn( int v ) => v * 2;
+}
+
+public class B
+{
+    public int B1 { get; set; }
+
+    public C? B2 { get; set; }
+
+    public C? B3 { get; set; }
+}
+
+public class C
+{
+    public int C1 { get; set; }
+}
+
+public class A
+{
+    public B? A1 { get; set; }
+
+    public B? A2 { get; set; }
+
+    // Q references A1.B1 and A2.B1
+    public int Q => A1?.B1 ?? A2?.B1 ?? 42;
+
+    // R references A1.B2.C1, A2.B2.C1, A1.B3.C1 and A2.B3.C1.
+    public int R => ((this.A1 ?? this.A2)?.B2 ?? (this.A1 ?? this.A2)?.B3!).C1;
+}";
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
+
+        var expected = @"<root>
+  A1
+    B1 [ Q ]
+    B2
+      C1 [ R ]
+    B3
+      C1 [ R ]
+  A2
+    B1 [ Q ]
+    B2
+      C1 [ R ]
+    B3
+      C1 [ R ]
+  Q
+  R
+";
+        diagnostics.Should().BeEmpty();
+        result.ToString().Should().Be( expected );
+    }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void ConditionalExpression()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class P
+{
+    public static int Fn( int v ) => v * 2;
+}
+
+public class B
+{
+    public int B1 { get; set; }
+
+    public C? B2 { get; set; }
+
+    public C? B3 { get; set; }
+}
+
+public class C
+{
+    public int C1 { get; set; }
+}
+
+public class A
+{
+    public B? A1 { get; set; }
+
+    public B? A2 { get; set; }
+
+    public bool A3 { get; set; }
+
+    // Q references A3, A1.B2.C1 and A2.B2.C1.
+    public int? Q => (A3 ? A1 : A2)?.B2?.C1;
+}";
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add );
+
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
+
+        var expected = @"<root>
+  A1
+    B2
+      C1 [ Q ]
+  A2
+    B2
+      C1 [ Q ]
+  A3 [ Q ]
+  Q
+";
+        diagnostics.Should().BeEmpty();
+        result.ToString().Should().Be( expected );
+    }
 }
