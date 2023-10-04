@@ -14,8 +14,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 [PublicAPI]
-[Inheritable]
-public sealed class CreditCardAttribute : ContractAspect
+public sealed class CreditCardAttribute : BaseContractAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CreditCardAttribute"/> class.

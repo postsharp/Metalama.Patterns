@@ -12,8 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// The base class of contracts that are based on custom attributes.
 /// </summary>
 [PublicAPI]
-[Inheritable]
-public abstract class RegularExpressionBaseAttribute : ContractAspect
+public abstract class RegularExpressionBaseAttribute : BaseContractAttribute
 {
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )

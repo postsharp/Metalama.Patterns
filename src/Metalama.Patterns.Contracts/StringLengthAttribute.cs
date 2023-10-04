@@ -13,8 +13,7 @@ namespace Metalama.Patterns.Contracts;
 /// Null strings are accepted and do not throw an exception.
 /// </summary>
 [PublicAPI]
-[Inheritable]
-public sealed class StringLengthAttribute : ContractAspect
+public sealed class StringLengthAttribute : BaseContractAttribute
 {
     // TODO: Add diagnostics if the aspect construction is invalid (eg, max < min).
 

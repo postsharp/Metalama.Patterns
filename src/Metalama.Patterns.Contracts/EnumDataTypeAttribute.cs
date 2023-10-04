@@ -19,8 +19,7 @@ namespace Metalama.Patterns.Contracts;
 /// </para>
 /// </remarks>
 [PublicAPI]
-[Inheritable]
-public sealed class EnumDataTypeAttribute : ContractAspect
+public sealed class EnumDataTypeAttribute : BaseContractAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="EnumDataTypeAttribute"/> class.

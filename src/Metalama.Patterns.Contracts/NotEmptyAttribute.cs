@@ -19,8 +19,7 @@ namespace Metalama.Patterns.Contracts;
 /// (where empty means zero items).  Null references or default <see cref="ImmutableArray{T}"/> instances are accepted and do not throw an exception.
 /// </summary>
 [PublicAPI]
-[Inheritable]
-public sealed class NotEmptyAttribute : ContractAspect
+public sealed class NotEmptyAttribute : BaseContractAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotEmptyAttribute"/> class.

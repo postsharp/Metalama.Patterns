@@ -87,8 +87,10 @@ public static class ContractExtensions
                 } );
     }
 
-    public static ContractOptions GetContractOptions( this IMetaTarget target )
-        => target.Declaration switch
+    public static ContractOptions GetContractOptions( this IMetaTarget target ) => target.Declaration.GetContractOptions();
+
+    public static ContractOptions GetContractOptions( this IDeclaration declaration )
+        => declaration switch
         {
             IParameter parameter => parameter.Enhancements().GetOptions<ContractOptions>(),
             IFieldOrPropertyOrIndexer field => field.Enhancements().GetOptions<ContractOptions>(),
