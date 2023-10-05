@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
@@ -11,6 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// Options for all aspects of the <c>Metalama.Patterns.Contracts</c> namespace.
 /// </summary>
+[PublicAPI]
 public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>,
                                       IHierarchicalOptions<IFieldOrPropertyOrIndexer>,
                                       IHierarchicalOptions<IMethod>, IHierarchicalOptions<IParameter>
@@ -55,7 +57,12 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
     /// </summary>
     public bool? AreInvariantsEnabled { get; init; }
 
-    public bool? SupportsInvariantSuspension { get; init; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the <see cref="InvariantAttribute"/> aspect should generate the code that
+    /// supports the <see cref="SuspendInvariantsAttribute"/>, including the <c>SuspendInvariants</c> and <c>AreInvariantsSuspended</c>
+    /// methods. The option is <c>false</c> by default.
+    /// </summary>
+    public bool? IsInvariantSuspensionSupported { get; init; }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
@@ -70,7 +77,7 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
             AreInvariantsEnabled = other.AreInvariantsEnabled ?? this.AreInvariantsEnabled,
             ArePostconditionsEnabled = other.ArePostconditionsEnabled ?? this.ArePostconditionsEnabled,
             ArePreconditionsEnabled = other.ArePreconditionsEnabled ?? this.ArePreconditionsEnabled,
-            SupportsInvariantSuspension = other.SupportsInvariantSuspension ?? this.SupportsInvariantSuspension
+            IsInvariantSuspensionSupported = other.IsInvariantSuspensionSupported ?? this.IsInvariantSuspensionSupported
         };
     }
 

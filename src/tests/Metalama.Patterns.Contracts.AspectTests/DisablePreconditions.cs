@@ -14,7 +14,6 @@ public class C
     {
         b = "b";
     }
-
 }
 
 public class Fabric : ProjectFabric

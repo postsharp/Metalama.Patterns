@@ -3,8 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Fabrics;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Contracts;
 

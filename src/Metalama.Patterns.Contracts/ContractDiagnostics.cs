@@ -37,8 +37,8 @@ internal static class ContractDiagnostics
         = new(
             "LAMA5004",
             Severity.Error,
-            $"The [{nameof(SuspendInvariantsAttribute)}] aspect cannot be applied to method '{{0}}' because the {nameof(ContractOptions.SupportsInvariantSuspension)} option is not set for the type '{{1}}'.",
-            $"The [${nameof(SuspendInvariantsAttribute)}] aspect cannot be applied to the method because the {nameof(ContractOptions.SupportsInvariantSuspension)} option is not set for the its declaring type." );
+            $"The [{nameof(SuspendInvariantsAttribute)}] aspect cannot be applied to method '{{0}}' because the {nameof(ContractOptions.IsInvariantSuspensionSupported)} option is not set for the type '{{1}}'.",
+            $"The [${nameof(SuspendInvariantsAttribute)}] aspect cannot be applied to the method because the {nameof(ContractOptions.IsInvariantSuspensionSupported)} option is not set for the its declaring type." );
 
     public static DiagnosticDefinition<(IMethod Method, INamedType Type)> SuspensionRedundant { get; }
         = new(
