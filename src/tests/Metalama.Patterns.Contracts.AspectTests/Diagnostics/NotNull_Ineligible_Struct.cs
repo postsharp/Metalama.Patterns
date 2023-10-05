@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Metalama.Patterns.Contracts.AspectTests;
+namespace Metalama.Patterns.Contracts.AspectTests.Diagnostics;
 
 public class NotNull_Ineligible_Struct
 {
