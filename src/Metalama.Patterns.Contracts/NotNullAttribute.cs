@@ -12,8 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// an <see cref="ArgumentNullException"/> if the target is assigned a <see langword="null"/> value.
 /// </summary>
 [PublicAPI]
-[Inheritable]
-public sealed class NotNullAttribute : ContractAspect
+public sealed class NotNullAttribute : ContractBaseAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotNullAttribute"/> class.

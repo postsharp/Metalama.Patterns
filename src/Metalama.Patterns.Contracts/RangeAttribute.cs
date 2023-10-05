@@ -22,8 +22,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used and <value>{5}</value> to refer to the maximum value used.</para>
 /// </remarks>
 [PublicAPI]
-[Inheritable]
-public class RangeAttribute : ContractAspect
+public class RangeAttribute : ContractBaseAttribute
 {
     [Flags]
     internal enum TypeFlag
@@ -66,6 +65,9 @@ public class RangeAttribute : ContractAspect
 
     private readonly TypeFlag _invalidTypes;
 
+    private readonly bool _shouldTestMinBound;
+    private readonly bool _shouldTestMaxBound;
+
     internal RangeAttribute(
         object displayMin,
         object displayMax,
@@ -77,7 +79,9 @@ public class RangeAttribute : ContractAspect
         double maxDouble,
         decimal minDecimal,
         decimal maxDecimal,
-        TypeFlag invalidTypes )
+        TypeFlag invalidTypes,
+        bool shouldTestMinBound = true,
+        bool shouldTestMaxBound = true )
     {
         this.DisplayMinValue = displayMin;
         this.DisplayMaxValue = displayMax;
@@ -90,6 +94,8 @@ public class RangeAttribute : ContractAspect
         this._minDecimal = minDecimal;
         this._maxDecimal = maxDecimal;
         this._invalidTypes = invalidTypes;
+        this._shouldTestMinBound = shouldTestMinBound;
+        this._shouldTestMaxBound = shouldTestMaxBound;
     }
 
     /// <summary>
@@ -115,6 +121,9 @@ public class RangeAttribute : ContractAspect
         this._maxDecimal = max;
 
         this._invalidTypes = GetInvalidTypes( min, max );
+
+        this._shouldTestMinBound = true;
+        this._shouldTestMaxBound = true;
     }
 
     /// <summary>
@@ -140,6 +149,9 @@ public class RangeAttribute : ContractAspect
         this._maxDecimal = max;
 
         this._invalidTypes = GetInvalidTypes( min );
+
+        this._shouldTestMinBound = true;
+        this._shouldTestMaxBound = true;
     }
 
     /// <summary>
@@ -165,6 +177,9 @@ public class RangeAttribute : ContractAspect
         this._maxUInt64 = ConvertDoubleToUInt64( max );
 
         this._invalidTypes = GetInvalidTypes( min, max );
+
+        this._shouldTestMinBound = true;
+        this._shouldTestMaxBound = true;
     }
 
     internal static TypeFlag GetInvalidTypes( long min, long max )
@@ -348,46 +363,28 @@ public class RangeAttribute : ContractAspect
     internal static long ConvertUInt64ToInt64( ulong value ) => value <= long.MaxValue ? (long) value : long.MaxValue;
 
     internal static decimal ConvertDoubleToDecimal( double value )
-    {
-        if ( value < (double) decimal.MinValue )
+        => value switch
         {
-            return decimal.MinValue;
-        }
-        else if ( value > (double) decimal.MaxValue )
-        {
-            return decimal.MaxValue;
-        }
-
-        return (decimal) value;
-    }
+            < (double) decimal.MinValue => decimal.MinValue,
+            > (double) decimal.MaxValue => decimal.MaxValue,
+            _ => (decimal) value
+        };
 
     internal static long ConvertDoubleToInt64( double value )
-    {
-        if ( value < long.MinValue )
+        => value switch
         {
-            return long.MinValue;
-        }
-        else if ( value > long.MaxValue )
-        {
-            return long.MaxValue;
-        }
-
-        return (long) value;
-    }
+            < long.MinValue => long.MinValue,
+            > long.MaxValue => long.MaxValue,
+            _ => (long) value
+        };
 
     private static ulong ConvertDoubleToUInt64( double value )
-    {
-        if ( value < ulong.MinValue )
+        => value switch
         {
-            return ulong.MinValue;
-        }
-        else if ( value > long.MaxValue )
-        {
-            return long.MaxValue;
-        }
-
-        return (ulong) value;
-    }
+            < ulong.MinValue => ulong.MinValue,
+            > long.MaxValue => long.MaxValue,
+            _ => (ulong) value
+        };
 
     [CompileTime]
     private static TypeFlag GetTypeFlag( IType locationType )
@@ -551,19 +548,64 @@ public class RangeAttribute : ContractAspect
         else
         {
             var (min, max) = this.GetMinAndMaxExpressions( basicType.SpecialType );
+            var testMin = this._shouldTestMinBound;
+            var testMax = this._shouldTestMaxBound;
 
             if ( isNullable )
             {
-                if ( value!.HasValue && (value < min.Value || value > max.Value) )
+                if ( testMin && testMax )
                 {
-                    this.OnContractViolated( value );
+                    if ( value!.HasValue && (value < min.Value || value > max.Value) )
+                    {
+                        this.OnContractViolated( value );
+                    }
+                }
+                else if ( testMin )
+                {
+                    if ( value!.HasValue && value < min.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
+                }
+                else if ( testMax )
+                {
+                    if ( value!.HasValue && value > max.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
                 }
             }
+
+            // TODO: Pending fix for #33920
+#if false
+            // This way, the entire following block is absent/ignored/dropped by the template compiler.
             else
+#else
+
+            // Workaround - repeat the condition (negated)
+            if ( !isNullable )
+#endif
             {
-                if ( value < min.Value || value > max.Value )
+                if ( testMin && testMax )
                 {
-                    this.OnContractViolated( value );
+                    if ( value < min.Value || value > max.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
+                }
+                else if ( testMin )
+                {
+                    if ( value < min.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
+                }
+                else if ( testMax )
+                {
+                    if ( value > max.Value )
+                    {
+                        this.OnContractViolated( value );
+                    }
                 }
             }
         }

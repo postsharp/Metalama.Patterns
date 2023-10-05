@@ -12,8 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// The base class of contracts that are based on custom attributes.
 /// </summary>
 [PublicAPI]
-[Inheritable]
-public abstract class RegularExpressionBaseAttribute : ContractAspect
+public abstract class RegularExpressionBaseAttribute : ContractBaseAttribute
 {
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -34,11 +33,24 @@ public abstract class RegularExpressionBaseAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
+        var targetType = meta.Target.GetTargetType();
+        var requiresNullCheck = targetType.IsNullable != false;
+
         var regex = (Regex) this.GetRegex().Value!;
 
-        if ( value != null && !regex.IsMatch( (string) value! ) )
+        if ( requiresNullCheck )
         {
-            this.OnContractViolated( value, regex );
+            if ( value != null && !regex.IsMatch( (string) value! ) )
+            {
+                this.OnContractViolated( value, regex );
+            }
+        }
+        else
+        {
+            if ( !regex.IsMatch( (string) value! ) )
+            {
+                this.OnContractViolated( value, regex );
+            }
         }
     }
 
