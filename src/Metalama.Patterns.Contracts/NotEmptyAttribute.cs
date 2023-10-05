@@ -3,41 +3,28 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Eligibility;
 using System.Collections;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
-/// an <see cref="ArgumentNullException"/> if the target is assigned a null or empty value.
+/// an <see cref="ArgumentException"/> if the target is assigned an empty value.
 /// The custom attributes can be added to locations of type <see cref="string"/> (where empty
-/// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/> or <see cref="IReadOnlyCollection{T}"/>
-/// (where empty means zero items). 
+/// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/>, <see cref="IReadOnlyCollection{T}"/>, arrays or <see cref="ImmutableArray{T}"/>
+/// (where empty means zero items).  Null references or default <see cref="ImmutableArray{T}"/> instances are accepted and do not throw an exception.
 /// </summary>
 [PublicAPI]
-[Inheritable]
-public sealed class NotEmptyAttribute : ContractAspect
+public sealed class NotEmptyAttribute : ContractBaseAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotEmptyAttribute"/> class.
     /// </summary>
     public NotEmptyAttribute() { }
-
-    public override void BuildAspect( IAspectBuilder<IParameter> builder )
-    {
-        base.BuildAspect( builder );
-
-        builder.WarnIfNullable();
-    }
-
-    public override void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
-    {
-        base.BuildAspect( builder );
-
-        builder.WarnIfNullable();
-    }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -52,30 +39,75 @@ public sealed class NotEmptyAttribute : ContractAspect
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetType = (INamedType) meta.Target.GetTargetType();
+        var targetType = meta.Target.GetTargetType();
+        var requiresNullCheck = targetType.IsNullable != false;
 
-        if ( targetType.Equals( SpecialType.String ) )
+        if ( targetType.Equals( SpecialType.String ) || targetType is IArrayType )
         {
-            if ( string.IsNullOrEmpty( value ) )
+            if ( requiresNullCheck )
             {
-                meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
-            }
-        }
-        else if ( TryGetCompatibleTargetInterface( targetType, out var interfaceType, out var requiresCast ) )
-        {
-            if ( requiresCast )
-            {
-                if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
+                if ( value != null && value!.Length <= 0 )
                 {
                     meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
                 }
             }
             else
             {
-                if ( value == null || value!.Count <= 0 )
+                if ( value!.Length <= 0 )
                 {
                     meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
                 }
+            }
+        }
+        else if ( targetType is INamedType namedType )
+        {
+            if ( namedType.Definition.Is( typeof(ImmutableArray<>) ) )
+            {
+                if ( !value!.IsDefault && value.IsEmpty )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                }
+            }
+            else if ( TryGetCompatibleTargetInterface( namedType, out var interfaceType, out var requiresCast ) )
+            {
+                if ( requiresCast )
+                {
+                    if ( requiresNullCheck )
+                    {
+                        if ( value != null && meta.Cast( interfaceType, value )!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                    else
+                    {
+                        if ( meta.Cast( interfaceType, value )!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                }
+                else
+                {
+                    if ( requiresNullCheck )
+                    {
+                        if ( value != null && value!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                    else
+                    {
+                        if ( value!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                }
+            }
+            else
+            {
+                ThrowValidateCalledOnIneligibleTarget();
             }
         }
         else
