@@ -1,0 +1,1 @@
+// Error LAMA5154 on `A`: `The property HasVirtualProperty.A is virtual. This is not supported.`
