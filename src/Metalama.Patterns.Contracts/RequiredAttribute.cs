@@ -19,8 +19,7 @@ namespace Metalama.Patterns.Contracts;
 /// </list>
 /// </summary>
 [PublicAPI]
-[Inheritable]
-public sealed class RequiredAttribute : ContractAspect
+public sealed class RequiredAttribute : ContractBaseAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="RequiredAttribute"/> class.

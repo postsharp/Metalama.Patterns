@@ -63,12 +63,12 @@ public sealed class StringLengthAttributeTests
     }
 
     [Fact]
-    public void Given_FieldWithMinLength_When_NullValuePassed_Then_Success()
+    public void Given_FieldWithMinLength_When_NullValuePassed_Then_NullReferenceException()
     {
         var cut = new StringLengthTestClass();
 
-        cut.StringField = null!;
+        var e = TestHelpers.RecordException<NullReferenceException>( () => cut.StringField = null! );
 
-        Assert.Null( cut.StringField );
+        Assert.NotNull( e );
     }
 }

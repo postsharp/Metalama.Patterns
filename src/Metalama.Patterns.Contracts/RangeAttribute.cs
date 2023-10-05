@@ -22,8 +22,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used and <value>{5}</value> to refer to the maximum value used.</para>
 /// </remarks>
 [PublicAPI]
-[Inheritable]
-public class RangeAttribute : ContractAspect
+public class RangeAttribute : ContractBaseAttribute
 {
     [Flags]
     internal enum TypeFlag
@@ -348,46 +347,28 @@ public class RangeAttribute : ContractAspect
     internal static long ConvertUInt64ToInt64( ulong value ) => value <= long.MaxValue ? (long) value : long.MaxValue;
 
     internal static decimal ConvertDoubleToDecimal( double value )
-    {
-        if ( value < (double) decimal.MinValue )
+        => value switch
         {
-            return decimal.MinValue;
-        }
-        else if ( value > (double) decimal.MaxValue )
-        {
-            return decimal.MaxValue;
-        }
-
-        return (decimal) value;
-    }
+            < (double) decimal.MinValue => decimal.MinValue,
+            > (double) decimal.MaxValue => decimal.MaxValue,
+            _ => (decimal) value
+        };
 
     internal static long ConvertDoubleToInt64( double value )
-    {
-        if ( value < long.MinValue )
+        => value switch
         {
-            return long.MinValue;
-        }
-        else if ( value > long.MaxValue )
-        {
-            return long.MaxValue;
-        }
-
-        return (long) value;
-    }
+            < long.MinValue => long.MinValue,
+            > long.MaxValue => long.MaxValue,
+            _ => (long) value
+        };
 
     private static ulong ConvertDoubleToUInt64( double value )
-    {
-        if ( value < ulong.MinValue )
+        => value switch
         {
-            return ulong.MinValue;
-        }
-        else if ( value > long.MaxValue )
-        {
-            return long.MaxValue;
-        }
-
-        return (ulong) value;
-    }
+            < ulong.MinValue => ulong.MinValue,
+            > long.MaxValue => long.MaxValue,
+            _ => (ulong) value
+        };
 
     [CompileTime]
     private static TypeFlag GetTypeFlag( IType locationType )
