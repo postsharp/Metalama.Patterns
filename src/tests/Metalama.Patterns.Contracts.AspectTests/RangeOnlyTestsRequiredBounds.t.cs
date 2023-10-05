@@ -48,7 +48,7 @@ public sealed class RangeOnlyTestsRequiredBounds
   {
     if (x < 10 || x > 20)
     {
-      throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be between 10 and 20.");
+      throw new ArgumentOutOfRangeException("The 'x' parameter must be between 10 and 20.", "x");
     }
   }
   public void StrictlyGreaterThanInt([StrictlyGreaterThan(42)] int x)
@@ -90,7 +90,7 @@ public sealed class RangeOnlyTestsRequiredBounds
   {
     if (x < 10 || x > 20)
     {
-      throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be between 10 and 20.");
+      throw new ArgumentOutOfRangeException("The 'x' parameter must be between 10 and 20.", "x");
     }
   }
   public void StrictlyGreaterThanDouble([StrictlyGreaterThan(42.0)] int x)
@@ -132,7 +132,7 @@ public sealed class RangeOnlyTestsRequiredBounds
   {
     if (x < 10 || x > 20)
     {
-      throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be between 10 and 20.");
+      throw new ArgumentOutOfRangeException("The 'x' parameter must be between 10 and 20.", "x");
     }
   }
   public void StrictlyGreaterThanUnsigned([StrictlyGreaterThan(42ul)] int x)

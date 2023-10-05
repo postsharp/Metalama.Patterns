@@ -41,7 +41,7 @@ internal sealed class CheckInvariantsAspect : IAspect<INamedType>
 
         foreach ( var method in methodsToOverride )
         {
-            builder.Advice.Override( method, nameof(OverrideMethod), args: new { EnableInvariantSuspensionSupport = enableInvariantSuspensionSupport } );
+            builder.Advice.Override( method, nameof(OverrideMethod), args: new { enableInvariantSuspensionSupport } );
         }
 
         // Add support for dynamic suspension of invariants.

@@ -1,7 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Contracts;
 namespace Metalama.Patterns.Contracts.AspectTests.DisablePostconditions;
 public class C
 {
@@ -17,7 +16,7 @@ public class C
     {
       if (value.Length <= 0)
       {
-        throw new ArgumentException("value", "The 'P' property must not be null or empty.");
+        throw new ArgumentException("The 'P' property must not be null or empty.", "value");
       }
       this._p = value;
     }
@@ -26,7 +25,7 @@ public class C
   {
     if (a.Length <= 0)
     {
-      throw new ArgumentException("a", "The 'a' parameter must not be null or empty.");
+      throw new ArgumentException("The 'a' parameter must not be null or empty.", "a");
     }
     b = "b";
   }

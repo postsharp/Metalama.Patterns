@@ -77,7 +77,7 @@ public class BaseClass
       return;
     }
   }
-  private InvariantSuspensionCounter _invariantSuspensionCounter = new();
+  private readonly InvariantSuspensionCounter _invariantSuspensionCounter = new();
   protected bool AreInvariantsSuspended()
   {
     return _invariantSuspensionCounter.AreInvariantsSuspended;
