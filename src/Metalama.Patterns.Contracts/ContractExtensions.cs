@@ -41,8 +41,7 @@ public static class ContractExtensions
 
         static IAttribute? GetNullableAttribute( IDeclaration d )
             => d.Attributes.OfAttributeType( typeof(RequiredAttribute) ).FirstOrDefault() ??
-               d.Attributes.OfAttributeType( typeof(NotNullAttribute) ).FirstOrDefault() ??
-               d.Attributes.OfAttributeType( typeof(NotEmptyAttribute) ).FirstOrDefault();
+               d.Attributes.OfAttributeType( typeof(NotNullAttribute) ).FirstOrDefault();
 
         // Add aspects to fields and properties.
         var fieldsAndProperties = types
@@ -88,8 +87,10 @@ public static class ContractExtensions
                 } );
     }
 
-    public static ContractOptions GetContractOptions( this IMetaTarget target )
-        => target.Declaration switch
+    public static ContractOptions GetContractOptions( this IMetaTarget target ) => target.Declaration.GetContractOptions();
+
+    public static ContractOptions GetContractOptions( this IDeclaration declaration )
+        => declaration switch
         {
             IParameter parameter => parameter.Enhancements().GetOptions<ContractOptions>(),
             IFieldOrPropertyOrIndexer field => field.Enhancements().GetOptions<ContractOptions>(),
