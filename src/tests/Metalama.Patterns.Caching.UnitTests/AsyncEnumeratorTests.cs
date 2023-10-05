@@ -11,19 +11,19 @@ public class AsyncEnumeratorTests : AsyncEnumTestsBase
     public AsyncEnumeratorTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
     [Fact]
-    public void DoesNotIterateOnUnawaitedMethod()
+    public void DoesNotBlockOnUnawaitedMethod()
     {
-        _ = this.Instance.CachedEnumerator();
+        _ = this.Instance.BlockedCachedEnumerator();
 
-        Assert.Equal( "E1", this.StringBuilder.ToString() );
+        // Success is indicated by this method completing.
     }
 
     [Fact]
-    public void DoesNotIterateOnUnawaitedFirstMoveNextAsync()
+    public void DoesNotBlockOnUnawaitedFirstMoveNextAsync()
     {
-        _ = this.Instance.CachedEnumerator().MoveNextAsync();
+        _ = this.Instance.BlockedCachedEnumerator().MoveNextAsync();
 
-        Assert.Equal( "E1", this.StringBuilder.ToString() );
+        // Success is indicated by this method completing.
     }
 
     [Fact]
@@ -31,11 +31,11 @@ public class AsyncEnumeratorTests : AsyncEnumTestsBase
     {
         _ = await this.Instance.CachedEnumerator().MoveNextAsync();
 
-        Assert.Equal( "E1.E2.E3.E4", this.StringBuilder.ToString() );
+        Assert.Equal( "E1.E2.E3", this.StringBuilder.ToString() );
     }
 
     [Fact]
-    public async void DoesNotIteratesOnSecondAwaitedMoveNextAsync()
+    public async void DoesNotIterateOnSecondAwaitedMoveNextAsync()
     {
         _ = await this.Instance.CachedEnumerator().MoveNextAsync();
         this.StringBuilder.Clear();
@@ -49,7 +49,7 @@ public class AsyncEnumeratorTests : AsyncEnumTestsBase
     {
         await this.Iterate( this.Instance.CachedEnumerator() );
 
-        Assert.Equal( "E1.I1.E2.E3.E4.I2[42].I2[99].I3", this.StringBuilder.ToString() );
+        Assert.Equal( "E1.E2.E3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class AsyncEnumeratorTests : AsyncEnumTestsBase
         await this.Iterate( this.Instance.CachedEnumerator() );
         await this.Iterate( this.Instance.CachedEnumerator() );
 
-        Assert.Equal( "E1.I1.E2.E3.E4.I2[42].I2[99].I3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );
+        Assert.Equal( "E1.E2.E3.I1.I2[42].I2[99].I3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );
     }
 }
 
