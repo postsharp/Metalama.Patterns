@@ -41,7 +41,8 @@ public class StrictlyLessThanAttribute : RangeAttribute
             FloatingPointHelper.Int64Maximum.ToDouble( max ),
             decimal.MinValue,
             FloatingPointHelper.Int64Maximum.ToDecimal( max ),
-            GetInvalidTypes( long.MinValue, FloatingPointHelper.Int64Maximum.ToInt64( max ) ) ) { }
+            GetInvalidTypes( long.MinValue, FloatingPointHelper.Int64Maximum.ToInt64( max ) ),
+            shouldTestMinBound: false ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an unsigned integer bound.
@@ -59,7 +60,8 @@ public class StrictlyLessThanAttribute : RangeAttribute
             FloatingPointHelper.UInt64Maximum.ToDouble( max ),
             decimal.MinValue,
             FloatingPointHelper.UInt64Maximum.ToDecimal( max ),
-            GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None) ) { }
+            GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None),
+            shouldTestMinBound: false ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a floating-point bound.
@@ -77,9 +79,8 @@ public class StrictlyLessThanAttribute : RangeAttribute
             FloatingPointHelper.DoubleMaximum.ToDouble( max ),
             decimal.MinValue,
             FloatingPointHelper.DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ) ) { }
-
-    protected override bool ShouldTestMinBound => false;
+            GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ),
+            shouldTestMinBound: false ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {

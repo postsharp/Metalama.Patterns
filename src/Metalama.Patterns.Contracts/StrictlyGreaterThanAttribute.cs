@@ -41,7 +41,8 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
             double.MaxValue,
             FloatingPointHelper.Int64Minimum.ToDecimal( min ),
             decimal.MaxValue,
-            GetInvalidTypes( FloatingPointHelper.Int64Minimum.ToInt64( min ), long.MaxValue ) ) { }
+            GetInvalidTypes( FloatingPointHelper.Int64Minimum.ToInt64( min ), long.MaxValue ),
+            shouldTestMaxBound: false ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying an unsigned integer bound.
@@ -59,7 +60,8 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
             double.MaxValue,
             FloatingPointHelper.UInt64Minimum.ToDecimal( min ),
             decimal.MaxValue,
-            GetInvalidTypes( FloatingPointHelper.UInt64Minimum.ToUInt64( min ) ) ) { }
+            GetInvalidTypes( FloatingPointHelper.UInt64Minimum.ToUInt64( min ) ),
+            shouldTestMaxBound: false ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a floating-point bound.
@@ -77,9 +79,8 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
             double.MaxValue,
             FloatingPointHelper.DoubleMinimum.ToDecimal( min ),
             decimal.MaxValue,
-            GetInvalidTypes( min < double.MaxValue - 1 ? min + 1 : double.MaxValue, double.MaxValue ) ) { }
-
-    protected override bool ShouldTestMaxBound => false;
+            GetInvalidTypes( min < double.MaxValue - 1 ? min + 1 : double.MaxValue, double.MaxValue ),
+            shouldTestMaxBound: false ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {

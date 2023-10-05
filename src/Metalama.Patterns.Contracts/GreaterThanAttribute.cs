@@ -37,7 +37,8 @@ public class GreaterThanAttribute : RangeAttribute
             double.MaxValue,
             min,
             decimal.MaxValue,
-            GetInvalidTypes( min, long.MaxValue ) ) { }
+            GetInvalidTypes( min, long.MaxValue ),
+            shouldTestMaxBound: false ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying an unsigned integer bound.
@@ -55,7 +56,8 @@ public class GreaterThanAttribute : RangeAttribute
             double.MaxValue,
             min,
             decimal.MaxValue,
-            GetInvalidTypes( min ) ) { }
+            GetInvalidTypes( min ),
+            shouldTestMaxBound: false ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a floating-point bound.
@@ -73,9 +75,8 @@ public class GreaterThanAttribute : RangeAttribute
             double.MaxValue,
             DoubleMinimum.ToDecimal( min ),
             decimal.MaxValue,
-            GetInvalidTypes( min, double.MaxValue ) ) { }
-
-    protected override bool ShouldTestMaxBound => false;
+            GetInvalidTypes( min, double.MaxValue ),
+            shouldTestMaxBound: false ) { }
 
     private static class DoubleMinimum
     {

@@ -52,16 +52,6 @@ public class RangeAttribute : ContractAspect
     /// </summary>
     protected object DisplayMaxValue { get; }
 
-    /// <summary>
-    /// Gets a value indicating whether the minimum bound should be tested.
-    /// </summary>
-    protected virtual bool ShouldTestMinBound => true;
-
-    /// <summary>
-    /// Gets a value indicating whether the maximum bound should be tested.
-    /// </summary>
-    protected virtual bool ShouldTestMaxBound => true;
-
     private readonly long _minInt64;
     private readonly long _maxInt64;
 
@@ -76,6 +66,9 @@ public class RangeAttribute : ContractAspect
 
     private readonly TypeFlag _invalidTypes;
 
+    private readonly bool _shouldTestMinBound;
+    private readonly bool _shouldTestMaxBound;
+
     internal RangeAttribute(
         object displayMin,
         object displayMax,
@@ -87,7 +80,9 @@ public class RangeAttribute : ContractAspect
         double maxDouble,
         decimal minDecimal,
         decimal maxDecimal,
-        TypeFlag invalidTypes )
+        TypeFlag invalidTypes,
+        bool shouldTestMinBound = true,
+        bool shouldTestMaxBound = true )
     {
         this.DisplayMinValue = displayMin;
         this.DisplayMaxValue = displayMax;
@@ -100,6 +95,8 @@ public class RangeAttribute : ContractAspect
         this._minDecimal = minDecimal;
         this._maxDecimal = maxDecimal;
         this._invalidTypes = invalidTypes;
+        this._shouldTestMinBound = shouldTestMinBound;
+        this._shouldTestMaxBound = shouldTestMaxBound;
     }
 
     /// <summary>
@@ -125,6 +122,9 @@ public class RangeAttribute : ContractAspect
         this._maxDecimal = max;
 
         this._invalidTypes = GetInvalidTypes( min, max );
+
+        this._shouldTestMinBound = true;
+        this._shouldTestMaxBound = true;
     }
 
     /// <summary>
@@ -150,6 +150,9 @@ public class RangeAttribute : ContractAspect
         this._maxDecimal = max;
 
         this._invalidTypes = GetInvalidTypes( min );
+
+        this._shouldTestMinBound = true;
+        this._shouldTestMaxBound = true;
     }
 
     /// <summary>
@@ -175,6 +178,9 @@ public class RangeAttribute : ContractAspect
         this._maxUInt64 = ConvertDoubleToUInt64( max );
 
         this._invalidTypes = GetInvalidTypes( min, max );
+
+        this._shouldTestMinBound = true;
+        this._shouldTestMaxBound = true;
     }
 
     internal static TypeFlag GetInvalidTypes( long min, long max )
@@ -561,8 +567,8 @@ public class RangeAttribute : ContractAspect
         else
         {
             var (min, max) = this.GetMinAndMaxExpressions( basicType.SpecialType );
-            var testMin = this.ShouldTestMinBound;
-            var testMax = this.ShouldTestMaxBound;
+            var testMin = this._shouldTestMinBound;
+            var testMax = this._shouldTestMaxBound;
 
             if ( isNullable )
             {

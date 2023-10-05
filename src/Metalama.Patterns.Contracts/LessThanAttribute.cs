@@ -37,7 +37,8 @@ public class LessThanAttribute : RangeAttribute
             max,
             decimal.MinValue,
             max,
-            GetInvalidTypes( long.MinValue, max ) ) { }
+            GetInvalidTypes( long.MinValue, max ),
+            shouldTestMinBound: false ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying an unsigned integer bound.
@@ -55,7 +56,8 @@ public class LessThanAttribute : RangeAttribute
             max,
             decimal.MinValue,
             max,
-            GetInvalidTypes( ulong.MinValue ) ) { }
+            GetInvalidTypes( ulong.MinValue ),
+            shouldTestMinBound: false ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a floating-point bound.
@@ -73,9 +75,8 @@ public class LessThanAttribute : RangeAttribute
             max,
             decimal.MinValue,
             DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes( double.MinValue, max ) ) { }
-
-    protected override bool ShouldTestMinBound => false;
+            GetInvalidTypes( double.MinValue, max ),
+            shouldTestMinBound: false ) { }
 
     private static class DoubleMaximum
     {
