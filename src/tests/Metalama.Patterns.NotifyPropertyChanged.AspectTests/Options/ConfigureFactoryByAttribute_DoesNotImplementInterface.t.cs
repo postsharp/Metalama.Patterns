@@ -1,0 +1,1 @@
+// Error LAMA5159 on `ConfigureFactoryByAttribute_DoesNotImplementInterface`: `The type specified for ImplementationStrategyFactoryType must implement IImplementationStrategyFactory.`
