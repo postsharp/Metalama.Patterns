@@ -251,7 +251,7 @@ public sealed class RangeAttributeTests
 
         long? p = 1;
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>(
+        var e = TestHelpers.RecordException<PostconditionViolationException>(
             () =>
                 cut.ZeroToTenNullableIntRef( -1, ref p ) );
 
@@ -264,7 +264,7 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>(
+        var e = TestHelpers.RecordException<PostconditionViolationException>(
             () =>
                 cut.ZeroToTenNullableIntOut( -1, out _ ) );
 
@@ -277,7 +277,7 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
+        var e = TestHelpers.RecordException<PostconditionViolationException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
 
         Assert.NotNull( e );
         Assert.Contains( "return value", e!.Message, StringComparison.Ordinal );

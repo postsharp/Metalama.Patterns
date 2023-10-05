@@ -1,0 +1,27 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Fabrics;
+using Metalama.Patterns.Contracts;
+
+namespace Metalama.Patterns.Contracts.AspectTests.DisablePostconditions;
+
+public class C
+{
+    [NotEmpty( Direction = ContractDirection.Both )]
+    public string P { get; set; } = "x";
+
+    public void M( [NotEmpty] string a, [NotEmpty] out string b )
+    {
+        b = "b";
+    }
+
+}
+
+public class Fabric : ProjectFabric
+{
+    public override void AmendProject( IProjectAmender amender )
+    {
+        amender.Outbound.SetOptions( new ContractOptions { ArePostconditionsEnabled = false } );
+    }
+}

@@ -3,6 +3,8 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Fabrics;
+using System.Diagnostics;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -16,6 +18,36 @@ public abstract class ContractBaseAttribute : ContractAspect, IConditionallyInhe
 {
     private readonly bool? _isInheritable;
     private readonly ContractDirection? _direction;
+
+    protected override ContractDirection GetDefinedDirection( IAspectBuilder builder )
+        => this._direction ??
+           builder.Target.GetContractOptions().Direction ?? ContractDirection.Default;
+
+    protected override ContractDirection GetActualDirection( IAspectBuilder builder, ContractDirection direction )
+    {
+        var options = builder.Target.GetContractOptions();
+        
+        switch ( direction )
+        {
+            case ContractDirection.Input when options.ArePreconditionsEnabled == false:
+                return ContractDirection.None;
+
+            case ContractDirection.Output when options.ArePostconditionsEnabled == false:
+                return ContractDirection.None;
+
+            case ContractDirection.Both when options is { ArePreconditionsEnabled: false, ArePostconditionsEnabled: false }:
+                return ContractDirection.None;
+
+            case ContractDirection.Both when options.ArePostconditionsEnabled == false:
+                return ContractDirection.Input;
+
+            case ContractDirection.Both when options.ArePreconditionsEnabled == false:
+                return ContractDirection.Output;
+
+            default:
+                return direction;
+        }
+    }
 
     /// <summary>
     /// Gets or sets the direction of the contract. When this property is not set, its
@@ -38,10 +70,6 @@ public abstract class ContractBaseAttribute : ContractAspect, IConditionallyInhe
         get => this._isInheritable ?? true;
         init => this._isInheritable = value;
     }
-
-    protected override ContractDirection GetDirection( IAspectBuilder builder )
-        => this._direction ??
-           builder.Target.GetContractOptions().Direction ?? ContractDirection.Default;
 
     bool IConditionallyInheritableAspect.IsInheritable( IDeclaration targetDeclaration, IAspectInstance aspectInstance )
         => this._isInheritable ?? targetDeclaration.GetContractOptions().IsInheritable ?? true;

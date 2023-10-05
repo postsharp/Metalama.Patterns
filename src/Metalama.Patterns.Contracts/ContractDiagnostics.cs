@@ -32,4 +32,18 @@ internal static class ContractDiagnostics
             "The [{1}] contract is redundant because the [NotNull] contract is automatically added by a fabric.",
             $"The non-nullable contract is redundant because it is automatically added by a fabric.",
             "Metalama.Patterns.Contracts" );
+
+    public static DiagnosticDefinition<(IMethod Method, INamedType Type)> SuspensionNotSupported { get; }
+        = new(
+            "LAMA5004",
+            Severity.Error,
+            $"The [{nameof(SuspendInvariantsAttribute)}] aspect cannot be applied to method '{{0}}' because the {nameof(ContractOptions.SupportsInvariantSuspension)} option is not set for the type '{{1}}'.",
+            $"The [${nameof(SuspendInvariantsAttribute)}] aspect cannot be applied to the method because the {nameof(ContractOptions.SupportsInvariantSuspension)} option is not set for the its declaring type." );
+
+    public static DiagnosticDefinition<(IMethod Method, INamedType Type)> SuspensionRedundant { get; }
+        = new(
+            "LAMA5005",
+            Severity.Warning,
+            $"The [{nameof(SuspendInvariantsAttribute)}] aspect on method '{{0}}' is redundant the type '{{1}}' does not contain any invariants.",
+            $"The [${nameof(SuspendInvariantsAttribute)}] aspect is redundant because the type does not contain any invariants." );
 }

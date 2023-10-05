@@ -33,12 +33,29 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
     /// property of the aspect class.
     /// </summary>
     public ContractDirection? Direction { get; init; }
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether the LAMA5002 warning should be reported when attempting to add a <see cref="NotNullAttribute"/> or
     /// <see cref="RequiredAttribute"/> contract on a nullable parameter, field or property. This option is <c>true</c> by default.
     /// </summary>
     public bool? WarnOnNotNullableOnNullable { get; init; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether precondition contracts are being enforced. This option is <c>true</c> by default.
+    /// </summary>
+    public bool? ArePreconditionsEnabled { get; init; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether postcondition contracts are being enforced. This option is <c>true</c> by default.
+    /// </summary>
+    public bool? ArePostconditionsEnabled { get; init; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether invariants are being enforced. This option is <c>true</c> by default.
+    /// </summary>
+    public bool? AreInvariantsEnabled { get; init; }
+
+    public bool? SupportsInvariantSuspension { get; init; }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
@@ -49,10 +66,14 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
             Templates = other.Templates ?? this.Templates,
             IsInheritable = other.IsInheritable ?? this.IsInheritable,
             Direction = other.Direction ?? this.Direction,
-            WarnOnNotNullableOnNullable = other.WarnOnNotNullableOnNullable ?? this.WarnOnNotNullableOnNullable
+            WarnOnNotNullableOnNullable = other.WarnOnNotNullableOnNullable ?? this.WarnOnNotNullableOnNullable,
+            AreInvariantsEnabled = other.AreInvariantsEnabled ?? this.AreInvariantsEnabled,
+            ArePostconditionsEnabled = other.ArePostconditionsEnabled ?? this.ArePostconditionsEnabled,
+            ArePreconditionsEnabled = other.ArePreconditionsEnabled ?? this.ArePreconditionsEnabled,
+            SupportsInvariantSuspension = other.SupportsInvariantSuspension ?? this.SupportsInvariantSuspension
         };
     }
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new ContractOptions { Templates = new ContractTemplates(), IsInheritable = true };
+        => new ContractOptions { Templates = new ContractTemplates() };
 }

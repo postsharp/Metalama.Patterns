@@ -7,8 +7,7 @@ using Metalama.Framework.CodeFixes;
 
 namespace Metalama.Patterns.Contracts;
 
-[CompileTime]
-[PublicAPI]
+[CompileTime, PublicAPI]
 public static class ContractExtensions
 {
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<ICompilation> compilation, bool includeInternalApis = false )
@@ -89,11 +88,18 @@ public static class ContractExtensions
 
     public static ContractOptions GetContractOptions( this IMetaTarget target ) => target.Declaration.GetContractOptions();
 
+    public static ContractOptions GetContractOptions( this IMethod declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
+    public static ContractOptions GetContractOptions( this INamedType declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
+    public static ContractOptions GetContractOptions( this IFieldOrPropertyOrIndexer declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
+    public static ContractOptions GetContractOptions( this IParameter declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
+    
     public static ContractOptions GetContractOptions( this IDeclaration declaration )
         => declaration switch
         {
             IParameter parameter => parameter.Enhancements().GetOptions<ContractOptions>(),
             IFieldOrPropertyOrIndexer field => field.Enhancements().GetOptions<ContractOptions>(),
+            INamedType namedType => namedType.Enhancements().GetOptions<ContractOptions>(),
+            IMethod method => method.Enhancements().GetOptions<ContractOptions>(),
             _ => throw new ArgumentOutOfRangeException()
         };
 }

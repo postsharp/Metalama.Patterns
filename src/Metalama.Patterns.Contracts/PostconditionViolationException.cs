@@ -8,34 +8,34 @@ namespace Metalama.Patterns.Contracts;
 /// The exception that is thrown when a postcondition contract was not fulfilled by a method.
 /// </summary>
 [Serializable]
-public class PostconditionFailedException : Exception
+public class PostconditionViolationException : ApplicationException
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="PostconditionFailedException"/> class.
+    /// Initializes a new instance of the <see cref="PostconditionViolationException"/> class.
     /// </summary>
-    public PostconditionFailedException() { }
+    public PostconditionViolationException() { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PostconditionFailedException"/> class with a specified error message.
+    /// Initializes a new instance of the <see cref="PostconditionViolationException"/> class with a specified error message.
     /// </summary>
     /// <param name="message">Exception message.</param>
-    public PostconditionFailedException( string message )
+    public PostconditionViolationException( string message )
         : base( message ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PostconditionFailedException"/> class with a specified error message
+    /// Initializes a new instance of the <see cref="PostconditionViolationException"/> class with a specified error message
     /// and a reference to the inner exception that is the cause of this exception.
     /// </summary>
     /// <param name="message">Exception message.</param>
     /// <param name="innerException">Inner exception.</param>
-    public PostconditionFailedException( string message, Exception innerException )
+    public PostconditionViolationException( string message, Exception innerException )
         : base( message, innerException ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PostconditionFailedException"/> class with serialized data.
+    /// Initializes a new instance of the <see cref="PostconditionViolationException"/> class with serialized data.
     /// </summary>
     /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
     /// <param name="context">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
-    protected PostconditionFailedException( SerializationInfo info, StreamingContext context )
+    protected PostconditionViolationException( SerializationInfo info, StreamingContext context )
         : base( info, context ) { }
 }
