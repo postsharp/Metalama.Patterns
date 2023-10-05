@@ -11,39 +11,39 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     public AsyncEnumerableTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
     [Fact]
-    public void DoesNotIterateOnUnawaitedMethod()
+    public void DoesNotBlockOnUnawaitedMethod()
     {
-        _ = this.Instance.CachedEnumerable();
+        _ = this.Instance.BlockedCachedEnumerable();
 
-        Assert.Equal( "E1", this.StringBuilder.ToString() );
+        // Success is indicated by this method completing.
     }
 
     [Fact]
-    public void DoesNotIterateOnGetAsyncEnumerator()
+    public void DoesNotBlockOnGetAsyncEnumerator()
     {
-        _ = this.Instance.CachedEnumerable().GetAsyncEnumerator();
+        _ = this.Instance.BlockedCachedEnumerable().GetAsyncEnumerator();
 
-        Assert.Equal( "E1", this.StringBuilder.ToString() );
+        // Success is indicated by this method completing.
     }
 
     [Fact]
-    public void DoesNotIterateOnUnawaitedFirstMoveNextAsync()
+    public void DoesNotBlockOnUnawaitedFirstMoveNextAsync()
     {
-        _ = this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
+        _ = this.Instance.BlockedCachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
 
-        Assert.Equal( "E1", this.StringBuilder.ToString() );
+        // Success is indicated by this method completing.
     }
 
     [Fact]
     public async void IteratesCompletelyOnFirstAwaitedMoveNextAsync()
     {
         _ = await this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
-
-        Assert.Equal( "E1.E2.E3.E4", this.StringBuilder.ToString() );
+        
+        Assert.Equal( "E1.E2.E3", this.StringBuilder.ToString() );
     }
 
     [Fact]
-    public async void DoesNotIteratesOnSecondAwaitedMoveNextAsync()
+    public async void DoesNotIterateOnSecondAwaitedMoveNextAsync()
     {
         _ = await this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
         this.StringBuilder.Clear();
@@ -57,7 +57,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     {
         await this.Iterate( this.Instance.CachedEnumerable().GetAsyncEnumerator() );
 
-        Assert.Equal( "E1.I1.E2.E3.E4.I2[42].I2[99].I3", this.StringBuilder.ToString() );
+        Assert.Equal( "E1.E2.E3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
         await this.Iterate( this.Instance.CachedEnumerable().GetAsyncEnumerator() );
         await this.Iterate( this.Instance.CachedEnumerable().GetAsyncEnumerator() );
 
-        Assert.Equal( "E1.I1.E2.E3.E4.I2[42].I2[99].I3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );
+        Assert.Equal( "E1.E2.E3.I1.I2[42].I2[99].I3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
         // ReSharper disable once PossibleMultipleEnumeration
         await this.Iterate( seq.GetAsyncEnumerator() );
 
-        Assert.Equal( "E1.I1.E2.E3.E4.I2[42].I2[99].I3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );
+        Assert.Equal( "E1.E2.E3.I1.I2[42].I2[99].I3.I1.I2[42].I2[99].I3", this.StringBuilder.ToString() );
     }
 }
 
