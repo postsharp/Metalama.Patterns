@@ -14,14 +14,14 @@ namespace Metalama.Patterns.Contracts;
 /// throw an exception.
 /// </summary>
 [PublicAPI]
-public sealed class EmailAddressAttribute : RegularExpressionBaseAttribute
+public sealed class EmailAttribute : RegularExpressionBaseAttribute
 {
     protected override IExpression GetRegex()
     {
         var builder = new ExpressionBuilder();
         builder.AppendTypeName( typeof(ContractHelpers) );
         builder.AppendVerbatim( "." );
-        builder.AppendVerbatim( nameof(ContractHelpers.EmailAddressRegex) );
+        builder.AppendVerbatim( nameof(ContractHelpers.EmailRegex) );
 
         return builder.ToExpression();
     }

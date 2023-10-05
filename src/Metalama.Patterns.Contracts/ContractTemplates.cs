@@ -9,18 +9,22 @@ namespace Metalama.Patterns.Contracts;
 [PublicAPI]
 public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
 {
+    [CompileTime]
+    protected static string TargetParameterName => meta.Target.GetTargetParameterName();
+
+    [CompileTime]
+    protected static string TargetDisplayName => meta.Target.GetTargetDisplayName();
+
     [Template]
     public virtual void OnCreditCardContractViolated( dynamic? value )
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be a valid credit card number." );
+            throw new ArgumentException( $"The {TargetDisplayName} must be a valid credit card number.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be a valid credit card number." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be a valid credit card number." );
         }
     }
 
@@ -30,13 +34,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be a valid {meta.Target.GetTargetType().ToDisplayString()}." );
+                $"The {TargetDisplayName} must be a valid {meta.Target.GetTargetType().ToDisplayString()}.",
+                TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException(
-                $"The {meta.Target.GetTargetDisplayName()} must be a valid {meta.Target.GetTargetType().ToDisplayString()}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be a valid {meta.Target.GetTargetType().ToDisplayString()}." );
         }
     }
 
@@ -46,12 +49,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must not be null or empty." );
+                $"The {TargetDisplayName} must not be null or empty.",
+                TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must not be null or empty." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must not be null or empty." );
         }
     }
 
@@ -61,12 +64,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentNullException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must not be null." );
+                TargetParameterName,
+                $"The {TargetDisplayName} must not be null." );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must not be null." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must not be null." );
         }
     }
 
@@ -75,13 +78,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must match the regular expression '{pattern}'." );
+            throw new ArgumentException( $"The {TargetDisplayName} must match the regular expression '{pattern}'.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must match the regular expression '{pattern}'." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must match the regular expression '{pattern}'." );
         }
     }
 
@@ -90,13 +91,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be a valid phone number." );
+            throw new ArgumentException( $"The {TargetDisplayName} must be a valid phone number.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be a valid phone number." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be a valid phone number." );
         }
     }
 
@@ -105,13 +104,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be a valid email address." );
+            throw new ArgumentException( $"The {TargetDisplayName} must be a valid email address.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be a valid email address." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be a valid email address." );
         }
     }
 
@@ -120,13 +117,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be a valid URL." );
+            throw new ArgumentException( $"The {TargetDisplayName} must be a valid URL.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be a valid URL." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be a valid URL." );
         }
     }
 
@@ -135,13 +130,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The  {meta.Target.GetTargetDisplayName()} must be a string with a maximum length of {maximumLength}." );
+            throw new ArgumentException( $"The  {TargetDisplayName} must be a string with a maximum length of {maximumLength}.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The  {meta.Target.GetTargetDisplayName()} must be a string with a maximum length of {maximumLength}." );
+            throw new PostconditionViolationException( $"The  {TargetDisplayName} must be a string with a maximum length of {maximumLength}." );
         }
     }
 
@@ -150,13 +143,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The  {meta.Target.GetTargetDisplayName()} must be a string with a minimum length of {minimumLength}." );
+            throw new ArgumentException( $"The  {TargetDisplayName} must be a string with a minimum length of {minimumLength}.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The  {meta.Target.GetTargetDisplayName()} must be a string with a minimum length of {minimumLength}." );
+            throw new PostconditionViolationException( $"The  {TargetDisplayName} must be a string with a minimum length of {minimumLength}." );
         }
     }
 
@@ -166,13 +157,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentException(
-                meta.Target.GetTargetParameterName(),
-                $"The  {meta.Target.GetTargetDisplayName()} must be a string with length between {minimumLength} and {maximumLength}." );
+                $"The  {TargetDisplayName} must be a string with length between {minimumLength} and {maximumLength}.",
+                TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException(
-                $"The  {meta.Target.GetTargetDisplayName()} must be a string with length between {minimumLength} and {maximumLength}." );
+            throw new PostconditionViolationException( $"The  {TargetDisplayName} must be a string with length between {minimumLength} and {maximumLength}." );
         }
     }
 
@@ -181,13 +171,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentOutOfRangeException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be between {minValue} and {maxValue}." );
+            throw new ArgumentOutOfRangeException( $"The {TargetDisplayName} must be between {minValue} and {maxValue}.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be between {minValue} and {maxValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be between {minValue} and {maxValue}." );
         }
     }
 
@@ -197,12 +185,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be greater than {minValue}." );
+                TargetParameterName,
+                $"The {TargetDisplayName} must be greater than {minValue}." );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be greater than {minValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be greater than {minValue}." );
         }
     }
 
@@ -212,12 +200,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be less than {maxValue}." );
+                TargetParameterName,
+                $"The {TargetDisplayName} must be less than {maxValue}." );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be less than {maxValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be less than {maxValue}." );
         }
     }
 
@@ -227,12 +215,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be strictly greater than {minValue}." );
+                TargetParameterName,
+                $"The {TargetDisplayName} must be strictly greater than {minValue}." );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be strictly greater than {minValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be strictly greater than {minValue}." );
         }
     }
 
@@ -242,12 +230,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be strictly less than {maxValue}." );
+                TargetParameterName,
+                $"The {TargetDisplayName} must be strictly less than {maxValue}." );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be strictly less than {maxValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be strictly less than {maxValue}." );
         }
     }
 
@@ -257,12 +245,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} must be strictly between {minValue} and {maxValue}." );
+                TargetParameterName,
+                $"The {TargetDisplayName} must be strictly between {minValue} and {maxValue}." );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} must be strictly between {minValue} and {maxValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be strictly between {minValue} and {maxValue}." );
         }
     }
 
@@ -271,11 +259,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentNullException( meta.Target.GetTargetParameterName(), $"The {meta.Target.GetTargetDisplayName()} is required." );
+            throw new ArgumentNullException( TargetParameterName, $"The {TargetDisplayName} is required." );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} is required." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} is required." );
         }
     }
 
@@ -285,12 +273,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
-                meta.Target.GetTargetParameterName(),
-                $"The {meta.Target.GetTargetDisplayName()} is required." );
+                TargetParameterName,
+                $"The {TargetDisplayName} is required." );
         }
         else
         {
-            throw new PostconditionFailedException( $"The {meta.Target.GetTargetDisplayName()} is required." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} is required." );
         }
     }
 }

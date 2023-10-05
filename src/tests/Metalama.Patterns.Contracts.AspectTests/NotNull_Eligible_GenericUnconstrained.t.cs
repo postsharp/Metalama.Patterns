@@ -1,3 +1,4 @@
+using System;
 namespace Metalama.Patterns.Contracts.AspectTests;
 public class NotNull_Eligible_GenericUnconstrained
 {
@@ -5,7 +6,7 @@ public class NotNull_Eligible_GenericUnconstrained
   {
     if (x == null !)
     {
-      throw new global::System.ArgumentNullException("x", "The 'x' parameter must not be null.");
+      throw new ArgumentNullException("x", "The 'x' parameter must not be null.");
     }
   }
 }
