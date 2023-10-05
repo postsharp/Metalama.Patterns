@@ -39,7 +39,7 @@ public abstract class ContractBaseAttribute : ContractAspect, IConditionallyInhe
         init => this._isInheritable = value;
     }
 
-    protected override ContractDirection GetDirection( IAspectBuilder builder )
+    protected override ContractDirection GetDefinedDirection( IAspectBuilder builder )
         => this._direction ??
            builder.Target.GetContractOptions().Direction ?? ContractDirection.Default;
 
