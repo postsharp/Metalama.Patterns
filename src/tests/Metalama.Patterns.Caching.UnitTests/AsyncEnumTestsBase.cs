@@ -24,6 +24,7 @@ public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
 
     public void Dispose()
     {
+        this.Instance.FinishBlockingTask();
         TestProfileConfigurationFactory.DisposeTest();
         this.TestOutputHelper.WriteLine( this.StringBuilder.ToString() );
     }
@@ -60,11 +61,36 @@ public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
             this._log = log;
         }
 
+        private readonly TaskCompletionSource _blockingTask = new();
+
+        public void FinishBlockingTask()
+        {
+            this._blockingTask.TrySetResult();
+        }
+
         [Cache( IgnoreThisParameter = true )]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async IAsyncEnumerable<int> CachedEnumerable()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             this._log( "E1" );
-            await Task.Delay( 1 );
+
+            yield return 42;
+
+            this._log( "E2" );
+
+            yield return 99;
+
+            this._log( "E3" );
+        }
+
+        [Cache( IgnoreThisParameter = true )]
+        public async IAsyncEnumerable<int> BlockedCachedEnumerable()
+        {
+            this._log( "E1" );
+
+            await this._blockingTask.Task;
+
             this._log( "E2" );
 
             yield return 42;
@@ -77,10 +103,28 @@ public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
         }
 
         [Cache( IgnoreThisParameter = true )]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async IAsyncEnumerator<int> CachedEnumerator()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             this._log( "E1" );
-            await Task.Delay( 1 );
+
+            yield return 42;
+
+            this._log( "E2" );
+
+            yield return 99;
+
+            this._log( "E3" );
+        }
+
+        [Cache( IgnoreThisParameter = true )]
+        public async IAsyncEnumerator<int> BlockedCachedEnumerator()
+        {
+            this._log( "E1" );
+
+            await this._blockingTask.Task;
+
             this._log( "E2" );
 
             yield return 42;
