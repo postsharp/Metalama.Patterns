@@ -12,5 +12,4 @@ using Metalama.Patterns.Contracts;
     typeof(PhoneAttribute),
     typeof(EmailAddressAttribute),
     typeof(UrlAttribute),
-    typeof(CreditCardAttribute)
-    )]
+    typeof(CreditCardAttribute) )]
