@@ -6,6 +6,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
 #pragma warning disable CA1001
+#pragma warning disable CS0628 // New protected member declared in sealed type
+#pragma warning disable CA1822
 
 namespace Metalama.Patterns.Contracts;
 
@@ -17,8 +19,8 @@ internal sealed class CheckInvariantsAspect : IAspect<INamedType>
     public void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         var contractOptions = builder.Target.GetContractOptions();
-        
-        var supportsInvariantSuspension = contractOptions.SupportsInvariantSuspension == true;
+
+        var enableInvariantSuspensionSupport = contractOptions.IsInvariantSuspensionSupported == true;
 
         // Override methods.
         var setters = builder.Target.Properties.Where( x => x.SetMethod != null )
@@ -39,12 +41,12 @@ internal sealed class CheckInvariantsAspect : IAspect<INamedType>
 
         foreach ( var method in methodsToOverride )
         {
-            builder.Advice.Override( method, nameof(OverrideMethod), args: new { supportsInvariantSuspension } );
+            builder.Advice.Override( method, nameof(OverrideMethod), args: new { EnableInvariantSuspensionSupport = enableInvariantSuspensionSupport } );
         }
 
         // Add support for dynamic suspension of invariants.
 
-        if ( supportsInvariantSuspension )
+        if ( enableInvariantSuspensionSupport )
         {
             if ( !builder.Target.AllMethods.OfName( nameof(this.SuspendInvariants) ).Any() )
             {
@@ -56,7 +58,7 @@ internal sealed class CheckInvariantsAspect : IAspect<INamedType>
     }
 
     [Template]
-    private InvariantSuspensionCounter _invariantSuspensionCounter = new();
+    private readonly InvariantSuspensionCounter _invariantSuspensionCounter = new();
 
     [Template]
     protected IDisposable SuspendInvariants( IField counterField )
@@ -73,7 +75,7 @@ internal sealed class CheckInvariantsAspect : IAspect<INamedType>
     }
 
     [Template]
-    private static dynamic? OverrideMethod( [CompileTime] bool supportsInvariantSuspension )
+    private static dynamic? OverrideMethod( [CompileTime] bool enableInvariantSuspensionSupport )
     {
         try
         {
@@ -81,7 +83,7 @@ internal sealed class CheckInvariantsAspect : IAspect<INamedType>
         }
         finally
         {
-            if ( supportsInvariantSuspension )
+            if ( enableInvariantSuspensionSupport )
             {
                 if ( !meta.This.AreInvariantsSuspended() )
                 {

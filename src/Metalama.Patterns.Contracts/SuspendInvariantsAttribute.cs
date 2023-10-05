@@ -20,9 +20,9 @@ public sealed class SuspendInvariantsAttribute : OverrideMethodAspect
         }
 
         // Report an error if invariant suspension is not supported for this type.
-        var supportsInvariantSuspension = contractOptions.SupportsInvariantSuspension == true;
+        var enableInvariantSuspensionSupport = contractOptions.IsInvariantSuspensionSupported == true;
 
-        if ( !supportsInvariantSuspension )
+        if ( !enableInvariantSuspensionSupport )
         {
             builder.Diagnostics.Report( ContractDiagnostics.SuspensionNotSupported.WithArguments( (builder.Target, builder.Target.DeclaringType) ) );
 

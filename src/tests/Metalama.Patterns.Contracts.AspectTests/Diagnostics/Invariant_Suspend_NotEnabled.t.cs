@@ -1,1 +1,1 @@
-// Error LAMA5004 on `ExecuteWithoutInvariants`: `The [SuspendInvariantsAttribute] aspect cannot be applied to method 'BaseClass.ExecuteWithoutInvariants()' because the SupportsInvariantSuspension option is not set for the type 'BaseClass'.`
+// Error LAMA5004 on `ExecuteWithoutInvariants`: `The [SuspendInvariantsAttribute] aspect cannot be applied to method 'BaseClass.ExecuteWithoutInvariants()' because the EnableInvariantSuspensionSupport option is not set for the type 'BaseClass'.`

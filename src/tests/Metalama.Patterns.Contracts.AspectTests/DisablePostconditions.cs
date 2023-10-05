@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Contracts;
 
 namespace Metalama.Patterns.Contracts.AspectTests.DisablePostconditions;
 
@@ -15,7 +14,6 @@ public class C
     {
         b = "b";
     }
-
 }
 
 public class Fabric : ProjectFabric

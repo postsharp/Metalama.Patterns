@@ -7,7 +7,8 @@ using Metalama.Framework.CodeFixes;
 
 namespace Metalama.Patterns.Contracts;
 
-[CompileTime, PublicAPI]
+[CompileTime]
+[PublicAPI]
 public static class ContractExtensions
 {
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<ICompilation> compilation, bool includeInternalApis = false )
@@ -55,7 +56,8 @@ public static class ContractExtensions
             .RequireAspect<NotNullAttribute>();
 
         // Add aspects to method parameters.
-        var parameters = types.SelectMany( t => t.Methods )
+        var parameters = types
+            .SelectMany( t => t.Methods.Cast<IMethodBase>().Concat( t.Constructors ) )
             .Where( IsVisible )
             .SelectMany( t => t.Parameters )
             .Where( IsNullableType );
