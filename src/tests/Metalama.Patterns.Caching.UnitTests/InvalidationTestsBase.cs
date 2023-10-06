@@ -39,71 +39,64 @@ namespace Metalama.Patterns.Caching.Tests
             bool othersShouldWork,
             bool onlyPairsShouldWork = false )
         {
-            this.InitializeTestWithCachingBackend( profileName );
+            using var context = this.InitializeTestWithCachingBackend( profileName );
             TestProfileConfigurationFactory.CreateProfile( profileName );
 
-            try
+            Assert.Equal( cachedMethods.Length, invalidatingMethods.Length );
+
+            var cachedMethodValuesBeforeInvalidation = new CachedValueClass[cachedMethods.Length];
+
+            for ( var testedPairIndex = 0; testedPairIndex < cachedMethods.Length; testedPairIndex++ )
             {
-                Assert.Equal( cachedMethods.Length, invalidatingMethods.Length );
-
-                var cachedMethodValuesBeforeInvalidation = new CachedValueClass[cachedMethods.Length];
-
-                for ( var testedPairIndex = 0; testedPairIndex < cachedMethods.Length; testedPairIndex++ )
+                for ( var cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
                 {
-                    for ( var cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
+                    cachedMethodValuesBeforeInvalidation[cachedMethodIndex] =
+                        cachedMethods[cachedMethodIndex].Invoke();
+                }
+
+                var valueDuringInvalidation =
+                    invalidatingMethods[testedPairIndex].Invoke();
+
+                AssertEx.Equal(
+                    cachedMethodValuesBeforeInvalidation[testedPairIndex],
+                    valueDuringInvalidation,
+                    $"{testDescription}: The value during invalidation of the invalidated method #{testedPairIndex} is different than the cached one when invalidating by the method #{testedPairIndex}." );
+
+                for ( var cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
+                {
+                    var cachedMethodValueAfterInvalidation =
+                        cachedMethods[cachedMethodIndex].Invoke();
+
+                    bool shouldBeInvalidated;
+
+                    if ( onlyPairsShouldWork )
                     {
-                        cachedMethodValuesBeforeInvalidation[cachedMethodIndex] =
-                            cachedMethods[cachedMethodIndex].Invoke();
+                        shouldBeInvalidated = cachedMethodIndex == testedPairIndex
+                                              && ((firstShouldWork && testedPairIndex == 0)
+                                                  || (othersShouldWork && testedPairIndex > 0));
+                    }
+                    else
+                    {
+                        shouldBeInvalidated = cachedMethodIndex <= testedPairIndex
+                                              && ((firstShouldWork && cachedMethodIndex == 0)
+                                                  || (othersShouldWork && cachedMethodIndex > 0));
                     }
 
-                    var valueDuringInvalidation =
-                        invalidatingMethods[testedPairIndex].Invoke();
-
-                    AssertEx.Equal(
-                        cachedMethodValuesBeforeInvalidation[testedPairIndex],
-                        valueDuringInvalidation,
-                        $"{testDescription}: The value during invalidation of the invalidated method #{testedPairIndex} is different than the cached one when invalidating by the method #{testedPairIndex}." );
-
-                    for ( var cachedMethodIndex = 0; cachedMethodIndex < cachedMethods.Length; cachedMethodIndex++ )
+                    if ( shouldBeInvalidated )
                     {
-                        var cachedMethodValueAfterInvalidation =
-                            cachedMethods[cachedMethodIndex].Invoke();
-
-                        bool shouldBeInvalidated;
-
-                        if ( onlyPairsShouldWork )
-                        {
-                            shouldBeInvalidated = cachedMethodIndex == testedPairIndex
-                                                  && ((firstShouldWork && testedPairIndex == 0)
-                                                      || (othersShouldWork && testedPairIndex > 0));
-                        }
-                        else
-                        {
-                            shouldBeInvalidated = cachedMethodIndex <= testedPairIndex
-                                                  && ((firstShouldWork && cachedMethodIndex == 0)
-                                                      || (othersShouldWork && cachedMethodIndex > 0));
-                        }
-
-                        if ( shouldBeInvalidated )
-                        {
-                            AssertEx.NotEqual(
-                                cachedMethodValuesBeforeInvalidation[cachedMethodIndex],
-                                cachedMethodValueAfterInvalidation,
-                                $"{testDescription}: The value after invalidation of the invalidated method #{cachedMethodIndex} is the same as the cached one when invalidating by the method #{testedPairIndex}." );
-                        }
-                        else
-                        {
-                            AssertEx.Equal(
-                                cachedMethodValuesBeforeInvalidation[cachedMethodIndex],
-                                cachedMethodValueAfterInvalidation,
-                                $"{testDescription}: The value after invalidation of the not invalidated method #{cachedMethodIndex} is different than the cached one when invalidating by the method #{testedPairIndex}." );
-                        }
+                        AssertEx.NotEqual(
+                            cachedMethodValuesBeforeInvalidation[cachedMethodIndex],
+                            cachedMethodValueAfterInvalidation,
+                            $"{testDescription}: The value after invalidation of the invalidated method #{cachedMethodIndex} is the same as the cached one when invalidating by the method #{testedPairIndex}." );
+                    }
+                    else
+                    {
+                        AssertEx.Equal(
+                            cachedMethodValuesBeforeInvalidation[cachedMethodIndex],
+                            cachedMethodValueAfterInvalidation,
+                            $"{testDescription}: The value after invalidation of the not invalidated method #{cachedMethodIndex} is different than the cached one when invalidating by the method #{testedPairIndex}." );
                     }
                 }
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
             }
         }
 

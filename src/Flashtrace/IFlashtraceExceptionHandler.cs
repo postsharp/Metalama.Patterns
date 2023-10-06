@@ -7,11 +7,11 @@ namespace Flashtrace;
 
 /// <summary>
 /// Defines methods called in case of exception in logging infrastructure classes. This interface
-/// can be implemented by any class implementing the <see cref="ILogger"/> interface.
-/// When an <see cref="ILogger"/> does not implement this interface, logging exceptions are silently ignored.
+/// can be implemented by any class implementing the <see cref="IFlashtraceLogger"/> interface.
+/// When an <see cref="IFlashtraceLogger"/> does not implement this interface, logging exceptions are silently ignored.
 /// </summary>
 [PublicAPI]
-public interface ILoggerExceptionHandler
+public interface IFlashtraceExceptionHandler
 {
     /// <summary>
     /// Method invoked when the user code calling a logging infrastructure method is invalid, e.g. when the formatting string

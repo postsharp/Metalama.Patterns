@@ -20,7 +20,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 [PublicAPI] // Comments above indicate use case.
 public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingComponent
 {
-    private readonly LogSource _logger;
+    private readonly FlashtraceSource _logger;
     private RedisKeyBuilder _keyBuilder = null!; // "Guaranteed" to be initialized via Init et al.
 
     internal RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
@@ -37,7 +37,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
         this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration );
         this._ownsBackend = true;
-        this._logger = configuration.ServiceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
+        this._logger = configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
     }
 
     private RedisCacheDependencyGarbageCollector( DependenciesRedisCachingBackend backend )
@@ -46,7 +46,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         this.Database = backend.Database;
         this._backend = backend;
         this._ownsBackend = false;
-        this._logger = backend.Configuration.ServiceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
+        this._logger = backend.Configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
     }
 
     /// <summary>

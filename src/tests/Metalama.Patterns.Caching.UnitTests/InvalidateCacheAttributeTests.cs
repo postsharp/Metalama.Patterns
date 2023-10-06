@@ -1750,22 +1750,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedContexts()
         {
-            this.InitializeTestWithCachingBackend( _testNestedContextsProfileName );
+            using var context = this.InitializeTestWithCachingBackend( _testNestedContextsProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testNestedContextsProfileName );
 
-            try
-            {
-                var c = new TestNestedContextsClass();
-                var call1 = c.OuterMethod();
-                c.InvalidateInnerMethod();
-                var call2 = c.OuterMethod();
+            var c = new TestNestedContextsClass();
+            var call1 = c.OuterMethod();
+            c.InvalidateInnerMethod();
+            var call2 = c.OuterMethod();
 
-                Assert.NotEqual( call1, call2 );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.NotEqual( call1, call2 );
         }
 
         #endregion TestNestedContexts
@@ -1802,22 +1795,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestNestedContextsAsync()
         {
-            this.InitializeTestWithCachingBackend( _testNestedContextsAsyncProfileName );
+            await using var context = this.InitializeTestWithCachingBackend( _testNestedContextsAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testNestedContextsAsyncProfileName );
 
-            try
-            {
-                var c = new TestNestedContextsAsyncClass();
-                var call1 = await c.OuterMethodAsync();
-                await c.InvalidateInnerMethodAsync();
-                var call2 = await c.OuterMethodAsync();
+            var c = new TestNestedContextsAsyncClass();
+            var call1 = await c.OuterMethodAsync();
+            await c.InvalidateInnerMethodAsync();
+            var call2 = await c.OuterMethodAsync();
 
-                Assert.NotEqual( call1, call2 );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            Assert.NotEqual( call1, call2 );
         }
 
         #endregion TestNestedContextsAsync

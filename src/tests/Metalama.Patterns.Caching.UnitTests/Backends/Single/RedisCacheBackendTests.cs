@@ -114,8 +114,8 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 
         // [Porting] Not fixing, can't be certain of original intent.
         // ReSharper disable UseAwaitUsing
-        using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
-        using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.UnderlyingBackend ) )
+        await using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
+        await using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.UnderlyingBackend ) )
         {
             const string valueSmallKey = "i";
             const string dependencySmallKey = "d";
@@ -239,8 +239,8 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
         // [Porting] Not fixing, can't be certain of original intent (twice).
         // ReSharper disable UseAwaitUsing
         // ReSharper disable once MethodHasAsyncOverload
-        using ( var redisCachingBackend = this.CreateBackend( keyPrefix ) )
-        using ( var cache = (DependenciesRedisCachingBackend) redisCachingBackend.UnderlyingBackend )
+        await using ( var redisCachingBackend = this.CreateBackend( keyPrefix ) )
+        await using ( var cache = (DependenciesRedisCachingBackend) redisCachingBackend.UnderlyingBackend )
         {
             // [Porting] Not fixing, can't be certain of original intent.
             // ReSharper disable MethodHasAsyncOverload

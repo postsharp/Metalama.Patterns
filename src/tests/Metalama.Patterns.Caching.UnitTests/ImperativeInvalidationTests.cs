@@ -76,52 +76,45 @@ namespace Metalama.Patterns.Caching.Tests
             Func<CachedValueClass> invalidatingOrRecachingMethod,
             Func<bool> resetMethod )
         {
-            this.InitializeTestWithCachingBackend( profileName );
+            using var context = this.InitializeTestWithCachingBackend( profileName );
             TestProfileConfigurationFactory.CreateProfile( profileName );
 
-            try
+            var initialValue = cachedMethod();
+            Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
+
+            var cachedValueBeforeInvalidation = cachedMethod();
+            Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
+
+            AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
+
+            var recachedValue = invalidatingOrRecachingMethod();
+
+            // ReSharper disable once PossibleUnintendedReferenceComparison
+            if ( recachedValue == NullCachedValueClass.Instance )
             {
-                var initialValue = cachedMethod();
-                Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
+                // Just invalidating (not recaching)
 
-                var cachedValueBeforeInvalidation = cachedMethod();
-                Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
+                var valueAfterInvalidation = cachedMethod();
+                Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
 
-                AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
+                var cachedValueAfterInvalidation = cachedMethod();
+                Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
 
-                var recachedValue = invalidatingOrRecachingMethod();
-
-                // ReSharper disable once PossibleUnintendedReferenceComparison
-                if ( recachedValue == NullCachedValueClass.Instance )
-                {
-                    // Just invalidating (not recaching)
-
-                    var valueAfterInvalidation = cachedMethod();
-                    Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
-
-                    var cachedValueAfterInvalidation = cachedMethod();
-                    Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
-
-                    AssertEx.Equal(
-                        valueAfterInvalidation,
-                        cachedValueAfterInvalidation,
-                        "The initial value and the cached value after invalidation are not the same." );
-                }
-                else
-                {
-                    // Recaching (not just invalidating)
-
-                    Assert.True( resetMethod(), "The cached method has not been called during recaching." );
-
-                    var valueAfterRecaching = cachedMethod();
-                    Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
-
-                    AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
-                }
+                AssertEx.Equal(
+                    valueAfterInvalidation,
+                    cachedValueAfterInvalidation,
+                    "The initial value and the cached value after invalidation are not the same." );
             }
-            finally
+            else
             {
-                TestProfileConfigurationFactory.DisposeTest();
+                // Recaching (not just invalidating)
+
+                Assert.True( resetMethod(), "The cached method has not been called during recaching." );
+
+                var valueAfterRecaching = cachedMethod();
+                Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
+
+                AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
             }
         }
 
@@ -147,52 +140,45 @@ namespace Metalama.Patterns.Caching.Tests
             Func<Task<CachedValueClass>> invalidatingOrRecachingMethod,
             Func<bool> resetMethod )
         {
-            this.InitializeTestWithCachingBackend( profileName );
+            await using var context = this.InitializeTestWithCachingBackend( profileName );
             TestProfileConfigurationFactory.CreateProfile( profileName );
 
-            try
+            var initialValue = await cachedMethod();
+            Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
+
+            var cachedValueBeforeInvalidation = await cachedMethod();
+            Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
+
+            AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
+
+            var recachedValue = await invalidatingOrRecachingMethod();
+
+            // ReSharper disable once PossibleUnintendedReferenceComparison
+            if ( recachedValue == NullCachedValueClass.Instance )
             {
-                var initialValue = await cachedMethod();
-                Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
+                // Just invalidating (not recaching)
 
-                var cachedValueBeforeInvalidation = await cachedMethod();
-                Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
+                var valueAfterInvalidation = await cachedMethod();
+                Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
 
-                AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
+                var cachedValueAfterInvalidation = await cachedMethod();
+                Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
 
-                var recachedValue = await invalidatingOrRecachingMethod();
-
-                // ReSharper disable once PossibleUnintendedReferenceComparison
-                if ( recachedValue == NullCachedValueClass.Instance )
-                {
-                    // Just invalidating (not recaching)
-
-                    var valueAfterInvalidation = await cachedMethod();
-                    Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
-
-                    var cachedValueAfterInvalidation = await cachedMethod();
-                    Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
-
-                    AssertEx.Equal(
-                        valueAfterInvalidation,
-                        cachedValueAfterInvalidation,
-                        "The initial value and the cached value after invalidation are not the same." );
-                }
-                else
-                {
-                    // Recaching (not just invalidating)
-
-                    Assert.True( resetMethod(), "The cached method has not been called during recaching." );
-
-                    var valueAfterRecaching = await cachedMethod();
-                    Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
-
-                    AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
-                }
+                AssertEx.Equal(
+                    valueAfterInvalidation,
+                    cachedValueAfterInvalidation,
+                    "The initial value and the cached value after invalidation are not the same." );
             }
-            finally
+            else
             {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
+                // Recaching (not just invalidating)
+
+                Assert.True( resetMethod(), "The cached method has not been called during recaching." );
+
+                var valueAfterRecaching = await cachedMethod();
+                Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
+
+                AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
             }
         }
 
@@ -698,22 +684,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestImperativeInvalidationWithNestedContexts()
         {
-            this.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsProfileName );
+            using var context = this.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testImperativeInvalidationWithNestedContextsProfileName );
 
-            try
-            {
-                var c = new TestImperativeInvalidationWithNestedContextsClass();
-                var call1 = c.OuterMethod();
-                CachingService.Default.Invalidate( c.InnerMethod );
-                var call2 = c.OuterMethod();
+            var c = new TestImperativeInvalidationWithNestedContextsClass();
+            var call1 = c.OuterMethod();
+            CachingService.Default.Invalidate( c.InnerMethod );
+            var call2 = c.OuterMethod();
 
-                Assert.NotEqual( call1, call2 );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.NotEqual( call1, call2 );
         }
 
         #endregion TestImperativeInvalidationWithNestedContexts
@@ -744,22 +723,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestImperativeInvalidationWithNestedContextsAsync()
         {
-            this.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
+            await using var context = this.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
 
-            try
-            {
-                var c = new TestImperativeInvalidationWithNestedContextsAsyncClass();
-                var call1 = await c.OuterMethodAsync();
-                await CachingService.Default.InvalidateAsync( c.InnerMethodAsync );
-                var call2 = await c.OuterMethodAsync();
+            var c = new TestImperativeInvalidationWithNestedContextsAsyncClass();
+            var call1 = await c.OuterMethodAsync();
+            await CachingService.Default.InvalidateAsync( c.InnerMethodAsync );
+            var call2 = await c.OuterMethodAsync();
 
-                Assert.NotEqual( call1, call2 );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            Assert.NotEqual( call1, call2 );
         }
 
         #endregion TestImperativeInvalidationWithNestedContextsAsync
@@ -790,23 +762,16 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestRecachingOfInnerMethod()
         {
-            this.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodProfileName );
+            using var context = this.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testRecachingOfInnerMethodProfileName );
 
-            try
-            {
-                var c = new TestRecachingOfInnerMethodClass();
-                var call1 = c.OuterMethod();
-                var call2 = CachingService.Default.Recache( c.InnerMethod );
-                var call3 = c.OuterMethod();
+            var c = new TestRecachingOfInnerMethodClass();
+            var call1 = c.OuterMethod();
+            var call2 = CachingService.Default.Recache( c.InnerMethod );
+            var call3 = c.OuterMethod();
 
-                Assert.NotEqual( call1, call2 );
-                Assert.NotEqual( call2, call3 );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.NotEqual( call1, call2 );
+            Assert.NotEqual( call2, call3 );
         }
 
         #endregion TestRecachingOfInnerMethod
@@ -837,23 +802,16 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestRecachingOfInnerMethodAsync()
         {
-            this.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodAsyncProfileName );
+            await using var context = this.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testRecachingOfInnerMethodAsyncProfileName );
 
-            try
-            {
-                var c = new TestRecachingOfInnerMethodAsyncClass();
-                var call1 = await c.OuterMethodAsync();
-                var call2 = await CachingService.Default.RecacheAsync( c.InnerMethodAsync );
-                var call3 = await c.OuterMethodAsync();
+            var c = new TestRecachingOfInnerMethodAsyncClass();
+            var call1 = await c.OuterMethodAsync();
+            var call2 = await CachingService.Default.RecacheAsync( c.InnerMethodAsync );
+            var call3 = await c.OuterMethodAsync();
 
-                Assert.NotEqual( call1, call2 );
-                Assert.NotEqual( call2, call3 );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            Assert.NotEqual( call1, call2 );
+            Assert.NotEqual( call2, call3 );
         }
 
         #endregion TestRecachingOfInnerMethodAsync
@@ -884,23 +842,16 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestRecachingOfOuterMethod()
         {
-            this.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodProfileName );
+            using var context = this.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testRecachingOfOuterMethodProfileName );
 
-            try
-            {
-                var c = new TestRecachingOfOuterMethodClass();
-                var call1 = c.OuterMethod();
-                var call2 = CachingService.Default.Recache( c.OuterMethod );
-                var call3 = c.OuterMethod();
+            var c = new TestRecachingOfOuterMethodClass();
+            var call1 = c.OuterMethod();
+            var call2 = CachingService.Default.Recache( c.OuterMethod );
+            var call3 = c.OuterMethod();
 
-                Assert.Equal( call1, call2 );
-                Assert.Equal( call2, call3 );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.Equal( call1, call2 );
+            Assert.Equal( call2, call3 );
         }
 
         #endregion TestRecachingOfOuterMethod
@@ -931,23 +882,16 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestRecachingOfOuterMethodAsync()
         {
-            this.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodAsyncProfileName );
+            await using var context = this.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testRecachingOfOuterMethodAsyncProfileName );
 
-            try
-            {
-                var c = new TestRecachingOfOuterMethodAsyncClass();
-                var call1 = await c.OuterMethodAsync();
-                var call2 = await CachingService.Default.RecacheAsync( c.OuterMethodAsync );
-                var call3 = await c.OuterMethodAsync();
+            var c = new TestRecachingOfOuterMethodAsyncClass();
+            var call1 = await c.OuterMethodAsync();
+            var call2 = await CachingService.Default.RecacheAsync( c.OuterMethodAsync );
+            var call3 = await c.OuterMethodAsync();
 
-                Assert.Equal( call1, call2 );
-                Assert.Equal( call2, call3 );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            Assert.Equal( call1, call2 );
+            Assert.Equal( call2, call3 );
         }
 
         #endregion TestRecachingOfOuterMethodAsync

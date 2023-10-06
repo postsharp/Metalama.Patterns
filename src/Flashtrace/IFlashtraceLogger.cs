@@ -11,29 +11,29 @@ namespace Flashtrace;
 /// Abstraction of the Logging facility, through which other components emit their log records.
 /// </summary>
 /// <remarks>
-/// <para>If you want to implement this interface, you should also implement the <see cref="IRoleLoggerFactory"/> interface
-/// and register it to the <see cref="IServiceProvider"/> or, if you use the dependency mechanism, to <see cref="LogSourceFactory"/>.
+/// <para>If you want to implement this interface, you should also implement the <see cref="IFlashtraceRoleLoggerFactory"/> interface
+/// and register it to the <see cref="IServiceProvider"/> or, if you use the dependency mechanism, to <see cref="FlashtraceSourceFactory"/>.
 /// </para>
 /// </remarks>
 [PublicAPI]
-public partial interface ILogger : ILoggerExceptionHandler
+public partial interface IFlashtraceLogger : IFlashtraceExceptionHandler
 {
     /// <summary>
-    /// Gets a factory that can provide instances of <see cref="ILogger"/>.
+    /// Gets a factory that can provide instances of <see cref="IFlashtraceLogger"/>.
     /// </summary>
-    IRoleLoggerFactory Factory { get; }
+    IFlashtraceRoleLoggerFactory Factory { get; }
 
     /// <summary>
-    /// Gets the role of records created by this <see cref="ILogger"/>. A list of standard roles is available in the <see cref="LoggingRoles"/> class.
+    /// Gets the role of records created by this <see cref="IFlashtraceLogger"/>. A list of standard roles is available in the <see cref="FlashtraceRoles"/> class.
     /// </summary>
     string Role { get; }
 
     /// <summary>
-    /// Determines whether logging is enabled for a given <see cref="LogLevel"/>.
+    /// Determines whether logging is enabled for a given <see cref="FlashtraceLevel"/>.
     /// </summary>
     /// <param name="level">A record level (or severity).</param>
     /// <returns><c>true</c> if logging is enabled for <paramref name="level"/>, otherwise <c>false</c>.</returns>
-    bool IsEnabled( LogLevel level );
+    bool IsEnabled( FlashtraceLevel level );
 
     /// <summary>
     /// Gets a value indicating whether calls of <see cref="SuspendActivity"/> and <see cref="ResumeActivity"/> 
@@ -45,18 +45,18 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// Writes a log record with a description without parameters.
     /// </summary>
     /// <param name="context"></param>
-    /// <param name="level"><see cref="LogLevel"/> of the record.</param>
+    /// <param name="level"><see cref="FlashtraceLevel"/> of the record.</param>
     /// <param name="recordKind">Kind of record.</param>
     /// <param name="text">Text of the record.</param>
     /// <param name="exception">The <see cref="Exception"/> associated with the record, or <c>null</c>.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
-    void Write( ILoggingContext? context, LogLevel level, LogRecordKind recordKind, string text, Exception? exception, in CallerInfo callerInfo );
+    void Write( ILoggingContext? context, FlashtraceLevel level, LogRecordKind recordKind, string text, Exception? exception, in CallerInfo callerInfo );
 
     /// <summary>
     /// Writes a log record with a description with an array of parameters.
     /// </summary>
     /// <param name="context"></param>
-    /// <param name="level"><see cref="LogLevel"/> of the record.</param>
+    /// <param name="level"><see cref="FlashtraceLevel"/> of the record.</param>
     /// <param name="recordKind">Kind of record.</param>
     /// <param name="text">Text of the record.</param>
     /// <param name="args">An array of parameters.</param>
@@ -64,7 +64,7 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// <param name="callerInfo">Information about the caller source code.</param>
     void Write(
         ILoggingContext? context,
-        LogLevel level,
+        FlashtraceLevel level,
         LogRecordKind recordKind,
         string text,
         object[] args,
@@ -110,13 +110,13 @@ public partial interface ILogger : ILoggerExceptionHandler
     /// Gets the logger for the current context.
     /// </summary>
     /// <returns></returns>
-    IContextLocalLogger GetContextLocalLogger();
+    IFlashtraceLocalLogger GetContextLocalLogger();
 
     /// <summary>
-    /// Gets the <see cref="IContextLocalLogger"/> plus a flag indicating whether the source is enabled for a given <see cref="LogLevel"/>.
+    /// Gets the <see cref="IFlashtraceLocalLogger"/> plus a flag indicating whether the source is enabled for a given <see cref="FlashtraceLevel"/>.
     /// </summary>
     /// <param name="level">Log level.</param>
-    /// <returns>The <see cref="IContextLocalLogger"/> for the current execution context and a flag indicating whether logging
+    /// <returns>The <see cref="IFlashtraceLocalLogger"/> for the current execution context and a flag indicating whether logging
     /// is enabled for the given <paramref name="level"/>.</returns>
-    (IContextLocalLogger Logger, bool IsEnabled) GetContextLocalLogger( LogLevel level );
+    (IFlashtraceLocalLogger Logger, bool IsEnabled) GetContextLocalLogger( FlashtraceLevel level );
 }

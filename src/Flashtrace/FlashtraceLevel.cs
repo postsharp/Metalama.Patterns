@@ -8,7 +8,7 @@ namespace Flashtrace;
 /// Specifies the severity of a logged message.
 /// </summary>
 [PublicAPI]
-public enum LogLevel
+public enum FlashtraceLevel
 {
     /// <summary>
     /// No message should be logged.

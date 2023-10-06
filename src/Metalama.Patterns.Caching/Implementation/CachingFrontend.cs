@@ -27,7 +27,7 @@ internal sealed class CachingFrontend
         Func<object?, object?[], object?> invokeOriginalMethod,
         object? instance,
         object?[] args,
-        LogSource logger )
+        FlashtraceSource logger )
     {
         ILockHandle? lockHandle = null;
         CacheValue? item = null;
@@ -151,7 +151,7 @@ internal sealed class CachingFrontend
         Func<object?, object?[], CancellationToken, Task<object?>> invokeOriginalMethod,
         object? instance,
         object?[] args,
-        LogSource logger,
+        FlashtraceSource logger,
         CancellationToken cancellationToken )
     {
         // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
@@ -283,7 +283,7 @@ internal sealed class CachingFrontend
         Func<object?, object?[], CancellationToken, ValueTask<object?>> invokeOriginalMethod,
         object? instance,
         object?[] args,
-        LogSource logger,
+        FlashtraceSource logger,
         CancellationToken cancellationToken )
     {
         // Keep any changes in logic in sync with other overloads of GetOrAddAsync.

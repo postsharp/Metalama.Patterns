@@ -11,14 +11,14 @@ namespace Flashtrace;
 /// Abstraction of logging methods where the context has already been resolved.
 /// </summary>
 [PublicAPI]
-public interface IContextLocalLogger : ILoggerExceptionHandler
+public interface IFlashtraceLocalLogger : IFlashtraceExceptionHandler
 {
     /// <summary>
-    /// Determines whether logging is enabled for a given <see cref="LogLevel"/>.
+    /// Determines whether logging is enabled for a given <see cref="FlashtraceLevel"/>.
     /// </summary>
     /// <param name="level">A record level (or severity).</param>
     /// <returns><c>true</c> if logging is enabled for <paramref name="level"/>, otherwise <c>false</c>.</returns>
-    bool IsEnabled( LogLevel level );
+    bool IsEnabled( FlashtraceLevel level );
 
     /// <summary>
     /// Opens a new context for an activity.

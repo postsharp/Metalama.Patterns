@@ -12,17 +12,10 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void InvalidateBeforeCachedClassHasBeenTouched()
         {
-            this.InitializeTestWithCachingBackend( nameof(Issue20774Tests) );
+            using var context = this.InitializeTestWithCachingBackend( nameof(Issue20774Tests) );
 
-            try
-            {
-                // This shouldn't fail, even though the CachedClass type hasn't been touched yet.
-                new InvalidatingClass().Invalidate();
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            // This shouldn't fail, even though the CachedClass type hasn't been touched yet.
+            new InvalidatingClass().Invalidate();
         }
 
         public Issue20774Tests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }

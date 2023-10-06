@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching;
 /// </summary>
 public partial class CachingService
 {
-    private readonly LogSource _defaultLogger;
+    private readonly FlashtraceSource _defaultLogger;
 
     private readonly ConcurrentDictionary<MethodInfo, int> _nestedCachedMethods = new();
 

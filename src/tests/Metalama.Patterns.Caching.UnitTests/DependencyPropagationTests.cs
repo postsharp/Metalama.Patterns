@@ -59,32 +59,25 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestDependencyPropagation()
         {
-            _ = this.InitializeTestWithTestingBackend( _testDependencyPropagationProfileName );
+            using var context = this.InitializeTestWithTestingBackend( _testDependencyPropagationProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testDependencyPropagationProfileName );
 
-            try
-            {
-                var cachingClass = new TestDependencyPropagationCachingClass();
+            var cachingClass = new TestDependencyPropagationCachingClass();
 
-                cachingClass.GetValue();
+            cachingClass.GetValue();
 
-                cachingClass.WasGetValueCalled = false;
-                cachingClass.WasGetValueIntermediateCalled = false;
-                cachingClass.WasGetValueDependencyCalled = false;
+            cachingClass.WasGetValueCalled = false;
+            cachingClass.WasGetValueIntermediateCalled = false;
+            cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingService.Default.Invalidate( cachingClass.GetValueDependency );
+            CachingService.Default.Invalidate( cachingClass.GetValueDependency );
 
-                cachingClass.GetValue();
+            cachingClass.GetValue();
 
-                Assert.True( cachingClass.WasGetValueCalled, "The outer method was not invalidated." );
-                Assert.True( cachingClass.WasGetValueIntermediateCalled, "The intermediate method was not invalidated." );
-                Assert.True( cachingClass.WasGetValueDependencyCalled, "The inner method was not invalidated." );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.True( cachingClass.WasGetValueCalled, "The outer method was not invalidated." );
+            Assert.True( cachingClass.WasGetValueIntermediateCalled, "The intermediate method was not invalidated." );
+            Assert.True( cachingClass.WasGetValueDependencyCalled, "The inner method was not invalidated." );
         }
 
         #endregion
@@ -133,34 +126,25 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDependencyPropagationAsync()
         {
-            _ = this.InitializeTestWithTestingBackend( _testDependencyPropagationAsyncProfileName );
+            await using var context = this.InitializeTestWithTestingBackend( _testDependencyPropagationAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testDependencyPropagationAsyncProfileName );
 
-            try
-            {
-                var cachingClass = new TestDependencyPropagationAsyncCachingClass();
+            var cachingClass = new TestDependencyPropagationAsyncCachingClass();
 
-                await cachingClass.GetValueAsync();
+            await cachingClass.GetValueAsync();
 
-                cachingClass.WasGetValueCalled = false;
-                cachingClass.WasGetValueIntermediateCalled = false;
-                cachingClass.WasGetValueDependencyCalled = false;
+            cachingClass.WasGetValueCalled = false;
+            cachingClass.WasGetValueIntermediateCalled = false;
+            cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+            await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
-                await cachingClass.GetValueAsync();
+            await cachingClass.GetValueAsync();
 
-                Assert.True( cachingClass.WasGetValueCalled, "The outer method was not invalidated." );
-                Assert.True( cachingClass.WasGetValueIntermediateCalled, "The intermediate method was not invalidated." );
-                Assert.True( cachingClass.WasGetValueDependencyCalled, "The inner method was not invalidated." );
-            }
-            finally
-            {
-                // [Porting] Won't fix, can't be certain of original intent.
-                // ReSharper disable once MethodHasAsyncOverload
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.True( cachingClass.WasGetValueCalled, "The outer method was not invalidated." );
+            Assert.True( cachingClass.WasGetValueIntermediateCalled, "The intermediate method was not invalidated." );
+            Assert.True( cachingClass.WasGetValueDependencyCalled, "The inner method was not invalidated." );
         }
 
         #endregion
@@ -216,35 +200,26 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestDisposedContextAsync()
         {
-            _ = this.InitializeTestWithTestingBackend( _testDisposedContextAsyncProfileName );
+            await using var context = this.InitializeTestWithTestingBackend( _testDisposedContextAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testDisposedContextAsyncProfileName );
 
-            try
-            {
-                // This test is trying not-so-nicely replicate previously crashing scenario with context being disposed before it's child context.
-                // The real-world scenario is probably much less strange and much more complicated.
+            // This test is trying not-so-nicely replicate previously crashing scenario with context being disposed before it's child context.
+            // The real-world scenario is probably much less strange and much more complicated.
 
-                var cachingClass = new TestDisposedContextAsyncCachingClass();
+            var cachingClass = new TestDisposedContextAsyncCachingClass();
 
-                await cachingClass.GetValueAsync();
+            await cachingClass.GetValueAsync();
 
-                cachingClass.WasGetValueCalled = false;
-                cachingClass.WasGetValueDependencyCalled = false;
+            cachingClass.WasGetValueCalled = false;
+            cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+            await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
-                await cachingClass.GetValueAsync();
+            await cachingClass.GetValueAsync();
 
-                Assert.True( cachingClass.WasGetValueCalled, "The outer method was not invalidated." );
-                Assert.True( cachingClass.WasGetValueDependencyCalled, "The inner method was not invalidated." );
-            }
-            finally
-            {
-                // [Porting] Won't fix, can't be certain of original intent.
-                // ReSharper disable once MethodHasAsyncOverload
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.True( cachingClass.WasGetValueCalled, "The outer method was not invalidated." );
+            Assert.True( cachingClass.WasGetValueDependencyCalled, "The inner method was not invalidated." );
         }
 
         #endregion
@@ -293,36 +268,29 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSuspendedDependencyPropagation()
         {
-            _ = this.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationProfileName );
+            using var context = this.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testSuspendedDependencyPropagationProfileName );
 
-            try
-            {
-                var cachingClass = new TestSuspendedDependencyPropagationCachingClass();
+            var cachingClass = new TestSuspendedDependencyPropagationCachingClass();
 
-                cachingClass.GetValue();
+            cachingClass.GetValue();
 
-                cachingClass.WasGetValueCalled = false;
-                cachingClass.WasGetValueIntermediateCalled = false;
-                cachingClass.WasGetValueDependencyCalled = false;
+            cachingClass.WasGetValueCalled = false;
+            cachingClass.WasGetValueIntermediateCalled = false;
+            cachingClass.WasGetValueDependencyCalled = false;
 
-                CachingService.Default.Invalidate( cachingClass.GetValueDependency );
+            CachingService.Default.Invalidate( cachingClass.GetValueDependency );
 
-                cachingClass.GetValue();
+            cachingClass.GetValue();
 
-                Assert.False( cachingClass.WasGetValueCalled, "The outer method was invalidated." );
-                Assert.False( cachingClass.WasGetValueIntermediateCalled, "The intermediate method was invalidated." );
-                Assert.False( cachingClass.WasGetValueDependencyCalled, "The dependency method was called." );
+            Assert.False( cachingClass.WasGetValueCalled, "The outer method was invalidated." );
+            Assert.False( cachingClass.WasGetValueIntermediateCalled, "The intermediate method was invalidated." );
+            Assert.False( cachingClass.WasGetValueDependencyCalled, "The dependency method was called." );
 
-                cachingClass.GetValueDependency();
+            cachingClass.GetValueDependency();
 
-                Assert.True( cachingClass.WasGetValueDependencyCalled, "The intermediate method was not invalidated." );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.True( cachingClass.WasGetValueDependencyCalled, "The intermediate method was not invalidated." );
         }
 
         #endregion
@@ -374,38 +342,29 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestSuspendedDependencyPropagationAsync()
         {
-            _ = this.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationAsyncProfileName );
+            await using var context = this.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationAsyncProfileName );
 
             TestProfileConfigurationFactory.CreateProfile( _testSuspendedDependencyPropagationAsyncProfileName );
 
-            try
-            {
-                var cachingClass = new TestSuspendedDependencyPropagationAsyncCachingClass();
+            var cachingClass = new TestSuspendedDependencyPropagationAsyncCachingClass();
 
-                await cachingClass.GetValueAsync();
+            await cachingClass.GetValueAsync();
 
-                cachingClass.WasGetValueCalled = false;
-                cachingClass.WasGetValueIntermediateCalled = false;
-                cachingClass.WasGetValueDependencyCalled = false;
+            cachingClass.WasGetValueCalled = false;
+            cachingClass.WasGetValueIntermediateCalled = false;
+            cachingClass.WasGetValueDependencyCalled = false;
 
-                await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
+            await CachingService.Default.InvalidateAsync( cachingClass.GetValueDependencyAsync );
 
-                await cachingClass.GetValueAsync();
+            await cachingClass.GetValueAsync();
 
-                Assert.False( cachingClass.WasGetValueCalled, "The outer method was invalidated." );
-                Assert.False( cachingClass.WasGetValueIntermediateCalled, "The intermediate method was invalidated." );
-                Assert.False( cachingClass.WasGetValueDependencyCalled, "The dependency method was called." );
+            Assert.False( cachingClass.WasGetValueCalled, "The outer method was invalidated." );
+            Assert.False( cachingClass.WasGetValueIntermediateCalled, "The intermediate method was invalidated." );
+            Assert.False( cachingClass.WasGetValueDependencyCalled, "The dependency method was called." );
 
-                await cachingClass.GetValueDependencyAsync();
+            await cachingClass.GetValueDependencyAsync();
 
-                Assert.True( cachingClass.WasGetValueDependencyCalled, "The intermediate method was not invalidated." );
-            }
-            finally
-            {
-                // [Porting] Won't fix, can't be certain of original intent.
-                // ReSharper disable once MethodHasAsyncOverload
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.True( cachingClass.WasGetValueDependencyCalled, "The intermediate method was not invalidated." );
         }
 
         #endregion

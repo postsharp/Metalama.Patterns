@@ -71,36 +71,35 @@ public class Program
     {
         Console.WriteLine( "Test started." );
 
-        var backend =
-            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestProfiles.A, null );
-
-        TestProfileConfigurationFactory.CreateProfile( TestProfiles.A );
-        TestProfileConfigurationFactory.CreateProfile( TestProfiles.B );
-
-        var cachingClass = new LocalChildCachingClass();
-
-        var cachingClassOverridden = new LocalChildCachingClassOverridden();
-
-        var referencedInnerCachingClassInBase
-            = new ReferencedParentCachingClass.ReferencedInnerCachingClassInBase();
-
-        var referencedInnerCachingClassInChild
-            = new ReferencedChildCachingClass.ReferencedInnerCachingClassInChild();
-
-        var localInnerCachingClassInChild
-            = new LocalChildCachingClass.LocalChildCachingClass_Inner();
-
-        var referencedInnerCachingClassInBaseOverridden
-            = new ReferencedParentCachingClassOverridden.ReferencedInnerCachingClassInBaseOverridden();
-
-        var referencedInnerCachingClassInChildOverridden
-            = new ReferencedChildCachingClassOverridden.ReferencedInnerCachingClassInChildOverridden();
-
-        var localInnerCachingClassInChildOverridden
-            = new LocalChildCachingClassOverridden.LocalChildCachingClassOverridden_Inner();
-
-        try
+        using ( var context = TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestProfiles.A, null ) )
         {
+            var backend = context.Backend;
+
+            TestProfileConfigurationFactory.CreateProfile( TestProfiles.A );
+            TestProfileConfigurationFactory.CreateProfile( TestProfiles.B );
+
+            var cachingClass = new LocalChildCachingClass();
+
+            var cachingClassOverridden = new LocalChildCachingClassOverridden();
+
+            var referencedInnerCachingClassInBase
+                = new ReferencedParentCachingClass.ReferencedInnerCachingClassInBase();
+
+            var referencedInnerCachingClassInChild
+                = new ReferencedChildCachingClass.ReferencedInnerCachingClassInChild();
+
+            var localInnerCachingClassInChild
+                = new LocalChildCachingClass.LocalChildCachingClass_Inner();
+
+            var referencedInnerCachingClassInBaseOverridden
+                = new ReferencedParentCachingClassOverridden.ReferencedInnerCachingClassInBaseOverridden();
+
+            var referencedInnerCachingClassInChildOverridden
+                = new ReferencedChildCachingClassOverridden.ReferencedInnerCachingClassInChildOverridden();
+
+            var localInnerCachingClassInChildOverridden
+                = new LocalChildCachingClassOverridden.LocalChildCachingClassOverridden_Inner();
+
             string? previousCachedKey = null;
 
             if ( backend.LastCachedKey != null )
@@ -210,10 +209,6 @@ public class Program
                 TestProfiles.B );
 
             Console.WriteLine( "Test completed." );
-        }
-        finally
-        {
-            TestProfileConfigurationFactory.DisposeTest();
         }
     }
 }

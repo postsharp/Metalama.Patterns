@@ -5,15 +5,15 @@ using JetBrains.Annotations;
 namespace Flashtrace;
 
 /// <summary>
-/// Creates instances of <see cref="IRoleLoggerFactory"/> for a specified role.
+/// Creates instances of <see cref="IFlashtraceRoleLoggerFactory"/> for a specified role.
 /// </summary>
 [PublicAPI]
-public interface ILoggerFactory
+public interface IFlashtraceLoggerFactory
 {
     /// <summary>
-    /// Gets an instance of the <see cref="IRoleLoggerFactory"/> interface.
+    /// Gets an instance of the <see cref="IFlashtraceRoleLoggerFactory"/> interface.
     /// </summary>
     /// <param name="role">The role for which the logger is requested.</param>
     /// <returns></returns>
-    IRoleLoggerFactory ForRole( string role );
+    IFlashtraceRoleLoggerFactory ForRole( string role );
 }

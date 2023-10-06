@@ -2,4 +2,4 @@
 
 namespace Flashtrace.Activities;
 
-internal readonly record struct ActivityLogLevels( LogLevel DefaultLevel, LogLevel FailureLevel );
+internal readonly record struct ActivityLevels( FlashtraceLevel DefaultLevel, FlashtraceLevel FailureLevel );

@@ -23,7 +23,7 @@ public partial class CachingService
         CacheItemConfiguration? configuration = null,
         CancellationToken cancellationToken = default )
     {
-        var logSource = this.ServiceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
+        var logSource = this.ServiceProvider.GetFlashtraceSource( metadata.Method.DeclaringType!, FlashtraceRoles.Caching );
 
         object? result;
 
@@ -90,7 +90,7 @@ public partial class CachingService
     {
         // TODO: What about ConfigureAwait( false )?
 
-        var logSource = this.ServiceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
+        var logSource = this.ServiceProvider.GetFlashtraceSource( metadata.Method.DeclaringType!, FlashtraceRoles.Caching );
 
         object? result;
 
@@ -200,7 +200,7 @@ public partial class CachingService
     {
         // TODO: What about ConfigureAwait( false )?
 
-        var logSource = this.ServiceProvider.GetLogSource( metadata.Method.DeclaringType!, LoggingRoles.Caching );
+        var logSource = this.ServiceProvider.GetFlashtraceSource( metadata.Method.DeclaringType!, FlashtraceRoles.Caching );
 
         object? result;
 

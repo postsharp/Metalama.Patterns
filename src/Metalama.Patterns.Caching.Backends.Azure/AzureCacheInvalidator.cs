@@ -86,7 +86,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                         catch ( OperationCanceledException ) { }
                         catch ( Exception e )
                         {
-                            this.LogSource.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                            this.Source.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
                             this._backgroundTaskExceptions++;
                         }
                     }
@@ -187,7 +187,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             }
             catch ( Exception e )
             {
-                this.LogSource.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
+                this.Source.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
 
                 throw;
             }

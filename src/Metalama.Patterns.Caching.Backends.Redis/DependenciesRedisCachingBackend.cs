@@ -100,7 +100,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             }
             else
             {
-                this.LogSource.Debug.Write( Formatted( "Transaction DeleteItem failed. Retrying." ) );
+                this.Source.Debug.Write( Formatted( "Transaction DeleteItem failed. Retrying." ) );
             }
         }
 
@@ -109,7 +109,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private void LogRetryTransaction( [CallerMemberName] string? memberName = null )
     {
-        this.LogSource.Debug.Write( Formatted( "Transaction {Method} failed. Retrying.", memberName ) );
+        this.Source.Debug.Write( Formatted( "Transaction {Method} failed. Retrying.", memberName ) );
     }
 
     /// <inheritdoc />
@@ -144,9 +144,9 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             this.RemoveDependenciesTransaction( key, dependencies, transaction );
         }
 
-        this.LogSource.Debug.Write( Formatted( "KeyDelete({Key})", dependenciesKey ) );
+        this.Source.Debug.Write( Formatted( "KeyDelete({Key})", dependenciesKey ) );
         transaction.KeyDeleteAsync( dependenciesKey );
-        this.LogSource.Debug.Write( Formatted( "KeyDelete({Key})", valueKey ) );
+        this.Source.Debug.Write( Formatted( "KeyDelete({Key})", valueKey ) );
         transaction.KeyDeleteAsync( valueKey );
     }
 
@@ -164,7 +164,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     private Task RemoveDependencyAsync( string valueKey, string dependency, IDatabaseAsync database )
     {
         var dependencyKey = this._keyBuilder.GetDependencyKey( dependency );
-        this.LogSource.Debug.Write( Formatted( "SetRemove({DependencyKey}, {ValueKey})", dependencyKey, valueKey ) );
+        this.Source.Debug.Write( Formatted( "SetRemove({DependencyKey}, {ValueKey})", dependencyKey, valueKey ) );
 
         return database.SetRemoveAsync( dependencyKey, valueKey );
     }
@@ -211,7 +211,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 // However, we want to prevent corrupted entries, i.e. we want to ensure that the value/dependency/dependencies
                 // keys are all consistent. This is why we're using the item versioning thing.
 
-                this.LogSource.Debug.Write(
+                this.Source.Debug.Write(
                     Formatted(
                         "Version of existing item is {Version}. Deleting the key {Key} under the condition that the version remains equal.",
                         version,
@@ -264,7 +264,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 // However, we want to prevent corrupted entries, i.e. we want to ensure that the value/dependency/dependencies
                 // keys are all consistent. This is why we're using the item versioning thing.
 
-                this.LogSource.Debug.Write(
+                this.Source.Debug.Write(
                     Formatted(
                         "Version of existing item is {Version}. Deleting the key {Key} under the condition that the version remains equal.",
                         version,
@@ -294,7 +294,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             }
             else
             {
-                this.LogSource.Debug.Write( Formatted( "Transaction SetItem failed. Retrying." ) );
+                this.Source.Debug.Write( Formatted( "Transaction SetItem failed. Retrying." ) );
             }
         }
 
@@ -475,7 +475,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             }
             else
             {
-                this.LogSource.Debug.Write( Formatted( "Transaction InvalidateDependency failed. Retrying." ) );
+                this.Source.Debug.Write( Formatted( "Transaction InvalidateDependency failed. Retrying." ) );
             }
         }
 
@@ -546,7 +546,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             if ( !keyPrefix.Equals( this._keyBuilder.KeyPrefix.AsSpan(), StringComparison.Ordinal ) )
             {
-                this.LogSource.Warning.IfEnabled?.Write(
+                this.Source.Warning.IfEnabled?.Write(
                     Formatted( "The key {Key} has an invalid prefix. Redis should not have returned it. Ignoring it.", keyPrefix.ToString() ) );
 
                 continue;
@@ -591,7 +591,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         {
             if ( !await this.Database.KeyExistsAsync( this._keyBuilder.GetValueKey( item ) ) )
             {
-                this.LogSource.Warning.Write( Formatted( "The dependency key {Key} does not have the corresponding dependencies key. Deleting it.", key ) );
+                this.Source.Warning.Write( Formatted( "The dependency key {Key} does not have the corresponding dependencies key. Deleting it.", key ) );
 
                 await this.RemoveDependencyAsync( item, key, this.Database );
             }
@@ -602,7 +602,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     {
         if ( !await this.Database.KeyExistsAsync( this._keyBuilder.GetValueKey( key ) ) )
         {
-            this.LogSource.Warning.Write( Formatted( "The dependencies key {Key} does not have the corresponding value key. Deleting it.", key ) );
+            this.Source.Warning.Write( Formatted( "The dependencies key {Key} does not have the corresponding value key. Deleting it.", key ) );
 
             await this.DeleteItemAsync( key );
         }
@@ -620,7 +620,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 return;
             }
 
-            this.LogSource.Warning.Write( Formatted( "The value key {Key} does not have the corresponding dependencies key. Deleting it.", smallKey ) );
+            this.Source.Warning.Write( Formatted( "The value key {Key} does not have the corresponding dependencies key. Deleting it.", smallKey ) );
 
             await this.Database.KeyDeleteAsync( redisKey );
 
@@ -629,7 +629,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
         if ( itemVersion != dependencies[_itemVersionInDependenciesIndex] )
         {
-            this.LogSource.Warning.Write(
+            this.Source.Warning.Write(
                 Formatted(
                     "The value {Key} version and the corresponding dependencies version differ. Deleting both.",
                     smallKey ) );
@@ -649,7 +649,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         {
             if ( !await this.Database.SetContainsAsync( this._keyBuilder.GetDependencyKey( dependencies[i] ), smallKey ) )
             {
-                this.LogSource.Warning.Write(
+                this.Source.Warning.Write(
                     Formatted(
                         "The value key {Key} does not have the corresponding dependency key {Dependency}. Deleting it.",
                         smallKey,

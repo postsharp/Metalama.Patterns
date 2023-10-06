@@ -25,7 +25,6 @@ public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
     public void Dispose()
     {
         this.Instance.FinishBlockingTask();
-        TestProfileConfigurationFactory.DisposeTest();
         this.TestOutputHelper.WriteLine( this.StringBuilder.ToString() );
     }
 

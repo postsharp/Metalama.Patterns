@@ -8,10 +8,11 @@
 
 using Flashtrace.Contexts;
 using Flashtrace.Records;
+using Microsoft.Extensions.Logging;
 
 namespace Flashtrace
 {
-	public partial interface ILogger
+	public partial interface IFlashtraceLogger
 	{
 	<#
     for (var i = 1; i <= 10; i++)
@@ -22,7 +23,7 @@ namespace Flashtrace
         /// Writes a log record with <#= i #> parameter<#= GetPlural( i ) #>.
         /// </summary>
 		/// <param name="context">The context for which the message has to be written.</param>
-        /// <param name="level">The severity of the record (e.g. <see cref="LogLevel.Info"/> or <see cref="LogLevel.Warning"/>).</param>
+        /// <param name="level">The severity of the record (e.g. <see cref="FlashtraceLevel.Info"/> or <see cref="FlashtraceLevel.Warning"/>).</param>
         /// <param name="text">The text of the log record, including parameters (e.g. <c>Opening {Path} file {ShareMode} sharing mode</c>).</param>
         /// <param name="recordKind">Kind of record.</param>
         /// <param name="exception">The <see cref="Exception"/> associated with the record, or <c>null</c>.</param>
@@ -30,7 +31,7 @@ namespace Flashtrace
 		<#
         GenerateXmlDoc( i );
 #>
-	   void Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception, in CallerInfo recordInfo  );
+	   void Write<<#= Repeat( "T{0}", i ) #>>( ILoggingContext context, FlashtraceLevel level, LogRecordKind recordKind, string text, <#= Repeat( "T{0} arg{0}", i ) #>, Exception exception, in CallerInfo recordInfo  );
 
 
 	<#

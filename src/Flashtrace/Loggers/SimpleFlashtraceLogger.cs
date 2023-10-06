@@ -34,31 +34,31 @@ namespace Flashtrace.Loggers;
  */
 
 /// <summary>
-/// A base class for simple and low-performance implementations of <see cref="ILogger"/>.
+/// A base class for simple and low-performance implementations of <see cref="IFlashtraceLogger"/>.
 /// </summary>
 /// <remarks>
 /// <para>The simplification stems from the wrapping of all message arguments in an object array, which
 /// allocates memory.</para>
 /// </remarks>
 [PublicAPI]
-public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
+public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalLogger
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SimpleSourceLogger"/> class.
+    /// Initializes a new instance of the <see cref="SimpleFlashtraceLogger"/> class.
     /// </summary>
     /// <param name="role">The role.</param>
     /// <param name="name">The source name.</param>
-    protected SimpleSourceLogger( string role, string name )
+    protected SimpleFlashtraceLogger( string role, string name )
     {
         this.Name = name;
         this.Role = role;
     }
 
     /// <inheritdoc/>
-    public abstract bool IsEnabled( LogLevel level );
+    public abstract bool IsEnabled( FlashtraceLevel level );
 
     /// <inheritdoc/>
-    public abstract IRoleLoggerFactory Factory { get; }
+    public abstract IFlashtraceRoleLoggerFactory Factory { get; }
 
     public string Name { get; }
 
@@ -103,9 +103,9 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
     /// <param name="recordKind"></param>
     /// <param name="text">The fully-rendered message.</param>
     /// <param name="exception">An optional <see cref="Exception"/>.</param>
-    protected abstract void Write( LogLevel level, LogRecordKind recordKind, string text, Exception exception );
+    protected abstract void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception exception );
 
-    private void WriteFormatted( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, object[] args, Exception exception )
+    private void WriteFormatted( ILoggingContext context, FlashtraceLevel level, LogRecordKind recordKind, string text, object[] args, Exception exception )
     {
         var stringBuilder = new StringBuilder();
 
@@ -180,9 +180,9 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
         }
     }
 
-    void ILogger.Write(
+    void IFlashtraceLogger.Write(
         ILoggingContext context,
-        LogLevel level,
+        FlashtraceLevel level,
         LogRecordKind recordKind,
         string text,
         object[] args,
@@ -195,7 +195,13 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
         }
     }
 
-    void ILogger.Write( ILoggingContext context, LogLevel level, LogRecordKind recordKind, string text, Exception exception, in CallerInfo recordInfo )
+    void IFlashtraceLogger.Write(
+        ILoggingContext context,
+        FlashtraceLevel level,
+        LogRecordKind recordKind,
+        string text,
+        Exception exception,
+        in CallerInfo recordInfo )
     {
         if ( this.IsEnabled( level ) )
         {
@@ -203,30 +209,30 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
         }
     }
 
-    ILoggingContext ILogger.OpenActivity( in LogActivityOptions options, in CallerInfo callerInfo )
+    ILoggingContext IFlashtraceLogger.OpenActivity( in LogActivityOptions options, in CallerInfo callerInfo )
     {
         return new Context( options.IsAsync );
     }
 
-    ILoggingContext IContextLocalLogger.OpenActivity( in OpenActivityOptions options, in CallerInfo callerInfo, bool isAsync ) => new Context( isAsync );
+    ILoggingContext IFlashtraceLocalLogger.OpenActivity( in OpenActivityOptions options, in CallerInfo callerInfo, bool isAsync ) => new Context( isAsync );
 
-    void ILogger.ResumeActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
+    void IFlashtraceLogger.ResumeActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void ILogger.SuspendActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
+    void IFlashtraceLogger.SuspendActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void ILogger.SetWaitDependency( ILoggingContext context, object waited ) { }
+    void IFlashtraceLogger.SetWaitDependency( ILoggingContext context, object waited ) { }
 
-    bool ILogger.RequiresSuspendResume => false;
+    bool IFlashtraceLogger.RequiresSuspendResume => false;
 
-    void IContextLocalLogger.ResumeActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
+    void IFlashtraceLocalLogger.ResumeActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void IContextLocalLogger.SuspendActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
+    void IFlashtraceLocalLogger.SuspendActivity( ILoggingContext context, in CallerInfo callerInfo ) { }
 
-    void IContextLocalLogger.SetWaitDependency( ILoggingContext context, object waited ) { }
+    void IFlashtraceLocalLogger.SetWaitDependency( ILoggingContext context, object waited ) { }
 
-    string ILogger.Role => null;
+    string IFlashtraceLogger.Role => null;
 
-    void ILoggerExceptionHandler.OnInvalidUserCode( in CallerInfo callerInfo, string format, params object[] args )
+    void IFlashtraceExceptionHandler.OnInvalidUserCode( in CallerInfo callerInfo, string format, params object[] args )
     {
         try
         {
@@ -234,52 +240,52 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
 
             message += Environment.NewLine + new StackTrace().ToString();
 
-            this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.Message, message, null, null );
+            this.WriteFormatted( null, FlashtraceLevel.Warning, LogRecordKind.Message, message, null, null );
         }
         catch { }
     }
 
-    void ILoggerExceptionHandler.OnInternalException( Exception exception )
+    void IFlashtraceExceptionHandler.OnInternalException( Exception exception )
     {
         try
         {
             var message = "Error in user code calling the logging subsystem: " + exception.ToString();
-            this.WriteFormatted( null, LogLevel.Warning, LogRecordKind.Message, message, null, null );
+            this.WriteFormatted( null, FlashtraceLevel.Warning, LogRecordKind.Message, message, null, null );
         }
         catch { }
     }
 
-    ILogRecordBuilder IContextLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, in CallerInfo callerInfo, ILoggingContext context )
+    ILogRecordBuilder IFlashtraceLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, in CallerInfo callerInfo, ILoggingContext context )
     {
         return new RecordBuilder( this, recordInfo.Level, recordInfo.Kind, (Context) context );
     }
 
-    IRoleLoggerFactory ILogger.Factory => (IRoleLoggerFactory) this.Factory;
+    IFlashtraceRoleLoggerFactory IFlashtraceLogger.Factory => (IFlashtraceRoleLoggerFactory) this.Factory;
 
-    IContextLocalLogger ILogger.GetContextLocalLogger() => this;
+    IFlashtraceLocalLogger IFlashtraceLogger.GetContextLocalLogger() => this;
 
-    (IContextLocalLogger Logger, bool IsEnabled) ILogger.GetContextLocalLogger( LogLevel level )
+    (IFlashtraceLocalLogger Logger, bool IsEnabled) IFlashtraceLogger.GetContextLocalLogger( FlashtraceLevel level )
     {
         return (this, this.IsEnabled( level ));
     }
 
-    ILoggingContext ILogger.CurrentContext => throw new NotImplementedException();
+    ILoggingContext IFlashtraceLogger.CurrentContext => throw new NotImplementedException();
 
-    bool ILogger.IsEnabled( LogLevel level ) => this.IsEnabled( level );
+    bool IFlashtraceLogger.IsEnabled( FlashtraceLevel level ) => this.IsEnabled( level );
 
     private class RecordBuilder : ILogRecordBuilder
     {
-        private SimpleSourceLogger _logger;
+        private SimpleFlashtraceLogger _flashtraceLogger;
         private readonly StringBuilder _stringBuilder = new();
-        private readonly LogLevel _level;
+        private readonly FlashtraceLevel _level;
         private readonly LogRecordKind _recordKind;
         private Exception _exception;
         private readonly Context _context;
         private bool _appendComma;
 
-        public RecordBuilder( SimpleSourceLogger logger, LogLevel level, LogRecordKind recordKind, Context context )
+        public RecordBuilder( SimpleFlashtraceLogger flashtraceLogger, FlashtraceLevel level, LogRecordKind recordKind, Context context )
         {
-            this._logger = logger;
+            this._flashtraceLogger = flashtraceLogger;
             this._level = level;
             this._recordKind = recordKind;
             this._context = context;
@@ -325,7 +331,7 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
 
         public void Dispose()
         {
-            this._logger = null;
+            this._flashtraceLogger = null;
         }
 
         void ILogRecordBuilder.SetException( Exception e )
@@ -389,7 +395,7 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
 
         void ILogRecordBuilder.Complete()
         {
-            if ( this._logger != null )
+            if ( this._flashtraceLogger != null )
             {
                 if ( this._recordKind == LogRecordKind.ActivityEntry )
                 {
@@ -398,7 +404,7 @@ public abstract partial class SimpleSourceLogger : ILogger, IContextLocalLogger
                     this._stringBuilder.Append( GetRecordKindText( LogRecordKind.ActivityEntry ) );
                 }
 
-                this._logger.Write( this._level, this._recordKind, this._stringBuilder.ToString(), this._exception );
+                this._flashtraceLogger.Write( this._level, this._recordKind, this._stringBuilder.ToString(), this._exception );
             }
 
             this.Dispose();

@@ -27,15 +27,15 @@ namespace Metalama.Patterns.Caching.Aspects;
 /// </summary>
 /// <remarks>
 /// <para>There are several ways to configure the behavior of the <see cref="CacheAttribute"/> aspect: you can set the properties of the
-/// <see cref="CacheAttribute"/> class, such as <see cref="BaseCachingAttribute.AbsoluteExpiration"/> or <see cref="BaseCachingAttribute.SlidingExpiration"/>. You can
+/// <see cref="CacheAttribute"/> class, such as <see cref="CachingBaseAttribute.AbsoluteExpiration"/> or <see cref="CachingBaseAttribute.SlidingExpiration"/>. You can
 /// add the <see cref="CachingConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
-/// Finally, you can define a profile by setting the <see cref="BaseCachingAttribute.ProfileName"/> property and configure the profile at run time
+/// Finally, you can define a profile by setting the <see cref="CachingBaseAttribute.ProfileName"/> property and configure the profile at run time
 /// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="ICachingService"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
 /// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="ICachingService.Invalidate"/> method.</para>
 /// </remarks>
 [PublicAPI]
-public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
+public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
 {
     void IEligible<IMethod>.BuildEligibility( IEligibilityBuilder<IMethod> builder )
     {
@@ -165,7 +165,7 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
 
         builder.Advice.AddInitializer(
             builder.Target.DeclaringType,
-            nameof(this.CachedMethodRegistrationInitializer),
+            nameof(CachedMethodRegistrationInitializer),
             InitializerKind.BeforeTypeConstructor,
             args: new { method = builder.Target, field = registrationField.Declaration, awaitableResultType, options } );
 

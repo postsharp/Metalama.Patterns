@@ -1,8 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using Flashtrace.Formatters;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
@@ -13,22 +16,42 @@ public abstract class BaseCachingTests
     {
         this.TestOutputHelper = testOutputHelper;
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSingleton<ILoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
+        serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
         this.ServiceProvider = serviceCollection.BuildServiceProvider();
-        CachingService.Default = new CachingService( this.ServiceProvider );
+        CachingService.Default = CachingService.CreateUninitialized( this.ServiceProvider );
     }
 
     protected ServiceProvider ServiceProvider { get; }
 
     protected ITestOutputHelper TestOutputHelper { get; }
 
-    protected CachingBackend InitializeTestWithCachingBackend( string name )
+    internal static void ResetCachingServices()
     {
-        return TestProfileConfigurationFactory.InitializeTestWithCachingBackend( name, this.ServiceProvider );
+        Assert.True(
+            CachingService.Default.DefaultBackend is UninitializedCachingBackend or NullCachingBackend,
+            "Each test has to use the TestProfileConfigurationFactory." );
+
+        var uninitialized = CachingService.CreateUninitialized();
+        CachingService.Default = uninitialized;
     }
 
-    protected TestingCacheBackend InitializeTestWithTestingBackend( string name )
+    protected CachingTestContext<MemoryCachingBackend> InitializeTestWithCachingBackend(
+        string name,
+        Func<IFormatterRepository, CacheKeyBuilder>? keyBuilderFactory = null )
     {
-        return TestProfileConfigurationFactory.InitializeTestWithTestingBackend( name, this.ServiceProvider );
+        ResetCachingServices();
+        var backend = new MemoryCachingBackend( new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider } ) { DebugName = name };
+        CachingService.Default = new CachingService( backend, keyBuilderFactory, serviceProvider: this.ServiceProvider );
+
+        return new CachingTestContext<MemoryCachingBackend>( backend );
+    }
+
+    protected CachingTestContext<TestingCacheBackend> InitializeTestWithTestingBackend( string name )
+    {
+        ResetCachingServices();
+        var backend = new TestingCacheBackend( "test-" + name, this.ServiceProvider );
+        CachingService.Default = new CachingService( backend, serviceProvider: this.ServiceProvider );
+
+        return new CachingTestContext<TestingCacheBackend>( backend );
     }
 }

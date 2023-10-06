@@ -8,34 +8,34 @@ using System.Diagnostics;
 
 namespace Flashtrace.Loggers;
 
-internal sealed class TraceSourceLogger : SimpleSourceLogger
+internal sealed class TraceSourceFlashtraceLogger : SimpleFlashtraceLogger
 {
     private readonly TraceSource _traceSource;
     private static readonly ConcurrentDictionary<string, TraceSource> _traceSources = new( StringComparer.OrdinalIgnoreCase );
 
-    internal TraceSourceLogger( IRoleLoggerFactory factory, string role, string name ) : base( role, name )
+    internal TraceSourceFlashtraceLogger( IFlashtraceRoleLoggerFactory factory, string role, string name ) : base( role, name )
     {
         this.Factory = factory;
         this._traceSource = GetTraceSource( role );
     }
 
-    public override IRoleLoggerFactory Factory { get; }
+    public override IFlashtraceRoleLoggerFactory Factory { get; }
 
     private static string GetSourceName( string role )
     {
         return "Flashtrace." + role;
     }
 
-    public static TraceSource GetTraceSource( string role = LoggingRoles.Default )
+    public static TraceSource GetTraceSource( string role = FlashtraceRoles.Default )
     {
         var sourceName = GetSourceName( role );
 
         return _traceSources.GetOrAdd( sourceName, n => new TraceSource( n ) );
     }
 
-    public override bool IsEnabled( LogLevel level )
+    public override bool IsEnabled( FlashtraceLevel level )
     {
-        if ( level == LogLevel.None )
+        if ( level == FlashtraceLevel.None )
         {
             return false;
         }
@@ -43,32 +43,32 @@ internal sealed class TraceSourceLogger : SimpleSourceLogger
         return this._traceSource.Switch.ShouldTrace( GetTraceEventType( level ) );
     }
 
-    protected override void Write( LogLevel level, LogRecordKind recordKind, string text, Exception exception )
+    protected override void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception exception )
     {
         var eventType = GetTraceEventType( level );
         this._traceSource.TraceEvent( eventType, 0, text );
     }
 
-    private static TraceEventType GetTraceEventType( LogLevel level )
+    private static TraceEventType GetTraceEventType( FlashtraceLevel level )
     {
         switch ( level )
         {
-            case LogLevel.Trace:
+            case FlashtraceLevel.Trace:
                 return TraceEventType.Verbose;
 
-            case LogLevel.Debug:
+            case FlashtraceLevel.Debug:
                 return TraceEventType.Verbose;
 
-            case LogLevel.Info:
+            case FlashtraceLevel.Info:
                 return TraceEventType.Information;
 
-            case LogLevel.Warning:
+            case FlashtraceLevel.Warning:
                 return TraceEventType.Warning;
 
-            case LogLevel.Error:
+            case FlashtraceLevel.Error:
                 return TraceEventType.Error;
 
-            case LogLevel.Critical:
+            case FlashtraceLevel.Critical:
                 return TraceEventType.Critical;
 
             default:

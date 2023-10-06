@@ -78,7 +78,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
             return;
         }
 
-        var activity = this.LogSource.Default.OpenActivity( Formatted( "{This} is processing the message {Message}.", this, message ) );
+        var activity = this.Source.Default.OpenActivity( Formatted( "{This} is processing the message {Message}.", this, message ) );
 
         try
         {
@@ -92,7 +92,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
 #endif
             {
                 activity.SetOutcome(
-                    this.LogSource.Failure.Level,
+                    this.Source.Failure.Level,
                     Formatted( "Failed: cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", backendIdStr.ToString() ) );
 
                 return;
@@ -104,7 +104,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
 
             if ( sourceId == this.UnderlyingBackend.Id )
             {
-                this.LogSource.Default.Write( Formatted( "Skipping the message {Message} because it has sent it itself.", message ) );
+                this.Source.Default.Write( Formatted( "Skipping the message {Message} because it has sent it itself.", message ) );
                 activity.SetResult( "Skipped." );
 
                 return;
@@ -114,20 +114,20 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
             {
                 case "dependency":
                     this.UnderlyingBackend.InvalidateDependency( key );
-                    this.LogSource.Default.Write( Formatted( "Invalidated the dependency {Key}.", key ) );
+                    this.Source.Default.Write( Formatted( "Invalidated the dependency {Key}.", key ) );
                     activity.SetSuccess();
 
                     break;
 
                 case "item":
                     this.UnderlyingBackend.RemoveItem( key );
-                    this.LogSource.Default.Write( Formatted( "Removed the item {Key}.", key ) );
+                    this.Source.Default.Write( Formatted( "Removed the item {Key}.", key ) );
                     activity.SetSuccess();
 
                     break;
 
                 default:
-                    activity.SetOutcome( this.LogSource.Failure.Level, Formatted( "Failed: invalid kind key: {Kind}.", kind.ToString() ) );
+                    activity.SetOutcome( this.Source.Failure.Level, Formatted( "Failed: invalid kind key: {Kind}.", kind.ToString() ) );
 
                     break;
             }
@@ -144,7 +144,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     {
         var message = this.GetMessage( cacheKeyKind, key );
 
-        this.LogSource.Debug.Write( Formatted( "{This} is sending the message {Message}.", this, message ) );
+        this.Source.Debug.Write( Formatted( "{This} is sending the message {Message}.", this, message ) );
 
         return this.SendMessageAsync( message, cancellationToken );
     }

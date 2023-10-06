@@ -170,7 +170,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     // ReSharper disable UnusedParameter.Global
 
     [Template]
-    private static readonly LogSource _logSource = LogSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
+    private static readonly FlashtraceSource _flashtraceSource = FlashtraceSource.Get( ((IType) meta.Tags["type"]!).ToTypeOfExpression().Value );
 
     [Template]
     public static void InitializeMethodInfoArray( IReadOnlyList<IMethod> methods, IField field )

@@ -262,7 +262,7 @@ public class RedisCachingBackend : CachingBackend
 
         if ( kind.IsEmpty || sourceIdStr.IsEmpty || key.IsEmpty )
         {
-            this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
+            this.Source.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
 
             return;
         }
@@ -273,14 +273,14 @@ public class RedisCachingBackend : CachingBackend
         if ( !Guid.TryParse( sourceIdStr.ToString(), out var sourceId ) )
 #endif
         {
-            this.LogSource.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr.ToString() ) );
+            this.Source.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr.ToString() ) );
 
             return;
         }
 
         if ( !this.ProcessEvent( kind.ToString(), key.ToString(), sourceId ) )
         {
-            this.LogSource.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind.ToString() ) );
+            this.Source.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind.ToString() ) );
         }
     }
 
@@ -301,7 +301,7 @@ public class RedisCachingBackend : CachingBackend
                 return true;
 
             default:
-                this.LogSource.Debug.Write( Formatted( "Event {Kind} ignored.", kind ) );
+                this.Source.Debug.Write( Formatted( "Event {Kind} ignored.", kind ) );
 
                 break;
         }
@@ -318,7 +318,7 @@ public class RedisCachingBackend : CachingBackend
     protected Task SendEventAsync( string kind, string key )
     {
         var value = kind + ":" + this.Id + ":" + key;
-        this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
+        this.Source.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
 
         return this.NotificationQueue.Subscriber.PublishAsync( this._keyBuilder.EventsChannel, value );
     }
@@ -331,7 +331,7 @@ public class RedisCachingBackend : CachingBackend
     protected void SendEvent( string kind, string key )
     {
         var value = kind + ":" + this.Id + ":" + key;
-        this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
+        this.Source.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
 
         this.NotificationQueue.Subscriber.Publish( this._keyBuilder.EventsChannel, value );
     }
@@ -605,7 +605,7 @@ public class RedisCachingBackend : CachingBackend
         }
         catch ( Exception e )
         {
-            this.LogSource.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
+            this.Source.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
             this._backgroundTaskExceptions++;
         }
     }

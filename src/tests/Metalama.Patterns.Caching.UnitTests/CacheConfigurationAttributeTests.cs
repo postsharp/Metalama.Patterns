@@ -87,56 +87,46 @@ namespace Metalama.Patterns.Caching.Tests
 
         private void DoCachingAttributeTest( Func<object> getValueAction, bool defaultProfile )
         {
-            var backend =
+            using var context =
                 this.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
+
+            var backend = context.Backend;
 
             TestProfileConfigurationFactory.CreateProfile( _testCachingAttributeProfileName );
 
-            try
-            {
-                Assert.Null( backend.LastCachedKey );
-                Assert.Null( backend.LastCachedItem );
+            Assert.Null( backend.LastCachedKey );
+            Assert.Null( backend.LastCachedItem );
 
-                getValueAction.Invoke();
+            getValueAction.Invoke();
 
-                Assert.NotNull( backend.LastCachedKey );
-                Assert.NotNull( backend.LastCachedItem );
+            Assert.NotNull( backend.LastCachedKey );
+            Assert.NotNull( backend.LastCachedItem );
 
-                Assert.Equal(
-                    defaultProfile ? CachingProfile.DefaultName : _testCachingAttributeProfileName,
-                    backend.LastCachedItem!.Configuration!.ProfileName );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.Equal(
+                defaultProfile ? CachingProfile.DefaultName : _testCachingAttributeProfileName,
+                backend.LastCachedItem!.Configuration!.ProfileName );
         }
 
         private async Task DoCachingAttributeTestAsync( Func<Task<object>> getValueAction, bool defaultProfile )
         {
-            var backend =
+            await using var context =
                 this.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
+
+            var backend = context.Backend;
 
             TestProfileConfigurationFactory.CreateProfile( _testCachingAttributeProfileName );
 
-            try
-            {
-                Assert.Null( backend.LastCachedKey );
-                Assert.Null( backend.LastCachedItem );
+            Assert.Null( backend.LastCachedKey );
+            Assert.Null( backend.LastCachedItem );
 
-                await getValueAction.Invoke();
+            await getValueAction.Invoke();
 
-                Assert.NotNull( backend.LastCachedKey );
-                Assert.NotNull( backend.LastCachedItem );
+            Assert.NotNull( backend.LastCachedKey );
+            Assert.NotNull( backend.LastCachedItem );
 
-                Assert.Equal(
-                    defaultProfile ? CachingProfile.DefaultName : _testCachingAttributeProfileName,
-                    backend.LastCachedItem!.Configuration!.ProfileName );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            Assert.Equal(
+                defaultProfile ? CachingProfile.DefaultName : _testCachingAttributeProfileName,
+                backend.LastCachedItem!.Configuration!.ProfileName );
         }
 
         [Fact]

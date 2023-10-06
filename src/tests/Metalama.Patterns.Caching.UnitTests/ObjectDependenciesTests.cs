@@ -28,49 +28,42 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestOneDependency()
         {
-            this.InitializeTestWithCachingBackend( _testOneDependencyProfileName );
+            using var context = this.InitializeTestWithCachingBackend( _testOneDependencyProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testOneDependencyProfileName );
 
-            try
-            {
-                var cachingClass = new TestOneDependencyCachingClass();
-                var currentId = 0;
+            var cachingClass = new TestOneDependencyCachingClass();
+            var currentId = 0;
 
-                var value1 = cachingClass.GetValueAsDependency();
-                var called = cachingClass.Reset();
-                Assert.True( called, "The method was not called when the cache should be empty." );
-                AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
+            var value1 = cachingClass.GetValueAsDependency();
+            var called = cachingClass.Reset();
+            Assert.True( called, "The method was not called when the cache should be empty." );
+            AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
 
-                var value2 = cachingClass.GetValueAsDependency();
-                called = cachingClass.Reset();
-                Assert.False( called, "The method was called when its first return value should be cached." );
+            var value2 = cachingClass.GetValueAsDependency();
+            called = cachingClass.Reset();
+            Assert.False( called, "The method was called when its first return value should be cached." );
 
-                AssertEx.Equal(
-                    value1,
-                    value2,
-                    "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
+            AssertEx.Equal(
+                value1,
+                value2,
+                "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
 
-                CachingService.Default.Invalidate( value1 );
+            CachingService.Default.Invalidate( value1 );
 
-                ++currentId;
-                var value3 = cachingClass.GetValueAsDependency();
-                called = cachingClass.Reset();
-                Assert.True( called, "The method was not called when the cache item should be invalidated." );
-                AssertEx.Equal( currentId, value3.Id, "The second given value has unexpected ID." );
+            ++currentId;
+            var value3 = cachingClass.GetValueAsDependency();
+            called = cachingClass.Reset();
+            Assert.True( called, "The method was not called when the cache item should be invalidated." );
+            AssertEx.Equal( currentId, value3.Id, "The second given value has unexpected ID." );
 
-                var value4 = cachingClass.GetValueAsDependency();
-                called = cachingClass.Reset();
-                Assert.False( called, "The method was called when its second return value should be cached." );
+            var value4 = cachingClass.GetValueAsDependency();
+            called = cachingClass.Reset();
+            Assert.False( called, "The method was called when its second return value should be cached." );
 
-                AssertEx.Equal(
-                    value3,
-                    value4,
-                    "The second value, which should be returned from the cache, is not the same as the one which should have been cached." );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            AssertEx.Equal(
+                value3,
+                value4,
+                "The second value, which should be returned from the cache, is not the same as the one which should have been cached." );
         }
 
         #endregion TestOneDependency
@@ -92,49 +85,42 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestOneDependencyAsync()
         {
-            this.InitializeTestWithCachingBackend( _testOneDependencyAsyncProfileName );
+            await using var context = this.InitializeTestWithCachingBackend( _testOneDependencyAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testOneDependencyAsyncProfileName );
 
-            try
-            {
-                var cachingClass = new TestOneDependencyAsyncCachingClass();
-                var currentId = 0;
+            var cachingClass = new TestOneDependencyAsyncCachingClass();
+            var currentId = 0;
 
-                var value1 = await cachingClass.GetValueAsDependencyAsync();
-                var called = cachingClass.Reset();
-                Assert.True( called, "The method was not called when the cache should be empty." );
-                AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
+            var value1 = await cachingClass.GetValueAsDependencyAsync();
+            var called = cachingClass.Reset();
+            Assert.True( called, "The method was not called when the cache should be empty." );
+            AssertEx.Equal( currentId, value1.Id, "The first given value has unexpected ID." );
 
-                var value2 = await cachingClass.GetValueAsDependencyAsync();
-                called = cachingClass.Reset();
-                Assert.False( called, "The method was called when its first return value should be cached." );
+            var value2 = await cachingClass.GetValueAsDependencyAsync();
+            called = cachingClass.Reset();
+            Assert.False( called, "The method was called when its first return value should be cached." );
 
-                AssertEx.Equal(
-                    value1,
-                    value2,
-                    "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
+            AssertEx.Equal(
+                value1,
+                value2,
+                "The first value, which should be returned from the cache, is not the same as the one which should have been cached." );
 
-                await CachingService.Default.InvalidateAsync( value1 );
+            await CachingService.Default.InvalidateAsync( value1 );
 
-                ++currentId;
-                var value3 = await cachingClass.GetValueAsDependencyAsync();
-                called = cachingClass.Reset();
-                Assert.True( called, "The method was not called when the cache item should be invalidated." );
-                AssertEx.Equal( currentId, value3.Id, "The second given value has unexpected ID." );
+            ++currentId;
+            var value3 = await cachingClass.GetValueAsDependencyAsync();
+            called = cachingClass.Reset();
+            Assert.True( called, "The method was not called when the cache item should be invalidated." );
+            AssertEx.Equal( currentId, value3.Id, "The second given value has unexpected ID." );
 
-                var value4 = await cachingClass.GetValueAsDependencyAsync();
-                called = cachingClass.Reset();
-                Assert.False( called, "The method was called when its second return value should be cached." );
+            var value4 = await cachingClass.GetValueAsDependencyAsync();
+            called = cachingClass.Reset();
+            Assert.False( called, "The method was called when its second return value should be cached." );
 
-                AssertEx.Equal(
-                    value3,
-                    value4,
-                    "The second value, which should be returned from the cache, is not the same as the one which should have been cached." );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            AssertEx.Equal(
+                value3,
+                value4,
+                "The second value, which should be returned from the cache, is not the same as the one which should have been cached." );
         }
 
         #endregion TestOneDependencyAsync
@@ -183,28 +169,21 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedDependencies()
         {
-            this.InitializeTestWithCachingBackend( _testNestedDependenciesProfileName );
+            using var context = this.InitializeTestWithCachingBackend( _testNestedDependenciesProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesProfileName );
 
-            try
-            {
-                var cachingClass2 = new TestNestedDependenciesCachingClass2();
-                var cachingClass1 = cachingClass2.Class1;
+            var cachingClass2 = new TestNestedDependenciesCachingClass2();
+            var cachingClass1 = cachingClass2.Class1;
 
-                CachedValueClass value1 = cachingClass2.GetValueAsDependency();
-                cachingClass1.Reset();
-                cachingClass2.Reset();
+            CachedValueClass value1 = cachingClass2.GetValueAsDependency();
+            cachingClass1.Reset();
+            cachingClass2.Reset();
 
-                CachingService.Default.Invalidate( value1 );
+            CachingService.Default.Invalidate( value1 );
 
-                cachingClass2.GetValueAsDependency();
-                var called = cachingClass1.Reset();
-                Assert.True( called, "The method result did not get invalidated by the automatic dependency." );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            cachingClass2.GetValueAsDependency();
+            var called = cachingClass1.Reset();
+            Assert.True( called, "The method result did not get invalidated by the automatic dependency." );
         }
 
         #endregion TestNestedDependencies
@@ -253,28 +232,21 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestNestedDependenciesAsync()
         {
-            this.InitializeTestWithCachingBackend( _testNestedDependenciesAsyncProfileName );
+            await using var context = this.InitializeTestWithCachingBackend( _testNestedDependenciesAsyncProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesAsyncProfileName );
 
-            try
-            {
-                var cachingClass2 = new TestNestedDependenciesAsyncCachingClass2();
-                var cachingClass1 = cachingClass2.Class1;
+            var cachingClass2 = new TestNestedDependenciesAsyncCachingClass2();
+            var cachingClass1 = cachingClass2.Class1;
 
-                CachedValueClass value1 = await cachingClass2.GetValueAsDependencyAsync();
-                cachingClass1.Reset();
-                cachingClass2.Reset();
+            CachedValueClass value1 = await cachingClass2.GetValueAsDependencyAsync();
+            cachingClass1.Reset();
+            cachingClass2.Reset();
 
-                await CachingService.Default.InvalidateAsync( value1 );
+            await CachingService.Default.InvalidateAsync( value1 );
 
-                await cachingClass2.GetValueAsDependencyAsync();
-                var called = cachingClass1.Reset();
-                Assert.True( called, "The method result did not get invalidated by the automatic dependency." );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            await cachingClass2.GetValueAsDependencyAsync();
+            var called = cachingClass1.Reset();
+            Assert.True( called, "The method result did not get invalidated by the automatic dependency." );
         }
 
         #endregion TestNestedDependenciesAsync
@@ -320,27 +292,20 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedDependenciesWithEnumerable()
         {
-            this.InitializeTestWithCachingBackend( _testNestedDependenciesWithEnumerableProfileName );
+            using var context = this.InitializeTestWithCachingBackend( _testNestedDependenciesWithEnumerableProfileName );
             TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesWithEnumerableProfileName );
 
-            try
-            {
-                var cachingClass2 = new TestNestedDependenciesWithEnumerableCachingClass2();
+            var cachingClass2 = new TestNestedDependenciesWithEnumerableCachingClass2();
 
-                IList<TestNestedDependenciesWithEnumerableCachedValueClass> value1 = cachingClass2.GetTwoValuesAsDependencies().ToList();
-                var class1CallsCount = cachingClass2.Reset();
-                AssertEx.Equal( value1.Count, class1CallsCount, "The method did not get called for the first time." );
+            IList<TestNestedDependenciesWithEnumerableCachedValueClass> value1 = cachingClass2.GetTwoValuesAsDependencies().ToList();
+            var class1CallsCount = cachingClass2.Reset();
+            AssertEx.Equal( value1.Count, class1CallsCount, "The method did not get called for the first time." );
 
-                CachingService.Default.Invalidate( value1[0] );
+            CachingService.Default.Invalidate( value1[0] );
 
-                IList<TestNestedDependenciesWithEnumerableCachedValueClass> value2 = cachingClass2.GetTwoValuesAsDependencies().ToList();
-                class1CallsCount = cachingClass2.Reset();
-                AssertEx.Equal( value2.Count, class1CallsCount, "The method result did not get invalidated by the automatic dependency." );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            IList<TestNestedDependenciesWithEnumerableCachedValueClass> value2 = cachingClass2.GetTwoValuesAsDependencies().ToList();
+            class1CallsCount = cachingClass2.Reset();
+            AssertEx.Equal( value2.Count, class1CallsCount, "The method result did not get invalidated by the automatic dependency." );
         }
 
         #endregion TestNestedDependenciesWithEnumerable

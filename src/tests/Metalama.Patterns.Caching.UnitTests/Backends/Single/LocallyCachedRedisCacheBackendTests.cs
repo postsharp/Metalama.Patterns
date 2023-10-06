@@ -73,46 +73,32 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
         var testObject = new Issue15680CachingClass();
 
-        TestProfileConfigurationFactory.InitializeTestWithoutBackend();
-
         CachedValueClass setValue;
         var redisTestInstance = this._redisSetupFixture.TestInstance;
 
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        using ( CachingService.Default.DefaultBackend = RedisFactory.CreateBackend(
-                   this.TestContext,
-                   this._redisSetupFixture,
-                   prefix: redisKeyPrefix,
-                   locallyCached: false ) )
+        using ( this.WithBackend(
+                   RedisFactory.CreateBackend(
+                       this.TestContext,
+                       this._redisSetupFixture,
+                       prefix: redisKeyPrefix,
+                       locallyCached: false ) ) )
         {
-            try
-            {
-                setValue = testObject.GetValue();
-                Assert.True( testObject.Reset() );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            setValue = testObject.GetValue();
+            Assert.True( testObject.Reset() );
         }
 
-        using ( CachingService.Default.DefaultBackend = RedisFactory.CreateBackend(
-                   this.TestContext,
-                   this._redisSetupFixture,
-                   prefix: redisKeyPrefix,
-                   locallyCached: true ) )
+        using ( this.WithBackend(
+                   RedisFactory.CreateBackend(
+                       this.TestContext,
+                       this._redisSetupFixture,
+                       prefix: redisKeyPrefix,
+                       locallyCached: true ) ) )
         {
-            try
-            {
-                var retrievedValue = testObject.GetValue();
-                Assert.True( testObject.Reset() );
-                Assert.NotEqual( setValue, retrievedValue );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            var retrievedValue = testObject.GetValue();
+            Assert.True( testObject.Reset() );
+            Assert.NotEqual( setValue, retrievedValue );
         }
     }
 

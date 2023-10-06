@@ -13,12 +13,9 @@ namespace Metalama.Patterns.Caching;
 
 public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICachingService
 {
-    public static CachingService Default { get; set; } = new();
+    public static CachingService Default { get; set; } = CreateUninitialized();
 
     internal IServiceProvider? ServiceProvider { get; }
-
-    private volatile CacheKeyBuilder _keyBuilder;
-    private volatile CachingBackend _backend = new UninitializedCachingBackend();
 
     public FormatterRepository Formatters { get; } = new CachingFormatterRepository();
 
@@ -28,15 +25,28 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
 
     public ValueAdapterFactory ValueAdapters { get; } = new();
 
-    public CachingService( IServiceProvider? serviceProvider = null )
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CachingService"/> class.
+    /// </summary>
+    /// <param name="backend">The default back-end. If null, a new <see cref="MemoryCachingBackend"/> is created.</param>
+    /// <param name="serviceProvider">An optional <see cref="IServiceProvider"/>.</param>
+    public CachingService(
+        CachingBackend? backend = null,
+        Func<IFormatterRepository, CacheKeyBuilder>? keyBuilderFactory = null,
+        IServiceProvider? serviceProvider = null )
     {
         this.ServiceProvider = serviceProvider;
-        this._keyBuilder = new CacheKeyBuilder( this.Formatters );
+        this.DefaultBackend = backend ?? new MemoryCachingBackend();
+        this.KeyBuilder = new CacheKeyBuilder( this.Formatters );
         this.Profiles = new CachingProfileRegistry( this );
         this.Frontend = new CachingFrontend( this );
         this.AutoReloadManager = new AutoReloadManager( this );
-        this._defaultLogger = serviceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
+        this.KeyBuilder = keyBuilderFactory?.Invoke( this.Formatters ) ?? new CacheKeyBuilder( this.Formatters );
+        this._defaultLogger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
     }
+
+    internal static CachingService CreateUninitialized( IServiceProvider? serviceProvider = null )
+        => new( new UninitializedCachingBackend(), null, serviceProvider );
 
     /// <summary>
     /// Gets the set of distinct backends used in the service.
@@ -52,33 +62,16 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
     string ICachingService.GetDependencyKey( object o ) => this.KeyBuilder.BuildDependencyKey( o );
 
     /// <summary>
-    /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
+    /// Gets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
     /// </summary>
     [AllowNull]
-    public CacheKeyBuilder KeyBuilder
-    {
-        get => this._keyBuilder;
-        set => this._keyBuilder = value ?? new CacheKeyBuilder( this.Formatters );
-    }
+    public CacheKeyBuilder KeyBuilder { get; }
 
     /// <summary>
-    /// Gets or sets the default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
+    /// Gets default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
     /// </summary>
     [AllowNull]
-    public CachingBackend DefaultBackend
-    {
-        get => this._backend;
-        set
-        {
-            if ( this._backend == value )
-            {
-                return;
-            }
-
-            this._backend = value ?? new NullCachingBackend();
-            this.Profiles.OnChange();
-        }
-    }
+    public CachingBackend DefaultBackend { get; }
 
     /// <summary>
     /// Gets the repository of caching profiles (<see cref="CachingProfile"/>).

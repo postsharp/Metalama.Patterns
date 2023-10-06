@@ -4,10 +4,10 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Options;
 using Metalama.Patterns.Caching.Implementation;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Aspects;
 
 [RunTimeOrCompileTime]
-public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProvider
+public abstract class CachingBaseAttribute : Attribute, IHierarchicalOptionsProvider
 {
     private CachingOptions _options = new();
 
@@ -74,6 +74,6 @@ public abstract class BaseCachingAttribute : Attribute, IHierarchicalOptionsProv
         get => this._options.UseDependencyInjection ?? CachingOptions.DefaultCompileTimeOptions.UseDependencyInjection!.Value;
         set => this._options = this._options with { UseDependencyInjection = value };
     }
-    
+
     public IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context ) => new[] { this._options };
 }

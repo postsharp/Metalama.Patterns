@@ -15,7 +15,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 {
     private const int _connectDelay = 10;
 
-    private readonly LogSource _logger;
+    private readonly FlashtraceSource _logger;
     private readonly BlockingCollection<RedisNotification> _notificationQueue = new();
     private readonly ManualResetEventSlim _notificationProcessingLock = new( true );
     private readonly TaskCompletionSource<bool> _disposeTask = new();
@@ -45,7 +45,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         this._handler = handler;
         this._connectionTimeout = connectionTimeout;
         this.Subscriber = connection.GetSubscriber();
-        this._logger = serviceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
+        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
 
         this._notificationProcessingThread = new Thread( ProcessNotificationQueue )
         {
@@ -319,7 +319,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
             {
                 if ( !this.TryChangeStatus( Status.Default, Status.DisposingPhase1 ) )
                 {
-                    activity.SetOutcome( LogLevel.Debug, Formatted( "The method was already called." ) );
+                    activity.SetOutcome( FlashtraceLevel.Debug, Formatted( "The method was already called." ) );
                     this._disposeTask.Task.Wait();
 
                     return;
@@ -390,7 +390,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
             {
                 if ( !this.TryChangeStatus( Status.Default, Status.DisposingPhase1 ) )
                 {
-                    activity?.SetOutcome( LogLevel.Debug, Formatted( "The method was already called." ) );
+                    activity?.SetOutcome( FlashtraceLevel.Debug, Formatted( "The method was already called." ) );
                     await this._disposeTask.Task;
 
                     return;
@@ -417,7 +417,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 #if NETCOREAPP
                         await
 #endif
-                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                            using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                         {
                             await this._notificationProcessingThreadCompleted.Task;
 

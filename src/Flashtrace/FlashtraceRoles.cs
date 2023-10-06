@@ -8,7 +8,7 @@ namespace Flashtrace;
 /// List of standard logging roles.
 /// </summary>
 [PublicAPI]
-public static class LoggingRoles
+public static class FlashtraceRoles
 {
     /// <summary>
     /// Log records emitted by the Caching component.
@@ -26,7 +26,7 @@ public static class LoggingRoles
     public const string Meta = "Meta";
 
     /// <summary>
-    /// Default role for logging using the <see cref="LogSource"/> class.
+    /// Default role for logging using the <see cref="FlashtraceSource"/> class.
     /// </summary>
     public const string Default = "Default";
 

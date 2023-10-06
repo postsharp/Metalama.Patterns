@@ -43,7 +43,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         Type valueType,
         ICacheItemConfiguration configuration,
         Func<object?> valueProvider,
-        LogSource logger,
+        FlashtraceSource logger,
         bool isAsync )
     {
         if ( !backend.SupportedFeatures.Events )
@@ -126,7 +126,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         ICacheItemConfiguration Configuration,
         Type ReturnType,
         Func<object?> ValueProvider,
-        LogSource Logger,
+        FlashtraceSource Logger,
         bool IsAsync );
 
     private void Unsubscribe()

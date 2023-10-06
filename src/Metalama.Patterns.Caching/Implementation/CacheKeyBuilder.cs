@@ -14,7 +14,8 @@ namespace Metalama.Patterns.Caching.Implementation;
 public class CacheKeyBuilder : IDisposable
 {
     private readonly UnsafeStringBuilderPool _stringBuilderPool;
-    private readonly IFormatterRepository _formatterRepository;
+
+    public IFormatterRepository Formatters { get; }
 
     /// <summary>
     /// Gets a sentinel object that means that the parameter is not a part of the cache key, and should be ignored.
@@ -31,7 +32,7 @@ public class CacheKeyBuilder : IDisposable
     /// </param>
     public CacheKeyBuilder( IFormatterRepository formatterRepository, int maxKeySize = 1024 )
     {
-        this._formatterRepository = formatterRepository;
+        this.Formatters = formatterRepository;
         this._stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
     }
 
@@ -190,7 +191,7 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="type">A <see cref="Type"/>.</param>
-    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, Type type ) => this._formatterRepository.Get<Type>().Write( stringBuilder, type );
+    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, Type type ) => this.Formatters.Get<Type>().Write( stringBuilder, type );
 
     /// <summary>
     /// Appends a string representing an <see cref="object"/> to an <see cref="UnsafeStringBuilder"/>.
@@ -205,7 +206,7 @@ public class CacheKeyBuilder : IDisposable
         }
         else
         {
-            var formatter = this._formatterRepository.Get( o.GetType() );
+            var formatter = this.Formatters.Get( o.GetType() );
             formatter.Write( stringBuilder, o );
         }
     }

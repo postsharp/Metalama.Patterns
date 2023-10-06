@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Flashtrace.Contexts;
 
 /// <summary>
-/// Defines the minimal semantics of a logging context required by the <see cref="LogSource"/> class.
+/// Defines the minimal semantics of a logging context required by the <see cref="FlashtraceSource"/> class.
 /// This interface is not intended to be implemented by end users of Flashtrace.
 /// </summary>
 [PublicAPI]

@@ -1,79 +1,91 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Contexts;
+using Flashtrace.Loggers;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 
 namespace Flashtrace;
 
 /// <summary>
-/// Extension methods for the <see cref="IRoleLoggerFactory"/> interface.
+/// Extension methods for the <see cref="IFlashtraceRoleLoggerFactory"/> interface.
 /// </summary>
 [PublicAPI]
-public static class LoggerFactoryExtensions
+public static class FlashtraceExtensions
 {
-    private static readonly ConcurrentDictionary<CacheKey, LogSource> _cache = new();
+    private static readonly ConcurrentDictionary<CacheKey, FlashtraceSource> _cache = new();
 
-    public static LogSource GetLogSource( this IServiceProvider? serviceProvider, Type type, string role = LoggingRoles.Default )
+    public static IServiceCollection AddFlashtrace( this IServiceCollection serviceCollection )
     {
-        var factory = (ILoggerFactory?) serviceProvider?.GetService( typeof(ILoggerFactory) );
+        serviceCollection.Add(
+            ServiceDescriptor.Singleton<IFlashtraceLoggerFactory, NetCoreSourceLoggerFactory>(
+                provider => new NetCoreSourceLoggerFactory( provider.GetRequiredService<ILoggerFactory>() ) ) );
+
+        return serviceCollection;
+    }
+
+    public static FlashtraceSource GetFlashtraceSource( this IServiceProvider? serviceProvider, Type type, string role = FlashtraceRoles.Default )
+    {
+        var factory = (IFlashtraceLoggerFactory?) serviceProvider?.GetService( typeof(IFlashtraceLoggerFactory) );
 
         if ( factory == null )
         {
-            return LogSource.Null;
+            return FlashtraceSource.Null;
         }
         else
         {
-            return factory.ForRole( role ).GetLogSource( type );
+            return factory.ForRole( role ).GetFlashtraceSource( type );
         }
     }
 
-    public static LogSource GetLogSource( this IServiceProvider? serviceProvider, string sourceName, string role = LoggingRoles.Default )
+    public static FlashtraceSource GetFlashtraceSource( this IServiceProvider? serviceProvider, string sourceName, string role = FlashtraceRoles.Default )
     {
-        var factory = (ILoggerFactory?) serviceProvider?.GetService( typeof(ILoggerFactory) );
+        var factory = (IFlashtraceLoggerFactory?) serviceProvider?.GetService( typeof(IFlashtraceLoggerFactory) );
 
         if ( factory == null )
         {
-            return LogSource.Null;
+            return FlashtraceSource.Null;
         }
         else
         {
-            return factory.ForRole( role ).GetLogSource( sourceName );
+            return factory.ForRole( role ).GetFlashtraceSource( sourceName );
         }
     }
 
-    public static LogSource GetLogSource( this ILoggerFactory? loggerFactory, Type type, string role = LoggingRoles.Default )
+    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceLoggerFactory? loggerFactory, Type type, string role = FlashtraceRoles.Default )
     {
         if ( loggerFactory == null )
         {
-            return LogSource.Null;
+            return FlashtraceSource.Null;
         }
         else
         {
-            return loggerFactory.ForRole( role ).GetLogSource( type );
+            return loggerFactory.ForRole( role ).GetFlashtraceSource( type );
         }
     }
 
-    public static LogSource GetLogSource( this ILoggerFactory? loggerFactory, string sourceName, string role = LoggingRoles.Default )
+    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceLoggerFactory? loggerFactory, string sourceName, string role = FlashtraceRoles.Default )
     {
         if ( loggerFactory == null )
         {
-            return LogSource.Null;
+            return FlashtraceSource.Null;
         }
         else
         {
-            return loggerFactory.ForRole( role ).GetLogSource( sourceName );
+            return loggerFactory.ForRole( role ).GetFlashtraceSource( sourceName );
         }
     }
 
     /// <summary>
-    /// Gets a <see cref="LogSource"/> for a given role and <see cref="Type"/>.
+    /// Gets a <see cref="FlashtraceSource"/> for a given role and <see cref="Type"/>.
     /// </summary>
-    /// <param name="factory">An <see cref="IRoleLoggerFactory"/>.</param>
+    /// <param name="factory">An <see cref="IFlashtraceRoleLoggerFactory"/>.</param>
     /// <param name="type">The type that will emit the records.</param>
-    /// <returns>A <see cref="LogSource"/> for <paramref name="type"/>.</returns>
-    public static LogSource GetLogSource( this IRoleLoggerFactory factory, Type type )
+    /// <returns>A <see cref="FlashtraceSource"/> for <paramref name="type"/>.</returns>
+    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceRoleLoggerFactory factory, Type type )
     {
         if ( factory == null )
         {
@@ -97,7 +109,7 @@ public static class LoggerFactoryExtensions
         }
         else
         {
-            var newSource = new LogSource( factory.GetLogger( type ) );
+            var newSource = new FlashtraceSource( factory.GetLogger( type ) );
             _cache.TryAdd( cacheKey, newSource );
 
             return newSource;
@@ -105,12 +117,12 @@ public static class LoggerFactoryExtensions
     }
 
     /// <summary>
-    /// Gets a <see cref="LogSource"/> for a given role and <paramref name="sourceName"/>.
+    /// Gets a <see cref="FlashtraceSource"/> for a given role and <paramref name="sourceName"/>.
     /// </summary>
-    /// <param name="factory">An <see cref="IRoleLoggerFactory"/>.</param>
+    /// <param name="factory">An <see cref="IFlashtraceRoleLoggerFactory"/>.</param>
     /// <param name="sourceName">Log source name to be used by the backend. Not all backends support creating sources by name.</param>
-    /// <returns>A <see cref="LogSource"/> for <paramref name="sourceName"/>.</returns>
-    public static LogSource GetLogSource( this IRoleLoggerFactory factory, string sourceName )
+    /// <returns>A <see cref="FlashtraceSource"/> for <paramref name="sourceName"/>.</returns>
+    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceRoleLoggerFactory factory, string sourceName )
     {
         if ( factory == null )
         {
@@ -134,7 +146,7 @@ public static class LoggerFactoryExtensions
         }
         else
         {
-            var newSource = new LogSource( factory.GetLogger( sourceName ) );
+            var newSource = new FlashtraceSource( factory.GetLogger( sourceName ) );
             _cache.TryAdd( cacheKey, newSource );
 
             return newSource;
@@ -142,23 +154,23 @@ public static class LoggerFactoryExtensions
     }
 
     /// <summary>
-    /// Gets a <see cref="LogSource"/> for a given role and for the calling type.
+    /// Gets a <see cref="FlashtraceSource"/> for a given role and for the calling type.
     /// </summary>
-    /// <param name="factory">An <see cref="IRoleLoggerFactory"/>.</param>
-    /// <returns>A <see cref="LogSource"/> for the calling type.</returns>
-    public static LogSource GetLogSource( this IRoleLoggerFactory factory )
+    /// <param name="factory">An <see cref="IFlashtraceRoleLoggerFactory"/>.</param>
+    /// <returns>A <see cref="FlashtraceSource"/> for the calling type.</returns>
+    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceRoleLoggerFactory factory )
     {
         if ( factory == null )
         {
             throw new ArgumentNullException( nameof(factory) );
         }
 
-        return factory.GetLogSource( CallerInfo.GetDynamic( 1 ) );
+        return factory.GetFlashtraceSource( CallerInfo.GetDynamic( 1 ) );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public static LogSource GetLogSource( this IRoleLoggerFactory factory, in CallerInfo callerInfo )
+    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceRoleLoggerFactory factory, in CallerInfo callerInfo )
     {
         if ( factory == null )
         {
@@ -168,7 +180,7 @@ public static class LoggerFactoryExtensions
         // If we don't have a caller type, it's preferable to use System.Object as a safe fallback rather than throwing an exception.
         var callerType = callerInfo.SourceType ?? typeof(object);
 
-        return factory.GetLogSource( callerType );
+        return factory.GetFlashtraceSource( callerType );
     }
 
     private readonly struct CacheKey : IEquatable<CacheKey>

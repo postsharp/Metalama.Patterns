@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using Metalama.Patterns.Caching.Implementation;
 
-namespace Metalama.Patterns.Caching;
+namespace Metalama.Patterns.Caching.Aspects;
 
 #pragma warning disable SA1623
 

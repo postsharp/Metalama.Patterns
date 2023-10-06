@@ -1196,6 +1196,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
             }
         }
 
+        protected IDisposable WithBackend<T>( T backend )
+            where T : CachingBackend
+        {
+            CachingService.Default = new CachingService( backend, serviceProvider: this.ServiceProvider );
+
+            return new CachingTestContext<T>( backend );
+        }
+
         private sealed class NullTestableCachingComponent : ITestableCachingComponent
         {
             public int BackgroundTaskExceptions => 0;
@@ -1212,6 +1220,29 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 return new ValueTask( Task.CompletedTask );
 #endif
             }
+        }
+    }
+
+    public sealed class CachingTestContext<T> : IDisposable, IAsyncDisposable
+        where T : CachingBackend
+    {
+        public T Backend { get; }
+
+        public CachingTestContext( T backend )
+        {
+            this.Backend = backend;
+        }
+
+        public void Dispose()
+        {
+            TestableCachingComponentDisposer.Dispose( CachingService.Default.DefaultBackend );
+            CachingService.Default = CachingService.CreateUninitialized();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await TestableCachingComponentDisposer.DisposeAsync( CachingService.Default.DefaultBackend );
+            CachingService.Default = CachingService.CreateUninitialized();
         }
     }
 }

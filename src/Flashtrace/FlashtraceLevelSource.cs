@@ -13,20 +13,20 @@ using System.Runtime.CompilerServices;
 namespace Flashtrace;
 
 /// <summary>
-/// A facade to a <see cref="Flashtrace.LogSource"/> constrained to a specific <see cref="LogLevel"/>.
-/// Instances of the <see cref="LogLevelSource"/> class are exposed as properties of the <see cref="Flashtrace.LogSource"/>
-/// class, e.g. <see cref="Flashtrace.LogSource.Debug"/> or <see cref="Flashtrace.LogSource.Error"/>.
+/// A facade to a <see cref="FlashtraceSource"/> constrained to a specific <see cref="FlashtraceLevel"/>.
+/// Instances of the <see cref="FlashtraceLevelSource"/> class are exposed as properties of the <see cref="FlashtraceSource"/>
+/// class, e.g. <see cref="FlashtraceSource.Debug"/> or <see cref="FlashtraceSource.Error"/>.
 /// </summary>
 [PublicAPI]
 [SuppressMessage(
     "StyleCop.CSharp.ReadabilityRules",
     "SA1124:Do not use regions",
     Justification = "Class has many method overloads which suit grouping by name." )]
-public sealed class LogLevelSource
+public sealed class FlashtraceLevelSource
 {
-    internal LogLevelSource( LogSource logSource, LogLevel level )
+    internal FlashtraceLevelSource( FlashtraceSource flashtraceSource, FlashtraceLevel level )
     {
-        this.LogSource = logSource;
+        this.Source = flashtraceSource;
         this.Level = level;
     }
 
@@ -74,7 +74,7 @@ public sealed class LogLevelSource
     public void Write<T>( in T message, Exception? exception, in WriteMessageOptions options, in CallerInfo callerInfo )
         where T : IMessage
     {
-        var (logger, isEnabled) = this.LogSource.Logger.GetContextLocalLogger( this.Level );
+        var (logger, isEnabled) = this.Source.Logger.GetContextLocalLogger( this.Level );
 
         if ( !isEnabled )
         {
@@ -118,7 +118,7 @@ public sealed class LogLevelSource
     /// <remarks>The activity must be closed using
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>,
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetResult{TResult}(TResult,in CloseActivityOptions)"/>,
-    /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(FlashtraceLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
     /// or <see cref="Activities.LogActivity{TActivityDescription}.SetException(Exception,in CloseActivityOptions)"/>.
     /// </remarks>
     [MethodImpl( MethodImplOptions.NoInlining )]
@@ -139,7 +139,7 @@ public sealed class LogLevelSource
     /// <remarks>The activity must be closed using
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>
     /// <see cref="Activities.LogActivity{TActivityDescription}.SetResult{TResult}(TResult,in CloseActivityOptions)"/>,
-    /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
+    /// <see cref="Activities.LogActivity{TActivityDescription}.SetOutcome{TMessage}(FlashtraceLevel,in TMessage,Exception?,in CloseActivityOptions)"/>
     /// or <see cref="Activities.LogActivity{TActivityDescription}.SetException(Exception,in CloseActivityOptions)"/>.
     /// </remarks>
     [MethodImpl( MethodImplOptions.NoInlining )]
@@ -171,7 +171,7 @@ public sealed class LogLevelSource
         try
         {
             var level = this.Level;
-            IContextLocalLogger logger;
+            IFlashtraceLocalLogger logger;
             bool isEnabled;
 
             ILoggingContext? context = null;
@@ -182,7 +182,7 @@ public sealed class LogLevelSource
                 // ways to disable logging: disabled backend or disabled local configuration.
                 level = level.WithForce();
 
-                (logger, isEnabled) = this.LogSource.Logger.GetContextLocalLogger( level );
+                (logger, isEnabled) = this.Source.Logger.GetContextLocalLogger( level );
 
                 if ( !isEnabled )
                 {
@@ -195,13 +195,13 @@ public sealed class LogLevelSource
 
                 // The log source has changed during OpenActivity because we're now within a ".Use()" call so we must update ourselves
                 // to use the new log source:
-                logger = this.LogSource.Logger.GetContextLocalLogger();
+                logger = this.Source.Logger.GetContextLocalLogger();
                 isEnabled = true;
             }
             else if ( options.Data.HasInheritedProperty )
             {
                 // We need to open a context anyway, except when it is "hard" disabled.
-                (logger, isEnabled) = this.LogSource.Logger.GetContextLocalLogger( this.Level );
+                (logger, isEnabled) = this.Source.Logger.GetContextLocalLogger( this.Level );
 
                 if ( isEnabled )
                 {
@@ -214,7 +214,7 @@ public sealed class LogLevelSource
             }
             else
             {
-                (logger, isEnabled) = this.LogSource.Logger.GetContextLocalLogger( this.Level );
+                (logger, isEnabled) = this.Source.Logger.GetContextLocalLogger( this.Level );
 
                 if ( isEnabled )
                 {
@@ -238,11 +238,11 @@ public sealed class LogLevelSource
                 }
             }
 
-            return new LogActivity<T>( logger, new ActivityLogLevels( level, level.CopyForce( this.LogSource.FailureLevel ) ), context, description );
+            return new LogActivity<T>( logger, new ActivityLevels( level, level.CopyForce( this.Source.FailureLevel ) ), context, description );
         }
         catch ( Exception e )
         {
-            this.LogSource.Logger.OnInternalException( e );
+            this.Source.Logger.OnInternalException( e );
 
             return default;
         }
@@ -483,21 +483,21 @@ public sealed class LogLevelSource
         }
     }
 
-    internal LogSource LogSource { get; }
+    internal FlashtraceSource Source { get; }
 
     /// <summary>
-    /// Gets the <see cref="LogLevel"/> to which the current <see cref="LogLevelSource"/> is constrained.
+    /// Gets the <see cref="FlashtraceLevel"/> to which the current <see cref="FlashtraceLevelSource"/> is constrained.
     /// </summary>
-    public LogLevel Level { get; }
+    public FlashtraceLevel Level { get; }
 
     /// <summary>
     /// Gets a value indicating whether logging is enabled for the current <see cref="Level"/>.
     /// </summary>
-    public bool IsEnabled => this.LogSource.Logger.IsEnabled( this.Level );
+    public bool IsEnabled => this.Source.Logger.IsEnabled( this.Level );
 
     /// <summary>
-    /// Gets the current <see cref="LogLevelSource"/>, or <c>null</c> if logging is not enabled for the current instance. This
+    /// Gets the current <see cref="FlashtraceLevelSource"/>, or <c>null</c> if logging is not enabled for the current instance. This
     /// property allows to write conditional logging using the <c>?.</c> operator.
     /// </summary>
-    public LogLevelSource? IfEnabled => this.IsEnabled ? this : null;
+    public FlashtraceLevelSource? IfEnabled => this.IsEnabled ? this : null;
 }

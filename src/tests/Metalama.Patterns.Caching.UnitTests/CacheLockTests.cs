@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Aspects;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Locking;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
@@ -15,13 +16,13 @@ namespace Metalama.Patterns.Caching.Tests
         public CacheLockTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {
             Console.WriteLine( "TestInitialize" );
-            this.InitializeTestWithCachingBackend( "CacheLockTests" );
+            this._context = this.InitializeTestWithCachingBackend( "CacheLockTests" );
             CachingService.Default.Profiles["LocalLock"].LockManager = new LocalLockManager();
         }
 
         public void Dispose()
         {
-            TestProfileConfigurationFactory.DisposeTest();
+            this._context.Dispose();
         }
 
         [Fact]
@@ -138,6 +139,7 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         private static readonly TimeSpan _globalTimeout = TimeSpan.FromSeconds( 10 );
+        private readonly CachingTestContext<MemoryCachingBackend> _context;
 
         [Fact]
         public void TestSyncLockTimeoutIgnoreLock()
