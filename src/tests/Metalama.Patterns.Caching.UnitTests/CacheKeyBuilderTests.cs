@@ -36,8 +36,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private void DoTestMethod( string profileName, string expectedKey, Func<string> action )
         {
-            using var context = this.InitializeTestWithCachingBackend( profileName, f => new MyCacheKeyBuilder( f ) );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            using var context = this.InitializeTest( profileName, b => b.WithKeyBuilder( f => new MyCacheKeyBuilder( f ) ) );
 
             var keyBuilder = (MyCacheKeyBuilder) CachingService.Default.KeyBuilder;
             action();
@@ -47,8 +46,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private async Task DoTestMethodAsync( string profileName, string expectedKey, Func<Task<string>> action )
         {
-            await using var context = this.InitializeTestWithCachingBackend( profileName, f => new MyCacheKeyBuilder( f ) );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            await using var context = this.InitializeTest( profileName, b => b.WithKeyBuilder( f => new MyCacheKeyBuilder( f ) ) );
 
             var keyBuilder = (MyCacheKeyBuilder) CachingService.Default.KeyBuilder;
             await action();

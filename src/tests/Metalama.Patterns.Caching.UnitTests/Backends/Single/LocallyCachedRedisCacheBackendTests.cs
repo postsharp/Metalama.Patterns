@@ -78,23 +78,27 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        using ( this.WithBackend(
+        using ( this.InitializeTest(
+                   "TestIssue15680",
                    RedisFactory.CreateBackend(
                        this.TestContext,
                        this._redisSetupFixture,
                        prefix: redisKeyPrefix,
-                       locallyCached: false ) ) )
+                       locallyCached: false ),
+                   b => b.WithProfile( "Issue15680" ) ) )
         {
             setValue = testObject.GetValue();
             Assert.True( testObject.Reset() );
         }
 
-        using ( this.WithBackend(
+        using ( this.InitializeTest(
+                   "TestIssue15680",
                    RedisFactory.CreateBackend(
                        this.TestContext,
                        this._redisSetupFixture,
                        prefix: redisKeyPrefix,
-                       locallyCached: true ) ) )
+                       locallyCached: true ),
+                   b => b.WithProfile( "Issue15680" ) ) )
         {
             var retrievedValue = testObject.GetValue();
             Assert.True( testObject.Reset() );

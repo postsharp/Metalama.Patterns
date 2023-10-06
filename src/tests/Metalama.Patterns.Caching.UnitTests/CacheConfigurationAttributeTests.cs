@@ -92,8 +92,6 @@ namespace Metalama.Patterns.Caching.Tests
 
             var backend = context.Backend;
 
-            TestProfileConfigurationFactory.CreateProfile( _testCachingAttributeProfileName );
-
             Assert.Null( backend.LastCachedKey );
             Assert.Null( backend.LastCachedItem );
 
@@ -113,8 +111,6 @@ namespace Metalama.Patterns.Caching.Tests
                 this.InitializeTestWithTestingBackend( _testCachingAttributeProfileName );
 
             var backend = context.Backend;
-
-            TestProfileConfigurationFactory.CreateProfile( _testCachingAttributeProfileName );
 
             Assert.Null( backend.LastCachedKey );
             Assert.Null( backend.LastCachedItem );

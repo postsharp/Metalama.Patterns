@@ -61,8 +61,6 @@ namespace Metalama.Patterns.Caching.Tests
         {
             using var context = this.InitializeTestWithTestingBackend( _testDependencyPropagationProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( _testDependencyPropagationProfileName );
-
             var cachingClass = new TestDependencyPropagationCachingClass();
 
             cachingClass.GetValue();
@@ -127,8 +125,6 @@ namespace Metalama.Patterns.Caching.Tests
         public async Task TestDependencyPropagationAsync()
         {
             await using var context = this.InitializeTestWithTestingBackend( _testDependencyPropagationAsyncProfileName );
-
-            TestProfileConfigurationFactory.CreateProfile( _testDependencyPropagationAsyncProfileName );
 
             var cachingClass = new TestDependencyPropagationAsyncCachingClass();
 
@@ -202,8 +198,6 @@ namespace Metalama.Patterns.Caching.Tests
         {
             await using var context = this.InitializeTestWithTestingBackend( _testDisposedContextAsyncProfileName );
 
-            TestProfileConfigurationFactory.CreateProfile( _testDisposedContextAsyncProfileName );
-
             // This test is trying not-so-nicely replicate previously crashing scenario with context being disposed before it's child context.
             // The real-world scenario is probably much less strange and much more complicated.
 
@@ -269,8 +263,6 @@ namespace Metalama.Patterns.Caching.Tests
         public void TestSuspendedDependencyPropagation()
         {
             using var context = this.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationProfileName );
-
-            TestProfileConfigurationFactory.CreateProfile( _testSuspendedDependencyPropagationProfileName );
 
             var cachingClass = new TestSuspendedDependencyPropagationCachingClass();
 
@@ -343,8 +335,6 @@ namespace Metalama.Patterns.Caching.Tests
         public async Task TestSuspendedDependencyPropagationAsync()
         {
             await using var context = this.InitializeTestWithTestingBackend( _testSuspendedDependencyPropagationAsyncProfileName );
-
-            TestProfileConfigurationFactory.CreateProfile( _testSuspendedDependencyPropagationAsyncProfileName );
 
             var cachingClass = new TestSuspendedDependencyPropagationAsyncCachingClass();
 

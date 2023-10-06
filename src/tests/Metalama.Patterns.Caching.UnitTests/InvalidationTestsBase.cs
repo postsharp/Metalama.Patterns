@@ -39,8 +39,7 @@ namespace Metalama.Patterns.Caching.Tests
             bool othersShouldWork,
             bool onlyPairsShouldWork = false )
         {
-            using var context = this.InitializeTestWithCachingBackend( profileName );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            using var context = this.InitializeTest( profileName );
 
             Assert.Equal( cachedMethods.Length, invalidatingMethods.Length );
 

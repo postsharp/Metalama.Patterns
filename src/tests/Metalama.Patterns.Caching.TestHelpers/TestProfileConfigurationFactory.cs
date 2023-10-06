@@ -4,6 +4,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 {
     public static class TestProfileConfigurationFactory
     {
+        [Obsolete( "", true )]
         public static CachingProfile CreateProfile( string name ) => CachingService.Default.Profiles[name];
     }
 }

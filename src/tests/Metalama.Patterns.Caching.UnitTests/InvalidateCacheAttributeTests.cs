@@ -1750,8 +1750,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedContexts()
         {
-            using var context = this.InitializeTestWithCachingBackend( _testNestedContextsProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testNestedContextsProfileName );
+            using var context = this.InitializeTest( _testNestedContextsProfileName );
 
             var c = new TestNestedContextsClass();
             var call1 = c.OuterMethod();
@@ -1795,8 +1794,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestNestedContextsAsync()
         {
-            await using var context = this.InitializeTestWithCachingBackend( _testNestedContextsAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testNestedContextsAsyncProfileName );
+            await using var context = this.InitializeTest( _testNestedContextsAsyncProfileName );
 
             var c = new TestNestedContextsAsyncClass();
             var call1 = await c.OuterMethodAsync();

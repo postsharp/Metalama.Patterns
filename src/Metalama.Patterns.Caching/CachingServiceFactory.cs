@@ -22,7 +22,7 @@ public static class CachingServiceFactory
 
                     return new CachingService(
                         backend,
-                        keyBuilderFactory == null ? null : formatters => keyBuilderFactory( serviceProvider, formatters ),
+                        keyBuilderFactory: keyBuilderFactory == null ? null : formatters => keyBuilderFactory( serviceProvider, formatters ),
                         serviceProvider: serviceProvider );
                 } ) );
 

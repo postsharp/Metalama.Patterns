@@ -10,6 +10,29 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
 
+public class TestBuilder
+{
+    public List<CachingProfile> Profiles { get; } = new();
+
+    public Func<IFormatterRepository, CacheKeyBuilder>? KeyBuilderFactory { get; private set; }
+
+    public TestBuilder WithProfile( string name ) => this.WithProfile( new CachingProfile( name ) );
+
+    public TestBuilder WithProfile( CachingProfile profile )
+    {
+        this.Profiles.Add( profile );
+
+        return this;
+    }
+
+    public TestBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilder> factory )
+    {
+        this.KeyBuilderFactory = factory;
+
+        return this;
+    }
+}
+
 public abstract class BaseCachingTests
 {
     protected BaseCachingTests( ITestOutputHelper testOutputHelper )
@@ -25,7 +48,7 @@ public abstract class BaseCachingTests
 
     protected ITestOutputHelper TestOutputHelper { get; }
 
-    internal static void ResetCachingServices()
+    private static void ResetCachingServices()
     {
         Assert.True(
             CachingService.Default.DefaultBackend is UninitializedCachingBackend or NullCachingBackend,
@@ -35,23 +58,46 @@ public abstract class BaseCachingTests
         CachingService.Default = uninitialized;
     }
 
-    protected CachingTestContext<MemoryCachingBackend> InitializeTestWithCachingBackend(
+    protected CachingTestContext<T> InitializeTest<T>(
         string name,
-        Func<IFormatterRepository, CacheKeyBuilder>? keyBuilderFactory = null )
+        T backend,
+        Action<TestBuilder>? buildTest = null )
+        where T : CachingBackend
     {
         ResetCachingServices();
-        var backend = new MemoryCachingBackend( new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider } ) { DebugName = name };
-        CachingService.Default = new CachingService( backend, keyBuilderFactory, serviceProvider: this.ServiceProvider );
+        var testBuilder = new TestBuilder();
+        buildTest?.Invoke( testBuilder );
 
-        return new CachingTestContext<MemoryCachingBackend>( backend );
+        // We always add a profile named after the test because many tests use this trick.
+        if ( testBuilder.Profiles.All( p => p.Name != name ) )
+        {
+            testBuilder.Profiles.Add( new CachingProfile( name ) );
+        }
+
+        CachingService.Default = new CachingService(
+            backend,
+            profiles: testBuilder.Profiles,
+            keyBuilderFactory: testBuilder.KeyBuilderFactory,
+            serviceProvider: this.ServiceProvider );
+
+        return new CachingTestContext<T>( backend );
     }
 
-    protected CachingTestContext<TestingCacheBackend> InitializeTestWithTestingBackend( string name )
+    protected CachingTestContext<MemoryCachingBackend> InitializeTest(
+        string name,
+        Action<TestBuilder>? buildTest = null )
     {
-        ResetCachingServices();
-        var backend = new TestingCacheBackend( "test-" + name, this.ServiceProvider );
-        CachingService.Default = new CachingService( backend, serviceProvider: this.ServiceProvider );
+        var backend = new MemoryCachingBackend( new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider } ) { DebugName = name };
 
-        return new CachingTestContext<TestingCacheBackend>( backend );
+        return this.InitializeTest( name, backend, buildTest );
+    }
+
+    protected CachingTestContext<TestingCacheBackend> InitializeTestWithTestingBackend(
+        string name,
+        Action<TestBuilder>? buildTest = null )
+    {
+        var backend = new TestingCacheBackend( "test-" + name, this.ServiceProvider );
+
+        return this.InitializeTest( name, backend, buildTest );
     }
 }

@@ -32,13 +32,32 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
     /// <param name="serviceProvider">An optional <see cref="IServiceProvider"/>.</param>
     public CachingService(
         CachingBackend? backend = null,
+        IEnumerable<CachingProfile>? profiles = null,
         Func<IFormatterRepository, CacheKeyBuilder>? keyBuilderFactory = null,
         IServiceProvider? serviceProvider = null )
     {
-        this.ServiceProvider = serviceProvider;
+        var profilesDictionary = ImmutableDictionary.CreateBuilder<string, CachingProfile>( StringComparer.Ordinal );
         this.DefaultBackend = backend ?? new MemoryCachingBackend();
+
+        if ( profiles != null )
+        {
+            foreach ( var profile in profiles )
+            {
+                profilesDictionary.Add( profile.Name, profile );
+                profile.Initialize( this.DefaultBackend );
+            }
+        }
+
+        if ( !profilesDictionary.ContainsKey( CachingProfile.DefaultName ) )
+        {
+            var profile = new CachingProfile();
+            profilesDictionary.Add( CachingProfile.DefaultName, profile );
+            profile.Initialize( this.DefaultBackend );
+        }
+
+        this.ServiceProvider = serviceProvider;
         this.KeyBuilder = new CacheKeyBuilder( this.Formatters );
-        this.Profiles = new CachingProfileRegistry( this );
+        this.Profiles = new CachingProfileRegistry( profilesDictionary.ToImmutable() );
         this.Frontend = new CachingFrontend( this );
         this.AutoReloadManager = new AutoReloadManager( this );
         this.KeyBuilder = keyBuilderFactory?.Invoke( this.Formatters ) ?? new CacheKeyBuilder( this.Formatters );
@@ -46,7 +65,7 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
     }
 
     internal static CachingService CreateUninitialized( IServiceProvider? serviceProvider = null )
-        => new( new UninitializedCachingBackend(), null, serviceProvider );
+        => new( new UninitializedCachingBackend(), serviceProvider: serviceProvider );
 
     /// <summary>
     /// Gets the set of distinct backends used in the service.

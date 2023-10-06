@@ -76,8 +76,7 @@ namespace Metalama.Patterns.Caching.Tests
             Func<CachedValueClass> invalidatingOrRecachingMethod,
             Func<bool> resetMethod )
         {
-            using var context = this.InitializeTestWithCachingBackend( profileName );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            using var context = this.InitializeTest( profileName );
 
             var initialValue = cachedMethod();
             Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
@@ -140,8 +139,7 @@ namespace Metalama.Patterns.Caching.Tests
             Func<Task<CachedValueClass>> invalidatingOrRecachingMethod,
             Func<bool> resetMethod )
         {
-            await using var context = this.InitializeTestWithCachingBackend( profileName );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            await using var context = this.InitializeTest( profileName );
 
             var initialValue = await cachedMethod();
             Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
@@ -684,8 +682,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestImperativeInvalidationWithNestedContexts()
         {
-            using var context = this.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testImperativeInvalidationWithNestedContextsProfileName );
+            using var context = this.InitializeTest( _testImperativeInvalidationWithNestedContextsProfileName );
 
             var c = new TestImperativeInvalidationWithNestedContextsClass();
             var call1 = c.OuterMethod();
@@ -723,8 +720,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestImperativeInvalidationWithNestedContextsAsync()
         {
-            await using var context = this.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
+            await using var context = this.InitializeTest( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
 
             var c = new TestImperativeInvalidationWithNestedContextsAsyncClass();
             var call1 = await c.OuterMethodAsync();
@@ -762,8 +758,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestRecachingOfInnerMethod()
         {
-            using var context = this.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfInnerMethodProfileName );
+            using var context = this.InitializeTest( _testRecachingOfInnerMethodProfileName );
 
             var c = new TestRecachingOfInnerMethodClass();
             var call1 = c.OuterMethod();
@@ -802,8 +797,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestRecachingOfInnerMethodAsync()
         {
-            await using var context = this.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfInnerMethodAsyncProfileName );
+            await using var context = this.InitializeTest( _testRecachingOfInnerMethodAsyncProfileName );
 
             var c = new TestRecachingOfInnerMethodAsyncClass();
             var call1 = await c.OuterMethodAsync();
@@ -842,8 +836,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestRecachingOfOuterMethod()
         {
-            using var context = this.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfOuterMethodProfileName );
+            using var context = this.InitializeTest( _testRecachingOfOuterMethodProfileName );
 
             var c = new TestRecachingOfOuterMethodClass();
             var call1 = c.OuterMethod();
@@ -882,8 +875,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestRecachingOfOuterMethodAsync()
         {
-            await using var context = this.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfOuterMethodAsyncProfileName );
+            await using var context = this.InitializeTest( _testRecachingOfOuterMethodAsyncProfileName );
 
             var c = new TestRecachingOfOuterMethodAsyncClass();
             var call1 = await c.OuterMethodAsync();

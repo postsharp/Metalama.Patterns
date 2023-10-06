@@ -9,25 +9,32 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class CacheLockTests : BaseCachingTests, IDisposable
+    public sealed class CacheLockTests : BaseCachingTests
     {
         private int _counter;
 
-        public CacheLockTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
-        {
-            Console.WriteLine( "TestInitialize" );
-            this._context = this.InitializeTestWithCachingBackend( "CacheLockTests" );
-            CachingService.Default.Profiles["LocalLock"].LockManager = new LocalLockManager();
-        }
+        public CacheLockTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
-        public void Dispose()
+        private CachingTestContext<MemoryCachingBackend> InitializeTest(
+            int acquireLockTimeout = -1,
+            IAcquireLockTimeoutStrategy? acquireLockTimeoutStrategy = null )
         {
-            this._context.Dispose();
+            return this.InitializeTest(
+                "CacheLockTests",
+                b => b.WithProfile(
+                    new CachingProfile( "LocalLock" )
+                    {
+                        LockManager = new LocalLockManager(),
+                        AcquireLockTimeout = TimeSpan.FromMilliseconds( acquireLockTimeout ),
+                        AcquireLockTimeoutStrategy = acquireLockTimeoutStrategy ?? new DefaultAcquireLockTimeoutStrategy()
+                    } ) );
         }
 
         [Fact]
         public void TestSyncLock()
         {
+            using var context = this.InitializeTest();
+
             var t1 = Task.Run( () => this.TestLoop() );
             var t2 = Task.Run( () => this.TestLoop() );
 
@@ -38,6 +45,8 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncLock()
         {
+            using var context = this.InitializeTest();
+
             var t1 = Task.Run( this.TestLoopAsync );
             var t2 = Task.Run( this.TestLoopAsync );
 
@@ -47,7 +56,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSyncLockTimeout()
         {
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( 2 );
+            using var context = this.InitializeTest( 2 );
 
             Task t1 = Task.Run( () => this.CachedMethod( 100 ) );
             Task t2 = Task.Run( () => this.CachedMethod( 100 ) );
@@ -65,7 +74,7 @@ namespace Metalama.Patterns.Caching.Tests
                 Assert.IsType<TimeoutException>( e.InnerExceptions[0] );
             }
 
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
+            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
 
             // After a method completes with a timeout, the next call should be successful.
             try
@@ -92,7 +101,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncLockTimeout()
         {
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( 50 );
+            using var context = this.InitializeTest( 50 );
 
             var barrier = new AsyncBarrier( 2 );
             Task t1 = Task.Run( async () => await this.CachedMethodAsync( 100, barrier ) );
@@ -114,7 +123,7 @@ namespace Metalama.Patterns.Caching.Tests
             }
             catch ( TimeoutException ) { }
 
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
+            // CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
 
             // After a method completes with a timeout, the next call should be successful.
             try
@@ -139,13 +148,11 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         private static readonly TimeSpan _globalTimeout = TimeSpan.FromSeconds( 10 );
-        private readonly CachingTestContext<MemoryCachingBackend> _context;
 
         [Fact]
         public void TestSyncLockTimeoutIgnoreLock()
         {
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( 2 );
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = new IgnoreLockStrategy();
+            using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
 
             Task t1 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
             Task t2 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
@@ -153,8 +160,8 @@ namespace Metalama.Patterns.Caching.Tests
             Assert.True( t1.Wait( _globalTimeout ), "Timeout" );
             Assert.True( t2.Wait( _globalTimeout ), "Timeout" );
 
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
+            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
+            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
 
             // After a method completes with a timeout, the next call should be successful.
             this.CachedMethod();
@@ -163,8 +170,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncLockTimeoutAsync()
         {
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( 2 );
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = new IgnoreLockStrategy();
+            using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
 
             var barrier = new AsyncBarrier( 2 );
             var t1State = 0;
@@ -196,8 +202,8 @@ namespace Metalama.Patterns.Caching.Tests
 
             Assert.Equal( 0, this._counter );
 
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
+            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
+            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
 
             await this.CachedMethodAsync();
         }

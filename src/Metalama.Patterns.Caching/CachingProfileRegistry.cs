@@ -15,34 +15,15 @@ namespace Metalama.Patterns.Caching;
 [PublicAPI]
 public sealed class CachingProfileRegistry
 {
-    private readonly CachingService _cachingService;
+    private readonly ImmutableDictionary<string, CachingProfile> _profiles;
 
-    private volatile ImmutableDictionary<string, CachingProfile> _profiles =
-        ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
-
-    private int _revisionNumber;
-
-    public CachingProfileRegistry( CachingService cachingService )
+    internal CachingProfileRegistry( ImmutableDictionary<string, CachingProfile> profiles )
     {
-        this._cachingService = cachingService;
-        this.Reset();
+        this._profiles = profiles;
+        this.AllBackends = profiles.Select( x => x.Value.Backend ).ToImmutableHashSet();
     }
 
-    internal ImmutableHashSet<CachingBackend> AllBackends { get; private set; } = ImmutableHashSet<CachingBackend>.Empty;
-
-    /// <summary>
-    /// Gets the revision number of all caching profiles. This property is incremented every time
-    /// a profile is registered or modified.
-    /// </summary>
-    public int RevisionNumber => this._revisionNumber;
-
-    internal void OnChange()
-    {
-        Interlocked.Increment( ref this._revisionNumber );
-        this.AllBackends = this._profiles.Values.Select( p => p.Backend ).Where( b => b is not UninitializedCachingBackend ).Distinct().ToImmutableHashSet();
-    }
-
-    private void OnProfileChanged( object? sender, PropertyChangedEventArgs args ) => this.OnChange();
+    internal ImmutableHashSet<CachingBackend> AllBackends { get; }
 
     /// <summary>
     /// Gets the default <see cref="CachingProfile"/>.
@@ -59,39 +40,13 @@ public sealed class CachingProfileRegistry
         get
         {
             profileName ??= CachingProfile.DefaultName;
-            CachingProfile? profile;
 
-            ImmutableDictionary<string, CachingProfile> oldDictionary;
-            ImmutableDictionary<string, CachingProfile> newDictionary;
-
-            do
+            if ( !this._profiles.TryGetValue( profileName, out var profile ) )
             {
-                oldDictionary = this._profiles;
-
-                if ( oldDictionary.TryGetValue( profileName, out profile ) )
-                {
-                    return profile;
-                }
-
-                profile = new CachingProfile( profileName, this._cachingService );
-                newDictionary = oldDictionary.SetItem( profile.Name, profile );
+                throw new KeyNotFoundException( $"The caching profile '{profileName}' has not been defined." );
             }
-            while ( Interlocked.CompareExchange( ref this._profiles, newDictionary, oldDictionary ) != oldDictionary );
-
-            this.OnChange();
 
             return profile;
         }
-    }
-
-    /// <summary>
-    /// Resets the current <see cref="CachingProfileRegistry"/> to the default values.
-    /// </summary>
-    public void Reset()
-    {
-        this._profiles = ImmutableDictionary.Create<string, CachingProfile>( StringComparer.OrdinalIgnoreCase );
-
-        // Force the creation of the default backend. 
-        _ = this.Default;
     }
 }

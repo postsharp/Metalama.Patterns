@@ -13,7 +13,7 @@ public sealed class AspectlessTests : BaseCachingTests
     [Fact]
     public void TestCacheHit()
     {
-        using ( this.InitializeTestWithCachingBackend( nameof(AspectlessTests) ) )
+        using ( this.InitializeTest( nameof(AspectlessTests) ) )
         {
             var o = new C();
 

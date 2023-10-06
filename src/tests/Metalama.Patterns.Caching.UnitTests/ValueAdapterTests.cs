@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         public ValueAdapterTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {
-            this._context = this.InitializeTestWithCachingBackend( "Caching.Tests.ValueAdapterTests" );
+            this._context = this.InitializeTest( "Caching.Tests.ValueAdapterTests" );
         }
 
         public void Dispose()

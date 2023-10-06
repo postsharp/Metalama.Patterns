@@ -28,8 +28,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestOneDependency()
         {
-            using var context = this.InitializeTestWithCachingBackend( _testOneDependencyProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testOneDependencyProfileName );
+            using var context = this.InitializeTest( _testOneDependencyProfileName );
 
             var cachingClass = new TestOneDependencyCachingClass();
             var currentId = 0;
@@ -85,8 +84,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestOneDependencyAsync()
         {
-            await using var context = this.InitializeTestWithCachingBackend( _testOneDependencyAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testOneDependencyAsyncProfileName );
+            await using var context = this.InitializeTest( _testOneDependencyAsyncProfileName );
 
             var cachingClass = new TestOneDependencyAsyncCachingClass();
             var currentId = 0;
@@ -169,8 +167,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedDependencies()
         {
-            using var context = this.InitializeTestWithCachingBackend( _testNestedDependenciesProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesProfileName );
+            using var context = this.InitializeTest( _testNestedDependenciesProfileName );
 
             var cachingClass2 = new TestNestedDependenciesCachingClass2();
             var cachingClass1 = cachingClass2.Class1;
@@ -232,8 +229,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestNestedDependenciesAsync()
         {
-            await using var context = this.InitializeTestWithCachingBackend( _testNestedDependenciesAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesAsyncProfileName );
+            await using var context = this.InitializeTest( _testNestedDependenciesAsyncProfileName );
 
             var cachingClass2 = new TestNestedDependenciesAsyncCachingClass2();
             var cachingClass1 = cachingClass2.Class1;
@@ -292,8 +288,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestNestedDependenciesWithEnumerable()
         {
-            using var context = this.InitializeTestWithCachingBackend( _testNestedDependenciesWithEnumerableProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testNestedDependenciesWithEnumerableProfileName );
+            using var context = this.InitializeTest( _testNestedDependenciesWithEnumerableProfileName );
 
             var cachingClass2 = new TestNestedDependenciesWithEnumerableCachingClass2();
 

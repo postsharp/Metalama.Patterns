@@ -36,7 +36,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         protected override CachingBackendFeatures CreateFeatures() => this._backend.SupportedFeatures;
 
-        public TestingCacheBackend( string name, IServiceProvider? serviceProvider ) : base(
+        public TestingCacheBackend( string name, IServiceProvider? serviceProvider = null ) : base(
             new CachingBackendConfiguration() { ServiceProvider = serviceProvider } )
         {
             this._name = name;
