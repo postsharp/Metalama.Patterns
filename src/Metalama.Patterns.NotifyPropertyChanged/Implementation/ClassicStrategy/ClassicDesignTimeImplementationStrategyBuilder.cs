@@ -2,11 +2,13 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Patterns.NotifyPropertyChanged.Implementation.DesignTimeStrategy;
+using Metalama.Patterns.NotifyPropertyChanged.Options;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
-internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrategy.DesignTimeImplementationStrategyBuilder
+internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplementationStrategyBuilder
 {
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
@@ -15,7 +17,7 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
     public ClassicDesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> builder ) : base( builder )
     {
         var target = builder.Target;
-        var elements = new Elements( target );
+        var elements = builder.Target.Compilation.Cache.GetOrAdd( _ => new Assets() );
         this._baseOnPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnPropertyChangedMethod( target );
         this._baseOnChildPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnChildPropertyChangedMethod( target );
 
@@ -94,7 +96,7 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeStrate
 
     private void IntroduceOnUnmonitoredObservablePropertyChanged()
     {
-        if ( !this.Builder.Target.Enhancements().GetOptions<Options.ClassicImplementationStrategyOptions>().EnableOnUnmonitoredObservablePropertyChangedMethod
+        if ( !this.Builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>().EnableOnUnmonitoredObservablePropertyChangedMethod
              == true )
         {
             return;

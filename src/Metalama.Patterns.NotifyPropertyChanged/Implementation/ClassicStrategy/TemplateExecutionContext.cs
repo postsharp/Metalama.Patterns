@@ -8,7 +8,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy
 
 /*
  * NB: TemplateExecutionContext members must not hold any reference to the IAspectBuilder<> passed
- * to BuildAspect. Members must be immutable, with the exception of cached computed values. Lazy behaviour 
+ * to BuildAspect. Members must be immutable, with the exception of cached computed values. Lazy behaviour
  * should be avoided.
  */
 
@@ -19,7 +19,8 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy
 internal sealed record TemplateExecutionContext(
     NotifyPropertyChangedOptions CommonOptions,
     ClassicImplementationStrategyOptions Options,
-    ClassicElements Elements,
+    INamedType TargetType,
+    Assets Assets,
     InpcInstrumentationKindLookup InpcInstrumentationKindLookup,
     IReadOnlyClassicProcessingNode DependencyGraph,
     IMethod? OnUnmonitoredObservablePropertyChangedMethod,
