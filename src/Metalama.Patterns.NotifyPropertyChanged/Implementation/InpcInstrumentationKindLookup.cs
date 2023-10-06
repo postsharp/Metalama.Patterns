@@ -11,12 +11,14 @@ internal sealed class InpcInstrumentationKindLookup
 {
     private readonly ConcurrentDictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
     private readonly Func<IType, InpcInstrumentationKind> _getCore;
-    private readonly Elements _elements;
+    private readonly INamedType _targetType;
+    private readonly Assets _assets;
 
-    public InpcInstrumentationKindLookup( Elements elements )
+    public InpcInstrumentationKindLookup( INamedType targetType, Assets assets )
     {
         this._getCore = this.GetCore;
-        this._elements = elements;
+        this._targetType = targetType;
+        this._assets = assets;
     }
 
     public InpcInstrumentationKind Get( IType type )
@@ -34,13 +36,13 @@ internal sealed class InpcInstrumentationKindLookup
                     // None of the special types implement INPC.
                     return InpcInstrumentationKind.None;
                 }
-                else if ( namedType.Equals( this._elements.INotifyPropertyChanged ) )
+                else if ( namedType.Equals( this._assets.INotifyPropertyChanged ) )
                 {
                     return InpcInstrumentationKind.Implicit;
                 }
-                else if ( namedType.Is( this._elements.INotifyPropertyChanged ) )
+                else if ( namedType.Is( this._assets.INotifyPropertyChanged ) )
                 {
-                    if ( namedType.TryFindImplementationForInterfaceMember( this._elements.PropertyChangedEventOfINotifyPropertyChanged, out var member ) )
+                    if ( namedType.TryFindImplementationForInterfaceMember( this._assets.PropertyChangedEventOfINotifyPropertyChanged, out var member ) )
                     {
                         return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Implicit;
                     }
@@ -53,7 +55,7 @@ internal sealed class InpcInstrumentationKindLookup
                 }
                 else
                 {
-                    if ( this._elements.Target.Compilation.IsPartial && !this._elements.Target.Compilation.Types.Contains( type ) )
+                    if ( this._targetType.Compilation.IsPartial && !this._targetType.Compilation.Types.Contains( type ) )
                     {
                         return InpcInstrumentationKind.Unknown;
                     }

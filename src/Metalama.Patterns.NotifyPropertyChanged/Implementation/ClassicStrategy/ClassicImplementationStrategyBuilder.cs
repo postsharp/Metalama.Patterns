@@ -30,7 +30,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
     private readonly IMethod? _baseOnUnmonitoredObservablePropertyChangedMethod;
-    private readonly ClassicElements _elements;
+    private readonly Assets _assets;
     private readonly InpcInstrumentationKindLookup _inpcInstrumentationKindLookup;
     private readonly bool _targetImplementsInpc;
 
@@ -48,8 +48,8 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         var target = builder.Target;
 
         this._builder = builder;
-        this._elements = new ClassicElements( target );
-        this._inpcInstrumentationKindLookup = new( this._elements );
+        this._assets = target.Compilation.Cache.GetOrAdd( _ => new Assets() );
+        this._inpcInstrumentationKindLookup = new InpcInstrumentationKindLookup( this._builder.Target, this._assets );
         this._commonOptions = builder.Target.Enhancements().GetOptions<NotifyPropertyChangedOptions>();
         this._classicOptions = builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>();
 
@@ -57,20 +57,20 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
         this._baseImplementsInpc =
             target.BaseType != null && (
-                target.BaseType.Is( this._elements.INotifyPropertyChanged )
+                target.BaseType.Is( this._assets.INotifyPropertyChanged )
                 || (target.BaseType is { BelongsToCurrentProject: true }
                     && target.BaseType.Definition.Enhancements().HasAspect( typeof(NotifyPropertyChangedAttribute) )));
 
-        this._targetImplementsInpc = this._baseImplementsInpc || target.Is( this._elements.INotifyPropertyChanged );
+        this._targetImplementsInpc = this._baseImplementsInpc || target.Is( this._assets.INotifyPropertyChanged );
         this._baseOnPropertyChangedMethod = GetOnPropertyChangedMethod( target );
         this._baseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod( target );
-        this._baseOnUnmonitoredObservablePropertyChangedMethod = GetOnUnmonitoredObservablePropertyChangedMethod( target, this._elements );
+        this._baseOnUnmonitoredObservablePropertyChangedMethod = GetOnUnmonitoredObservablePropertyChangedMethod( target, this._assets );
 
         var useOnUnmonitoredObservablePropertyChangedMethod =
             this._classicOptions.EnableOnUnmonitoredObservablePropertyChangedMethod == true &&
             (!target.IsSealed || this._baseOnUnmonitoredObservablePropertyChangedMethod != null);
 
-        this._onUnmonitoredObservablePropertyChangedMethod = new( willBeDefined: useOnUnmonitoredObservablePropertyChangedMethod );
+        this._onUnmonitoredObservablePropertyChangedMethod = new DeferredOptional<IMethod>( willBeDefined: useOnUnmonitoredObservablePropertyChangedMethod );
     }
 
     public void BuildAspect()
@@ -99,10 +99,11 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             this.IntroduceOnChildPropertyChangedMethod();
             this.IntroduceOnUnmonitoredObservablePropertyChanged();
 
-            this._deferredTemplateExecutionContext.Value = new(
+            this._deferredTemplateExecutionContext.Value = new TemplateExecutionContext(
                 this._commonOptions,
                 this._classicOptions,
-                this._elements,
+                this._builder.Target,
+                this._assets,
                 this._inpcInstrumentationKindLookup,
                 this.DependencyGraph,
                 this._onUnmonitoredObservablePropertyChangedMethod.Value,
@@ -129,7 +130,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 .Where(
                     p =>
                         p is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !p.Attributes.Any( this._elements.IgnoreAutoChangeNotificationAttribute ) );
+                        && !p.Attributes.Any( this._assets.IgnoreAutoChangeNotificationAttribute ) );
 
         var allValid = true;
 
@@ -223,7 +224,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 {
                     b.AddAttribute(
                         AttributeConstruction.Create(
-                            this._elements.OnChildPropertyChangedMethodAttribute,
+                            this._assets.OnChildPropertyChangedMethodAttribute,
                             new[] { this._propertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                     if ( isOverride )
@@ -265,7 +266,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 {
                     b.AddAttribute(
                         AttributeConstruction.Create(
-                            this._elements.OnUnmonitoredObservablePropertyChangedMethodAttribute,
+                            this._assets.OnUnmonitoredObservablePropertyChangedMethodAttribute,
                             new[] { this._propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
 
                     if ( isOverride )
@@ -308,7 +309,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     {
         if ( !this._targetImplementsInpc )
         {
-            this._builder.Advice.WithTemplateProvider( Templates.Provider ).ImplementInterface( this._builder.Target, this._elements.INotifyPropertyChanged );
+            this._builder.Advice.WithTemplateProvider( Templates.Provider ).ImplementInterface( this._builder.Target, this._assets.INotifyPropertyChanged );
         }
     }
 
@@ -395,7 +396,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 .Where(
                     p =>
                         p is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !p.Attributes.Any( this._elements.IgnoreAutoChangeNotificationAttribute ) )
+                        && !p.Attributes.Any( this._assets.IgnoreAutoChangeNotificationAttribute ) )
                 .ToList();
 
         foreach ( var p in autoProperties )
@@ -487,7 +488,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     private bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath )
     {
         this._inheritedOnChildPropertyChangedPropertyPaths ??=
-            BuildPropertyPathLookup( GetPropertyPaths( this._elements.OnChildPropertyChangedMethodAttribute, this._baseOnChildPropertyChangedMethod ) );
+            BuildPropertyPathLookup( GetPropertyPaths( this._assets.OnChildPropertyChangedMethodAttribute, this._baseOnChildPropertyChangedMethod ) );
 
         return this._inheritedOnChildPropertyChangedPropertyPaths.Contains( parentPropertyPath );
     }
@@ -499,7 +500,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         this._inheritedOnUnmonitoredObservablePropertyChangedPropertyNames ??=
             BuildPropertyPathLookup(
                 GetPropertyPaths(
-                    this._elements.OnUnmonitoredObservablePropertyChangedMethodAttribute,
+                    this._assets.OnUnmonitoredObservablePropertyChangedMethodAttribute,
                     this._baseOnUnmonitoredObservablePropertyChangedMethod ) );
 
         return this._inheritedOnUnmonitoredObservablePropertyChangedPropertyNames.Contains( propertyName );
@@ -524,7 +525,8 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
             this._builder.CancellationToken );
 
         var processingGraph =
-            structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>( new( this._builder.Target.Compilation, this ) );
+            structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>(
+                new ClassicProcessingNodeInitializationContext( this._builder.Target.Compilation, this ) );
 
         foreach ( var node in processingGraph.DescendantsDepthFirst() )
         {
@@ -568,7 +570,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 .IntroduceField(
                     this._builder.Target,
                     handlerFieldName,
-                    this._elements.NullablePropertyChangedEventHandler,
+                    this._assets.NullablePropertyChangedEventHandler,
                     IntroductionScope.Instance,
                     OverrideStrategy.Fail,
                     b => b.Accessibility = Accessibility.Private );
@@ -630,7 +632,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
         else
         {
             // ReSharper disable once BadSemicolonSpaces
-            for ( var i = 1; ; i++ )
+            for ( var i = 1; /* Intentionally empty */; i++ )
             {
                 var adjustedName = $"{desiredName}_{i}";
 
@@ -684,7 +686,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }, { Type.SpecialType: SpecialType.String }] );
 
-    internal static IMethod? GetOnUnmonitoredObservablePropertyChangedMethod( INamedType type, Elements elements )
+    internal static IMethod? GetOnUnmonitoredObservablePropertyChangedMethod( INamedType type, Assets assets )
         => type.AllMethods.FirstOrDefault(
             m =>
                 !m.IsStatic
@@ -692,8 +694,8 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
                 && m.ReturnType.SpecialType == SpecialType.Void
                 && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _]
-                && m.Parameters[1].Type == elements.NullableINotifyPropertyChanged
-                && m.Parameters[2].Type == elements.NullableINotifyPropertyChanged );
+                && m.Parameters[1].Type == assets.NullableINotifyPropertyChanged
+                && m.Parameters[2].Type == assets.NullableINotifyPropertyChanged );
 
     /// <summary>
     /// Validates the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. The result is cached

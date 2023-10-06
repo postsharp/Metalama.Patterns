@@ -54,7 +54,7 @@ internal sealed class Templates : ITemplateProvider
                 {
                     if ( eventRequiresCast )
                     {
-                        meta.Cast( ctx.Elements.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                        meta.Cast( ctx.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
                     }
                     else
                     {
@@ -124,7 +124,7 @@ internal sealed class Templates : ITemplateProvider
             if ( eventRequiresCast )
             {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                meta.Cast( ctx.Elements.INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
+                meta.Cast( ctx.Assets.INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
             else
@@ -264,7 +264,7 @@ internal sealed class Templates : ITemplateProvider
             EqualityComparisonKind.ThisEquals => (IExpression) !meta.Target.FieldOrProperty.Value!.Equals( value ),
             EqualityComparisonKind.ReferenceEquals => (IExpression) !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ),
             EqualityComparisonKind.DefaultEqualityComparer => (IExpression)
-                !ctx.Elements.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value!.Equals( value, meta.Target.FieldOrProperty.Value ),
+                !ctx.Assets.GetDefaultEqualityComparerForType( meta.Target.FieldOrProperty.Type ).Value!.Equals( value, meta.Target.FieldOrProperty.Value ),
             _ => null
         };
 
@@ -302,7 +302,7 @@ internal sealed class Templates : ITemplateProvider
 
         foreach ( var node in ctx.DependencyGraph.Children )
         {
-            if ( node.FieldOrProperty.IsAutoPropertyOrField == true && node.FieldOrProperty.DeclaringType == ctx.Elements.Target )
+            if ( node.FieldOrProperty.IsAutoPropertyOrField == true && node.FieldOrProperty.DeclaringType == ctx.TargetType )
             {
                 if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
@@ -357,7 +357,10 @@ internal sealed class Templates : ITemplateProvider
 
             if ( refsToNotify.Count > 0
                  || childUpdateMethods.Count > 0
-                 || node is { HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged } )
+                 || node is
+                 {
+                     HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged
+                 } )
             {
                 var rootPropertyNamesToNotify = refsToNotify
                     .Select( n => n.Name )
@@ -408,7 +411,7 @@ internal sealed class Templates : ITemplateProvider
                                     {
                                         if ( eventRequiresCast )
                                         {
-                                            meta.Cast( ctx.Elements.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                                            meta.Cast( ctx.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
                                         }
                                         else
                                         {
@@ -437,7 +440,7 @@ internal sealed class Templates : ITemplateProvider
 
                                         if ( eventRequiresCast )
                                         {
-                                            meta.Cast( ctx.Elements.INotifyPropertyChanged, newValue ).PropertyChanged += handlerField.Value;
+                                            meta.Cast( ctx.Assets.INotifyPropertyChanged, newValue ).PropertyChanged += handlerField.Value;
                                         }
                                         else
                                         {
@@ -523,7 +526,7 @@ internal sealed class Templates : ITemplateProvider
         {
             var rootPropertyNode = node.AncestorOrSelfAtDepth( 1 );
 
-            if ( rootPropertyNode.FieldOrProperty.DeclaringType == ctx.Elements.Target )
+            if ( rootPropertyNode.FieldOrProperty.DeclaringType == ctx.TargetType )
             {
                 if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
@@ -626,28 +629,28 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
-        /* 
+        /*
          * The generated OnUnmonitoredObservablePropertyChanged method is like an enhanced overload of OnPropertyChanged, the differences
          * being that the caller provides the old and new values, the method receives a property path rather than a root property name,
          * and it only applies to property types which implement INotifyPropertyChanged.
-         * 
+         *
          * NB:
-         * 
-         * - In the current implementation (outside this template), the generated OnUnmonitoredObservablePropertyChanged 
-         *   method is only called for root properties. As/when false positive detection is implemented and enabled, 
-         *   then the generated OnUnmonitoredObservablePropertyChanged method could receive calls for leaf INotifyPropertyChanged 
+         *
+         * - In the current implementation (outside this template), the generated OnUnmonitoredObservablePropertyChanged
+         *   method is only called for root properties. As/when false positive detection is implemented and enabled,
+         *   then the generated OnUnmonitoredObservablePropertyChanged method could receive calls for leaf INotifyPropertyChanged
          *   properties.
-         * 
+         *
          * - OnUnmonitoredObservablePropertyChanged is only called when a ref has changed - the caller checks this first.
-         * 
+         *
          * - For root properties, the caller will also call OnPropertyChanged - this is to maintain compatibility with derivations
          *   which do not observe OnUnmonitoredObservablePropertyChanged.
-         * 
+         *
          * - Nodes only appear in the graph if they are relevant to the current class.
-         * 
+         *
          * - The logic which selects nodes for which support will be generated must be kept in sync with the logic in
          *   NaturalAspect.AddPropertyPathsForOnChildPropertyChangedMethodAttribute.
-        */
+         */
 
         foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst()
                      .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )

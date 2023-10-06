@@ -37,11 +37,14 @@ public static class ContractExtensions
     {
         bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
 
+        var requiredAttribute = (INamedType) TypeFactory.GetType( typeof(RequiredAttribute) );
+        var notNullableAttribute = (INamedType) TypeFactory.GetType( typeof(NotNullAttribute) );
+
         static bool IsNullableType( IHasType d ) => d is { Type: { IsReferenceType: true, IsNullable: false }, RefKind: RefKind.None };
 
-        static IAttribute? GetNullableAttribute( IDeclaration d )
-            => d.Attributes.OfAttributeType( typeof(RequiredAttribute) ).FirstOrDefault() ??
-               d.Attributes.OfAttributeType( typeof(NotNullAttribute) ).FirstOrDefault();
+        IAttribute? GetNotNullAspectAttribute( IDeclaration d )
+            => d.Attributes.OfAttributeType( requiredAttribute ).FirstOrDefault() ??
+               d.Attributes.OfAttributeType( notNullableAttribute ).FirstOrDefault();
 
         // Add aspects to fields and properties.
         var fieldsAndProperties = types
@@ -52,7 +55,7 @@ public static class ContractExtensions
             .Where( f => IsVisible( f ) && IsNullableType( f ) && f.Attributes.All( a => a.Type.Name != "AllowNullAttribute" ) );
 
         fieldsAndProperties
-            .Where( f => GetNullableAttribute( f ) == null && f.Writeability is Writeability.InitOnly or Writeability.All )
+            .Where( f => GetNotNullAspectAttribute( f ) == null && f.Writeability is Writeability.InitOnly or Writeability.All )
             .RequireAspect<NotNullAttribute>();
 
         // Add aspects to method parameters.
@@ -63,25 +66,25 @@ public static class ContractExtensions
             .Where( IsNullableType );
 
         parameters
-            .Where( parameter => GetNullableAttribute( parameter ) == null )
+            .Where( parameter => GetNotNullAspectAttribute( parameter ) == null )
             .RequireAspect<NotNullAttribute>();
 
         // Warn if the attribute is duplicate.
-        fieldsAndProperties.Where( f => GetNullableAttribute( f ) != null )
+        fieldsAndProperties.Where( f => GetNotNullAspectAttribute( f ) != null )
             .ReportDiagnostic(
                 f =>
                 {
-                    var nullableAttribute = GetNullableAttribute( f );
+                    var nullableAttribute = GetNotNullAspectAttribute( f );
 
                     return ContractDiagnostics.ContractRedundant.WithArguments( (f, nullableAttribute!.Type.Name) )
                         .WithCodeFixes( CodeFixFactory.RemoveAttributes( f, nullableAttribute.Type ) );
                 } );
 
-        parameters.Where( f => GetNullableAttribute( f ) != null )
+        parameters.Where( f => GetNotNullAspectAttribute( f ) != null )
             .ReportDiagnostic(
                 f =>
                 {
-                    var nullableAttribute = GetNullableAttribute( f );
+                    var nullableAttribute = GetNotNullAspectAttribute( f );
 
                     return ContractDiagnostics.ContractRedundant.WithArguments( (f, nullableAttribute!.Type.Name) )
                         .WithCodeFixes( CodeFixFactory.RemoveAttributes( f, nullableAttribute.Type ) );
@@ -91,10 +94,13 @@ public static class ContractExtensions
     public static ContractOptions GetContractOptions( this IMetaTarget target ) => target.Declaration.GetContractOptions();
 
     public static ContractOptions GetContractOptions( this IMethod declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
+
     public static ContractOptions GetContractOptions( this INamedType declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
+
     public static ContractOptions GetContractOptions( this IFieldOrPropertyOrIndexer declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
+
     public static ContractOptions GetContractOptions( this IParameter declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
-    
+
     public static ContractOptions GetContractOptions( this IDeclaration declaration )
         => declaration switch
         {
