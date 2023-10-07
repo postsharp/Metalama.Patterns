@@ -13,7 +13,7 @@ public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.
     // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class TraceSourceFixture : IDisposable
     {
-        private readonly TraceSource _traceSource = TraceSourceFlashtraceLogger.GetTraceSource();
+        private readonly TraceSource _traceSource = TraceSourceFlashtraceLogger.GetTraceSource( FlashtraceRole.Logging );
 
         internal MyListener Listener { get; } = new();
 

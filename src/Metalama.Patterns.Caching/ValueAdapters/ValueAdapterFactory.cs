@@ -1,54 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters.TypeExtensions;
-using JetBrains.Annotations;
 using System.Collections.Concurrent;
 
 namespace Metalama.Patterns.Caching.ValueAdapters;
 
-/// <summary>
-/// Registers and provides value adapters (<see cref="IValueAdapter"/>), which allow for instance to cache things like <see cref="System.IO.Stream"/> or <see cref="System.Collections.IEnumerable"/>,
-/// which could not be otherwise cached.
-/// </summary>
-[PublicAPI]
-public sealed class ValueAdapterFactory
+internal sealed class ValueAdapterFactory
 {
     private readonly ConcurrentDictionary<Type, TypeExtensionInfo<IValueAdapter>> _valueAdaptersByValueType = new();
-    private readonly TypeExtensionFactory<IValueAdapter> _factory = new( typeof(IValueAdapter<>), null );
+    private readonly TypeExtensionFactory<IValueAdapter> _factory;
 
-    internal ValueAdapterFactory()
+    internal ValueAdapterFactory( TypeExtensionFactory<IValueAdapter> factory )
     {
-        this.Register( new StreamAdapter() );
-        this.Register( typeof(IEnumerable<>), typeof(EnumerableAdapter<>) );
-        this.Register( typeof(IEnumerator<>), typeof(EnumeratorAdapter<>) );
-#if NETCOREAPP3_0_OR_GREATER
-        this.Register( typeof(IAsyncEnumerable<>), typeof(AsyncEnumerableAdapter<>) );
-        this.Register( typeof(IAsyncEnumerator<>), typeof(AsyncEnumeratorAdapter<>) );
-#endif
+        this._factory = factory;
     }
-
-    /// <summary>
-    /// Registers an <see cref="IValueAdapter"/> instance and explicitly specifies the value type.
-    /// </summary>
-    /// <param name="valueType">The type of the cached value (typically the return type of the cached method).</param>
-    /// <param name="valueAdapter">The adapter.</param>
-    public void Register( Type valueType, IValueAdapter valueAdapter ) => this._factory.RegisterTypeExtension( valueType, valueAdapter );
-
-    /// <summary>
-    /// Registers a generic value adapter.
-    /// </summary>
-    /// <param name="valueType">The type of the cached value (typically the return type of the cached method).</param>
-    /// <param name="valueAdapterType">The type of the value adapter. This type must implement the <see cref="IValueAdapter"/>
-    /// interface and have the same number of generic parameters as <paramref name="valueType"/>.
-    /// </param>
-    public void Register( Type valueType, Type valueAdapterType ) => this._factory.RegisterTypeExtension( valueType, valueAdapterType );
-
-    /// <summary>
-    /// Registers an <see cref="IValueAdapter{T}"/>.
-    /// </summary>
-    /// <typeparam name="T">The type of the cached value (typically the return type of the cached method).</typeparam>
-    /// <param name="valueAdapter">The adapter.</param>
-    public void Register<T>( IValueAdapter<T> valueAdapter ) => this.Register( typeof(T), valueAdapter );
 
     /// <summary>
     /// Gets an <see cref="IValueAdapter"/> given a value type.

@@ -7,9 +7,9 @@ namespace Metalama.Patterns.Caching.TestHelpers;
 
 public sealed class CachingTestBuilder
 {
-    private readonly CachingServiceBuilder _serviceBuilder;
+    private readonly CachingService.Builder _serviceBuilder;
 
-    public CachingTestBuilder( CachingServiceBuilder serviceBuilder )
+    public CachingTestBuilder( CachingService.Builder serviceBuilder )
     {
         this._serviceBuilder = serviceBuilder;
     }
@@ -18,7 +18,7 @@ public sealed class CachingTestBuilder
 
     public CachingTestBuilder WithProfile( CachingProfile profile )
     {
-        this._serviceBuilder.Profiles.Add( profile );
+        this._serviceBuilder.AddProfile( profile );
 
         return this;
     }

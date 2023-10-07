@@ -13,17 +13,10 @@ public static class CachingServiceFactory
 {
     public static IServiceCollection AddCaching(
         this IServiceCollection serviceCollection,
-        Action<CachingServiceBuilder>? build = null )
+        Action<CachingService.Builder>? build = null )
     {
         serviceCollection.Add(
-            ServiceDescriptor.Singleton<ICachingService, CachingService>(
-                serviceProvider =>
-                {
-                    var builder = new CachingServiceBuilder( serviceProvider );
-                    build?.Invoke( builder );
-
-                    return builder.Build();
-                } ) );
+            ServiceDescriptor.Singleton<ICachingService, CachingService>( serviceProvider => CachingService.Create( build, serviceProvider ) ) );
 
         return serviceCollection;
     }

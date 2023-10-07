@@ -13,39 +13,41 @@ namespace Metalama.Patterns.Caching;
 
 public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICachingService
 {
+    private readonly FormatterRepository _formatters;
+
     public static CachingService Default { get; set; } = CreateUninitialized();
 
-    internal IServiceProvider? ServiceProvider { get; }
+    public static CachingService Create( Action<Builder>? build = null, IServiceProvider? serviceProvider = null ) => new( serviceProvider, build );
 
-    public FormatterRepository Formatters { get; } = new CachingFormatterRepository();
+    internal IServiceProvider? ServiceProvider { get; }
 
     internal AutoReloadManager AutoReloadManager { get; }
 
     internal CachingFrontend Frontend { get; }
 
-    public ValueAdapterFactory ValueAdapters { get; } = new();
+    internal ValueAdapterFactory ValueAdapters { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CachingService"/> class.
     /// </summary>
     /// <param name="backend">The default back-end. If null, a new <see cref="MemoryCachingBackend"/> is created.</param>
     /// <param name="serviceProvider">An optional <see cref="IServiceProvider"/>.</param>
-    public CachingService(
-        CachingBackend? backend = null,
-        IEnumerable<CachingProfile>? profiles = null,
-        Func<IFormatterRepository, CacheKeyBuilder>? keyBuilderFactory = null,
-        IServiceProvider? serviceProvider = null )
+    private CachingService( IServiceProvider? serviceProvider, Action<Builder>? build )
     {
-        var profilesDictionary = ImmutableDictionary.CreateBuilder<string, CachingProfile>( StringComparer.Ordinal );
-        this.DefaultBackend = backend ?? new MemoryCachingBackend();
+        // Run the builder.
+        var builder = new Builder( serviceProvider );
+        build?.Invoke( builder );
+        builder.Dispose();
+        
+        this.DefaultBackend = builder.Backend ?? new MemoryCachingBackend();
 
-        if ( profiles != null )
+        // Set profiles.
+        var profilesDictionary = ImmutableDictionary.CreateBuilder<string, CachingProfile>( StringComparer.Ordinal );
+        
+        foreach ( var profile in builder.Profiles )
         {
-            foreach ( var profile in profiles )
-            {
-                profilesDictionary.Add( profile.Name, profile );
-                profile.Initialize( this.DefaultBackend );
-            }
+            profilesDictionary.Add( profile.Name, profile );
+            profile.Initialize( this.DefaultBackend );
         }
 
         if ( !profilesDictionary.ContainsKey( CachingProfile.DefaultName ) )
@@ -55,18 +57,31 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
             profile.Initialize( this.DefaultBackend );
         }
 
-        this.ServiceProvider = serviceProvider;
-        this.KeyBuilder = new CacheKeyBuilder( this.Formatters );
+        this._formatters = FormatterRepository.Create(
+            CachingFormattingRole.Instance,
+            formattersBuilder =>
+            {
+                formattersBuilder.AddFormatter( typeof(IEnumerable<>), typeof(CollectionFormatter<>) );
+
+                foreach ( var action in builder.FormattersBuildActions )
+                {
+                    action( formattersBuilder );
+                }
+            } );
+
+        this.ValueAdapters = new ValueAdapterFactory( builder.ValueAdapters );
+        this.ServiceProvider = builder.ServiceProvider;
+        this.KeyBuilder = new CacheKeyBuilder( this._formatters );
         this.Profiles = new CachingProfileRegistry( profilesDictionary.ToImmutable() );
         this.AllBackends = this.Profiles.AllBackends.ToImmutableArray();
         this.Frontend = new CachingFrontend( this );
         this.AutoReloadManager = new AutoReloadManager( this );
-        this.KeyBuilder = keyBuilderFactory?.Invoke( this.Formatters ) ?? new CacheKeyBuilder( this.Formatters );
-        this.Logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
+        this.KeyBuilder = builder.KeyBuilderFactory?.Invoke( this._formatters ) ?? new CacheKeyBuilder( this._formatters );
+        this.Logger = builder.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     internal static CachingService CreateUninitialized( IServiceProvider? serviceProvider = null )
-        => new( new UninitializedCachingBackend(), serviceProvider: serviceProvider );
+        => Create( b => b.Backend = new UninitializedCachingBackend(), serviceProvider );
 
     /// <summary>
     /// Gets the set of distinct backends used in the service.

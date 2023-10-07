@@ -42,7 +42,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     public BackgroundTaskScheduler( IServiceProvider? serviceProvider, bool sequential = false )
     {
         this._sequential = sequential;
-        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
+        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     /// <summary>

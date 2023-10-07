@@ -48,7 +48,7 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
     /// </summary>
     /// <param name="role">The role.</param>
     /// <param name="name">The source name.</param>
-    protected SimpleFlashtraceLogger( string role, string name )
+    protected SimpleFlashtraceLogger( FlashtraceRole role, string name )
     {
         this.Name = name;
         this.Role = role;
@@ -63,7 +63,7 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
     public string Name { get; }
 
     /// <inheritdoc/>
-    public string Role { get; }
+    public FlashtraceRole Role { get; }
 
     /// <inheritdoc/>
     public bool RequiresSuspendResume => false;

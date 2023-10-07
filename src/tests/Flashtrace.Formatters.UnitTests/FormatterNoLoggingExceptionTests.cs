@@ -16,9 +16,9 @@ public sealed class FormatterNoLoggingExceptionTests : FormattersTestsBase
     [Fact]
     public void ThrowingConstructor()
     {
-        this.DefaultRepository.Register( typeof(IEnumerable<>), typeof(ThrowingFormatter<>) );
+        var formatters = CreateRepository( b => b.AddFormatter( typeof(IEnumerable<>), typeof(ThrowingFormatter<>) ) );
 
-        var result = this.FormatDefault<IEnumerable<int>>( new int[0] );
+        var result = this.Format<IEnumerable<int>>( formatters, new int[0] );
 
         Assert.True( ThrowingFormatter<int>.Ran );
         Assert.Equal( "{int[]}", result );
@@ -27,9 +27,9 @@ public sealed class FormatterNoLoggingExceptionTests : FormattersTestsBase
     [Fact]
     public void PrivateConstructor()
     {
-        this.DefaultRepository.Register( typeof(IEnumerable<>), typeof(NoConstructorFormatter<>) );
+        var formatters = CreateRepository( b => b.AddFormatter( typeof(IEnumerable<>), typeof(NoConstructorFormatter<>) ) );
 
-        var result = this.FormatDefault<IEnumerable<int>>( new int[0] );
+        var result = this.Format<IEnumerable<int>>( formatters, new int[0] );
 
         Assert.Equal( "{int[]}", result );
     }
@@ -37,9 +37,9 @@ public sealed class FormatterNoLoggingExceptionTests : FormattersTestsBase
     [Fact]
     public void BadRegistration()
     {
-        this.DefaultRepository.Register( typeof(IComparable<>), typeof(ThrowingFormatter<>) );
+        var formatters = CreateRepository( b => b.AddFormatter( typeof(IComparable<>), typeof(ThrowingFormatter<>) ) );
 
-        var result = this.FormatDefault<IComparable<int>>( 0 );
+        var result = this.Format<IComparable<int>>( formatters, 0 );
 
         Assert.True( ThrowingFormatter<int>.Ran );
         Assert.Equal( "0", result );

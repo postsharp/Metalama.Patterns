@@ -35,7 +35,7 @@ public static class FlashtraceExtensions
         return serviceCollection;
     }
 
-    public static FlashtraceSource GetFlashtraceSource( this IServiceProvider? serviceProvider, Type type, string role = FlashtraceRoles.Default )
+    public static FlashtraceSource GetFlashtraceSource( this IServiceProvider? serviceProvider, Type type, FlashtraceRole? role = null )
     {
         var factory = (IFlashtraceLoggerFactory?) serviceProvider?.GetService( typeof(IFlashtraceLoggerFactory) );
 
@@ -45,11 +45,11 @@ public static class FlashtraceExtensions
         }
         else
         {
-            return factory.ForRole( role ).GetFlashtraceSource( type );
+            return factory.ForRole( role ?? FlashtraceRole.Logging ).GetFlashtraceSource( type );
         }
     }
 
-    public static FlashtraceSource GetFlashtraceSource( this IServiceProvider? serviceProvider, string sourceName, string role = FlashtraceRoles.Default )
+    public static FlashtraceSource GetFlashtraceSource( this IServiceProvider? serviceProvider, string sourceName, FlashtraceRole? role = null )
     {
         var factory = (IFlashtraceLoggerFactory?) serviceProvider?.GetService( typeof(IFlashtraceLoggerFactory) );
 
@@ -59,11 +59,11 @@ public static class FlashtraceExtensions
         }
         else
         {
-            return factory.ForRole( role ).GetFlashtraceSource( sourceName );
+            return factory.ForRole( role ?? FlashtraceRole.Logging ).GetFlashtraceSource( sourceName );
         }
     }
 
-    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceLoggerFactory? loggerFactory, Type type, string role = FlashtraceRoles.Default )
+    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceLoggerFactory? loggerFactory, Type type, FlashtraceRole? role = null )
     {
         if ( loggerFactory == null )
         {
@@ -71,11 +71,11 @@ public static class FlashtraceExtensions
         }
         else
         {
-            return loggerFactory.ForRole( role ).GetFlashtraceSource( type );
+            return loggerFactory.ForRole( role ?? FlashtraceRole.Logging ).GetFlashtraceSource( type );
         }
     }
 
-    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceLoggerFactory? loggerFactory, string sourceName, string role = FlashtraceRoles.Default )
+    public static FlashtraceSource GetFlashtraceSource( this IFlashtraceLoggerFactory? loggerFactory, string sourceName, FlashtraceRole? role = null )
     {
         if ( loggerFactory == null )
         {
@@ -83,7 +83,7 @@ public static class FlashtraceExtensions
         }
         else
         {
-            return loggerFactory.ForRole( role ).GetFlashtraceSource( sourceName );
+            return loggerFactory.ForRole( role ?? FlashtraceRole.Logging ).GetFlashtraceSource( sourceName );
         }
     }
 

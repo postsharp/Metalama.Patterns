@@ -109,7 +109,7 @@ public partial class NullFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalL
 
     IFlashtraceLocalLogger IFlashtraceLogger.GetContextLocalLogger() => this;
 
-    IFlashtraceRoleLoggerFactory IFlashtraceLoggerFactory.ForRole( string role ) => this;
+    IFlashtraceRoleLoggerFactory IFlashtraceLoggerFactory.ForRole( FlashtraceRole role ) => this;
 
     IFlashtraceLogger IFlashtraceRoleLoggerFactory.GetLogger( Type type ) => this;
 

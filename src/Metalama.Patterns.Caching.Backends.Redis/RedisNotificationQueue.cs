@@ -45,7 +45,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         this._handler = handler;
         this._connectionTimeout = connectionTimeout;
         this.Subscriber = connection.GetSubscriber();
-        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
+        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
 
         this._notificationProcessingThread = new Thread( ProcessNotificationQueue )
         {
@@ -417,7 +417,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 #if NETCOREAPP
                         await
 #endif
-                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                            using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                         {
                             await this._notificationProcessingThreadCompleted.Task;
 

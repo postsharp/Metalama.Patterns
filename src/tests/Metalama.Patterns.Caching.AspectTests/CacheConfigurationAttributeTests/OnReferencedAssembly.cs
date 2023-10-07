@@ -73,9 +73,14 @@ public class Program
 
         var backend = new TestingCacheBackend( "test" );
 
-        CachingService.Default = new CachingService(
-            backend: backend,
-            profiles: new[] { new CachingProfile( TestProfiles.A ), new CachingProfile( TestProfiles.B ) } );
+        CachingService.Default =
+            CachingService.Create(
+                b =>
+                {
+                    b.Backend = backend;
+                    b.AddProfile( new CachingProfile( TestProfiles.A ) );
+                    b.AddProfile( new CachingProfile( TestProfiles.B ) );
+                } );
 
         var cachingClass = new LocalChildCachingClass();
 

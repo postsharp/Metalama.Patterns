@@ -4,13 +4,13 @@ namespace Flashtrace.Loggers;
 
 internal sealed class TraceSourceLoggerFactory : IFlashtraceLoggerFactory
 {
-    IFlashtraceRoleLoggerFactory IFlashtraceLoggerFactory.ForRole( string role ) => new RoleLoggerFactory( role );
+    IFlashtraceRoleLoggerFactory IFlashtraceLoggerFactory.ForRole( FlashtraceRole role ) => new RoleLoggerFactory( role );
 
     private sealed class RoleLoggerFactory : IFlashtraceRoleLoggerFactory
     {
-        private readonly string _role;
+        private readonly FlashtraceRole _role;
 
-        public RoleLoggerFactory( string role )
+        public RoleLoggerFactory( FlashtraceRole role )
         {
             this._role = role;
         }

@@ -41,18 +41,22 @@ public abstract class BaseCachingTests
         where T : CachingBackend
     {
         ResetCachingServices();
-        var serviceBuilder = new CachingServiceBuilder( this.ServiceProvider ) { Backend = backend };
 
-        var testBuilder = new CachingTestBuilder( serviceBuilder );
-        buildTest?.Invoke( testBuilder );
+        CachingService.Default = CachingService.Create(
+            b =>
+            {
+                b.Backend = backend;
+                
+                var testBuilder = new CachingTestBuilder( b );
+                buildTest?.Invoke( testBuilder );
 
-        // We always add a profile named after the test because many tests use this trick.
-        if ( serviceBuilder.Profiles.All( p => p.Name != name ) )
-        {
-            serviceBuilder.Profiles.Add( new CachingProfile( name ) );
-        }
-
-        CachingService.Default = serviceBuilder.Build();
+                // We always add a profile named after the test because many tests use this trick.
+                if ( b.Profiles.All( p => p.Name != name ) )
+                {
+                    b.AddProfile( new CachingProfile( name ) );
+                }
+            },
+            this.ServiceProvider );
 
         return new CachingTestContext<T>( backend );
     }

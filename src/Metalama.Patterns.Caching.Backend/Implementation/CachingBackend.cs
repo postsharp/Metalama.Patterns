@@ -35,7 +35,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected CachingBackend( CachingBackendConfiguration? configuration )
     {
         this.Configuration = configuration ?? new MemoryCachingBackendConfiguration();
-        this.Source = this.Configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
+        this.Source = this.Configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
         this.DebugName = this.Id.ToString();
     }
 

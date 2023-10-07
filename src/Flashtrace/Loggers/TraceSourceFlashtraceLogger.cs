@@ -13,7 +13,7 @@ internal sealed class TraceSourceFlashtraceLogger : SimpleFlashtraceLogger
     private readonly TraceSource _traceSource;
     private static readonly ConcurrentDictionary<string, TraceSource> _traceSources = new( StringComparer.OrdinalIgnoreCase );
 
-    internal TraceSourceFlashtraceLogger( IFlashtraceRoleLoggerFactory factory, string role, string name ) : base( role, name )
+    internal TraceSourceFlashtraceLogger( IFlashtraceRoleLoggerFactory factory, FlashtraceRole role, string name ) : base( role, name )
     {
         this.Factory = factory;
         this._traceSource = GetTraceSource( role );
@@ -21,14 +21,14 @@ internal sealed class TraceSourceFlashtraceLogger : SimpleFlashtraceLogger
 
     public override IFlashtraceRoleLoggerFactory Factory { get; }
 
-    private static string GetSourceName( string role )
+    private static string GetSourceName( FlashtraceRole role )
     {
-        return "Flashtrace." + role;
+        return "Flashtrace." + role.Name;
     }
 
-    public static TraceSource GetTraceSource( string role = FlashtraceRoles.Default )
+    public static TraceSource GetTraceSource( FlashtraceRole? role = null )
     {
-        var sourceName = GetSourceName( role );
+        var sourceName = GetSourceName( role ?? FlashtraceRole.Logging );
 
         return _traceSources.GetOrAdd( sourceName, n => new TraceSource( n ) );
     }

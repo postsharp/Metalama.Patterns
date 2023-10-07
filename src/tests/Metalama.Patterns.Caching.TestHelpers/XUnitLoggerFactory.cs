@@ -14,5 +14,5 @@ public class XUnitLoggerFactory : IFlashtraceLoggerFactory
         this._testOutputHelper = testOutputHelper;
     }
 
-    public IFlashtraceRoleLoggerFactory ForRole( string role ) => new XUnitLogger( role, this._testOutputHelper );
+    public IFlashtraceRoleLoggerFactory ForRole( FlashtraceRole role ) => new XUnitLogger( role, this._testOutputHelper );
 }

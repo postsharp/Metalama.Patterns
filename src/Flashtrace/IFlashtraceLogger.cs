@@ -24,7 +24,7 @@ public partial interface IFlashtraceLogger : IFlashtraceExceptionHandler
     IFlashtraceRoleLoggerFactory Factory { get; }
 
     /// <summary>
-    /// Gets the role of records created by this <see cref="IFlashtraceLogger"/>. A list of standard roles is available in the <see cref="FlashtraceRoles"/> class.
+    /// Gets the role of records created by this <see cref="IFlashtraceLogger"/>. A list of standard roles is available in the <see cref="FlashtraceRole"/> class.
     /// </summary>
     string Role { get; }
 

@@ -6,11 +6,11 @@ public sealed class FlashtraceServiceBuilder
 {
     public IServiceProvider ServiceProvider { get; }
 
-    public HashSet<string> EnabledRoles { get; } = new();
+    public HashSet<FlashtraceRole> EnabledRoles { get; } = new();
 
     internal FlashtraceServiceBuilder( IServiceProvider serviceProvider )
     {
         this.ServiceProvider = serviceProvider;
-        this.EnabledRoles.Add( FlashtraceRoles.Default );
+        this.EnabledRoles.Add( FlashtraceRole.Logging );
     }
 }

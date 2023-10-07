@@ -37,7 +37,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
         this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration );
         this._ownsBackend = true;
-        this._logger = configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
+        this._logger = configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     private RedisCacheDependencyGarbageCollector( DependenciesRedisCachingBackend backend )
@@ -46,7 +46,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         this.Database = backend.Database;
         this._backend = backend;
         this._ownsBackend = false;
-        this._logger = backend.Configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
+        this._logger = backend.Configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     /// <summary>

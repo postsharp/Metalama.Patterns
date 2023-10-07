@@ -9,10 +9,10 @@ namespace Metalama.Patterns.Caching.TestHelpers;
 
 internal class XUnitLogger : IFlashtraceRoleLoggerFactory
 {
-    private readonly string _role;
+    private readonly FlashtraceRole _role;
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public XUnitLogger( string role, ITestOutputHelper testOutputHelper )
+    public XUnitLogger( FlashtraceRole role, ITestOutputHelper testOutputHelper )
     {
         this._role = role;
         this._testOutputHelper = testOutputHelper;
@@ -26,7 +26,7 @@ internal class XUnitLogger : IFlashtraceRoleLoggerFactory
     {
         private readonly ITestOutputHelper _testOutputHelper;
 
-        public Logger( string role, string name, ITestOutputHelper testOutputHelper, IFlashtraceRoleLoggerFactory factory ) : base( role, name )
+        public Logger( FlashtraceRole role, string name, ITestOutputHelper testOutputHelper, IFlashtraceRoleLoggerFactory factory ) : base( role, name )
         {
             this._testOutputHelper = testOutputHelper;
             this.Factory = factory;

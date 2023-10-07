@@ -127,10 +127,10 @@ public sealed class FlashtraceSource
     /// Gets a log source for a specified role and source name.
     /// </summary>
     /// <param name="sourceName">The source name. A dotted name.</param>
-    /// <param name="role">A role name. See <see cref="FlashtraceRoles"/>.</param>
+    /// <param name="role">A role name. See <see cref="FlashtraceRole"/>.</param>
     /// <returns></returns>
     [Obsolete( "Use ILoggerFactory.GetLogSource." )]
-    public static FlashtraceSource Get( string sourceName, string? role )
+    public static FlashtraceSource Get( string sourceName, FlashtraceRole? role )
         => role == null
             ? FlashtraceSourceFactory.Default.GetFlashtraceSource( sourceName )
             : FlashtraceSourceFactory.ForRole( role ).GetFlashtraceSource( sourceName );
@@ -139,10 +139,10 @@ public sealed class FlashtraceSource
     /// Gets a log source for a specified role and <see cref="Type"/>.
     /// </summary>
     /// <param name="type">The type.</param>
-    /// <param name="role">See <see cref="FlashtraceRoles"/>.</param>
+    /// <param name="role">See <see cref="FlashtraceRole"/>.</param>
     /// <returns></returns>
     [Obsolete( "Use ILoggerFactory.GetLogSource." )]
-    public static FlashtraceSource Get( Type type, string? role = null )
+    public static FlashtraceSource Get( Type type, FlashtraceRole? role = null )
         => role == null
             ? FlashtraceSourceFactory.Default.GetFlashtraceSource( type )
             : FlashtraceSourceFactory.ForRole( role ).GetFlashtraceSource( type );

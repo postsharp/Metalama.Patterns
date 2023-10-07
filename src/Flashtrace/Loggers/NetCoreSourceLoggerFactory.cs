@@ -9,13 +9,13 @@ namespace Flashtrace.Loggers;
 internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
 {
     private readonly ILoggerFactory _underlyingLoggerFactory;
-    private readonly HashSet<string> _enabledRoles;
-    private readonly ConcurrentDictionary<string, IFlashtraceRoleLoggerFactory> _roleLoggerFactories = new();
+    private readonly HashSet<FlashtraceRole> _enabledRoles;
+    private readonly ConcurrentDictionary<FlashtraceRole, IFlashtraceRoleLoggerFactory> _roleLoggerFactories = new();
 
-    public NetCoreSourceLoggerFactory( ILoggerFactory underlyingLoggerFactory, IEnumerable<string> enabledRoles )
+    public NetCoreSourceLoggerFactory( ILoggerFactory underlyingLoggerFactory, IEnumerable<FlashtraceRole> enabledRoles )
     {
         this._underlyingLoggerFactory = underlyingLoggerFactory;
-        this._enabledRoles = new HashSet<string>();
+        this._enabledRoles = new HashSet<FlashtraceRole>();
 
         foreach ( var role in enabledRoles )
         {
@@ -23,7 +23,7 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
         }
     }
 
-    public IFlashtraceRoleLoggerFactory ForRole( string role )
+    public IFlashtraceRoleLoggerFactory ForRole( FlashtraceRole role )
     {
         if ( this._roleLoggerFactories.TryGetValue( role, out var factory ) )
         {
@@ -49,9 +49,9 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
     {
         private readonly ILoggerFactory _underlyingLoggerFactory;
         private readonly ConcurrentDictionary<string, Logger> _loggers = new();
-        private readonly string _role;
+        private readonly FlashtraceRole _role;
 
-        public RoleLoggerFactory( ILoggerFactory underlyingLoggerFactory, string role )
+        public RoleLoggerFactory( ILoggerFactory underlyingLoggerFactory, FlashtraceRole role )
         {
             this._underlyingLoggerFactory = underlyingLoggerFactory;
             this._role = role;
@@ -74,7 +74,7 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
     {
         private readonly ILogger _underlyingLogger;
 
-        public Logger( string role, string name, ILogger underlyingLogger, IFlashtraceRoleLoggerFactory factory ) : base( role, name )
+        public Logger( FlashtraceRole role, string name, ILogger underlyingLogger, IFlashtraceRoleLoggerFactory factory ) : base( role, name )
         {
             this._underlyingLogger = underlyingLogger;
             this.Factory = factory;

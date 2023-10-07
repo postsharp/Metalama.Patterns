@@ -15,5 +15,5 @@ public interface IFlashtraceLoggerFactory
     /// </summary>
     /// <param name="role">The role for which the logger is requested.</param>
     /// <returns></returns>
-    IFlashtraceRoleLoggerFactory ForRole( string role );
+    IFlashtraceRoleLoggerFactory ForRole( FlashtraceRole role );
 }

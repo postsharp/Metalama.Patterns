@@ -19,7 +19,7 @@ public sealed class DependencyInjectionTests : BaseCachingTests
         ServiceCollection serviceCollection = new();
         var backend = new TestingCacheBackend( "test", this.ServiceProvider );
         serviceCollection.AddLogging();
-        serviceCollection.AddFlashtrace( b => b.EnabledRoles.Add( FlashtraceRoles.Caching ) );
+        serviceCollection.AddFlashtrace( b => b.EnabledRoles.Add( FlashtraceRole.Caching ) );
         serviceCollection.AddCaching( b => b.Backend = backend );
         serviceCollection.AddSingleton<C>();
         var c = (C) serviceCollection.BuildServiceProvider().GetService( typeof(C) )!;
