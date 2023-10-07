@@ -36,17 +36,17 @@ public class FlashtraceRole
     public override string ToString() => this.Name;
 
     /// <summary>
-    /// Log records emitted by the Caching component.
+    /// Gets the <see cref="FlashtraceRole"/> used by <c>Metalama.Patterns.Caching</c>.
     /// </summary>
     public static FlashtraceRole Caching { get; } = new( "Cache", true );
 
     /// <summary>
-    /// Default role for the Logging component. Used for manual logging.
+    /// Gets the default <see cref="FlashtraceRole"/> instance, which should be used for manual logging.
     /// </summary>
     public static FlashtraceRole Logging { get; } = new( "Log" );
 
     /// <summary>
-    /// Logging of the logging component itself.
+    /// Gets the <see cref="FlashtraceRole"/> used by the logging component itself.
     /// </summary>
     public static FlashtraceRole Meta { get; } = new( "Meta", true );
 }
