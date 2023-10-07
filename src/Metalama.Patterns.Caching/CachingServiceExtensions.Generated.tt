@@ -62,15 +62,15 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public static TReturn Recache<TReturn,  <#= Repeat( "TParam{0}", i ) #>>(this ICachingService cachingService,  Func< <#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
+			public static TReturn Refresh<TReturn,  <#= Repeat( "TParam{0}", i ) #>>(this ICachingService cachingService,  Func< <#= Repeat( "TParam{0}", i ) #>, TReturn> method, <#= Repeat( "TParam{0} arg{0}", i ) #> )
             {
-				using ( var activity = cachingService.Logger.Default.OpenActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+				using ( var activity = cachingService.Logger.Default.OpenActivity( Semantic("Refresh", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
                         TReturn result;
 
-                        using ( cachingService.OpenRecacheContext( method, <#= Repeat( "arg{0}", i ) #> ) )
+                        using ( cachingService.OpenRefreshContext( method, <#= Repeat( "arg{0}", i ) #> ) )
                         {
                             result = method( <#= Repeat( "arg{0}", i ) #>  );
                         }
@@ -97,15 +97,15 @@ namespace Metalama.Patterns.Caching
 <#
         GenerateXmlDoc( i );
 #>
-			public static async Task<TReturn> RecacheAsync<TReturn,  <#= Repeat( "TParam{0}", i ) #>>(  this ICachingService cachingService, Func<<#= Repeat( "TParam{0}", i ) #>, Task<TReturn>> method, <#= Repeat( "TParam{0} arg{0}", i ) #>, CancellationToken cancellationToken = default )
+			public static async Task<TReturn> RefreshAsync<TReturn,  <#= Repeat( "TParam{0}", i ) #>>(  this ICachingService cachingService, Func<<#= Repeat( "TParam{0}", i ) #>, Task<TReturn>> method, <#= Repeat( "TParam{0} arg{0}", i ) #>, CancellationToken cancellationToken = default )
             {
-                using ( var activity = cachingService.Logger.Default.OpenAsyncActivity( Semantic("Recache", ("Method", method.Method ) ) ) )
+                using ( var activity = cachingService.Logger.Default.OpenAsyncActivity( Semantic("Refresh", ("Method", method.Method ) ) ) )
                 {
                     try
                     {
                         TReturn result;
 
-                        using ( cachingService.OpenRecacheContext( method, <#= Repeat( "arg{0}", i ) #> ) )
+                        using ( cachingService.OpenRefreshContext( method, <#= Repeat( "arg{0}", i ) #> ) )
                         {
                             result = await method( <#= Repeat( "arg{0}", i ) #>  );
                         }

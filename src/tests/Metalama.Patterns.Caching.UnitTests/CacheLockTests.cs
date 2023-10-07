@@ -31,21 +31,21 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         [Fact]
-        public void TestSyncLock()
+        public async Task TestSyncLock()
         {
-            using var context = this.InitializeTest();
+            await using var context = this.InitializeTest();
 
-            var t1 = Task.Run( () => this.TestLoop() );
-            var t2 = Task.Run( () => this.TestLoop() );
+            var t1 = Task.Run( this.TestLoop );
+            var t2 = Task.Run( this.TestLoop );
 
-            t1.Wait();
-            t2.Wait();
+            await t1;
+            await t2;
         }
 
         [Fact]
         public async Task TestAsyncLock()
         {
-            using var context = this.InitializeTest();
+            await using var context = this.InitializeTest();
 
             var t1 = Task.Run( this.TestLoopAsync );
             var t2 = Task.Run( this.TestLoopAsync );
@@ -54,30 +54,26 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         [Fact]
-        public void TestSyncLockTimeout()
+        public async Task TestSyncLockTimeout()
         {
-            using var context = this.InitializeTest( 2 );
+            await using var context = this.InitializeTest( 2 );
 
             Task t1 = Task.Run( () => this.CachedMethod( 100 ) );
             Task t2 = Task.Run( () => this.CachedMethod( 100 ) );
 
             try
             {
-                t1.Wait();
-                t2.Wait();
+                await t1;
+                await t2;
 
                 AssertEx.Fail( "An exception was expected" );
             }
-            catch ( AggregateException e )
-            {
-                Assert.NotNull( e.InnerExceptions[0] );
-                Assert.IsType<TimeoutException>( e.InnerExceptions[0] );
-            }
+            catch ( TimeoutException ) { }
 
             // After a method completes with a timeout, the next call should be successful.
             try
             {
-                t1.Wait();
+                await t1;
             }
             catch
             {
@@ -86,7 +82,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                t2.Wait();
+                await t2;
             }
             catch
             {
@@ -99,7 +95,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncLockTimeout()
         {
-            using var context = this.InitializeTest( 50 );
+            await using var context = this.InitializeTest( 50 );
 
             var barrier = new AsyncBarrier( 2 );
             Task t1 = Task.Run( async () => await this.CachedMethodAsync( 100, barrier ) );
@@ -146,15 +142,15 @@ namespace Metalama.Patterns.Caching.Tests
         private static readonly TimeSpan _globalTimeout = TimeSpan.FromSeconds( 10 );
 
         [Fact]
-        public void TestSyncLockTimeoutIgnoreLock()
+        public async Task TestSyncLockTimeoutIgnoreLock()
         {
-            using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
+            await using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
 
             Task t1 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
             Task t2 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
 
-            Assert.True( t1.Wait( _globalTimeout ), "Timeout" );
-            Assert.True( t2.Wait( _globalTimeout ), "Timeout" );
+            Assert.True( await t1.WithTimeout( _globalTimeout ), "Timeout" );
+            Assert.True( await t2.WithTimeout( _globalTimeout ), "Timeout" );
 
             // After a method completes with a timeout, the next call should be successful.
             this.CachedMethod();
@@ -163,7 +159,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncLockTimeoutAsync()
         {
-            using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
+            await using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
 
             var barrier = new AsyncBarrier( 2 );
             var t1State = 0;

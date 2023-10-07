@@ -370,7 +370,7 @@ public static partial class CachingServiceExtensions
     public static ValueTask InvalidateAsync<TReturn>( this ICachingService cachingService, Func<TReturn> method, CancellationToken cancellationToken = default )
         => cachingService.InvalidateDelegateAsync( method, Array.Empty<object?>(), cancellationToken );
 
-    private static CachingContext OpenRecacheContext( this ICachingService cachingService, Delegate method, params object?[] args )
+    private static CachingContext OpenRefreshContext( this ICachingService cachingService, Delegate method, params object?[] args )
     {
         var key = cachingService.KeyBuilder.BuildMethodKey(
             CachedMethodMetadataRegistry.Instance.Get( method.Method )
@@ -378,7 +378,7 @@ public static partial class CachingServiceExtensions
             method.Target,
             args );
 
-        return CachingContext.OpenRecacheContext( key );
+        return CachingContext.OpenRefreshContext( key );
     }
 
     /// <summary>
@@ -388,15 +388,15 @@ public static partial class CachingServiceExtensions
     /// <param name="cachingService">The <see cref="ICachingService"/>.</param>
     /// <param name="method">A delegate of the method to evaluate.</param>
     /// <returns>The return value of <paramref name="method"/>.</returns>
-    public static TReturn Recache<TReturn>( this ICachingService cachingService, Func<TReturn> method )
+    public static TReturn Refresh<TReturn>( this ICachingService cachingService, Func<TReturn> method )
     {
-        using ( var activity = cachingService.Logger.Default.OpenActivity( Formatted( "Recache( method = {Method} )", method.Method ) ) )
+        using ( var activity = cachingService.Logger.Default.OpenActivity( Formatted( "Refresh( method = {Method} )", method.Method ) ) )
         {
             try
             {
                 TReturn result;
 
-                using ( cachingService.OpenRecacheContext( method ) )
+                using ( cachingService.OpenRefreshContext( method ) )
                 {
                     result = method();
                 }
@@ -422,18 +422,18 @@ public static partial class CachingServiceExtensions
     /// <param name="method">A delegate of the method to evaluate.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task{TResult}"/> that evaluates to the return value of <paramref name="method"/>.</returns>
-    public static async Task<TReturn> RecacheAsync<TReturn>(
+    public static async Task<TReturn> RefreshAsync<TReturn>(
         this ICachingService cachingService,
         Func<Task<TReturn>> method,
         CancellationToken cancellationToken = default )
     {
-        using ( var activity = cachingService.Logger.Default.OpenAsyncActivity( Formatted( "RecacheAsync( method = {Method} )", method.Method ) ) )
+        using ( var activity = cachingService.Logger.Default.OpenAsyncActivity( Formatted( "RefreshAsync( method = {Method} )", method.Method ) ) )
         {
             try
             {
                 TReturn result;
 
-                using ( cachingService.OpenRecacheContext( method ) )
+                using ( cachingService.OpenRefreshContext( method ) )
                 {
                     result = await method();
                 }

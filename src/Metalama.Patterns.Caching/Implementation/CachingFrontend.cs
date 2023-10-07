@@ -37,7 +37,7 @@ internal sealed class CachingFrontend
 
         try
         {
-            if ( (CachingContext.Current.Kind & CachingContextKind.Recache) == 0 )
+            if ( (CachingContext.Current.Kind & CachingContextKind.Refresh) == 0 )
             {
                 item = backend.GetItem( key );
 
@@ -164,7 +164,7 @@ internal sealed class CachingFrontend
 
         try
         {
-            if ( (CachingContext.Current.Kind & CachingContextKind.Recache) == 0 )
+            if ( (CachingContext.Current.Kind & CachingContextKind.Refresh) == 0 )
             {
                 item = await backend.GetItemAsync( key, cancellationToken: cancellationToken );
 
@@ -296,7 +296,7 @@ internal sealed class CachingFrontend
 
         try
         {
-            if ( (CachingContext.Current.Kind & CachingContextKind.Recache) == 0 )
+            if ( (CachingContext.Current.Kind & CachingContextKind.Refresh) == 0 )
             {
                 item = await backend.GetItemAsync( key, cancellationToken: cancellationToken );
 

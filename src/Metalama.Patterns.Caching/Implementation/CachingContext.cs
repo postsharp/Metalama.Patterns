@@ -56,9 +56,9 @@ internal sealed class CachingContext : IDisposable, ICachingContext
 
     ICachingContext? ICachingContext.Parent => this.Parent;
 
-    internal static CachingContext OpenRecacheContext( string key )
+    internal static CachingContext OpenRefreshContext( string key )
     {
-        var context = new CachingContext( key, CachingContextKind.Recache, Current );
+        var context = new CachingContext( key, CachingContextKind.Refresh, Current );
         Current = context;
 
         return context;

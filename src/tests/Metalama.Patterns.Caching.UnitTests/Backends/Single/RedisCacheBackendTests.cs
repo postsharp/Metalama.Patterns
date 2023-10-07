@@ -73,7 +73,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
         var redisTestInstance = this._redisSetupFixture.TestInstance;
         this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        Assert.Equal( 0, this.GetAllKeys( prefix ).Count );
+        Assert.Empty( this.GetAllKeys( prefix ) );
 
         // [Porting] The null passed to CreateAsync in the second using below will throw because that parameter is [Required]. This test
         // is currently skipped (as per original code), but would throw here if re-enabled. Not fixing, as can't be certain of original intent.
@@ -123,9 +123,9 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 
             var keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
 
-            string valueKey = keyBuilder.GetValueKey( valueSmallKey );
-            string dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
-            string dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
+            var valueKey = keyBuilder.GetValueKey( valueSmallKey );
+            var dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
+            var dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
 
             collector.NotificationQueue.SuspendProcessing();
 
