@@ -48,9 +48,9 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
     /// </summary>
-    public MemoryCachingBackend( MemoryCachingBackendConfiguration? serviceProvider = null ) : this(
+    public MemoryCachingBackend( MemoryCachingBackendConfiguration? configuration = null ) : this(
         new MemoryCache( new MemoryCacheOptions() ),
-        serviceProvider ) { }
+        configuration ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on the given <see cref="IMemoryCache"/>. The backend creates cache entries

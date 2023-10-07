@@ -1,16 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
-using System.ComponentModel;
 
 namespace Metalama.Patterns.Caching;
 
 /// <summary>
-/// Allows to configure caching profiles (<see cref="CachingProfile"/>), and therefore influence the behavior
-/// the caching of methods that are bound to this profile. Exposed on the <see cref="CachingService.Profiles"/> property.
+/// Exposes the profiles registered in the <see cref="CachingService"/>.
 /// </summary>
 [PublicAPI]
 public sealed class CachingProfileRegistry
@@ -31,7 +28,7 @@ public sealed class CachingProfileRegistry
     public CachingProfile Default => this[CachingProfile.DefaultName];
 
     /// <summary>
-    /// Gets a <see cref="CachingProfile"/> of a given name. If no profile exists, a new profile is created, registered and returned.
+    /// Gets a <see cref="CachingProfile"/> of a given name. If no profile exists, a <see cref="KeyNotFoundException"/> is thrown.
     /// </summary>
     /// <param name="profileName">The profile name (a case-insensitive string).</param>
     /// <returns>A <see cref="CachingProfile"/> object with name <paramref name="profileName"/>.</returns>

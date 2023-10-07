@@ -12,7 +12,9 @@ namespace Metalama.Patterns.Caching;
 #pragma warning disable SA1623
 
 /// <summary>
-/// Allows for centralized and run-time configuration several methods.
+/// Set of options defined at run time when the <see cref="CachingService"/> is instantiated. Classes and methods can be assigned
+/// to a <see cref="CachingProfile"/> using the <c>ProfileName</c> option or attribute property. Any compile-time setting takes
+/// precedence over the values defined in the <see cref="CachingProfile"/>. 
 /// </summary>
 [PublicAPI]
 [RunTime]

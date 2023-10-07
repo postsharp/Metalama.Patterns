@@ -1,9 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Dependencies;
 
 namespace Metalama.Patterns.Caching;
 
+/// <summary>
+/// Extension methods for the <see cref="ICachingService"/> interface.
+/// </summary>
+[PublicAPI]
 public static class CachingServiceExtensions
 {
     public static void AddDependency( this ICachingService cachingService, ICacheDependency dependency )

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,14 +18,19 @@ public sealed class DependencyInjectionTests : BaseCachingTests
     {
         ServiceCollection serviceCollection = new();
         var backend = new TestingCacheBackend( "test", this.ServiceProvider );
-        var cachingService = new CachingService( backend, serviceProvider: this.ServiceProvider );
-        serviceCollection.AddSingleton<ICachingService>( cachingService );
+        serviceCollection.AddFlashtrace( b => b.EnabledRoles.Add( FlashtraceRoles.Caching ) );
+        serviceCollection.AddCaching( this.InitializeCaching );
         serviceCollection.AddSingleton<C>();
         var c = (C) serviceCollection.BuildServiceProvider().GetService( typeof(C) )!;
         _ = c.Method();
 
         Assert.NotNull( backend.LastCachedItem );
         Assert.Equal( "DependencyInjection!", backend.LastCachedItem.Value );
+    }
+
+    private void InitializeCaching( CachingServiceBuilder builder )
+    {
+        builder.Backend = new TestingCacheBackend( "test", builder.ServiceProvider );
     }
 
     private sealed class C

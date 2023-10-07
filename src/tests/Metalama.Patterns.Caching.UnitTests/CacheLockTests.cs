@@ -74,8 +74,6 @@ namespace Metalama.Patterns.Caching.Tests
                 Assert.IsType<TimeoutException>( e.InnerExceptions[0] );
             }
 
-            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
-
             // After a method completes with a timeout, the next call should be successful.
             try
             {
@@ -123,8 +121,6 @@ namespace Metalama.Patterns.Caching.Tests
             }
             catch ( TimeoutException ) { }
 
-            // CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
-
             // After a method completes with a timeout, the next call should be successful.
             try
             {
@@ -159,9 +155,6 @@ namespace Metalama.Patterns.Caching.Tests
 
             Assert.True( t1.Wait( _globalTimeout ), "Timeout" );
             Assert.True( t2.Wait( _globalTimeout ), "Timeout" );
-
-            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
-            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
 
             // After a method completes with a timeout, the next call should be successful.
             this.CachedMethod();
@@ -201,9 +194,6 @@ namespace Metalama.Patterns.Caching.Tests
             AssertEx.NotSame( delay, t, $"Timeout. t1={t1.Status}, t1State={t1State}, t2={t2.Status}, t2State={t2State}, barrier={barrier}." );
 
             Assert.Equal( 0, this._counter );
-
-            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
-            //CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
 
             await this.CachedMethodAsync();
         }

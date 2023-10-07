@@ -9,11 +9,18 @@ namespace Flashtrace.Loggers;
 internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
 {
     private readonly ILoggerFactory _underlyingLoggerFactory;
-    private readonly ConcurrentDictionary<string, RoleLoggerFactory> _roleLoggerFactories = new();
+    private readonly HashSet<string> _enabledRoles;
+    private readonly ConcurrentDictionary<string, IFlashtraceRoleLoggerFactory> _roleLoggerFactories = new();
 
-    public NetCoreSourceLoggerFactory( ILoggerFactory underlyingLoggerFactory )
+    public NetCoreSourceLoggerFactory( ILoggerFactory underlyingLoggerFactory, IEnumerable<string> enabledRoles )
     {
         this._underlyingLoggerFactory = underlyingLoggerFactory;
+        this._enabledRoles = new HashSet<string>();
+
+        foreach ( var role in enabledRoles )
+        {
+            this._enabledRoles.Add( role );
+        }
     }
 
     public IFlashtraceRoleLoggerFactory ForRole( string role )
@@ -23,7 +30,19 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
             return factory;
         }
 
-        return this._roleLoggerFactories.GetOrAdd( role, _ => new RoleLoggerFactory( this._underlyingLoggerFactory, role ) );
+        return this._roleLoggerFactories.GetOrAdd(
+            role,
+            _ =>
+            {
+                if ( this._enabledRoles.Contains( role ) )
+                {
+                    return new RoleLoggerFactory( this._underlyingLoggerFactory, role );
+                }
+                else
+                {
+                    return new NullFlashtraceLogger();
+                }
+            } );
     }
 
     private sealed class RoleLoggerFactory : IFlashtraceRoleLoggerFactory
