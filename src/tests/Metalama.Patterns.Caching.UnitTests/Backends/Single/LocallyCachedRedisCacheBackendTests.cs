@@ -122,4 +122,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
     }
 
     #endregion
+
+    [Fact( Skip = "https://postsharp.tpondemand.com/entity/33937-test-locallycachedrediscachebackendteststestremovaleventbydependencyasync-is-flaky" )]
+    public override Task TestRemovalEventByDependencyAsync() => base.TestRemovalEventByDependencyAsync();
 }

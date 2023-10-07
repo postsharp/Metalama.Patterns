@@ -32,7 +32,7 @@ namespace Metalama.Patterns.Caching.Aspects;
 /// Finally, you can define a profile by setting the <see cref="CachingBaseAttribute.ProfileName"/> property and configure the profile at run time
 /// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="ICachingService"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
-/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="ICachingService.Invalidate"/> method.</para>
+/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="CachingServiceExtensions.Invalidate{TReturn,TParam1}"/> method.</para>
 /// </remarks>
 [PublicAPI]
 public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>

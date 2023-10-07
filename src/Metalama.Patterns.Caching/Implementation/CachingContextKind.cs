@@ -20,7 +20,7 @@ internal enum CachingContextKind
 
     /// <summary>
     /// The <see cref="ICachingContext"/> of a method being re-evaluated, ignoring the previous value, and replaced into the cache, using the
-    /// <see cref="CachingService.Recache{TReturn}"/> method.
+    /// <see cref="CachingServiceExtensions.Recache{TReturn}"/> method.
     /// </summary>
     Recache = 2
 }

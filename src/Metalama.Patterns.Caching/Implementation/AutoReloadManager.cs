@@ -76,7 +76,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         {
             try
             {
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     var value = subscription.ValueProvider.Invoke();
 
@@ -98,7 +98,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         {
             try
             {
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     var invokeValueProviderTask = (Task<object?>?) subscription.ValueProvider.Invoke();
                     var value = invokeValueProviderTask == null ? null : await invokeValueProviderTask;

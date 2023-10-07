@@ -111,7 +111,7 @@ internal sealed class CachingFrontend
 
                 logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     value = invokeOriginalMethod( instance, args );
 
@@ -239,7 +239,7 @@ internal sealed class CachingFrontend
 
                 logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     var invokeValueProviderTask = invokeOriginalMethod( instance, args, cancellationToken );
 
@@ -371,7 +371,7 @@ internal sealed class CachingFrontend
 
                 logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     var invokeValueProviderTask = invokeOriginalMethod( instance, args, cancellationToken );
 

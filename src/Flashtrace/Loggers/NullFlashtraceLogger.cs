@@ -8,8 +8,8 @@ using System.Diagnostics;
 namespace Flashtrace.Loggers;
 
 // ReSharper disable once UnusedType.Global : Usage is conditional.
-internal partial class NullFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalLogger, IFlashtraceRoleLoggerFactory, ILoggingContext, ILogRecordBuilder,
-                                              IFlashtraceLoggerFactory
+public partial class NullFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalLogger, IFlashtraceRoleLoggerFactory, ILoggingContext, ILogRecordBuilder,
+                                            IFlashtraceLoggerFactory
 {
     private static bool _warningEmitted;
 

@@ -175,7 +175,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             public async Task<Task<CachedValueClass>> GetValueIntermediateAsync()
             {
-                using ( CachingContext.OpenCacheContext( "k", CachingService.Default ) )
+                using ( CachingContext.OpenCacheContext( "k" ) )
                 {
                     await Task.Yield();
 

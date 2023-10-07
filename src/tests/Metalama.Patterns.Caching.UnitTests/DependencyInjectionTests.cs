@@ -18,19 +18,15 @@ public sealed class DependencyInjectionTests : BaseCachingTests
     {
         ServiceCollection serviceCollection = new();
         var backend = new TestingCacheBackend( "test", this.ServiceProvider );
+        serviceCollection.AddLogging();
         serviceCollection.AddFlashtrace( b => b.EnabledRoles.Add( FlashtraceRoles.Caching ) );
-        serviceCollection.AddCaching( this.InitializeCaching );
+        serviceCollection.AddCaching( b => b.Backend = backend );
         serviceCollection.AddSingleton<C>();
         var c = (C) serviceCollection.BuildServiceProvider().GetService( typeof(C) )!;
         _ = c.Method();
 
         Assert.NotNull( backend.LastCachedItem );
         Assert.Equal( "DependencyInjection!", backend.LastCachedItem.Value );
-    }
-
-    private void InitializeCaching( CachingServiceBuilder builder )
-    {
-        builder.Backend = new TestingCacheBackend( "test", builder.ServiceProvider );
     }
 
     private sealed class C

@@ -9,7 +9,6 @@ namespace Metalama.Patterns.Caching.Implementation;
 internal sealed class CachingContext : IDisposable, ICachingContext
 {
     private static readonly AsyncLocal<ICachingContext?> _currentContext = new();
-    private readonly CachingService _cachingService;
 
     [AllowNull]
     public static ICachingContext Current
@@ -25,12 +24,11 @@ internal sealed class CachingContext : IDisposable, ICachingContext
     private HashSet<string>? _dependencies;
     private ImmutableHashSet<string>? _immutableDependencies;
 
-    private CachingContext( string key, CachingContextKind options, ICachingContext parent, CachingService cachingService )
+    private CachingContext( string key, CachingContextKind options, ICachingContext parent )
     {
         this._key = key;
         this.Kind = options;
         this.Parent = parent;
-        this._cachingService = cachingService;
     }
 
     public CachingContextKind Kind { get; }
@@ -58,17 +56,17 @@ internal sealed class CachingContext : IDisposable, ICachingContext
 
     ICachingContext? ICachingContext.Parent => this.Parent;
 
-    internal static CachingContext OpenRecacheContext( string key, CachingService cachingService )
+    internal static CachingContext OpenRecacheContext( string key )
     {
-        var context = new CachingContext( key, CachingContextKind.Recache, Current, cachingService );
+        var context = new CachingContext( key, CachingContextKind.Recache, Current );
         Current = context;
 
         return context;
     }
 
-    internal static CachingContext OpenCacheContext( string key, CachingService cachingService )
+    internal static CachingContext OpenCacheContext( string key )
     {
-        var context = new CachingContext( key, CachingContextKind.Cache, Current, cachingService );
+        var context = new CachingContext( key, CachingContextKind.Cache, Current );
         Current = context;
 
         return context;
@@ -144,10 +142,6 @@ internal sealed class CachingContext : IDisposable, ICachingContext
             if ( backend.SupportedFeatures.Dependencies )
             {
                 this.Parent.AddDependency( this._key );
-            }
-            else
-            {
-                this._cachingService.AddedNestedCachedMethod( method );
             }
         }
     }

@@ -8,13 +8,16 @@ using System.Reflection;
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// Builds cache item keys and dependency keys.
+/// Builds cache item keys and dependency keys. Implementation of <see cref="ICacheKeyBuilder"/>.
 /// </summary>
 [PublicAPI]
-public class CacheKeyBuilder : IDisposable
+public class CacheKeyBuilder : IDisposable, ICacheKeyBuilder
 {
     private readonly UnsafeStringBuilderPool _stringBuilderPool;
 
+    /// <summary>
+    /// Gets the formatters used to build the caching key.
+    /// </summary>
     public IFormatterRepository Formatters { get; }
 
     /// <summary>
@@ -61,19 +64,18 @@ public class CacheKeyBuilder : IDisposable
                 "The list must have the same number of items as the number of parameters of the method." );
         }
 
-        if ( !method.IsStatic && instance == null )
+        switch ( method.IsStatic )
         {
-            throw new ArgumentNullException( nameof(instance) );
-        }
+            case false when instance == null:
+                throw new ArgumentNullException( nameof(instance) );
 
-        if ( method.IsStatic && instance != null )
-        {
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "The {0} parameter must be null when {1} is a static method.",
-                    nameof(instance),
-                    nameof(method) ) );
+            case true when instance != null:
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "The {0} parameter must be null when {1} is a static method.",
+                        nameof(instance),
+                        nameof(method) ) );
         }
 
         // Compute the caching key.

@@ -785,7 +785,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         }
 
         [Fact( Timeout = Timeout )]
-        public async Task TestRemovalEventByDependencyAsync()
+        public virtual async Task TestRemovalEventByDependencyAsync()
         {
             if ( !this.TestDependencies )
             {

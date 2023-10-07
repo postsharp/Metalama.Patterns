@@ -58,10 +58,11 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
         this.ServiceProvider = serviceProvider;
         this.KeyBuilder = new CacheKeyBuilder( this.Formatters );
         this.Profiles = new CachingProfileRegistry( profilesDictionary.ToImmutable() );
+        this.AllBackends = this.Profiles.AllBackends.ToImmutableArray();
         this.Frontend = new CachingFrontend( this );
         this.AutoReloadManager = new AutoReloadManager( this );
         this.KeyBuilder = keyBuilderFactory?.Invoke( this.Formatters ) ?? new CacheKeyBuilder( this.Formatters );
-        this._defaultLogger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
+        this.Logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRoles.Caching );
     }
 
     internal static CachingService CreateUninitialized( IServiceProvider? serviceProvider = null )
@@ -70,21 +71,15 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
     /// <summary>
     /// Gets the set of distinct backends used in the service.
     /// </summary>
-    public ImmutableHashSet<CachingBackend> AllBackends => this.Profiles.AllBackends;
+    public ImmutableArray<CachingBackend> AllBackends { get; }
 
-    public void AddDependency( string key ) => CachingContext.Current.AddDependency( key );
-
-    public void AddDependencies( IEnumerable<string> keys ) => CachingContext.Current.AddDependencies( keys );
-
-    public IDisposable SuspendDependencyPropagation() => CachingContext.OpenSuspendedCacheContext();
-
-    string ICachingService.GetDependencyKey( object o ) => this.KeyBuilder.BuildDependencyKey( o );
+    public FlashtraceSource Logger { get; }
 
     /// <summary>
     /// Gets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
     /// </summary>
     [AllowNull]
-    public CacheKeyBuilder KeyBuilder { get; }
+    public ICacheKeyBuilder KeyBuilder { get; }
 
     /// <summary>
     /// Gets default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
