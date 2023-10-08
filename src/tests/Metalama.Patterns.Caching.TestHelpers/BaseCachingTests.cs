@@ -2,6 +2,7 @@
 
 using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Implementation;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -45,27 +46,23 @@ public abstract class BaseCachingTests
         CachingService.Default = CachingService.Create(
             b =>
             {
-                b.Backend = backend;
+                b.WithBackend( x => x.Specific( backend ) );
 
                 var testBuilder = new CachingTestBuilder( b );
+                b.AddProfile( new CachingProfile( name ) );
                 buildTest?.Invoke( testBuilder );
-
-                // We always add a profile named after the test because many tests use this trick.
-                if ( b.Profiles.All( p => p.Name != name ) )
-                {
-                    b.AddProfile( new CachingProfile( name ) );
-                }
             },
             this.ServiceProvider );
 
         return new CachingTestContext<T>( backend );
     }
 
-    protected CachingTestContext<MemoryCachingBackend> InitializeTest(
+    protected CachingTestContext<CachingBackend> InitializeTest(
         string name,
         Action<CachingTestBuilder>? buildTest = null )
     {
-        var backend = new MemoryCachingBackend( this.ServiceProvider ) { DebugName = name };
+        var backend = CachingBackend.Create( b => b.Memory(), this.ServiceProvider );
+        backend.DebugName = name;
 
         return this.InitializeTest( name, backend, buildTest );
     }

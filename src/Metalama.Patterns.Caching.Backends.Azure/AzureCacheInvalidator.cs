@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     /// meant for .NET Standard.
     /// </summary>
     [PublicAPI]
-    public class AzureCacheInvalidator : CacheInvalidator
+    internal sealed class AzureCacheInvalidator : CacheInvalidator
     {
         private const string _subject = "Metalama.Patterns.Caching.Backends.Azure.Invalidation";
 
@@ -25,7 +25,9 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         private ServiceBusSender? _sender;
         private int _backgroundTaskExceptions;
 
-        private AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions options ) : base( underlyingBackend, options ) { }
+        public AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorConfiguration configuration ) : base(
+            underlyingBackend,
+            configuration ) { }
 
         protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
@@ -33,37 +35,37 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// Asynchronously creates a new <see cref="AzureCacheInvalidator"/>.
         /// </summary>
         /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator"/>.</param>
-        /// <param name="options">Options.</param>
+        /// <param name="configuration">Options.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
         public static async Task<AzureCacheInvalidator> CreateAsync(
             CachingBackend backend,
-            AzureCacheInvalidatorOptions options,
+            AzureCacheInvalidatorConfiguration configuration,
             CancellationToken cancellationToken = default )
         {
-            var invalidator = new AzureCacheInvalidator( backend, options );
-            await invalidator.InitAsync( options, cancellationToken );
+            var invalidator = new AzureCacheInvalidator( backend, configuration );
+            await invalidator.InitAsync( configuration, cancellationToken );
 
             return invalidator;
         }
 
         public event EventHandler<AzureCacheInvalidatorExceptionEventArgs>? ReceiverException;
 
-        private async Task InitAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
+        private async Task InitAsync( AzureCacheInvalidatorConfiguration configuration, CancellationToken cancellationToken )
         {
-            if ( options.SubscriptionName == null )
+            if ( configuration.SubscriptionName == null )
             {
-                this._subscriptionName = await this.CreateSubscriptionAsync( options, cancellationToken );
+                this._subscriptionName = await this.CreateSubscriptionAsync( configuration, cancellationToken );
             }
             else
             {
-                this._subscriptionName = options.SubscriptionName;
+                this._subscriptionName = configuration.SubscriptionName;
             }
 
-            var client = new ServiceBusClient( options.ConnectionString, options.ClientOptions );
+            var client = new ServiceBusClient( configuration.ConnectionString, configuration.ClientOptions );
 
-            this._receiver = client.CreateReceiver( options.TopicName, this._subscriptionName );
-            this._sender = client.CreateSender( options.TopicName );
+            this._receiver = client.CreateReceiver( configuration.TopicName, this._subscriptionName );
+            this._sender = client.CreateSender( configuration.TopicName );
 
             // Start a background task to process received messages.
             _ = Task.Run( this.ReceiveMessagesAsync, this._receiverCancellation.Token );
@@ -94,7 +96,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                 catch ( Exception e )
                 {
                     this.ReceiverException?.Invoke( this, new AzureCacheInvalidatorExceptionEventArgs( e ) );
-                    await Task.Delay( ((AzureCacheInvalidatorOptions) this.Options).RetryOnReceiveError );
+                    await Task.Delay( ((AzureCacheInvalidatorConfiguration) this.Configuration).RetryOnReceiveError );
                 }
             }
 
@@ -167,18 +169,18 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             this.DisposeCore( false );
         }
 
-        private async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
+        private async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorConfiguration configuration, CancellationToken cancellationToken )
         {
             try
             {
                 var subscriptionId = Guid.NewGuid().ToString();
 
-                var client = new ServiceBusAdministrationClient( options.ConnectionString, options.AdministrationClientOptions );
+                var client = new ServiceBusAdministrationClient( configuration.ConnectionString, configuration.AdministrationClientOptions );
 
                 var subscriptionOptions =
-                    new CreateSubscriptionOptions( options.TopicName, subscriptionId )
+                    new CreateSubscriptionOptions( configuration.TopicName, subscriptionId )
                     {
-                        MaxDeliveryCount = options.MaxDeliveryCount, AutoDeleteOnIdle = options.AutoDeleteOnIdle
+                        MaxDeliveryCount = configuration.MaxDeliveryCount, AutoDeleteOnIdle = configuration.AutoDeleteOnIdle
                     };
 
                 await client.CreateSubscriptionAsync( subscriptionOptions, cancellationToken );

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using CacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
 
@@ -173,14 +174,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
         }
 
-        protected override void ClearCore()
+        protected override void ClearCore( ClearCacheOptions options )
         {
             this._backend.Clear();
         }
 
-        protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
+        protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
         {
-            return this._backend.ClearAsync( cancellationToken );
+            return this._backend.ClearAsync( options, cancellationToken );
         }
 
         protected override void RemoveItemCore( string key )

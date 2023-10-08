@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Microsoft.Extensions.Caching.Memory;
@@ -15,14 +16,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact( Timeout = 5000 )]
         public void TestSizeCalculator()
         {
-            var backend = new MemoryCachingBackend(
-                new MemoryCache(
-                    new MemoryCacheOptions()
-                    {
-                        SizeLimit = 5, CompactionPercentage = 1 // compact full cache
-                    } ),
-                this.ServiceProvider,
-                new MemoryCachingBackendConfiguration { SizeCalculator = ( cItem ) => (int) cItem.Value! } );
+            var backend =
+                CachingBackend.Create(
+                    x => x.Memory( new MemoryCachingBackendConfiguration { SizeCalculator = ( cItem ) => (int) cItem.Value! } )
+                        .WithMemoryCacheOptions(
+                            new MemoryCacheOptions()
+                            {
+                                SizeLimit = 5, CompactionPercentage = 1 // compact full cache
+                            } ),
+                    this.ServiceProvider );
 
             backend.SetItem( "A", new CacheItem( 2 ) );
             backend.SetItem( "B", new CacheItem( 2 ) );
@@ -37,14 +39,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact( Timeout = 5000 )]
         public void TestPriorities()
         {
-            var backend = new MemoryCachingBackend(
-                new MemoryCache(
-                    new MemoryCacheOptions()
-                    {
-                        SizeLimit = 10, CompactionPercentage = 0.5 // compact half
-                    } ),
-                this.ServiceProvider,
-                new MemoryCachingBackendConfiguration { SizeCalculator = ( cItem ) => 1 } );
+            var backend =
+                CachingBackend.Create(
+                    x => x.Memory( new MemoryCachingBackendConfiguration { SizeCalculator = ( cItem ) => 1 } )
+                        .WithMemoryCacheOptions(
+                            new MemoryCacheOptions()
+                            {
+                                SizeLimit = 10, CompactionPercentage = 0.5 // compact half
+                            } ),
+                    this.ServiceProvider );
 
             backend.SetItem( "A", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
             backend.SetItem( "B", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
@@ -80,7 +83,7 @@ namespace Metalama.Patterns.Caching.Tests
             Assert.True( count > 4 );
         }
 
-        private static void EvictEventually( MemoryCachingBackend backend, string key )
+        private static void EvictEventually( CachingBackend backend, string key )
         {
             while ( backend.ContainsItem( key ) )
             {

@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// instances of local caches.
 /// </summary>
 [PublicAPI]
-public sealed class RedisCacheInvalidator : CacheInvalidator
+internal sealed class RedisCacheInvalidator : CacheInvalidator
 {
     private readonly bool _ownsConnection;
     private readonly RedisChannel _channel;
@@ -25,18 +25,18 @@ public sealed class RedisCacheInvalidator : CacheInvalidator
     /// </summary>
     private IConnectionMultiplexer Connection { get; }
 
-    private RedisCacheInvalidator(
+    public RedisCacheInvalidator(
         CachingBackend underlyingBackend,
         IConnectionMultiplexer connection,
-        RedisCacheInvalidatorOptions options ) : base( underlyingBackend, options )
+        RedisCacheInvalidatorConfiguration configuration ) : base( underlyingBackend, configuration )
     {
         this.Connection = connection;
-        this._ownsConnection = options.OwnsConnection;
-        this._connectionTimeout = options.ConnectionTimeout;
-        this._channel = new RedisChannel( options.ChannelName, RedisChannel.PatternMode.Literal );
+        this._ownsConnection = configuration.OwnsConnection;
+        this._connectionTimeout = configuration.ConnectionTimeout;
+        this._channel = new RedisChannel( configuration.ChannelName, RedisChannel.PatternMode.Literal );
     }
 
-    private void Init()
+    protected override void Initialize()
     {
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
@@ -45,9 +45,11 @@ public sealed class RedisCacheInvalidator : CacheInvalidator
             this.HandleMessage,
             this._connectionTimeout,
             this.ServiceProvider );
+
+        base.Initialize();
     }
 
-    private async Task<RedisCacheInvalidator> InitAsync( CancellationToken cancellationToken )
+    protected override async Task InitializeAsync( CancellationToken cancellationToken = default )
     {
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
@@ -58,44 +60,7 @@ public sealed class RedisCacheInvalidator : CacheInvalidator
             this.ServiceProvider,
             cancellationToken );
 
-        return this;
-    }
-
-    /// <summary>
-    /// Creates a new <see cref="RedisCacheInvalidator"/>.
-    /// </summary>
-    /// <param name="backend">A local (typically in-memory) caching back-end.</param>
-    /// <param name="connection">A Redis connection.</param>
-    /// <param name="options">Options.</param>
-    /// <returns>A new <see cref="RedisCacheInvalidator"/>.</returns>
-    public static RedisCacheInvalidator Create(
-        CachingBackend backend,
-        IConnectionMultiplexer connection,
-        RedisCacheInvalidatorOptions options )
-    {
-        var invalidator = new RedisCacheInvalidator( backend, connection, options );
-        invalidator.Init();
-
-        return invalidator;
-    }
-
-    /// <summary>
-    /// Asynchronously creates a new <see cref="RedisCacheInvalidator"/>.
-    /// </summary>
-    /// <param name="backend">A local (typically in-memory) caching back-end.</param>
-    /// <param name="connection">A Redis connection.</param>
-    /// <param name="options">Options.</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>A <see cref="Task"/> returning a new <see cref="RedisCacheInvalidator"/>.</returns>
-    public static Task<RedisCacheInvalidator> CreateAsync(
-        CachingBackend backend,
-        IConnectionMultiplexer connection,
-        RedisCacheInvalidatorOptions options,
-        CancellationToken cancellationToken = default )
-    {
-        var invalidator = new RedisCacheInvalidator( backend, connection, options );
-
-        return invalidator.InitAsync( cancellationToken );
+        await base.InitializeAsync( cancellationToken );
     }
 
     private void HandleMessage( RedisNotification notification )

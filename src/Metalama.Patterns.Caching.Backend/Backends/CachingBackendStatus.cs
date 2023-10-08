@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Backends;
 
 /// <summary>
 /// Statuses of a <see cref="CachingBackend"/>.
@@ -8,9 +8,14 @@ namespace Metalama.Patterns.Caching.Implementation;
 public enum CachingBackendStatus
 {
     /// <summary>
-    /// Default.
+    /// Default. Just created.
     /// </summary>
     Default,
+
+    /// <summary>
+    /// Initialized.
+    /// </summary>
+    Initialized,
 
     /// <summary>
     /// Being currently disposed.

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Backends;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -17,16 +18,16 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     /// <summary>
     /// Gets the options of the current <see cref="CacheInvalidator"/>.
     /// </summary>
-    public CacheInvalidatorOptions Options { get; }
+    public new CacheInvalidatorConfiguration Configuration { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CacheInvalidator"/> class.
     /// </summary>
     /// <param name="underlyingBackend">The underlying <see cref="CachingBackend"/> (typically an in-memory cache).</param>
-    /// <param name="options">Options of the new <see cref="CacheInvalidator"/>.</param>
-    protected CacheInvalidator( CachingBackend underlyingBackend, CacheInvalidatorOptions options ) : base( underlyingBackend )
+    /// <param name="configuration">Options of the new <see cref="CacheInvalidator"/>.</param>
+    protected CacheInvalidator( CachingBackend underlyingBackend, CacheInvalidatorConfiguration configuration ) : base( underlyingBackend )
     {
-        this.Options = options;
+        this.Configuration = configuration;
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( underlyingBackend.ServiceProvider );
     }
 
@@ -71,7 +72,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
         var tokenizer = new StringTokenizer( message );
         var prefix = tokenizer.GetNext( ':' );
 
-        if ( !prefix.Equals( this.Options.Prefix.AsSpan(), StringComparison.Ordinal ) )
+        if ( !prefix.Equals( this.Configuration.Prefix.AsSpan(), StringComparison.Ordinal ) )
         {
             return;
         }
@@ -136,7 +137,8 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
         }
     }
 
-    private string GetMessage( string kind, string key ) => this.Options.Prefix + ":" + kind.ToLowerInvariant() + ":" + this.UnderlyingBackend.Id + ":" + key;
+    private string GetMessage( string kind, string key )
+        => this.Configuration.Prefix + ":" + kind.ToLowerInvariant() + ":" + this.UnderlyingBackend.Id + ":" + key;
 
     private Task PublishInvalidationAsync( string key, CacheKeyKind cacheKeyKind, CancellationToken cancellationToken )
     {

@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// A <see cref="CachingBackend"/> for Redis, based on the <c>StackExchange.Redis</c> client.
 /// </summary>
 [PublicAPI]
-public class RedisCachingBackend : CachingBackend
+internal class RedisCachingBackend : CachingBackend
 {
     private const string _itemRemovedEvent = "item-removed";
 
@@ -86,10 +86,7 @@ public class RedisCachingBackend : CachingBackend
         this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
     }
 
-    /// <summary>
-    /// Initializes the current <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    internal void Init()
+    protected override void Initialize()
     {
         this._notificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
@@ -98,14 +95,11 @@ public class RedisCachingBackend : CachingBackend
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider );
+
+        base.Initialize();
     }
 
-    /// <summary>
-    /// Asynchronously initializes the current <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>A <see cref="Task"/>.</returns>
-    internal async Task InitAsync( CancellationToken cancellationToken )
+    protected override async Task InitializeAsync( CancellationToken cancellationToken = default )
     {
         this._notificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
@@ -117,103 +111,8 @@ public class RedisCachingBackend : CachingBackend
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider,
             cancellationToken );
-    }
 
-    /// <summary>
-    /// Creates a new <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    /// <param name="connection">A Redis connection.</param>
-    /// <param name="configuration">Configuration of the new back-end.</param>
-    /// <param name="serviceProvider"></param>
-    /// <returns>A <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
-    /// according to the properties of the <paramref name="configuration"/>.</returns>
-    public static CachingBackend Create(
-        IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration? configuration = null,
-        IServiceProvider? serviceProvider = null )
-    {
-        configuration ??= new RedisCachingBackendConfiguration();
-
-        // #20775 Caching: two-layered cache should modify the key to avoid conflicts when toggling the option
-        if ( configuration.IsLocallyCached )
-        {
-            configuration = configuration with { KeyPrefix = configuration.KeyPrefix != null ? configuration.KeyPrefix + "L2" : "L2" };
-        }
-
-        var backend = configuration.SupportsDependencies
-            ? new DependenciesRedisCachingBackend( connection, configuration, serviceProvider )
-            : new RedisCachingBackend( connection, configuration, serviceProvider );
-
-        try
-        {
-            backend.Init();
-
-            CachingBackend enhancer;
-
-            if ( configuration.IsLocallyCached )
-            {
-                enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
-            }
-            else
-            {
-                enhancer = backend;
-            }
-
-            return enhancer;
-        }
-        catch
-        {
-            // Dispose the backend until it becomes unreachable, otherwise we may have a GC deadlock.
-            backend.Dispose();
-
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Asynchronously creates a new <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    /// <param name="connection">A Redis connection.</param>
-    /// <param name="configuration">Configuration of the new back-end.</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>A task returning a <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
-    /// according to the properties of the <paramref name="configuration"/>.</returns>
-    public static async Task<CachingBackend> CreateAsync(
-        IConnectionMultiplexer connection,
-        IServiceProvider? serviceProvider = null,
-        RedisCachingBackendConfiguration? configuration = null,
-        CancellationToken cancellationToken = default )
-    {
-        configuration ??= new RedisCachingBackendConfiguration();
-
-        var backend = configuration.SupportsDependencies
-            ? new DependenciesRedisCachingBackend( connection, configuration, serviceProvider )
-            : new RedisCachingBackend( connection, configuration, serviceProvider );
-
-        try
-        {
-            await backend.InitAsync( cancellationToken );
-
-            CachingBackend enhancer;
-
-            if ( configuration.IsLocallyCached )
-            {
-                enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
-            }
-            else
-            {
-                enhancer = backend;
-            }
-
-            return enhancer;
-        }
-        catch
-        {
-            // Dispose the backend until it becomes unreachable, otherwise we may have a GC deadlock.
-            await backend.DisposeAsync( CancellationToken.None );
-
-            throw;
-        }
+        await base.InitializeAsync( cancellationToken );
     }
 
     /// <inheritdoc />
@@ -623,14 +522,15 @@ public class RedisCachingBackend : CachingBackend
         }
     }
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore()
+    protected override void ClearCore( ClearCacheOptions options )
     {
         throw new NotSupportedException();
     }
 
     /// <inheritdoc />
-    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
+    protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
     {
         throw new NotSupportedException();
     }

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit.Abstractions;
 
@@ -13,18 +13,20 @@ public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
         cachingTestOptions,
         testOutputHelper ) { }
 
-    protected abstract Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix );
+    protected abstract BuiltCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix );
 
     protected override async Task<CachingBackend[]> CreateBackendsAsync()
     {
         var testId = Guid.NewGuid().ToString();
 
-        return new CachingBackend[]
+        Task<CachingBackend> CreateCacheInvalidator()
         {
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( this.ServiceProvider ), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( this.ServiceProvider ), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( this.ServiceProvider ), testId )
-        };
+            return CachingBackend.CreateAsync(
+                b => this.AddInvalidationBroker( b.Memory(), testId ),
+                this.ServiceProvider );
+        }
+
+        return new[] { await CreateCacheInvalidator(), await CreateCacheInvalidator(), await CreateCacheInvalidator() };
     }
 
     protected override CachingBackend[] CreateBackends()

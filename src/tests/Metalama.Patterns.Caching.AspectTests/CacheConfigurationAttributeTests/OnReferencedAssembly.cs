@@ -75,12 +75,9 @@ public class Program
 
         CachingService.Default =
             CachingService.Create(
-                b =>
-                {
-                    b.Backend = backend;
-                    b.AddProfile( new CachingProfile( TestProfiles.A ) );
-                    b.AddProfile( new CachingProfile( TestProfiles.B ) );
-                } );
+                b => b.WithBackend( backend )
+                    .AddProfile( new CachingProfile( TestProfiles.A ) )
+                    .AddProfile( new CachingProfile( TestProfiles.B ) ) );
 
         var cachingClass = new LocalChildCachingClass();
 

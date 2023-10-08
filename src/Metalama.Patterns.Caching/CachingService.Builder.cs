@@ -3,6 +3,8 @@
 using Flashtrace.Formatters;
 using Flashtrace.Formatters.TypeExtensions;
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Utilities;
 using Metalama.Patterns.Caching.ValueAdapters;
@@ -11,13 +13,14 @@ namespace Metalama.Patterns.Caching;
 
 public partial class CachingService
 {
-    
     [PublicAPI]
-    public sealed class Builder : IDisposable
+    internal sealed class Builder : ICachingServiceBuilder, IDisposable
     {
         private readonly Dictionary<string, CachingProfile> _profiles = new();
         private readonly List<Action<FormatterRepository.Builder>> _formattersBuildActions = new();
         private bool _isDisposed;
+        private CachingBackend? _specificBackend;
+        private Func<CachingBackendBuilder, BuiltCachingBackendBuilder>? _cachingBackendBuildAction;
 
         internal TypeExtensionFactory<IValueAdapter> ValueAdapters { get; } = new( typeof(IValueAdapter<>), null );
 
@@ -44,7 +47,41 @@ public partial class CachingService
 
         public IServiceProvider ServiceProvider { get; }
 
-        public CachingBackend? Backend { get; set; }
+        public CachingBackend? CreateBackend()
+        {
+            var backend = this._specificBackend;
+
+            if ( backend != null )
+            {
+                return backend;
+            }
+            else if ( this._cachingBackendBuildAction != null )
+            {
+                return CachingBackend.Create( this._cachingBackendBuildAction, this.ServiceProvider );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<CachingBackend?> CreateBackendAsync( CancellationToken cancellationToken )
+        {
+            var backend = this._specificBackend;
+
+            if ( backend != null )
+            {
+                return backend;
+            }
+            else if ( this._cachingBackendBuildAction != null )
+            {
+                return await CachingBackend.CreateAsync( this._cachingBackendBuildAction, this.ServiceProvider, cancellationToken );
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         internal IReadOnlyCollection<CachingProfile> Profiles => this._profiles.Values;
 
@@ -52,10 +89,12 @@ public partial class CachingService
 
         public Func<IFormatterRepository, CacheKeyBuilder>? KeyBuilderFactory { get; set; }
 
-        public void AddProfile( CachingProfile profile )
+        public ICachingServiceBuilder AddProfile( CachingProfile profile )
         {
             this.CheckNotDisposed();
             this._profiles.Add( profile.Name, profile );
+
+            return this;
         }
 
         /// <summary>
@@ -63,10 +102,12 @@ public partial class CachingService
         /// </summary>
         /// <param name="valueType">The type of the cached value (typically the return type of the cached method).</param>
         /// <param name="valueAdapter">The adapter.</param>
-        public void AddValueAdapter( Type valueType, IValueAdapter valueAdapter )
+        public ICachingServiceBuilder AddValueAdapter( Type valueType, IValueAdapter valueAdapter )
         {
             this.CheckNotDisposed();
             this.ValueAdapters.RegisterTypeExtension( valueType, valueAdapter );
+
+            return this;
         }
 
         /// <summary>
@@ -76,10 +117,12 @@ public partial class CachingService
         /// <param name="valueAdapterType">The type of the value adapter. This type must implement the <see cref="IValueAdapter"/>
         /// interface and have the same number of generic parameters as <paramref name="valueType"/>.
         /// </param>
-        public void AddValueAdapter( Type valueType, Type valueAdapterType )
+        public ICachingServiceBuilder AddValueAdapter( Type valueType, Type valueAdapterType )
         {
             this.CheckNotDisposed();
             this.ValueAdapters.RegisterTypeExtension( valueType, valueAdapterType );
+
+            return this;
         }
 
         /// <summary>
@@ -87,23 +130,41 @@ public partial class CachingService
         /// </summary>
         /// <typeparam name="T">The type of the cached value (typically the return type of the cached method).</typeparam>
         /// <param name="valueAdapter">The adapter.</param>
-        public void AddValueAdapter<T>( IValueAdapter<T> valueAdapter )
+        public ICachingServiceBuilder AddValueAdapter<T>( IValueAdapter<T> valueAdapter )
         {
             this.CheckNotDisposed();
             this.AddValueAdapter( typeof(T), valueAdapter );
+
+            return this;
         }
-        
-        public void ConfigureFormatters( Action<FormatterRepository.Builder> action )
+
+        public ICachingServiceBuilder WithBackend( CachingBackend backend )
+        {
+            this._specificBackend = backend;
+
+            return this;
+        }
+
+        public ICachingServiceBuilder WithBackend( Func<CachingBackendBuilder, BuiltCachingBackendBuilder> action )
+        {
+            this._cachingBackendBuildAction = action;
+
+            return this;
+        }
+
+        public ICachingServiceBuilder ConfigureFormatters( Action<FormatterRepository.Builder> action )
         {
             this.CheckNotDisposed();
             this._formattersBuildActions.Add( action );
+
+            return this;
         }
+
+        public ICachingServiceBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilder> factory ) => throw new NotImplementedException();
 
         public void Dispose()
         {
             this._isDisposed = true;
         }
-
-   
     }
 }

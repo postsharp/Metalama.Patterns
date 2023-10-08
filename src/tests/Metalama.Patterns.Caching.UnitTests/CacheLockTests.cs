@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         public CacheLockTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
-        private CachingTestContext<MemoryCachingBackend> InitializeTest(
+        private CachingTestContext<CachingBackend> InitializeTest(
             int acquireLockTimeout = -1,
             IAcquireLockTimeoutStrategy? acquireLockTimeoutStrategy = null )
         {

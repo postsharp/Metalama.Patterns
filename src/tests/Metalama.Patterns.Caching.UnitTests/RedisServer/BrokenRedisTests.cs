@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
@@ -22,12 +23,11 @@ public sealed class BrokenRedisTests
                         KeyPrefix = Guid.NewGuid().ToString(),
                         OwnsConnection = true,
                         SupportsDependencies = false,
-                        IsLocallyCached = false,
                         ConnectionTimeout = TimeSpan.FromMilliseconds( 10 )
                     };
 
                 var connection = CreateConnection( false );
-                RedisCachingBackend.Create( connection, configuration: configuration );
+                CachingBackend.Create( b => b.Redis( connection, configuration ) );
             } );
 
         // Make sure there are no deadlocks in finalizers.

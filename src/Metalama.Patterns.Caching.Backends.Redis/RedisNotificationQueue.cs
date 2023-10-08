@@ -459,7 +459,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
     /// Gets the default connection timeout when creating a Redis backend. 
     /// </summary>
     /// <remarks>
-    /// When you change this value, please also change the documentation for <see cref="RedisCacheInvalidatorOptions.ConnectionTimeout"/>
+    /// When you change this value, please also change the documentation for <see cref="RedisCacheInvalidatorConfiguration.ConnectionTimeout"/>
     /// and <see cref="RedisCachingBackendConfiguration.ConnectionTimeout"/>.
     /// </remarks>
     public static TimeSpan DefaultSubscriptionTimeout { get; } = TimeSpan.FromMinutes( 1 );

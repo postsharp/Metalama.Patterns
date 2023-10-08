@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Caching.Tests;
 
 public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
 {
-    private readonly CachingTestContext<MemoryCachingBackend> _context;
+    private readonly CachingTestContext<CachingBackend> _context;
 
     protected StringBuilder StringBuilder { get; }
 

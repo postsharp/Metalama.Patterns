@@ -3,6 +3,7 @@
 using Flashtrace;
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ValueAdapters;
@@ -17,7 +18,30 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
 
     public static CachingService Default { get; set; } = CreateUninitialized();
 
-    public static CachingService Create( Action<Builder>? build = null, IServiceProvider? serviceProvider = null ) => new( serviceProvider, build );
+    public static CachingService Create( Action<ICachingServiceBuilder>? build = null, IServiceProvider? serviceProvider = null )
+    {
+        var builder = new Builder( serviceProvider );
+        build?.Invoke( builder );
+        builder.Dispose();
+
+        var backend = builder.CreateBackend();
+
+        return new CachingService( serviceProvider, backend, builder );
+    }
+
+    public static async Task<CachingService> CreateAsync(
+        Action<ICachingServiceBuilder>? build = null,
+        IServiceProvider? serviceProvider = null,
+        CancellationToken cancellationToken = default )
+    {
+        var builder = new Builder( serviceProvider );
+        build?.Invoke( builder );
+        builder.Dispose();
+
+        var backend = await builder.CreateBackendAsync( cancellationToken );
+
+        return new CachingService( serviceProvider, backend, builder );
+    }
 
     internal IServiceProvider? ServiceProvider { get; }
 
@@ -32,18 +56,15 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
     /// </summary>
     /// <param name="backend">The default back-end. If null, a new <see cref="MemoryCachingBackend"/> is created.</param>
     /// <param name="serviceProvider">An optional <see cref="IServiceProvider"/>.</param>
-    private CachingService( IServiceProvider? serviceProvider, Action<Builder>? build )
+    private CachingService( IServiceProvider? serviceProvider, CachingBackend? defaultBackend, Builder builder )
     {
         // Run the builder.
-        var builder = new Builder( serviceProvider );
-        build?.Invoke( builder );
-        builder.Dispose();
-        
-        this.DefaultBackend = builder.Backend ?? new MemoryCachingBackend();
+
+        this.DefaultBackend = defaultBackend ?? CachingBackend.Create( b => b.Memory(), serviceProvider );
 
         // Set profiles.
         var profilesDictionary = ImmutableDictionary.CreateBuilder<string, CachingProfile>( StringComparer.Ordinal );
-        
+
         foreach ( var profile in builder.Profiles )
         {
             profilesDictionary.Add( profile.Name, profile );
@@ -81,7 +102,7 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
     }
 
     internal static CachingService CreateUninitialized( IServiceProvider? serviceProvider = null )
-        => Create( b => b.Backend = new UninitializedCachingBackend(), serviceProvider );
+        => Create( b => b.WithBackend( b => b.Uninitialized() ), serviceProvider );
 
     /// <summary>
     /// Gets the set of distinct backends used in the service.

@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// This class is typically instantiated in the back-end factory method. You should normally not use this class unless you develop a custom caching back-end.
 /// </summary>
 [PublicAPI]
-public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
+internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 {
     private readonly TimeSpan _removedItemTransitionPeriod = TimeSpan.FromMinutes( 1 );
 
@@ -31,7 +31,19 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         remoteCache,
         new CachingBackendConfiguration() )
     {
-        this.LocalCache = memoryCache ?? new MemoryCachingBackend( remoteCache.ServiceProvider );
+        this.LocalCache = memoryCache ?? new MemoryCachingBackend( serviceProvider: remoteCache.ServiceProvider );
+    }
+
+    protected internal override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    {
+        await base.InitializeAsync( cancellationToken );
+        await this.LocalCache.InitializeAsync( cancellationToken );
+    }
+
+    protected internal override void Initialize()
+    {
+        base.Initialize();
+        this.LocalCache.Initialize();
     }
 
     /// <inheritdoc />
@@ -369,19 +381,31 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         return this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken );
     }
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore()
+    protected override void ClearCore( ClearCacheOptions options )
     {
         this.LocalCache.Clear();
-        this.UnderlyingBackend.Clear();
+
+        if ( options == ClearCacheOptions.Default )
+        {
+            this.UnderlyingBackend.Clear();
+        }
     }
 
     /// <inheritdoc />
-    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
+    protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
     {
         this.LocalCache.Clear();
 
-        return this.UnderlyingBackend.ClearAsync( cancellationToken );
+        if ( options == ClearCacheOptions.Default )
+        {
+            return this.UnderlyingBackend.ClearAsync( options, cancellationToken );
+        }
+        else
+        {
+            return default;
+        }
     }
 
     /// <inheritdoc />

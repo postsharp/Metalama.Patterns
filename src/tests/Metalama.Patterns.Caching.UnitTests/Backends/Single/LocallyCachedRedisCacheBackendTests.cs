@@ -116,7 +116,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
         using ( var backend = (DisposingRedisCachingBackend) this.CreateBackend() )
         {
             backend.SetItem( "test", new CacheItem( "Hello, world." ) );
-            ((TwoLayerCachingBackendEnhancer) backend.UnderlyingBackend).LocalCache.Clear();
+            backend.Clear( ClearCacheOptions.Local );
             backend.GetItem( "test" );
         }
     }

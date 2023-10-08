@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// Options for <see cref="RedisCacheInvalidator"/>.
 /// </summary>
 [PublicAPI]
-public class RedisCacheInvalidatorOptions : CacheInvalidatorOptions
+public sealed record RedisCacheInvalidatorConfiguration : CacheInvalidatorConfiguration
 {
     /// <summary>
     /// Gets or sets the name of the Redis channel to use to exchange invalidation messages. The default value is <c>RedisCacheInvalidator</c>.

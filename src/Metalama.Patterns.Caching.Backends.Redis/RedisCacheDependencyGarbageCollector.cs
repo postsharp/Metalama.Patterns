@@ -348,12 +348,17 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// Performs a full garbage collection on all Redis servers. This operation enumerates and validates all keys in the database, and can possibly last several
     /// minutes and affect performance in production.
     /// </summary>
-    /// <param name="backend">A <see cref="RedisCachingBackend"/> that supports dependencies.</param>
+    /// <param name="backend">A Redis <see cref="CachingBackend"/> that supports dependencies.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public static Task PerformFullCollectionAsync( RedisCachingBackend backend, CancellationToken cancellationToken = default )
+    public static Task PerformFullCollectionAsync( CachingBackend backend, CancellationToken cancellationToken = default )
     {
-        return ((DependenciesRedisCachingBackend) backend).CleanUpAsync( cancellationToken );
+        if ( backend is not DependenciesRedisCachingBackend dependenciesRedisCachingBackend )
+        {
+            throw new ArgumentOutOfRangeException( nameof(backend), "The back-end is not a Redis backend supporting dependencies." );
+        }
+
+        return dependenciesRedisCachingBackend.CleanUpAsync( cancellationToken );
     }
 
     /// <summary>
@@ -365,11 +370,16 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
     public static Task PerformFullCollectionAsync(
-        RedisCachingBackend backend,
+        CachingBackend backend,
         IServer server,
         CancellationToken cancellationToken = default )
     {
-        return ((DependenciesRedisCachingBackend) backend).CleanUpAsync( server, cancellationToken );
+        if ( backend is not DependenciesRedisCachingBackend dependenciesRedisCachingBackend )
+        {
+            throw new ArgumentOutOfRangeException( nameof(backend), "The back-end is not a Redis backend supporting dependencies." );
+        }
+
+        return dependenciesRedisCachingBackend.CleanUpAsync( server, cancellationToken );
     }
 
     internal int BackgroundTaskExceptions => this.NotificationQueue.BackgroundTaskExceptions;

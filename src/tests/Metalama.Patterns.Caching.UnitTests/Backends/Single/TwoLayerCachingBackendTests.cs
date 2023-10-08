@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit.Abstractions;
 
@@ -16,8 +16,17 @@ public class TwoLayerCachingBackendTests : BaseCacheBackendTests
 
     protected override CachingBackend CreateBackend()
     {
-        return new TwoLayerCachingBackendEnhancer(
-            MemoryCacheFactory.CreateBackend( this.ServiceProvider, "Remote" ),
-            MemoryCacheFactory.CreateBackend( this.ServiceProvider, "Local" ) ) { DebugName = "TwoLayer" };
+#pragma warning disable CS0618 // Type or member is obsolete
+
+        var backend = CachingBackend.Create(
+            b => b.Memory( new MemoryCachingBackendConfiguration { DebugName = "Remote" } )
+                .WithLocalLayer()
+                .WithLocalCacheConfiguration( new MemoryCachingBackendConfiguration { DebugName = "Local" } ) );
+
+        backend.DebugName = "TwoLayer";
+
+        return backend;
+
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

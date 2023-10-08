@@ -2,21 +2,22 @@
 
 using Flashtrace;
 using JetBrains.Annotations;
-using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
+using Metalama.Patterns.Caching.Implementation;
 using System.Globalization;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Backends;
 
 /// <summary>
 /// An abstraction of the physical implementation of the cache.
 /// </summary>
 [PublicAPI]
-public abstract class CachingBackend : ITestableCachingComponent
+public abstract partial class CachingBackend : ITestableCachingComponent
 {
     public IServiceProvider ServiceProvider { get; }
 
-    public CachingBackendConfiguration Configuration { get; }
+    protected CachingBackendConfiguration Configuration { get; }
 
     private const int _disposeTimeout = 30000;
 
@@ -39,7 +40,7 @@ public abstract class CachingBackend : ITestableCachingComponent
         this.ServiceProvider = serviceProvider ?? NullServiceProvider.Instance;
         this.Configuration = configuration ?? new MemoryCachingBackendConfiguration();
         this.Source = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
-        this.DebugName = this.Id.ToString();
+        this.DebugName = this.Configuration.DebugName ?? this.Id.ToString();
     }
 
     public string? DebugName { get; set; }
@@ -67,8 +68,31 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     public CachingBackendFeatures SupportedFeatures => this._features ??= this.CreateFeatures();
 
+    protected internal virtual void Initialize()
+    {
+        if ( !this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Initialized ) )
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    protected internal virtual Task InitializeAsync( CancellationToken cancellationToken = default )
+    {
+        if ( !this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Initialized ) )
+        {
+            throw new InvalidOperationException();
+        }
+
+        return Task.CompletedTask;
+    }
+
     private void CheckStatus()
     {
+        if ( this.Status == CachingBackendStatus.Default )
+        {
+            throw new InvalidOperationException( "The back-end '{this}' has not been initialized." );
+        }
+
         if ( this.Status != CachingBackendStatus.Default )
         {
             throw new ObjectDisposedException( this.ToString() );
@@ -600,16 +624,18 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <summary>
     /// Clears the cache. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. 
     /// </summary>
-    protected abstract void ClearCore();
+    /// <param name="options"></param>
+    protected abstract void ClearCore( ClearCacheOptions options );
 
     /// <summary>
     /// Asynchronously clears the cache. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked.
     /// </summary>
+    /// <param name="options"></param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    protected virtual ValueTask ClearAsyncCore( CancellationToken cancellationToken )
+    protected virtual ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
     {
-        this.ClearCore();
+        this.ClearCore( options );
 
         return _completedTask;
     }
@@ -617,14 +643,14 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <summary>
     /// Clears the cache.
     /// </summary>
-    public void Clear()
+    public void Clear( ClearCacheOptions options = default )
     {
         using ( var activity = this.Source.Default.OpenActivity( Formatted( "Clear()" ) ) )
         {
             try
             {
                 this.CheckStatus();
-                this.ClearCore();
+                this.ClearCore( options );
 
                 activity.SetSuccess();
             }
@@ -642,7 +668,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async ValueTask ClearAsync( CancellationToken cancellationToken = default )
+    public async ValueTask ClearAsync( ClearCacheOptions options = ClearCacheOptions.Default, CancellationToken cancellationToken = default )
     {
         using ( var activity = this.Source.Default.OpenAsyncActivity( Formatted( "ClearAsync()" ) ) )
         {
@@ -651,7 +677,7 @@ public abstract class CachingBackend : ITestableCachingComponent
                 this.CheckStatus();
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await this.ClearAsyncCore( cancellationToken );
+                await this.ClearAsyncCore( options, cancellationToken );
             }
             catch ( Exception e )
             {
@@ -942,9 +968,46 @@ public abstract class CachingBackend : ITestableCachingComponent
 
     int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
 
-
-    public sealed class Builder
+    public static CachingBackend Create( Func<CachingBackendBuilder, BuiltCachingBackendBuilder> build, IServiceProvider? serviceProvider = null )
     {
-        public CachingBackend? Backend { get; set; }
+        var builder = build( new CachingBackendBuilder() );
+
+        var backend = builder.CreateBackend( new CreateBackendArgs { ServiceProvider = serviceProvider, Layer = 1 } );
+
+        try
+        {
+            backend.Initialize();
+        }
+        catch
+        {
+            backend.Dispose();
+
+            throw;
+        }
+
+        return backend;
+    }
+
+    public static async Task<CachingBackend> CreateAsync(
+        Func<CachingBackendBuilder, BuiltCachingBackendBuilder> build,
+        IServiceProvider? serviceProvider = null,
+        CancellationToken cancellationToken = default )
+    {
+        var builder = build( new CachingBackendBuilder() );
+
+        var backend = builder.CreateBackend( new CreateBackendArgs { ServiceProvider = serviceProvider, Layer = 1 } );
+
+        try
+        {
+            await backend.InitializeAsync( cancellationToken );
+        }
+        catch
+        {
+            await backend.DisposeAsync( cancellationToken );
+
+            throw;
+        }
+
+        return backend;
     }
 }

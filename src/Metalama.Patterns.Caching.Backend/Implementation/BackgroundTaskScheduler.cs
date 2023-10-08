@@ -3,6 +3,7 @@
 using Flashtrace;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Backends;
 using System.Globalization;
 
 #if DEBUG

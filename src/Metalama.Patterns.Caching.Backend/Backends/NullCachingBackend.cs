@@ -26,8 +26,9 @@ public class NullCachingBackend : CachingBackend
     /// <inheritdoc />
     protected override bool ContainsDependencyCore( string key ) => false;
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore() { }
+    protected override void ClearCore( ClearCacheOptions options ) { }
 
     /// <inheritdoc />
     protected override void RemoveItemCore( string key ) { }

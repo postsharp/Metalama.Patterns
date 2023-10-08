@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Caching.Tests
 {
     public sealed class ValueAdapterTests : BaseCachingTests, IDisposable
     {
-        private readonly CachingTestContext<MemoryCachingBackend> _context;
+        private readonly CachingTestContext<CachingBackend> _context;
 
         public ValueAdapterTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {

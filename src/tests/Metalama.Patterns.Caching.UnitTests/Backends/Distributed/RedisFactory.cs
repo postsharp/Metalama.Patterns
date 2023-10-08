@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.RedisServer;
 using StackExchange.Redis;
@@ -28,23 +30,36 @@ internal static class RedisFactory
         RedisSetupFixture redisSetupFixture,
         string? prefix = null,
         bool supportsDependencies = false,
-        bool locallyCached = false,
-        IServiceProvider? serviceProvider = null )
+        IServiceProvider? serviceProvider = null,
+        bool locallyCached = false )
     {
         _ = CreateTestInstance( cachingTestOptions, redisSetupFixture );
 
         var configuration =
             new RedisCachingBackendConfiguration
             {
-                KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
-                OwnsConnection = true,
-                SupportsDependencies = supportsDependencies,
-                IsLocallyCached = locallyCached
+                KeyPrefix = prefix ?? Guid.NewGuid().ToString(), OwnsConnection = true, SupportsDependencies = supportsDependencies
             };
 
         IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
 
-        return new DisposingRedisCachingBackend( RedisCachingBackend.Create( connection, configuration, serviceProvider ) );
+        var backend = CachingBackend.Create(
+            b =>
+            {
+                var redis = b.Redis( connection ).WithConfiguration( configuration );
+
+                if ( locallyCached )
+                {
+                    return redis.WithLocalLayer();
+                }
+                else
+                {
+                    return redis;
+                }
+            },
+            serviceProvider );
+
+        return new DisposingRedisCachingBackend( backend );
     }
 
     public static DisposingConnectionMultiplexer CreateConnection( CachingTestOptions cachingTestOptions )
@@ -66,6 +81,7 @@ internal static class RedisFactory
         RedisSetupFixture redisSetupFixture,
         string? prefix = null,
         bool supportsDependencies = false,
+        IServiceProvider? serviceProvider = null,
         bool locallyCached = false )
     {
         if ( !cachingTestOptions.Properties.Contains( "RedisEndpoint" ) )
@@ -76,13 +92,27 @@ internal static class RedisFactory
 
         var configuration = new RedisCachingBackendConfiguration
         {
-            KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
-            OwnsConnection = true,
-            SupportsDependencies = supportsDependencies,
-            IsLocallyCached = locallyCached
+            KeyPrefix = prefix ?? Guid.NewGuid().ToString(), OwnsConnection = true, SupportsDependencies = supportsDependencies
         };
 
-        return new DisposingRedisCachingBackend(
-            await RedisCachingBackend.CreateAsync( CreateConnection( cachingTestOptions ), configuration: configuration ) );
+        var connection = CreateConnection( cachingTestOptions );
+
+        var backend = await CachingBackend.CreateAsync(
+            b =>
+            {
+                var redis = b.Redis( connection ).WithConfiguration( configuration );
+
+                if ( locallyCached )
+                {
+                    return redis.WithLocalLayer();
+                }
+                else
+                {
+                    return redis;
+                }
+            },
+            serviceProvider );
+
+        return new DisposingRedisCachingBackend( backend );
     }
 }

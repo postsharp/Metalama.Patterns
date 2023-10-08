@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure;
 /// Options that determine the mode of operation of an <see cref="AzureCacheInvalidator"/> instance.
 /// </summary>
 [PublicAPI]
-public sealed class AzureCacheInvalidatorOptions : CacheInvalidatorOptions
+public sealed record AzureCacheInvalidatorConfiguration : CacheInvalidatorConfiguration
 {
     public string TopicName { get; init; }
 
@@ -33,7 +33,7 @@ public sealed class AzureCacheInvalidatorOptions : CacheInvalidatorOptions
 
     public int MaxDeliveryCount { get; init; } = 10;
 
-    public AzureCacheInvalidatorOptions( string connectionString, string? topicName = null )
+    public AzureCacheInvalidatorConfiguration( string connectionString, string? topicName = null )
     {
         this.ConnectionString = connectionString;
 

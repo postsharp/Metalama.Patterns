@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if NETSTANDARD || NETCOREAPP
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Azure;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.TestHelpers;
@@ -24,16 +26,8 @@ internal
         cachingTestOptions,
         testOutputHelper ) { }
 
-    protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
-    {
-        return await AzureCacheInvalidator.CreateAsync( backend, CreateOptions() );
-    }
-
-    private static AzureCacheInvalidatorOptions CreateOptions()
-    {
-        // ReSharper disable once StringLiteralTypo
-        return new AzureCacheInvalidatorOptions( _connectionString );
-    }
+    protected override BuiltCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix )
+        => builder.WithAzureInvalidation( new AzureCacheInvalidatorConfiguration( _connectionString ) { Prefix = prefix } );
 }
 
 #endif
