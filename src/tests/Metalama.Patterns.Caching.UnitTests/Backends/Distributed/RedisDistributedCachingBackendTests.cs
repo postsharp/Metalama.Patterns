@@ -12,8 +12,11 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IA
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
-    public RedisDistributedCachingBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
-        testContext,
+    public RedisDistributedCachingBackendTests(
+        CachingTestOptions cachingTestOptions,
+        RedisSetupFixture redisSetupFixture,
+        ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
         testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
@@ -25,8 +28,8 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IA
 
         return new CachingBackend[]
         {
-            await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true ),
-            await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true )
+            await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, prefix, supportsDependencies: true ),
+            await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, prefix, supportsDependencies: true )
         };
     }
 
@@ -36,14 +39,14 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IA
 
         return new CachingBackend[]
         {
-            RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true ),
-            RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, prefix, supportsDependencies: true )
+            RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, prefix, supportsDependencies: true ),
+            RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, prefix, supportsDependencies: true )
         };
     }
 
     protected override void ConnectToRedisIfRequired()
     {
         var redisTestInstance = this._redisSetupFixture.TestInstance;
-        this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+        this.TestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
     }
 }

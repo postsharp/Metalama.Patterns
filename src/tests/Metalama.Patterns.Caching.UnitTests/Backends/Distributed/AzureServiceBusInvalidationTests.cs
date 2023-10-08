@@ -13,7 +13,9 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Distributed
     {
         private readonly string _connectionString = Secrets.Get( "CacheInvalidationTestServiceBusConnectionString" );
 
-        public AzureServiceBusInvalidationTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
+        public AzureServiceBusInvalidationTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
+            cachingTestOptions,
+            testOutputHelper ) { }
 
         protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
         {

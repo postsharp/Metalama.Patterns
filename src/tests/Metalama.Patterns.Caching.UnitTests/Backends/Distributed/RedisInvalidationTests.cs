@@ -13,8 +13,8 @@ public class RedisInvalidationTests : BaseInvalidationBrokerTests, IAssemblyFixt
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
-    public RedisInvalidationTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
-        testContext,
+    public RedisInvalidationTests( CachingTestOptions cachingTestOptions, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
         testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
@@ -24,12 +24,12 @@ public class RedisInvalidationTests : BaseInvalidationBrokerTests, IAssemblyFixt
     {
         return await RedisCacheInvalidator.CreateAsync(
             backend,
-            RedisFactory.CreateConnection( this.TestContext ),
+            RedisFactory.CreateConnection( this.TestOptions ),
             new RedisCacheInvalidatorOptions { Prefix = prefix, OwnsConnection = true } );
     }
 
     protected override void ConnectToRedisIfRequired()
     {
-        RedisFactory.CreateTestInstance( this.TestContext, this._redisSetupFixture );
+        RedisFactory.CreateTestInstance( this.TestOptions, this._redisSetupFixture );
     }
 }

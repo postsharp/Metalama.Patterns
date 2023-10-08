@@ -21,7 +21,8 @@ namespace Metalama.Patterns.Caching.Tests
                     {
                         SizeLimit = 5, CompactionPercentage = 1 // compact full cache
                     } ),
-                new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider, SizeCalculator = ( cItem ) => (int) cItem.Value! } );
+                this.ServiceProvider,
+                new MemoryCachingBackendConfiguration { SizeCalculator = ( cItem ) => (int) cItem.Value! } );
 
             backend.SetItem( "A", new CacheItem( 2 ) );
             backend.SetItem( "B", new CacheItem( 2 ) );
@@ -42,7 +43,8 @@ namespace Metalama.Patterns.Caching.Tests
                     {
                         SizeLimit = 10, CompactionPercentage = 0.5 // compact half
                     } ),
-                new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider, SizeCalculator = ( cItem ) => 1 } );
+                this.ServiceProvider,
+                new MemoryCachingBackendConfiguration { SizeCalculator = ( cItem ) => 1 } );
 
             backend.SetItem( "A", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
             backend.SetItem( "B", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );

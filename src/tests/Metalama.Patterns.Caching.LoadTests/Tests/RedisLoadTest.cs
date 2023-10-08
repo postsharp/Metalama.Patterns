@@ -24,7 +24,7 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 
                 var collectorConnection = CreateConnection();
 
-                collectors[i] = RedisCacheDependencyGarbageCollector.Create( collectorConnection, collectorConfiguration );
+                collectors[i] = RedisCacheDependencyGarbageCollector.Create( collectorConnection, configuration: collectorConfiguration );
             }
 
             base.Test( configuration, duration );
@@ -57,6 +57,6 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 
         var configuration = new RedisCachingBackendConfiguration() { KeyPrefix = this._keyPrefix, OwnsConnection = true, SupportsDependencies = true };
 
-        return RedisCachingBackend.Create( connection, configuration );
+        return RedisCachingBackend.Create( connection, configuration: configuration );
     }
 }

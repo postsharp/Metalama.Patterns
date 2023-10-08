@@ -14,6 +14,8 @@ namespace Metalama.Patterns.Caching.Implementation;
 [PublicAPI]
 public abstract class CachingBackend : ITestableCachingComponent
 {
+    public IServiceProvider ServiceProvider { get; }
+
     public CachingBackendConfiguration Configuration { get; }
 
     private const int _disposeTimeout = 30000;
@@ -32,10 +34,11 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <summary>
     /// Initializes a new instance of the <see cref="CachingBackend"/> class.
     /// </summary>
-    protected CachingBackend( CachingBackendConfiguration? configuration )
+    protected CachingBackend( CachingBackendConfiguration? configuration = null, IServiceProvider? serviceProvider = null )
     {
+        this.ServiceProvider = serviceProvider ?? NullServiceProvider.Instance;
         this.Configuration = configuration ?? new MemoryCachingBackendConfiguration();
-        this.Source = this.Configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
+        this.Source = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
         this.DebugName = this.Id.ToString();
     }
 
@@ -938,4 +941,10 @@ public abstract class CachingBackend : ITestableCachingComponent
     protected virtual int BackgroundTaskExceptions => 0;
 
     int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
+
+
+    public sealed class Builder
+    {
+        public CachingBackend? Backend { get; set; }
+    }
 }

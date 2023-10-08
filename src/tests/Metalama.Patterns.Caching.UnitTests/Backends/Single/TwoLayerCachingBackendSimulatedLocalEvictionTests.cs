@@ -10,8 +10,8 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
     // ReSharper disable once UnusedType.Global
     public sealed class TwoLayerCachingBackendSimulatedLocalEvictionTests : TwoLayerCachingBackendTests
     {
-        public TwoLayerCachingBackendSimulatedLocalEvictionTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base(
-            testContext,
+        public TwoLayerCachingBackendSimulatedLocalEvictionTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
+            cachingTestOptions,
             testOutputHelper ) { }
 
         protected override CachingBackend CreateBackend()

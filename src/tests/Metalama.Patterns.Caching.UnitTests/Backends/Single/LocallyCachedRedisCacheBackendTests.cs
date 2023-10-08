@@ -16,10 +16,10 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
     private readonly RedisSetupFixture _redisSetupFixture;
 
     public LocallyCachedRedisCacheBackendTests(
-        TestContext testContext,
+        CachingTestOptions cachingTestOptions,
         RedisSetupFixture redisSetupFixture,
         ITestOutputHelper testOutputHelper ) : base(
-        testContext,
+        cachingTestOptions,
         testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
@@ -38,12 +38,12 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
     protected override CachingBackend CreateBackend()
     {
-        return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
+        return RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
     }
 
     protected override async Task<CachingBackend> CreateBackendAsync()
     {
-        return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
+        return await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
     }
 
     protected override ITestableCachingComponent CreateCollector( CachingBackend backend )
@@ -76,12 +76,12 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
         CachedValueClass setValue;
         var redisTestInstance = this._redisSetupFixture.TestInstance;
 
-        this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+        this.TestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
         using ( this.InitializeTest(
                    "TestIssue15680",
                    RedisFactory.CreateBackend(
-                       this.TestContext,
+                       this.TestOptions,
                        this._redisSetupFixture,
                        prefix: redisKeyPrefix,
                        locallyCached: false ),
@@ -94,7 +94,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
         using ( this.InitializeTest(
                    "TestIssue15680",
                    RedisFactory.CreateBackend(
-                       this.TestContext,
+                       this.TestOptions,
                        this._redisSetupFixture,
                        prefix: redisKeyPrefix,
                        locallyCached: true ),

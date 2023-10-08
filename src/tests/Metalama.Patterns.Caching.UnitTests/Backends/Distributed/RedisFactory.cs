@@ -10,28 +10,28 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 internal static class RedisFactory
 {
-    public static RedisTestInstance? CreateTestInstance( TestContext testContext, RedisSetupFixture redisSetupFixture )
+    public static RedisTestInstance? CreateTestInstance( CachingTestOptions cachingTestOptions, RedisSetupFixture redisSetupFixture )
     {
         RedisTestInstance? redisTestInstance = null;
 
-        if ( !testContext.Properties.Contains( "RedisEndpoint" ) )
+        if ( !cachingTestOptions.Properties.Contains( "RedisEndpoint" ) )
         {
             redisTestInstance = redisSetupFixture.TestInstance;
-            testContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+            cachingTestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
         }
 
         return redisTestInstance;
     }
 
     public static DisposingRedisCachingBackend CreateBackend(
-        TestContext testContext,
+        CachingTestOptions cachingTestOptions,
         RedisSetupFixture redisSetupFixture,
         string? prefix = null,
         bool supportsDependencies = false,
         bool locallyCached = false,
         IServiceProvider? serviceProvider = null )
     {
-        _ = CreateTestInstance( testContext, redisSetupFixture );
+        _ = CreateTestInstance( cachingTestOptions, redisSetupFixture );
 
         var configuration =
             new RedisCachingBackendConfiguration
@@ -42,17 +42,17 @@ internal static class RedisFactory
                 IsLocallyCached = locallyCached
             };
 
-        IConnectionMultiplexer connection = CreateConnection( testContext );
+        IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
 
-        return new DisposingRedisCachingBackend( RedisCachingBackend.Create( connection, configuration ) );
+        return new DisposingRedisCachingBackend( RedisCachingBackend.Create( connection, configuration, serviceProvider ) );
     }
 
-    public static DisposingConnectionMultiplexer CreateConnection( TestContext testContext )
+    public static DisposingConnectionMultiplexer CreateConnection( CachingTestOptions cachingTestOptions )
     {
         var socketManager = new SocketManager();
 
         var redisConfigurationOptions = new ConfigurationOptions();
-        redisConfigurationOptions.EndPoints.Add( (EndPoint?) testContext.Properties["RedisEndpoint"] );
+        redisConfigurationOptions.EndPoints.Add( (EndPoint?) cachingTestOptions.Properties["RedisEndpoint"] );
         redisConfigurationOptions.AbortOnConnectFail = false;
         redisConfigurationOptions.SocketManager = socketManager;
 
@@ -62,16 +62,16 @@ internal static class RedisFactory
     }
 
     public static async Task<DisposingRedisCachingBackend> CreateBackendAsync(
-        TestContext testContext,
+        CachingTestOptions cachingTestOptions,
         RedisSetupFixture redisSetupFixture,
         string? prefix = null,
         bool supportsDependencies = false,
         bool locallyCached = false )
     {
-        if ( !testContext.Properties.Contains( "RedisEndpoint" ) )
+        if ( !cachingTestOptions.Properties.Contains( "RedisEndpoint" ) )
         {
             var redisTestInstance = redisSetupFixture.TestInstance;
-            testContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+            cachingTestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
         }
 
         var configuration = new RedisCachingBackendConfiguration
@@ -82,6 +82,7 @@ internal static class RedisFactory
             IsLocallyCached = locallyCached
         };
 
-        return new DisposingRedisCachingBackend( await RedisCachingBackend.CreateAsync( CreateConnection( testContext ), configuration ) );
+        return new DisposingRedisCachingBackend(
+            await RedisCachingBackend.CreateAsync( CreateConnection( cachingTestOptions ), configuration: configuration ) );
     }
 }

@@ -46,7 +46,7 @@ public abstract class BaseCachingTests
             b =>
             {
                 b.Backend = backend;
-                
+
                 var testBuilder = new CachingTestBuilder( b );
                 buildTest?.Invoke( testBuilder );
 
@@ -65,7 +65,7 @@ public abstract class BaseCachingTests
         string name,
         Action<CachingTestBuilder>? buildTest = null )
     {
-        var backend = new MemoryCachingBackend( new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider } ) { DebugName = name };
+        var backend = new MemoryCachingBackend( this.ServiceProvider ) { DebugName = name };
 
         return this.InitializeTest( name, backend, buildTest );
     }

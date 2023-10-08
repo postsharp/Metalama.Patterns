@@ -14,8 +14,11 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
-    public SimpleRedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
-        testContext,
+    public SimpleRedisCacheBackendTests(
+        CachingTestOptions cachingTestOptions,
+        RedisSetupFixture redisSetupFixture,
+        ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
         testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
@@ -41,11 +44,11 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
 
     private CachingBackend CreateBackend( string? keyPrefix )
     {
-        return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, keyPrefix );
+        return RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, keyPrefix );
     }
 
     private async Task<CachingBackend> CreateBackendAsync( string? keyPrefix )
     {
-        return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, keyPrefix );
+        return await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, keyPrefix );
     }
 }

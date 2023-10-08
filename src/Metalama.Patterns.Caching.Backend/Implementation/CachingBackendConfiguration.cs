@@ -2,7 +2,4 @@
 
 namespace Metalama.Patterns.Caching.Implementation;
 
-public record CachingBackendConfiguration
-{
-    public IServiceProvider? ServiceProvider { get; init; }
-}
+public record CachingBackendConfiguration { }

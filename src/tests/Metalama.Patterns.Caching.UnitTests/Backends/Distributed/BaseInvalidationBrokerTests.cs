@@ -9,20 +9,21 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
 {
-    protected BaseInvalidationBrokerTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
+    protected BaseInvalidationBrokerTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
+        testOutputHelper ) { }
 
     protected abstract Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix );
 
     protected override async Task<CachingBackend[]> CreateBackendsAsync()
     {
         var testId = Guid.NewGuid().ToString();
-        var configuration = new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider };
 
         return new CachingBackend[]
         {
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId )
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( this.ServiceProvider ), testId ),
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( this.ServiceProvider ), testId ),
+            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( this.ServiceProvider ), testId )
         };
     }
 

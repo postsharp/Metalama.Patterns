@@ -24,15 +24,19 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private static readonly string _dependenciesSeparatorString = new( _dependenciesSeparator, 1 );
 
-    internal DependenciesRedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration )
-        : base( connection, configuration ) { }
+    internal DependenciesRedisCachingBackend(
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider )
+        : base( connection, configuration, serviceProvider ) { }
 
     internal DependenciesRedisCachingBackend(
         IConnectionMultiplexer connection,
         IDatabase database,
         RedisKeyBuilder keyBuilder,
-        RedisCachingBackendConfiguration configuration )
-        : base( connection, database, keyBuilder, configuration ) { }
+        RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider )
+        : base( connection, database, keyBuilder, configuration, serviceProvider ) { }
 
     protected override CachingBackendFeatures CreateFeatures() => new DependenciesRedisCachingBackendFeatures( this );
 

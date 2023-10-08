@@ -9,7 +9,9 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
     // ReSharper disable once UnusedType.Global
     public sealed class MemoryCachingBackendTests : BaseCacheBackendTests
     {
-        public MemoryCachingBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
+        public MemoryCachingBackendTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
+            cachingTestOptions,
+            testOutputHelper ) { }
 
         protected override CachingBackend CreateBackend()
         {

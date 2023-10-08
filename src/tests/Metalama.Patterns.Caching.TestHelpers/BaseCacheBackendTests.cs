@@ -10,19 +10,19 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
-    public abstract class BaseCacheBackendTests : BaseCachingTests, IDisposable, IClassFixture<TestContext>
+    public abstract class BaseCacheBackendTests : BaseCachingTests, IDisposable, IClassFixture<CachingTestOptions>
     {
         protected const int Timeout = 30_000; // 30 seconds ought to be enough to anyone. (otherwise the test should be refactored, anyway).
         protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout );
 
-        protected BaseCacheBackendTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
+        protected BaseCacheBackendTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {
-            this.TestContext = testContext;
+            this.TestOptions = cachingTestOptions;
         }
 
         protected virtual bool TestDependencies { get; } = true;
 
-        protected TestContext TestContext { get; }
+        protected CachingTestOptions TestOptions { get; }
 
         protected abstract CachingBackend CreateBackend();
 

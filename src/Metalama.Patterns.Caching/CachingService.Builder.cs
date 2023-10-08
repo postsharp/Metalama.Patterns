@@ -4,14 +4,16 @@ using Flashtrace.Formatters;
 using Flashtrace.Formatters.TypeExtensions;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Utilities;
 using Metalama.Patterns.Caching.ValueAdapters;
 
 namespace Metalama.Patterns.Caching;
 
 public partial class CachingService
 {
+    
     [PublicAPI]
-    public sealed class Builder : IDisposable, IAsyncDisposable
+    public sealed class Builder : IDisposable
     {
         private readonly Dictionary<string, CachingProfile> _profiles = new();
         private readonly List<Action<FormatterRepository.Builder>> _formattersBuildActions = new();
@@ -21,7 +23,7 @@ public partial class CachingService
 
         internal Builder( IServiceProvider? serviceProvider )
         {
-            this.ServiceProvider = serviceProvider ?? new NullServiceProvider();
+            this.ServiceProvider = serviceProvider ?? NullServiceProvider.Instance;
 
             this.AddValueAdapter( new StreamAdapter() );
             this.AddValueAdapter( typeof(IEnumerable<>), typeof(EnumerableAdapter<>) );
@@ -36,7 +38,7 @@ public partial class CachingService
         {
             if ( this._isDisposed )
             {
-                throw new ObjectDisposedException(this.GetType().FullName);
+                throw new ObjectDisposedException( this.GetType().FullName );
             }
         }
 
@@ -90,16 +92,11 @@ public partial class CachingService
             this.CheckNotDisposed();
             this.AddValueAdapter( typeof(T), valueAdapter );
         }
-
+        
         public void ConfigureFormatters( Action<FormatterRepository.Builder> action )
         {
             this.CheckNotDisposed();
             this._formattersBuildActions.Add( action );
-        }
-
-        private class NullServiceProvider : IServiceProvider
-        {
-            public object? GetService( Type serviceType ) => null;
         }
 
         public void Dispose()
@@ -107,12 +104,6 @@ public partial class CachingService
             this._isDisposed = true;
         }
 
-        public async ValueTask DisposeAsync()
-        {
-            if ( this.Backend != null )
-            {
-                await ((IAsyncDisposable) this.Backend).DisposeAsync();
-            }
-        }
+   
     }
 }

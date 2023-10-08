@@ -15,8 +15,8 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
-    public RedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
-        testContext,
+    public RedisCacheBackendTests( CachingTestOptions cachingTestOptions, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
         testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
@@ -50,12 +50,12 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 
     private DisposingRedisCachingBackend CreateBackend( string? keyPrefix )
     {
-        return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, keyPrefix, supportsDependencies: true );
+        return RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, keyPrefix, supportsDependencies: true );
     }
 
     private async Task<DisposingRedisCachingBackend> CreateBackendAsync( string? keyPrefix )
     {
-        return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, keyPrefix, supportsDependencies: true );
+        return await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, keyPrefix, supportsDependencies: true );
     }
 
     private static string GeneratePrefix()
@@ -71,7 +71,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
         var prefix = GeneratePrefix();
 
         var redisTestInstance = this._redisSetupFixture.TestInstance;
-        this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+        this.TestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
         Assert.Empty( this.GetAllKeys( prefix ) );
 
@@ -361,7 +361,7 @@ public sealed class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFix
 
     private IList<string> GetAllKeys( string prefix )
     {
-        using ( var connection = RedisFactory.CreateConnection( this.TestContext ) )
+        using ( var connection = RedisFactory.CreateConnection( this.TestOptions ) )
         {
             var servers = connection.Inner.GetEndPoints().Select( endpoint => connection.Inner.GetServer( endpoint ) ).ToList();
             var keys = servers.SelectMany( server => server.Keys( pattern: prefix + ":*" ) ).ToList();

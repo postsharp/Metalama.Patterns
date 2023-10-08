@@ -21,11 +21,9 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     /// <summary>
     /// Initializes a new instance of the <see cref="NonBlockingCachingBackendEnhancer"/> class.
     /// </summary>
-    public NonBlockingCachingBackendEnhancer( CachingBackend underlyingBackend ) : base(
-        underlyingBackend,
-        new CachingBackendConfiguration { ServiceProvider = underlyingBackend.Configuration.ServiceProvider } )
+    public NonBlockingCachingBackendEnhancer( CachingBackend underlyingBackend ) : base( underlyingBackend )
     {
-        this._taskScheduler = new BackgroundTaskScheduler( underlyingBackend.Configuration.ServiceProvider, true );
+        this._taskScheduler = new BackgroundTaskScheduler( underlyingBackend.ServiceProvider, true );
     }
 
     private void EnqueueBackgroundTask( Func<Task> task ) => this._taskScheduler.EnqueueBackgroundTask( task );

@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
-public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixture<TestContext>
+public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixture<CachingTestOptions>
 {
     private const int _timeout = 120000; // 2 minutes ought to be enough to anyone. (otherwise the test should be refactored, anyway).
     private static readonly TimeSpan _timeoutTimeSpan = TimeSpan.FromMilliseconds( _timeout * 0.8 );
@@ -19,9 +19,9 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
 
     protected abstract CachingBackend[] CreateBackends();
 
-    protected BaseDistributedCacheTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
+    protected BaseDistributedCacheTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
     {
-        this.TestContext = testContext;
+        this.TestOptions = cachingTestOptions;
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
     /// </summary>
     protected virtual void ConnectToRedisIfRequired() { }
 
-    protected TestContext TestContext { get; }
+    protected CachingTestOptions TestOptions { get; }
 
     [Fact( Timeout = _timeout )]
     public async Task TestInvalidateDependencyIdenticalItemsAsync()

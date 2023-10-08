@@ -56,7 +56,10 @@ public class RedisCachingBackend : CachingBackend
     /// </summary>
     /// <param name="connection">The Redis connection.</param>
     /// <param name="configuration">Configuration.</param>
-    internal RedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration ) : base( configuration )
+    /// <param name="serviceProvider"></param>
+    internal RedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration, IServiceProvider? serviceProvider ) : base(
+        configuration,
+        serviceProvider )
     {
         this.Connection = connection;
         this._ownsConnection = configuration.OwnsConnection;
@@ -65,20 +68,21 @@ public class RedisCachingBackend : CachingBackend
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
         this._createSerializerFunc = configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
-        this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
+        this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
     }
 
     internal RedisCachingBackend(
         IConnectionMultiplexer connection,
         IDatabase database,
         RedisKeyBuilder keyBuilder,
-        RedisCachingBackendConfiguration configuration ) : base( configuration )
+        RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider ) : base( configuration, serviceProvider )
     {
         this.Connection = connection;
         this.Database = database;
         this._keyBuilder = keyBuilder;
         this._ownsConnection = false;
-        this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
+        this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
         this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
     }
 
@@ -93,7 +97,7 @@ public class RedisCachingBackend : CachingBackend
             ImmutableArray.Create( this._keyBuilder.EventsChannel, this._keyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
-            this.Configuration.ServiceProvider );
+            this.ServiceProvider );
     }
 
     /// <summary>
@@ -111,7 +115,7 @@ public class RedisCachingBackend : CachingBackend
                 this._keyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
-            this.Configuration.ServiceProvider,
+            this.ServiceProvider,
             cancellationToken );
     }
 
@@ -120,10 +124,16 @@ public class RedisCachingBackend : CachingBackend
     /// </summary>
     /// <param name="connection">A Redis connection.</param>
     /// <param name="configuration">Configuration of the new back-end.</param>
+    /// <param name="serviceProvider"></param>
     /// <returns>A <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
     /// according to the properties of the <paramref name="configuration"/>.</returns>
-    public static CachingBackend Create( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration )
+    public static CachingBackend Create(
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration? configuration = null,
+        IServiceProvider? serviceProvider = null )
     {
+        configuration ??= new RedisCachingBackendConfiguration();
+
         // #20775 Caching: two-layered cache should modify the key to avoid conflicts when toggling the option
         if ( configuration.IsLocallyCached )
         {
@@ -131,8 +141,8 @@ public class RedisCachingBackend : CachingBackend
         }
 
         var backend = configuration.SupportsDependencies
-            ? new DependenciesRedisCachingBackend( connection, configuration )
-            : new RedisCachingBackend( connection, configuration );
+            ? new DependenciesRedisCachingBackend( connection, configuration, serviceProvider )
+            : new RedisCachingBackend( connection, configuration, serviceProvider );
 
         try
         {
@@ -170,12 +180,15 @@ public class RedisCachingBackend : CachingBackend
     /// according to the properties of the <paramref name="configuration"/>.</returns>
     public static async Task<CachingBackend> CreateAsync(
         IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider = null,
+        RedisCachingBackendConfiguration? configuration = null,
         CancellationToken cancellationToken = default )
     {
+        configuration ??= new RedisCachingBackendConfiguration();
+
         var backend = configuration.SupportsDependencies
-            ? new DependenciesRedisCachingBackend( connection, configuration )
-            : new RedisCachingBackend( connection, configuration );
+            ? new DependenciesRedisCachingBackend( connection, configuration, serviceProvider )
+            : new RedisCachingBackend( connection, configuration, serviceProvider );
 
         try
         {

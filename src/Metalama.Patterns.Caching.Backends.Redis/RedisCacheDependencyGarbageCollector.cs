@@ -30,14 +30,16 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
 
     private RedisCacheDependencyGarbageCollector(
         IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration configuration )
+        RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider )
     {
+        this.ServiceProvider = serviceProvider;
         this.Connection = connection;
         this.Database = this.Connection.GetDatabase( configuration.Database );
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
-        this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration );
+        this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration, serviceProvider );
         this._ownsBackend = true;
-        this._logger = configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
+        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     private RedisCacheDependencyGarbageCollector( DependenciesRedisCachingBackend backend )
@@ -46,7 +48,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         this.Database = backend.Database;
         this._backend = backend;
         this._ownsBackend = false;
-        this._logger = backend.Configuration.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
+        this._logger = backend.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     /// <summary>
@@ -57,9 +59,11 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
     public static RedisCacheDependencyGarbageCollector Create(
         IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration configuration )
+        IServiceProvider? serviceProvider = null,
+        RedisCachingBackendConfiguration? configuration = null )
     {
-        var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
+        configuration ??= new RedisCachingBackendConfiguration();
+        var collector = new RedisCacheDependencyGarbageCollector( connection, configuration, serviceProvider );
         collector.Init( configuration );
 
         return collector;
@@ -110,9 +114,10 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     public static Task<RedisCacheDependencyGarbageCollector> CreateAsync(
         IConnectionMultiplexer connection,
         RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider,
         CancellationToken cancellationToken = default )
     {
-        var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
+        var collector = new RedisCacheDependencyGarbageCollector( connection, configuration, serviceProvider );
 
         return collector.InitAsync( configuration, cancellationToken );
     }
@@ -148,7 +153,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
             ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
             this.ProcessKeyspaceNotification,
             configuration.ConnectionTimeout,
-            configuration.ServiceProvider );
+            this.ServiceProvider );
     }
 
     private async Task<RedisCacheDependencyGarbageCollector> InitAsync(
@@ -164,7 +169,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
             ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
             this.ProcessKeyspaceNotification,
             configuration.ConnectionTimeout,
-            configuration.ServiceProvider,
+            this.ServiceProvider,
             cancellationToken );
 
         return this;
@@ -176,6 +181,8 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// Gets the Redis <see cref="IDatabase"/> used by the current object.
     /// </summary>
     public IDatabase Database { get; }
+
+    public IServiceProvider? ServiceProvider { get; }
 
     /// <summary>
     /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current object.

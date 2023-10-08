@@ -10,5 +10,5 @@ public static class MemoryCacheFactory
     public static MemoryCache CreateCache() => new( new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds( 10 ) } );
 
     public static MemoryCachingBackend CreateBackend( IServiceProvider? serviceProvider, string debugName = "test" )
-        => new( CreateCache(), new MemoryCachingBackendConfiguration() { ServiceProvider = serviceProvider } ) { DebugName = debugName };
+        => new( CreateCache(), serviceProvider ) { DebugName = debugName };
 }

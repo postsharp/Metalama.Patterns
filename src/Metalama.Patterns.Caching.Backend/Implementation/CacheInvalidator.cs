@@ -24,12 +24,10 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     /// </summary>
     /// <param name="underlyingBackend">The underlying <see cref="CachingBackend"/> (typically an in-memory cache).</param>
     /// <param name="options">Options of the new <see cref="CacheInvalidator"/>.</param>
-    protected CacheInvalidator( CachingBackend underlyingBackend, CacheInvalidatorOptions options ) : base(
-        underlyingBackend,
-        new CachingBackendConfiguration() { ServiceProvider = underlyingBackend.Configuration.ServiceProvider } )
+    protected CacheInvalidator( CachingBackend underlyingBackend, CacheInvalidatorOptions options ) : base( underlyingBackend )
     {
         this.Options = options;
-        this._backgroundTaskScheduler = new BackgroundTaskScheduler( underlyingBackend.Configuration.ServiceProvider );
+        this._backgroundTaskScheduler = new BackgroundTaskScheduler( underlyingBackend.ServiceProvider );
     }
 
     /// <inheritdoc />

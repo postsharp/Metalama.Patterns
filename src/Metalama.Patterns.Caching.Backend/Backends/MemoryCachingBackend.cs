@@ -48,8 +48,9 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
     /// </summary>
-    public MemoryCachingBackend( MemoryCachingBackendConfiguration? configuration = null ) : this(
+    public MemoryCachingBackend( IServiceProvider? serviceProvider = null, MemoryCachingBackendConfiguration? configuration = null ) : this(
         new MemoryCache( new MemoryCacheOptions() ),
+        serviceProvider,
         configuration ) { }
 
     /// <summary>
@@ -58,7 +59,9 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// </summary>
     /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
     /// <param name="configuration"></param>
-    public MemoryCachingBackend( IMemoryCache cache, MemoryCachingBackendConfiguration? configuration = null ) : base( configuration )
+    public MemoryCachingBackend( IMemoryCache cache, IServiceProvider? serviceProvider, MemoryCachingBackendConfiguration? configuration = null ) : base(
+        configuration,
+        serviceProvider )
     {
         this._cache = cache;
         this._sizeCalculator = configuration?.SizeCalculator;

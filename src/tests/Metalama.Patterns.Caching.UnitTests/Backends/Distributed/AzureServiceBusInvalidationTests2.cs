@@ -20,7 +20,9 @@ internal
 {
     private static readonly string _connectionString = Secrets.Get( "CacheInvalidationNetCoreTestServiceBusConnectionString" );
 
-    public AzureServiceBusInvalidationTests2( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
+    public AzureServiceBusInvalidationTests2( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
+        testOutputHelper ) { }
 
     protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
     {

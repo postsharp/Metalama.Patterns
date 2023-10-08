@@ -27,7 +27,7 @@ public sealed class BrokenRedisTests
                     };
 
                 var connection = CreateConnection( false );
-                RedisCachingBackend.Create( connection, configuration );
+                RedisCachingBackend.Create( connection, configuration: configuration );
             } );
 
         // Make sure there are no deadlocks in finalizers.
