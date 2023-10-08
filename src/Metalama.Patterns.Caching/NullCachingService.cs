@@ -19,6 +19,8 @@ public sealed class NullCachingService : ICachingService
 
     public ImmutableArray<CachingBackend> AllBackends { get; } = ImmutableArray<CachingBackend>.Empty;
 
+    public Task InitializeAsync( CancellationToken cancellationToken = default ) => Task.CompletedTask;
+
     public TResult? GetFromCacheOrExecute<TResult>(
         CachedMethodMetadata metadata,
         object? instance,
@@ -52,4 +54,8 @@ public sealed class NullCachingService : ICachingService
 
         public string BuildDependencyKey( object o ) => "";
     }
+
+    public void Dispose() { }
+
+    public ValueTask DisposeAsync() => default;
 }

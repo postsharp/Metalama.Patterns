@@ -10,13 +10,21 @@ namespace Metalama.Patterns.Caching;
 /// <summary>
 /// Front-end interface used by the caching aspects.
 /// </summary>
-public interface ICachingService
+public interface ICachingService : IAsyncDisposable, IDisposable
 {
     FlashtraceSource Logger { get; }
 
     ICacheKeyBuilder KeyBuilder { get; }
 
     ImmutableArray<CachingBackend> AllBackends { get; }
+
+    /// <summary>
+    /// Initializes the caching service. It is recommended to call this method from the start-up program
+    /// sequence when the back-end involves a network or out-of-process service (e.g. Redis, Azure). If this
+    /// method is not called, initialization will occur automatically upon the first call any
+    /// cached method.
+    /// </summary>
+    Task InitializeAsync( CancellationToken cancellationToken = default );
 
     TResult? GetFromCacheOrExecute<TResult>(
         CachedMethodMetadata metadata,

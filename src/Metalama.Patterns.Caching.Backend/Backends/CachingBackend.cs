@@ -13,19 +13,15 @@ namespace Metalama.Patterns.Caching.Backends;
 /// An abstraction of the physical implementation of the cache.
 /// </summary>
 [PublicAPI]
-public abstract partial class CachingBackend : ITestableCachingComponent
+public abstract class CachingBackend : ITestableCachingComponent
 {
-    public IServiceProvider ServiceProvider { get; }
-
-    protected CachingBackendConfiguration Configuration { get; }
-
     private const int _disposeTimeout = 30000;
-
     private static readonly ValueTask<bool> _falseTaskResult = new( false );
     private static readonly ValueTask<bool> _trueTaskResult = new( true );
     private static readonly ValueTask _completedTask = new( Task.CompletedTask );
 
     private readonly TaskCompletionSource<bool> _disposeTask = new();
+    private readonly SemaphoreSlim _initializeSemaphore = new( 1, 1 );
 
     private CachingBackendFeatures? _features;
     private int _status;
@@ -42,6 +38,10 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         this.Source = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
         this.DebugName = this.Configuration.DebugName ?? this.Id.ToString();
     }
+
+    public IServiceProvider ServiceProvider { get; }
+
+    protected CachingBackendConfiguration Configuration { get; }
 
     public string? DebugName { get; set; }
 
@@ -76,7 +76,7 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         }
     }
 
-    protected internal virtual Task InitializeAsync( CancellationToken cancellationToken = default )
+    public virtual Task InitializeAsync( CancellationToken cancellationToken = default )
     {
         if ( !this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Initialized ) )
         {
@@ -90,7 +90,44 @@ public abstract partial class CachingBackend : ITestableCachingComponent
     {
         if ( this.Status == CachingBackendStatus.Default )
         {
-            throw new InvalidOperationException( "The back-end '{this}' has not been initialized." );
+            this._initializeSemaphore.Wait();
+
+            try
+            {
+                if ( this.Status == CachingBackendStatus.Default )
+                {
+                    this.InitializeAsync();
+                }
+            }
+            finally
+            {
+                this._initializeSemaphore.Dispose();
+            }
+        }
+
+        if ( this.Status != CachingBackendStatus.Default )
+        {
+            throw new ObjectDisposedException( this.ToString() );
+        }
+    }
+
+    private async ValueTask CheckStatusAsync( CancellationToken cancellationToken )
+    {
+        if ( this.Status == CachingBackendStatus.Default )
+        {
+            await this._initializeSemaphore.WaitAsync( cancellationToken );
+
+            try
+            {
+                if ( this.Status == CachingBackendStatus.Default )
+                {
+                    await this.InitializeAsync( cancellationToken );
+                }
+            }
+            finally
+            {
+                this._initializeSemaphore.Dispose();
+            }
         }
 
         if ( this.Status != CachingBackendStatus.Default )
@@ -172,7 +209,7 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         {
             try
             {
-                this.CheckStatus();
+                await this.CheckStatusAsync( cancellationToken );
                 this.Validate( item );
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -249,7 +286,7 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         {
             try
             {
-                this.CheckStatus();
+                await this.CheckStatusAsync( cancellationToken );
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var present = await this.ContainsItemAsyncCore( key, cancellationToken );
@@ -354,7 +391,7 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         {
             try
             {
-                this.CheckStatus();
+                await this.CheckStatusAsync( cancellationToken );
                 cancellationToken.ThrowIfCancellationRequested();
 
                 CacheValue? item = null;
@@ -443,7 +480,7 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         {
             try
             {
-                this.CheckStatus();
+                await this.CheckStatusAsync( cancellationToken );
                 cancellationToken.ThrowIfCancellationRequested();
 
                 await this.RemoveItemAsyncCore( key, cancellationToken );
@@ -519,7 +556,7 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         {
             try
             {
-                this.CheckStatus();
+                await this.CheckStatusAsync( cancellationToken );
                 this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -599,7 +636,7 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         {
             try
             {
-                this.CheckStatus();
+                await this.CheckStatusAsync( cancellationToken );
 
                 this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
                 this.RequireFeature( this.SupportedFeatures.ContainsDependency, nameof(this.SupportedFeatures.ContainsDependency) );
@@ -674,7 +711,7 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         {
             try
             {
-                this.CheckStatus();
+                await this.CheckStatusAsync( cancellationToken );
                 cancellationToken.ThrowIfCancellationRequested();
 
                 await this.ClearAsyncCore( options, cancellationToken );
@@ -973,40 +1010,6 @@ public abstract partial class CachingBackend : ITestableCachingComponent
         var builder = build( new CachingBackendBuilder() );
 
         var backend = builder.CreateBackend( new CreateBackendArgs { ServiceProvider = serviceProvider, Layer = 1 } );
-
-        try
-        {
-            backend.Initialize();
-        }
-        catch
-        {
-            backend.Dispose();
-
-            throw;
-        }
-
-        return backend;
-    }
-
-    public static async Task<CachingBackend> CreateAsync(
-        Func<CachingBackendBuilder, BuiltCachingBackendBuilder> build,
-        IServiceProvider? serviceProvider = null,
-        CancellationToken cancellationToken = default )
-    {
-        var builder = build( new CachingBackendBuilder() );
-
-        var backend = builder.CreateBackend( new CreateBackendArgs { ServiceProvider = serviceProvider, Layer = 1 } );
-
-        try
-        {
-            await backend.InitializeAsync( cancellationToken );
-        }
-        catch
-        {
-            await backend.DisposeAsync( cancellationToken );
-
-            throw;
-        }
 
         return backend;
     }

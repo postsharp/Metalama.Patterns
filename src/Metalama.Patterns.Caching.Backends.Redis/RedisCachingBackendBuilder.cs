@@ -9,6 +9,7 @@ public class RedisCachingBackendBuilder : DistributedCachingBackendBuilder
 {
     private readonly IConnectionMultiplexer _connection;
     private RedisCachingBackendConfiguration? _configuration;
+    private bool _createGargageCollector;
 
     public RedisCachingBackendBuilder( IConnectionMultiplexer connection, RedisCachingBackendConfiguration? configuration )
     {
@@ -19,6 +20,23 @@ public class RedisCachingBackendBuilder : DistributedCachingBackendBuilder
     public RedisCachingBackendBuilder WithConfiguration( RedisCachingBackendConfiguration configuration )
     {
         this._configuration = configuration;
+
+        if ( this._configuration?.SupportsDependencies != true && this._createGargageCollector )
+        {
+            throw new InvalidOperationException( "Cannot disable dependencies because garbage collection has been enabled." );
+        }
+
+        return this;
+    }
+
+    public RedisCachingBackendBuilder WithGarbageCollector()
+    {
+        if ( this._configuration?.SupportsDependencies != true )
+        {
+            throw new InvalidOperationException( "Cannot enable garbage collection because this back-end does not support dependencies." );
+        }
+
+        this._createGargageCollector = true;
 
         return this;
     }
@@ -38,8 +56,21 @@ public class RedisCachingBackendBuilder : DistributedCachingBackendBuilder
             };
         }
 
-        return this._configuration.SupportsDependencies
-            ? new DependenciesRedisCachingBackend( this._connection, this._configuration, args.ServiceProvider )
-            : new RedisCachingBackend( this._connection, this._configuration, args.ServiceProvider );
+        if ( this._configuration.SupportsDependencies )
+        {
+            var backend = new DependenciesRedisCachingBackend( this._connection, this._configuration, args.ServiceProvider );
+
+            if ( this._createGargageCollector )
+            {
+                // This conveniently binds the lifetime of the collector with the one of the back-end.
+                backend.Collector = new RedisCacheDependencyGarbageCollector( backend );
+            }
+
+            return backend;
+        }
+        else
+        {
+            return new RedisCachingBackend( this._connection, this._configuration, args.ServiceProvider );
+        }
     }
 }

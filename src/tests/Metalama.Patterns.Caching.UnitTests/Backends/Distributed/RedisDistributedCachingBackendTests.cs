@@ -33,16 +33,7 @@ public class RedisDistributedCachingBackendTests : BaseDistributedCacheTests, IA
         };
     }
 
-    protected override CachingBackend[] CreateBackends()
-    {
-        var prefix = Guid.NewGuid().ToString();
-
-        return new CachingBackend[]
-        {
-            RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, prefix, supportsDependencies: true ),
-            RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, prefix, supportsDependencies: true )
-        };
-    }
+    protected override CachingBackend[] CreateBackends() => Task.Run( this.CreateBackendsAsync ).Result;
 
     protected override void ConnectToRedisIfRequired()
     {

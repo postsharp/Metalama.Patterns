@@ -38,17 +38,24 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
     protected override CachingBackend CreateBackend()
     {
-        return RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
+        return Task.Run( this.CreateBackendAsync ).Result;
     }
+
+    protected override CachingBackend CreateBackendWithCollector() => Task.Run( this.CreateBackendWithCollectorAsync ).Result;
 
     protected override async Task<CachingBackend> CreateBackendAsync()
     {
         return await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
     }
 
-    protected override ITestableCachingComponent CreateCollector( CachingBackend backend )
+    protected override async Task<CachingBackend> CreateBackendWithCollectorAsync()
     {
-        return RedisCacheDependencyGarbageCollector.Create( backend );
+        return await RedisFactory.CreateBackendAsync(
+            this.TestOptions,
+            this._redisSetupFixture,
+            supportsDependencies: true,
+            locallyCached: true,
+            collector: true );
     }
 
     #region TestIssue15680
@@ -67,7 +74,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
     }
 
     [Fact]
-    public void TestIssue15680()
+    public async Task TestIssue15680()
     {
         var redisKeyPrefix = _testIssue15680 + Guid.NewGuid();
 
@@ -80,7 +87,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
         using ( this.InitializeTest(
                    "TestIssue15680",
-                   RedisFactory.CreateBackend(
+                   await RedisFactory.CreateBackendAsync(
                        this.TestOptions,
                        this._redisSetupFixture,
                        prefix: redisKeyPrefix,
@@ -93,7 +100,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
         using ( this.InitializeTest(
                    "TestIssue15680",
-                   RedisFactory.CreateBackend(
+                   await RedisFactory.CreateBackendAsync(
                        this.TestOptions,
                        this._redisSetupFixture,
                        prefix: redisKeyPrefix,

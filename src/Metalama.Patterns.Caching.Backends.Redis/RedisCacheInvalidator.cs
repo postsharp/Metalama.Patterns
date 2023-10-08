@@ -49,7 +49,7 @@ internal sealed class RedisCacheInvalidator : CacheInvalidator
         base.Initialize();
     }
 
-    protected override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
     {
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),

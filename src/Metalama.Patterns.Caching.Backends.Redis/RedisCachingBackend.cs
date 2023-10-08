@@ -99,7 +99,7 @@ internal class RedisCachingBackend : CachingBackend
         base.Initialize();
     }
 
-    protected override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
     {
         this._notificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),

@@ -14,7 +14,7 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
     {
         Console.WriteLine( "collector init" );
 
-        var collectors = new RedisCacheDependencyGarbageCollector[configuration.CollectorsCount];
+        var collectors = new IAsyncDisposable[configuration.CollectorsCount];
 
         try
         {
@@ -24,7 +24,9 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 
                 var collectorConnection = CreateConnection();
 
-                collectors[i] = RedisCacheDependencyGarbageCollector.Create( collectorConnection, configuration: collectorConfiguration );
+                collectors[i] = RedisCachingBackendFactory.CreateRedisCacheDependencyGarbageCollector(
+                    collectorConnection,
+                    configuration: collectorConfiguration );
             }
 
             base.Test( configuration, duration );

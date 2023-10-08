@@ -19,11 +19,15 @@ public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
     {
         var testId = Guid.NewGuid().ToString();
 
-        Task<CachingBackend> CreateCacheInvalidator()
+        async Task<CachingBackend> CreateCacheInvalidator()
         {
-            return CachingBackend.CreateAsync(
+            var backend = CachingBackend.Create(
                 b => this.AddInvalidationBroker( b.Memory(), testId ),
                 this.ServiceProvider );
+
+            await backend.InitializeAsync();
+
+            return backend;
         }
 
         return new[] { await CreateCacheInvalidator(), await CreateCacheInvalidator(), await CreateCacheInvalidator() };

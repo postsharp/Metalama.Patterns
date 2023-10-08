@@ -27,35 +27,24 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         protected abstract CachingBackend CreateBackend();
 
-        protected virtual Task<CachingBackend> CreateBackendAsync()
-        {
-            return Task.FromResult( this.CreateBackend() );
-        }
+        protected virtual CachingBackend CreateBackendWithCollector() => this.CreateBackend();
+
+        protected virtual Task<CachingBackend> CreateBackendAsync() => Task.FromResult( this.CreateBackend() );
+
+        protected virtual Task<CachingBackend> CreateBackendWithCollectorAsync() => Task.FromResult( this.CreateBackendWithCollector() );
 
         protected virtual void GiveChanceToResetLocalCache( CachingBackend backend ) { }
-
-        protected virtual ITestableCachingComponent CreateCollector( CachingBackend backend )
-        {
-            // Return anything disposable.
-            return new NullTestableCachingComponent();
-        }
-
-        protected virtual Task<ITestableCachingComponent> CreateCollectorAsync( CachingBackend backend )
-        {
-            // Return anything disposable.
-            return Task.FromResult( this.CreateCollector( backend ) );
-        }
 
         protected virtual TimeSpan GetExpirationQuantum( double multiplier = 1 )
         {
             return TimeSpan.FromSeconds( 0.05 * multiplier );
         }
 
-        private static Task RepeatUntilNullOrFailAsync<T>( Func<ValueTask<T?>> func )
+        protected static Task RepeatUntilNullOrFailAsync<T>( Func<ValueTask<T?>> func )
             where T : class
             => RepeatUntilNullOrFailAsync( () => func().AsTask() );
 
-        private static async Task RepeatUntilNullOrFailAsync<T>( Func<Task<T?>> func )
+        protected static async Task RepeatUntilNullOrFailAsync<T>( Func<Task<T?>> func )
             where T : class
         {
             var stopwatch = Stopwatch.StartNew();
@@ -73,7 +62,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             Assert.Fail( $"The item still exists in cache after the {TimeoutTimeSpan} timeout." );
         }
 
-        private static void RepeatUntilNullOrFail<T>( Func<T?> func )
+        protected static void RepeatUntilNullOrFail<T>( Func<T?> func )
             where T : class
         {
             var stopwatch = Stopwatch.StartNew();
@@ -281,146 +270,13 @@ namespace Metalama.Patterns.Caching.TestHelpers
             }
         }
 
-        [Fact( Timeout = Timeout )]
-        public async Task TestAbsoluteExpirationDependencyCollectedAsync()
-        {
-            if ( !this.TestDependencies || !RunningOnWindows )
-            {
-                AssertEx.Inconclusive();
-
-                return;
-            }
-
-            // [Porting] Not fixing, can't be certain of original intent.
-            // ReSharper disable UseAwaitUsing
-            using ( var cache = await this.CreateBackendAsync() )
-            using ( var collector = await this.CreateCollectorAsync( cache ) )
-            {
-                try
-                {
-                    var storedValue = new CachedValueClass( 0 );
-                    const string key = "0";
-
-                    var offset = this.GetExpirationQuantum();
-
-                    var cacheItem = new CacheItem(
-                        storedValue,
-                        Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                        Dependencies: ImmutableList.Create( "d" ) );
-
-                    var itemRemoved = new TaskCompletionSource<bool>();
-                    cache.ItemRemoved += ( _, _ ) => itemRemoved.SetResult( true );
-
-                    await cache.SetItemAsync( key, cacheItem );
-
-                    while ( !itemRemoved.Task.IsCompleted )
-                    {
-                        // [Porting] Not fixing, can't be certain of original intent.
-                        // ReSharper disable once MethodHasAsyncOverload
-                        cache.SetItem( "cycle", new CacheItem( "value" ) );
-                        await Task.Delay( 50 );
-                    }
-
-                    Assert.True( await itemRemoved.Task.WithTimeout( TimeoutTimeSpan ) );
-
-                    await RepeatUntilNullOrFailAsync( () => cache.GetItemAsync( key ) );
-
-                    if ( cache.SupportedFeatures.ContainsDependency )
-                    {
-                        var success = false;
-                        var until = DateTime.Now.AddSeconds( 30 );
-
-                        while ( DateTime.Now < until )
-                        {
-                            if ( !await cache.ContainsDependencyAsync( "d" ) )
-                            {
-                                success = true;
-
-                                break;
-                            }
-                        }
-
-                        this.TestOutputHelper.WriteLine( $"Checking for dependency in {cache}." );
-                        Assert.True( success );
-                    }
-                }
-                finally
-                {
-                    await TestableCachingComponentDisposer.DisposeAsync( cache, collector );
-                }
-            }
-
-            // ReSharper restore UseAwaitUsing
-        }
-
         private static bool? _runningOnWindows;
 
         /// <summary>
         /// Gets a value indicating whether the test is run on Windows. We don't run some tests on Linux because, for some reason, the event that an item expired from the cache
         /// arrives up to 20 minutes later on Linux, and I don't know why. So we're just no longer testing this on Linux.
         /// </summary>
-        private static bool RunningOnWindows => _runningOnWindows ?? (_runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
-
-        [Fact( Timeout = Timeout )]
-        public void TestAbsoluteExpirationDependencyCollected()
-        {
-            if ( !this.TestDependencies || !RunningOnWindows )
-            {
-                AssertEx.Inconclusive();
-
-                return;
-            }
-
-            // We need at least one sync test with the collector, this is why we have this one, otherwise a duplicate from TestAbsoluteExpirationDependencyCollectedAsync.
-
-            using ( var cache = this.CreateBackend() )
-            using ( var collector = this.CreateCollector( cache ) )
-            {
-                var storedValue = new CachedValueClass( 0 );
-                const string key = "0";
-
-                var offset = this.GetExpirationQuantum();
-
-                var cacheItem = new CacheItem(
-                    storedValue,
-                    Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                    Dependencies: ImmutableList.Create( "d" ) );
-
-                var itemRemoved = new ManualResetEventSlim( false );
-                cache.ItemRemoved += ( _, _ ) => itemRemoved.Set();
-                cache.SetItem( key, cacheItem );
-
-                while ( !itemRemoved.IsSet )
-                {
-                    cache.SetItem( "cycle", new CacheItem( "value" ) );
-                    Thread.Yield();
-                }
-
-                // ReSharper disable once AccessToDisposedClosure
-                RepeatUntilNullOrFail( () => cache.GetItem( key ) );
-
-                if ( cache.SupportedFeatures.ContainsDependency )
-                {
-                    var success = false;
-                    var until = DateTime.Now.AddSeconds( 30 );
-
-                    while ( DateTime.Now < until )
-                    {
-                        if ( !cache.ContainsDependency( "d" ) )
-                        {
-                            success = true;
-
-                            break;
-                        }
-                    }
-
-                    this.TestOutputHelper.WriteLine( $"Checking for dependency in {cache}." );
-                    Assert.True( success );
-                }
-
-                TestableCachingComponentDisposer.Dispose( cache, collector );
-            }
-        }
+        protected static bool RunningOnWindows => _runningOnWindows ?? (_runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
 
         [Fact( Timeout = Timeout, Skip = "#33668" )]
         public void TestSlidingExpiration()
@@ -1194,6 +1050,128 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 await Assert.ThrowsAsync<NotSupportedException>( async () => await cache.ContainsDependencyAsync( "d" ) );
 
                 await TestableCachingComponentDisposer.DisposeAsync( cache );
+            }
+        }
+
+        [Fact( Timeout = Timeout )]
+        public async Task TestAbsoluteExpirationDependencyCollectedAsync()
+        {
+            if ( !this.TestDependencies || !RunningOnWindows )
+            {
+                AssertEx.Inconclusive();
+
+                return;
+            }
+
+            // [Porting] Not fixing, can't be certain of original intent.
+            // ReSharper disable UseAwaitUsing
+            using ( var cache = await this.CreateBackendWithCollectorAsync() )
+            {
+                var storedValue = new CachedValueClass( 0 );
+                const string key = "0";
+
+                var offset = this.GetExpirationQuantum();
+
+                var cacheItem = new CacheItem(
+                    storedValue,
+                    Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
+                    Dependencies: ImmutableList.Create( "d" ) );
+
+                var itemRemoved = new TaskCompletionSource<bool>();
+                cache.ItemRemoved += ( _, _ ) => itemRemoved.SetResult( true );
+
+                await cache.SetItemAsync( key, cacheItem );
+
+                while ( !itemRemoved.Task.IsCompleted )
+                {
+                    // [Porting] Not fixing, can't be certain of original intent.
+                    // ReSharper disable once MethodHasAsyncOverload
+                    cache.SetItem( "cycle", new CacheItem( "value" ) );
+                    await Task.Delay( 50 );
+                }
+
+                Assert.True( await itemRemoved.Task.WithTimeout( TimeoutTimeSpan ) );
+
+                await RepeatUntilNullOrFailAsync( () => cache.GetItemAsync( key ) );
+
+                if ( cache.SupportedFeatures.ContainsDependency )
+                {
+                    var success = false;
+                    var until = DateTime.Now.AddSeconds( 30 );
+
+                    while ( DateTime.Now < until )
+                    {
+                        if ( !await cache.ContainsDependencyAsync( "d" ) )
+                        {
+                            success = true;
+
+                            break;
+                        }
+                    }
+
+                    this.TestOutputHelper.WriteLine( $"Checking for dependency in {cache}." );
+                    Assert.True( success );
+                }
+            }
+
+            // ReSharper restore UseAwaitUsing
+        }
+
+        [Fact( Timeout = Timeout )]
+        public void TestAbsoluteExpirationDependencyCollected()
+        {
+            if ( !this.TestDependencies || !RunningOnWindows )
+            {
+                AssertEx.Inconclusive();
+
+                return;
+            }
+
+            // We need at least one sync test with the collector, this is why we have this one, otherwise a duplicate from TestAbsoluteExpirationDependencyCollectedAsync.
+
+            using ( var cache = this.CreateBackendWithCollector() )
+            {
+                var storedValue = new CachedValueClass( 0 );
+                const string key = "0";
+
+                var offset = this.GetExpirationQuantum();
+
+                var cacheItem = new CacheItem(
+                    storedValue,
+                    Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
+                    Dependencies: ImmutableList.Create( "d" ) );
+
+                var itemRemoved = new ManualResetEventSlim( false );
+                cache.ItemRemoved += ( _, _ ) => itemRemoved.Set();
+                cache.SetItem( key, cacheItem );
+
+                while ( !itemRemoved.IsSet )
+                {
+                    cache.SetItem( "cycle", new CacheItem( "value" ) );
+                    Thread.Yield();
+                }
+
+                // ReSharper disable once AccessToDisposedClosure
+                RepeatUntilNullOrFail( () => cache.GetItem( key ) );
+
+                if ( cache.SupportedFeatures.ContainsDependency )
+                {
+                    var success = false;
+                    var until = DateTime.Now.AddSeconds( 30 );
+
+                    while ( DateTime.Now < until )
+                    {
+                        if ( !cache.ContainsDependency( "d" ) )
+                        {
+                            success = true;
+
+                            break;
+                        }
+                    }
+
+                    this.TestOutputHelper.WriteLine( $"Checking for dependency in {cache}." );
+                    Assert.True( success );
+                }
             }
         }
 

@@ -40,6 +40,8 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     protected override CachingBackendFeatures CreateFeatures() => new DependenciesRedisCachingBackendFeatures( this );
 
+    internal RedisCacheDependencyGarbageCollector? Collector { get; set; }
+
     private string[]? GetDependencies( string key, ITransaction? transaction = null )
     {
         var dependenciesKey = this._keyBuilder.GetDependenciesKey( key );
@@ -51,6 +53,38 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 : Condition.StringEqual( dependenciesKey, dependencies ) );
 
         return dependencies?.Split( _dependenciesSeparator );
+    }
+
+    protected override void Initialize()
+    {
+        base.Initialize();
+        this.Collector?.Initialize();
+    }
+
+    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    {
+        await base.InitializeAsync( cancellationToken );
+
+        if ( this.Collector != null )
+        {
+            await this.Collector.InitializeAsync( cancellationToken );
+        }
+    }
+
+    protected override void DisposeCore( bool disposing )
+    {
+        this.Collector?.Initialize();
+        base.DisposeCore( disposing );
+    }
+
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
+    {
+        if ( this.Collector != null )
+        {
+            await this.Collector.DisposeAsync( cancellationToken );
+        }
+
+        await base.DisposeAsyncCore( cancellationToken );
     }
 
     internal async Task<string[]?> GetDependenciesAsync( string key, ITransaction? transaction = null )

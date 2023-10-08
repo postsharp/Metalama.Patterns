@@ -12,7 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching;
 
-public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICachingService
+public sealed partial class CachingService : ICachingService
 {
     private readonly FormatterRepository _formatters;
 
@@ -25,20 +25,6 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
         builder.Dispose();
 
         var backend = builder.CreateBackend();
-
-        return new CachingService( serviceProvider, backend, builder );
-    }
-
-    public static async Task<CachingService> CreateAsync(
-        Action<ICachingServiceBuilder>? build = null,
-        IServiceProvider? serviceProvider = null,
-        CancellationToken cancellationToken = default )
-    {
-        var builder = new Builder( serviceProvider );
-        build?.Invoke( builder );
-        builder.Dispose();
-
-        var backend = await builder.CreateBackendAsync( cancellationToken );
 
         return new CachingService( serviceProvider, backend, builder );
     }
@@ -108,6 +94,14 @@ public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICac
     /// Gets the set of distinct backends used in the service.
     /// </summary>
     public ImmutableArray<CachingBackend> AllBackends { get; }
+
+    public async Task InitializeAsync( CancellationToken cancellationToken )
+    {
+        foreach ( var backend in this.AllBackends )
+        {
+            await backend.InitializeAsync( cancellationToken );
+        }
+    }
 
     public FlashtraceSource Logger { get; }
 

@@ -65,24 +65,6 @@ public partial class CachingService
             }
         }
 
-        public async Task<CachingBackend?> CreateBackendAsync( CancellationToken cancellationToken )
-        {
-            var backend = this._specificBackend;
-
-            if ( backend != null )
-            {
-                return backend;
-            }
-            else if ( this._cachingBackendBuildAction != null )
-            {
-                return await CachingBackend.CreateAsync( this._cachingBackendBuildAction, this.ServiceProvider, cancellationToken );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         internal IReadOnlyCollection<CachingProfile> Profiles => this._profiles.Values;
 
         internal IReadOnlyList<Action<FormatterRepository.Builder>> FormattersBuildActions => this._formattersBuildActions;

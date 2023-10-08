@@ -6,12 +6,13 @@ namespace Metalama.Patterns.Caching.Backends.Azure;
 
 public sealed class AzureInvalidatedCachingBackendBuilder : BuiltCachingBackendBuilder
 {
-    private MemoryCachingBackendBuilder _underlying;
-    private AzureCacheInvalidatorConfiguration _configuration;
+    private readonly MemoryCachingBackendBuilder _underlying;
+    private readonly AzureCacheInvalidatorConfiguration _configuration;
 
-    internal AzureInvalidatedCachingBackendBuilder( MemoryCachingBackendBuilder underlying )
+    internal AzureInvalidatedCachingBackendBuilder( MemoryCachingBackendBuilder underlying, AzureCacheInvalidatorConfiguration configuration )
     {
         this._underlying = underlying;
+        this._configuration = configuration;
     }
 
     public override CachingBackend CreateBackend( CreateBackendArgs args )

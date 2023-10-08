@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Building;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -19,4 +20,23 @@ public static class RedisCachingBackendFactory
         this MemoryCachingBackendBuilder builder,
         IConnectionMultiplexer connection )
         => new( builder, connection );
+
+    public static IServiceCollection AddRedisCacheDependencyGarbageCollector(
+        this IServiceCollection serviceCollection,
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration configuration )
+    {
+        serviceCollection.AddHostedService<RedisCacheDependencyGarbageCollector>(
+            serviceProvider => new RedisCacheDependencyGarbageCollector( connection, configuration, serviceProvider ) );
+
+        return serviceCollection;
+    }
+
+    public static IAsyncDisposable CreateRedisCacheDependencyGarbageCollector(
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration? configuration = null,
+        IServiceProvider? serviceProvider = null )
+    {
+        return new RedisCacheDependencyGarbageCollector( connection, configuration ?? new RedisCachingBackendConfiguration(), serviceProvider );
+    }
 }

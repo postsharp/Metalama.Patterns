@@ -32,19 +32,11 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
 
     protected override bool TestDependencies => false;
 
-    protected override CachingBackend CreateBackend()
-    {
-        return this.CreateBackend( null );
-    }
+    protected override CachingBackend CreateBackend() => Task.Run( this.CreateBackendAsync ).Result;
 
     protected override async Task<CachingBackend> CreateBackendAsync()
     {
         return await this.CreateBackendAsync( null );
-    }
-
-    private CachingBackend CreateBackend( string? keyPrefix )
-    {
-        return RedisFactory.CreateBackend( this.TestOptions, this._redisSetupFixture, keyPrefix );
     }
 
     private async Task<CachingBackend> CreateBackendAsync( string? keyPrefix )

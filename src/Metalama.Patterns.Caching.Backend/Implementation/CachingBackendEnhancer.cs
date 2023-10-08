@@ -43,7 +43,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
         this.UnderlyingBackend.Initialize();
     }
 
-    protected internal override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
     {
         await base.InitializeAsync( cancellationToken );
         await this.UnderlyingBackend.InitializeAsync( cancellationToken );
