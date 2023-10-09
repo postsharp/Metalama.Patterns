@@ -74,7 +74,7 @@ public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.
 
         Assert.Equal( 2, this._fixture.Listener.Messages.Count );
         Assert.Equal( "Activity: Starting", this._fixture.Listener.Messages[0] );
-        Assert.Equal( "Activity: Oops: Hello", this._fixture.Listener.Messages[1] );
+        Assert.Equal( "Activity: Returning, Oops: Hello", this._fixture.Listener.Messages[1] );
     }
 
     [Fact]
