@@ -2,9 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 
@@ -33,14 +31,9 @@ internal static partial class DependencyGraph
      * to determine which properties are affected by a change to a given node.
      */
 
-    public delegate void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null );
-
-    public delegate bool TreatAsImplementingInpc( ITypeSymbol type );
-
     public static Node GetDependencyGraph(
         INamedType type,
-        ReportDiagnostic reportDiagnostic,
-        TreatAsImplementingInpc treatAsImplementingInpc,
+        IGraphBuildingContext context,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
@@ -59,12 +52,11 @@ internal static partial class DependencyGraph
                 type.Compilation,
                 tree,
                 propertySymbol,
-                reportDiagnostic,
-                treatAsImplementingInpc,
+                context,
                 trace,
                 cancellationToken );
         }
 
         return tree;
-    }    
+    }
 }

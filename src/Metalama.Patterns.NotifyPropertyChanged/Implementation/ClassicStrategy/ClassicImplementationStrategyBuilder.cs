@@ -6,9 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.Graph;
 using Metalama.Patterns.NotifyPropertyChanged.Metadata;
@@ -17,7 +14,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
-internal sealed class ClassicImplementationStrategyBuilder : IImplementationStrategyBuilder, IClassicProcessingNodeInitializationHelper
+internal sealed partial class ClassicImplementationStrategyBuilder : IImplementationStrategyBuilder, IClassicProcessingNodeInitializationHelper
 {
     private readonly DeferredOptional<IMethod> _onUnmonitoredObservablePropertyChangedMethod;
 
@@ -513,27 +510,18 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
     /// <returns>Success. <see langword="true"/> if the graph was built without diagnostic errors, otherwise <see langword="false"/>.</returns>
     private bool BuildAndValidateDependencyGraph()
     {
-        var hasErrors = false;
+        var graphBuildingContext = new GraphBuildingContext( this );
 
         var structuralGraph = DependencyAnalysis.DependencyGraph.GetDependencyGraph(
             this._builder.Target,
-            ( diagnostic, location ) =>
-            {
-                // ReSharper disable once AccessToModifiedClosure
-                hasErrors |= diagnostic.Definition.Severity == Severity.Error;
-                this._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
-            },
-            typeSymbol =>
-            {
-                var typeDecl = this._builder.Target.Compilation.GetDeclaration( typeSymbol ) as IType;
-                
-                return typeDecl != null && this._inpcInstrumentationKindLookup.Get( typeDecl ) != InpcInstrumentationKind.None;
-            },
+            graphBuildingContext,
             cancellationToken: this._builder.CancellationToken );
 
         var processingGraph =
             structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>(
                 new ClassicProcessingNodeInitializationContext( this._builder.Target.Compilation, this ) );
+
+        var hasErrors = graphBuildingContext.HasReportedErrors;
 
         foreach ( var node in processingGraph.DescendantsDepthFirst() )
         {

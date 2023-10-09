@@ -92,7 +92,9 @@ class D
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   A1
@@ -146,7 +148,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   X [ Z ]
@@ -193,7 +197,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -235,7 +241,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -274,7 +282,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -316,7 +326,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -351,7 +363,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -386,7 +400,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -431,7 +447,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -476,7 +494,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -486,7 +506,7 @@ public class A
   Y
 ";
 
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Calls to local instance methods are not supported.)@(12,19)-(12,31)" );
+        diagnostics.Should().Equal( "LAMA5162: Method call is not supported for dependency analysis. (Fn(int))@(12,19)-(12,31)" );
         result.ToString().Should().Be( expected );
     }
 
@@ -521,7 +541,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -562,7 +584,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -573,7 +597,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,20)-(12,24)" );
+            .Equal( "LAMA5162: Method call is not supported for dependency analysis. (A.GetZ())@(12,20)-(12,31)" );
 
         result.ToString().Should().Be( expected );
     }
@@ -609,7 +633,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -654,7 +680,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -670,7 +698,7 @@ public class A
 
     [Trait( "Supported", "No" )]
     [Fact]
-    public void StaticMethodOfExternalTypeInvocationWithNonPrimitiveArgument()
+    public void SafeStaticMethodOfOtherTypeInvocationWithNonPrimitiveArgument()
     {
         using var testContext = this.CreateTestContext();
 
@@ -702,7 +730,12 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext(
+                isConfiguredAsSafeToCall: _ => true,
+                reportDiagnostic: diagnostics.Add,
+                treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -720,7 +753,7 @@ public class A
 
     [Trait( "Supported", "Yes" )]
     [Fact]
-    public void StaticMethodOfExternalTypeInvocationWithPrimitiveArgument()
+    public void SafeStaticMethodOfOtherTypeInvocationWithPrimitiveArgument()
     {
         using var testContext = this.CreateTestContext();
 
@@ -749,7 +782,12 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext(
+                isConfiguredAsSafeToCall: _ => true,
+                reportDiagnostic: diagnostics.Add,
+                treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -808,7 +846,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -878,7 +918,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -955,7 +997,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, AlwaysTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -1014,7 +1058,9 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph( type, diagnostics.Add, NeverTreatAsInpc );
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: NeverTreatAsInpc ) );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );

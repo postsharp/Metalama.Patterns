@@ -20,8 +20,7 @@ internal static partial class DependencyGraph
         ICompilation compilation,
         Node tree,
         IPropertySymbol property,
-        ReportDiagnostic reportDiagnostic,
-        TreatAsImplementingInpc treatAsImplementingInpc,
+        IGraphBuildingContext context,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
@@ -40,7 +39,7 @@ internal static partial class DependencyGraph
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( tree, property, semanticModel, reportDiagnostic, treatAsImplementingInpc, trace, cancellationToken );
+        var visitor = new Visitor( tree, property, semanticModel, context, trace, cancellationToken );
 
         visitor.Visit( body );
     }
@@ -52,10 +51,9 @@ internal static partial class DependencyGraph
         private readonly INamedTypeSymbol _declaringType;
         private readonly ISymbol _originSymbol;
         private readonly SemanticModel _semanticModel;
-        private readonly ReportDiagnostic _reportDiagnostic;
         private readonly CancellationToken _cancellationToken;
         private readonly Action<string>? _trace;
-        private readonly TreatAsImplementingInpc _implementsInpc;
+        private readonly IGraphBuildingContext _context;
 
         private readonly GatherIdentifiersContextManager _gatherManager;
 
@@ -65,8 +63,7 @@ internal static partial class DependencyGraph
             IGraphBuildingNode tree,
             ISymbol originSymbol,
             SemanticModel semanticModel,
-            ReportDiagnostic reportDiagnostic,
-            TreatAsImplementingInpc implementsInpc,
+            IGraphBuildingContext context,
             Action<string>? trace,
             CancellationToken cancellationToken )
         {
@@ -75,9 +72,8 @@ internal static partial class DependencyGraph
             this._declaringType = originSymbol.ContainingType;
             this._originSymbol = originSymbol;
             this._semanticModel = semanticModel;
-            this._reportDiagnostic = reportDiagnostic;
             this._cancellationToken = cancellationToken;
-            this._implementsInpc = implementsInpc;
+            this._context = context;
             this._gatherManager = new GatherIdentifiersContextManager( this );
         }
 
@@ -86,12 +82,16 @@ internal static partial class DependencyGraph
             this.ProcessAndResetIfApplicable( context );
         }
 
+        /// <summary>
+        /// Called when an unexpected scenario is encountered during processing. Indicates that the program logic of <see cref="DependencyGraph"/> is not yet implemented
+        /// to handle that scenario.
+        /// </summary>
         private void ReportWarningNotImplementedForDependencyAnalysis(
             Location location,
             [CallerMemberName] string? name = null,
             [CallerLineNumber] int line = 0 )
         {
-            this._reportDiagnostic(
+            this._context.ReportDiagnostic(
                 DiagnosticDescriptors.WarningNotImplementedForDependencyAnalysis.WithArguments( $"{name}/{line}" ),
                 location );
         }
@@ -120,7 +120,7 @@ internal static partial class DependencyGraph
 
                         if ( !elementaryType.IsPrimitiveType() )
                         {
-                            this._reportDiagnostic(
+                            this._context.ReportDiagnostic(
                                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
                                     .WithArguments( "Method arguments (including 'this') must be of primitive types." ),
                                 expression.GetLocation() );
@@ -167,9 +167,9 @@ internal static partial class DependencyGraph
                                     var propertyType = ((IPropertySymbol) sr.Symbol).Type.GetElementaryType();
 
                                     // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
-                                    if ( i < stemCount - 1 && !propertyType.IsPrimitiveType() && !this._implementsInpc( propertyType ) )
+                                    if ( i < stemCount - 1 && !propertyType.IsPrimitiveType() && !this._context.TreatAsImplementingInpc( propertyType ) )
                                     {
-                                        this._reportDiagnostic(
+                                        this._context.ReportDiagnostic(
                                             DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( propertyType ),
                                             sr.Node.GetLocation() );
                                     }
@@ -202,39 +202,42 @@ internal static partial class DependencyGraph
 
         public override void VisitInvocationExpression( InvocationExpressionSyntax node )
         {
-            var invocationSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
+            bool? isConfiguredAsSafeToCall = null;
 
-            if ( invocationSymbol == null )
+            if ( this._semanticModel.GetSymbolInfo( node ).Symbol is not IMethodSymbol methodSymbol )
             {
-                this.ReportWarningNotImplementedForDependencyAnalysis( node.GetLocation() );
+                // Undefined name, will be a compiler error (eg, "The name 'X' does not exist in the current context").
+                this._gatherManager.Current.Reset();
+
+                return;
             }
-            else if ( this._declaringType.Equals( invocationSymbol.ContainingType ) )
+
+            if ( this._declaringType.IsOrInheritsFrom( methodSymbol.ContainingType ) )
             {
-                if ( !invocationSymbol.IsStatic )
+                if ( !methodSymbol.IsStatic )
                 {
-                    // TODO: Remove this warning when we support calling local instance methods.
-                    this._reportDiagnostic(
-                        DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments( "Calls to local instance methods are not supported." ),
+                    isConfiguredAsSafeToCall ??= this._context.IsConfiguredAsSafeToCall( methodSymbol );
+
+                    if ( isConfiguredAsSafeToCall != true )
+                    {
+                        this._context.ReportDiagnostic(
+                            DiagnosticDescriptors.WarningMethodIsNotSupportedForDependencyAnalysis.WithArguments( methodSymbol ),
+                            node.GetLocation() );
+                    }
+                }
+            }
+            else if ( !methodSymbol.ContainingType.IsPrimitiveType() )
+            {
+                // Only methods of primitive types are implicitly safe to call.
+
+                isConfiguredAsSafeToCall ??= this._context.IsConfiguredAsSafeToCall( methodSymbol );
+
+                if ( isConfiguredAsSafeToCall != true )
+                {
+                    this._context.ReportDiagnostic(
+                        DiagnosticDescriptors.WarningMethodIsNotSupportedForDependencyAnalysis.WithArguments( methodSymbol ),
                         node.GetLocation() );
                 }
-            }
-
-            // NB: Calls to external methods are safe so long as all args are primitive (including this)
-
-            if ( node.Expression.IsKind( SyntaxKind.IdentifierName ) )
-            {
-                // Like "Fn(...)", no 'this.'. 'this' must be the declaring type, or it's a static method.
-            }
-            else if ( node.Expression is MemberAccessExpressionSyntax memberAccess )
-            {
-                if ( invocationSymbol?.IsStatic == false )
-                {
-                    this.ValidateMethodArgumentType( memberAccess.Expression );
-                }
-            }
-            else
-            {
-                this.ReportWarningNotImplementedForDependencyAnalysis( node.GetLocation() );
             }
 
             foreach ( var arg in node.ArgumentList.Arguments )
@@ -255,10 +258,10 @@ internal static partial class DependencyGraph
 
         public override void VisitVariableDeclaration( VariableDeclarationSyntax node )
         {
-            // TODO: At first glance, variables don't seem to be problematic. Why should they not be supported?
+            // TODO: Allow variables of primitive types only, as this is safe and does not require more complex handling elsewhere. TP-33948
 #if false
             // TODO: Use more correct diagnostic.
-            this._reportDiagnostic(
+            this._context.ReportDiagnostic(
                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments( "Variable declarations are not supported." ),
                 node.GetLocation() );
 
@@ -360,11 +363,8 @@ internal static partial class DependencyGraph
             }
             else
             {
-                // TODO: When can this happen?
-                this.ReportWarningNotImplementedForDependencyAnalysis( node.GetLocation() );
-
-                // Best effort
-                this.ProcessAndResetIfApplicable( ctx );
+                // Undefined name, will be a compiler error (eg, "The name 'X' does not exist in the current context").
+                ctx.Reset();
             }
         }
     }
