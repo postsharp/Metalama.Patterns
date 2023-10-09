@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
+
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
@@ -22,6 +24,8 @@ public class CachingBackendFeatures
     /// If <c>false</c>, methods may run in the background, and the calling thread may not have a consistent view of the cache.
     /// </summary>
     public virtual bool Blocking => true;
+
+    public virtual bool NonBlockingModifierNotRecommended => true;
 
     /// <summary>
     /// Gets a value indicating whether dependencies are supported.

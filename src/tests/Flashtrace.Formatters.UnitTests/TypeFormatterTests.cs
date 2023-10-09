@@ -13,7 +13,7 @@ public class TypeFormatterTests : FormattersTestsBase
 
     public TypeFormatterTests( ITestOutputHelper logger ) : base( logger )
     {
-        this.DefaultTypeFormatter = new TypeFormatter( this.DefaultRepository );
+        this.DefaultTypeFormatter = new TypeFormatter( CreateRepository() );
     }
 
     private void TestFormatter( Type type, string expectedString )

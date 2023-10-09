@@ -76,52 +76,44 @@ namespace Metalama.Patterns.Caching.Tests
             Func<CachedValueClass> invalidatingOrRecachingMethod,
             Func<bool> resetMethod )
         {
-            this.InitializeTestWithCachingBackend( profileName );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            using var context = this.InitializeTest( profileName );
 
-            try
+            var initialValue = cachedMethod();
+            Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
+
+            var cachedValueBeforeInvalidation = cachedMethod();
+            Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
+
+            AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
+
+            var recachedValue = invalidatingOrRecachingMethod();
+
+            // ReSharper disable once PossibleUnintendedReferenceComparison
+            if ( recachedValue == NullCachedValueClass.Instance )
             {
-                var initialValue = cachedMethod();
-                Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
+                // Just invalidating (not recaching)
 
-                var cachedValueBeforeInvalidation = cachedMethod();
-                Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
+                var valueAfterInvalidation = cachedMethod();
+                Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
 
-                AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
+                var cachedValueAfterInvalidation = cachedMethod();
+                Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
 
-                var recachedValue = invalidatingOrRecachingMethod();
-
-                // ReSharper disable once PossibleUnintendedReferenceComparison
-                if ( recachedValue == NullCachedValueClass.Instance )
-                {
-                    // Just invalidating (not recaching)
-
-                    var valueAfterInvalidation = cachedMethod();
-                    Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
-
-                    var cachedValueAfterInvalidation = cachedMethod();
-                    Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
-
-                    AssertEx.Equal(
-                        valueAfterInvalidation,
-                        cachedValueAfterInvalidation,
-                        "The initial value and the cached value after invalidation are not the same." );
-                }
-                else
-                {
-                    // Recaching (not just invalidating)
-
-                    Assert.True( resetMethod(), "The cached method has not been called during recaching." );
-
-                    var valueAfterRecaching = cachedMethod();
-                    Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
-
-                    AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
-                }
+                AssertEx.Equal(
+                    valueAfterInvalidation,
+                    cachedValueAfterInvalidation,
+                    "The initial value and the cached value after invalidation are not the same." );
             }
-            finally
+            else
             {
-                TestProfileConfigurationFactory.DisposeTest();
+                // Recaching (not just invalidating)
+
+                Assert.True( resetMethod(), "The cached method has not been called during recaching." );
+
+                var valueAfterRecaching = cachedMethod();
+                Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
+
+                AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
             }
         }
 
@@ -147,52 +139,44 @@ namespace Metalama.Patterns.Caching.Tests
             Func<Task<CachedValueClass>> invalidatingOrRecachingMethod,
             Func<bool> resetMethod )
         {
-            this.InitializeTestWithCachingBackend( profileName );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            await using var context = this.InitializeTest( profileName );
 
-            try
+            var initialValue = await cachedMethod();
+            Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
+
+            var cachedValueBeforeInvalidation = await cachedMethod();
+            Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
+
+            AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
+
+            var recachedValue = await invalidatingOrRecachingMethod();
+
+            // ReSharper disable once PossibleUnintendedReferenceComparison
+            if ( recachedValue == NullCachedValueClass.Instance )
             {
-                var initialValue = await cachedMethod();
-                Assert.True( resetMethod(), "The cached method has not been called for the first time before invalidation." );
+                // Just invalidating (not recaching)
 
-                var cachedValueBeforeInvalidation = await cachedMethod();
-                Assert.False( resetMethod(), "The cached method has been called for the second time before invalidation." );
+                var valueAfterInvalidation = await cachedMethod();
+                Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
 
-                AssertEx.Equal( initialValue, cachedValueBeforeInvalidation, "The initial value and the cached value before invalidation are not the same." );
+                var cachedValueAfterInvalidation = await cachedMethod();
+                Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
 
-                var recachedValue = await invalidatingOrRecachingMethod();
-
-                // ReSharper disable once PossibleUnintendedReferenceComparison
-                if ( recachedValue == NullCachedValueClass.Instance )
-                {
-                    // Just invalidating (not recaching)
-
-                    var valueAfterInvalidation = await cachedMethod();
-                    Assert.True( resetMethod(), "The cached method has not been called for the first time after invalidation." );
-
-                    var cachedValueAfterInvalidation = await cachedMethod();
-                    Assert.False( resetMethod(), "The cached method has been called for the second time after invalidation." );
-
-                    AssertEx.Equal(
-                        valueAfterInvalidation,
-                        cachedValueAfterInvalidation,
-                        "The initial value and the cached value after invalidation are not the same." );
-                }
-                else
-                {
-                    // Recaching (not just invalidating)
-
-                    Assert.True( resetMethod(), "The cached method has not been called during recaching." );
-
-                    var valueAfterRecaching = await cachedMethod();
-                    Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
-
-                    AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
-                }
+                AssertEx.Equal(
+                    valueAfterInvalidation,
+                    cachedValueAfterInvalidation,
+                    "The initial value and the cached value after invalidation are not the same." );
             }
-            finally
+            else
             {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
+                // Recaching (not just invalidating)
+
+                Assert.True( resetMethod(), "The cached method has not been called during recaching." );
+
+                var valueAfterRecaching = await cachedMethod();
+                Assert.False( resetMethod(), "The cached method has been called for the first time after recaching." );
+
+                AssertEx.Equal( recachedValue, valueAfterRecaching, "The recached value and the cached value after recaching are not the same." );
             }
         }
 
@@ -360,7 +344,7 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         [Fact]
-        public void TestImperativeInvalidationAsync()
+        public async Task TestImperativeInvalidationAsync()
         {
             var cachingClass =
                 new TestImperativeInvalidationAsyncCachingClass();
@@ -371,28 +355,29 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedMethods =
                 new[]
                 {
-                    () => cachingClass.GetValueAsync().GetAwaiter().GetResult(),
-                    () => cachingClass.GetValueAsync( 1 ).GetAwaiter().GetResult(),
-                    () => cachingClass.GetValueAsync( 1, cachedValue2 ).GetAwaiter().GetResult(),
-                    () => cachingClass.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
+                    () => cachingClass.GetValueAsync(),
+                    () => cachingClass.GetValueAsync( 1 ),
+                    () => cachingClass.GetValueAsync( 1, cachedValue2 ),
+                    () => cachingClass.GetValueAsync( 1, cachedValue2, 3, 4 )
                 };
 
             var invalidatingMethods =
                 new[]
                 {
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync ).Wait(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 1 ).Wait(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 1, cachedValue2 ).Wait(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 1, cachedValue2, 3, 5 ).Wait()
+                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync ).AsTask(),
+                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 1 ).AsTask(),
+                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 1, cachedValue2 ).AsTask(),
+                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 1, cachedValue2, 3, 5 ).AsTask()
                 };
 
             var testName = "Matching values test";
 
-            this.DoInvalidateCacheAttributeTest(
+            await this.DoInvalidateCacheAttributeTestAsync(
                 _testImperativeInvalidationAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
+                true,
                 true,
                 true );
 
@@ -407,21 +392,22 @@ namespace Metalama.Patterns.Caching.Tests
             invalidatingMethods =
                 new[]
                 {
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync ).Wait(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0 ).Wait(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0, cachedValue0 ).Wait(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0, cachedValue0, 0, 5 ).Wait()
+                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync ).AsTask(),
+                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0 ).AsTask(),
+                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0, cachedValue0 ).AsTask(),
+                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0, cachedValue0, 0, 5 ).AsTask()
                 };
 
             testName = "Not matching values test";
 
-            this.DoInvalidateCacheAttributeTest(
+            await this.DoInvalidateCacheAttributeTestAsync(
                 _testImperativeInvalidationAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
                 true,
-                false );
+                false,
+                true );
 
             for ( var i = 0; i < cachedMethods.Length; i++ )
             {
@@ -499,10 +485,10 @@ namespace Metalama.Patterns.Caching.Tests
             var invalidatingMethods =
                 new Action[]
                 {
-                    () => CachingService.Default.Recache( cachingClass.GetValue ),
-                    () => CachingService.Default.Recache( cachingClass.GetValue, 1 ),
-                    () => CachingService.Default.Recache( cachingClass.GetValue, 1, cachedValue2 ),
-                    () => CachingService.Default.Recache( cachingClass.GetValue, 1, cachedValue2, 3, 5 )
+                    () => CachingService.Default.Refresh( cachingClass.GetValue ),
+                    () => CachingService.Default.Refresh( cachingClass.GetValue, 1 ),
+                    () => CachingService.Default.Refresh( cachingClass.GetValue, 1, cachedValue2 ),
+                    () => CachingService.Default.Refresh( cachingClass.GetValue, 1, cachedValue2, 3, 5 )
                 };
 
             var testName = "Matching values test";
@@ -526,10 +512,10 @@ namespace Metalama.Patterns.Caching.Tests
             invalidatingMethods =
                 new Action[]
                 {
-                    () => CachingService.Default.Recache( cachingClass.GetValue ),
-                    () => CachingService.Default.Recache( cachingClass.GetValue, 0 ),
-                    () => CachingService.Default.Recache( cachingClass.GetValue, 0, cachedValue0 ),
-                    () => CachingService.Default.Recache( cachingClass.GetValue, 0, cachedValue0, 0, 5 )
+                    () => CachingService.Default.Refresh( cachingClass.GetValue ),
+                    () => CachingService.Default.Refresh( cachingClass.GetValue, 0 ),
+                    () => CachingService.Default.Refresh( cachingClass.GetValue, 0, cachedValue0 ),
+                    () => CachingService.Default.Refresh( cachingClass.GetValue, 0, cachedValue0, 0, 5 )
                 };
 
             testName = "Not matching values test";
@@ -598,7 +584,7 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         [Fact]
-        public void TestRecachingAsync()
+        public async Task TestRecachingAsync()
         {
             var cachingClass =
                 new TestRecachingAsyncCachingClass();
@@ -609,28 +595,30 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedMethods =
                 new[]
                 {
-                    () => cachingClass.GetValueAsync().GetAwaiter().GetResult(),
-                    () => cachingClass.GetValueAsync( 1 ).GetAwaiter().GetResult(),
-                    () => cachingClass.GetValueAsync( 1, cachedValue2 ).GetAwaiter().GetResult(),
-                    () => cachingClass.GetValueAsync( 1, cachedValue2, 3, 4 ).GetAwaiter().GetResult()
+                    () => cachingClass.GetValueAsync(),
+                    () => cachingClass.GetValueAsync( 1 ),
+                    () => cachingClass.GetValueAsync( 1, cachedValue2 ),
+                    () => cachingClass.GetValueAsync( 1, cachedValue2, 3, 4 )
                 };
 
             var invalidatingMethods =
                 new[]
                 {
-                    () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync ).Wait(),
-                    () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync, 1 ).Wait(),
-                    () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync, 1, cachedValue2 ).Wait(),
-                    () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync, 1, cachedValue2, 3, 5 ).Wait()
+                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync ),
+                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 1 ),
+                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 1, cachedValue2 ),
+                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 1, cachedValue2, 3, 5 )
                 };
 
             var testName = "Matching values test";
 
-            this.DoInvalidateCacheAttributeTest(
+            await this.DoInvalidateCacheAttributeTestAsync(
                 _testRecachingAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 testName,
+                true,
+                true,
                 true,
                 true );
 
@@ -645,21 +633,23 @@ namespace Metalama.Patterns.Caching.Tests
             invalidatingMethods =
                 new[]
                 {
-                    () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync ).Wait(),
-                    () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync, 0 ).Wait(),
-                    () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync, 0, cachedValue0 ).Wait(),
-                    () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync, 0, cachedValue0, 0, 5 ).Wait()
+                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync ),
+                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0 ),
+                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0, cachedValue0 ),
+                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0, cachedValue0, 0, 5 )
                 };
 
             testName = "Not matching values test";
 
-            this.DoInvalidateCacheAttributeTest(
+            await this.DoInvalidateCacheAttributeTestAsync(
                 _testRecachingAsyncProfileName,
                 cachedMethods,
                 invalidatingMethods,
                 "Not matching values test",
                 true,
-                false );
+                false,
+                true,
+                true );
 
             for ( var i = 0; i < cachedMethods.Length; i++ )
             {
@@ -698,22 +688,14 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestImperativeInvalidationWithNestedContexts()
         {
-            this.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testImperativeInvalidationWithNestedContextsProfileName );
+            using var context = this.InitializeTest( _testImperativeInvalidationWithNestedContextsProfileName );
 
-            try
-            {
-                var c = new TestImperativeInvalidationWithNestedContextsClass();
-                var call1 = c.OuterMethod();
-                CachingService.Default.Invalidate( c.InnerMethod );
-                var call2 = c.OuterMethod();
+            var c = new TestImperativeInvalidationWithNestedContextsClass();
+            var call1 = c.OuterMethod();
+            CachingService.Default.Invalidate( c.InnerMethod );
+            var call2 = c.OuterMethod();
 
-                Assert.NotEqual( call1, call2 );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.NotEqual( call1, call2 );
         }
 
         #endregion TestImperativeInvalidationWithNestedContexts
@@ -744,22 +726,14 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestImperativeInvalidationWithNestedContextsAsync()
         {
-            this.InitializeTestWithCachingBackend( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
+            await using var context = this.InitializeTest( _testImperativeInvalidationWithNestedContextsAsyncProfileName );
 
-            try
-            {
-                var c = new TestImperativeInvalidationWithNestedContextsAsyncClass();
-                var call1 = await c.OuterMethodAsync();
-                await CachingService.Default.InvalidateAsync( c.InnerMethodAsync );
-                var call2 = await c.OuterMethodAsync();
+            var c = new TestImperativeInvalidationWithNestedContextsAsyncClass();
+            var call1 = await c.OuterMethodAsync();
+            await CachingService.Default.InvalidateAsync( c.InnerMethodAsync );
+            var call2 = await c.OuterMethodAsync();
 
-                Assert.NotEqual( call1, call2 );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            Assert.NotEqual( call1, call2 );
         }
 
         #endregion TestImperativeInvalidationWithNestedContextsAsync
@@ -790,23 +764,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestRecachingOfInnerMethod()
         {
-            this.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfInnerMethodProfileName );
+            using var context = this.InitializeTest( _testRecachingOfInnerMethodProfileName );
 
-            try
-            {
-                var c = new TestRecachingOfInnerMethodClass();
-                var call1 = c.OuterMethod();
-                var call2 = CachingService.Default.Recache( c.InnerMethod );
-                var call3 = c.OuterMethod();
+            var c = new TestRecachingOfInnerMethodClass();
+            var call1 = c.OuterMethod();
+            var call2 = CachingService.Default.Refresh( c.InnerMethod );
+            var call3 = c.OuterMethod();
 
-                Assert.NotEqual( call1, call2 );
-                Assert.NotEqual( call2, call3 );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.NotEqual( call1, call2 );
+            Assert.NotEqual( call2, call3 );
         }
 
         #endregion TestRecachingOfInnerMethod
@@ -837,23 +803,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestRecachingOfInnerMethodAsync()
         {
-            this.InitializeTestWithCachingBackend( _testRecachingOfInnerMethodAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfInnerMethodAsyncProfileName );
+            await using var context = this.InitializeTest( _testRecachingOfInnerMethodAsyncProfileName );
 
-            try
-            {
-                var c = new TestRecachingOfInnerMethodAsyncClass();
-                var call1 = await c.OuterMethodAsync();
-                var call2 = await CachingService.Default.RecacheAsync( c.InnerMethodAsync );
-                var call3 = await c.OuterMethodAsync();
+            var c = new TestRecachingOfInnerMethodAsyncClass();
+            var call1 = await c.OuterMethodAsync();
+            var call2 = await CachingService.Default.RefreshAsync( c.InnerMethodAsync );
+            var call3 = await c.OuterMethodAsync();
 
-                Assert.NotEqual( call1, call2 );
-                Assert.NotEqual( call2, call3 );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            Assert.NotEqual( call1, call2 );
+            Assert.NotEqual( call2, call3 );
         }
 
         #endregion TestRecachingOfInnerMethodAsync
@@ -884,23 +842,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestRecachingOfOuterMethod()
         {
-            this.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfOuterMethodProfileName );
+            using var context = this.InitializeTest( _testRecachingOfOuterMethodProfileName );
 
-            try
-            {
-                var c = new TestRecachingOfOuterMethodClass();
-                var call1 = c.OuterMethod();
-                var call2 = CachingService.Default.Recache( c.OuterMethod );
-                var call3 = c.OuterMethod();
+            var c = new TestRecachingOfOuterMethodClass();
+            var call1 = c.OuterMethod();
+            var call2 = CachingService.Default.Refresh( c.OuterMethod );
+            var call3 = c.OuterMethod();
 
-                Assert.Equal( call1, call2 );
-                Assert.Equal( call2, call3 );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            Assert.Equal( call1, call2 );
+            Assert.Equal( call2, call3 );
         }
 
         #endregion TestRecachingOfOuterMethod
@@ -931,23 +881,15 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestRecachingOfOuterMethodAsync()
         {
-            this.InitializeTestWithCachingBackend( _testRecachingOfOuterMethodAsyncProfileName );
-            TestProfileConfigurationFactory.CreateProfile( _testRecachingOfOuterMethodAsyncProfileName );
+            await using var context = this.InitializeTest( _testRecachingOfOuterMethodAsyncProfileName );
 
-            try
-            {
-                var c = new TestRecachingOfOuterMethodAsyncClass();
-                var call1 = await c.OuterMethodAsync();
-                var call2 = await CachingService.Default.RecacheAsync( c.OuterMethodAsync );
-                var call3 = await c.OuterMethodAsync();
+            var c = new TestRecachingOfOuterMethodAsyncClass();
+            var call1 = await c.OuterMethodAsync();
+            var call2 = await CachingService.Default.RefreshAsync( c.OuterMethodAsync );
+            var call3 = await c.OuterMethodAsync();
 
-                Assert.Equal( call1, call2 );
-                Assert.Equal( call2, call3 );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            Assert.Equal( call1, call2 );
+            Assert.Equal( call2, call3 );
         }
 
         #endregion TestRecachingOfOuterMethodAsync
@@ -1031,7 +973,7 @@ namespace Metalama.Patterns.Caching.Tests
             this.DoTestSimpleImperativeInvalidation(
                 _testSimpleImperativeRecachingWith0ParametersProfileName,
                 cachingClass.GetValue,
-                () => CachingService.Default.Recache( cachingClass.GetValue ),
+                () => CachingService.Default.Refresh( cachingClass.GetValue ),
                 cachingClass.Reset );
         }
 
@@ -1059,7 +1001,7 @@ namespace Metalama.Patterns.Caching.Tests
             await this.DoTestSimpleImperativeInvalidationAsync(
                 _testSimpleImperativeRecachingWith0ParametersAsyncProfileName,
                 cachingClass.GetValueAsync,
-                () => CachingService.Default.RecacheAsync( cachingClass.GetValueAsync ),
+                () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync ),
                 cachingClass.Reset );
         }
 

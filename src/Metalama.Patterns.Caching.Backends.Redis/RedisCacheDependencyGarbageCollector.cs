@@ -3,24 +3,18 @@
 using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
+using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-/// <summary>
-/// Removes dependencies added when a <see cref="RedisCachingBackend"/> when items are expired or evicted from the cache.
-/// At least one instance (ideally a single instance) of the <see cref="RedisCacheDependencyGarbageCollector"/> must be running whenever a
-/// <see cref="RedisCachingBackend"/> instance that supports dependencies is running, otherwise the cache will use storage to store dependencies
-/// that are no longer relevant, and will not be removed otherwise. If no <see cref="RedisCacheDependencyGarbageCollector"/> is running while
-/// at least one dependency-enabled <see cref="RedisCachingBackend"/> instance is running, you must initiate full garbage collection
-/// by calling the <see cref="PerformFullCollectionAsync(RedisCachingBackend,CancellationToken)"/> method.
-/// </summary>
 [PublicAPI] // Comments above indicate use case.
-public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingComponent
+internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisposable, IAsyncDisposable
 {
-    private readonly LogSource _logger;
+    private readonly RedisCachingBackendConfiguration _configuration;
+    private readonly FlashtraceSource _logger;
     private RedisKeyBuilder _keyBuilder = null!; // "Guaranteed" to be initialized via Init et al.
 
     internal RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
@@ -28,41 +22,29 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     private readonly bool _ownsBackend;
     private readonly DependenciesRedisCachingBackend _backend;
 
-    private RedisCacheDependencyGarbageCollector(
+    internal RedisCacheDependencyGarbageCollector(
         IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration configuration )
+        RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider )
     {
+        this._configuration = configuration;
+        this.ServiceProvider = serviceProvider;
         this.Connection = connection;
         this.Database = this.Connection.GetDatabase( configuration.Database );
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
-        this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration );
+        this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration, serviceProvider );
         this._ownsBackend = true;
-        this._logger = configuration.ServiceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
+        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
-    private RedisCacheDependencyGarbageCollector( DependenciesRedisCachingBackend backend )
+    internal RedisCacheDependencyGarbageCollector( DependenciesRedisCachingBackend backend )
     {
+        this._configuration = backend.Configuration;
         this.Connection = backend.Connection;
         this.Database = backend.Database;
         this._backend = backend;
         this._ownsBackend = false;
-        this._logger = backend.Configuration.ServiceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
-    }
-
-    /// <summary>
-    /// Creates a new <see cref="RedisCacheDependencyGarbageCollector"/> given a Redis connection and a configuration object.
-    /// </summary>
-    /// <param name="connection">A Redis connection.</param>
-    /// <param name="configuration">A configuration object.</param>
-    /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
-    public static RedisCacheDependencyGarbageCollector Create(
-        IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration configuration )
-    {
-        var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
-        collector.Init( configuration );
-
-        return collector;
+        this._logger = backend.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     private static RedisCachingBackend FindRedisCachingBackend( CachingBackend backend )
@@ -81,101 +63,11 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     }
 
     /// <summary>
-    /// Creates a new <see cref="RedisCacheDependencyGarbageCollector"/> that uses an existing <see cref="DependenciesRedisCachingBackend"/> object.
-    /// </summary>
-    /// <param name="backend">An existing Redis <see cref="CachingBackend"/>, as returned by <see cref="RedisCachingBackend.Create"/>.</param>
-    /// <returns>A <see cref="RedisCacheDependencyGarbageCollector"/> using <paramref name="backend"/>.</returns>
-    public static RedisCacheDependencyGarbageCollector Create( CachingBackend backend )
-    {
-        var redisCachingBackend = FindRedisCachingBackend( backend );
-
-        if ( !redisCachingBackend.SupportedFeatures.Dependencies )
-        {
-            throw new ArgumentException( "This backend does not support dependencies.", nameof(backend) );
-        }
-
-        var collector = new RedisCacheDependencyGarbageCollector( (DependenciesRedisCachingBackend) redisCachingBackend );
-        collector.Init( redisCachingBackend.Configuration );
-
-        return collector;
-    }
-
-    /// <summary>
-    /// Asynchronously creates a new <see cref="RedisCacheDependencyGarbageCollector"/> given a Redis connection and a configuration object.
-    /// </summary>
-    /// <param name="connection">A Redis connection.</param>
-    /// <param name="configuration">A configuration object.</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>A <see cref="Task"/> returning a <see cref="RedisCacheDependencyGarbageCollector"/> that uses <paramref name="connection"/> and <paramref name="configuration"/>.</returns>
-    public static Task<RedisCacheDependencyGarbageCollector> CreateAsync(
-        IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration configuration,
-        CancellationToken cancellationToken = default )
-    {
-        var collector = new RedisCacheDependencyGarbageCollector( connection, configuration );
-
-        return collector.InitAsync( configuration, cancellationToken );
-    }
-
-    /// <summary>
-    /// Asynchronously creates a new <see cref="RedisCacheDependencyGarbageCollector"/> that uses an existing <see cref="RedisCachingBackend"/> object.
-    /// </summary>
-    /// <param name="backend">An existing <see cref="CachingBackend"/>, as returned by <see cref="RedisCachingBackend.Create"/>, that supports dependencies.</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>A <see cref="Task"/> returning a <see cref="RedisCacheDependencyGarbageCollector"/> that uses <paramref name="backend"/>.</returns>
-    public static Task<RedisCacheDependencyGarbageCollector> CreateAsync( CachingBackend backend, CancellationToken cancellationToken = default )
-    {
-        var redisCachingBackend = FindRedisCachingBackend( backend );
-
-        if ( !redisCachingBackend.SupportedFeatures.Dependencies )
-        {
-            throw new ArgumentException( "This backend does not support dependencies.", nameof(backend) );
-        }
-
-        var collector = new RedisCacheDependencyGarbageCollector( (DependenciesRedisCachingBackend) backend );
-
-        return collector.InitAsync( redisCachingBackend.Configuration, cancellationToken );
-    }
-
-    private void Init( RedisCachingBackendConfiguration configuration )
-    {
-        this.InitCommon( configuration );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        this.NotificationQueue = RedisNotificationQueue.Create(
-            this.ToString()!,
-            this.Connection,
-            ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
-            this.ProcessKeyspaceNotification,
-            configuration.ConnectionTimeout,
-            configuration.ServiceProvider );
-    }
-
-    private async Task<RedisCacheDependencyGarbageCollector> InitAsync(
-        RedisCachingBackendConfiguration configuration,
-        CancellationToken cancellationToken )
-    {
-        this.InitCommon( configuration );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
-            this.ToString()!,
-            this.Connection,
-            ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
-            this.ProcessKeyspaceNotification,
-            configuration.ConnectionTimeout,
-            configuration.ServiceProvider,
-            cancellationToken );
-
-        return this;
-    }
-
-    private void InitCommon( RedisCachingBackendConfiguration configuration ) => this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
-
-    /// <summary>
     /// Gets the Redis <see cref="IDatabase"/> used by the current object.
     /// </summary>
     public IDatabase Database { get; }
+
+    public IServiceProvider? ServiceProvider { get; }
 
     /// <summary>
     /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current object.
@@ -321,7 +213,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -335,37 +227,40 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         }
     }
 
-    ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
-
-    /// <summary>
-    /// Performs a full garbage collection on all Redis servers. This operation enumerates and validates all keys in the database, and can possibly last several
-    /// minutes and affect performance in production.
-    /// </summary>
-    /// <param name="backend">A <see cref="RedisCachingBackend"/> that supports dependencies.</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>A <see cref="Task"/>.</returns>
-    public static Task PerformFullCollectionAsync( RedisCachingBackend backend, CancellationToken cancellationToken = default )
-    {
-        return ((DependenciesRedisCachingBackend) backend).CleanUpAsync( cancellationToken );
-    }
-
-    /// <summary>
-    /// Performs a full garbage collection on a given Redis server. This operation enumerates and validates all keys in the database, and can possibly last several
-    /// minutes and affect performance in production.
-    /// </summary>
-    /// <param name="backend">A <see cref="RedisCachingBackend"/> that supports dependencies.</param>
-    /// <param name="server">The Redis server whose keys will be enumerated and validated.</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>A <see cref="Task"/>.</returns>
-    public static Task PerformFullCollectionAsync(
-        RedisCachingBackend backend,
-        IServer server,
-        CancellationToken cancellationToken = default )
-    {
-        return ((DependenciesRedisCachingBackend) backend).CleanUpAsync( server, cancellationToken );
-    }
-
     internal int BackgroundTaskExceptions => this.NotificationQueue.BackgroundTaskExceptions;
 
-    int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
+    Task IHostedService.StartAsync( CancellationToken cancellationToken ) => this.InitializeAsync( cancellationToken );
+
+    Task IHostedService.StopAsync( CancellationToken cancellationToken ) => this.DisposeAsync( cancellationToken ).AsTask();
+
+    public void Initialize()
+    {
+        this._keyBuilder = new RedisKeyBuilder( this.Database, this._configuration );
+
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
+        this.NotificationQueue = RedisNotificationQueue.Create(
+            this.ToString()!,
+            this.Connection,
+            ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
+            this.ProcessKeyspaceNotification,
+            this._configuration.ConnectionTimeout,
+            this.ServiceProvider );
+    }
+
+    public async Task InitializeAsync( CancellationToken cancellationToken )
+    {
+        this._keyBuilder = new RedisKeyBuilder( this.Database, this._configuration );
+
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
+        this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
+            this.ToString()!,
+            this.Connection,
+            ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
+            this.ProcessKeyspaceNotification,
+            this._configuration.ConnectionTimeout,
+            this.ServiceProvider,
+            cancellationToken );
+    }
+
+    public ValueTask DisposeAsync() => this.DisposeAsync( default );
 }

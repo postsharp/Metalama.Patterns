@@ -36,40 +36,22 @@ namespace Metalama.Patterns.Caching.Tests
 
         private void DoTestMethod( string profileName, string expectedKey, Func<string> action )
         {
-            this.InitializeTestWithCachingBackend( profileName );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            using var context = this.InitializeTest( profileName, b => b.WithKeyBuilder( f => new MyCacheKeyBuilder( f ) ) );
 
-            try
-            {
-                var keyBuilder = new MyCacheKeyBuilder( CachingService.Default.Formatters );
-                CachingService.Default.KeyBuilder = keyBuilder;
-                action();
-                Console.WriteLine( keyBuilder.LastMethodKey );
-                Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            var keyBuilder = (MyCacheKeyBuilder) CachingService.Default.KeyBuilder;
+            action();
+            Console.WriteLine( keyBuilder.LastMethodKey );
+            Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
         }
 
         private async Task DoTestMethodAsync( string profileName, string expectedKey, Func<Task<string>> action )
         {
-            this.InitializeTestWithCachingBackend( profileName );
-            TestProfileConfigurationFactory.CreateProfile( profileName );
+            await using var context = this.InitializeTest( profileName, b => b.WithKeyBuilder( f => new MyCacheKeyBuilder( f ) ) );
 
-            try
-            {
-                var keyBuilder = new MyCacheKeyBuilder( CachingService.Default.Formatters );
-                CachingService.Default.KeyBuilder = keyBuilder;
-                await action();
-                Console.WriteLine( keyBuilder.LastMethodKey );
-                Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
-            }
-            finally
-            {
-                await TestProfileConfigurationFactory.DisposeTestAsync();
-            }
+            var keyBuilder = (MyCacheKeyBuilder) CachingService.Default.KeyBuilder;
+            await action();
+            Console.WriteLine( keyBuilder.LastMethodKey );
+            Assert.Equal( expectedKey, keyBuilder.LastMethodKey );
         }
 
 #pragma warning disable CA1822 // Mark members as static

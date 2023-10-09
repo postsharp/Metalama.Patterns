@@ -32,14 +32,13 @@ public class FormattersTests : FormattersTestsBase
     [Fact]
     public void StronglyTypedUnregisteredType()
     {
-        _ = this.DefaultRepository.Get<TestStruct>();
+        _ = CreateRepository().Get<TestStruct>();
     }
 
     [Fact]
     public void NullableUsesFormatter()
     {
-        var repo = GetNewRepository();
-        repo.Register( new TestStructFormatter( repo ) );
+        var repo = CreateRepository( b => b.AddFormatter( x => new TestStructFormatter( x ) ) );
 
         Assert.Equal( "formatter", this.Format<TestStruct?>( repo, default(TestStruct) ) );
     }
@@ -47,8 +46,7 @@ public class FormattersTests : FormattersTestsBase
     [Fact]
     public void NullableNull()
     {
-        var repo = GetNewRepository();
-        repo.Register( new TestStructFormatter( repo ) );
+        var repo = CreateRepository( b => b.AddFormatter( x => new TestStructFormatter( x ) ) );
 
         Assert.Equal( "null", this.Format<TestStruct?>( repo, null ) );
     }
@@ -194,10 +192,9 @@ public class FormattersTests : FormattersTestsBase
     [Fact]
     public void DifferentRepositoriesAreDifferent()
     {
-        var repo1 = GetNewRepository();
-        repo1.Register( new TestStructFormatter( repo1 ) );
+        var repo1 = CreateRepository( b => b.AddFormatter( r => new TestStructFormatter( r ) ) );
 
-        var repo2 = GetNewRepository();
+        var repo2 = CreateRepository();
 
         Assert.Equal( "formatter", this.Format( repo1, default(TestStruct) ) );
         Assert.Equal( "{ToString}", this.Format( repo2, default(TestStruct) ) );

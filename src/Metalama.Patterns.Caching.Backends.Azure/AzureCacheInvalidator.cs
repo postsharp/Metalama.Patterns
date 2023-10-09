@@ -14,10 +14,11 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     /// meant for .NET Standard.
     /// </summary>
     [PublicAPI]
-    public class AzureCacheInvalidator : CacheInvalidator
+    internal sealed class AzureCacheInvalidator : CacheInvalidator
     {
         private const string _subject = "Metalama.Patterns.Caching.Backends.Azure.Invalidation";
 
+        private readonly AzureCacheInvalidatorConfiguration _configuration;
         private readonly CancellationTokenSource _receiverCancellation = new();
 
         private string _subscriptionName = null!;
@@ -25,45 +26,32 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         private ServiceBusSender? _sender;
         private int _backgroundTaskExceptions;
 
-        private AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorOptions options ) : base( underlyingBackend, options ) { }
-
-        protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
-
-        /// <summary>
-        /// Asynchronously creates a new <see cref="AzureCacheInvalidator"/>.
-        /// </summary>
-        /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator"/>.</param>
-        /// <param name="options">Options.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
-        public static async Task<AzureCacheInvalidator> CreateAsync(
-            CachingBackend backend,
-            AzureCacheInvalidatorOptions options,
-            CancellationToken cancellationToken = default )
+        public AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorConfiguration configuration ) : base(
+            underlyingBackend,
+            configuration )
         {
-            var invalidator = new AzureCacheInvalidator( backend, options );
-            await invalidator.InitAsync( options, cancellationToken );
-
-            return invalidator;
+            this._configuration = configuration;
         }
+
+        public override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
         public event EventHandler<AzureCacheInvalidatorExceptionEventArgs>? ReceiverException;
 
-        private async Task InitAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
+        protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
         {
-            if ( options.SubscriptionName == null )
+            if ( this._configuration.SubscriptionName == null )
             {
-                this._subscriptionName = await this.CreateSubscriptionAsync( options, cancellationToken );
+                this._subscriptionName = await this.CreateSubscriptionAsync( this._configuration, cancellationToken );
             }
             else
             {
-                this._subscriptionName = options.SubscriptionName;
+                this._subscriptionName = this._configuration.SubscriptionName;
             }
 
-            var client = new ServiceBusClient( options.ConnectionString, options.ClientOptions );
+            var client = new ServiceBusClient( this._configuration.ConnectionString, this._configuration.ClientOptions );
 
-            this._receiver = client.CreateReceiver( options.TopicName, this._subscriptionName );
-            this._sender = client.CreateSender( options.TopicName );
+            this._receiver = client.CreateReceiver( this._configuration.TopicName, this._subscriptionName );
+            this._sender = client.CreateSender( this._configuration.TopicName );
 
             // Start a background task to process received messages.
             _ = Task.Run( this.ReceiveMessagesAsync, this._receiverCancellation.Token );
@@ -86,7 +74,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                         catch ( OperationCanceledException ) { }
                         catch ( Exception e )
                         {
-                            this.LogSource.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                            this.Source.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
                             this._backgroundTaskExceptions++;
                         }
                     }
@@ -94,7 +82,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                 catch ( Exception e )
                 {
                     this.ReceiverException?.Invoke( this, new AzureCacheInvalidatorExceptionEventArgs( e ) );
-                    await Task.Delay( ((AzureCacheInvalidatorOptions) this.Options).RetryOnReceiveError );
+                    await Task.Delay( ((AzureCacheInvalidatorConfiguration) this.Configuration).RetryOnReceiveError );
                 }
             }
 
@@ -167,18 +155,18 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             this.DisposeCore( false );
         }
 
-        private async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorOptions options, CancellationToken cancellationToken )
+        private async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorConfiguration configuration, CancellationToken cancellationToken )
         {
             try
             {
                 var subscriptionId = Guid.NewGuid().ToString();
 
-                var client = new ServiceBusAdministrationClient( options.ConnectionString, options.AdministrationClientOptions );
+                var client = new ServiceBusAdministrationClient( configuration.ConnectionString, configuration.AdministrationClientOptions );
 
                 var subscriptionOptions =
-                    new CreateSubscriptionOptions( options.TopicName, subscriptionId )
+                    new CreateSubscriptionOptions( configuration.TopicName, subscriptionId )
                     {
-                        MaxDeliveryCount = options.MaxDeliveryCount, AutoDeleteOnIdle = options.AutoDeleteOnIdle
+                        MaxDeliveryCount = configuration.MaxDeliveryCount, AutoDeleteOnIdle = configuration.AutoDeleteOnIdle
                     };
 
                 await client.CreateSubscriptionAsync( subscriptionOptions, cancellationToken );
@@ -187,7 +175,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             }
             catch ( Exception e )
             {
-                this.LogSource.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
+                this.Source.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
 
                 throw;
             }

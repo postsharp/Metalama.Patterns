@@ -102,12 +102,7 @@ public sealed partial class CachedMethodMetadata
     public static CachedMethodMetadata ForCallingMethod( CachedMethodConfiguration? configuration = null, int skipFrames = 0 )
     {
         var stackFrame = new StackFrame( 1 + skipFrames );
-        var methodInfo = (MethodInfo?) stackFrame.GetMethod();
-
-        if ( methodInfo == null )
-        {
-            throw new InvalidOperationException( "Cannot get the calling method." );
-        }
+        var methodInfo = (MethodInfo?) stackFrame.GetMethod() ?? throw new InvalidOperationException( "Cannot get the calling method." );
 
         var existingMetadata = CachedMethodMetadataRegistry.Instance.Get( methodInfo );
 

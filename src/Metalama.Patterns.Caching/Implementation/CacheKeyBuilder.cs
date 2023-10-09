@@ -8,13 +8,17 @@ using System.Reflection;
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// Builds cache item keys and dependency keys.
+/// Builds cache item keys and dependency keys. Implementation of <see cref="ICacheKeyBuilder"/>.
 /// </summary>
 [PublicAPI]
-public class CacheKeyBuilder : IDisposable
+public class CacheKeyBuilder : IDisposable, ICacheKeyBuilder
 {
     private readonly UnsafeStringBuilderPool _stringBuilderPool;
-    private readonly IFormatterRepository _formatterRepository;
+
+    /// <summary>
+    /// Gets the formatters used to build the caching key.
+    /// </summary>
+    public IFormatterRepository Formatters { get; }
 
     /// <summary>
     /// Gets a sentinel object that means that the parameter is not a part of the cache key, and should be ignored.
@@ -31,7 +35,7 @@ public class CacheKeyBuilder : IDisposable
     /// </param>
     public CacheKeyBuilder( IFormatterRepository formatterRepository, int maxKeySize = 1024 )
     {
-        this._formatterRepository = formatterRepository;
+        this.Formatters = formatterRepository;
         this._stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
     }
 
@@ -60,19 +64,18 @@ public class CacheKeyBuilder : IDisposable
                 "The list must have the same number of items as the number of parameters of the method." );
         }
 
-        if ( !method.IsStatic && instance == null )
+        switch ( method.IsStatic )
         {
-            throw new ArgumentNullException( nameof(instance) );
-        }
+            case false when instance == null:
+                throw new ArgumentNullException( nameof(instance) );
 
-        if ( method.IsStatic && instance != null )
-        {
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "The {0} parameter must be null when {1} is a static method.",
-                    nameof(instance),
-                    nameof(method) ) );
+            case true when instance != null:
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "The {0} parameter must be null when {1} is a static method.",
+                        nameof(instance),
+                        nameof(method) ) );
         }
 
         // Compute the caching key.
@@ -190,7 +193,7 @@ public class CacheKeyBuilder : IDisposable
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="type">A <see cref="Type"/>.</param>
-    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, Type type ) => this._formatterRepository.Get<Type>().Write( stringBuilder, type );
+    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, Type type ) => this.Formatters.Get<Type>().Write( stringBuilder, type );
 
     /// <summary>
     /// Appends a string representing an <see cref="object"/> to an <see cref="UnsafeStringBuilder"/>.
@@ -205,7 +208,7 @@ public class CacheKeyBuilder : IDisposable
         }
         else
         {
-            var formatter = this._formatterRepository.Get( o.GetType() );
+            var formatter = this.Formatters.Get( o.GetType() );
             formatter.Write( stringBuilder, o );
         }
     }

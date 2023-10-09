@@ -71,11 +71,13 @@ public class Program
     {
         Console.WriteLine( "Test started." );
 
-        var backend =
-            TestProfileConfigurationFactory.InitializeTestWithTestingBackend( TestProfiles.A, null );
+        var backend = new TestingCacheBackend( "test" );
 
-        TestProfileConfigurationFactory.CreateProfile( TestProfiles.A );
-        TestProfileConfigurationFactory.CreateProfile( TestProfiles.B );
+        CachingService.Default =
+            CachingService.Create(
+                b => b.WithBackend( backend )
+                    .AddProfile( new CachingProfile( TestProfiles.A ) )
+                    .AddProfile( new CachingProfile( TestProfiles.B ) ) );
 
         var cachingClass = new LocalChildCachingClass();
 
@@ -99,121 +101,114 @@ public class Program
         var localInnerCachingClassInChildOverridden
             = new LocalChildCachingClassOverridden.LocalChildCachingClassOverridden_Inner();
 
-        try
+        string? previousCachedKey = null;
+
+        if ( backend.LastCachedKey != null )
         {
-            string? previousCachedKey = null;
-
-            if ( backend.LastCachedKey != null )
-            {
-                throw new Exception( "backend.LastCachedKey != null" );
-            }
-
-            if ( backend.LastCachedItem != null )
-            {
-                throw new Exception( "backend.LastCachedItem != null" );
-            }
-
-            cachingClass.GetValueReferencedBase();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "referenced base",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.A );
-
-            cachingClass.GetValueReferencedChild();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "referenced child",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.A );
-
-            cachingClass.LocalChildCachingClass_Method();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "local child",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.A );
-
-            cachingClassOverridden.GetValueReferencedBase();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "overridden referenced base",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.B );
-
-            cachingClassOverridden.GetValueReferencedChild();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "overridden referenced child",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.B );
-
-            cachingClassOverridden.LocalChildCachingClassOverridden_Method();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "overridden local child",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.B );
-
-            referencedInnerCachingClassInBase.GetValueReferencedInnerBase();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "referenced inner base",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.A );
-
-            referencedInnerCachingClassInChild.GetValueReferencedInnerChild();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "referenced inner child",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.A );
-
-            localInnerCachingClassInChild.LocalChildCachingClass_Inner_Method();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "local inner child",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.A );
-
-            referencedInnerCachingClassInBaseOverridden.GetValueReferencedInnerBase();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "overridden referenced inner base",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.B );
-
-            referencedInnerCachingClassInChildOverridden.GetValueReferencedInnerChild();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "overridden referenced inner child",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.B );
-
-            localInnerCachingClassInChildOverridden.LocalChildCachingClassOverridden_Inner_Method();
-
-            CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
-                "overridden local inner child",
-                backend,
-                ref previousCachedKey,
-                TestProfiles.B );
-
-            Console.WriteLine( "Test completed." );
+            throw new Exception( "backend.LastCachedKey != null" );
         }
-        finally
+
+        if ( backend.LastCachedItem != null )
         {
-            TestProfileConfigurationFactory.DisposeTest();
+            throw new Exception( "backend.LastCachedItem != null" );
         }
+
+        cachingClass.GetValueReferencedBase();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "referenced base",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.A );
+
+        cachingClass.GetValueReferencedChild();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "referenced child",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.A );
+
+        cachingClass.LocalChildCachingClass_Method();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "local child",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.A );
+
+        cachingClassOverridden.GetValueReferencedBase();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "overridden referenced base",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.B );
+
+        cachingClassOverridden.GetValueReferencedChild();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "overridden referenced child",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.B );
+
+        cachingClassOverridden.LocalChildCachingClassOverridden_Method();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "overridden local child",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.B );
+
+        referencedInnerCachingClassInBase.GetValueReferencedInnerBase();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "referenced inner base",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.A );
+
+        referencedInnerCachingClassInChild.GetValueReferencedInnerChild();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "referenced inner child",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.A );
+
+        localInnerCachingClassInChild.LocalChildCachingClass_Inner_Method();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "local inner child",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.A );
+
+        referencedInnerCachingClassInBaseOverridden.GetValueReferencedInnerBase();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "overridden referenced inner base",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.B );
+
+        referencedInnerCachingClassInChildOverridden.GetValueReferencedInnerChild();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "overridden referenced inner child",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.B );
+
+        localInnerCachingClassInChildOverridden.LocalChildCachingClassOverridden_Inner_Method();
+
+        CacheConfigurationAttributeTest.CheckAfterCachedMethodCall(
+            "overridden local inner child",
+            backend,
+            ref previousCachedKey,
+            TestProfiles.B );
+
+        Console.WriteLine( "Test completed." );
     }
 }

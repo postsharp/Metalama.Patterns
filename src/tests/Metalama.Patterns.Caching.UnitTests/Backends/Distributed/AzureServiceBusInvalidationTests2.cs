@@ -2,7 +2,7 @@
 
 #if NETSTANDARD || NETCOREAPP
 using Metalama.Patterns.Caching.Backends.Azure;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.TestHelpers;
 using Xunit.Abstractions;
@@ -20,18 +20,12 @@ internal
 {
     private static readonly string _connectionString = Secrets.Get( "CacheInvalidationNetCoreTestServiceBusConnectionString" );
 
-    public AzureServiceBusInvalidationTests2( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
+    public AzureServiceBusInvalidationTests2( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
+        testOutputHelper ) { }
 
-    protected override async Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix )
-    {
-        return await AzureCacheInvalidator.CreateAsync( backend, CreateOptions() );
-    }
-
-    private static AzureCacheInvalidatorOptions CreateOptions()
-    {
-        // ReSharper disable once StringLiteralTypo
-        return new AzureCacheInvalidatorOptions( _connectionString );
-    }
+    protected override BuiltCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix )
+        => builder.WithAzureInvalidation( new AzureCacheInvalidatorConfiguration( _connectionString ) { Prefix = prefix } );
 }
 
 #endif
