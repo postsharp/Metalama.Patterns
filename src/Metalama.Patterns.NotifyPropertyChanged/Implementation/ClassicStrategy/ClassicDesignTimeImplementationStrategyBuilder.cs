@@ -17,7 +17,7 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplem
     public ClassicDesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> builder ) : base( builder )
     {
         var target = builder.Target;
-        var elements = new Elements( target );
+        var elements = builder.Target.Compilation.Cache.GetOrAdd( _ => new Assets() );
         this._baseOnPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnPropertyChangedMethod( target );
         this._baseOnChildPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnChildPropertyChangedMethod( target );
 

@@ -3,9 +3,9 @@ using System;
 namespace Metalama.Patterns.Contracts.AspectTests;
 public class NotNull_Eligible_NullableStruct
 {
-  private global::System.DateTime? _field1;
-  [global::Metalama.Patterns.Contracts.NotNullAttribute]
-  private global::System.DateTime? field
+  private DateTime? _field1;
+  [NotNull]
+  private DateTime? field
   {
     get
     {
@@ -15,7 +15,7 @@ public class NotNull_Eligible_NullableStruct
     {
       if (value == null !)
       {
-        throw new global::System.ArgumentNullException("value", "The 'field' property must not be null.");
+        throw new ArgumentNullException("value", "The 'field' property must not be null.");
       }
       this._field1 = value;
     }

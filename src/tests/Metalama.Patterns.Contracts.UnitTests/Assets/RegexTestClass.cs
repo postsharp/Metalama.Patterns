@@ -7,7 +7,7 @@ public class RegexTestClass
     [RegularExpression( ".+@.+" )]
     public string Email;
 
-    [EmailAddress]
+    [Email]
     public string Email2;
 
     [Phone]

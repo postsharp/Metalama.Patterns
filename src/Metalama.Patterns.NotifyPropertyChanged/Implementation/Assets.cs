@@ -2,16 +2,16 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 [CompileTime]
-internal class Elements
+internal class Assets
 {
-    public Elements( INamedType target )
+    public Assets()
     {
-        this.Target = target;
         this.INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof(INotifyPropertyChanged) );
         this.PropertyChangedEventOfINotifyPropertyChanged = this.INotifyPropertyChanged.Events.First();
         this.NullableINotifyPropertyChanged = this.INotifyPropertyChanged.ToNullableType();
@@ -19,9 +19,15 @@ internal class Elements
         this.NullablePropertyChangedEventHandler = this.PropertyChangedEventHandler.ToNullableType();
         this.IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof(IgnoreNotifyPropertyChangedAttribute) );
         this.EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof(EqualityComparer<>) );
+        this.OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnChildPropertyChangedMethodAttribute) );
+
+        this.OnUnmonitoredObservablePropertyChangedMethodAttribute =
+            (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredObservablePropertyChangedMethodAttribute) );
     }
 
-    public INamedType Target { get; }
+    public INamedType OnChildPropertyChangedMethodAttribute { get; }
+
+    public INamedType OnUnmonitoredObservablePropertyChangedMethodAttribute { get; }
 
     // ReSharper disable once InconsistentNaming
     public INamedType INotifyPropertyChanged { get; }
