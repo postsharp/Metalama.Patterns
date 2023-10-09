@@ -26,7 +26,7 @@ namespace Flashtrace;
 [PublicAPI]
 public sealed class FlashtraceSource
 {
-    public static FlashtraceSource Null { get; } = new( new NullFlashtraceLogger(), FlashtraceLevel.None, FlashtraceLevel.None );
+    public static FlashtraceSource Null { get; } = new( NullFlashtraceLogger.Instance, FlashtraceLevel.None, FlashtraceLevel.None );
 
     private FlashtraceLevelSource? _debugFlashtraceLevelSource;
     private FlashtraceLevelSource? _traceFlashtraceLevelSource;

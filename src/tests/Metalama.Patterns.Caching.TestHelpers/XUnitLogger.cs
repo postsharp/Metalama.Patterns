@@ -36,7 +36,7 @@ internal class XUnitLogger : IFlashtraceRoleLoggerFactory
 
         public override IFlashtraceRoleLoggerFactory Factory { get; }
 
-        protected override void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception exception )
+        protected override void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception? exception )
         {
             this._testOutputHelper.WriteLine( $"{level.ToString().ToUpperInvariant()}: {text}" );
         }

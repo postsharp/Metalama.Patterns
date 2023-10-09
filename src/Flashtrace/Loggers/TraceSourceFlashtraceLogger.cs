@@ -43,7 +43,7 @@ internal sealed class TraceSourceFlashtraceLogger : SimpleFlashtraceLogger
         return this._traceSource.Switch.ShouldTrace( GetTraceEventType( level ) );
     }
 
-    protected override void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception exception )
+    protected override void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception? exception )
     {
         var eventType = GetTraceEventType( level );
         this._traceSource.TraceEvent( eventType, 0, text );

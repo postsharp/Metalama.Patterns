@@ -67,7 +67,6 @@ public interface ILogActivity : IDisposable
     [EditorBrowsable( EditorBrowsableState.Never )]
     void SetException( Exception exception, in CloseActivityOptions options, in CallerInfo callerInfo );
 
-#pragma warning disable CA1716 // Identifiers should not match keywords
     /// <summary>
     /// Resumes the current async activity after it has been suspended by a call to <see cref="LogActivity{TActivityDescription}.Suspend()"/>. There is typically no need
     /// to invoke this method in user code because all async methods that use the <see cref="FlashtraceLevelSource"/> class are automatically instrumented.
@@ -77,7 +76,6 @@ public interface ILogActivity : IDisposable
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
     void Resume( in CallerInfo callerInfo );
-#pragma warning restore CA1716 // Identifiers should not match keywords
 
     /// <summary>
     /// Suspends the current async activity.

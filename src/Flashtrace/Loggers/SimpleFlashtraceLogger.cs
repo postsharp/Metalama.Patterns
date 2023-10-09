@@ -7,31 +7,10 @@ using Flashtrace.Records;
 using Flashtrace.Utilities;
 using JetBrains.Annotations;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
 namespace Flashtrace.Loggers;
-
-// Disable all warnings until to do below is decided.
-// ReSharper disable all
-#pragma warning disable SA1648
-#pragma warning disable SA1404
-#pragma warning disable SA1214
-#pragma warning disable CA1822
-#pragma warning disable CS8603
-#pragma warning disable CS8604
-#pragma warning disable CS8769
-#pragma warning disable CS8625
-#pragma warning disable CS8618
-#pragma warning disable IDE0004
-
-// TODO: For now, making this internal pending encountering a necessary use case.
-/* LegacySourceLogger appears to intend both implicit and explicit interface implementation for some
- * members - for example, Role has inheritdoc which implies implicit of ILogger.Role, but also
- * has an explicit impl of ILogger.Role. Maybe there's a good reason for this. But I'm not going to
- * try and work it out until we decide if we're keeping this class or not.
- */
 
 /// <summary>
 /// A base class for simple and low-performance implementations of <see cref="IFlashtraceLogger"/>.
@@ -57,43 +36,25 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
     /// <inheritdoc/>
     public abstract bool IsEnabled( FlashtraceLevel level );
 
-    /// <inheritdoc/>
     public abstract IFlashtraceRoleLoggerFactory Factory { get; }
 
     public string Name { get; }
 
-    /// <inheritdoc/>
     public FlashtraceRole Role { get; }
 
-    /// <inheritdoc/>
-    public bool RequiresSuspendResume => false;
-
-    private static string GetRecordKindText( LogRecordKind recordKind )
+    private static string? GetRecordKindText( LogRecordKind recordKind )
     {
-        // TODO: [FT-Review] If LegacySourceLogger is retained (see TODO at top of this file), decide how to rework this properly.
-#if false // Orginal code:
         switch ( recordKind )
         {
-            case LogRecordKind.CustomActivityEntry:
+            case LogRecordKind.ActivityEntry:
                 return "Starting";
 
-            case LogRecordKind.CustomActivityFailure:
-            case LogRecordKind.CustomActivityException:
-                return "Failed";
-
-            case LogRecordKind.CustomActivitySuccess:
-                return "Succeeded";
+            case LogRecordKind.ActivityExit:
+                return "Returning";
 
             default:
                 return null;
         }
-#else // Quick fix when removing LogRecordKind.CustomActivityFailure et al, retains effective behaviour of the original so tests still pass:
-        return recordKind switch
-        {
-            LogRecordKind.ActivityEntry => "Starting",
-            _ => null
-        };
-#endif
     }
 
     /// <summary>
@@ -103,9 +64,9 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
     /// <param name="recordKind"></param>
     /// <param name="text">The fully-rendered message.</param>
     /// <param name="exception">An optional <see cref="Exception"/>.</param>
-    protected abstract void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception exception );
+    protected abstract void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception? exception );
 
-    private void WriteFormatted( ILoggingContext context, FlashtraceLevel level, LogRecordKind recordKind, string text, object[] args, Exception exception )
+    private void WriteFormatted( ILoggingContext? context, FlashtraceLevel level, LogRecordKind recordKind, string text, object?[]? args, Exception? exception )
     {
         var stringBuilder = new StringBuilder();
 
@@ -114,7 +75,12 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
         if ( recordKind == LogRecordKind.ActivityEntry )
         {
             WriteText( text, args, stringBuilder );
-            ((Context) context).Description = stringBuilder.ToString();
+
+            if ( context is Context typedContext )
+            {
+                typedContext.Description = stringBuilder.ToString();
+            }
+
             stringBuilder.Append( ": " );
             stringBuilder.Append( recordKindText );
         }
@@ -145,13 +111,13 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
         if ( exception != null )
         {
             stringBuilder.AppendLine();
-            stringBuilder.Append( exception.ToString() );
+            stringBuilder.Append( exception );
         }
 
         this.Write( level, recordKind, stringBuilder.ToString(), exception );
     }
 
-    private static void WriteText( string text, object[] args, StringBuilder stringBuilder )
+    private static void WriteText( string text, object?[]? args, StringBuilder stringBuilder )
     {
         if ( args == null || args.Length == 0 )
         {
@@ -186,7 +152,7 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
         LogRecordKind recordKind,
         string text,
         object[] args,
-        Exception exception,
+        Exception? exception,
         in CallerInfo recordInfo )
     {
         if ( this.IsEnabled( level ) )
@@ -196,11 +162,11 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
     }
 
     void IFlashtraceLogger.Write(
-        ILoggingContext context,
+        ILoggingContext? context,
         FlashtraceLevel level,
         LogRecordKind recordKind,
         string text,
-        Exception exception,
+        Exception? exception,
         in CallerInfo recordInfo )
     {
         if ( this.IsEnabled( level ) )
@@ -209,10 +175,7 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
         }
     }
 
-    ILoggingContext IFlashtraceLogger.OpenActivity( in LogActivityOptions options, in CallerInfo callerInfo )
-    {
-        return new Context( options.IsAsync );
-    }
+    ILoggingContext IFlashtraceLogger.OpenActivity( in LogActivityOptions options, in CallerInfo callerInfo ) => new Context( options.IsAsync );
 
     ILoggingContext IFlashtraceLocalLogger.OpenActivity( in OpenActivityOptions options, in CallerInfo callerInfo, bool isAsync ) => new Context( isAsync );
 
@@ -230,18 +193,18 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
 
     void IFlashtraceLocalLogger.SetWaitDependency( ILoggingContext context, object waited ) { }
 
-    string IFlashtraceLogger.Role => null;
-
     void IFlashtraceExceptionHandler.OnInvalidUserCode( in CallerInfo callerInfo, string format, params object[] args )
     {
         try
         {
             var message = "Error in user code calling the logging subsystem: " + string.Format( CultureInfo.InvariantCulture, format, args );
 
-            message += Environment.NewLine + new StackTrace().ToString();
+            message += Environment.NewLine + new StackTrace();
 
             this.WriteFormatted( null, FlashtraceLevel.Warning, LogRecordKind.Message, message, null, null );
         }
+
+        // ReSharper disable once EmptyGeneralCatchClause
         catch { }
     }
 
@@ -249,25 +212,22 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
     {
         try
         {
-            var message = "Error in user code calling the logging subsystem: " + exception.ToString();
+            var message = "Error in user code calling the logging subsystem: " + exception;
             this.WriteFormatted( null, FlashtraceLevel.Warning, LogRecordKind.Message, message, null, null );
         }
+
+        // ReSharper disable once EmptyGeneralCatchClause
         catch { }
     }
 
-    ILogRecordBuilder IFlashtraceLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, in CallerInfo callerInfo, ILoggingContext context )
-    {
-        return new RecordBuilder( this, recordInfo.Level, recordInfo.Kind, (Context) context );
-    }
+    ILogRecordBuilder IFlashtraceLocalLogger.GetRecordBuilder( in LogRecordOptions recordInfo, in CallerInfo callerInfo, ILoggingContext? context )
+        => new RecordBuilder( this, recordInfo.Level, recordInfo.Kind, context as Context );
 
-    IFlashtraceRoleLoggerFactory IFlashtraceLogger.Factory => (IFlashtraceRoleLoggerFactory) this.Factory;
+    IFlashtraceRoleLoggerFactory IFlashtraceLogger.Factory => this.Factory;
 
     IFlashtraceLocalLogger IFlashtraceLogger.GetContextLocalLogger() => this;
 
-    (IFlashtraceLocalLogger Logger, bool IsEnabled) IFlashtraceLogger.GetContextLocalLogger( FlashtraceLevel level )
-    {
-        return (this, this.IsEnabled( level ));
-    }
+    (IFlashtraceLocalLogger Logger, bool IsEnabled) IFlashtraceLogger.GetContextLocalLogger( FlashtraceLevel level ) => (this, this.IsEnabled( level ));
 
     ILoggingContext IFlashtraceLogger.CurrentContext => throw new NotImplementedException();
 
@@ -275,15 +235,15 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
 
     private class RecordBuilder : ILogRecordBuilder
     {
-        private SimpleFlashtraceLogger _flashtraceLogger;
         private readonly StringBuilder _stringBuilder = new();
         private readonly FlashtraceLevel _level;
         private readonly LogRecordKind _recordKind;
-        private Exception _exception;
-        private readonly Context _context;
+        private readonly Context? _context;
+        private readonly SimpleFlashtraceLogger? _flashtraceLogger;
+        private Exception? _exception;
         private bool _appendComma;
 
-        public RecordBuilder( SimpleFlashtraceLogger flashtraceLogger, FlashtraceLevel level, LogRecordKind recordKind, Context context )
+        public RecordBuilder( SimpleFlashtraceLogger? flashtraceLogger, FlashtraceLevel level, LogRecordKind recordKind, Context? context )
         {
             this._flashtraceLogger = flashtraceLogger;
             this._level = level;
@@ -329,11 +289,6 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
 
         void ILogRecordBuilder.EndWriteItem( LogRecordItem item ) { }
 
-        public void Dispose()
-        {
-            this._flashtraceLogger = null;
-        }
-
         void ILogRecordBuilder.SetException( Exception e )
         {
             this._exception = e;
@@ -344,9 +299,7 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
 
         void ILogRecordBuilder.WriteParameter<T>( int index, in ReadOnlySpan<char> parameterName, T? value, in LogParameterOptions options )
             where T : default
-        {
-            this.WriteParameter( parameterName.ToString(), value, options );
-        }
+            => this.WriteParameter( parameterName.ToString(), value, options );
 
         private void WriteParameter<T>( string parameterName, T value, in LogParameterOptions options )
         {
@@ -372,14 +325,8 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
 
         private void WriteValue<T>( T value )
         {
-            if ( value == null )
-            {
-                this._stringBuilder.Append( "null" );
-            }
-            else
-            {
-                this._stringBuilder.Append( value.ToString() );
-            }
+            // ReSharper disable once CompareNonConstrainedGenericWithNull
+            this._stringBuilder.Append( value == null ? "null" : value.ToString() );
         }
 
         void ILogRecordBuilder.WriteString( in ReadOnlySpan<char> span )
@@ -399,15 +346,17 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
             {
                 if ( this._recordKind == LogRecordKind.ActivityEntry )
                 {
-                    this._context.Description = this._stringBuilder.ToString();
+                    if ( this._context != null )
+                    {
+                        this._context.Description = this._stringBuilder.ToString();
+                    }
+
                     this._stringBuilder.Append( ": " );
                     this._stringBuilder.Append( GetRecordKindText( LogRecordKind.ActivityEntry ) );
                 }
 
                 this._flashtraceLogger.Write( this._level, this._recordKind, this._stringBuilder.ToString(), this._exception );
             }
-
-            this.Dispose();
         }
 
         void IDisposable.Dispose() { }
@@ -420,7 +369,7 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
             this.IsAsync = isAsync;
         }
 
-        public string Description
+        public string? Description
         {
             get;
             set;
@@ -428,18 +377,12 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
 
         public bool IsAsync { get; }
 
-        public string SyntheticId => null;
+        public string? SyntheticId => null;
 
         public bool IsDisposed { get; private set; }
 
         int ILoggingContext.RecycleId => 0;
 
-        void IDisposable.Dispose()
-        {
-            this.IsDisposed = true;
-        }
-
-        [SuppressMessage( "Microsoft.Performance", "CA1822" )]
-        public bool IsHidden => false;
+        void IDisposable.Dispose() => this.IsDisposed = true;
     }
 }

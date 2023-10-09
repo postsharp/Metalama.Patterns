@@ -26,7 +26,7 @@ public partial interface IFlashtraceLogger : IFlashtraceExceptionHandler
     /// <summary>
     /// Gets the role of records created by this <see cref="IFlashtraceLogger"/>. A list of standard roles is available in the <see cref="FlashtraceRole"/> class.
     /// </summary>
-    string Role { get; }
+    FlashtraceRole Role { get; }
 
     /// <summary>
     /// Determines whether logging is enabled for a given <see cref="FlashtraceLevel"/>.
@@ -63,7 +63,7 @@ public partial interface IFlashtraceLogger : IFlashtraceExceptionHandler
     /// <param name="exception">The <see cref="Exception"/> associated with the record, or <c>null</c>.</param>
     /// <param name="callerInfo">Information about the caller source code.</param>
     void Write(
-        ILoggingContext? context,
+        ILoggingContext context,
         FlashtraceLevel level,
         LogRecordKind recordKind,
         string text,

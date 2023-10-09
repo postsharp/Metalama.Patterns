@@ -30,5 +30,5 @@ public interface ILoggingContext : IDisposable
     /// <summary>
     /// Gets a cross-process globally unique identifier for the current context.
     /// </summary>
-    string SyntheticId { get; }
+    string? SyntheticId { get; }
 }

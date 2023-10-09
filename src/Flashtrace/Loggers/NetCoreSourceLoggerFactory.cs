@@ -40,7 +40,7 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
                 }
                 else
                 {
-                    return new NullFlashtraceLogger();
+                    return NullFlashtraceLogger.Instance;
                 }
             } );
     }
@@ -84,7 +84,7 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
 
         public override IFlashtraceRoleLoggerFactory Factory { get; }
 
-        protected override void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception exception )
+        protected override void Write( FlashtraceLevel level, LogRecordKind recordKind, string text, Exception? exception )
         {
             this._underlyingLogger.Log( level.ToLogLevel(), exception, text );
         }

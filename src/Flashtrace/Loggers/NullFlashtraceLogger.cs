@@ -13,7 +13,11 @@ public partial class NullFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalL
 {
     private static bool _warningEmitted;
 
-    string IFlashtraceLogger.Role => null!;
+    public static NullFlashtraceLogger Instance { get; } = new NullFlashtraceLogger(); 
+
+    private NullFlashtraceLogger() { }
+
+    FlashtraceRole IFlashtraceLogger.Role => null!;
 
     bool IFlashtraceLogger.RequiresSuspendResume => false;
 
@@ -31,7 +35,7 @@ public partial class NullFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalL
         => EmitWarning( level );
 
     void IFlashtraceLogger.Write(
-        ILoggingContext? context,
+        ILoggingContext context,
         FlashtraceLevel level,
         LogRecordKind recordKind,
         string text,

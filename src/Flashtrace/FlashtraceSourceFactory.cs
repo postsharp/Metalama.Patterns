@@ -9,7 +9,7 @@ namespace Flashtrace;
 [PublicAPI]
 public static class FlashtraceSourceFactory
 {
-    public static IFlashtraceLoggerFactory DefaultFactory { get; set; } = new NullFlashtraceLogger();
+    public static IFlashtraceLoggerFactory DefaultFactory { get; set; } = NullFlashtraceLogger.Instance;
 
     public static IFlashtraceRoleLoggerFactory Default => DefaultFactory.ForRole( FlashtraceRole.Logging );
 
