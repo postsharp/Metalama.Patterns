@@ -14,7 +14,7 @@ public class TwoLayerCachingBackendTests : BaseCacheBackendTests
         cachingTestOptions,
         testOutputHelper ) { }
 
-    protected override CachingBackend CreateBackend()
+    protected override CheckAfterDisposeCachingBackend CreateBackend()
     {
 #pragma warning disable CS0618 // Type or member is obsolete
 
@@ -25,7 +25,7 @@ public class TwoLayerCachingBackendTests : BaseCacheBackendTests
 
         backend.DebugName = "TwoLayer";
 
-        return backend;
+        return new CheckAfterDisposeCachingBackend( backend );
 
 #pragma warning restore CS0618 // Type or member is obsolete
     }

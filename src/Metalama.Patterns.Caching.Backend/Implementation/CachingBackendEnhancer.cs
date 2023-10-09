@@ -37,15 +37,15 @@ public abstract class CachingBackendEnhancer : CachingBackend
         }
     }
 
-    protected internal override void Initialize()
+    protected override void InitializeCore()
     {
-        base.Initialize();
+        base.InitializeCore();
         this.UnderlyingBackend.Initialize();
     }
 
-    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
-        await base.InitializeAsync( cancellationToken );
+        await base.InitializeCoreAsync( cancellationToken );
         await this.UnderlyingBackend.InitializeAsync( cancellationToken );
     }
 
@@ -93,7 +93,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
 
     /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore( ClearCacheOptions options ) => this.UnderlyingBackend.Clear();
+    protected override void ClearCore( ClearCacheOptions options ) => this.UnderlyingBackend.Clear( options );
 
     /// <inheritdoc />
     protected override ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )

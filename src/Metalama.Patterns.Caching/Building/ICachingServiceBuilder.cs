@@ -11,7 +11,7 @@ public interface ICachingServiceBuilder
 {
     IServiceProvider ServiceProvider { get; }
 
-    ICachingServiceBuilder AddProfile( CachingProfile profile );
+    ICachingServiceBuilder AddProfile( CachingProfile profile, bool overwrite = false );
 
     /// <summary>
     /// Registers an <see cref="IValueAdapter"/> instance and explicitly specifies the value type.

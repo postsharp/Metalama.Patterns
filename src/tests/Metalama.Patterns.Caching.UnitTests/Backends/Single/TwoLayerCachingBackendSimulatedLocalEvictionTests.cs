@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
             cachingTestOptions,
             testOutputHelper ) { }
 
-        protected override CachingBackend CreateBackend()
+        protected override CheckAfterDisposeCachingBackend CreateBackend()
         {
 #pragma warning disable CS0618 // Type or member is obsolete
 
@@ -27,7 +27,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
 
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            return backend;
+            return new CheckAfterDisposeCachingBackend( backend );
         }
 
         protected override void GiveChanceToResetLocalCache( CachingBackend backend )

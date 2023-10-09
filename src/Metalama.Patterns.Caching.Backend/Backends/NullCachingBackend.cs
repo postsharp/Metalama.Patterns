@@ -32,6 +32,4 @@ public class NullCachingBackend : CachingBackend
 
     /// <inheritdoc />
     protected override void RemoveItemCore( string key ) { }
-
-    public NullCachingBackend() : base( null ) { }
 }

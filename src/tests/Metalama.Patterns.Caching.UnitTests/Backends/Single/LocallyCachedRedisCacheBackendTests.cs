@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 
-public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
+public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
@@ -25,6 +25,8 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
         this._redisSetupFixture = redisSetupFixture;
     }
 
+    protected virtual bool EnableGarbageCollector => false;
+
     protected override void Cleanup()
     {
         base.Cleanup();
@@ -36,26 +38,20 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
         return TimeSpan.FromSeconds( 0.1 * multiplier );
     }
 
-    protected override CachingBackend CreateBackend()
+    protected override CheckAfterDisposeCachingBackend CreateBackend()
     {
         return Task.Run( this.CreateBackendAsync ).Result;
     }
 
-    protected override CachingBackend CreateBackendWithCollector() => Task.Run( this.CreateBackendWithCollectorAsync ).Result;
-
-    protected override async Task<CachingBackend> CreateBackendAsync()
+    protected override async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync()
     {
-        return await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
-    }
-
-    protected override async Task<CachingBackend> CreateBackendWithCollectorAsync()
-    {
-        return await RedisFactory.CreateBackendAsync(
-            this.TestOptions,
-            this._redisSetupFixture,
-            supportsDependencies: true,
-            locallyCached: true,
-            collector: true );
+        return new CheckAfterDisposeCachingBackend(
+            await RedisFactory.CreateBackendAsync(
+                this.TestOptions,
+                this._redisSetupFixture,
+                supportsDependencies: true,
+                locallyCached: true,
+                collector: this.EnableGarbageCollector ) );
     }
 
     #region TestIssue15680
@@ -85,27 +81,27 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
 
         this.TestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        using ( this.InitializeTest(
-                   "TestIssue15680",
-                   await RedisFactory.CreateBackendAsync(
-                       this.TestOptions,
-                       this._redisSetupFixture,
-                       prefix: redisKeyPrefix,
-                       locallyCached: false ),
-                   b => b.WithProfile( "Issue15680" ) ) )
+        await using ( this.InitializeTest(
+                         "TestIssue15680",
+                         await RedisFactory.CreateBackendAsync(
+                             this.TestOptions,
+                             this._redisSetupFixture,
+                             prefix: redisKeyPrefix,
+                             locallyCached: false ),
+                         b => b.WithProfile( "Issue15680" ) ) )
         {
             setValue = testObject.GetValue();
             Assert.True( testObject.Reset() );
         }
 
-        using ( this.InitializeTest(
-                   "TestIssue15680",
-                   await RedisFactory.CreateBackendAsync(
-                       this.TestOptions,
-                       this._redisSetupFixture,
-                       prefix: redisKeyPrefix,
-                       locallyCached: true ),
-                   b => b.WithProfile( "Issue15680" ) ) )
+        await using ( this.InitializeTest(
+                         "TestIssue15680",
+                         await RedisFactory.CreateBackendAsync(
+                             this.TestOptions,
+                             this._redisSetupFixture,
+                             prefix: redisKeyPrefix,
+                             locallyCached: true ),
+                         b => b.WithProfile( "Issue15680" ) ) )
         {
             var retrievedValue = testObject.GetValue();
             Assert.True( testObject.Reset() );
@@ -120,7 +116,7 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
     [Fact]
     public void TestIssue23499()
     {
-        using ( var backend = (DisposingRedisCachingBackend) this.CreateBackend() )
+        using ( var backend = this.CreateBackend() )
         {
             backend.SetItem( "test", new CacheItem( "Hello, world." ) );
             backend.Clear( ClearCacheOptions.Local );

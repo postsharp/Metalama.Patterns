@@ -71,10 +71,14 @@ public partial class CachingService
 
         public Func<IFormatterRepository, CacheKeyBuilder>? KeyBuilderFactory { get; set; }
 
-        public ICachingServiceBuilder AddProfile( CachingProfile profile )
+        public ICachingServiceBuilder AddProfile( CachingProfile profile, bool skipIfExists = false )
         {
             this.CheckNotDisposed();
-            this._profiles.Add( profile.Name, profile );
+
+            if ( !skipIfExists || !this._profiles.ContainsKey( profile.Name ) )
+            {
+                this._profiles.Add( profile.Name, profile );
+            }
 
             return this;
         }
@@ -142,7 +146,14 @@ public partial class CachingService
             return this;
         }
 
-        public ICachingServiceBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilder> factory ) => throw new NotImplementedException();
+        public ICachingServiceBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilder> factory )
+        {
+            this.CheckNotDisposed();
+
+            this.KeyBuilderFactory = factory;
+
+            return this;
+        }
 
         public void Dispose()
         {

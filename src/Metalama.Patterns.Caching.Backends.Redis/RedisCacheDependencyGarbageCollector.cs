@@ -10,16 +10,8 @@ using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-/// <summary>
-/// Removes dependencies added when a <see cref="RedisCachingBackend"/> when items are expired or evicted from the cache.
-/// At least one instance (ideally a single instance) of the <see cref="RedisCacheDependencyGarbageCollector"/> must be running whenever a
-/// <see cref="RedisCachingBackend"/> instance that supports dependencies is running, otherwise the cache will use storage to store dependencies
-/// that are no longer relevant, and will not be removed otherwise. If no <see cref="RedisCacheDependencyGarbageCollector"/> is running while
-/// at least one dependency-enabled <see cref="RedisCachingBackend"/> instance is running, you must initiate full garbage collection
-/// by calling the <see cref="PerformFullCollectionAsync(RedisCachingBackend,CancellationToken)"/> method.
-/// </summary>
 [PublicAPI] // Comments above indicate use case.
-public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingComponent, IHostedService
+internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisposable, IAsyncDisposable
 {
     private readonly RedisCachingBackendConfiguration _configuration;
     private readonly FlashtraceSource _logger;
@@ -221,7 +213,7 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -235,16 +227,9 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
         }
     }
 
-    ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
-
     internal int BackgroundTaskExceptions => this.NotificationQueue.BackgroundTaskExceptions;
 
-    int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
-
-    Task IHostedService.StartAsync( CancellationToken cancellationToken )
-    {
-        return this.InitializeAsync( cancellationToken );
-    }
+    Task IHostedService.StartAsync( CancellationToken cancellationToken ) => this.InitializeAsync( cancellationToken );
 
     Task IHostedService.StopAsync( CancellationToken cancellationToken ) => this.DisposeAsync( cancellationToken ).AsTask();
 
@@ -276,4 +261,6 @@ public sealed class RedisCacheDependencyGarbageCollector : ITestableCachingCompo
             this.ServiceProvider,
             cancellationToken );
     }
+
+    public ValueTask DisposeAsync() => this.DisposeAsync( default );
 }

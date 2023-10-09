@@ -18,6 +18,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
     {
         private const string _subject = "Metalama.Patterns.Caching.Backends.Azure.Invalidation";
 
+        private readonly AzureCacheInvalidatorConfiguration _configuration;
         private readonly CancellationTokenSource _receiverCancellation = new();
 
         private string _subscriptionName = null!;
@@ -27,45 +28,30 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         public AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorConfiguration configuration ) : base(
             underlyingBackend,
-            configuration ) { }
-
-        protected override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
-
-        /// <summary>
-        /// Asynchronously creates a new <see cref="AzureCacheInvalidator"/>.
-        /// </summary>
-        /// <param name="backend">The local (in-memory, typically) cache being invalidated by the new <see cref="AzureCacheInvalidator"/>.</param>
-        /// <param name="configuration">Options.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        /// <returns>A new <see cref="AzureCacheInvalidator"/>.</returns>
-        public static async Task<AzureCacheInvalidator> CreateAsync(
-            CachingBackend backend,
-            AzureCacheInvalidatorConfiguration configuration,
-            CancellationToken cancellationToken = default )
+            configuration )
         {
-            var invalidator = new AzureCacheInvalidator( backend, configuration );
-            await invalidator.InitAsync( configuration, cancellationToken );
-
-            return invalidator;
+            this._configuration = configuration;
         }
+
+        public override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
         public event EventHandler<AzureCacheInvalidatorExceptionEventArgs>? ReceiverException;
 
-        private async Task InitAsync( AzureCacheInvalidatorConfiguration configuration, CancellationToken cancellationToken )
+        protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
         {
-            if ( configuration.SubscriptionName == null )
+            if ( this._configuration.SubscriptionName == null )
             {
-                this._subscriptionName = await this.CreateSubscriptionAsync( configuration, cancellationToken );
+                this._subscriptionName = await this.CreateSubscriptionAsync( this._configuration, cancellationToken );
             }
             else
             {
-                this._subscriptionName = configuration.SubscriptionName;
+                this._subscriptionName = this._configuration.SubscriptionName;
             }
 
-            var client = new ServiceBusClient( configuration.ConnectionString, configuration.ClientOptions );
+            var client = new ServiceBusClient( this._configuration.ConnectionString, this._configuration.ClientOptions );
 
-            this._receiver = client.CreateReceiver( configuration.TopicName, this._subscriptionName );
-            this._sender = client.CreateSender( configuration.TopicName );
+            this._receiver = client.CreateReceiver( this._configuration.TopicName, this._subscriptionName );
+            this._sender = client.CreateSender( this._configuration.TopicName );
 
             // Start a background task to process received messages.
             _ = Task.Run( this.ReceiveMessagesAsync, this._receiverCancellation.Token );

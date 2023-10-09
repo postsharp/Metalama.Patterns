@@ -67,6 +67,8 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
     /// </summary>
     public bool SupportsDependencies { get; init; }
 
+    public bool RunGarbageCollector { get; init; }
+
     /// <summary>
     /// Gets the default expiration time of cached items.
     /// All items that don't have an explicit expiration time are automatically expired according to the value

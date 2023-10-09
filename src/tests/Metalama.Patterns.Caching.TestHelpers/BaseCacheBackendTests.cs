@@ -25,13 +25,9 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         protected CachingTestOptions TestOptions { get; }
 
-        protected abstract CachingBackend CreateBackend();
+        protected abstract CheckAfterDisposeCachingBackend CreateBackend();
 
-        protected virtual CachingBackend CreateBackendWithCollector() => this.CreateBackend();
-
-        protected virtual Task<CachingBackend> CreateBackendAsync() => Task.FromResult( this.CreateBackend() );
-
-        protected virtual Task<CachingBackend> CreateBackendWithCollectorAsync() => Task.FromResult( this.CreateBackendWithCollector() );
+        protected virtual Task<CheckAfterDisposeCachingBackend> CreateBackendAsync() => Task.FromResult( this.CreateBackend() );
 
         protected virtual void GiveChanceToResetLocalCache( CachingBackend backend ) { }
 
@@ -106,8 +102,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 var retrievedItem = cache.GetItem( key );
 
                 AssertEx.Null( retrievedItem, "The cache does not return null on miss." );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -128,8 +122,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 var retrievedItem = await cache.GetItemAsync( key );
 
                 AssertEx.Null( retrievedItem, $"The cache does not return null on miss. It returned {{{retrievedItem}}} instead." );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -164,8 +156,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 AssertEx.NotNull( retrievedItem, "The item has not been stored in the cache." );
                 AssertEx.NotEqual( cacheItem0, retrievedItem, "The item has not been changed." );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -204,8 +194,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 AssertEx.NotNull( retrievedItem, "The item has not been stored in the cache." );
                 AssertEx.NotEqual( cacheItem0, retrievedItem, "The item has not been changed." );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -216,56 +204,49 @@ namespace Metalama.Patterns.Caching.TestHelpers
             {
                 using ( var cache = this.CreateBackend() )
                 {
-                    try
+                    var storedValue = new CachedValueClass( 0 );
+                    const string key = "0";
+
+                    var offset = this.GetExpirationQuantum( 3 );
+
+                    var cacheItem = new CacheItem(
+                        storedValue,
+                        Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
+                        Dependencies: this.TestDependencies ? ImmutableList.Create( "d" ) : null );
+
+                    var itemRemovedEvent = new ManualResetEvent( false );
+                    cache.ItemRemoved += ( _, _ ) => itemRemovedEvent.Set();
+                    var setTime = DateTime.Now;
+
+                    cache.SetItem( key, cacheItem );
+
+                    Thread.Sleep( this.GetExpirationQuantum() );
+                    var retrievedItemBeforeTimeout = cache.GetItem( key );
+
+                    if ( DateTime.Now > setTime + offset )
                     {
-                        var storedValue = new CachedValueClass( 0 );
-                        const string key = "0";
+                        // Bad timing. Retry the test.
+                        this.TestOutputHelper.WriteLine( "We waited too much." );
 
-                        var offset = this.GetExpirationQuantum( 3 );
-
-                        var cacheItem = new CacheItem(
-                            storedValue,
-                            Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                            Dependencies: this.TestDependencies ? ImmutableList.Create( "d" ) : null );
-
-                        var itemRemovedEvent = new ManualResetEvent( false );
-                        cache.ItemRemoved += ( _, _ ) => itemRemovedEvent.Set();
-                        var setTime = DateTime.Now;
-
-                        cache.SetItem( key, cacheItem );
-
-                        Thread.Sleep( this.GetExpirationQuantum() );
-                        var retrievedItemBeforeTimeout = cache.GetItem( key );
-
-                        if ( DateTime.Now > setTime + offset )
-                        {
-                            // Bad timing. Retry the test.
-                            this.TestOutputHelper.WriteLine( "We waited too much." );
-
-                            continue;
-                        }
-
-                        AssertEx.NotNull( retrievedItemBeforeTimeout, "The item has been removed before expiration." );
-
-                        // This forces collection of the expired item on some backends.
-
-                        Thread.Sleep( offset.Multiply( 2 ) );
-
-                        // ReSharper disable once AccessToDisposedClosure
-                        RepeatUntilNullOrFail( () => cache.GetItem( key ) );
-
-                        Assert.True( itemRemovedEvent.WaitOne( TimeoutTimeSpan ) );
-
-                        var retrievedItemAfterTimeout = cache.GetItem( key );
-
-                        AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
-
-                        return;
+                        continue;
                     }
-                    finally
-                    {
-                        TestableCachingComponentDisposer.Dispose( cache );
-                    }
+
+                    AssertEx.NotNull( retrievedItemBeforeTimeout, "The item has been removed before expiration." );
+
+                    // This forces collection of the expired item on some backends.
+
+                    Thread.Sleep( offset.Multiply( 2 ) );
+
+                    // ReSharper disable once AccessToDisposedClosure
+                    RepeatUntilNullOrFail( () => cache.GetItem( key ) );
+
+                    Assert.True( itemRemovedEvent.WaitOne( TimeoutTimeSpan ) );
+
+                    var retrievedItemAfterTimeout = cache.GetItem( key );
+
+                    AssertEx.Null( retrievedItemAfterTimeout, "There is an item retrieved after the timeout." );
+
+                    return;
                 }
             }
         }
@@ -292,52 +273,45 @@ namespace Metalama.Patterns.Caching.TestHelpers
             {
                 using ( var cache = this.CreateBackend() )
                 {
-                    try
+                    var storedValue = new CachedValueClass( 0 );
+                    const string key = "0";
+                    var expiration = this.GetExpirationQuantum( 2 );
+
+                    var cacheItem = new CacheItem(
+                        storedValue,
+                        Configuration:
+                        new CacheItemConfiguration { SlidingExpiration = expiration } );
+
+                    var itemRemoved = new ManualResetEventSlim( false );
+                    cache.ItemRemoved += ( _, _ ) => itemRemoved.Set();
+                    var timeWhenSet = DateTime.Now;
+
+                    cache.SetItem( key, cacheItem );
+                    Thread.Sleep( this.GetExpirationQuantum() );
+
+                    var retrievedItemBeforeTimeout = cache.GetItem( key );
+
+                    if ( DateTime.Now > timeWhenSet + expiration )
                     {
-                        var storedValue = new CachedValueClass( 0 );
-                        const string key = "0";
-                        var expiration = this.GetExpirationQuantum( 2 );
+                        this.TestOutputHelper.WriteLine( "We slept too much time. Retry the test." );
 
-                        var cacheItem = new CacheItem(
-                            storedValue,
-                            Configuration:
-                            new CacheItemConfiguration { SlidingExpiration = expiration } );
-
-                        var itemRemoved = new ManualResetEventSlim( false );
-                        cache.ItemRemoved += ( _, _ ) => itemRemoved.Set();
-                        var timeWhenSet = DateTime.Now;
-
-                        cache.SetItem( key, cacheItem );
-                        Thread.Sleep( this.GetExpirationQuantum() );
-
-                        var retrievedItemBeforeTimeout = cache.GetItem( key );
-
-                        if ( DateTime.Now > timeWhenSet + expiration )
-                        {
-                            this.TestOutputHelper.WriteLine( "We slept too much time. Retry the test." );
-
-                            continue;
-                        }
-
-                        AssertEx.NotNull( retrievedItemBeforeTimeout, "There is not an item retrieved before the timeout." );
-
-                        while ( !itemRemoved.IsSet )
-                        {
-                            cache.SetItem( "cycle", new CacheItem( "value" ) );
-                            Thread.Yield();
-                        }
-
-                        Thread.Sleep( this.GetExpirationQuantum() );
-
-                        // ReSharper disable once AccessToDisposedClosure
-                        RepeatUntilNullOrFail( () => cache.GetItem( key ) );
-
-                        return;
+                        continue;
                     }
-                    finally
+
+                    AssertEx.NotNull( retrievedItemBeforeTimeout, "There is not an item retrieved before the timeout." );
+
+                    while ( !itemRemoved.IsSet )
                     {
-                        TestableCachingComponentDisposer.Dispose( cache );
+                        cache.SetItem( "cycle", new CacheItem( "value" ) );
+                        Thread.Yield();
                     }
+
+                    Thread.Sleep( this.GetExpirationQuantum() );
+
+                    // ReSharper disable once AccessToDisposedClosure
+                    RepeatUntilNullOrFail( () => cache.GetItem( key ) );
+
+                    return;
                 }
             }
         }
@@ -401,8 +375,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 }
                 finally
                 {
-                    await TestableCachingComponentDisposer.DisposeAsync( cache );
-
                     // [Porting] Not fixing, can't be certain of original intent.
                     // ReSharper disable once MethodHasAsyncOverload
                     cache.Dispose();
@@ -450,8 +422,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 AssertEx.NotNull( removalArguments, "The event did not pass any arguments." );
                 Assert.Equal( CacheItemRemovedReason.Expired, removalArguments.RemovedReason );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -494,8 +464,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 AssertEx.NotNull( removalArguments, "The event did not pass any arguments." );
                 Assert.Equal( CacheItemRemovedReason.Expired, removalArguments.RemovedReason );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -532,8 +500,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.True( eventRaised.Wait( TimeSpan.FromSeconds( 5 ) ), "The event has not been raised." );
                 AssertEx.NotNull( removalArguments, "The event did not pass any arguments." );
                 Assert.Equal( CacheItemRemovedReason.Evicted, removalArguments.RemovedReason );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -572,8 +538,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 AssertEx.NotNull( removalArguments, "The event did not pass any arguments." );
                 Assert.Equal( CacheItemRemovedReason.Evicted, removalArguments.RemovedReason );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -636,8 +600,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.Equal( CacheItemRemovedReason.Invalidated, itemEventArgs.RemovedReason );
 
                 AssertEx.NotNull( dependencyEventArgs, "The dependency event did not pass any arguments." );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -703,8 +665,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.Equal( CacheItemRemovedReason.Invalidated, itemEventArgs.RemovedReason );
 
                 AssertEx.NotNull( dependencyEventArgs, "The dependency event did not pass any arguments." );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -741,8 +701,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 {
                     Assert.False( cache.ContainsDependency( dependencyKey ) );
                 }
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -782,8 +740,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 {
                     Assert.False( await cache.ContainsDependencyAsync( dependencyKey ) );
                 }
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -815,8 +771,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.NotNull( cache.GetItem( "m2" ) );
 
                 Assert.Equal( 0, eventsCount );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -851,8 +805,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.NotNull( await cache.GetItemAsync( "m2" ) );
 
                 Assert.Equal( 0, eventsCount );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -881,8 +833,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 }
 
                 Assert.True( cache.ContainsItem( "m" ) );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -913,8 +863,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 }
 
                 Assert.True( await cache.ContainsItemAsync( "m" ) );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -934,8 +882,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
                 Assert.Throws<NotSupportedException>( () => cache.SetItem( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) ) );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -958,8 +904,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 await Assert.ThrowsAsync<NotSupportedException>(
                     async () => await cache.SetItemAsync( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) ) );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -979,8 +923,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
                 Assert.Throws<NotSupportedException>( () => cache.InvalidateDependency( "d" ) );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -1002,8 +944,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
                 await Assert.ThrowsAsync<NotSupportedException>( async () => await cache.InvalidateDependencyAsync( "d" ) );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
             }
         }
 
@@ -1024,8 +964,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.False( cache.SupportedFeatures.ContainsDependency );
 
                 Assert.Throws<NotSupportedException>( () => cache.ContainsDependency( "d" ) );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -1048,148 +986,6 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 Assert.False( cache.SupportedFeatures.ContainsDependency );
 
                 await Assert.ThrowsAsync<NotSupportedException>( async () => await cache.ContainsDependencyAsync( "d" ) );
-
-                await TestableCachingComponentDisposer.DisposeAsync( cache );
-            }
-        }
-
-        [Fact( Timeout = Timeout )]
-        public async Task TestAbsoluteExpirationDependencyCollectedAsync()
-        {
-            if ( !this.TestDependencies || !RunningOnWindows )
-            {
-                AssertEx.Inconclusive();
-
-                return;
-            }
-
-            // [Porting] Not fixing, can't be certain of original intent.
-            // ReSharper disable UseAwaitUsing
-            using ( var cache = await this.CreateBackendWithCollectorAsync() )
-            {
-                var storedValue = new CachedValueClass( 0 );
-                const string key = "0";
-
-                var offset = this.GetExpirationQuantum();
-
-                var cacheItem = new CacheItem(
-                    storedValue,
-                    Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                    Dependencies: ImmutableList.Create( "d" ) );
-
-                var itemRemoved = new TaskCompletionSource<bool>();
-                cache.ItemRemoved += ( _, _ ) => itemRemoved.SetResult( true );
-
-                await cache.SetItemAsync( key, cacheItem );
-
-                while ( !itemRemoved.Task.IsCompleted )
-                {
-                    // [Porting] Not fixing, can't be certain of original intent.
-                    // ReSharper disable once MethodHasAsyncOverload
-                    cache.SetItem( "cycle", new CacheItem( "value" ) );
-                    await Task.Delay( 50 );
-                }
-
-                Assert.True( await itemRemoved.Task.WithTimeout( TimeoutTimeSpan ) );
-
-                await RepeatUntilNullOrFailAsync( () => cache.GetItemAsync( key ) );
-
-                if ( cache.SupportedFeatures.ContainsDependency )
-                {
-                    var success = false;
-                    var until = DateTime.Now.AddSeconds( 30 );
-
-                    while ( DateTime.Now < until )
-                    {
-                        if ( !await cache.ContainsDependencyAsync( "d" ) )
-                        {
-                            success = true;
-
-                            break;
-                        }
-                    }
-
-                    this.TestOutputHelper.WriteLine( $"Checking for dependency in {cache}." );
-                    Assert.True( success );
-                }
-            }
-
-            // ReSharper restore UseAwaitUsing
-        }
-
-        [Fact( Timeout = Timeout )]
-        public void TestAbsoluteExpirationDependencyCollected()
-        {
-            if ( !this.TestDependencies || !RunningOnWindows )
-            {
-                AssertEx.Inconclusive();
-
-                return;
-            }
-
-            // We need at least one sync test with the collector, this is why we have this one, otherwise a duplicate from TestAbsoluteExpirationDependencyCollectedAsync.
-
-            using ( var cache = this.CreateBackendWithCollector() )
-            {
-                var storedValue = new CachedValueClass( 0 );
-                const string key = "0";
-
-                var offset = this.GetExpirationQuantum();
-
-                var cacheItem = new CacheItem(
-                    storedValue,
-                    Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                    Dependencies: ImmutableList.Create( "d" ) );
-
-                var itemRemoved = new ManualResetEventSlim( false );
-                cache.ItemRemoved += ( _, _ ) => itemRemoved.Set();
-                cache.SetItem( key, cacheItem );
-
-                while ( !itemRemoved.IsSet )
-                {
-                    cache.SetItem( "cycle", new CacheItem( "value" ) );
-                    Thread.Yield();
-                }
-
-                // ReSharper disable once AccessToDisposedClosure
-                RepeatUntilNullOrFail( () => cache.GetItem( key ) );
-
-                if ( cache.SupportedFeatures.ContainsDependency )
-                {
-                    var success = false;
-                    var until = DateTime.Now.AddSeconds( 30 );
-
-                    while ( DateTime.Now < until )
-                    {
-                        if ( !cache.ContainsDependency( "d" ) )
-                        {
-                            success = true;
-
-                            break;
-                        }
-                    }
-
-                    this.TestOutputHelper.WriteLine( $"Checking for dependency in {cache}." );
-                    Assert.True( success );
-                }
-            }
-        }
-
-        private sealed class NullTestableCachingComponent : ITestableCachingComponent
-        {
-            public int BackgroundTaskExceptions => 0;
-
-            public void Dispose() { }
-
-            ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
-
-            public ValueTask DisposeAsync( CancellationToken cancellationToken = default )
-            {
-#if NET6_0_OR_GREATER
-                return ValueTask.CompletedTask;
-#else
-                return new ValueTask( Task.CompletedTask );
-#endif
             }
         }
     }

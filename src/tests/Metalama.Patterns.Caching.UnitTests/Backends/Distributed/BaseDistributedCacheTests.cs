@@ -33,6 +33,24 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
     /// </summary>
     protected virtual void ConnectToRedisIfRequired() { }
 
+    private static async ValueTask DisposeAndVerifyBackendsAsync( IEnumerable<CachingBackend> backends, CancellationToken cancellationToken = default )
+    {
+        foreach ( var backend in backends )
+        {
+            await backend.DisposeAsync( cancellationToken );
+            Assert.Equal( 0, backend.BackgroundTaskExceptions );
+        }
+    }
+
+    private static void DisposeAndVerifyBackends( IEnumerable<CachingBackend> backends )
+    {
+        foreach ( var backend in backends )
+        {
+            backend.Dispose();
+            Assert.Equal( 0, backend.BackgroundTaskExceptions );
+        }
+    }
+
     protected CachingTestOptions TestOptions { get; }
 
     [Fact( Timeout = _timeout )]
@@ -94,7 +112,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
         }
         finally
         {
-            await TestableCachingComponentDisposer.DisposeAsync( backends );
+            await DisposeAndVerifyBackendsAsync( backends );
         }
     }
 
@@ -156,7 +174,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
         }
         finally
         {
-            TestableCachingComponentDisposer.Dispose( backends );
+            DisposeAndVerifyBackends( backends );
         }
     }
 
@@ -224,7 +242,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
         }
         finally
         {
-            await TestableCachingComponentDisposer.DisposeAsync( backends );
+            await DisposeAndVerifyBackendsAsync( backends );
         }
     }
 
@@ -288,7 +306,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
         }
         finally
         {
-            await TestableCachingComponentDisposer.DisposeAsync( backends );
+            await DisposeAndVerifyBackendsAsync( backends );
         }
     }
 
@@ -362,7 +380,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
         }
         finally
         {
-            await TestableCachingComponentDisposer.DisposeAsync( backends );
+            await DisposeAndVerifyBackendsAsync( backends );
         }
     }
 }

@@ -34,15 +34,15 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         this.LocalCache = memoryCache ?? new MemoryCachingBackend( serviceProvider: remoteCache.ServiceProvider );
     }
 
-    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
-        await base.InitializeAsync( cancellationToken );
+        await base.InitializeCoreAsync( cancellationToken );
         await this.LocalCache.InitializeAsync( cancellationToken );
     }
 
-    protected internal override void Initialize()
+    protected override void InitializeCore()
     {
-        base.Initialize();
+        base.InitializeCore();
         this.LocalCache.Initialize();
     }
 

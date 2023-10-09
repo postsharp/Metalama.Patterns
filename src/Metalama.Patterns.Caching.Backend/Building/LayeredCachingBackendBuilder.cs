@@ -5,6 +5,8 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Metalama.Patterns.Caching.Building;
 
+#pragma warning disable CA1001
+
 public sealed class LayeredCachingBackendBuilder : BuiltCachingBackendBuilder
 {
     private readonly BuiltCachingBackendBuilder _underlying;

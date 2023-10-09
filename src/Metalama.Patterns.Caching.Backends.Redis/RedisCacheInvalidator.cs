@@ -36,7 +36,7 @@ internal sealed class RedisCacheInvalidator : CacheInvalidator
         this._channel = new RedisChannel( configuration.ChannelName, RedisChannel.PatternMode.Literal );
     }
 
-    protected override void Initialize()
+    protected override void InitializeCore()
     {
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
@@ -46,10 +46,10 @@ internal sealed class RedisCacheInvalidator : CacheInvalidator
             this._connectionTimeout,
             this.ServiceProvider );
 
-        base.Initialize();
+        base.InitializeCore();
     }
 
-    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
@@ -60,7 +60,7 @@ internal sealed class RedisCacheInvalidator : CacheInvalidator
             this.ServiceProvider,
             cancellationToken );
 
-        await base.InitializeAsync( cancellationToken );
+        await base.InitializeCoreAsync( cancellationToken );
     }
 
     private void HandleMessage( RedisNotification notification )

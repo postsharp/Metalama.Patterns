@@ -55,15 +55,15 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         return dependencies?.Split( _dependenciesSeparator );
     }
 
-    protected override void Initialize()
+    protected override void InitializeCore()
     {
-        base.Initialize();
+        base.InitializeCore();
         this.Collector?.Initialize();
     }
 
-    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
-        await base.InitializeAsync( cancellationToken );
+        await base.InitializeCoreAsync( cancellationToken );
 
         if ( this.Collector != null )
         {
@@ -73,7 +73,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     protected override void DisposeCore( bool disposing )
     {
-        this.Collector?.Initialize();
+        this.Collector?.Dispose();
         base.DisposeCore( disposing );
     }
 
@@ -701,7 +701,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     private sealed class DependenciesRedisCachingBackendFeatures : RedisCachingBackendFeatures
     {
         public DependenciesRedisCachingBackendFeatures( DependenciesRedisCachingBackend parent )
-            : base( parent ) { }
+            : base() { }
 
         public override bool Dependencies => true;
 

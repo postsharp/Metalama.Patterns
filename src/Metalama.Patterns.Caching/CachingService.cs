@@ -88,7 +88,7 @@ public sealed partial class CachingService : ICachingService
     }
 
     internal static CachingService CreateUninitialized( IServiceProvider? serviceProvider = null )
-        => Create( b => b.WithBackend( b => b.Uninitialized() ), serviceProvider );
+        => Create( b => b.WithBackend( x => x.Uninitialized() ), serviceProvider );
 
     /// <summary>
     /// Gets the set of distinct backends used in the service.

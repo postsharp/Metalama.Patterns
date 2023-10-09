@@ -13,9 +13,16 @@ public enum CachingBackendStatus
     Default,
 
     /// <summary>
+    /// Initializing.
+    /// </summary>
+    Initializing,
+
+    /// <summary>
     /// Initialized.
     /// </summary>
     Initialized,
+
+    Failed,
 
     /// <summary>
     /// Being currently disposed.

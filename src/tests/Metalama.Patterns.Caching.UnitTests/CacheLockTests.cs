@@ -27,7 +27,8 @@ namespace Metalama.Patterns.Caching.Tests
                         LockManager = new LocalLockManager(),
                         AcquireLockTimeout = TimeSpan.FromMilliseconds( acquireLockTimeout ),
                         AcquireLockTimeoutStrategy = acquireLockTimeoutStrategy ?? new DefaultAcquireLockTimeoutStrategy()
-                    } ) );
+                    } ),
+                passServiceProvider: false /* Disable caching because it's too slow */ );
         }
 
         [Fact]
@@ -35,8 +36,8 @@ namespace Metalama.Patterns.Caching.Tests
         {
             await using var context = this.InitializeTest();
 
-            var t1 = Task.Run( this.TestLoop );
-            var t2 = Task.Run( this.TestLoop );
+            var t1 = Task.Run( () => this.TestLoop( 1 ) );
+            var t2 = Task.Run( () => this.TestLoop( 2 ) );
 
             await t1;
             await t2;
@@ -194,13 +195,20 @@ namespace Metalama.Patterns.Caching.Tests
             await this.CachedMethodAsync();
         }
 
-        private void TestLoop()
+        private void TestLoop( int id )
         {
             for ( var i = 0; i < 1000; i++ )
             {
+                if ( i % 20 == 0 )
+                {
+                    this.TestOutputHelper.WriteLine( $"{id}: {100m * i / 1000m}% done." );
+                }
+
                 this.CachedMethod( 0 );
                 CachingService.Default.Invalidate( this.CachedMethod, 0, (Barrier?) null, true );
             }
+
+            this.TestOutputHelper.WriteLine( "TestLoop: 100% done." );
         }
 
         [Cache( ProfileName = "LocalLock" )]
@@ -227,6 +235,11 @@ namespace Metalama.Patterns.Caching.Tests
         {
             for ( var i = 0; i < 1000; i++ )
             {
+                if ( i % 20 == 0 )
+                {
+                    this.TestOutputHelper.WriteLine( $"{100m * i / 1000m}% done." );
+                }
+
                 await this.CachedMethodAsync( 0 );
                 await CachingService.Default.InvalidateAsync( this.CachedMethodAsync, 0, (AsyncBarrier?) null, true );
             }

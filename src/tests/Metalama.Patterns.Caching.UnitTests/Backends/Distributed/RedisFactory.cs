@@ -39,7 +39,7 @@ internal static class RedisFactory
         return new DisposingConnectionMultiplexer( connection, socketManager );
     }
 
-    public static async Task<DisposingRedisCachingBackend> CreateBackendAsync(
+    public static async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync(
         CachingTestOptions cachingTestOptions,
         RedisSetupFixture redisSetupFixture,
         string? prefix = null,
@@ -53,7 +53,10 @@ internal static class RedisFactory
         var configuration =
             new RedisCachingBackendConfiguration
             {
-                KeyPrefix = prefix ?? Guid.NewGuid().ToString(), OwnsConnection = true, SupportsDependencies = supportsDependencies
+                KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
+                OwnsConnection = true,
+                SupportsDependencies = supportsDependencies,
+                RunGarbageCollector = collector
             };
 
         IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
@@ -62,11 +65,6 @@ internal static class RedisFactory
             b =>
             {
                 var redis = b.Redis( connection ).WithConfiguration( configuration );
-
-                if ( collector )
-                {
-                    redis = redis.WithGarbageCollector();
-                }
 
                 if ( locallyCached )
                 {
@@ -81,6 +79,6 @@ internal static class RedisFactory
 
         await backend.InitializeAsync();
 
-        return new DisposingRedisCachingBackend( backend );
+        return new CheckAfterDisposeCachingBackend( backend );
     }
 }

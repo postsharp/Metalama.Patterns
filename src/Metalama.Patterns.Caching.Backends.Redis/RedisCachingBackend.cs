@@ -86,7 +86,7 @@ internal class RedisCachingBackend : CachingBackend
         this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
     }
 
-    protected override void Initialize()
+    protected override void InitializeCore()
     {
         this._notificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
@@ -96,10 +96,10 @@ internal class RedisCachingBackend : CachingBackend
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider );
 
-        base.Initialize();
+        base.InitializeCore();
     }
 
-    public override async Task InitializeAsync( CancellationToken cancellationToken = default )
+    protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
         this._notificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
@@ -112,11 +112,11 @@ internal class RedisCachingBackend : CachingBackend
             this.ServiceProvider,
             cancellationToken );
 
-        await base.InitializeAsync( cancellationToken );
+        await base.InitializeCoreAsync( cancellationToken );
     }
 
     /// <inheritdoc />
-    protected override CachingBackendFeatures CreateFeatures() => new RedisCachingBackendFeatures( this );
+    protected override CachingBackendFeatures CreateFeatures() => new RedisCachingBackendFeatures();
 
     private void ProcessNotification( RedisNotification notification )
     {
@@ -552,7 +552,7 @@ internal class RedisCachingBackend : CachingBackend
         }
     }
 
-    protected override int BackgroundTaskExceptions
+    public override int BackgroundTaskExceptions
         => base.BackgroundTaskExceptions + this.NotificationQueue.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
     /// <summary>
@@ -560,19 +560,8 @@ internal class RedisCachingBackend : CachingBackend
     /// </summary>
     internal class RedisCachingBackendFeatures : CachingBackendFeatures
     {
-        private readonly RedisCachingBackend _parent;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RedisCachingBackendFeatures"/> class.
-        /// </summary>
-        /// <param name="parent">The parent <see cref="RedisCachingBackend"/>.</param>
-        public RedisCachingBackendFeatures( RedisCachingBackend parent )
-        {
-            this._parent = parent;
-        }
-
         /// <inheritdoc />
-        public override bool Events => this._parent._notificationQueue != null;
+        public override bool Events => true;
 
         /// <inheritdoc />
         public override bool Clear => false;

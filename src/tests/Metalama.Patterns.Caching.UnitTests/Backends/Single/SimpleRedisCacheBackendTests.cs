@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
@@ -32,15 +31,16 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
 
     protected override bool TestDependencies => false;
 
-    protected override CachingBackend CreateBackend() => Task.Run( this.CreateBackendAsync ).Result;
+    protected override CheckAfterDisposeCachingBackend CreateBackend() => Task.Run( this.CreateBackendAsync ).Result;
 
-    protected override async Task<CachingBackend> CreateBackendAsync()
+    protected override async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync()
     {
         return await this.CreateBackendAsync( null );
     }
 
-    private async Task<CachingBackend> CreateBackendAsync( string? keyPrefix )
+    private async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync( string? keyPrefix )
     {
-        return await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, keyPrefix );
+        return new CheckAfterDisposeCachingBackend(
+            await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, keyPrefix, serviceProvider: this.ServiceProvider ) );
     }
 }

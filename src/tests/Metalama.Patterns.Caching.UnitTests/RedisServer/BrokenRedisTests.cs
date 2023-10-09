@@ -12,23 +12,33 @@ namespace Metalama.Patterns.Caching.Tests.RedisServer;
 public sealed class BrokenRedisTests
 {
     [Fact( Timeout = 20000 )]
-    public void TestWeAbortConnection()
+    public async Task TestWeAbortConnection()
     {
-        AssertEx.Throws<TimeoutException>(
-            () =>
-            {
-                var configuration =
-                    new RedisCachingBackendConfiguration
-                    {
-                        KeyPrefix = Guid.NewGuid().ToString(),
-                        OwnsConnection = true,
-                        SupportsDependencies = false,
-                        ConnectionTimeout = TimeSpan.FromMilliseconds( 10 )
-                    };
+        try
+        {
+            var configuration =
+                new RedisCachingBackendConfiguration
+                {
+                    KeyPrefix = Guid.NewGuid().ToString(),
+                    OwnsConnection = true,
+                    SupportsDependencies = false,
+                    ConnectionTimeout = TimeSpan.FromMilliseconds( 10 )
+                };
 
-                var connection = CreateConnection( false );
-                CachingBackend.Create( b => b.Redis( connection, configuration ) );
-            } );
+            var connection = CreateConnection( false );
+            await using var backend = CachingBackend.Create( b => b.Redis( connection, configuration ) );
+
+            using var cancellation = new CancellationTokenSource( 20 );
+
+            await backend.InitializeAsync( cancellation.Token );
+
+            Assert.Fail( "A OperationCanceledException was expected but we got no exception." );
+        }
+        catch ( OperationCanceledException ) { }
+        catch ( Exception e )
+        {
+            Assert.Fail( $"A OperationCanceledException was expected but we got {e.GetType()}." );
+        }
 
         // Make sure there are no deadlocks in finalizers.
         GC.Collect();

@@ -59,7 +59,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this.ExpectedInvalidateCount = 0;
         }
 
-        public void ResetTest( string locationDescription )
+        public void AssertAndReset( string locationDescription )
         {
             AssertEx.Equal(
                 this.ExpectedSetCount,
@@ -164,13 +164,13 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         protected override void DisposeCore( bool disposing )
         {
-            TestableCachingComponentDisposer.Dispose( this._backend );
+            this._backend.Dispose();
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
         }
 
         protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
         {
-            await TestableCachingComponentDisposer.DisposeAsync( this._backend );
+            await this._backend.DisposeAsync( cancellationToken );
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
         }
 

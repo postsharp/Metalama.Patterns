@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
-using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -11,7 +10,7 @@ using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-internal sealed class RedisNotificationQueue : ITestableCachingComponent
+internal sealed class RedisNotificationQueue : IDisposable
 {
     private const int _connectDelay = 10;
 
@@ -379,8 +378,6 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
             GC.SuppressFinalize( this );
         }
     }
-
-    ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
 
     public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {

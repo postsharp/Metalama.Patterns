@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// An abstraction of the physical implementation of the cache.
 /// </summary>
 [PublicAPI]
-public abstract class CachingBackend : ITestableCachingComponent
+public abstract class CachingBackend : IDisposable, IAsyncDisposable
 {
     private const int _disposeTimeout = 30000;
     private static readonly ValueTask<bool> _falseTaskResult = new( false );
@@ -68,44 +68,97 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// </summary>
     public CachingBackendFeatures SupportedFeatures => this._features ??= this.CreateFeatures();
 
-    protected internal virtual void Initialize()
+    public void Initialize()
     {
-        if ( !this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Initialized ) )
+        var status = this.Status;
+
+        if ( status is CachingBackendStatus.Failed )
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException( "A previous initialization has failed." );
+        }
+        else if ( status is not (CachingBackendStatus.Default or CachingBackendStatus.Initializing) )
+        {
+            // The component is already initialized.
+            return;
+        }
+
+        this._initializeSemaphore.Wait();
+
+        try
+        {
+            if ( !this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Initializing ) )
+            {
+                return;
+            }
+
+            this.InitializeCoreAsync();
+
+            if ( !this.TryChangeStatus( CachingBackendStatus.Initializing, CachingBackendStatus.Initialized ) )
+            {
+                throw new CachingAssertionFailedException();
+            }
+        }
+        catch
+        {
+            this.TryChangeStatus( CachingBackendStatus.Initializing, CachingBackendStatus.Failed );
+
+            throw;
+        }
+        finally
+        {
+            this._initializeSemaphore.Release();
         }
     }
 
-    public virtual Task InitializeAsync( CancellationToken cancellationToken = default )
+    public async ValueTask InitializeAsync( CancellationToken cancellationToken = default )
     {
-        if ( !this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Initialized ) )
+        if ( this.Status is CachingBackendStatus.Failed )
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException( "A previous initialization has failed." );
+        }
+        else if ( this.Status is not (CachingBackendStatus.Default or CachingBackendStatus.Initializing) )
+        {
+            // The component is already initialized.
+            return;
         }
 
-        return Task.CompletedTask;
+        await this._initializeSemaphore.WaitAsync( cancellationToken );
+
+        try
+        {
+            if ( !this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Initializing ) )
+            {
+                return;
+            }
+
+            await this.InitializeCoreAsync( cancellationToken );
+
+            if ( !this.TryChangeStatus( CachingBackendStatus.Initializing, CachingBackendStatus.Initialized ) )
+            {
+                throw new CachingAssertionFailedException();
+            }
+        }
+        catch
+        {
+            this.TryChangeStatus( CachingBackendStatus.Initializing, CachingBackendStatus.Failed );
+
+            throw;
+        }
+        finally
+        {
+            this._initializeSemaphore.Release();
+        }
     }
+
+    protected virtual void InitializeCore() { }
+
+    protected virtual Task InitializeCoreAsync( CancellationToken cancellationToken = default ) => Task.CompletedTask;
 
     private void CheckStatus()
     {
-        if ( this.Status == CachingBackendStatus.Default )
-        {
-            this._initializeSemaphore.Wait();
+        this.Initialize();
 
-            try
-            {
-                if ( this.Status == CachingBackendStatus.Default )
-                {
-                    this.InitializeAsync();
-                }
-            }
-            finally
-            {
-                this._initializeSemaphore.Dispose();
-            }
-        }
-
-        if ( this.Status != CachingBackendStatus.Default )
+        if ( this.Status != CachingBackendStatus.Initialized )
         {
             throw new ObjectDisposedException( this.ToString() );
         }
@@ -113,24 +166,9 @@ public abstract class CachingBackend : ITestableCachingComponent
 
     private async ValueTask CheckStatusAsync( CancellationToken cancellationToken )
     {
-        if ( this.Status == CachingBackendStatus.Default )
-        {
-            await this._initializeSemaphore.WaitAsync( cancellationToken );
+        await this.InitializeAsync( cancellationToken );
 
-            try
-            {
-                if ( this.Status == CachingBackendStatus.Default )
-                {
-                    await this.InitializeAsync( cancellationToken );
-                }
-            }
-            finally
-            {
-                this._initializeSemaphore.Dispose();
-            }
-        }
-
-        if ( this.Status != CachingBackendStatus.Default )
+        if ( this.Status != CachingBackendStatus.Initialized )
         {
             throw new ObjectDisposedException( this.ToString() );
         }
@@ -703,6 +741,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <summary>
     /// Asynchronously clears the cache.
     /// </summary>
+    /// <param name="options">Options.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
     public async ValueTask ClearAsync( ClearCacheOptions options = ClearCacheOptions.Default, CancellationToken cancellationToken = default )
@@ -737,6 +776,8 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <inheritdoc />
     public override string ToString()
         => string.Format( CultureInfo.InvariantCulture, "{{{0} Id={1}, Status={2}}}", this.GetType().Name, this.DebugName, this.Status );
+
+    public ValueTask DisposeAsync() => this.DisposeAsync( default );
 
     /// <summary>
     /// Returns a <see cref="Task"/> that is signaled to the complete state when all background tasks
@@ -882,13 +923,22 @@ public abstract class CachingBackend : ITestableCachingComponent
     /// <param name="disposing"><c>true</c> if this method is called because the <see cref="Dispose()"/> method has been called, or <c>false</c> if the object is being finalized.</param>
     protected void Dispose( bool disposing )
     {
-        if ( this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) )
+        if ( this.Status == CachingBackendStatus.Initializing )
         {
-            using ( var activity = this.Source.Default.OpenActivity( Formatted( "Disposing" ) ) )
+            this._initializeSemaphore.Wait();
+        }
+
+        if ( this.TryChangeStatus( CachingBackendStatus.Initialized, CachingBackendStatus.Disposing ) ||
+             this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) ||
+             this.TryChangeStatus( CachingBackendStatus.Failed, CachingBackendStatus.Disposing ) )
+        {
+            using ( var activity = this.Source.Default.OpenActivity( Formatted( "Disposing( backend = {Backend}", this ) ) )
             {
                 try
                 {
                     this.DisposeCore( disposing );
+
+                    this._initializeSemaphore.Dispose();
 
                     if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
                     {
@@ -939,16 +989,21 @@ public abstract class CachingBackend : ITestableCachingComponent
         }
     }
 
-    ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
-
     /// <summary>
     /// Asynchronously dispose the current <see cref="CachingBackend"/>.
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken )
     {
-        if ( this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) )
+        if ( this.Status == CachingBackendStatus.Initializing )
+        {
+            await this._initializeSemaphore.WaitAsync( cancellationToken );
+        }
+
+        if ( this.TryChangeStatus( CachingBackendStatus.Initialized, CachingBackendStatus.Disposing ) ||
+             this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) ||
+             this.TryChangeStatus( CachingBackendStatus.Failed, CachingBackendStatus.Disposing ) )
         {
             using ( var activity = this.Source.Default.OpenAsyncActivity( Formatted( "Disposing" ) ) )
             {
@@ -960,6 +1015,8 @@ public abstract class CachingBackend : ITestableCachingComponent
                     {
                         throw new CachingAssertionFailedException();
                     }
+
+                    this._initializeSemaphore.Dispose();
 
                     this._disposeTask.SetResult( true );
                     activity.SetSuccess();
@@ -1001,9 +1058,7 @@ public abstract class CachingBackend : ITestableCachingComponent
     }
 
     // Was [ExplicitCrossPackageInternal]. Used by Redis backend. Making protected for now.
-    protected virtual int BackgroundTaskExceptions => 0;
-
-    int ITestableCachingComponent.BackgroundTaskExceptions => this.BackgroundTaskExceptions;
+    public virtual int BackgroundTaskExceptions => 0;
 
     public static CachingBackend Create( Func<CachingBackendBuilder, BuiltCachingBackendBuilder> build, IServiceProvider? serviceProvider = null )
     {

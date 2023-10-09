@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit.Abstractions;
 
@@ -13,9 +12,9 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
             cachingTestOptions,
             testOutputHelper ) { }
 
-        protected override CachingBackend CreateBackend()
+        protected override CheckAfterDisposeCachingBackend CreateBackend()
         {
-            return MemoryCacheFactory.CreateBackend( this.ServiceProvider );
+            return new CheckAfterDisposeCachingBackend( MemoryCacheFactory.CreateBackend( this.ServiceProvider ) );
         }
     }
 }

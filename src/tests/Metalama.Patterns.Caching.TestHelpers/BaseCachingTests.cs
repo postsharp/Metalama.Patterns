@@ -37,7 +37,8 @@ public abstract class BaseCachingTests
     protected CachingTestContext<T> InitializeTest<T>(
         string name,
         T backend,
-        Action<CachingTestBuilder>? buildTest = null )
+        Action<CachingTestBuilder>? buildTest = null,
+        bool passServiceProvider = true )
         where T : CachingBackend
     {
         ResetCachingServices();
@@ -48,22 +49,23 @@ public abstract class BaseCachingTests
                 b.WithBackend( x => x.Specific( backend ) );
 
                 var testBuilder = new CachingTestBuilder( b );
-                b.AddProfile( new CachingProfile( name ) );
                 buildTest?.Invoke( testBuilder );
+                b.AddProfile( new CachingProfile( name ), true );
             },
-            this.ServiceProvider );
+            passServiceProvider ? this.ServiceProvider : null );
 
         return new CachingTestContext<T>( backend );
     }
 
     protected CachingTestContext<CachingBackend> InitializeTest(
         string name,
-        Action<CachingTestBuilder>? buildTest = null )
+        Action<CachingTestBuilder>? buildTest = null,
+        bool passServiceProvider = true )
     {
-        var backend = CachingBackend.Create( b => b.Memory(), this.ServiceProvider );
+        var backend = CachingBackend.Create( b => b.Memory(), passServiceProvider ? this.ServiceProvider : null );
         backend.DebugName = name;
 
-        return this.InitializeTest( name, backend, buildTest );
+        return this.InitializeTest( name, backend, buildTest, passServiceProvider );
     }
 
     protected CachingTestContext<TestingCacheBackend> InitializeTestWithTestingBackend(

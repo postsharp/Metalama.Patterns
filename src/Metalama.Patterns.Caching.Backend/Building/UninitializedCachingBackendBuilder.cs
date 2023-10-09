@@ -10,15 +10,3 @@ public sealed class UninitializedCachingBackendBuilder : BuiltCachingBackendBuil
 
     internal UninitializedCachingBackendBuilder() { }
 }
-
-internal sealed class SpecificCachingBackendBuilder : BuiltCachingBackendBuilder
-{
-    private Func<CreateBackendArgs, CachingBackend> _factory;
-
-    public SpecificCachingBackendBuilder( Func<CreateBackendArgs, CachingBackend> factory )
-    {
-        this._factory = factory;
-    }
-
-    public override CachingBackend CreateBackend( CreateBackendArgs args ) => throw new NotImplementedException();
-}

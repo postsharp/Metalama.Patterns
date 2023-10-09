@@ -412,7 +412,7 @@ namespace Metalama.Patterns.Caching.Tests
             backend.ExpectedSetCount = 1;
             var value1 = cachingClass.GetValueAsDependency();
             cachingClass.Reset();
-            backend.ResetTest( "When calling the method the first time" );
+            backend.AssertAndReset( "When calling the method the first time" );
 
             // The auto-refresh feature is asynchronous,
             // so we need to wait for the item to be set.
@@ -533,7 +533,7 @@ namespace Metalama.Patterns.Caching.Tests
             backend.ExpectedSetCount = 1;
             var value1 = await cachingClass.GetValueAsDependencyAsync();
             cachingClass.Reset();
-            backend.ResetTest( "When calling the method the first time" );
+            backend.AssertAndReset( "When calling the method the first time" );
 
             // The auto-refresh feature is asynchronous,
             // so we need to wait for the item to be set.
@@ -1613,7 +1613,7 @@ namespace Metalama.Patterns.Caching.Tests
         public void TestMethodLevelProfile()
         {
             Debugger.Break();
-            
+
             using var context =
                 this.InitializeTestWithTestingBackend(
                     _testMethodLevelProfileNameSetInConfigurationAttribute,

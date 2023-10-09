@@ -25,7 +25,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 
                 cache.ExpectedContainsKeyCount = 1;
                 var keyContained = cache.ContainsItem( key );
-                cache.ResetTest( "When checkin existence of a non-existing key." );
+                cache.AssertAndReset( "When checkin existence of a non-existing key." );
 
                 Assert.False( keyContained, "The cache does not return false on miss." );
 
@@ -34,15 +34,13 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 
                 cache.ExpectedSetCount = 1;
                 cache.SetItem( key, cacheItem0 );
-                cache.ResetTest( "When setting the cache item" );
+                cache.AssertAndReset( "When setting the cache item" );
 
                 cache.ExpectedContainsKeyCount = 1;
                 keyContained = cache.ContainsItem( key );
-                cache.ResetTest( "When checkin existence of an existing key." );
+                cache.AssertAndReset( "When checkin existence of an existing key." );
 
                 Assert.True( keyContained, "The cache does not return true on hit." );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -55,11 +53,9 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 
                 cache.ExpectedGetCount = 1;
                 var retrievedValue = cache.GetItem( key );
-                cache.ResetTest( "When getting the cached value" );
+                cache.AssertAndReset( "When getting the cached value" );
 
                 AssertEx.Null( retrievedValue, "The cache does not return null on miss." );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -74,11 +70,11 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 
                 cache.ExpectedSetCount = 1;
                 cache.SetItem( key, cacheItem0 );
-                cache.ResetTest( "When setting the cache item" );
+                cache.AssertAndReset( "When setting the cache item" );
 
                 cache.ExpectedGetCount = 1;
                 var retrievedItem = cache.GetItem( key );
-                cache.ResetTest( "When getting the cache item" );
+                cache.AssertAndReset( "When getting the cache item" );
                 AssertEx.NotNull( retrievedItem, "The item has not been stored in the cache." );
                 AssertEx.Equal( cacheItem0.Value, retrievedItem.Value, "The retrieved item is not equal to the stored item." );
 
@@ -87,13 +83,11 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 
                 cache.ExpectedSetCount = 1;
                 cache.SetItem( key, cacheItem1 );
-                cache.ResetTest( "When setting the second item" );
+                cache.AssertAndReset( "When setting the second item" );
 
                 retrievedItem = cache.GetItem( key );
                 AssertEx.NotNull( retrievedItem, "The item has not been stored in the cache." );
                 AssertEx.NotEqual( cacheItem0, retrievedItem, "The item has not been changed." );
-
-                TestableCachingComponentDisposer.Dispose( cache );
             }
         }
 
@@ -106,9 +100,7 @@ namespace Metalama.Patterns.Caching.Tests.TestHelpersTests
 
                 cache.ExpectedInvalidateCount = 1;
                 cache.InvalidateDependency( dependencyKey );
-                cache.ResetTest( "When invalidating dependency" );
-
-                TestableCachingComponentDisposer.Dispose( cache );
+                cache.AssertAndReset( "When invalidating dependency" );
             }
         }
     }

@@ -5,6 +5,8 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Metalama.Patterns.Caching.Building;
 
+#pragma warning disable CA1001
+
 public sealed class MemoryCachingBackendBuilder : BuiltCachingBackendBuilder
 {
     private IMemoryCache? _memoryCache;
@@ -17,7 +19,7 @@ public sealed class MemoryCachingBackendBuilder : BuiltCachingBackendBuilder
 
     public MemoryCachingBackendBuilder WithMemoryCache( IMemoryCache memoryCache )
     {
-        this._memoryCache = this._memoryCache;
+        this._memoryCache = memoryCache;
 
         return this;
     }
