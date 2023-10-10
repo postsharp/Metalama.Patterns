@@ -200,7 +200,7 @@ public class FormattersTests : FormattersTestsBase
         Assert.Equal( "{ToString}", this.Format( repo2, default(TestStruct) ) );
     }
 
-    private sealed class FormattableObject : IFormattable
+    private sealed class FormattableObject : IFormattable<TestRole>
     {
         public void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
         {

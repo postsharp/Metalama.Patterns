@@ -65,7 +65,7 @@ public sealed partial class CachingService : ICachingService
         }
 
         this._formatters = FormatterRepository.Create(
-            CachingFormattingRole.Instance,
+            CacheKeyFormatting.Instance,
             formattersBuilder =>
             {
                 formattersBuilder.AddFormatter( typeof(IEnumerable<>), typeof(CollectionFormatter<>) );

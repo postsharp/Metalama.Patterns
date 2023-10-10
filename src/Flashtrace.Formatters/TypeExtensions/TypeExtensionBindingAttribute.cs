@@ -2,4 +2,5 @@
 
 namespace Flashtrace.Formatters.TypeExtensions;
 
-public sealed class BindToExtendedTypeAttribute : TypeExtensionBindingAttribute { }
+[AttributeUsage( AttributeTargets.GenericParameter )]
+public abstract class TypeExtensionBindingAttribute : Attribute { }

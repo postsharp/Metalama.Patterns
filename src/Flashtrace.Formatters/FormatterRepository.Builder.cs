@@ -58,7 +58,7 @@ public partial class FormatterRepository
 #if NET6_0_OR_GREATER
             this.AddFormatter( typeof(ISpanFormattable), typeof(SpanFormattableFormatter<>) );
 #endif
-            this.AddFormatter( typeof(IFormattable), typeof(FormattableFormatter<>) );
+            this.AddFormatter( typeof(IFormattable<>), typeof(FormattableFormatter<,>) );
             this.AddFormatter( typeof(Nullable<>), typeof(NullableFormatter<>) );
             this.AddFormatter( typeof(Type), new TypeFormatter( this._formatters ) );
             this.AddFormatter( typeof(MethodBase), new MethodInfoFormatter( this._formatters ) );

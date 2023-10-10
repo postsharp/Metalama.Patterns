@@ -13,7 +13,7 @@ namespace Flashtrace.Formatters.TypeExtensions;
 public class TypeExtensionFactory<T> : TypeExtensionFactoryBase<T>
     where T : class
 {
-    public TypeExtensionFactory( Type genericInterfaceType, Type? converterType ) : base( genericInterfaceType, converterType ) { }
+    public TypeExtensionFactory( Type genericInterfaceType, Type? converterType, Type? roleType ) : base( genericInterfaceType, converterType, roleType ) { }
 
     public T? Convert( T? o, Type targetObjectType ) => this.Convert( o, targetObjectType, null );
 

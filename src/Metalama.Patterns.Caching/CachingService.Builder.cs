@@ -22,7 +22,7 @@ public partial class CachingService
         private CachingBackend? _specificBackend;
         private Func<CachingBackendBuilder, BuiltCachingBackendBuilder>? _cachingBackendBuildAction;
 
-        internal TypeExtensionFactory<IValueAdapter> ValueAdapters { get; } = new( typeof(IValueAdapter<>), null );
+        internal TypeExtensionFactory<IValueAdapter> ValueAdapters { get; } = new( typeof(IValueAdapter<>), null, null );
 
         internal Builder( IServiceProvider? serviceProvider )
         {

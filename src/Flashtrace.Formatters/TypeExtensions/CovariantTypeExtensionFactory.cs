@@ -5,8 +5,8 @@ namespace Flashtrace.Formatters.TypeExtensions;
 internal sealed class CovariantTypeExtensionFactory<T, TContext> : TypeExtensionFactory<T, TContext>
     where T : class
 {
-    public CovariantTypeExtensionFactory( Type genericInterfaceType, Type converterType, TContext? context )
-        : base( genericInterfaceType, converterType, context ) { }
+    public CovariantTypeExtensionFactory( Type genericInterfaceType, Type converterType, Type roleType, TContext? context )
+        : base( genericInterfaceType, converterType, roleType, context ) { }
 
     protected override IEnumerable<Type> GetAssignableTypes( Type type ) => CovariantTypeExtensionFactoryHelpers.GetAssignableTypes( type );
 }

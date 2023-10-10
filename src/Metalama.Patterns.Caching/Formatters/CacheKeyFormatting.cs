@@ -10,9 +10,9 @@ namespace Metalama.Patterns.Caching.Formatters;
 /// The <see cref="FormattingRole"/> for <c>Metalama.Patterns.Caching</c>.
 /// </summary>
 [PublicAPI]
-public sealed class CachingFormattingRole : FormattingRole
+public sealed class CacheKeyFormatting : FormattingRole
 {
-    public static CachingFormattingRole Instance { get; } = new();
+    public static CacheKeyFormatting Instance { get; } = new();
 
-    private CachingFormattingRole() : base( "Caching" ) { }
+    private CacheKeyFormatting() : base( "Caching" ) { }
 }

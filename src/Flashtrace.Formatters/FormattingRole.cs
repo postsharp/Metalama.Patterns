@@ -13,14 +13,9 @@ public class FormattingRole
     /// <summary>
     /// Initializes a new instance of the <see cref="FormattingRole"/> class.
     /// </summary>
-    public FormattingRole( string name )
+    public FormattingRole( string? name = null )
     {
-        if ( string.IsNullOrWhiteSpace( name ) )
-        {
-            throw new ArgumentNullException( nameof(name) );
-        }
-
-        this.Name = name;
+        this.Name = name ?? this.GetType().Name;
     }
 
     /// <summary>

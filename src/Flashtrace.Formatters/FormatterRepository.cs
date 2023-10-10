@@ -25,12 +25,13 @@ public sealed partial class FormatterRepository : IFormatterRepository
     private FormatterRepository( FormattingRole role, Action<Builder>? build = null )
     {
         this.Role = role ?? throw new ArgumentNullException( nameof(role) );
+        var roleType = role.GetType();
 
         this._formatterFactory =
-            new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof(IFormatter<>), typeof(FormatterConverter<,>), this );
+            new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof(IFormatter<>), typeof(FormatterConverter<,>), roleType, this );
 
         this._dynamicFormatterFactory =
-            new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof(IFormatter<>), typeof(FormatterConverter<,>), this );
+            new CovariantTypeExtensionFactory<IFormatter, IFormatterRepository>( typeof(IFormatter<>), typeof(FormatterConverter<,>), roleType, this );
 
         this._getFormatterFunc = type =>
             this._dynamicFormatterFactory.GetTypeExtension(

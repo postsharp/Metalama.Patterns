@@ -4,13 +4,15 @@ using Flashtrace.Formatters.TypeExtensions;
 
 namespace Flashtrace.Formatters.Implementations;
 
-internal sealed class FormattableFormatter<[BindToExtendedType] TValue> : Formatter<TValue>
-    where TValue : IFormattable
+internal sealed class FormattableFormatter<[BindToRoleType] TRole, [BindToExtendedType] TValue> : Formatter<TValue>
+    where TRole : FormattingRole
+    where TValue : IFormattable<TRole>
 {
     public FormattableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
     {
+        // ReSharper disable once CompareNonConstrainedGenericWithNull
         if ( value == null )
         {
             stringBuilder.Append( 'n', 'u', 'l', 'l' );

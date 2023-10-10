@@ -2,4 +2,4 @@
 
 namespace Flashtrace.Formatters.TypeExtensions;
 
-public sealed class BindToExtendedTypeAttribute : TypeExtensionBindingAttribute { }
+public sealed class BindToRoleTypeAttribute : TypeExtensionBindingAttribute { }
