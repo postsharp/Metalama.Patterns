@@ -148,7 +148,7 @@ internal static partial class DependencyGraph
 
                     if ( this.IsLocalInstanceMember( firstSymbol ) )
                     {
-                        var stemCount = symbols.Count( sr => sr.Symbol.Kind == SymbolKind.Property );
+                        var stemCount = symbols.TakeWhile( sr => sr.Symbol.Kind == SymbolKind.Property ).Count();
 
                         if ( stemCount > 0 )
                         {
