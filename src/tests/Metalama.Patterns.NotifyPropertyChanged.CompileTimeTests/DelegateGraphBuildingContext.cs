@@ -8,12 +8,12 @@ namespace Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests;
 
 public sealed class DelegateGraphBuildingContext : DependencyGraph.IGraphBuildingContext
 {
-    private readonly Func<IMethodSymbol, bool>? _isConfiguredAsSafeToCall;
+    private readonly Func<ISymbol, bool>? _isConfiguredAsSafeToCall;
     private readonly Action<IDiagnostic, Location?>? _reportDiagnostic;
     private readonly Func<ITypeSymbol, bool>? _treatAsImplementingInpc;
 
     public DelegateGraphBuildingContext(
-        Func<IMethodSymbol, bool>? isConfiguredAsSafeToCall = null,
+        Func<ISymbol, bool>? isConfiguredAsSafeToCall = null,
         Action<IDiagnostic, Location?>? reportDiagnostic = null,
         Func<ITypeSymbol, bool>? treatAsImplementingInpc = null )
     {
@@ -22,7 +22,7 @@ public sealed class DelegateGraphBuildingContext : DependencyGraph.IGraphBuildin
         this._treatAsImplementingInpc = treatAsImplementingInpc;
     }
 
-    public bool IsConfiguredAsSafeToCall( IMethodSymbol method ) => this._isConfiguredAsSafeToCall?.Invoke( method ) ?? false;
+    public bool IsConfiguredAsSafe( ISymbol symbol ) => this._isConfiguredAsSafeToCall?.Invoke( symbol ) ?? false;
 
     public void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null ) => this._reportDiagnostic?.Invoke( diagnostic, location );
 

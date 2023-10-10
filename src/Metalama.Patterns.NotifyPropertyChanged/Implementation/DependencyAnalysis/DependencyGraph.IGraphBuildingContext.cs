@@ -16,11 +16,11 @@ internal static partial class DependencyGraph
         bool TreatAsImplementingInpc( ITypeSymbol type );
 
         /// <summary>
-        /// Gets a value indicating if the given method is configured as safe to call for dependency analysis.
+        /// Gets a value indicating if the given method is configured as safe for dependency analysis.
         /// </summary>
         /// <remarks>
-        /// Configuration is by <see cref="Options.SafeToCallForDependencyAnalysisAttribute"/> or <see cref="Options.DependencyAnalysisOptions"/>.
+        /// Configuration is by <see cref="Options.SafeForDependencyAnalysisAttribute"/> or <see cref="Options.DependencyAnalysisOptions"/>.
         /// </remarks>
-        bool IsConfiguredAsSafeToCall( IMethodSymbol method );
+        bool IsConfiguredAsSafe( ISymbol symbol );
     }
 }

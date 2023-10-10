@@ -5,7 +5,6 @@
 // related namespaces.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,10 +16,11 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnaly
 internal static partial class DependencyGraph
 {
     private static void AddReferencedProperties(
-        ICompilation compilation,
+        Framework.Code.ICompilation compilation,
         Node tree,
         IPropertySymbol property,
         IGraphBuildingContext context,
+        RoslynAssets assets,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
@@ -39,7 +39,7 @@ internal static partial class DependencyGraph
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( tree, property, semanticModel, context, trace, cancellationToken );
+        var visitor = new Visitor( tree, property, semanticModel, context, assets, trace, cancellationToken );
 
         visitor.Visit( body );
     }
@@ -54,6 +54,7 @@ internal static partial class DependencyGraph
         private readonly CancellationToken _cancellationToken;
         private readonly Action<string>? _trace;
         private readonly IGraphBuildingContext _context;
+        private readonly RoslynAssets _assets;
 
         private readonly GatherIdentifiersContextManager _gatherManager;
 
@@ -64,6 +65,7 @@ internal static partial class DependencyGraph
             ISymbol originSymbol,
             SemanticModel semanticModel,
             IGraphBuildingContext context,
+            RoslynAssets assets,
             Action<string>? trace,
             CancellationToken cancellationToken )
         {
@@ -75,6 +77,7 @@ internal static partial class DependencyGraph
             this._cancellationToken = cancellationToken;
             this._context = context;
             this._gatherManager = new GatherIdentifiersContextManager( this );
+            this._assets = assets;
         }
 
         void IGatherIdentifiersContextManagerClient.OnRootContextPopped( GatherIdentifiersContext context )
@@ -118,7 +121,7 @@ internal static partial class DependencyGraph
                     {
                         var elementaryType = ti.Type.GetElementaryType();
 
-                        if ( !elementaryType.IsPrimitiveType() )
+                        if ( !elementaryType.IsPrimitiveType( this._assets ) )
                         {
                             this._context.ReportDiagnostic(
                                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
@@ -167,7 +170,7 @@ internal static partial class DependencyGraph
                                     var propertyType = ((IPropertySymbol) sr.Symbol).Type.GetElementaryType();
 
                                     // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
-                                    if ( i < stemCount - 1 && !propertyType.IsPrimitiveType() && !this._context.TreatAsImplementingInpc( propertyType ) )
+                                    if ( i < stemCount - 1 && !propertyType.IsPrimitiveType( this._assets ) && !this._context.TreatAsImplementingInpc( propertyType ) )
                                     {
                                         this._context.ReportDiagnostic(
                                             DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( propertyType ),
@@ -202,7 +205,7 @@ internal static partial class DependencyGraph
 
         public override void VisitInvocationExpression( InvocationExpressionSyntax node )
         {
-            bool? isConfiguredAsSafeToCall = null;
+            bool? isConfiguredAsSafe = null;
 
             if ( this._semanticModel.GetSymbolInfo( node ).Symbol is not IMethodSymbol methodSymbol )
             {
@@ -216,9 +219,9 @@ internal static partial class DependencyGraph
             {
                 if ( !methodSymbol.IsStatic )
                 {
-                    isConfiguredAsSafeToCall ??= this._context.IsConfiguredAsSafeToCall( methodSymbol );
+                    isConfiguredAsSafe ??= this._context.IsConfiguredAsSafe( methodSymbol );
 
-                    if ( isConfiguredAsSafeToCall != true )
+                    if ( isConfiguredAsSafe != true )
                     {
                         this._context.ReportDiagnostic(
                             DiagnosticDescriptors.WarningMethodIsNotSupportedForDependencyAnalysis.WithArguments( methodSymbol ),
@@ -226,13 +229,13 @@ internal static partial class DependencyGraph
                     }
                 }
             }
-            else if ( !methodSymbol.ContainingType.IsPrimitiveType() )
+            else if ( !methodSymbol.ContainingType.IsPrimitiveType( this._assets ) )
             {
                 // Only methods of primitive types are implicitly safe to call.
 
-                isConfiguredAsSafeToCall ??= this._context.IsConfiguredAsSafeToCall( methodSymbol );
+                isConfiguredAsSafe ??= this._context.IsConfiguredAsSafe( methodSymbol );
 
-                if ( isConfiguredAsSafeToCall != true )
+                if ( isConfiguredAsSafe != true )
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningMethodIsNotSupportedForDependencyAnalysis.WithArguments( methodSymbol ),
@@ -358,6 +361,20 @@ internal static partial class DependencyGraph
 
                 if ( ctx.StartDepth > 0 )
                 {
+                    if ( symbol is IFieldSymbol fieldSymbol )
+                    {
+                        if ( !(!fieldSymbol.IsStatic && fieldSymbol.EffectiveAccessibility() == Accessibility.Private)
+                            && !fieldSymbol.ContainingType.IsPrimitiveType( this._assets )
+                            && !(fieldSymbol.IsReadOnly && fieldSymbol.Type.IsPrimitiveType( this._assets ))
+                            && !this._context.IsConfiguredAsSafe( symbol ) )
+                        {
+                            this._context.ReportDiagnostic(
+                                DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
+                                    .WithArguments( "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported." ),
+                                node.GetLocation() );
+                        }
+                    }
+
                     ctx.AddSymbol( symbol, node, this._depth );
                 }
             }
