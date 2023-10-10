@@ -14,27 +14,51 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnaly
 [CompileTime]
 internal static class RoslynExtensions
 {
-    public static bool IsPrimitiveType( this ITypeSymbol? type )
+    public static Accessibility EffectiveAccessibility( this IFieldSymbol fieldSymbol )
+    {
+        if ( fieldSymbol.DeclaredAccessibility != Accessibility.NotApplicable )
+        {
+            return fieldSymbol.DeclaredAccessibility;
+        }
+
+        var t = fieldSymbol.ContainingType;
+
+        if ( t == null )
+        {
+            return Accessibility.NotApplicable;
+        }
+
+        return t.TypeKind switch
+        {
+            TypeKind.Class or TypeKind.Struct => Accessibility.Private,
+            TypeKind.Interface or TypeKind.Enum => Accessibility.Public,
+            _ => throw new NotSupportedException()
+        };
+    }
+
+    public static bool IsPrimitiveType( this ITypeSymbol? type, RoslynAssets assets )
     {
         // ReSharper disable once MissingIndent
-        return type is
-        {
-            SpecialType: SpecialType.System_Boolean or
-            SpecialType.System_Byte or
-            SpecialType.System_Char or
-            SpecialType.System_DateTime or
-            SpecialType.System_Decimal or
-            SpecialType.System_Double or
-            SpecialType.System_Int16 or
-            SpecialType.System_Int32 or
-            SpecialType.System_Int64 or
-            SpecialType.System_SByte or
-            SpecialType.System_Single or
-            SpecialType.System_String or
-            SpecialType.System_UInt16 or
-            SpecialType.System_UInt32 or
-            SpecialType.System_UInt64
-        };
+        return type != null && (
+            type is
+            {
+                SpecialType: SpecialType.System_Boolean or
+                SpecialType.System_Byte or
+                SpecialType.System_Char or
+                SpecialType.System_DateTime or
+                SpecialType.System_Decimal or
+                SpecialType.System_Double or
+                SpecialType.System_Int16 or
+                SpecialType.System_Int32 or
+                SpecialType.System_Int64 or
+                SpecialType.System_SByte or
+                SpecialType.System_Single or
+                SpecialType.System_String or
+                SpecialType.System_UInt16 or
+                SpecialType.System_UInt32 or
+                SpecialType.System_UInt64
+            }
+            || assets.IsNonSpecialPrimitiveType( type ));
     }
 
     public static bool IsOrInheritsFrom( this INamedTypeSymbol type, ITypeSymbol? candidateBaseType )

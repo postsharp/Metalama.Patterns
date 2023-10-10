@@ -381,6 +381,43 @@ public class A
 
     [Trait( "Supported", "Yes" )]
     [Fact]
+    public void TimeSpan()
+    {
+        using var testContext = this.CreateTestContext();
+        
+        const string code = @"
+using System;
+public class A
+{
+    public TimeSpan X { get; set; }
+
+    public long Y => DateTime.Now.Add( this.X ).Ticks;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+
+        const string expected = @"<root>
+  X [ Y ]
+  Y
+";
+
+        diagnostics.Should().BeEmpty();
+        result.ToString().Should().Be( expected );
+    }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
     public void StringSplitAndJoin()
     {
         using var testContext = this.CreateTestContext();
