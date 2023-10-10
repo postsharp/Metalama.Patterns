@@ -14,26 +14,40 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnaly
 [CompileTime]
 internal static class RoslynExtensions
 {
-    public static Accessibility EffectiveAccessibility( this IFieldSymbol fieldSymbol )
-    {
-        if ( fieldSymbol.DeclaredAccessibility != Accessibility.NotApplicable )
+    public static Accessibility EffectiveAccessibility( this ISymbol symbol )
+    {        
+        if ( symbol.DeclaredAccessibility != Accessibility.NotApplicable )
         {
-            return fieldSymbol.DeclaredAccessibility;
+            return symbol.DeclaredAccessibility;
         }
 
-        var t = fieldSymbol.ContainingType;
-
-        if ( t == null )
+        switch ( symbol.Kind )
         {
-            return Accessibility.NotApplicable;
+            case SymbolKind.Property:
+            case SymbolKind.Method:
+            case SymbolKind.Field:
+            case SymbolKind.Event:
+            case SymbolKind.NamedType when symbol.ContainingType != null:
+                {
+                    var t = symbol.ContainingType;
+
+                    if ( t == null )
+                    {
+                        return Accessibility.NotApplicable;
+                    }
+
+                    return t.TypeKind switch
+                    {
+                        TypeKind.Class or TypeKind.Struct => Accessibility.Private,
+                        TypeKind.Interface or TypeKind.Enum => Accessibility.Public,
+                        _ => throw new NotSupportedException()
+                    };
+                }
+            case SymbolKind.NamedType:
+                return Accessibility.Internal;
+            default:
+                throw new NotSupportedException();
         }
-
-        return t.TypeKind switch
-        {
-            TypeKind.Class or TypeKind.Struct => Accessibility.Private,
-            TypeKind.Interface or TypeKind.Enum => Accessibility.Public,
-            _ => throw new NotSupportedException()
-        };
     }
 
     public static bool IsPrimitiveType( this ITypeSymbol? type, RoslynAssets assets )

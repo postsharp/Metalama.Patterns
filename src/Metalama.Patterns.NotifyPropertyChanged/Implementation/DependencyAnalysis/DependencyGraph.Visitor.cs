@@ -151,7 +151,9 @@ internal static partial class DependencyGraph
 
                     if ( this.IsLocalInstanceMember( firstSymbol ) )
                     {
-                        var stemCount = symbols.TakeWhile( sr => sr.Symbol.Kind == SymbolKind.Property ).Count();
+                        var stemCount = symbols.TakeWhile(
+                            sr => sr.Symbol.Kind == SymbolKind.Property
+                                || (sr.Symbol.Kind == SymbolKind.Field && sr.Symbol.EffectiveAccessibility() == Accessibility.Private) ).Count();
 
                         if ( stemCount > 0 )
                         {
@@ -167,14 +169,36 @@ internal static partial class DependencyGraph
 
                                     treeNode = treeNode.GetOrAddChild( sr.Symbol );
 
-                                    var propertyType = ((IPropertySymbol) sr.Symbol).Type.GetElementaryType();
-
-                                    // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
-                                    if ( i < stemCount - 1 && !propertyType.IsPrimitiveType( this._assets ) && !this._context.TreatAsImplementingInpc( propertyType ) )
+                                    var fieldOrPropertyType = sr.Symbol switch
                                     {
-                                        this._context.ReportDiagnostic(
-                                            DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( propertyType ),
-                                            sr.Node.GetLocation() );
+                                        IPropertySymbol property => property.Type,
+                                        IFieldSymbol field => field.Type,
+                                        _ => throw new NotImplementedException()
+                                    };
+
+                                    fieldOrPropertyType = fieldOrPropertyType.GetElementaryType();                                    
+                                    
+                                    if ( i < stemCount - 1 )
+                                    {
+                                        // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
+
+                                        if ( !fieldOrPropertyType.IsPrimitiveType( this._assets ) && !this._context.TreatAsImplementingInpc( fieldOrPropertyType ) )
+                                        {
+                                            this._context.ReportDiagnostic(
+                                                DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( fieldOrPropertyType ),
+                                                sr.Node.GetLocation() );
+                                        }
+
+                                        // Warn if this is a non-leaf reference to an INPC non-auto property of the target type because we can't
+                                        // (yet) track changes to children of indirectly-referenced INPC properties.
+
+                                        if ( !this._context.IsAutoPropertyOrField( sr.Symbol ) && this._context.TreatAsImplementingInpc( fieldOrPropertyType ) )
+                                        {
+                                            this._context.ReportDiagnostic(
+                                                DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
+                                                    .WithArguments( "Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed." ),
+                                                symbols[i + 1].Node.GetLocation() );
+                                        }
                                     }
                                 }
 

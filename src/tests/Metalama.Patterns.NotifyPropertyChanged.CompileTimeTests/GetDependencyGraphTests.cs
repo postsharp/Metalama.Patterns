@@ -770,7 +770,7 @@ public class A
         var result = DependencyGraph.GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext(
-                isConfiguredAsSafeToCall: _ => true,
+                isConfiguredAsSafe: _ => true,
                 reportDiagnostic: diagnostics.Add,
                 treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -822,7 +822,7 @@ public class A
         var result = DependencyGraph.GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext(
-                isConfiguredAsSafeToCall: _ => true,
+                isConfiguredAsSafe: _ => true,
                 reportDiagnostic: diagnostics.Add,
                 treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1358,6 +1358,7 @@ public class A
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
+  _foo [ X, Z ]
   X [ Z ]
   Y [ Z ]
   Z
@@ -1404,6 +1405,8 @@ public class A
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
+  _foo
+    Q [ X, Z ]
   X [ Z ]
   Y [ Z ]
   Z

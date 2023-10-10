@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 using Metalama.Patterns.NotifyPropertyChanged.Options;
+using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
@@ -44,6 +45,9 @@ internal sealed partial class ClassicImplementationStrategyBuilder
             
             return options.IsSafe == true;
         }
+
+        public bool IsAutoPropertyOrField( ISymbol symbol )
+            => this._strategyBuilder._builder.Target.Compilation.GetDeclaration( symbol ) is IFieldOrProperty { IsAutoPropertyOrField: true };
 
         public void ReportDiagnostic( IDiagnostic diagnostic, Microsoft.CodeAnalysis.Location? location = null )
         {

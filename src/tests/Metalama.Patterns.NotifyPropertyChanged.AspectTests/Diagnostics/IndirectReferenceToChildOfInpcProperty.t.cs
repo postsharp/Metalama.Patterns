@@ -1,0 +1,1 @@
+// Warning LAMA5156 on `A1`: `Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed.`

@@ -94,7 +94,10 @@ internal sealed class Templates : ITemplateProvider
                 }
             }
 
-            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+            if ( node?.FieldOrProperty.DeclarationKind != DeclarationKind.Field )
+            {
+                ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+            }
 
 #pragma warning disable IDE0031 // Use null propagation
             if ( subscribeMethod != null )
@@ -268,17 +271,41 @@ internal sealed class Templates : ITemplateProvider
             _ => null
         };
 
+        var isField = node?.FieldOrProperty.DeclarationKind == DeclarationKind.Field;
+
         if ( compareExpr == null )
         {
             meta.Target.FieldOrProperty.Value = value;
-            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+
+            if ( isField )
+            {
+                foreach ( var r in node!.ReferencedBy )
+                {
+                    ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                }
+            }
+            else
+            {
+                ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+            }
         }
         else
         {
             if ( compareExpr.Value )
             {
                 meta.Target.FieldOrProperty.Value = value;
-                ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+
+                if ( isField )
+                {
+                    foreach ( var r in node!.ReferencedBy )
+                    {
+                        ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                    }
+                }
+                else
+                {
+                    ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+                }
             }
         }
     }
@@ -725,6 +752,7 @@ internal sealed class Templates : ITemplateProvider
         }
 
         var propertyName = propertyChangedEventArgs.Value!.PropertyName;
+        var nodeIsProperty = node.FieldOrProperty.DeclarationKind == DeclarationKind.Property;
 
         foreach ( var childNode in node.Children )
         {
@@ -750,7 +778,10 @@ internal sealed class Templates : ITemplateProvider
                             ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( refName );
                         }
 
-                        ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
+                        if ( nodeIsProperty )
+                        {
+                            ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
+                        }
                     }
 
                     return;
@@ -758,6 +789,9 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
-        ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
+        if ( nodeIsProperty )
+        {
+            ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
+        }
     }
 }

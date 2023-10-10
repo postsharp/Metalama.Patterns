@@ -187,4 +187,41 @@ public sealed class CoreTests : InpcTestsBase
 
         opc.Should().Equal( "EX1", "EX2", "EX2" );
     }
+
+    [Fact]
+    public void FieldBackedInpcPropertyIsCorrect()
+    {
+        var v = new FieldBackedInpcProperty();
+
+        v.P1.Should().NotBeNull();
+        v.P2.Should().Be( 0 );
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.P1.S1 = 42 )
+            .Should()
+            .Equal( "P2" );
+
+        var newVal = new Simple();
+
+        this.EventsFrom( () => v.SetValue( newVal ) )
+            .Should()
+            .Equal( "P1", "P2" );
+
+        this.EventsFrom( () => newVal.S1 = 42 )
+            .Should()
+            .Equal( "P2" );
+    }
+
+    [Fact]
+    public void FieldBackedIntPropertyIsCorrect()
+    {
+        var v = new FieldBackedIntProperty();
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.SetValue( 42))
+            .Should()
+            .Equal( "P2", "P1" );
+    }
 }

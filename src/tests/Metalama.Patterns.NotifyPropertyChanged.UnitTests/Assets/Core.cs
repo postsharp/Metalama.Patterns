@@ -131,3 +131,40 @@ public abstract class ExistingAbstractInpcImplWithValidOPCMethod : INotifyProper
         this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
 }
+
+[NotifyPropertyChanged]
+public partial class FieldBackedInpcProperty
+{
+    public FieldBackedInpcProperty()
+    {
+        this._value = new();
+    }
+
+    public void SetValue( Simple v ) => this._value = v;
+
+#pragma warning disable IDE0032 // Use auto property
+    private Simple _value;
+#pragma warning restore IDE0032 // Use auto property
+
+#pragma warning disable IDE0032 // Use auto property
+    public Simple P1 => this._value;
+#pragma warning restore IDE0032 // Use auto property
+
+    public int P2 => this._value.S1;
+}
+
+[NotifyPropertyChanged]
+public partial class FieldBackedIntProperty
+{
+    public void SetValue( int v ) => this._value = v;
+
+#pragma warning disable IDE0032 // Use auto property
+    private int _value;
+#pragma warning restore IDE0032 // Use auto property
+
+#pragma warning disable IDE0032 // Use auto property
+    public int P1 => this._value;
+#pragma warning restore IDE0032 // Use auto property
+
+    public int P2 => this.P1;
+}
