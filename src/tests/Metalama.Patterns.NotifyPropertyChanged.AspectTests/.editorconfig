@@ -43,6 +43,9 @@ dotnet_diagnostic.SA1402.severity = none
 # SA1649: File name should match first type name
 dotnet_diagnostic.SA1649.severity = none
 
+# IDE0032: Use auto property
+dotnet_diagnostic.IDE0032.severity = none
+
 resharper_inconsistent_naming_highlighting=none
 resharper_redundant_cast_highlighting=none
 resharper_unused_member_global_highlighting=none

@@ -2,13 +2,13 @@
 
 using Metalama.Patterns.NotifyPropertyChanged.Options;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.SafeToCallForDependencyAnalysis.UsingAttributeOnMethodOfTargetClass;
+namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.SafeForDependencyAnalysis.UsingAttributeOnMethodOfTargetClass;
 
 [NotifyPropertyChanged]
 public class UsingAttributeOnMethodOfTargetClass
 {
     public int X => this.Foo();
 
-    [SafeToCallForDependencyAnalysis]
+    [SafeForDependencyAnalysis]
     private int Foo() => 42;
 }

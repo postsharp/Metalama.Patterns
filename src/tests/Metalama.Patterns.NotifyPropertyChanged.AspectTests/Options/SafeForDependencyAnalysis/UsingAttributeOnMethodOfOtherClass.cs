@@ -2,11 +2,11 @@
 
 using Metalama.Patterns.NotifyPropertyChanged.Options;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.SafeToCallForDependencyAnalysis.UsingAttributeOnMethodOfOtherClass;
+namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.SafeForDependencyAnalysis.UsingAttributeOnMethodOfOtherClass;
 
 public static class OtherClass
 {
-    [SafeToCallForDependencyAnalysis]
+    [SafeForDependencyAnalysis]
     public static int Foo() => 42;
 }
 
