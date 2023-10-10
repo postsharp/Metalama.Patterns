@@ -168,3 +168,21 @@ public partial class FieldBackedIntProperty
 
     public int P2 => this.P1;
 }
+
+[NotifyPropertyChanged(DiagnosticCommentVerbosity =3)]
+public partial class PrivateProperty
+{
+    public void SetP1( int v ) => this.P1 = v;
+    
+    public int P1 { get; set; }
+
+    public int P2 => this.P1;
+}
+
+[NotifyPropertyChanged( DiagnosticCommentVerbosity = 3 )]
+public partial class ReferenceToNonInpcPropertyOfTargetType
+{
+    public int P1 { get; set; }
+
+    public int P2 => this.P1;
+}

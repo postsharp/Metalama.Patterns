@@ -224,4 +224,28 @@ public sealed class CoreTests : InpcTestsBase
             .Should()
             .Equal( "P2", "P1" );
     }
+
+    [SkippableFact( Skip = "Pending bug fix" )]
+    public void ChangeToPrivatePropertyShouldNotBeNotified()
+    {
+        var v = new PrivateProperty();
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.SetP1( 42 ) )
+            .Should()
+            .Equal( "P2" );
+    }
+
+    [SkippableFact( Skip = "Pending bug fix" )]
+    public void ReferenceToNonInpcPropertyOfTargetType()
+    {
+        var v = new ReferenceToNonInpcPropertyOfTargetType();
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => v.P1 = 42 )
+            .Should()
+            .Equal( "P1", "P2" );
+    }
 }
