@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 // ReSharper disable EqualExpressionComparison
 #pragma warning disable CA2201
 #pragma warning disable SA1402
-namespace Metalama.Patterns.Memoize.AspectTests.Instance;
+namespace Metalama.Patterns.Memoization.AspectTests.Instance;
 internal sealed class TheClass
 {
   private int _counter;

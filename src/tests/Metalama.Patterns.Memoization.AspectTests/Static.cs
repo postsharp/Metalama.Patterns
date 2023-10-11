@@ -7,7 +7,7 @@ using System.Globalization;
 #pragma warning disable CA2201
 #pragma warning disable SA1402
 
-namespace Metalama.Patterns.Memoize.AspectTests.Static;
+namespace Metalama.Patterns.Memoization.AspectTests.Static;
 
 internal static class TheClass
 {

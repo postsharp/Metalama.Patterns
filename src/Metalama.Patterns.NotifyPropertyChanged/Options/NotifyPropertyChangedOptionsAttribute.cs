@@ -30,37 +30,10 @@ public class NotifyPropertyChangedOptionsAttribute : Attribute, IHierarchicalOpt
             this._diagnosticCommentVerbosity = value;
         }
     }
-
-    public Type? ImplementationStrategyFactoryType { get; set; }
-
+    
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
     {
         IImplementationStrategyFactory? factory = null;
-
-        if ( this.ImplementationStrategyFactoryType != null )
-        {
-            if ( typeof(IImplementationStrategyFactory).IsAssignableFrom( this.ImplementationStrategyFactoryType ) )
-            {
-                var ctor = this.ImplementationStrategyFactoryType.GetConstructor( Type.EmptyTypes );
-
-                if ( ctor != null )
-                {
-                    factory = (IImplementationStrategyFactory) ctor.Invoke( null );
-                }
-                else
-                {
-                    context.Diagnostics.Report(
-                        DiagnosticDescriptors.ErrorTypeMustHaveAPublicParameterlessConstructor.WithArguments(
-                            nameof(this.ImplementationStrategyFactoryType) ) );
-                }
-            }
-            else
-            {
-                context.Diagnostics.Report(
-                    DiagnosticDescriptors.ErrorTypeMustImplementInterface.WithArguments(
-                        (nameof(this.ImplementationStrategyFactoryType), nameof(IImplementationStrategyFactory)) ) );
-            }
-        }
 
         return new[]
         {

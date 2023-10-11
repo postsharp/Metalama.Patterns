@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 // ReSharper disable EqualExpressionComparison
 #pragma warning disable CA2201
 #pragma warning disable SA1402
-namespace Metalama.Patterns.Memoize.AspectTests.Static;
+namespace Metalama.Patterns.Memoization.AspectTests.Static;
 internal static class TheClass
 {
   private static int _counter;
@@ -15,7 +15,7 @@ internal static class TheClass
     {
       string value;
       value = _counter++.ToString(CultureInfo.InvariantCulture);
-      global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoize.AspectTests.Static.TheClass._NonNullableMethod, value, null);
+      global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._NonNullableMethod, value, null);
     }
     return _NonNullableMethod;
   }
@@ -25,7 +25,7 @@ internal static class TheClass
     if (TheClass._NullableMethod == null)
     {
       var value = new StrongBox<string?>(TheClass.NullableMethod_Source());
-      global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoize.AspectTests.Static.TheClass._NullableMethod, value, null);
+      global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._NullableMethod, value, null);
     }
     return _NullableMethod!.Value;
   }
@@ -39,7 +39,7 @@ internal static class TheClass
       {
         string value;
         value = _counter++.ToString(CultureInfo.InvariantCulture);
-        global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoize.AspectTests.Static.TheClass._NonNullableProperty, value, null);
+        global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._NonNullableProperty, value, null);
       }
       return _NonNullableProperty;
     }
@@ -52,7 +52,7 @@ internal static class TheClass
       if (TheClass._NullableProperty == null)
       {
         var value = new StrongBox<string?>(TheClass.NullableProperty_Source);
-        global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoize.AspectTests.Static.TheClass._NullableProperty, value, null);
+        global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._NullableProperty, value, null);
       }
       return _NullableProperty!.Value;
     }
@@ -64,7 +64,7 @@ internal static class TheClass
     if (TheClass._MethodReturnsStruct == null)
     {
       var value = new StrongBox<Guid>(TheClass.MethodReturnsStruct_Source());
-      global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoize.AspectTests.Static.TheClass._MethodReturnsStruct, value, null);
+      global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._MethodReturnsStruct, value, null);
     }
     return _MethodReturnsStruct!.Value;
   }
@@ -77,7 +77,7 @@ internal static class TheClass
       if (TheClass._PropertyReturnsStruct == null)
       {
         var value = new StrongBox<Guid>(TheClass.PropertyReturnsStruct_Source);
-        global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoize.AspectTests.Static.TheClass._PropertyReturnsStruct, value, null);
+        global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._PropertyReturnsStruct, value, null);
       }
       return _PropertyReturnsStruct!.Value;
     }
