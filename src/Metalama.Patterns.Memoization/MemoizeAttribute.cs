@@ -8,7 +8,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using System.Runtime.CompilerServices;
 
-namespace Metalama.Patterns.Memoize;
+namespace Metalama.Patterns.Memoization;
 
 /// <summary>
 /// Custom attribute that, when added to a get-only property or non-void parameterless method, causes the result of this property or method
