@@ -216,7 +216,7 @@ internal static partial class DependencyGraph
             {
                 if ( !methodSymbol.IsStatic )
                 {
-                    isConfiguredAsSafeToCall ??= this._context.IsConfiguredAsSafeToCall( methodSymbol );
+                    isConfiguredAsSafeToCall ??= this._context.IsConfiguredAsSafe( methodSymbol );
 
                     if ( isConfiguredAsSafeToCall != true )
                     {
@@ -230,7 +230,7 @@ internal static partial class DependencyGraph
             {
                 // Only methods of primitive types are implicitly safe to call.
 
-                isConfiguredAsSafeToCall ??= this._context.IsConfiguredAsSafeToCall( methodSymbol );
+                isConfiguredAsSafeToCall ??= this._context.IsConfiguredAsSafe( methodSymbol );
 
                 if ( isConfiguredAsSafeToCall != true )
                 {

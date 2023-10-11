@@ -733,7 +733,7 @@ public class A
         var result = DependencyGraph.GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext(
-                isConfiguredAsSafeToCall: _ => true,
+                isConfiguredAsSafe: _ => true,
                 reportDiagnostic: diagnostics.Add,
                 treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -785,7 +785,7 @@ public class A
         var result = DependencyGraph.GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext(
-                isConfiguredAsSafeToCall: _ => true,
+                isConfiguredAsSafe: _ => true,
                 reportDiagnostic: diagnostics.Add,
                 treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
