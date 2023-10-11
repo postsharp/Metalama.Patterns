@@ -23,7 +23,7 @@ internal sealed class CharFormatter : Formatter<char>
     }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, char value )
+    public override void Format( UnsafeStringBuilder stringBuilder, char value )
     {
         stringBuilder.Append( '\'', value, '\'' );
     }
@@ -50,7 +50,7 @@ internal sealed class CharFormatter : Formatter<char>
             this._defaultCharFormatter = defaultCharFormatter;
         }
 
-        public override void Write( UnsafeStringBuilder stringBuilder, char value )
+        public override void Format( UnsafeStringBuilder stringBuilder, char value )
         {
             if ( value == '\0' )
             {

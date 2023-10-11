@@ -10,7 +10,7 @@ internal sealed class ByteFormatter : Formatter<byte>
     public ByteFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, byte value )
+    public override void Format( UnsafeStringBuilder stringBuilder, byte value )
     {
         stringBuilder.Append( value );
     }

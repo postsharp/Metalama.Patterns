@@ -21,7 +21,7 @@ public class IntegerFormatterTests : FormattersTestsBase
 
         foreach ( var value in values )
         {
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
 
             Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
@@ -39,7 +39,7 @@ public class IntegerFormatterTests : FormattersTestsBase
 
         foreach ( var value in values )
         {
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
 
             Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
@@ -57,7 +57,7 @@ public class IntegerFormatterTests : FormattersTestsBase
 
         foreach ( var value in values )
         {
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
 
             Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
@@ -75,7 +75,7 @@ public class IntegerFormatterTests : FormattersTestsBase
 
         foreach ( var value in values )
         {
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
 
             Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
@@ -116,7 +116,7 @@ public class IntegerFormatterTests : FormattersTestsBase
 
         foreach ( var value in values )
         {
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
 
             Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
@@ -164,7 +164,7 @@ public class IntegerFormatterTests : FormattersTestsBase
 
         foreach ( var value in values )
         {
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
 
             Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
@@ -229,7 +229,7 @@ public class IntegerFormatterTests : FormattersTestsBase
 
         foreach ( var value in values )
         {
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
 
             Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 
@@ -288,7 +288,7 @@ public class IntegerFormatterTests : FormattersTestsBase
 
         foreach ( var value in values )
         {
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
 
             Assert.Equal( value.ToString( CultureInfo.InvariantCulture ), stringBuilder.ToString() );
 

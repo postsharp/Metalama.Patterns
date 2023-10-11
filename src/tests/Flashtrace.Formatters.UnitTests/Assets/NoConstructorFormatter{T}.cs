@@ -6,7 +6,7 @@ internal class NoConstructorFormatter<T> : Formatter<IEnumerable<T>>
 {
     private NoConstructorFormatter() : base( null! ) { }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value )
     {
         throw new NotSupportedException();
     }

@@ -6,7 +6,7 @@ namespace Flashtrace.Formatters.UnitTests.Assets
     {
         public EnumerableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-        public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value )
+        public override void Format( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value )
         {
             stringBuilder.Append( '[' );
             stringBuilder.Append( string.Join( ",", value! ) );

@@ -19,7 +19,7 @@ public class TypeFormatterTests : FormattersTestsBase
     private void TestFormatter( Type type, string expectedString )
     {
         var sb = new UnsafeStringBuilder();
-        this.DefaultTypeFormatter.Write( sb, type );
+        this.DefaultTypeFormatter.Format( sb, type );
         Assert.Equal( expectedString, sb.ToString() );
     }
 

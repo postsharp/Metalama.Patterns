@@ -14,7 +14,7 @@ internal sealed class CollectionFormatter<T> : Formatter<IEnumerable<T>>
     public CollectionFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, IEnumerable<T>? value )
     {
         if ( value == null )
         {
@@ -40,7 +40,7 @@ internal sealed class CollectionFormatter<T> : Formatter<IEnumerable<T>>
 
             first = false;
 
-            formatter.Write( stringBuilder, item );
+            formatter.Format( stringBuilder, item );
         }
 
         if ( first )

@@ -5,13 +5,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using Metalama.Patterns.Caching.Implementation;
 
-namespace Metalama.Patterns.Caching.Aspects;
+namespace Metalama.Patterns.Caching.Aspects.Configuration;
 
 #pragma warning disable SA1623
 
 [RunTimeOrCompileTime]
-public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchicalOptions<INamedType>, IHierarchicalOptions<INamespace>,
-                                      IHierarchicalOptions<ICompilation>, ICacheItemConfiguration
+internal sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchicalOptions<INamedType>, IHierarchicalOptions<INamespace>,
+                                        IHierarchicalOptions<ICompilation>, ICacheItemConfiguration
 {
     // Default compile-time options are all unset (null) because those provided at run-time by the profile must take precedence.
     internal static CachingOptions DefaultCompileTimeOptions { get; } = new();
@@ -83,6 +83,9 @@ public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchic
 
     public bool? UseDependencyInjection { get; init; }
 
+    public IncrementalKeyedCollection<string, ParameterFilterRegistration> ParameterClassifiers { get; init; } =
+        IncrementalKeyedCollection<string, ParameterFilterRegistration>.Empty;
+
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (CachingOptions) changes;
@@ -95,7 +98,8 @@ public sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarchic
             Priority = other.Priority ?? this.Priority,
             ProfileName = other.ProfileName ?? this.ProfileName,
             SlidingExpiration = other.SlidingExpiration ?? this.SlidingExpiration,
-            UseDependencyInjection = other.UseDependencyInjection ?? this.UseDependencyInjection
+            UseDependencyInjection = other.UseDependencyInjection ?? this.UseDependencyInjection,
+            ParameterClassifiers = this.ParameterClassifiers.AddOrApplyChanges( other.ParameterClassifiers )
         };
     }
 

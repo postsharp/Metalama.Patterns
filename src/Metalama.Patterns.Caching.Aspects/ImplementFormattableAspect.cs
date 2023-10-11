@@ -9,10 +9,12 @@ using Metalama.Patterns.Caching.Formatters;
 
 namespace Metalama.Patterns.Caching.Aspects;
 
-internal class ImplementFormattableAspect : TypeAspect
+internal sealed class ImplementFormattableAspect : TypeAspect
 {
-    [Introduce( WhenExists = OverrideStrategy.Override )]
-    protected virtual void FormatCacheKey( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
+    [Template]
+#pragma warning disable CS0628 // New protected member declared in sealed type
+    protected void FormatCacheKey( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
+#pragma warning restore CS0628 // New protected member declared in sealed type
     {
         if ( meta.Target.Method.OverriddenMethod != null )
         {
@@ -53,7 +55,7 @@ internal class ImplementFormattableAspect : TypeAspect
         IExpression stringBuilder,
         IExpression formatterRepository )
     {
-        ((IFormatterRepository) formatterRepository.Value!).Get<T>().Write( stringBuilder.Value, fieldOrProperty.Value );
+        ((IFormatterRepository) formatterRepository.Value!).Get<T>().Format( stringBuilder.Value, fieldOrProperty.Value );
     }
 
     [UsedImplicitly]
@@ -66,5 +68,12 @@ internal class ImplementFormattableAspect : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         builder.Advice.ImplementInterface( builder.Target, typeof(IFormattable<CacheKeyFormatting>), whenExists: OverrideStrategy.Ignore );
+
+        builder.Advice.IntroduceMethod(
+            builder.Target,
+            nameof(this.FormatCacheKey),
+            whenExists: OverrideStrategy.Override,
+            buildMethod:
+            method => method.IsVirtual = !builder.Target.IsSealed );
     }
 }

@@ -2,7 +2,6 @@
 
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Formatters;
-using Metalama.Patterns.Caching.Implementation;
 using Xunit;
 
 // ReSharper disable RedundantTypeDeclarationBody
@@ -21,7 +20,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private static void AssertKey( FormatterRepository formatters, string expectedKey, object o )
         {
-            var cacheKeyBuilder = new CacheKeyBuilder( formatters );
+            var cacheKeyBuilder = new CacheKeyBuilder( formatters, new CacheKeyBuilderOptions() );
             var key = cacheKeyBuilder.BuildDependencyKey( o );
 
             Assert.Equal( expectedKey, key );
@@ -81,7 +80,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             public AnimalFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-            public override void Write( UnsafeStringBuilder stringBuilder, IAnimal? value )
+            public override void Format( UnsafeStringBuilder stringBuilder, IAnimal? value )
             {
                 stringBuilder.Append( "FormattedAnimal" );
             }
@@ -91,7 +90,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             public DogFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-            public override void Write( UnsafeStringBuilder stringBuilder, Dog? value )
+            public override void Format( UnsafeStringBuilder stringBuilder, Dog? value )
             {
                 stringBuilder.Append( "FormattedDog" );
             }

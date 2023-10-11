@@ -23,7 +23,7 @@ public class FormattersTests : FormattersTestsBase
     {
         public TestStructFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-        public override void Write( UnsafeStringBuilder stringBuilder, TestStruct value )
+        public override void Format( UnsafeStringBuilder stringBuilder, TestStruct value )
         {
             stringBuilder.Append( "formatter" );
         }

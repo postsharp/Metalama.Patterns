@@ -2,7 +2,7 @@
 
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Aspects;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -31,12 +31,12 @@ namespace Metalama.Patterns.Caching.Tests
                 return this.LastMethodKey = base.BuildMethodKey( metadata, instance, arguments );
             }
 
-            public MyCacheKeyBuilder( IFormatterRepository formatterRepository ) : base( formatterRepository ) { }
+            public MyCacheKeyBuilder( IFormatterRepository formatterRepository, CacheKeyBuilderOptions options ) : base( formatterRepository, options ) { }
         }
 
         private void DoTestMethod( string profileName, string expectedKey, Func<string> action )
         {
-            using var context = this.InitializeTest( profileName, b => b.WithKeyBuilder( f => new MyCacheKeyBuilder( f ) ) );
+            using var context = this.InitializeTest( profileName, b => b.WithKeyBuilder( ( f, o ) => new MyCacheKeyBuilder( f, o ) ) );
 
             var keyBuilder = (MyCacheKeyBuilder) CachingService.Default.KeyBuilder;
             action();
@@ -46,7 +46,7 @@ namespace Metalama.Patterns.Caching.Tests
 
         private async Task DoTestMethodAsync( string profileName, string expectedKey, Func<Task<string>> action )
         {
-            await using var context = this.InitializeTest( profileName, b => b.WithKeyBuilder( f => new MyCacheKeyBuilder( f ) ) );
+            await using var context = this.InitializeTest( profileName, b => b.WithKeyBuilder( ( f, o ) => new MyCacheKeyBuilder( f, o ) ) );
 
             var keyBuilder = (MyCacheKeyBuilder) CachingService.Default.KeyBuilder;
             await action();

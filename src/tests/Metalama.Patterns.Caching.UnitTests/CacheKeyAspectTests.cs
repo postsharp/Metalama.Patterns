@@ -28,7 +28,7 @@ public sealed class CacheKeyAspectTests : BaseCachingTests
     [Cache]
     private static int GetId( SomeClass c ) => c.Id;
 
-    private class SomeClass
+    private sealed class SomeClass
     {
         [CacheKey]
         public int Id { get; }
