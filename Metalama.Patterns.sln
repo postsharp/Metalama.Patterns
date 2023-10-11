@@ -47,6 +47,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Caching.A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Caching.Backend", "src\Metalama.Patterns.Caching.Backend\Metalama.Patterns.Caching.Backend.csproj", "{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Memoization", "src\Metalama.Patterns.Memoization\Metalama.Patterns.Memoization.csproj", "{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Memoization.AspectTests", "src\tests\Metalama.Patterns.Memoization.AspectTests\Metalama.Patterns.Memoization.AspectTests.csproj", "{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -180,6 +184,18 @@ Global
 		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
 		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -197,6 +213,7 @@ Global
 		{00C90E9E-93A3-490D-9BC4-D738F922811C} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{5F9908DA-29F6-4761-95C9-805182195BCA} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC2B6F6-5623-43F8-BBBB-ED8072670A80}
