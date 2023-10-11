@@ -36,7 +36,7 @@ public static class DependencyAnalysisExtensions
     }
 
     public static void ConfigureDependencyAnalysis(
-        this IAspectReceiver<IMethod> receiver,
+        this IAspectReceiver<IMember> receiver,
         Action<DependencyAnalysisOptionsBuilder> configure )
     {
         var builder = new DependencyAnalysisOptionsBuilder();

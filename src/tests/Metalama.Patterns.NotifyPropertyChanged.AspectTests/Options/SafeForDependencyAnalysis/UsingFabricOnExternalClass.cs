@@ -3,7 +3,7 @@
 using Metalama.Framework.Fabrics;
 using Metalama.Patterns.NotifyPropertyChanged.Options;
 
-namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.SafeToCallForDependencyAnalysis.UsingFabricOnExternalClass;
+namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.Options.SafeForDependencyAnalysis.UsingFabricOnExternalClass;
 
 public sealed class Fabric : ProjectFabric
 {

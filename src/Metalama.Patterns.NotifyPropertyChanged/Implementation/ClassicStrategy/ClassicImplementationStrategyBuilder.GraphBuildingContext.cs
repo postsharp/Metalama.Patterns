@@ -24,11 +24,25 @@ internal sealed partial class ClassicImplementationStrategyBuilder
 
         public bool HasReportedErrors { get; private set; }
 
-        public bool IsConfiguredAsSafeToCall( Microsoft.CodeAnalysis.IMethodSymbol method )
+        public bool IsConfiguredAsSafe( Microsoft.CodeAnalysis.ISymbol symbol )
         {
-            var methodDecl = this._strategyBuilder._builder.Target.Compilation.GetDeclaration( method ) as IMethod;
+            var decl = this._strategyBuilder._builder.Target.Compilation.GetDeclaration( symbol );
 
-            return methodDecl != null && methodDecl.Enhancements().GetOptions<DependencyAnalysisOptions>().IsSafe == true;
+            if ( decl == null )
+            {
+                return false;
+            }
+
+            var options = decl switch
+            {
+                ICompilation compilation => compilation.Enhancements().GetOptions<DependencyAnalysisOptions>(),
+                INamespace ns => ns.Enhancements().GetOptions<DependencyAnalysisOptions>(),
+                INamedType type => type.Enhancements().GetOptions<DependencyAnalysisOptions>(),
+                IMember member => member.Enhancements().GetOptions<DependencyAnalysisOptions>(),
+                _ => throw new NotImplementedException()
+            };
+            
+            return options.IsSafe == true;
         }
 
         public void ReportDiagnostic( IDiagnostic diagnostic, Microsoft.CodeAnalysis.Location? location = null )

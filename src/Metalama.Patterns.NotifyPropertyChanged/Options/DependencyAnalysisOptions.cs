@@ -11,7 +11,7 @@ public sealed record DependencyAnalysisOptions :
     IHierarchicalOptions<ICompilation>,
     IHierarchicalOptions<INamespace>,
     IHierarchicalOptions<INamedType>,
-    IHierarchicalOptions<IMethod>
+    IHierarchicalOptions<IMember>
 {
     public bool? IsSafe { get; init; }
 
