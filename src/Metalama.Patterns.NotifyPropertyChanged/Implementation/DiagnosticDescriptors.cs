@@ -145,13 +145,13 @@ internal static class DiagnosticDescriptors
             _category );
 
     /// <summary>
-    /// Method {0} cannot be analysed, and has not been configured as safe to call. Use [SafeToCallForDependencyAnalysis] or " + nameof(Options.NotifyPropertyChangedOptionsBuilder) + " via a fabric to configure {0} as safe to call.
+    /// Method {0} cannot be analysed, and has not been configured as safe to call. Use [SafeForDependencyAnalysis] or " + nameof(Options.NotifyPropertyChangedOptionsBuilder) + " via a fabric to configure {0} as safe to call.
     /// </summary>
     public static readonly DiagnosticDefinition<IMethodSymbol> WarningMethodIsNotSupportedForDependencyAnalysis =
         new(
             "LAMA5162",
             Warning,
-            "Method {0} cannot be analysed, and has not been configured as safe to call. Use [SafeToCallForDependencyAnalysis] or "
+            "Method {0} cannot be analysed, and has not been configured as safe to call. Use [SafeForDependencyAnalysis] or "
             + nameof(NotifyPropertyChangedOptionsBuilder) + " via a fabric to configure {0} as safe to call.",
             "Method call is not supported for dependency analysis.",
             _category );
