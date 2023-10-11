@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net471;net6.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;LamaDebug</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Net.Http" />
+    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+    <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
+    <Reference Include="WindowsBase" />
+  <!--
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework.Aero" />
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    -->
+  </ItemGroup>
+
+</Project>
