@@ -383,6 +383,9 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         }
     }
 
+    [CompileTime]
+    private record struct MemberAndNode( IFieldOrProperty FieldOrProperty, ClassicProcessingNode? Node );
+
     private void ProcessAutoPropertiesAndReferencedFields()
     {
         var target = this._builder.Target;
@@ -391,21 +394,21 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
         var toProcess =
             target.Properties
-                .Select( p => (FieldOrProperty: (IFieldOrProperty) p, Node: this.DependencyGraph.Children.FirstOrDefault( n => n.FieldOrProperty == p )) )
+                .Select( p => new MemberAndNode( p, this.DependencyGraph.Children.FirstOrDefault( n => n.FieldOrProperty == p ) ) )
                 .Concat( this._dependencyGraph.Value
                     .Children
                     .Where( n => n.FieldOrProperty.DeclarationKind == DeclarationKind.Field )
-                    .Select( n => (n.FieldOrProperty, Node: n) ) )
+                    .Select( n => new MemberAndNode( n.FieldOrProperty, n ) ) )
                 .Where(
-                    tup =>
-                        tup.FieldOrProperty is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !tup.FieldOrProperty.Attributes.Any( this._assets.IgnoreAutoChangeNotificationAttribute ) )
+                    memberAndNode =>
+                        memberAndNode.FieldOrProperty is { IsStatic: false, IsAutoPropertyOrField: true }
+                        && !memberAndNode.FieldOrProperty.Attributes.Any( this._assets.IgnoreAutoChangeNotificationAttribute ) )
                 .ToList();
 
-        foreach ( var tup in toProcess )
+        foreach ( var memberAndNode in toProcess )
         {
-            var fp = tup.FieldOrProperty!;
-            var node = tup.Node;
+            var fp = memberAndNode.FieldOrProperty;
+            var node = memberAndNode.Node;
             var propertyTypeInstrumentationKind = this._inpcInstrumentationKindLookup.Get( fp.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
 
