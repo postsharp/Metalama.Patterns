@@ -15,6 +15,7 @@ public class FieldBackedIntProperty : global::System.ComponentModel.INotifyPrope
       {
         this._x1 = value;
         this.OnPropertyChanged("X");
+        this.OnPropertyChanged("Y");
       }
     }
   }
@@ -26,10 +27,6 @@ public class FieldBackedIntProperty : global::System.ComponentModel.INotifyPrope
   }
   protected virtual void OnPropertyChanged(global::System.String propertyName)
   {
-    if (propertyName == "X")
-    {
-      this.OnPropertyChanged("Y");
-    }
     this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
   }
   [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { })]

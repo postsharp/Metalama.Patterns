@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
@@ -169,17 +170,44 @@ public partial class FieldBackedIntProperty
     public int P2 => this.P1;
 }
 
-[NotifyPropertyChanged(DiagnosticCommentVerbosity =3)]
-public partial class PrivateProperty
+[NotifyPropertyChanged]
+public partial class PrivateIntProperty
 {
     public void SetP1( int v ) => this.P1 = v;
     
-    public int P1 { get; set; }
+    private int P1 { get; set; }
 
     public int P2 => this.P1;
 }
 
-[NotifyPropertyChanged( DiagnosticCommentVerbosity = 3 )]
+[NotifyPropertyChanged]
+public partial class PrivateInpcProperty
+{
+    public PrivateInpcProperty()
+    {
+        this.P1 = new Simple();
+    }
+
+    public void SetP1( Simple v ) => this.P1 = v;
+
+    private Simple P1 { get; set; }
+
+    public int P2 => this.P1.S1;    
+}
+
+[ExcludeAspect( typeof( NotifyPropertyChangedAttribute ) )]
+public class PrivateInpcPropertyWithExposedOnChildPropertyChanged : PrivateInpcProperty
+{
+    protected override void OnChildPropertyChanged( string parentPropertyPath, string propertyName )
+    {
+        this.ExposeOnChildPropertyChanged?.Invoke( parentPropertyPath, propertyName );
+        base.OnChildPropertyChanged( parentPropertyPath, propertyName );
+    }
+
+    public event Action<string, string> ExposeOnChildPropertyChanged;
+}
+
+[NotifyPropertyChanged]
 public partial class ReferenceToNonInpcPropertyOfTargetType
 {
     public int P1 { get; set; }

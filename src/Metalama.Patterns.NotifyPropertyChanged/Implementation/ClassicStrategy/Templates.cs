@@ -86,15 +86,13 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
-                             .Select( n => n.Name )
-                             .OrderBy( n => n ) )
+                foreach ( var r in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private ).OrderBy( n => n.Name ) )
                 {
-                    ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                    ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
             }
 
-            if ( node?.FieldOrProperty.DeclarationKind != DeclarationKind.Field )
+            if ( node?.FieldOrProperty.DeclarationKind != DeclarationKind.Field && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
             {
                 ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
             }
@@ -214,11 +212,9 @@ internal sealed class Templates : ITemplateProvider
             }
 
             // Notify refs to the current node and any children without an update method.
-            foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
-                         .Select( n => n.Name )
-                         .OrderBy( n => n ) )
+            foreach ( var r in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private ).OrderBy( n => n.Name ) )
             {
-                ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }
 
             // Don't notify if we're joining on to existing NotifyChildPropertyChanged support from a base type, or we'll be stuck in a loop.
@@ -277,14 +273,15 @@ internal sealed class Templates : ITemplateProvider
         {
             meta.Target.FieldOrProperty.Value = value;
 
-            if ( isField )
+            if ( node != null )
             {
-                foreach ( var r in node!.ReferencedBy )
+                foreach ( var r in node.AllReferencedBy().Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private ).OrderBy( n => n.Name ) )
                 {
                     ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
             }
-            else
+            
+            if ( !isField && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
             {
                 ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
             }
@@ -295,14 +292,15 @@ internal sealed class Templates : ITemplateProvider
             {
                 meta.Target.FieldOrProperty.Value = value;
 
-                if ( isField )
+                if ( node != null )
                 {
-                    foreach ( var r in node!.ReferencedBy )
+                    foreach ( var r in node.AllReferencedBy().Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private ).OrderBy( n => n.Name ) )
                     {
                         ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                     }
                 }
-                else
+
+                if ( !isField && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
                 {
                     ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
                 }
@@ -329,11 +327,11 @@ internal sealed class Templates : ITemplateProvider
 
         foreach ( var node in ctx.DependencyGraph.Children )
         {
-            if ( node.FieldOrProperty.IsAutoPropertyOrField == true && node.FieldOrProperty.DeclaringType == ctx.TargetType )
+            if ( node.FieldOrProperty.DeclaringType == ctx.TargetType )
             {
                 if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
-                    meta.InsertComment( $"Skipping '{node.Name}': The field or auto property is defined by the current type." );
+                    meta.InsertComment( $"Skipping '{node.Name}': The field or property is defined by the current type." );
                 }
 
                 continue;
@@ -382,11 +380,12 @@ internal sealed class Templates : ITemplateProvider
 
             var childUpdateMethods = node.ChildUpdateMethods;
 
-            if ( refsToNotify.Count > 0
+            if ( ( refsToNotify.Count > 0 && refsToNotify.Any( n => n.FieldOrProperty.Accessibility != Accessibility.Private ) )
                  || childUpdateMethods.Count > 0
                  || node is { HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged } )
             {
                 var rootPropertyNamesToNotify = refsToNotify
+                    .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
                     .Select( n => n.Name )
                     .OrderBy( s => s );
 
@@ -612,9 +611,9 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         // No update method, notify here.
-                        foreach ( var refName in node.AllReferencedBy().Select( n => n.Name ).OrderBy( n => n ) )
+                        foreach ( var r in node.AllReferencedBy().Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private ).OrderBy( n => n.Name ) )
                         {
-                            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( refName );
+                            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                         }
                     }
 
@@ -720,11 +719,9 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var name in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
-                             .Select( n => n.Name )
-                             .OrderBy( n => n ) )
+                foreach ( var r in node.AllReferencedBy( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null ).Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private ).OrderBy( n => n.Name ) )
                 {
-                    ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                    ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
             }
         }
@@ -773,9 +770,9 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         // No update method, notify here.
-                        foreach ( var refName in childNode.AllReferencedBy().Select( n => n.Name ).OrderBy( n => n ) )
+                        foreach ( var r in childNode.AllReferencedBy().Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private ).OrderBy( n => n.Name ) )
                         {
-                            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( refName );
+                            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                         }
 
                         if ( nodeIsProperty )

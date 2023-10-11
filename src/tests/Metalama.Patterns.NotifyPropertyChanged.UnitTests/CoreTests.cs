@@ -222,13 +222,13 @@ public sealed class CoreTests : InpcTestsBase
 
         this.EventsFrom( () => v.SetValue( 42))
             .Should()
-            .Equal( "P2", "P1" );
+            .Equal( "P1", "P2" );
     }
 
-    [SkippableFact( Skip = "Pending bug fix" )]
-    public void ChangeToPrivatePropertyShouldNotBeNotified()
+    [Fact]
+    public void ChangeToPrivateIntPropertyShouldNotBeNotified()
     {
-        var v = new PrivateProperty();
+        var v = new PrivateIntProperty();
 
         this.SubscribeTo( v );
 
@@ -237,7 +237,57 @@ public sealed class CoreTests : InpcTestsBase
             .Equal( "P2" );
     }
 
-    [SkippableFact( Skip = "Pending bug fix" )]
+    [Fact]
+    public void ChangeToPrivateInpcPropertyShouldNotBeNotified()
+    {
+        var v = new PrivateInpcProperty();
+
+        this.SubscribeTo( v );
+
+        // Change private INPC property which P2 references. The change to private property P1 should not be notified.
+
+        var new_P1 = new Simple();
+
+        this.EventsFrom( () => v.SetP1( new_P1 ) )
+            .Should()
+            .Equal( "P2" );
+    }
+
+    [Fact]
+    public void ChangeToChildOfPrivateInpcPropertyShouldNotBeNotified()
+    {
+        var v = new PrivateInpcProperty();
+
+        var new_P1 = new Simple();
+        v.SetP1( new_P1 );
+
+        // Change child which P2 references. The change to private property P1 should not be notified.
+
+        this.SubscribeTo( v );
+
+        this.EventsFrom( () => new_P1.S1 = 42 )
+            .Should()
+            .Equal( "P2" );
+    }
+
+    [Fact]
+    public void ChangeToChildOfPrivateInpcPropertyShouldNotInvokeOnChildPropertyChanged()
+    {
+        var v = new PrivateInpcPropertyWithExposedOnChildPropertyChanged();
+
+        var new_P1 = new Simple();
+        v.SetP1( new_P1 );
+
+        var callsToOnChildPropertyChanged = new List<(string ParentPropertyPath, string PropertyName)>();
+        
+        v.ExposeOnChildPropertyChanged += ( p, n ) => callsToOnChildPropertyChanged.Add( (p, n) );
+
+        new_P1.S1 = 42;
+
+        callsToOnChildPropertyChanged.Should().BeEmpty();
+    }
+
+    [Fact]
     public void ReferenceToNonInpcPropertyOfTargetType()
     {
         var v = new ReferenceToNonInpcPropertyOfTargetType();
@@ -246,6 +296,6 @@ public sealed class CoreTests : InpcTestsBase
 
         this.EventsFrom( () => v.P1 = 42 )
             .Should()
-            .Equal( "P1", "P2" );
+            .Equal( "P2", "P1" );
     }
 }
