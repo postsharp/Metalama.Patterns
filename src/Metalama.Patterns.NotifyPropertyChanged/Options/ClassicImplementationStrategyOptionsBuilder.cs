@@ -23,5 +23,5 @@ public sealed class ClassicImplementationStrategyOptionsBuilder
         set => this._options = this._options with { EnableOnUnmonitoredObservablePropertyChangedMethod = value };
     }
 
-    public ClassicImplementationStrategyOptions Build() => this._options;
+    internal ClassicImplementationStrategyOptions Build() => this._options;
 }

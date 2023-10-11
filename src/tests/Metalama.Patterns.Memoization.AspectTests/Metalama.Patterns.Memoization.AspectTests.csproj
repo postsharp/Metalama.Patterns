@@ -1,12 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
         <Configurations>Debug;Release;LamaDebug</Configurations>
+        <StartupObject>Metalama.Patterns.Memoization.AspectTests.Instance.Program</StartupObject>
         <NoWarn>SA1649,SA1402,SA1649</NoWarn>
     </PropertyGroup>
 
-    <ItemGroup>        
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
@@ -14,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
+        <ProjectReference Include="..\..\Metalama.Patterns.Memoization\Metalama.Patterns.Memoization.csproj" />
     </ItemGroup>
 
 </Project>
