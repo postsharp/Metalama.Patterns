@@ -10,7 +10,7 @@ public sealed class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        var t = (INamedType) TypeFactory.GetType( typeof( ExternalClass ) );
+        var t = (INamedType) TypeFactory.GetType( typeof(ExternalClass) );
         amender.Outbound.SelectMany( c => c.Types.OfTypeDefinition( t ) ).ConfigureDependencyAnalysis( b => b.IsSafeToCall = true );
     }
 }

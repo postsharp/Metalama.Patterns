@@ -148,6 +148,8 @@ public partial class FieldBackedInpcProperty
 #pragma warning restore IDE0032 // Use auto property
 
 #pragma warning disable IDE0032 // Use auto property
+    
+    // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
     public Simple P1 => this._value;
 #pragma warning restore IDE0032 // Use auto property
 
@@ -164,6 +166,9 @@ public partial class FieldBackedIntProperty
 #pragma warning restore IDE0032 // Use auto property
 
 #pragma warning disable IDE0032 // Use auto property
+
+    // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+    // ReSharper disable once MemberCanBePrivate.Global
     public int P1 => this._value;
 #pragma warning restore IDE0032 // Use auto property
 
@@ -195,7 +200,7 @@ public partial class PrivateInpcProperty
     public int P2 => this.P1.S1;    
 }
 
-[ExcludeAspect( typeof( NotifyPropertyChangedAttribute ) )]
+[ExcludeAspect( typeof(NotifyPropertyChangedAttribute) )]
 public class PrivateInpcPropertyWithExposedOnChildPropertyChanged : PrivateInpcProperty
 {
     protected override void OnChildPropertyChanged( string parentPropertyPath, string propertyName )
@@ -204,7 +209,7 @@ public class PrivateInpcPropertyWithExposedOnChildPropertyChanged : PrivateInpcP
         base.OnChildPropertyChanged( parentPropertyPath, propertyName );
     }
 
-    public event Action<string, string> ExposeOnChildPropertyChanged;
+    public event Action<string, string>? ExposeOnChildPropertyChanged;
 }
 
 [NotifyPropertyChanged]

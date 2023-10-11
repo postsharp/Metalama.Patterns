@@ -43,8 +43,10 @@ internal static class RoslynExtensions
                         _ => throw new NotSupportedException()
                     };
                 }
+
             case SymbolKind.NamedType:
                 return Accessibility.Internal;
+
             default:
                 throw new NotSupportedException();
         }

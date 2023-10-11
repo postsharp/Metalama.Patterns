@@ -152,8 +152,9 @@ internal static partial class DependencyGraph
                     if ( this.IsLocalInstanceMember( firstSymbol ) )
                     {
                         var stemCount = symbols.TakeWhile(
-                            sr => sr.Symbol.Kind == SymbolKind.Property
-                                || (sr.Symbol.Kind == SymbolKind.Field && sr.Symbol.EffectiveAccessibility() == Accessibility.Private) ).Count();
+                                sr => sr.Symbol.Kind == SymbolKind.Property
+                                      || (sr.Symbol.Kind == SymbolKind.Field && sr.Symbol.EffectiveAccessibility() == Accessibility.Private) )
+                            .Count();
 
                         if ( stemCount > 0 )
                         {
@@ -388,13 +389,14 @@ internal static partial class DependencyGraph
                     if ( symbol is IFieldSymbol fieldSymbol )
                     {
                         if ( !(!fieldSymbol.IsStatic && fieldSymbol.EffectiveAccessibility() == Accessibility.Private)
-                            && !fieldSymbol.ContainingType.IsPrimitiveType( this._assets )
-                            && !(fieldSymbol.IsReadOnly && fieldSymbol.Type.IsPrimitiveType( this._assets ))
-                            && !this._context.IsConfiguredAsSafe( symbol ) )
+                             && !fieldSymbol.ContainingType.IsPrimitiveType( this._assets )
+                             && !(fieldSymbol.IsReadOnly && fieldSymbol.Type.IsPrimitiveType( this._assets ))
+                             && !this._context.IsConfiguredAsSafe( symbol ) )
                         {
                             this._context.ReportDiagnostic(
                                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
-                                    .WithArguments( "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported." ),
+                                    .WithArguments(
+                                        "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported." ),
                                 node.GetLocation() );
                         }
                     }

@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests;
 
-public sealed class DelegateGraphBuildingContext : DependencyGraph.IGraphBuildingContext
+internal sealed class DelegateGraphBuildingContext : DependencyGraph.IGraphBuildingContext
 {
     private readonly Func<ISymbol, bool>? _isConfiguredAsSafe;
     private readonly Action<IDiagnostic, Location?>? _reportDiagnostic;
@@ -24,7 +24,7 @@ public sealed class DelegateGraphBuildingContext : DependencyGraph.IGraphBuildin
         Func<ISymbol, bool>? isConfiguredAsSafe = null,
         Action<IDiagnostic, Location?>? reportDiagnostic = null,
         Func<ITypeSymbol, bool>? treatAsImplementingInpc = null,
-        Func<ISymbol, bool>? isAutoPropertyOrField = null)
+        Func<ISymbol, bool>? isAutoPropertyOrField = null )
     {
         this._isConfiguredAsSafe = isConfiguredAsSafe;
         this._reportDiagnostic = reportDiagnostic;

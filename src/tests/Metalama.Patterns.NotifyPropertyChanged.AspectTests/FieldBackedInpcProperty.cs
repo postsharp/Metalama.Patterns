@@ -1,5 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.FieldBackedInpcProperty;
 
 [NotifyPropertyChanged]

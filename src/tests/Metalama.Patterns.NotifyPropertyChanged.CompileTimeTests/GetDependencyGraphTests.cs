@@ -1371,7 +1371,6 @@ public class A
         // this.TestOutput.WriteLine( result.ToString() );
     }
 
-
     [Trait( "Supported", "Yes" )]
     [Fact]
     public void PrivateMutableNonPrimitiveFieldOfTargetType()
@@ -1459,5 +1458,4 @@ public class A
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
     }
-
 }

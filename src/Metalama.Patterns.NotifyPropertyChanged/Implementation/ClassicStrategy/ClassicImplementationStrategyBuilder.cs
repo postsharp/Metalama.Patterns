@@ -395,10 +395,11 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         var toProcess =
             target.Properties
                 .Select( p => new MemberAndNode( p, this.DependencyGraph.Children.FirstOrDefault( n => n.FieldOrProperty == p ) ) )
-                .Concat( this._dependencyGraph.Value
-                    .Children
-                    .Where( n => n.FieldOrProperty.DeclarationKind == DeclarationKind.Field )
-                    .Select( n => new MemberAndNode( n.FieldOrProperty, n ) ) )
+                .Concat(
+                    this._dependencyGraph.Value
+                        .Children
+                        .Where( n => n.FieldOrProperty.DeclarationKind == DeclarationKind.Field )
+                        .Select( n => new MemberAndNode( n.FieldOrProperty, n ) ) )
                 .Where(
                     memberAndNode =>
                         memberAndNode.FieldOrProperty is { IsStatic: false, IsAutoPropertyOrField: true }
@@ -427,6 +428,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                         {
                             handlerField = this.GetOrCreateHandlerField( node! );
                             subscribeMethod = this.GetOrCreateRootPropertySubscribeMethod( node! );
+                            
                             if ( fp.DeclarationKind == DeclarationKind.Property )
                             {
                                 this._propertyPathsForOnChildPropertyChangedMethodAttribute.Add( fp.Name );

@@ -388,7 +388,7 @@ internal sealed class Templates : ITemplateProvider
 
             var childUpdateMethods = node.ChildUpdateMethods;
 
-            if ( ( refsToNotify.Count > 0 && refsToNotify.Any( n => n.FieldOrProperty.Accessibility != Accessibility.Private ) )
+            if ( (refsToNotify.Count > 0 && refsToNotify.Any( n => n.FieldOrProperty.Accessibility != Accessibility.Private ))
                  || childUpdateMethods.Count > 0
                  || node is { HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged } )
             {

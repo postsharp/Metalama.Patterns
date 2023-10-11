@@ -220,7 +220,7 @@ public sealed class CoreTests : InpcTestsBase
 
         this.SubscribeTo( v );
 
-        this.EventsFrom( () => v.SetValue( 42))
+        this.EventsFrom( () => v.SetValue( 42 ) )
             .Should()
             .Equal( "P1", "P2" );
     }
