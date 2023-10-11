@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
 
-public class XUnitLoggerFactory : ILoggerFactory
+public class XUnitLoggerFactory : IFlashtraceLoggerFactory
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
@@ -14,5 +14,5 @@ public class XUnitLoggerFactory : ILoggerFactory
         this._testOutputHelper = testOutputHelper;
     }
 
-    public IRoleLoggerFactory ForRole( string role ) => new XUnitLogger( role, this._testOutputHelper );
+    public IFlashtraceRoleLoggerFactory ForRole( FlashtraceRole role ) => new XUnitLogger( role, this._testOutputHelper );
 }

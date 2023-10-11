@@ -16,5 +16,5 @@ public interface IFormatter<in T> : IFormatter
     /// </summary>
     /// <param name="stringBuilder">The target <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="value">The value to be formatted.</param>
-    void Write( UnsafeStringBuilder stringBuilder, T? value );
+    void Format( UnsafeStringBuilder stringBuilder, T? value );
 }

@@ -163,5 +163,13 @@ internal static class CachingDiagnosticDescriptors
                 "The [Cache] aspect can be applied at most once to a method.",
                 "[Cache] aspect applied more than once.",
                 _category );
+
+        public static readonly DiagnosticDefinition<(IMethod Method, string Classifier, string ParameterName)> ParameterClassifiedAsIneligible =
+            new(
+                "LAMA5111",
+                Error,
+                "The [Cache] aspect can be applied to the method '{0}' because the classifier '{1}' marked the  parameter '{2}' as ineligible.",
+                "[Cache] aspect cannot be applied to the method because a parameter is ineligible.",
+                _category );
     }
 }

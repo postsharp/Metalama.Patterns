@@ -11,7 +11,7 @@ internal sealed class NullableFormatter<T> : Formatter<T?>
     public NullableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, T? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, T? value )
     {
         if ( value == null )
         {
@@ -22,7 +22,7 @@ internal sealed class NullableFormatter<T> : Formatter<T?>
         }
         else
         {
-            this.Repository.Get<T>().Write( stringBuilder, value.Value );
+            this.Repository.Get<T>().Format( stringBuilder, value.Value );
         }
     }
 }

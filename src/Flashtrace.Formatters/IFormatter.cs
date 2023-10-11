@@ -20,7 +20,7 @@ public interface IFormatter
     /// </summary>
     /// <param name="stringBuilder">The target <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="value">The value to be formatted.</param>
-    void Write( UnsafeStringBuilder stringBuilder, object? value );
+    void Format( UnsafeStringBuilder stringBuilder, object? value );
 
     /// <summary>
     /// Gets the formatter attributes.

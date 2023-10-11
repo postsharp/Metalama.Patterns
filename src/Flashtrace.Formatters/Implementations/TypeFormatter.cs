@@ -39,7 +39,7 @@ internal sealed class TypeFormatter : Formatter<Type>
     }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, Type? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, Type? value )
     {
         this.WriteCore( stringBuilder, value );
     }
@@ -72,12 +72,12 @@ internal sealed class TypeFormatter : Formatter<Type>
 
             if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) )
             {
-                this.Write( stringBuilder, type.GetGenericArguments()[0] );
+                this.Format( stringBuilder, type.GetGenericArguments()[0] );
                 stringBuilder.Append( '?' );
             }
             else if ( type.IsArray )
             {
-                this.Write( stringBuilder, type.GetElementType() );
+                this.Format( stringBuilder, type.GetElementType() );
                 stringBuilder.Append( '[' );
 
                 for ( var i = 1; i < type.GetArrayRank(); i++ )
@@ -111,7 +111,7 @@ internal sealed class TypeFormatter : Formatter<Type>
                         appendComma = true;
                     }
 
-                    this.Write( stringBuilder, genericArguments[i] );
+                    this.Format( stringBuilder, genericArguments[i] );
                 }
 
                 stringBuilder.Append( '>' );

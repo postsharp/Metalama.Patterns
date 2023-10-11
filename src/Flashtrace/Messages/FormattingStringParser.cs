@@ -6,7 +6,7 @@ using System.Globalization;
 namespace Flashtrace.Messages;
 
 /// <summary>
-/// Parses the formatting string for messages of the <see cref="LogLevelSource"/> and <see cref="LogActivity{TActivityDescription}"/> classes.
+/// Parses the formatting string for messages of the <see cref="FlashtraceLevelSource"/> and <see cref="LogActivity{TActivityDescription}"/> classes.
 /// </summary>
 internal ref struct FormattingStringParser
 {

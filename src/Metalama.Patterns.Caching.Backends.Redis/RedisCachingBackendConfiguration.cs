@@ -67,10 +67,7 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
     /// </summary>
     public bool SupportsDependencies { get; init; }
 
-    /// <summary>
-    /// Gets a value indicating whether a <see cref="MemoryCachingBackend"/> should be added in front of the <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    public bool IsLocallyCached { get; init; }
+    public bool RunGarbageCollector { get; init; }
 
     /// <summary>
     /// Gets the default expiration time of cached items.

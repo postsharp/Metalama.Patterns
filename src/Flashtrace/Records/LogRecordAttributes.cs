@@ -12,7 +12,7 @@ namespace Flashtrace.Records;
 public enum LogRecordAttributes
 {
     /// <summary>
-    /// Legacy value set by <see cref="ILogger"/> implementations. No information is provided by the caller.
+    /// Legacy value set by <see cref="IFlashtraceLogger"/> implementations. No information is provided by the caller.
     /// </summary>
     None = 0,
 

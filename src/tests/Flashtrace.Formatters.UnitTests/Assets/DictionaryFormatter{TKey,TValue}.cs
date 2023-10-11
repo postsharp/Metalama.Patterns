@@ -8,7 +8,7 @@ namespace Flashtrace.Formatters.UnitTests.Assets
     {
         public DictionaryFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-        public override void Write( UnsafeStringBuilder stringBuilder, IDictionary<TKey, TValue>? value )
+        public override void Format( UnsafeStringBuilder stringBuilder, IDictionary<TKey, TValue>? value )
         {
             stringBuilder.Append(
                 "{" + string.Join( ",", value!.Select( kvp => string.Format( CultureInfo.InvariantCulture, "{0}:{1}", kvp.Key, kvp.Value ) ) ) + "}" );

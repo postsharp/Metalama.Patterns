@@ -18,6 +18,7 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         "Metalama.Patterns.Caching.Backends.Azure.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Backends.Redis.$(PackageVersion).nupkg",
         "Metalama.Patterns.Contracts.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Memoization.$(PackageVersion).nupkg",
         "Flashtrace.$(PackageVersion).nupkg",
         "Flashtrace.Formatters.$(PackageVersion).nupkg" ),
     Dependencies = new[] { DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions },

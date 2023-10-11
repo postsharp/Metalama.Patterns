@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace;
 using Metalama.Patterns.Caching.Aspects;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -13,15 +15,19 @@ public sealed class DependencyInjectionTests : BaseCachingTests
     public DependencyInjectionTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
     [Fact]
-    public void TestDependencyInjection()
+    public async Task TestDependencyInjection()
     {
         ServiceCollection serviceCollection = new();
-        var cachingService = new CachingService( this.ServiceProvider );
         var backend = new TestingCacheBackend( "test", this.ServiceProvider );
-        cachingService.DefaultBackend = backend;
-        serviceCollection.AddSingleton<ICachingService>( cachingService );
+        serviceCollection.AddLogging();
+        serviceCollection.AddFlashtrace( b => b.EnabledRoles.Add( FlashtraceRole.Caching ) );
+        serviceCollection.AddCaching( b => b.WithBackend( backend ) );
         serviceCollection.AddSingleton<C>();
-        var c = (C) serviceCollection.BuildServiceProvider().GetService( typeof(C) )!;
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        await using var initializer = serviceProvider.GetRequiredService<ICachingService>();
+        await initializer.InitializeAsync();
+
+        var c = (C) serviceProvider.GetService( typeof(C) )!;
         _ = c.Method();
 
         Assert.NotNull( backend.LastCachedItem );

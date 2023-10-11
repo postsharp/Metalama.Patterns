@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// immediately return to the caller.
 /// </summary>
 [PublicAPI]
-public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
+internal class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
 {
     private static readonly ValueTask _finishedTask = new( Task.CompletedTask );
     private readonly BackgroundTaskScheduler _taskScheduler;
@@ -21,17 +21,16 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     /// <summary>
     /// Initializes a new instance of the <see cref="NonBlockingCachingBackendEnhancer"/> class.
     /// </summary>
-    public NonBlockingCachingBackendEnhancer( CachingBackend underlyingBackend ) : base(
-        underlyingBackend,
-        new CachingBackendConfiguration { ServiceProvider = underlyingBackend.Configuration.ServiceProvider } )
+    public NonBlockingCachingBackendEnhancer( CachingBackend underlyingBackend ) : base( underlyingBackend )
     {
-        this._taskScheduler = new BackgroundTaskScheduler( underlyingBackend.Configuration.ServiceProvider, true );
+        this._taskScheduler = new BackgroundTaskScheduler( underlyingBackend.ServiceProvider, true );
     }
 
     private void EnqueueBackgroundTask( Func<Task> task ) => this._taskScheduler.EnqueueBackgroundTask( task );
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore() => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync().AsTask() );
+    protected override void ClearCore( ClearCacheOptions options ) => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync().AsTask() );
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key )
@@ -69,9 +68,9 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
+    protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
     {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync( cancellationToken ).AsTask() );
+        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync( options, cancellationToken ).AsTask() );
 
         return _finishedTask;
     }
@@ -95,5 +94,7 @@ public class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
         public Features( CachingBackendFeatures underlyingBackendFeatures ) : base( underlyingBackendFeatures ) { }
 
         public override bool Blocking => false;
+
+        public override bool NonBlockingModifierNotRecommended => false;
     }
 }

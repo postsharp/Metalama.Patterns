@@ -35,7 +35,7 @@ internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
         }
     }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, TValue? value )
     {
         if ( value == null )
         {
@@ -53,7 +53,7 @@ internal sealed class DynamicFormatter<TValue> : Formatter<TValue>
                     string.Format( CultureInfo.InvariantCulture, "Infinite loop in resolving formatters for type {0}.", value.GetType() ) );
             }
 
-            formatter.Write( stringBuilder, value );
+            formatter.Format( stringBuilder, value );
         }
     }
 }

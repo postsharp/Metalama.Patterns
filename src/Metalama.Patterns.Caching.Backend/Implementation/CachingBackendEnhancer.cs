@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
+
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
@@ -18,7 +20,9 @@ public abstract class CachingBackendEnhancer : CachingBackend
     /// </summary>
     /// <param name="underlyingBackend">The next <see cref="CachingBackend"/> in the chain of responsibility.</param>
     /// <param name="enhancerConfiguration"></param>
-    protected CachingBackendEnhancer( CachingBackend underlyingBackend, CachingBackendConfiguration? enhancerConfiguration ) : base( enhancerConfiguration )
+    protected CachingBackendEnhancer( CachingBackend underlyingBackend, CachingBackendConfiguration? enhancerConfiguration = null ) : base(
+        enhancerConfiguration,
+        underlyingBackend.ServiceProvider )
     {
         this.UnderlyingBackend = underlyingBackend;
 
@@ -31,6 +35,18 @@ public abstract class CachingBackendEnhancer : CachingBackend
                 this.UnderlyingBackend.DependencyInvalidated += this.OnBackendDependencyInvalidated;
             }
         }
+    }
+
+    protected override void InitializeCore()
+    {
+        base.InitializeCore();
+        this.UnderlyingBackend.Initialize();
+    }
+
+    protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
+    {
+        await base.InitializeCoreAsync( cancellationToken );
+        await this.UnderlyingBackend.InitializeAsync( cancellationToken );
     }
 
     /// <summary>
@@ -75,8 +91,9 @@ public abstract class CachingBackendEnhancer : CachingBackend
     /// <inheritdoc />
     protected override bool ContainsDependencyCore( string key ) => this.UnderlyingBackend.ContainsDependency( key );
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore() => this.UnderlyingBackend.Clear();
+    protected override void ClearCore( ClearCacheOptions options ) => this.UnderlyingBackend.Clear( options );
 
     /// <inheritdoc />
     protected override ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
@@ -103,7 +120,8 @@ public abstract class CachingBackendEnhancer : CachingBackend
         => this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken );
 
     /// <inheritdoc />
-    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken ) => this.UnderlyingBackend.ClearAsync( cancellationToken );
+    protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
+        => this.UnderlyingBackend.ClearAsync( options, cancellationToken );
 
     /// <inheritdoc />
     protected override void DisposeCore( bool disposing )

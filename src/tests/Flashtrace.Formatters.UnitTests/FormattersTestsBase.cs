@@ -23,17 +23,25 @@ public abstract class FormattersTestsBase
     /// <summary>
     /// Gets a new instance of <see cref="FormatterRepository"/>.
     /// </summary>
-    protected static FormatterRepository GetNewRepository() => new( TestRole.Instance );
+    protected static FormatterRepository CreateRepository( Action<FormatterRepository.Builder>? build = null, bool includeDefaultFormatters = true )
+        => FormatterRepository.Create(
+            TestRole.Instance,
+            builder =>
+            {
+                if ( !includeDefaultFormatters )
+                {
+                    builder.Clear();
+                }
 
-    /// <summary>
-    /// Gets a shared instance of <see cref="FormatterRepository"/>.
-    /// </summary>
-    protected FormatterRepository DefaultRepository { get; } = GetNewRepository();
+                build?.Invoke( builder );
+            } );
 
-    /// <summary>
-    /// Formats a value using <see cref="DefaultRepository"/>.
-    /// </summary>
-    protected string? FormatDefault<T>( T? value ) => this.Format( this.DefaultRepository, value );
+    protected string? FormatDefault<T>( T? value )
+    {
+        var formatters = CreateRepository( includeDefaultFormatters: true );
+
+        return this.Format( formatters, value );
+    }
 
     /// <summary>
     /// Formats a value using the specified <see cref="IFormatterRepository"/>.
@@ -41,7 +49,7 @@ public abstract class FormattersTestsBase
     protected string? Format<T>( IFormatterRepository formatterRepository, T? value )
     {
         var stringBuilder = new UnsafeStringBuilder( 1024 );
-        formatterRepository.Get<T>().Write( stringBuilder, value );
+        formatterRepository.Get<T>().Format( stringBuilder, value );
         var result = stringBuilder.ToString();
 
         if ( this.EnableLogging )
