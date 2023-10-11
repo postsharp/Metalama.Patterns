@@ -45,6 +45,7 @@ internal static class RedisFactory
         string? prefix = null,
         bool supportsDependencies = false,
         bool collector = false,
+        bool nonBlocking = false,
         IServiceProvider? serviceProvider = null,
         bool locallyCached = false )
     {
@@ -64,7 +65,12 @@ internal static class RedisFactory
         var backend = CachingBackend.Create(
             b =>
             {
-                var redis = b.Redis( connection ).WithConfiguration( configuration );
+                var redis = (DistributedCachingBackendBuilder) b.Redis( connection ).WithConfiguration( configuration );
+
+                if ( nonBlocking )
+                {
+                    redis = redis.NonBlocking();
+                }
 
                 if ( locallyCached )
                 {
