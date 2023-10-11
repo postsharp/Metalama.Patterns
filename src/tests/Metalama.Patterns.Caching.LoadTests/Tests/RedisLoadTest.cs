@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
-using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.LoadTests.Tests;
@@ -14,7 +14,7 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
     {
         Console.WriteLine( "collector init" );
 
-        var collectors = new RedisCacheDependencyGarbageCollector[configuration.CollectorsCount];
+        var collectors = new IAsyncDisposable[configuration.CollectorsCount];
 
         try
         {
@@ -24,7 +24,9 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 
                 var collectorConnection = CreateConnection();
 
-                collectors[i] = RedisCacheDependencyGarbageCollector.Create( collectorConnection, collectorConfiguration );
+                collectors[i] = RedisCachingBackendFactory.CreateRedisCacheDependencyGarbageCollector(
+                    collectorConnection,
+                    configuration: collectorConfiguration );
             }
 
             base.Test( configuration, duration );
@@ -57,6 +59,6 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 
         var configuration = new RedisCachingBackendConfiguration() { KeyPrefix = this._keyPrefix, OwnsConnection = true, SupportsDependencies = true };
 
-        return RedisCachingBackend.Create( connection, configuration );
+        return CachingBackend.Create( b => b.Redis( connection ).WithConfiguration( configuration ) );
     }
 }

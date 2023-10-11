@@ -6,9 +6,11 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Patterns.Caching.Aspects.Configuration;
 using Metalama.Patterns.Caching.Aspects.Helpers;
 
 #if NET6_0_OR_GREATER
@@ -27,15 +29,15 @@ namespace Metalama.Patterns.Caching.Aspects;
 /// </summary>
 /// <remarks>
 /// <para>There are several ways to configure the behavior of the <see cref="CacheAttribute"/> aspect: you can set the properties of the
-/// <see cref="CacheAttribute"/> class, such as <see cref="BaseCachingAttribute.AbsoluteExpiration"/> or <see cref="BaseCachingAttribute.SlidingExpiration"/>. You can
+/// <see cref="CacheAttribute"/> class, such as <see cref="CachingBaseAttribute.AbsoluteExpiration"/> or <see cref="CachingBaseAttribute.SlidingExpiration"/>. You can
 /// add the <see cref="CachingConfigurationAttribute"/> custom attribute to the declaring type, a base type, or the declaring assembly.
-/// Finally, you can define a profile by setting the <see cref="BaseCachingAttribute.ProfileName"/> property and configure the profile at run time
+/// Finally, you can define a profile by setting the <see cref="CachingBaseAttribute.ProfileName"/> property and configure the profile at run time
 /// by accessing the <see cref="CachingService.Profiles"/> collection of the <see cref="ICachingService"/> class.</para>
 /// <para>Use the <see cref="NotCacheKeyAttribute"/> custom attribute to exclude a parameter from being a part of the cache key.</para>
-/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="ICachingService.Invalidate"/> method.</para>
+/// <para>To invalidate a cached method, see <see cref="InvalidateCacheAttribute"/> and the <see cref="CachingServiceExtensions.Invalidate{TReturn,TParam1}"/> method.</para>
 /// </remarks>
 [PublicAPI]
-public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
+public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
 {
     void IEligible<IMethod>.BuildEligibility( IEligibilityBuilder<IMethod> builder )
     {
@@ -63,10 +65,42 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
         }
 
         var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.Definition.SpecialType ?? SpecialType.None;
-
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
-
         var options = builder.Target.Enhancements().GetOptions<CachingOptions>();
+
+        // Apply parameter classifiers.
+        var hasClassificationError = false;
+
+        foreach ( var parameter in builder.Target.Parameters )
+        {
+            var excluded = false;
+
+            foreach ( var classifier in options.ParameterClassifiers )
+            {
+                var classification = classifier.Classifier.GetClassification( parameter );
+                
+                if ( classification.IsIneligible )
+                {
+                    builder.Diagnostics.Report( classification.GetDiagnostic( parameter, classifier.Classifier ) );
+                    hasClassificationError = true;
+                }
+                else if ( classification == CacheParameterClassification.ExcludeFromCacheKey )
+                {
+                    excluded = true;
+                }
+            }
+
+            // Excluded.
+            if ( excluded && !parameter.Attributes.OfAttributeType( typeof(NotCacheKeyAttribute) ).Any() )
+            {
+                builder.Advice.IntroduceAttribute( parameter, AttributeConstruction.Create( typeof(NotCacheKeyAttribute) ) );
+            }
+        }
+
+        if ( hasClassificationError )
+        {
+            return;
+        }
 
         // Introduce a field of type CachedMethodRegistration.
         var registrationFieldPrefix = $"_cacheRegistration_{builder.Target.Name}";
@@ -165,7 +199,7 @@ public sealed class CacheAttribute : BaseCachingAttribute, IAspect<IMethod>
 
         builder.Advice.AddInitializer(
             builder.Target.DeclaringType,
-            nameof(this.CachedMethodRegistrationInitializer),
+            nameof(CachedMethodRegistrationInitializer),
             InitializerKind.BeforeTypeConstructor,
             args: new { method = builder.Target, field = registrationField.Declaration, awaitableResultType, options } );
 

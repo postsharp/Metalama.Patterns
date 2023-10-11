@@ -12,7 +12,7 @@ public sealed class InvariantAttribute : MethodAspect
     {
         builder.MustNotBeStatic();
         builder.ReturnType().MustBe( typeof(void) );
-        builder.MustSatisfy( m => m.Parameters.Count == 0, o => $"{0} must not have any parameters" );
+        builder.MustSatisfy( m => m.Parameters.Count == 0, o => $"{o} must not have any parameters" );
     }
 
     [Introduce( Accessibility = Accessibility.Protected, IsVirtual = true, WhenExists = OverrideStrategy.Override )]
@@ -35,7 +35,7 @@ public sealed class InvariantAttribute : MethodAspect
 
             return;
         }
-        
+
         builder.Outbound.Select( x => x.DeclaringType ).RequireAspect<CheckInvariantsAspect>();
     }
 }

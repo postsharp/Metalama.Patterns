@@ -3,6 +3,7 @@
 using Flashtrace;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Backends;
 using System.Globalization;
 
 #if DEBUG
@@ -18,7 +19,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 {
     private static volatile int _allBackgroundTaskExceptions;
 
-    private readonly LogSource _logger;
+    private readonly FlashtraceSource _logger;
     private readonly AwaitableEvent _backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
     private readonly bool _sequential;
     private readonly object _sync = new();
@@ -42,7 +43,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     public BackgroundTaskScheduler( IServiceProvider? serviceProvider, bool sequential = false )
     {
         this._sequential = sequential;
-        this._logger = serviceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
+        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     /// <summary>

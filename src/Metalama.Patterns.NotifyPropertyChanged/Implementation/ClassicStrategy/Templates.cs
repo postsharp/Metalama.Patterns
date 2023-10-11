@@ -111,7 +111,7 @@ internal sealed class Templates : ITemplateProvider
         [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
         [CompileTime] ClassicProcessingNode node,
         [CompileTime] IField handlerField )
-        where TValue : INotifyPropertyChanged
+        where TValue : class, INotifyPropertyChanged
     {
         var ctx = deferredExecutionContext.Value;
         var inpcImplementationKind = node.PropertyTypeInpcInstrumentationKind;

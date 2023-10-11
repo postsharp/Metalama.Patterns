@@ -26,7 +26,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// </list>
 /// </remarks>
 [PublicAPI]
-public sealed class MemoryCachingBackend : CachingBackend
+internal sealed class MemoryCachingBackend : CachingBackend
 {
     private readonly IMemoryCache _cache;
     private readonly Func<PSCacheItem, long>? _sizeCalculator;
@@ -48,8 +48,9 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
     /// </summary>
-    public MemoryCachingBackend( MemoryCachingBackendConfiguration? serviceProvider = null ) : this(
-        new MemoryCache( new MemoryCacheOptions() ),
+    internal MemoryCachingBackend( MemoryCachingBackendConfiguration? configuration = null, IServiceProvider? serviceProvider = null ) : this(
+        null,
+        configuration,
         serviceProvider ) { }
 
     /// <summary>
@@ -58,9 +59,15 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// </summary>
     /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
     /// <param name="configuration"></param>
-    public MemoryCachingBackend( IMemoryCache cache, MemoryCachingBackendConfiguration? configuration = null ) : base( configuration )
+    /// <param name="serviceProvider"></param>
+    internal MemoryCachingBackend(
+        IMemoryCache? cache,
+        MemoryCachingBackendConfiguration? configuration = null,
+        IServiceProvider? serviceProvider = null ) : base(
+        configuration,
+        serviceProvider )
     {
-        this._cache = cache;
+        this._cache = cache ?? new MemoryCache( new MemoryCacheOptions() );
         this._sizeCalculator = configuration?.SizeCalculator;
     }
 
@@ -379,8 +386,9 @@ public sealed class MemoryCachingBackend : CachingBackend
         return this._cache.Get( GetDependencyKey( key ) ) != null;
     }
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore()
+    protected override void ClearCore( ClearCacheOptions options )
     {
         if ( this._cache is MemoryCache classicMemoryCache )
         {
@@ -415,5 +423,7 @@ public sealed class MemoryCachingBackend : CachingBackend
         }
 
         public override bool Clear { get; }
+
+        public override bool NonBlockingModifierNotRecommended => false;
     }
 }

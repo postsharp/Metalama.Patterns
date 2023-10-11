@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using Metalama.Patterns.Caching.Backends;
 using System.Collections.Concurrent;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
@@ -43,7 +44,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         Type valueType,
         ICacheItemConfiguration configuration,
         Func<object?> valueProvider,
-        LogSource logger,
+        FlashtraceSource logger,
         bool isAsync )
     {
         if ( !backend.SupportedFeatures.Events )
@@ -76,7 +77,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         {
             try
             {
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     var value = subscription.ValueProvider.Invoke();
 
@@ -98,7 +99,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         {
             try
             {
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     var invokeValueProviderTask = (Task<object?>?) subscription.ValueProvider.Invoke();
                     var value = invokeValueProviderTask == null ? null : await invokeValueProviderTask;
@@ -126,7 +127,7 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         ICacheItemConfiguration Configuration,
         Type ReturnType,
         Func<object?> ValueProvider,
-        LogSource Logger,
+        FlashtraceSource Logger,
         bool IsAsync );
 
     private void Unsubscribe()

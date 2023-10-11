@@ -10,7 +10,7 @@ internal sealed class UInt64Formatter : Formatter<ulong>
     public UInt64Formatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, ulong value )
+    public override void Format( UnsafeStringBuilder stringBuilder, ulong value )
     {
         stringBuilder.Append( value );
     }

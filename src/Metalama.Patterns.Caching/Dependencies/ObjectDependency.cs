@@ -20,7 +20,7 @@ public sealed class ObjectDependency : ICacheDependency
     public object Object { get; }
 
     /// <inheritdoc />
-    public string GetCacheKey() => this._cachingService.GetDependencyKey( this.Object );
+    public string GetCacheKey() => this._cachingService.KeyBuilder.BuildDependencyKey( this.Object );
 
     internal ObjectDependency( [Required] object dependencyObject, ICachingService cachingService )
     {

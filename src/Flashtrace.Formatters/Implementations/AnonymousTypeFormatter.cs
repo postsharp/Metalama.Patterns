@@ -31,7 +31,7 @@ internal sealed class AnonymousTypeFormatter : IFormatter
     public FormatterAttributes Attributes => FormatterAttributes.Normal;
 
     /// <inheritdoc/>
-    public void Write( UnsafeStringBuilder stringBuilder, object? value )
+    public void Format( UnsafeStringBuilder stringBuilder, object? value )
     {
         var accessor = this._accessorFactory( value );
 
@@ -51,7 +51,7 @@ internal sealed class AnonymousTypeFormatter : IFormatter
                 stringBuilder.Append( property.Key );
                 stringBuilder.Append( ' ', '=', ' ' );
 
-                this.Repository.Get( property.Value.GetType() ).Write( stringBuilder, property.Value );
+                this.Repository.Get( property.Value.GetType() ).Format( stringBuilder, property.Value );
             }
 
             i++;

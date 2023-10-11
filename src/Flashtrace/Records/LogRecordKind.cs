@@ -55,7 +55,7 @@ public enum LogRecordKind
     /// </summary>
     /// <remarks>
     /// Emitted by:
-    ///     <see cref="LogLevelSource.Write{T}(in T, in Options.WriteMessageOptions)"/> and related overloads.
+    ///     <see cref="WriteMessageOptions"/> and related overloads.
     /// </remarks>
     Message = 1 << 7,
 
@@ -64,7 +64,7 @@ public enum LogRecordKind
     /// </summary>
     /// <remarks>
     /// Emitted by:
-    ///     <see cref="LogLevelSource.OpenActivity{T}(in T, in Options.OpenActivityOptions)"/> and
+    ///     <see cref="OpenActivityOptions"/> and
     ///     <see cref="LogActivity{TActivityDescription}"/> and related overloads.
     /// </remarks>
     ActivityEntry = 1 << 8,
@@ -80,11 +80,11 @@ public enum LogRecordKind
     IteratorMoveNext = 1 << 10,
 
     /// <summary>
-    /// Emitted by <see cref="LogSource.WriteExecutionPoint()"/>.
+    /// Emitted by <see cref="FlashtraceSource.WriteExecutionPoint()"/>.
     /// </summary>
     /// <remarks>
     /// Emitted by:
-    ///     <see cref="LogSource.WriteExecutionPoint()"/>.
+    ///     <see cref="FlashtraceSource.WriteExecutionPoint()"/>.
     /// </remarks>
     ExecutionPoint = 1 << 11,
 
@@ -99,7 +99,7 @@ public enum LogRecordKind
     /// <remarks>
     /// Emitted by:
     ///     <see cref="LogActivity{TActivityDescription}.SetException(Exception, in CloseActivityOptions)"/>,
-    ///     <see cref="LogActivity{TActivityDescription}.SetOutcome{TMessage}(LogLevel, in TMessage, Exception?, in CloseActivityOptions)"/>,
+    ///     <see cref="LogActivity{TActivityDescription}.SetOutcome{TMessage}(FlashtraceLevel, in TMessage, Exception?, in CloseActivityOptions)"/>,
     ///     <see cref="LogActivity{TActivityDescription}.SetResult{TResult}(TResult, in CloseActivityOptions)"/> and
     ///     <see cref="LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>.
     /// </remarks>

@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Flashtrace.Records;
 
 /// <summary>
-/// Options of the <see cref="IContextLocalLogger.GetRecordBuilder"/> method.
+/// Options of the <see cref="IFlashtraceLocalLogger.GetRecordBuilder"/> method.
 /// 
 /// </summary>
 [PublicAPI]
@@ -14,7 +14,7 @@ public readonly struct LogRecordOptions
     /// <summary>
     /// Gets the severity of the log record.
     /// </summary>
-    public LogLevel Level { get; }
+    public FlashtraceLevel Level { get; }
 
     /// <summary>
     /// Gets the kind of log the record (typically <see cref="LogRecordKind.ActivityEntry"/>, <see cref="LogRecordKind.ActivityExit"/>
@@ -40,7 +40,7 @@ public readonly struct LogRecordOptions
     /// <param name="kind"></param>
     /// <param name="attributes"></param>
     /// <param name="data"></param>
-    internal LogRecordOptions( LogLevel level, LogRecordKind kind, LogRecordAttributes attributes, in LogEventData data )
+    internal LogRecordOptions( FlashtraceLevel level, LogRecordKind kind, LogRecordAttributes attributes, in LogEventData data )
     {
         this.Level = level;
         this.Kind = kind;

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Aspects;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Locking;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
@@ -8,35 +9,45 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests
 {
-    public sealed class CacheLockTests : BaseCachingTests, IDisposable
+    public sealed class CacheLockTests : BaseCachingTests
     {
         private int _counter;
 
-        public CacheLockTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
-        {
-            Console.WriteLine( "TestInitialize" );
-            this.InitializeTestWithCachingBackend( "CacheLockTests" );
-            CachingService.Default.Profiles["LocalLock"].LockManager = new LocalLockManager();
-        }
+        public CacheLockTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
-        public void Dispose()
+        private CachingTestContext<CachingBackend> InitializeTest(
+            int acquireLockTimeout = -1,
+            IAcquireLockTimeoutStrategy? acquireLockTimeoutStrategy = null )
         {
-            TestProfileConfigurationFactory.DisposeTest();
+            return this.InitializeTest(
+                "CacheLockTests",
+                b => b.WithProfile(
+                    new CachingProfile( "LocalLock" )
+                    {
+                        LockManager = new LocalLockManager(),
+                        AcquireLockTimeout = TimeSpan.FromMilliseconds( acquireLockTimeout ),
+                        AcquireLockTimeoutStrategy = acquireLockTimeoutStrategy ?? new DefaultAcquireLockTimeoutStrategy()
+                    } ),
+                passServiceProvider: false /* Disable caching because it's too slow */ );
         }
 
         [Fact]
-        public void TestSyncLock()
+        public async Task TestSyncLock()
         {
-            var t1 = Task.Run( () => this.TestLoop() );
-            var t2 = Task.Run( () => this.TestLoop() );
+            await using var context = this.InitializeTest();
 
-            t1.Wait();
-            t2.Wait();
+            var t1 = Task.Run( () => this.TestLoop( 1 ) );
+            var t2 = Task.Run( () => this.TestLoop( 2 ) );
+
+            await t1;
+            await t2;
         }
 
         [Fact]
         public async Task TestAsyncLock()
         {
+            await using var context = this.InitializeTest();
+
             var t1 = Task.Run( this.TestLoopAsync );
             var t2 = Task.Run( this.TestLoopAsync );
 
@@ -44,32 +55,26 @@ namespace Metalama.Patterns.Caching.Tests
         }
 
         [Fact]
-        public void TestSyncLockTimeout()
+        public async Task TestSyncLockTimeout()
         {
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( 2 );
+            await using var context = this.InitializeTest( 2 );
 
             Task t1 = Task.Run( () => this.CachedMethod( 100 ) );
             Task t2 = Task.Run( () => this.CachedMethod( 100 ) );
 
             try
             {
-                t1.Wait();
-                t2.Wait();
+                await t1;
+                await t2;
 
                 AssertEx.Fail( "An exception was expected" );
             }
-            catch ( AggregateException e )
-            {
-                Assert.NotNull( e.InnerExceptions[0] );
-                Assert.IsType<TimeoutException>( e.InnerExceptions[0] );
-            }
-
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
+            catch ( TimeoutException ) { }
 
             // After a method completes with a timeout, the next call should be successful.
             try
             {
-                t1.Wait();
+                await t1;
             }
             catch
             {
@@ -78,7 +83,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             try
             {
-                t2.Wait();
+                await t2;
             }
             catch
             {
@@ -91,7 +96,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncLockTimeout()
         {
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( 50 );
+            await using var context = this.InitializeTest( 50 );
 
             var barrier = new AsyncBarrier( 2 );
             Task t1 = Task.Run( async () => await this.CachedMethodAsync( 100, barrier ) );
@@ -112,8 +117,6 @@ namespace Metalama.Patterns.Caching.Tests
                 AssertEx.Fail( "An exception was expected" );
             }
             catch ( TimeoutException ) { }
-
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
 
             // After a method completes with a timeout, the next call should be successful.
             try
@@ -140,19 +143,15 @@ namespace Metalama.Patterns.Caching.Tests
         private static readonly TimeSpan _globalTimeout = TimeSpan.FromSeconds( 10 );
 
         [Fact]
-        public void TestSyncLockTimeoutIgnoreLock()
+        public async Task TestSyncLockTimeoutIgnoreLock()
         {
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( 2 );
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = new IgnoreLockStrategy();
+            await using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
 
             Task t1 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
             Task t2 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
 
-            Assert.True( t1.Wait( _globalTimeout ), "Timeout" );
-            Assert.True( t2.Wait( _globalTimeout ), "Timeout" );
-
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
+            Assert.True( await t1.WithTimeout( _globalTimeout ), "Timeout" );
+            Assert.True( await t2.WithTimeout( _globalTimeout ), "Timeout" );
 
             // After a method completes with a timeout, the next call should be successful.
             this.CachedMethod();
@@ -161,8 +160,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncLockTimeoutAsync()
         {
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( 2 );
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = new IgnoreLockStrategy();
+            await using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
 
             var barrier = new AsyncBarrier( 2 );
             var t1State = 0;
@@ -194,19 +192,23 @@ namespace Metalama.Patterns.Caching.Tests
 
             Assert.Equal( 0, this._counter );
 
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeout = TimeSpan.FromMilliseconds( -1 );
-            CachingService.Default.Profiles["LocalLock"].AcquireLockTimeoutStrategy = null;
-
             await this.CachedMethodAsync();
         }
 
-        private void TestLoop()
+        private void TestLoop( int id )
         {
             for ( var i = 0; i < 1000; i++ )
             {
+                if ( i % 20 == 0 )
+                {
+                    this.TestOutputHelper.WriteLine( $"{id}: {100m * i / 1000m}% done." );
+                }
+
                 this.CachedMethod( 0 );
                 CachingService.Default.Invalidate( this.CachedMethod, 0, (Barrier?) null, true );
             }
+
+            this.TestOutputHelper.WriteLine( "TestLoop: 100% done." );
         }
 
         [Cache( ProfileName = "LocalLock" )]
@@ -233,6 +235,11 @@ namespace Metalama.Patterns.Caching.Tests
         {
             for ( var i = 0; i < 1000; i++ )
             {
+                if ( i % 20 == 0 )
+                {
+                    this.TestOutputHelper.WriteLine( $"{100m * i / 1000m}% done." );
+                }
+
                 await this.CachedMethodAsync( 0 );
                 await CachingService.Default.InvalidateAsync( this.CachedMethodAsync, 0, (AsyncBarrier?) null, true );
             }

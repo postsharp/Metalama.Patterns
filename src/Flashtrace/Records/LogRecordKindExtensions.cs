@@ -98,10 +98,10 @@ public static class LogRecordKindExtensions
 
     /// <summary>
     /// Determines whether the current <see cref="LogRecordKind"/> represents a record emitted by the
-    /// <see cref="LogLevelSource"/> class, which is typically invoked by user code.
+    /// <see cref="FlashtraceLevelSource"/> class, which is typically invoked by user code.
     /// </summary>
     /// <param name="kind">A <see cref="LogRecordKind"/>.</param>
-    /// <returns><c>true</c> if <paramref name="kind"/> is a record emitted by the <see cref="LogLevelSource"/> class,
+    /// <returns><c>true</c> if <paramref name="kind"/> is a record emitted by the <see cref="FlashtraceLevelSource"/> class,
     /// otherwise <c>false</c>.</returns>
     public static bool IsUser( this LogRecordKind kind )
     {

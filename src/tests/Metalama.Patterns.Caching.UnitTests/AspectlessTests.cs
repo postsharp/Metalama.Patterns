@@ -13,9 +13,7 @@ public sealed class AspectlessTests : BaseCachingTests
     [Fact]
     public void TestCacheHit()
     {
-        this.InitializeTestWithCachingBackend( nameof(AspectlessTests) );
-
-        try
+        using ( this.InitializeTest( nameof(AspectlessTests) ) )
         {
             var o = new C();
 
@@ -23,10 +21,6 @@ public sealed class AspectlessTests : BaseCachingTests
             var value2 = o.Get();
 
             Assert.Equal( value1, value2 );
-        }
-        finally
-        {
-            TestProfileConfigurationFactory.DisposeTest();
         }
     }
 

@@ -6,7 +6,7 @@ internal class ZeroFormatter<T> : Formatter<T>
 {
     public ZeroFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, T? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, T? value )
     {
         stringBuilder.Append( 0 );
     }

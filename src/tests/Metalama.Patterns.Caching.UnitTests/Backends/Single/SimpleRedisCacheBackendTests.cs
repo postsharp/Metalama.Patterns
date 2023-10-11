@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Backends.Redis;
-using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using Xunit;
@@ -14,8 +13,11 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
-    public SimpleRedisCacheBackendTests( TestContext testContext, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
-        testContext,
+    public SimpleRedisCacheBackendTests(
+        CachingTestOptions cachingTestOptions,
+        RedisSetupFixture redisSetupFixture,
+        ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
         testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
@@ -29,23 +31,16 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
 
     protected override bool TestDependencies => false;
 
-    protected override CachingBackend CreateBackend()
-    {
-        return this.CreateBackend( null );
-    }
+    protected override CheckAfterDisposeCachingBackend CreateBackend() => Task.Run( this.CreateBackendAsync ).Result;
 
-    protected override async Task<CachingBackend> CreateBackendAsync()
+    protected override async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync()
     {
         return await this.CreateBackendAsync( null );
     }
 
-    private CachingBackend CreateBackend( string? keyPrefix )
+    private async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync( string? keyPrefix )
     {
-        return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, keyPrefix );
-    }
-
-    private async Task<CachingBackend> CreateBackendAsync( string? keyPrefix )
-    {
-        return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, keyPrefix );
+        return new CheckAfterDisposeCachingBackend(
+            await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, keyPrefix, serviceProvider: this.ServiceProvider ) );
     }
 }

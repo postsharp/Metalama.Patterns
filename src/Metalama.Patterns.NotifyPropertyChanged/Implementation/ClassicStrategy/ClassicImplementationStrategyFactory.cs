@@ -7,7 +7,7 @@ using Metalama.Framework.Project;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation.ClassicStrategy;
 
 [CompileTime]
-public sealed class ClassicImplementationStrategyFactory : IImplementationStrategyFactory
+internal sealed class ClassicImplementationStrategyFactory : IImplementationStrategyFactory
 {
     private ClassicImplementationStrategyFactory() { }
 

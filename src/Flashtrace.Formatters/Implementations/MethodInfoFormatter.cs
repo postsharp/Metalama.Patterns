@@ -42,7 +42,7 @@ internal sealed class MethodInfoFormatter : Formatter<MethodBase>
     public MethodInfoFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, MethodBase? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, MethodBase? value )
     {
         if ( value == null )
         {
@@ -74,11 +74,11 @@ internal sealed class MethodInfoFormatter : Formatter<MethodBase>
                         if ( value.DeclaringType.Name[0] == '<' )
                         {
                             // Don't write the name of the closure class, if any.
-                            this.TypeFormatter.Write( stringBuilder, value.DeclaringType.DeclaringType );
+                            this.TypeFormatter.Format( stringBuilder, value.DeclaringType.DeclaringType );
                         }
                         else
                         {
-                            this.TypeFormatter.Write( stringBuilder, value.DeclaringType );
+                            this.TypeFormatter.Format( stringBuilder, value.DeclaringType );
                         }
 
                         stringBuilder.Append( '.' );
@@ -101,7 +101,7 @@ internal sealed class MethodInfoFormatter : Formatter<MethodBase>
                 }
             }
 
-            this.TypeFormatter.Write( stringBuilder, value.DeclaringType );
+            this.TypeFormatter.Format( stringBuilder, value.DeclaringType );
             stringBuilder.Append( '.' );
 
             stringBuilder.Append( methodName );
@@ -118,7 +118,7 @@ internal sealed class MethodInfoFormatter : Formatter<MethodBase>
                         stringBuilder.Append( ',' );
                     }
 
-                    this.TypeFormatter.Write( stringBuilder, genericArguments[i] );
+                    this.TypeFormatter.Format( stringBuilder, genericArguments[i] );
                 }
 
                 stringBuilder.Append( '>' );
@@ -134,7 +134,7 @@ internal sealed class MethodInfoFormatter : Formatter<MethodBase>
                     stringBuilder.Append( ',' );
                 }
 
-                this.TypeFormatter.Write( stringBuilder, parameters[i].ParameterType );
+                this.TypeFormatter.Format( stringBuilder, parameters[i].ParameterType );
             }
 
             stringBuilder.Append( ')' );

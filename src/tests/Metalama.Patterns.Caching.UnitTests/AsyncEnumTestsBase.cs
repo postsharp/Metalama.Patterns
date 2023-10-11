@@ -2,6 +2,7 @@
 
 #if NETCOREAPP3_0_OR_GREATER
 using Metalama.Patterns.Caching.Aspects;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.TestHelpers;
 using System.Text;
 using Xunit.Abstractions;
@@ -10,6 +11,8 @@ namespace Metalama.Patterns.Caching.Tests;
 
 public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
 {
+    private readonly CachingTestContext<CachingBackend> _context;
+
     protected StringBuilder StringBuilder { get; }
 
     protected TestClass Instance { get; }
@@ -19,14 +22,14 @@ public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
         this.StringBuilder = new StringBuilder();
         this.Instance = new TestClass( this.Log );
 
-        this.InitializeTestWithCachingBackend( nameof(AsyncEnumerableTests) );
+        this._context = this.InitializeTest( nameof(AsyncEnumerableTests) );
     }
 
     public void Dispose()
     {
         this.Instance.FinishBlockingTask();
-        TestProfileConfigurationFactory.DisposeTest();
         this.TestOutputHelper.WriteLine( this.StringBuilder.ToString() );
+        this._context.Dispose();
     }
 
     // ReSharper disable once MemberCanBePrivate.Global

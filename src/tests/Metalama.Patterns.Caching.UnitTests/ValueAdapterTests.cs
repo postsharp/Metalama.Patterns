@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Aspects;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -9,14 +10,16 @@ namespace Metalama.Patterns.Caching.Tests
 {
     public sealed class ValueAdapterTests : BaseCachingTests, IDisposable
     {
+        private readonly CachingTestContext<CachingBackend> _context;
+
         public ValueAdapterTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {
-            this.InitializeTestWithCachingBackend( "Caching.Tests.ValueAdapterTests" );
+            this._context = this.InitializeTest( "Caching.Tests.ValueAdapterTests" );
         }
 
         public void Dispose()
         {
-            TestProfileConfigurationFactory.DisposeTest();
+            this._context.Dispose();
         }
 
         [Fact]

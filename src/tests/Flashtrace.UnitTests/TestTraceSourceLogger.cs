@@ -13,11 +13,11 @@ public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.
     // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class TraceSourceFixture : IDisposable
     {
-        private readonly TraceSource _traceSource = TraceSourceLogger.GetTraceSource();
+        private readonly TraceSource _traceSource = TraceSourceFlashtraceLogger.GetTraceSource( FlashtraceRole.Logging );
 
         internal MyListener Listener { get; } = new();
 
-        internal LogSource LogSource { get; } = new TraceSourceLoggerFactory().GetLogSource( "test" );
+        internal FlashtraceSource Source { get; } = new TraceSourceLoggerFactory().GetFlashtraceSource( "test" );
 
         public TraceSourceFixture()
         {
@@ -42,11 +42,11 @@ public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.
     [Fact]
     public void Test_TextLogger_Write()
     {
-        this._fixture.LogSource.WithLevel( LogLevel.Error ).Write( FormattedMessageBuilder.Formatted( "Error" ) );
-        this._fixture.LogSource.WithLevel( LogLevel.Warning ).Write( FormattedMessageBuilder.Formatted( "Warning" ) );
-        this._fixture.LogSource.WithLevel( LogLevel.Critical ).Write( FormattedMessageBuilder.Formatted( "Critical" ) );
-        this._fixture.LogSource.WithLevel( LogLevel.Debug ).Write( FormattedMessageBuilder.Formatted( "Debug" ) );
-        this._fixture.LogSource.WithLevel( LogLevel.Trace ).Write( FormattedMessageBuilder.Formatted( "Trace" ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Error ).Write( FormattedMessageBuilder.Formatted( "Error" ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Warning ).Write( FormattedMessageBuilder.Formatted( "Warning" ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Critical ).Write( FormattedMessageBuilder.Formatted( "Critical" ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Debug ).Write( FormattedMessageBuilder.Formatted( "Debug" ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Trace ).Write( FormattedMessageBuilder.Formatted( "Trace" ) );
         Assert.Equal( 5, this._fixture.Listener.Messages.Count );
         Assert.Equal( "Error", this._fixture.Listener.Messages[0] );
     }
@@ -54,7 +54,7 @@ public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.
     [Fact]
     public void Test_TextLogger_ActivitySuccess()
     {
-        using ( var activity = this._fixture.LogSource.Default.OpenActivity( FormattedMessageBuilder.Formatted( "Activity" ) ) )
+        using ( var activity = this._fixture.Source.Default.OpenActivity( FormattedMessageBuilder.Formatted( "Activity" ) ) )
         {
             activity.SetSuccess();
         }
@@ -67,30 +67,30 @@ public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.
     [Fact]
     public void Test_TextLogger_ActivityFailure()
     {
-        using ( var activity = this._fixture.LogSource.Default.OpenActivity( FormattedMessageBuilder.Formatted( "Activity" ) ) )
+        using ( var activity = this._fixture.Source.Default.OpenActivity( FormattedMessageBuilder.Formatted( "Activity" ) ) )
         {
-            activity.SetOutcome( LogLevel.Error, FormattedMessageBuilder.Formatted( "Oops: {Hello}", "Hello" ) );
+            activity.SetOutcome( FlashtraceLevel.Error, FormattedMessageBuilder.Formatted( "Oops: {Hello}", "Hello" ) );
         }
 
         Assert.Equal( 2, this._fixture.Listener.Messages.Count );
         Assert.Equal( "Activity: Starting", this._fixture.Listener.Messages[0] );
-        Assert.Equal( "Activity: Oops: Hello", this._fixture.Listener.Messages[1] );
+        Assert.Equal( "Activity: Returning, Oops: Hello", this._fixture.Listener.Messages[1] );
     }
 
     [Fact]
     public void Test_SemanticLogger_Write()
     {
-        this._fixture.LogSource.WithLevel( LogLevel.Error ).Write( SemanticMessageBuilder.Semantic( "Error", ("a", "b"), ("b", "c") ) );
-        this._fixture.LogSource.WithLevel( LogLevel.Warning ).Write( SemanticMessageBuilder.Semantic( "Warning", ("a", "b") ) );
-        this._fixture.LogSource.WithLevel( LogLevel.Critical ).Write( SemanticMessageBuilder.Semantic( "Critical", ("a", "b") ) );
-        this._fixture.LogSource.WithLevel( LogLevel.Debug ).Write( SemanticMessageBuilder.Semantic( "Debug", ("a", "b") ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Error ).Write( SemanticMessageBuilder.Semantic( "Error", ("a", "b"), ("b", "c") ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Warning ).Write( SemanticMessageBuilder.Semantic( "Warning", ("a", "b") ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Critical ).Write( SemanticMessageBuilder.Semantic( "Critical", ("a", "b") ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Debug ).Write( SemanticMessageBuilder.Semantic( "Debug", ("a", "b") ) );
 
         // NB: Had to add the Semantic( string name, in (string Name, object Value) parameter1 ) overload to get this to
         //     resolve correctly, otherwise the compiler was trying (incorrectly) to use the
         //     Semantic(string messageName, (string Name, object Value)[] parameters) overload (note there's no 'params')
         //     instead of the expected overload Semantic<T>( string name, in (string Name, T Value) parameter1 ) where T
         //     is object.
-        this._fixture.LogSource.WithLevel( LogLevel.Trace ).Write( SemanticMessageBuilder.Semantic( "Trace", ("a", null) ) );
+        this._fixture.Source.WithLevel( FlashtraceLevel.Trace ).Write( SemanticMessageBuilder.Semantic( "Trace", ("a", null) ) );
         Assert.Equal( 5, this._fixture.Listener.Messages.Count );
         Assert.Equal( "Error, a = b, b = c", this._fixture.Listener.Messages[0] );
     }
@@ -98,7 +98,7 @@ public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.
     [Fact]
     public void Test_SemanticLogger_ActivitySuccess()
     {
-        using ( var activity = this._fixture.LogSource.Default.OpenActivity( SemanticMessageBuilder.Semantic( "Activity" ) ) )
+        using ( var activity = this._fixture.Source.Default.OpenActivity( SemanticMessageBuilder.Semantic( "Activity" ) ) )
         {
             activity.SetSuccess();
         }
@@ -111,9 +111,9 @@ public sealed class TestTraceSourceLogger : IClassFixture<TestTraceSourceLogger.
     [Fact]
     public void Test_SemanticLogger_ActivityFailure()
     {
-        using ( var activity = this._fixture.LogSource.Default.OpenActivity( SemanticMessageBuilder.Semantic( "Activity", ("a", "b") ) ) )
+        using ( var activity = this._fixture.Source.Default.OpenActivity( SemanticMessageBuilder.Semantic( "Activity", ("a", "b") ) ) )
         {
-            activity.SetOutcome( LogLevel.Error, SemanticMessageBuilder.Semantic( "Failed", ("c", "d") ) );
+            activity.SetOutcome( FlashtraceLevel.Error, SemanticMessageBuilder.Semantic( "Failed", ("c", "d") ) );
         }
 
         Assert.Equal( 2, this._fixture.Listener.Messages.Count );

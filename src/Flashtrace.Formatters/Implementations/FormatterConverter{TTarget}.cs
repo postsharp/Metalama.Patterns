@@ -22,9 +22,9 @@ internal class FormatterConverter<TTarget> : Formatter<TTarget>
             ? null
             : formatter as IFormatter<TTarget> ?? this._cache.GetOrAdd( formatter, f => new FormatterConverter<TTarget>( f, this.Repository ) );
 
-    public override void Write( UnsafeStringBuilder stringBuilder, TTarget? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, TTarget? value )
     {
-        this._wrapped.Write( stringBuilder, value );
+        this._wrapped.Format( stringBuilder, value );
     }
 
     public override FormatterAttributes Attributes => this._wrapped.Attributes | FormatterAttributes.Converter;

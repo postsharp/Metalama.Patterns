@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// A <see cref="CachingBackend"/> for Redis, based on the <c>StackExchange.Redis</c> client.
 /// </summary>
 [PublicAPI]
-public class RedisCachingBackend : CachingBackend
+internal class RedisCachingBackend : CachingBackend
 {
     private const string _itemRemovedEvent = "item-removed";
 
@@ -56,7 +56,10 @@ public class RedisCachingBackend : CachingBackend
     /// </summary>
     /// <param name="connection">The Redis connection.</param>
     /// <param name="configuration">Configuration.</param>
-    internal RedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration ) : base( configuration )
+    /// <param name="serviceProvider"></param>
+    internal RedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration, IServiceProvider? serviceProvider ) : base(
+        configuration,
+        serviceProvider )
     {
         this.Connection = connection;
         this._ownsConnection = configuration.OwnsConnection;
@@ -65,27 +68,25 @@ public class RedisCachingBackend : CachingBackend
         this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
 
         this._createSerializerFunc = configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
-        this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
+        this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
     }
 
     internal RedisCachingBackend(
         IConnectionMultiplexer connection,
         IDatabase database,
         RedisKeyBuilder keyBuilder,
-        RedisCachingBackendConfiguration configuration ) : base( configuration )
+        RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider ) : base( configuration, serviceProvider )
     {
         this.Connection = connection;
         this.Database = database;
         this._keyBuilder = keyBuilder;
         this._ownsConnection = false;
-        this._backgroundTaskScheduler = new BackgroundTaskScheduler( configuration.ServiceProvider );
+        this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
         this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
     }
 
-    /// <summary>
-    /// Initializes the current <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    internal void Init()
+    protected override void InitializeCore()
     {
         this._notificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
@@ -93,15 +94,12 @@ public class RedisCachingBackend : CachingBackend
             ImmutableArray.Create( this._keyBuilder.EventsChannel, this._keyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
-            this.Configuration.ServiceProvider );
+            this.ServiceProvider );
+
+        base.InitializeCore();
     }
 
-    /// <summary>
-    /// Asynchronously initializes the current <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>A <see cref="Task"/>.</returns>
-    internal async Task InitAsync( CancellationToken cancellationToken )
+    protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
         this._notificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
@@ -111,100 +109,14 @@ public class RedisCachingBackend : CachingBackend
                 this._keyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
-            this.Configuration.ServiceProvider,
+            this.ServiceProvider,
             cancellationToken );
-    }
 
-    /// <summary>
-    /// Creates a new <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    /// <param name="connection">A Redis connection.</param>
-    /// <param name="configuration">Configuration of the new back-end.</param>
-    /// <returns>A <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
-    /// according to the properties of the <paramref name="configuration"/>.</returns>
-    public static CachingBackend Create( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration )
-    {
-        // #20775 Caching: two-layered cache should modify the key to avoid conflicts when toggling the option
-        if ( configuration.IsLocallyCached )
-        {
-            configuration = configuration with { KeyPrefix = configuration.KeyPrefix != null ? configuration.KeyPrefix + "L2" : "L2" };
-        }
-
-        var backend = configuration.SupportsDependencies
-            ? new DependenciesRedisCachingBackend( connection, configuration )
-            : new RedisCachingBackend( connection, configuration );
-
-        try
-        {
-            backend.Init();
-
-            CachingBackend enhancer;
-
-            if ( configuration.IsLocallyCached )
-            {
-                enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
-            }
-            else
-            {
-                enhancer = backend;
-            }
-
-            return enhancer;
-        }
-        catch
-        {
-            // Dispose the backend until it becomes unreachable, otherwise we may have a GC deadlock.
-            backend.Dispose();
-
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Asynchronously creates a new <see cref="RedisCachingBackend"/>.
-    /// </summary>
-    /// <param name="connection">A Redis connection.</param>
-    /// <param name="configuration">Configuration of the new back-end.</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-    /// <returns>A task returning a <see cref="RedisCachingBackend"/>, <see cref="DependenciesRedisCachingBackend"/>, or a <see cref="TwoLayerCachingBackendEnhancer"/>,
-    /// according to the properties of the <paramref name="configuration"/>.</returns>
-    public static async Task<CachingBackend> CreateAsync(
-        IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration configuration,
-        CancellationToken cancellationToken = default )
-    {
-        var backend = configuration.SupportsDependencies
-            ? new DependenciesRedisCachingBackend( connection, configuration )
-            : new RedisCachingBackend( connection, configuration );
-
-        try
-        {
-            await backend.InitAsync( cancellationToken );
-
-            CachingBackend enhancer;
-
-            if ( configuration.IsLocallyCached )
-            {
-                enhancer = new TwoLayerCachingBackendEnhancer( new NonBlockingCachingBackendEnhancer( backend ) );
-            }
-            else
-            {
-                enhancer = backend;
-            }
-
-            return enhancer;
-        }
-        catch
-        {
-            // Dispose the backend until it becomes unreachable, otherwise we may have a GC deadlock.
-            await backend.DisposeAsync( CancellationToken.None );
-
-            throw;
-        }
+        await base.InitializeCoreAsync( cancellationToken );
     }
 
     /// <inheritdoc />
-    protected override CachingBackendFeatures CreateFeatures() => new RedisCachingBackendFeatures( this );
+    protected override CachingBackendFeatures CreateFeatures() => new RedisCachingBackendFeatures();
 
     private void ProcessNotification( RedisNotification notification )
     {
@@ -262,7 +174,7 @@ public class RedisCachingBackend : CachingBackend
 
         if ( kind.IsEmpty || sourceIdStr.IsEmpty || key.IsEmpty )
         {
-            this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
+            this.Source.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
 
             return;
         }
@@ -273,14 +185,14 @@ public class RedisCachingBackend : CachingBackend
         if ( !Guid.TryParse( sourceIdStr.ToString(), out var sourceId ) )
 #endif
         {
-            this.LogSource.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr.ToString() ) );
+            this.Source.Warning.Write( Formatted( "Cannot parse the SourceId '{SourceId}' into a Guid. Skipping the event.", sourceIdStr.ToString() ) );
 
             return;
         }
 
         if ( !this.ProcessEvent( kind.ToString(), key.ToString(), sourceId ) )
         {
-            this.LogSource.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind.ToString() ) );
+            this.Source.Warning.Write( Formatted( "Don't know how to process the event kind {Kind}.", kind.ToString() ) );
         }
     }
 
@@ -301,7 +213,7 @@ public class RedisCachingBackend : CachingBackend
                 return true;
 
             default:
-                this.LogSource.Debug.Write( Formatted( "Event {Kind} ignored.", kind ) );
+                this.Source.Debug.Write( Formatted( "Event {Kind} ignored.", kind ) );
 
                 break;
         }
@@ -318,7 +230,7 @@ public class RedisCachingBackend : CachingBackend
     protected Task SendEventAsync( string kind, string key )
     {
         var value = kind + ":" + this.Id + ":" + key;
-        this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
+        this.Source.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
 
         return this.NotificationQueue.Subscriber.PublishAsync( this._keyBuilder.EventsChannel, value );
     }
@@ -331,7 +243,7 @@ public class RedisCachingBackend : CachingBackend
     protected void SendEvent( string kind, string key )
     {
         var value = kind + ":" + this.Id + ":" + key;
-        this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
+        this.Source.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
 
         this.NotificationQueue.Subscriber.Publish( this._keyBuilder.EventsChannel, value );
     }
@@ -605,19 +517,20 @@ public class RedisCachingBackend : CachingBackend
         }
         catch ( Exception e )
         {
-            this.LogSource.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
+            this.Source.Error.Write( Formatted( "Exception when finalizing the RedisNotificationQueue." ), e );
             this._backgroundTaskExceptions++;
         }
     }
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore()
+    protected override void ClearCore( ClearCacheOptions options )
     {
         throw new NotSupportedException();
     }
 
     /// <inheritdoc />
-    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
+    protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
     {
         throw new NotSupportedException();
     }
@@ -639,7 +552,7 @@ public class RedisCachingBackend : CachingBackend
         }
     }
 
-    protected override int BackgroundTaskExceptions
+    public override int BackgroundTaskExceptions
         => base.BackgroundTaskExceptions + this.NotificationQueue.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
     /// <summary>
@@ -647,19 +560,8 @@ public class RedisCachingBackend : CachingBackend
     /// </summary>
     internal class RedisCachingBackendFeatures : CachingBackendFeatures
     {
-        private readonly RedisCachingBackend _parent;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RedisCachingBackendFeatures"/> class.
-        /// </summary>
-        /// <param name="parent">The parent <see cref="RedisCachingBackend"/>.</param>
-        public RedisCachingBackendFeatures( RedisCachingBackend parent )
-        {
-            this._parent = parent;
-        }
-
         /// <inheritdoc />
-        public override bool Events => this._parent._notificationQueue != null;
+        public override bool Events => true;
 
         /// <inheritdoc />
         public override bool Clear => false;

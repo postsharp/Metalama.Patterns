@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 namespace Flashtrace.Messages;
 
 /// <summary>
-/// Represents a message that can be used with the <see cref="LogSource"/> class. To create a message 
+/// Represents a message that can be used with the <see cref="FlashtraceSource"/> class. To create a message 
 /// instance, you would typically use the <see cref="SemanticMessageBuilder"/> or <see cref="FormattedMessageBuilder"/> class.
 /// </summary>
 [PublicAPI]

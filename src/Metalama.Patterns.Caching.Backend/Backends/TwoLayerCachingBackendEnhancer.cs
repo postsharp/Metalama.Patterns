@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// This class is typically instantiated in the back-end factory method. You should normally not use this class unless you develop a custom caching back-end.
 /// </summary>
 [PublicAPI]
-public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
+internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 {
     private readonly TimeSpan _removedItemTransitionPeriod = TimeSpan.FromMinutes( 1 );
 
@@ -29,10 +29,21 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     /// <param name="memoryCache">A <see cref="MemoryCachingBackend"/>, or <c>null</c> to use a new default <see cref="MemoryCachingBackend"/>.</param>
     public TwoLayerCachingBackendEnhancer( CachingBackend remoteCache, MemoryCachingBackend? memoryCache = null ) : base(
         remoteCache,
-        new CachingBackendConfiguration() { ServiceProvider = remoteCache.Configuration.ServiceProvider } )
+        new CachingBackendConfiguration() )
     {
-        this.LocalCache = memoryCache
-                          ?? new MemoryCachingBackend( new MemoryCachingBackendConfiguration { ServiceProvider = remoteCache.Configuration.ServiceProvider } );
+        this.LocalCache = memoryCache ?? new MemoryCachingBackend( serviceProvider: remoteCache.ServiceProvider );
+    }
+
+    protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
+    {
+        await base.InitializeCoreAsync( cancellationToken );
+        await this.LocalCache.InitializeAsync( cancellationToken );
+    }
+
+    protected override void InitializeCore()
+    {
+        base.InitializeCore();
+        this.LocalCache.Initialize();
     }
 
     /// <inheritdoc />
@@ -370,19 +381,31 @@ public sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
         return this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken );
     }
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore()
+    protected override void ClearCore( ClearCacheOptions options )
     {
         this.LocalCache.Clear();
-        this.UnderlyingBackend.Clear();
+
+        if ( options == ClearCacheOptions.Default )
+        {
+            this.UnderlyingBackend.Clear();
+        }
     }
 
     /// <inheritdoc />
-    protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
+    protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
     {
         this.LocalCache.Clear();
 
-        return this.UnderlyingBackend.ClearAsync( cancellationToken );
+        if ( options == ClearCacheOptions.Default )
+        {
+            return this.UnderlyingBackend.ClearAsync( options, cancellationToken );
+        }
+        else
+        {
+            return default;
+        }
     }
 
     /// <inheritdoc />

@@ -10,7 +10,7 @@ internal sealed class Int64Formatter : Formatter<long>
     public Int64Formatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, long value )
+    public override void Format( UnsafeStringBuilder stringBuilder, long value )
     {
         stringBuilder.Append( value );
     }

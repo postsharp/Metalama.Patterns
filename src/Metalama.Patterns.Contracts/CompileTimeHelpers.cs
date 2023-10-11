@@ -71,7 +71,7 @@ internal static class CompileTimeHelpers
         where T : class, IDeclaration, IHasType
     {
         if ( aspectBuilder.Target.Type.IsNullable == true && aspectBuilder.Target.Type.TypeKind != TypeKind.TypeParameter &&
-             (aspectBuilder.Target.GetContractOptions().WarnOnNotNullableOnNullable ?? true ) )
+             (aspectBuilder.Target.GetContractOptions().WarnOnNotNullableOnNullable ?? true) )
         {
             aspectBuilder.Diagnostics.Report(
                 ContractDiagnostics.NotNullableOnNullable.WithArguments( (aspectBuilder.Target, aspectBuilder.AspectInstance.AspectClass.ShortName) ) );
