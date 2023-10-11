@@ -6,9 +6,9 @@ using Metalama.Patterns.Caching.Aspects.Configuration;
 using Metalama.Patterns.Caching.Aspects.Helpers;
 namespace Metalama.Patterns.Caching.AspectTests.CacheAttributeTests.ParameterFilter;
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
-public class TheCacheParameterFilter : ICacheParameterFilter
+public class TheCacheParameterClassifier : ICacheParameterClassifier
 {
-  public bool IsIgnored(IParameter parameter) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+  public CacheParameterClassification GetClassification(IParameter parameter) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 }
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
