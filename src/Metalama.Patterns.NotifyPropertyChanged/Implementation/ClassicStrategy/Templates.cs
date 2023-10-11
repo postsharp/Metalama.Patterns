@@ -217,15 +217,23 @@ internal sealed class Templates : ITemplateProvider
                 ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }
 
-            // Don't notify if we're joining on to existing NotifyChildPropertyChanged support from a base type, or we'll be stuck in a loop.
-            if ( node.Parent.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
+            if ( node.Parent.FieldOrProperty.Accessibility != Accessibility.Private )
             {
-                ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.Parent.DottedPropertyPath, node.Name );
+                // Don't notify if we're joining on to existing NotifyChildPropertyChanged support from a base type, or we'll be stuck in a loop.
+                if ( node.Parent.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
+                {
+                    ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.Parent.DottedPropertyPath, node.Name );
+                }
+                else if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+                {
+                    meta.InsertComment(
+                        $"Not calling OnChildPropertyChanged('{node.Parent.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
+                }
             }
-            else if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+            else
             {
                 meta.InsertComment(
-                    $"Not calling OnChildPropertyChanged('{node.Parent.DottedPropertyPath}','{node.Name}') because a base type already provides OnChildPropertyChanged support for the parent property." );
+                    $"Not calling OnChildPropertyChanged for private parent field or property '{node.Parent.DottedPropertyPath}'." );
             }
         }
     }
@@ -749,7 +757,7 @@ internal sealed class Templates : ITemplateProvider
         }
 
         var propertyName = propertyChangedEventArgs.Value!.PropertyName;
-        var nodeIsProperty = node.FieldOrProperty.DeclarationKind == DeclarationKind.Property;
+        var nodeIsAccessible = node.FieldOrProperty.Accessibility != Accessibility.Private;
 
         foreach ( var childNode in node.Children )
         {
@@ -775,7 +783,7 @@ internal sealed class Templates : ITemplateProvider
                             ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                         }
 
-                        if ( nodeIsProperty )
+                        if ( nodeIsAccessible )
                         {
                             ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
                         }
@@ -786,7 +794,7 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
-        if ( nodeIsProperty )
+        if ( nodeIsAccessible )
         {
             ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
         }
