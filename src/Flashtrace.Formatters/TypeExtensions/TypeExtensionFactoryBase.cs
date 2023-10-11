@@ -15,15 +15,17 @@ public abstract class TypeExtensionFactoryBase<T>
 {
     private readonly Type _genericInterfaceType;
     private readonly Type? _converterType;
+    private readonly Type? _roleType;
     private readonly Dictionary<Type, T> _nonGenericExtensionTypes = new();
     private readonly Dictionary<Type, Type> _genericExtensionTypes = new();
 
     private readonly Dictionary<Type, TypeExtensionCacheUpdateCallback<T>> _cacheInvalidationCallbacks = new();
 
-    protected TypeExtensionFactoryBase( Type genericInterfaceType, Type? converterType )
+    protected TypeExtensionFactoryBase( Type genericInterfaceType, Type? converterType, Type? roleType )
     {
         this._genericInterfaceType = genericInterfaceType ?? throw new ArgumentException( nameof(genericInterfaceType) );
         this._converterType = converterType;
+        this._roleType = roleType;
     }
 
     public void RegisterTypeExtension( Type targetType, T typeExtension )
@@ -108,20 +110,18 @@ public abstract class TypeExtensionFactoryBase<T>
 
         var targetTypeParametersCount = targetType == typeof(Array) ? 1 : targetType.GetGenericArguments().Length;
         var typeExtensionGenericParameters = typeExtensionType.GetGenericArguments();
-        var extensionTypeParametersCount = typeExtensionGenericParameters.Length;
 
-        if ( typeExtensionGenericParameters.Length == 1 && typeExtensionGenericParameters[0].IsDefined( typeof(BindToExtendedTypeAttribute), false ) )
-        {
-            // We don't need to validate the match at this moment.
-        }
-        else
+        var unboundTypeExtensionGenericParameters =
+            typeExtensionGenericParameters.Where( t => !t.IsDefined( typeof(TypeExtensionBindingAttribute), false ) ).ToList();
+
+        if ( unboundTypeExtensionGenericParameters.Count > 0 )
         {
             if ( !targetType.IsGenericTypeDefinition && targetType != typeof(Array) )
             {
                 throw new ArgumentException( "When a type extension is generic with several generic arguments, target type has to be generic." );
             }
 
-            if ( targetTypeParametersCount != extensionTypeParametersCount )
+            if ( targetTypeParametersCount != unboundTypeExtensionGenericParameters.Count )
             {
                 throw new ArgumentException( "The number of generic parameters of target type and extension type are not compatible." );
             }
@@ -151,7 +151,7 @@ public abstract class TypeExtensionFactoryBase<T>
 
             if ( genericAssignableTypeDefinition == typeExtensionTargetType )
             {
-                var genericArguments = GetGenericArguments( assignableType, typeExtensionType );
+                var genericArguments = this.GetGenericArguments( assignableType, typeExtensionType );
 
                 var genericTypeExtensionType = MakeGenericExtensionType( typeExtensionType, genericArguments );
 
@@ -194,7 +194,7 @@ public abstract class TypeExtensionFactoryBase<T>
             {
                 if ( this._genericExtensionTypes.TryGetValue( type, out var typeExtensionType ) )
                 {
-                    var genericArguments = GetGenericArguments( assignableType, typeExtensionType );
+                    var genericArguments = this.GetGenericArguments( assignableType, typeExtensionType );
                     var genericExtensionType = MakeGenericExtensionType( typeExtensionType, genericArguments );
 
                     if ( ShouldOverwrite( assignableType, true, bestTargetType, isBestExtensionGeneric ) )
@@ -416,26 +416,30 @@ public abstract class TypeExtensionFactoryBase<T>
         throw new InvalidOperationException();
     }
 
-    private static Type[] GetGenericArguments( Type extendedType, Type extensionType )
+    private Type[] GetGenericArguments( Type extendedType, Type extensionType )
     {
-        var extensionTypeGenericParameters = extensionType.GetGenericArguments();
+        var genericArguments = new List<Type>( extendedType.GetGenericArguments().Length );
+        var extendedTypeArguments = extendedType.IsArray ? new[] { extendedType.GetElementType()! } : extendedType.GetGenericArguments();
+        var extendedTypeArgumentsIndex = 0;
 
-        if ( extensionTypeGenericParameters.Length == 1 && extensionTypeGenericParameters[0].IsDefined( typeof(BindToExtendedTypeAttribute), true ) )
+        foreach ( var extensionTypeArgument in extensionType.GetGenericArguments() )
         {
-            return new[] { extendedType };
+            if ( extensionTypeArgument.IsDefined( typeof(BindToExtendedTypeAttribute), false ) )
+            {
+                genericArguments.Add( extendedType );
+            }
+            else if ( extensionTypeArgument.IsDefined( typeof(BindToRoleTypeAttribute), false ) )
+            {
+                genericArguments.Add( this._roleType ?? throw new NotSupportedException( $"{nameof(BindToRoleTypeAttribute)} is not supported." ) );
+            }
+            else
+            {
+                genericArguments.Add( extendedTypeArguments[extendedTypeArgumentsIndex] );
+                extendedTypeArgumentsIndex++;
+            }
         }
 
-        if ( extendedType.IsGenericType )
-        {
-            return extendedType.GetGenericArguments();
-        }
-
-        if ( extendedType.IsArray )
-        {
-            return new[] { extendedType.GetElementType()! };
-        }
-
-        return Array.Empty<Type>();
+        return genericArguments.ToArray();
     }
 
     protected virtual IEnumerable<Type> GetAssignableTypes( Type type )

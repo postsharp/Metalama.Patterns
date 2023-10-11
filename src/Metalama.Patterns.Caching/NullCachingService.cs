@@ -2,7 +2,7 @@
 
 using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Formatters;
 using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching;

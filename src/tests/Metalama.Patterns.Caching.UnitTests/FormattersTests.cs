@@ -2,9 +2,7 @@
 
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Formatters;
-using Metalama.Patterns.Caching.Implementation;
 using Xunit;
-using IFormattable = Flashtrace.Formatters.IFormattable;
 
 // ReSharper disable RedundantTypeDeclarationBody
 
@@ -15,14 +13,14 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClass()
         {
-            var formatters = FormatterRepository.Create( CachingFormattingRole.Instance, b => b.AddFormatter( r => new DogFormatter( r ) ) );
+            var formatters = FormatterRepository.Create( CacheKeyFormatting.Instance, b => b.AddFormatter( r => new DogFormatter( r ) ) );
 
             AssertKey( formatters, "FormattedDog", new Dog() );
         }
 
         private static void AssertKey( FormatterRepository formatters, string expectedKey, object o )
         {
-            var cacheKeyBuilder = new CacheKeyBuilder( formatters );
+            var cacheKeyBuilder = new CacheKeyBuilder( formatters, new CacheKeyBuilderOptions() );
             var key = cacheKeyBuilder.BuildDependencyKey( o );
 
             Assert.Equal( expectedKey, key );
@@ -32,7 +30,7 @@ namespace Metalama.Patterns.Caching.Tests
         public void TestSameClassOverwritingFormatter()
         {
             var formatters = FormatterRepository.Create(
-                CachingFormattingRole.Instance,
+                CacheKeyFormatting.Instance,
                 b =>
                 {
                     b.AddFormatter( r => new AnimalFormatter( r ) );
@@ -46,7 +44,7 @@ namespace Metalama.Patterns.Caching.Tests
         public void TestDerivedClass()
         {
             var formatters = FormatterRepository.Create(
-                CachingFormattingRole.Instance,
+                CacheKeyFormatting.Instance,
                 b => b.AddFormatter( r => new DogFormatter( r ) ) );
 
             AssertKey( formatters, "FormattedDog", new Chihuahua() );
@@ -56,7 +54,7 @@ namespace Metalama.Patterns.Caching.Tests
         public void TestInterface()
         {
             var formatters = FormatterRepository.Create(
-                CachingFormattingRole.Instance,
+                CacheKeyFormatting.Instance,
                 b => b.AddFormatter( r => new AnimalFormatter( r ) ) );
 
             AssertKey( formatters, "FormattedAnimal", new Cat() );
@@ -65,7 +63,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestManuallyFormatted()
         {
-            var formatters = FormatterRepository.Create( CachingFormattingRole.Instance );
+            var formatters = FormatterRepository.Create( CacheKeyFormatting.Instance );
 
             AssertKey( formatters, "ManuallyFormatted:Caching", new ManuallyFormatted() );
         }
@@ -82,7 +80,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             public AnimalFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-            public override void Write( UnsafeStringBuilder stringBuilder, IAnimal? value )
+            public override void Format( UnsafeStringBuilder stringBuilder, IAnimal? value )
             {
                 stringBuilder.Append( "FormattedAnimal" );
             }
@@ -92,15 +90,15 @@ namespace Metalama.Patterns.Caching.Tests
         {
             public DogFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-            public override void Write( UnsafeStringBuilder stringBuilder, Dog? value )
+            public override void Format( UnsafeStringBuilder stringBuilder, Dog? value )
             {
                 stringBuilder.Append( "FormattedDog" );
             }
         }
 
-        private sealed class ManuallyFormatted : IFormattable
+        private sealed class ManuallyFormatted : IFormattable<CacheKeyFormatting>
         {
-            void IFormattable.Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
+            void IFormattable<CacheKeyFormatting>.Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
             {
                 stringBuilder.Append( "ManuallyFormatted:" + formatterRepository.Role.Name );
             }

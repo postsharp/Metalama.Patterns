@@ -14,7 +14,7 @@ internal sealed class BooleanFormatter : Formatter<bool>
     public BooleanFormatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, bool value )
+    public override void Format( UnsafeStringBuilder stringBuilder, bool value )
     {
         stringBuilder.Append( value );
     }

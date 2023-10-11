@@ -6,9 +6,11 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Patterns.Caching.Aspects.Configuration;
 using Metalama.Patterns.Caching.Aspects.Helpers;
 
 #if NET6_0_OR_GREATER
@@ -63,10 +65,42 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
         }
 
         var unboundReturnSpecialType = (builder.Target.ReturnType as INamedType)?.Definition.SpecialType ?? SpecialType.None;
-
         var returnTypeIsTask = unboundReturnSpecialType == SpecialType.Task_T;
-
         var options = builder.Target.Enhancements().GetOptions<CachingOptions>();
+
+        // Apply parameter classifiers.
+        var hasClassificationError = false;
+
+        foreach ( var parameter in builder.Target.Parameters )
+        {
+            var excluded = false;
+
+            foreach ( var classifier in options.ParameterClassifiers )
+            {
+                var classification = classifier.Classifier.GetClassification( parameter );
+                
+                if ( classification.IsIneligible )
+                {
+                    builder.Diagnostics.Report( classification.GetDiagnostic( parameter, classifier.Classifier ) );
+                    hasClassificationError = true;
+                }
+                else if ( classification == CacheParameterClassification.ExcludeFromCacheKey )
+                {
+                    excluded = true;
+                }
+            }
+
+            // Excluded.
+            if ( excluded && !parameter.Attributes.OfAttributeType( typeof(NotCacheKeyAttribute) ).Any() )
+            {
+                builder.Advice.IntroduceAttribute( parameter, AttributeConstruction.Create( typeof(NotCacheKeyAttribute) ) );
+            }
+        }
+
+        if ( hasClassificationError )
+        {
+            return;
+        }
 
         // Introduce a field of type CachedMethodRegistration.
         var registrationFieldPrefix = $"_cacheRegistration_{builder.Target.Name}";

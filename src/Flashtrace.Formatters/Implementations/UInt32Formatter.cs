@@ -10,7 +10,7 @@ internal sealed class UInt32Formatter : Formatter<uint>
     public UInt32Formatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, uint value )
+    public override void Format( UnsafeStringBuilder stringBuilder, uint value )
     {
         stringBuilder.Append( value );
     }

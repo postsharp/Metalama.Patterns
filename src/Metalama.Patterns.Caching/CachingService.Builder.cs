@@ -5,7 +5,7 @@ using Flashtrace.Formatters.TypeExtensions;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Building;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Utilities;
 using Metalama.Patterns.Caching.ValueAdapters;
 
@@ -22,7 +22,7 @@ public partial class CachingService
         private CachingBackend? _specificBackend;
         private Func<CachingBackendBuilder, BuiltCachingBackendBuilder>? _cachingBackendBuildAction;
 
-        internal TypeExtensionFactory<IValueAdapter> ValueAdapters { get; } = new( typeof(IValueAdapter<>), null );
+        internal TypeExtensionFactory<IValueAdapter> ValueAdapters { get; } = new( typeof(IValueAdapter<>), null, null );
 
         internal Builder( IServiceProvider? serviceProvider )
         {
@@ -69,7 +69,12 @@ public partial class CachingService
 
         internal IReadOnlyList<Action<FormatterRepository.Builder>> FormattersBuildActions => this._formattersBuildActions;
 
-        public Func<IFormatterRepository, CacheKeyBuilder>? KeyBuilderFactory { get; set; }
+        public Func<IFormatterRepository, CacheKeyBuilderOptions, ICacheKeyBuilder> KeyBuilderFactory { get; set; }
+            = ( formatters, options ) => new CacheKeyBuilder( formatters, options );
+
+        public CacheKeyBuilderOptions KeyBuilderOptions { get; set; } = new();
+
+        public ICacheKeyBuilder CreateKeyBuilder( IFormatterRepository formatters ) => this.KeyBuilderFactory( formatters, this.KeyBuilderOptions );
 
         public ICachingServiceBuilder AddProfile( CachingProfile profile, bool skipIfExists = false )
         {
@@ -146,11 +151,20 @@ public partial class CachingService
             return this;
         }
 
-        public ICachingServiceBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilder> factory )
+        public ICachingServiceBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilderOptions, ICacheKeyBuilder> factory )
         {
             this.CheckNotDisposed();
 
             this.KeyBuilderFactory = factory;
+
+            return this;
+        }
+
+        public ICachingServiceBuilder WithKeyBuilderOptions( CacheKeyBuilderOptions options )
+        {
+            this.CheckNotDisposed();
+
+            this.KeyBuilderOptions = options;
 
             return this;
         }

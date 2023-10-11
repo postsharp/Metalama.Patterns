@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
-using IFormattable = Flashtrace.Formatters.IFormattable;
+using Metalama.Patterns.Caching.Formatters;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
     // ReSharper disable once UnusedType.Global
-    public class DependencyClass : IFormattable
+    public class DependencyClass : IFormattable<CacheKeyFormatting>
     {
         private readonly string _key;
 
@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this._key = key;
         }
 
-        void IFormattable.Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
+        void IFormattable<CacheKeyFormatting>.Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
         {
             stringBuilder.Append( this._key );
         }

@@ -2,7 +2,7 @@
 
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.ValueAdapters;
 
 namespace Metalama.Patterns.Caching.Building;
@@ -42,5 +42,7 @@ public interface ICachingServiceBuilder
 
     ICachingServiceBuilder ConfigureFormatters( Action<FormatterRepository.Builder> action );
 
-    ICachingServiceBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilder> factory );
+    ICachingServiceBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilderOptions, ICacheKeyBuilder> factory );
+
+    ICachingServiceBuilder WithKeyBuilderOptions( CacheKeyBuilderOptions options );
 }

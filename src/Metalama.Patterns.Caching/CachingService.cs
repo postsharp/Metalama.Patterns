@@ -65,7 +65,7 @@ public sealed partial class CachingService : ICachingService
         }
 
         this._formatters = FormatterRepository.Create(
-            CachingFormattingRole.Instance,
+            CacheKeyFormatting.Instance,
             formattersBuilder =>
             {
                 formattersBuilder.AddFormatter( typeof(IEnumerable<>), typeof(CollectionFormatter<>) );
@@ -78,12 +78,11 @@ public sealed partial class CachingService : ICachingService
 
         this.ValueAdapters = new ValueAdapterFactory( builder.ValueAdapters );
         this.ServiceProvider = builder.ServiceProvider;
-        this.KeyBuilder = new CacheKeyBuilder( this._formatters );
         this.Profiles = new CachingProfileRegistry( profilesDictionary.ToImmutable() );
         this.AllBackends = this.Profiles.AllBackends.ToImmutableArray();
         this.Frontend = new CachingFrontend( this );
         this.AutoReloadManager = new AutoReloadManager( this );
-        this.KeyBuilder = builder.KeyBuilderFactory?.Invoke( this._formatters ) ?? new CacheKeyBuilder( this._formatters );
+        this.KeyBuilder = builder.CreateKeyBuilder( this._formatters );
         this.Logger = builder.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 

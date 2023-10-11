@@ -49,7 +49,7 @@ public abstract class FormattersTestsBase
     protected string? Format<T>( IFormatterRepository formatterRepository, T? value )
     {
         var stringBuilder = new UnsafeStringBuilder( 1024 );
-        formatterRepository.Get<T>().Write( stringBuilder, value );
+        formatterRepository.Get<T>().Format( stringBuilder, value );
         var result = stringBuilder.ToString();
 
         if ( this.EnableLogging )

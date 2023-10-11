@@ -14,7 +14,7 @@ internal sealed class EnumFormatter<T> : Formatter<T>
 {
     public EnumFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, T? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, T? value )
     {
         EnumFormatterCache<T>.Write( stringBuilder, value );
     }

@@ -2,7 +2,7 @@
 
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Building;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Formatters;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
 
@@ -24,7 +24,7 @@ public sealed class CachingTestBuilder
         return this;
     }
 
-    public CachingTestBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilder> factory )
+    public CachingTestBuilder WithKeyBuilder( Func<IFormatterRepository, CacheKeyBuilderOptions, CacheKeyBuilder> factory )
     {
         this._serviceBuilder.WithKeyBuilder( factory );
 

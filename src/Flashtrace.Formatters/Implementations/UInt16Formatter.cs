@@ -10,7 +10,7 @@ internal sealed class UInt16Formatter : Formatter<ushort>
     public UInt16Formatter( IFormatterRepository repository ) : base( repository ) { }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, ushort value )
+    public override void Format( UnsafeStringBuilder stringBuilder, ushort value )
     {
         stringBuilder.Append( value );
     }

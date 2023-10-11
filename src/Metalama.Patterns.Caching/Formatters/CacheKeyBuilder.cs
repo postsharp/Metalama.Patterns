@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using System.Globalization;
 using System.Reflection;
 
-namespace Metalama.Patterns.Caching.Implementation;
+namespace Metalama.Patterns.Caching.Formatters;
 
 /// <summary>
 /// Builds cache item keys and dependency keys. Implementation of <see cref="ICacheKeyBuilder"/>.
@@ -33,10 +33,10 @@ public class CacheKeyBuilder : IDisposable, ICacheKeyBuilder
     /// <param name="formatterRepository">
     /// The <see cref="IFormatterRepository"/> from which to obtain formatters.
     /// </param>
-    public CacheKeyBuilder( IFormatterRepository formatterRepository, int maxKeySize = 1024 )
+    public CacheKeyBuilder( IFormatterRepository formatterRepository, CacheKeyBuilderOptions options )
     {
         this.Formatters = formatterRepository;
-        this._stringBuilderPool = new UnsafeStringBuilderPool( maxKeySize, true );
+        this._stringBuilderPool = new UnsafeStringBuilderPool( options.MaxKeySize, true );
     }
 
     /// <summary>
@@ -193,7 +193,7 @@ public class CacheKeyBuilder : IDisposable, ICacheKeyBuilder
     /// </summary>
     /// <param name="stringBuilder">An <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="type">A <see cref="Type"/>.</param>
-    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, Type type ) => this.Formatters.Get<Type>().Write( stringBuilder, type );
+    protected virtual void AppendType( UnsafeStringBuilder stringBuilder, Type type ) => this.Formatters.Get<Type>().Format( stringBuilder, type );
 
     /// <summary>
     /// Appends a string representing an <see cref="object"/> to an <see cref="UnsafeStringBuilder"/>.
@@ -209,7 +209,7 @@ public class CacheKeyBuilder : IDisposable, ICacheKeyBuilder
         else
         {
             var formatter = this.Formatters.Get( o.GetType() );
-            formatter.Write( stringBuilder, o );
+            formatter.Format( stringBuilder, o );
         }
     }
 

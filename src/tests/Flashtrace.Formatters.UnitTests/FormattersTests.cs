@@ -23,7 +23,7 @@ public class FormattersTests : FormattersTestsBase
     {
         public TestStructFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-        public override void Write( UnsafeStringBuilder stringBuilder, TestStruct value )
+        public override void Format( UnsafeStringBuilder stringBuilder, TestStruct value )
         {
             stringBuilder.Append( "formatter" );
         }
@@ -200,7 +200,7 @@ public class FormattersTests : FormattersTestsBase
         Assert.Equal( "{ToString}", this.Format( repo2, default(TestStruct) ) );
     }
 
-    private sealed class FormattableObject : IFormattable
+    private sealed class FormattableObject : IFormattable<TestRole>
     {
         public void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
         {
