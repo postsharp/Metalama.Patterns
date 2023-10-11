@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
 using Metalama.Patterns.NotifyPropertyChanged.Options;
 
@@ -9,7 +10,8 @@ public sealed class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( c => c.Types.OfName( nameof(ExternalClass) ) ).ConfigureDependencyAnalysis( b => b.IsSafeToCall = true );
+        var t = (INamedType) TypeFactory.GetType( typeof( ExternalClass ) );
+        amender.Outbound.SelectMany( c => c.Types.OfTypeDefinition( t ) ).ConfigureDependencyAnalysis( b => b.IsSafeToCall = true );
     }
 }
 
