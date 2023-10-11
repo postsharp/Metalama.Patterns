@@ -541,7 +541,8 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     protected abstract void InvalidateDependencyCore( string key );
 
     /// <summary>
-    /// Asynchronously removes from the cache all items that have a specific dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
+    /// Asynchronously removes from the cache all items that have a specific dependency.
+    /// This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
@@ -582,7 +583,35 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     }
 
     /// <summary>
-    /// Asynchronously removes from the cache all items that have a specific dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
+    /// Removes from the cache all items that have a specific dependency.
+    /// </summary>
+    public void InvalidateDependencies( IReadOnlyCollection<string> keys )
+    {
+        using ( var activity = this.Source.Default.OpenActivity( Formatted( "InvalidateDependencies( \"{Keys}\" )", keys ) ) )
+        {
+            try
+            {
+                this.CheckStatus();
+                this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
+
+                foreach ( var key in keys )
+                {
+                    this.InvalidateDependencyCore( key );
+                }
+
+                activity.SetSuccess();
+            }
+            catch ( Exception e )
+            {
+                activity.SetException( e );
+
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously removes from the cache all items that have a specific dependency. 
     /// </summary>
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
@@ -600,6 +629,53 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                 cancellationToken.ThrowIfCancellationRequested();
 
                 await this.InvalidateDependencyAsyncCore( key, cancellationToken );
+
+                activity.SetSuccess();
+            }
+            catch ( Exception e )
+            {
+                activity.SetException( e );
+
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously removes from the cache all items that have one of the specified dependencies.
+    /// </summary>
+    /// <param name="keys">The dependency keys.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A <see cref="Task"/>.</returns>
+    public async ValueTask InvalidateDependenciesAsync( IReadOnlyCollection<string> keys, CancellationToken cancellationToken = default )
+    {
+        using ( var activity =
+               this.Source.Default.OpenAsyncActivity( Formatted( "InvalidateDependenciesAsync( Backend=\"{Backend}\", Keys=\"{Keys}\" )", this, keys ) ) )
+        {
+            try
+            {
+                await this.CheckStatusAsync( cancellationToken );
+                this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                List<Task>? tasks = null;
+
+                foreach ( var key in keys )
+                {
+                    var task = this.InvalidateDependencyAsyncCore( key, cancellationToken );
+
+                    if ( !task.IsCompleted )
+                    {
+                        tasks ??= new List<Task>( keys.Count );
+                        tasks.Add( task.AsTask() );
+                    }
+                }
+
+                if ( tasks != null )
+                {
+                    await Task.WhenAll( tasks );
+                }
 
                 activity.SetSuccess();
             }

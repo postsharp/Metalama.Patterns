@@ -38,7 +38,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         IServiceProvider? serviceProvider )
         : base( connection, database, keyBuilder, configuration, serviceProvider ) { }
 
-    protected override CachingBackendFeatures CreateFeatures() => new DependenciesRedisCachingBackendFeatures( this );
+    protected override CachingBackendFeatures CreateFeatures() => new DependenciesRedisCachingBackendFeatures();
 
     internal RedisCacheDependencyGarbageCollector? Collector { get; set; }
 
@@ -700,9 +700,6 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private sealed class DependenciesRedisCachingBackendFeatures : RedisCachingBackendFeatures
     {
-        public DependenciesRedisCachingBackendFeatures( DependenciesRedisCachingBackend parent )
-            : base() { }
-
         public override bool Dependencies => true;
 
         public override bool ContainsDependency => true;

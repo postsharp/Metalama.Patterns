@@ -412,10 +412,7 @@ internal sealed class CachingFrontend
     {
         if ( backend.SupportedFeatures.Dependencies )
         {
-            if ( item.Dependencies != null )
-            {
-                CachingContext.Current.AddDependencies( item.Dependencies );
-            }
+            if ( item.Dependencies != null ) { }
 
             CachingContext.Current.AddDependency( key );
         }
