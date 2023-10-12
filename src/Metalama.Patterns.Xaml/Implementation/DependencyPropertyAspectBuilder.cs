@@ -36,7 +36,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         var introduceFieldResult = this._builder.Advice.IntroduceField(
             this._declaringType,
-            $"{this._propertyName}Property",
+            this._options.RegistrationField ?? $"{this._propertyName}Property",
             typeof( DependencyProperty ),
             IntroductionScope.Static,
             OverrideStrategy.Fail,
@@ -99,11 +99,21 @@ internal sealed partial class DependencyPropertyAspectBuilder
         // TODO: Cache methodsByName?
         var methodsByName = this._declaringType.Methods.ToLookup( m => m.Name );
 
-        var onChangingHandlerName = $"On{this._propertyName}Changing";
-        var onChangedHandlerName = $"On{this._propertyName}Changed";
+        var onChangingHandlerName = this._options.PropertyChangingMethod ?? $"On{this._propertyName}Changing";
+        var onChangedHandlerName = this._options.PropertyChangedMethod ?? $"On{this._propertyName}Changed";
 
         var (onChangingHandlerMethod, onChangingHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangingHandlerName, allowOldValue: false );
         var (onChangedHandlerMethod, onChangedHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangedHandlerName, allowOldValue: true );
+
+        if ( this._options.PropertyChangingMethod != null && onChangingHandlerParametersKind == ChangeHandlerParametersKind.MethodNotFound )
+        {
+            // TODO: Diagnostic, explicit method not found.
+        }
+
+        if ( this._options.PropertyChangedMethod != null && onChangedHandlerParametersKind == ChangeHandlerParametersKind.MethodNotFound )
+        {
+            // TODO: Diagnostic, explicit method not found.
+        }
 
         this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
             this._declaringType,
@@ -149,15 +159,14 @@ internal sealed partial class DependencyPropertyAspectBuilder
         string methodName,
         bool allowOldValue )
     {
-        IMethod? method = null;
-        var parametersKind = ChangeHandlerParametersKind.Invalid;
+        IMethod? method;
 
         var onChangingGroup = methodsByName[methodName];
 
         switch ( onChangingGroup.Count() )
         {
             case 0:
-                break;
+                return (null, ChangeHandlerParametersKind.MethodNotFound);
 
             case 1:
                 method = onChangingGroup.First();
@@ -167,6 +176,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 // TODO: Ambiguous method diagnostic
                 throw new NotSupportedException( $"Ambiguous handler method for {methodName}" );
         }
+
+        var parametersKind = ChangeHandlerParametersKind.Invalid;
 
         if ( method != null )
         {

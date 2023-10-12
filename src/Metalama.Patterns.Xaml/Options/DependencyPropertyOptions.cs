@@ -19,6 +19,53 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     /// </summary>
     public bool? SetInitialValueFromInitializer { get; init; }
 
+    // TODO: Document the valid signatures of PropertyChangedMethod and PropertyChangingMethod, see project README.md.
+
+    /// <summary>
+    /// Gets the name of the method that will be called when the the property value has changed.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The <c>OnPropertyChanged</c> method must be declared in the same class as the target property.
+    /// </para>
+    /// <para>
+    /// If this property is not set then the default <c>OnFooChanged</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// </para>
+    /// </remarks>
+    public string? PropertyChangedMethod { get; init; }
+
+    /// <summary>
+    /// Gets the name of the method that reacts to the changes of the property value.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The <c>OnPropertyChanged</c> method must be declared in the same class as the target property.
+    /// </para>
+    /// <para>
+    /// If this property is not set then the default <c>OnFooChanging</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// </para>
+    /// </remarks>
+    public string? PropertyChangingMethod { get; init; }
+
+    /// <summary>
+    /// Gets the name of the static readonly field that will be generated to expose the instance of the registered <see cref="DependencyProperty"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// If this property is not set then the default <c>FooProperty</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// </para>
+    /// </remarks>
+    public string? RegistrationField { get; init; }
+
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
+    {
+        return new DependencyPropertyOptions()
+        {
+            IsReadOnly = false,
+            SetInitialValueFromInitializer = true,
+        };
+    }
+
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (DependencyPropertyOptions) changes;
@@ -26,16 +73,10 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         return new DependencyPropertyOptions
         {
             IsReadOnly = other.IsReadOnly ?? this.IsReadOnly,
-            SetInitialValueFromInitializer = other.SetInitialValueFromInitializer ?? this.SetInitialValueFromInitializer
-        };
-    }
-
-    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-    {
-        return new DependencyPropertyOptions()
-        {
-            IsReadOnly = false,
-            SetInitialValueFromInitializer = true
+            SetInitialValueFromInitializer = other.SetInitialValueFromInitializer ?? this.SetInitialValueFromInitializer,
+            PropertyChangedMethod = other.PropertyChangedMethod ?? this.PropertyChangedMethod,
+            PropertyChangingMethod = other.PropertyChangingMethod ?? this.PropertyChangingMethod,
+            RegistrationField = other.RegistrationField ?? this.RegistrationField,
         };
     }
 }
