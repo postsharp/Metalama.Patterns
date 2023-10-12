@@ -119,7 +119,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// the <see cref="IAcquireLockTimeoutStrategy"/> interface. If the <see cref="IAcquireLockTimeoutStrategy.OnTimeout"/> does not return
     /// any exception, the cached method will be evaluated (even without a lock).
     /// </summary>
-    public IAcquireLockTimeoutStrategy AcquireLockTimeoutStrategy { get; init; } = new DefaultAcquireLockTimeoutStrategy();
+    public IAcquireLockTimeoutStrategy AcquireLockTimeoutStrategy { get; init; } = new ThrowTimeoutStrategy();
 
     public ICacheItemConfiguration GetMergedConfiguration( CachedMethodMetadata metadata )
     {

@@ -26,5 +26,5 @@ public class RedisInvalidationTests : BaseInvalidationBrokerTests, IAssemblyFixt
     }
 
     protected override ConcreteCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix )
-        => builder.WithRedisSynchronizer( new RedisCacheSynchronizerConfiguration( RedisFactory.CreateConnection( this.TestOptions ), prefix ) );
+        => builder.WithRedisSynchronization( new RedisCacheSynchronizerConfiguration( RedisFactory.CreateConnection( this.TestOptions ), prefix ) );
 }

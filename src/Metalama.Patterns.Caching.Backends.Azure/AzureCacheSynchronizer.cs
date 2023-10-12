@@ -37,6 +37,11 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         public event EventHandler<AzureCacheSynchronizerExceptionEventArgs>? ReceiverException;
 
+        protected override void InitializeCore()
+        {
+            Task.Run( () => this.InitializeCoreAsync() ).Wait();
+        }
+
         protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
         {
             if ( this._configuration.SubscriptionName == null )

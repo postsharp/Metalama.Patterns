@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 public sealed class RedisCacheSynchronizerBuilder : ConcreteCachingBackendBuilder
 {
     private readonly MemoryCachingBackendBuilder _underlying;
-    private RedisCacheSynchronizerConfiguration _configuration;
+    private readonly RedisCacheSynchronizerConfiguration _configuration;
 
     internal RedisCacheSynchronizerBuilder(
         MemoryCachingBackendBuilder underlying,
@@ -22,17 +22,7 @@ public sealed class RedisCacheSynchronizerBuilder : ConcreteCachingBackendBuilde
         this._underlying = underlying;
         this._configuration = configuration;
     }
-
-    /// <summary>
-    /// Specifies the configuration of the synchronization component.
-    /// </summary>
-    public RedisCacheSynchronizerBuilder WithConfiguration( RedisCacheSynchronizerConfiguration configuration )
-    {
-        this._configuration = configuration;
-
-        return this;
-    }
-
+    
     public override CachingBackend CreateBackend( CreateBackendArgs args )
     {
         var underlying = this._underlying.CreateBackend( args );

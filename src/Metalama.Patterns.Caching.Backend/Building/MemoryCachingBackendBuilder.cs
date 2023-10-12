@@ -13,8 +13,8 @@ namespace Metalama.Patterns.Caching.Building;
 /// </summary>
 public sealed class MemoryCachingBackendBuilder : ConcreteCachingBackendBuilder
 {
+    private readonly MemoryCachingBackendConfiguration? _configuration;
     private IMemoryCache? _memoryCache;
-    private MemoryCachingBackendConfiguration? _configuration;
 
     internal MemoryCachingBackendBuilder( MemoryCachingBackendConfiguration? configuration, IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
@@ -41,19 +41,7 @@ public sealed class MemoryCachingBackendBuilder : ConcreteCachingBackendBuilder
 
         return this;
     }
-
-    /// <summary>
-    /// Specifies the configuration of the in-memory caching back-end.
-    /// </summary>
-    /// <param name="configuration"></param>
-    /// <returns></returns>
-    public MemoryCachingBackendBuilder WithConfiguration( MemoryCachingBackendConfiguration configuration )
-    {
-        this._configuration = configuration;
-
-        return this;
-    }
-
+    
     public override CachingBackend CreateBackend( CreateBackendArgs args )
         => new MemoryCachingBackend( this._memoryCache ?? new MemoryCache( new MemoryCacheOptions() ), this._configuration, this.ServiceProvider );
 }

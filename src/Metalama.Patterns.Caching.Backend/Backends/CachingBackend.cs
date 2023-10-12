@@ -91,7 +91,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                 return;
             }
 
-            this.InitializeCoreAsync();
+            this.InitializeCore();
 
             if ( !this.TryChangeStatus( CachingBackendStatus.Initializing, CachingBackendStatus.Initialized ) )
             {
