@@ -34,7 +34,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
     {
         // NB: WPF convention requires a specific field name.
 
-        var introduceFieldResult = this._builder.WithTarget( this._declaringType ).Advice.IntroduceField(
+        var introduceFieldResult = this._builder.Advice.IntroduceField(
             this._declaringType,
             $"{this._propertyName}Property",
             typeof( DependencyProperty ),
@@ -57,8 +57,43 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         if ( this._builder.Target.InitializerExpression != null && this._options.SetInitialValueFromInitializer == true )
         {
-            // TODO: Introduce a static RO field to hold the result of builder.Target.InitializerExpression.
+            var exprToAssign = this._builder.Target.InitializerExpression;
 
+            if ( this._builder.Target.InitializerExpression is not ISourceExpression { AsTypedConstant: not null } )
+            {
+                // The initializer is not a simple constant, create a static readonly field to hold the value.
+
+                var initialValueFieldName = this.GetAndReserveUnusedMemberName( $"_initialValueOf{this._propertyName}" );
+
+                var result = this._builder.Advice.IntroduceField(
+                    this._declaringType,
+                    initialValueFieldName,
+                    this._propertyType,
+                    IntroductionScope.Static,
+                    OverrideStrategy.Fail,
+                    b =>
+                    {
+                        b.InitializerExpression = this._builder.Target.InitializerExpression;
+                        b.Writeability = Writeability.ConstructorOnly;
+                    } );
+
+                if ( result.Outcome == AdviceOutcome.Default )
+                {
+                    initialValueField = result.Declaration;
+
+                    exprToAssign = (IExpression) initialValueField.Value!;
+                }
+            }
+
+            this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
+                    this._declaringType,
+                    nameof( Templates.Assign ),
+                    InitializerKind.BeforeInstanceConstructor,
+                    args: new
+                    {
+                        lhs = (IExpression) this._builder.Target.Value!,
+                        rhs = exprToAssign
+                    } );
         }
 
         // TODO: Cache methodsByName?
@@ -67,15 +102,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var onChangingHandlerName = $"On{this._propertyName}Changing";
         var onChangedHandlerName = $"On{this._propertyName}Changed";
 
-        var (onChangingHandlerMethod, onChangingHandlerParametersKind) =
-            GetHandlerMethod( methodsByName, onChangingHandlerName, this._declaringType, this._propertyType, allowOldValue: false, this._assets );
+        var (onChangingHandlerMethod, onChangingHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangingHandlerName, allowOldValue: false );
+        var (onChangedHandlerMethod, onChangedHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangedHandlerName, allowOldValue: true );
 
-        var (onChangedHandlerMethod, onChangedHandlerParametersKind) =
-            GetHandlerMethod( methodsByName, onChangedHandlerName, this._declaringType, this._propertyType, allowOldValue: true, this._assets );
-
-        this._builder.WithTarget( this._declaringType ).Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
+        this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
             this._declaringType,
-            nameof( Templates.InitializeProperty ),
+            nameof( Templates.InitializeDependencyProperty ),
             InitializerKind.BeforeTypeConstructor,
             args: new
             {
@@ -84,7 +116,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 propertyName = this._propertyName,
                 propertyType = this._propertyType,
                 declaringType = this._declaringType,
-                defaultValueExpr = this._builder.Target.InitializerExpression,
+                defaultValueExpr = initialValueField == null ? this._builder.Target.InitializerExpression : (IExpression?) initialValueField.Value,
                 onChangingHandlerMethod,
                 onChangingHandlerParametersKind,
                 onChangedHandlerMethod,
@@ -112,13 +144,10 @@ internal sealed partial class DependencyPropertyAspectBuilder
         }
     }
 
-    private static (IMethod? ChangeHanlderMethod, ChangeHandlerParametersKind ParametersKind) GetHandlerMethod(
+    private (IMethod? ChangeHanlderMethod, ChangeHandlerParametersKind ParametersKind) GetHandlerMethod(
         ILookup<string, IMethod> methodsByName,
         string methodName,
-        INamedType declaringType,
-        IType propertyType,
-        bool allowOldValue,
-        Assets assets )
+        bool allowOldValue )
     {
         IMethod? method = null;
         var parametersKind = ChangeHandlerParametersKind.Invalid;
@@ -141,7 +170,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         if ( method != null )
         {
-            parametersKind = GetChangeHandlerParametersKind( method, declaringType, propertyType, allowOldValue, assets );
+            parametersKind = GetChangeHandlerParametersKind( method, this._declaringType, this._propertyType, allowOldValue, this._assets );
 
             if ( parametersKind == ChangeHandlerParametersKind.Invalid )
             {

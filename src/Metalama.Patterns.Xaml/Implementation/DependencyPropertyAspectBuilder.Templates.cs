@@ -100,7 +100,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         }
 
         [Template]
-        internal static void InitializeProperty(
+        internal static void InitializeDependencyProperty(
             [CompileTime] IField dependencyPropertyField,
             [CompileTime] bool registerAsReadOnly,
             [CompileTime] string propertyName,
@@ -138,14 +138,14 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     if ( onChangingHandlerMethod != null )
                     {
                         InvokeChangeHandler(
-                        dependencyPropertyField,
-                        onChangingHandlerMethod,
-                        onChangingHandlerParametersKind,
-                        propertyType,
-                        declaringType,
-                        ExpressionFactory.Capture( d ),
-                        null,
-                        ExpressionFactory.Capture( value ) );
+                            dependencyPropertyField,
+                            onChangingHandlerMethod,
+                            onChangingHandlerParametersKind,
+                            propertyType,
+                            declaringType,
+                            ExpressionFactory.Capture( d ),
+                            null,
+                            ExpressionFactory.Capture( value ) );
                     }
 
                     return value;
@@ -191,14 +191,14 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     if ( onChangedHandlerMethod != null )
                     {
                         InvokeChangeHandler(
-                        dependencyPropertyField,
-                        onChangedHandlerMethod,
-                        onChangedHandlerParametersKind,
-                        propertyType,
-                        declaringType,
-                        ExpressionFactory.Capture( d ),
-                        ExpressionFactory.Capture( e.OldValue ),
-                        ExpressionFactory.Capture( e.NewValue ) );
+                            dependencyPropertyField,
+                            onChangedHandlerMethod,
+                            onChangedHandlerParametersKind,
+                            propertyType,
+                            declaringType,
+                            ExpressionFactory.Capture( d ),
+                            ExpressionFactory.Capture( e.OldValue ),
+                            ExpressionFactory.Capture( e.NewValue ) );
                     }
                 }
 #endif
@@ -227,6 +227,13 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 }
 
                 IExpression? metadataExpr = null;
+
+                if ( defaultValueExpr != null && defaultValueExpr.Type.SpecialType != SpecialType.Object )
+                {
+                    // Cast to ensure that the correct overload of the PropertyMetadata ctor is used.
+
+                    defaultValueExpr = (IExpression?) meta.Cast( TypeFactory.GetType( SpecialType.Object ), defaultValueExpr.Value );
+                }
 
                 if ( defaultValueExpr != null && propertyChangedCallbackExpr != null && coerceValueCallbackExpr != null )
                 {
@@ -303,6 +310,14 @@ internal sealed partial class DependencyPropertyAspectBuilder
                         declaringType.ToTypeOfExpression().Value );
                 }
             }
+        }
+
+        [Template]
+        internal static void Assign(
+            [CompileTime] IExpression lhs,
+            [CompileTime] IExpression rhs )
+        {
+            lhs.Value = rhs.Value;
         }
     }
 }
