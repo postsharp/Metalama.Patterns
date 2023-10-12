@@ -115,11 +115,11 @@ public sealed class CachingProfile : ICacheItemConfiguration
 
     /// <summary>
     /// Gets or sets the behavior in case that the caching aspect could not acquire a lock because of a timeout. 
-    /// The default behavior is to throw a <see cref="TimeoutException"/>. You can implement your own strategy by implementing
-    /// the <see cref="IAcquireLockTimeoutStrategy"/> interface. If the <see cref="IAcquireLockTimeoutStrategy.OnTimeout"/> does not return
-    /// any exception, the cached method will be evaluated (even without a lock).
+    /// The default behavior is to throw a <see cref="TimeoutException"/>.
+    /// If the delegate does not return any exception, the cached method will be evaluated (even without a lock).
     /// </summary>
-    public IAcquireLockTimeoutStrategy AcquireLockTimeoutStrategy { get; init; } = new ThrowTimeoutStrategy();
+    public Action<LockTimeoutContext> OnLockTimeout { get; init; } =
+        _ => throw new TimeoutException( "Time out while waiting for the cache lock." );
 
     public ICacheItemConfiguration GetMergedConfiguration( CachedMethodMetadata metadata )
     {

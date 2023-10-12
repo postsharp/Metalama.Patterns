@@ -62,7 +62,7 @@ internal sealed class CachingFrontend
                     else
                     {
                         // Time out condition.
-                        profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                        profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                     }
                 }
 
@@ -85,7 +85,7 @@ internal sealed class CachingFrontend
                 if ( !lockHandle.Acquire( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {
                     // Time out condition.
-                    profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                    profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                 }
             }
 
@@ -189,7 +189,7 @@ internal sealed class CachingFrontend
                     else
                     {
                         // Time out condition.
-                        profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                        profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                     }
                 }
 
@@ -212,7 +212,7 @@ internal sealed class CachingFrontend
                 if ( !await lockHandle.AcquireAsync( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {
                     // Time out condition.
-                    profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                    profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                 }
             }
 
@@ -321,7 +321,7 @@ internal sealed class CachingFrontend
                     else
                     {
                         // Time out condition.
-                        profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                        profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                     }
                 }
 
@@ -344,7 +344,7 @@ internal sealed class CachingFrontend
                 if ( !await lockHandle.AcquireAsync( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {
                     // Time out condition.
-                    profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                    profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                 }
             }
 
