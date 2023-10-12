@@ -2,10 +2,14 @@
 
 using System.Windows;
 
-namespace Metalama.Patterns.Xaml.AspectTests.NoCallbacks;
+namespace Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingNoParameters;
 
-public class NoCallbacks : DependencyObject
+public partial class InstanceOnChangingNoParameters : DependencyObject
 {
     [DependencyProperty]
     public int Foo { get; set; }
+
+    private void OnFooChanging()
+    {
+    }
 }

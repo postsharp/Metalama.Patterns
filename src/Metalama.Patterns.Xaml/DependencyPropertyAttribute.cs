@@ -3,7 +3,7 @@
 // TODO: Clean up unused references in project file.
 
 // TODO: Investigating compile time exception inside Metalma. Remove conditions when resolved.
-// #define ENABLE_DP_CALLBACKS
+#define ENABLE_LOCALFUNCTIONS_WORKAROUND_WA1_WA2
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
@@ -12,6 +12,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Patterns.Xaml.Implementation;
+using System.Diagnostics;
 using System.Windows;
 
 namespace Metalama.Patterns.Xaml;
@@ -63,15 +64,16 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
             return;
         }
 
+        // TODO: Cache methodsByName?
         var methodsByName = declaringType.Methods.ToLookup( m => m.Name );
 
         var onChangingHandlerName = $"On{propertyName}Changing";
         var onChangedHandlerName = $"On{propertyName}Changed";
 
-        var (onChangingHandlerMethod, onChangingHandlerParametersKind) = 
+        var (onChangingHandlerMethod, onChangingHandlerParametersKind) =
             GetHandlerMethod( methodsByName, onChangingHandlerName, declaringType, propertyType, allowOldValue: false, assets );
 
-        var (onChangedHandlerMethod, onChangedHandlerParametersKind) = 
+        var (onChangedHandlerMethod, onChangedHandlerParametersKind) =
             GetHandlerMethod( methodsByName, onChangedHandlerName, declaringType, propertyType, allowOldValue: true, assets );
 
         builder.WithTarget( declaringType ).Advice.AddInitializer(
@@ -146,6 +148,7 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
 
             if ( parametersKind == ChangeHandlerParametersKind.Invalid )
             {
+                Debugger.Break();
                 // TODO: Invalid method signature diagnostic
                 throw new NotSupportedException( $"Invalid handler method signature for {methodName}" );
             }
@@ -172,21 +175,21 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
 
                 if ( p[0].RefKind is RefKind.None or RefKind.In )
                 {
-                    if ( p[0].Type == assets.DependencyProperty )
+                    if ( p[0].Type.Equals( assets.DependencyProperty ) )
                     {
                         return method.IsStatic ? ChangeHandlerParametersKind.StaticDependencyProperty : ChangeHandlerParametersKind.DependencyProperty;
                     }
                     else if ( method.IsStatic
                              && (p[0].Type.SpecialType == SpecialType.Object
-                                  || p[0].Type == declaringType
-                                  || p[0].Type == assets.DependencyObject) )
+                                  || p[0].Type.Equals( declaringType )
+                                  || p[0].Type.Equals( assets.DependencyObject )) )
                     {
                         return ChangeHandlerParametersKind.StaticInstance;
                     }
                     else if ( !method.IsStatic
                               && (p[0].Type.SpecialType == SpecialType.Object
                                    || propertyType.Is( p[0].Type )
-                                   || p[0].Type.TypeKind == TypeKind.TypeParameter) )
+                                   || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
                     {
                         return ChangeHandlerParametersKind.Value;
                     }
@@ -198,21 +201,21 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
                 if ( p[0].RefKind is RefKind.None or RefKind.In && p[1].RefKind is RefKind.None or RefKind.In )
                 {
                     if ( method.IsStatic
-                         && p[0].Type == assets.DependencyProperty
+                         && p[0].Type.Equals( assets.DependencyProperty )
                          && (p[1].Type.SpecialType == SpecialType.Object
-                              || p[1].Type == declaringType
-                              || p[1].Type == assets.DependencyObject) )
+                              || p[1].Type.Equals( declaringType )
+                              || p[1].Type.Equals( assets.DependencyObject )) )
                     {
                         return ChangeHandlerParametersKind.StaticDependencyPropertyAndInstance;
                     }
-                    else if ( allowOldValue 
+                    else if ( allowOldValue
                               && !method.IsStatic
                               && (p[0].Type.SpecialType == SpecialType.Object
                                    || propertyType.Is( p[0].Type )
-                                   || p[0].Type.TypeKind == TypeKind.TypeParameter)
+                                   || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1))
                               && (p[1].Type.SpecialType == SpecialType.Object
                                    || propertyType.Is( p[1].Type )
-                                   || p[1].Type.TypeKind == TypeKind.TypeParameter) )
+                                   || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
                     {
                         return ChangeHandlerParametersKind.OldValueAndNewValue;
                     }
@@ -226,7 +229,7 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
     [Template]
     private static void InvokeChangeHandler(
         [CompileTime] IField dependencyPropertyField,
-        [CompileTime] IMethod handlerMethod, 
+        [CompileTime] IMethod handlerMethod,
         [CompileTime] ChangeHandlerParametersKind parametersKind,
         [CompileTime] INamedType propertyType,
         [CompileTime] INamedType declaringType,
@@ -234,44 +237,56 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
         [CompileTime] IExpression? oldValueExpr,
         [CompileTime] IExpression newValueExpr )
     {
+        if ( handlerMethod.TypeParameters.Count == 1 )
+        {
+            handlerMethod = handlerMethod.WithTypeArguments( propertyType );
+        }
+
         switch ( parametersKind )
         {
             // TODO: Some casts may not be required depending on the type of the method parameter.
 
             case ChangeHandlerParametersKind.None:
                 handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
+                
                 break;
 
             case ChangeHandlerParametersKind.StaticNone:
                 handlerMethod!.Invoke();
+                
                 break;
 
             case ChangeHandlerParametersKind.Value:
                 handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                     .Invoke( handlerMethod.Parameters[0].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
+                
                 break;
 
             case ChangeHandlerParametersKind.OldValueAndNewValue:
                 handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
-                    .Invoke( 
+                    .Invoke(
                         handlerMethod.Parameters[0].Type.SpecialType == SpecialType.Object ? oldValueExpr!.Value : meta.Cast( propertyType, oldValueExpr!.Value ),
                         handlerMethod.Parameters[1].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
                 break;
 
             case ChangeHandlerParametersKind.DependencyProperty:
                 handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
+                
                 break;
 
             case ChangeHandlerParametersKind.StaticDependencyProperty:
                 handlerMethod!.Invoke( dependencyPropertyField.Value );
+                
                 break;
 
             case ChangeHandlerParametersKind.StaticDependencyPropertyAndInstance:
                 handlerMethod!.Invoke( dependencyPropertyField.Value, meta.Cast( declaringType, instanceExpr.Value ) );
+                
                 break;
 
             case ChangeHandlerParametersKind.StaticInstance:
                 handlerMethod!.Invoke( meta.Cast( declaringType, instanceExpr.Value ) );
+                
                 break;
         }
     }
@@ -296,7 +311,7 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
     private static void InitializeProperty(
         [CompileTime] IField dependencyPropertyField,
         [CompileTime] bool registerAsReadOnly,
-        [CompileTime] string propertyName, 
+        [CompileTime] string propertyName,
         [CompileTime] INamedType propertyType,
         [CompileTime] INamedType declaringType,
         [CompileTime] IExpression? defaultValueExpr,
@@ -309,7 +324,7 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
          * 
          * - Uses the coercion callback for validation and notifying "changing"
          * - Always returns true for the validation callback
-         * - Uses ValueChange callback to notify "changed"
+         * - Uses PropertyChanged callback to notify "changed"
          * 
          */
 
@@ -317,13 +332,40 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
         {
             IExpression? coerceValueCallbackExpr = null;
 
+#if ENABLE_LOCALFUNCTIONS_WORKAROUND_WA1_WA2
+            // TODO: Remove workaround [WA1]
+            // The method below should be inside the 'if' block below (see [WA1]), and the outer 'if' in the method should be removed.
+            object CoerceValue( DependencyObject d, object value )
+            {
+                // As per PostSharp implementation, this callback is used for validation and notifying "changing", throwing ArgumentException if invalid.
+                // NB: Validation (eg, a configured explicit validation method and/or integration with Contracts) is not yet implemented.
+
+                // TODO: Validation
+                // TODO: Integration with INotifyPropertyChanging
+
+                if ( onChangingHandlerMethod != null )
+                {
+                    InvokeChangeHandler(
+                    dependencyPropertyField,
+                    onChangingHandlerMethod,
+                    onChangingHandlerParametersKind,
+                    propertyType,
+                    declaringType,
+                    ExpressionFactory.Capture( d ),
+                    null,
+                    ExpressionFactory.Capture( value ) );
+                }
+
+                return value;
+            }
+#endif
+
             if ( onChangingHandlerMethod != null )
             {
-#if ENABLE_DP_CALLBACKS
-                var coerceValueCallback = (CoerceValueCallback) CoerceValue;
+                coerceValueCallbackExpr = ExpressionFactory.Capture( (CoerceValueCallback) CoerceValue );
 
-                coerceValueCallbackExpr = ExpressionFactory.Capture( coerceValueCallback );
-
+                // TODO: Remove workaround [WA1] (see above)
+#if !ENABLE_LOCALFUNCTIONS_WORKAROUND_WA1_WA2
                 object CoerceValue( DependencyObject d, object value )
                 {
                     // As per PostSharp implementation, this callback is used for validation and notifying "changing", throwing ArgumentException if invalid.
@@ -349,15 +391,34 @@ public sealed partial class DependencyPropertyAttribute : Attribute, IAspect<IPr
 
             IExpression? propertyChangedCallbackExpr = null;
 
+#if ENABLE_LOCALFUNCTIONS_WORKAROUND_WA1_WA2
+            // TODO: Remove workaround [WA2]
+            // The method below should be inside the 'if' block below (see [WA2]), and the outer 'if' in the method should be removed.
+            void PropertyChanged( DependencyObject d, DependencyPropertyChangedEventArgs e )
+            {
+                if ( onChangedHandlerMethod != null )
+                {
+                    InvokeChangeHandler(
+                    dependencyPropertyField,
+                    onChangedHandlerMethod,
+                    onChangedHandlerParametersKind,
+                    propertyType,
+                    declaringType,
+                    ExpressionFactory.Capture( d ),
+                    ExpressionFactory.Capture( e.OldValue ),
+                    ExpressionFactory.Capture( e.NewValue ) );
+                }
+            }
+#endif
+
             if ( onChangedHandlerMethod != null )
             {
-#if ENABLE_DP_CALLBACKS
                 // TODO: Integration with INotifyPropertyChanged
 
-                var propertyChangedCallback = (PropertyChangedCallback) PropertyChanged;
+                propertyChangedCallbackExpr = ExpressionFactory.Capture( (PropertyChangedCallback) PropertyChanged );
 
-                propertyChangedCallbackExpr = ExpressionFactory.Capture( propertyChangedCallback );
-
+                // TODO: Remove workaround [WA2] (see above)
+#if !ENABLE_LOCALFUNCTIONS_WORKAROUND_WA1_WA2        
                 void PropertyChanged( DependencyObject d, DependencyPropertyChangedEventArgs e )
                 {
                     InvokeChangeHandler(
