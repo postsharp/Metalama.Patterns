@@ -6,6 +6,8 @@ using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
+#pragma warning disable SA1623
+
 /// <summary>
 /// Options for <see cref="RedisCacheSynchronizer"/>.
 /// </summary>

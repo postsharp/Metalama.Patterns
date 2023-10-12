@@ -4,8 +4,7 @@ namespace Metalama.Patterns.Caching.Building;
 
 /// <summary>
 /// A base class for <see cref="CachingBackendBuilder"/> representing an out-of-process cache. These back-ends can be further
-/// enhanced with non-blocking modifiers or an in-memory L1 layer through the <see cref="CachingBackendFactory.NonBlocking"/>
-/// or <see cref="CachingBackendFactory.WithL1"/>
+/// enhanced with an in-memory L1 layer through the  <see cref="CachingBackendFactory.WithL1(Metalama.Patterns.Caching.Building.OutOfProcessCachingBackendBuilder)"/>
 /// methods. 
 /// </summary>
 public abstract class OutOfProcessCachingBackendBuilder : ConcreteCachingBackendBuilder

@@ -1,7 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace;
-using Flashtrace.Loggers;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Building;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +35,7 @@ public static class RedisCachingFactory
     /// Enhances an in-memory cache with a component that synchronizes several local, in-memory caches, using Redis Pub/Sub, given
     /// a Redis <see cref="ConfigurationOptions"/> object. 
     /// </summary>
+    /// <param name="builder"></param>
     /// <param name="redisOptions"></param>
     /// <param name="configuration">A <see cref="RedisCachingBackendConfiguration"/>. The <see cref="RedisCachingBackendConfiguration.OwnsConnection"/>
     /// is overridden to <c>true</c>.</param> 
@@ -82,7 +81,7 @@ public static class RedisCachingFactory
     }
 
     /// <summary>
-    /// Creates an instance of the garbage collector service described in <see cref="AddRedisCacheDependencyGarbageCollector"/>.
+    /// Creates an instance of the garbage collector service described in <see cref="AddRedisCacheDependencyGarbageCollector(Microsoft.Extensions.DependencyInjection.IServiceCollection,Metalama.Patterns.Caching.Backends.Redis.RedisCachingBackendConfiguration)"/>.
     /// So start the instance, use <see cref="IHostedService.StartAsync"/>.
     /// </summary>
     public static IHostedService CreateRedisCacheDependencyGarbageCollector(
