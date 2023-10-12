@@ -8,10 +8,10 @@ using Metalama.Patterns.Caching.Implementation;
 namespace Metalama.Patterns.Caching.Backends.Azure;
 
 /// <summary>
-/// Options that determine the mode of operation of an <see cref="AzureCacheInvalidator"/> instance.
+/// Options that determine the mode of operation of an <see cref="AzureCacheSynchronizer"/> instance.
 /// </summary>
 [PublicAPI]
-public sealed record AzureCacheInvalidatorConfiguration : CacheInvalidatorConfiguration
+public sealed record AzureCacheSynchronizerConfiguration : CacheSynchronizerConfiguration
 {
     public string TopicName { get; init; }
 
@@ -23,7 +23,7 @@ public sealed record AzureCacheInvalidatorConfiguration : CacheInvalidatorConfig
 
     /// <summary>
     /// Gets the topic subscription name. Not to be confused with the Azure subscription id. If this property is not supplied,
-    /// a new auto-deleted is created every time a <see cref="AzureCacheInvalidator"/> is instantiated. 
+    /// a new auto-deleted subscription is created every time the component is instantiated. 
     /// </summary>
     public string? SubscriptionName { get; init; }
 
@@ -33,7 +33,7 @@ public sealed record AzureCacheInvalidatorConfiguration : CacheInvalidatorConfig
 
     public int MaxDeliveryCount { get; init; } = 10;
 
-    public AzureCacheInvalidatorConfiguration( string connectionString, string? topicName = null )
+    public AzureCacheSynchronizerConfiguration( string connectionString, string? topicName = null )
     {
         this.ConnectionString = connectionString;
 

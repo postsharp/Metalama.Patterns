@@ -2,6 +2,7 @@
 
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
+using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.LoadTests.Tests;
@@ -10,11 +11,11 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 {
     private readonly string _keyPrefix = Guid.NewGuid().ToString();
 
-    public override void Test( RedisLoadTestConfiguration configuration, TimeSpan duration )
+    public override async Task TestAsync( RedisLoadTestConfiguration configuration, TimeSpan duration )
     {
         Console.WriteLine( "collector init" );
 
-        var collectors = new IAsyncDisposable[configuration.CollectorsCount];
+        var collectors = new IHostedService[configuration.CollectorsCount];
 
         try
         {
@@ -24,16 +25,22 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 
                 var collectorConnection = CreateConnection();
 
-                collectors[i] = RedisCachingBackendFactory.CreateRedisCacheDependencyGarbageCollector(
+                var garbageCollector = RedisCachingFactory.CreateRedisCacheDependencyGarbageCollector(
                     collectorConnection,
                     configuration: collectorConfiguration );
+
+                await garbageCollector.StartAsync( default );
+                collectors[i] = garbageCollector;
             }
 
-            base.Test( configuration, duration );
+            await base.TestAsync( configuration, duration );
         }
         finally
         {
-            Task.WaitAll( collectors.Select( c => c.DisposeAsync().AsTask() ).ToArray() );
+            foreach ( var collector in collectors )
+            {
+                await collector.StopAsync( default );
+            }
         }
     }
 

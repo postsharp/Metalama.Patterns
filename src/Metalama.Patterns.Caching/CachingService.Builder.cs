@@ -20,7 +20,7 @@ public partial class CachingService
         private readonly List<Action<FormatterRepository.Builder>> _formattersBuildActions = new();
         private bool _isDisposed;
         private CachingBackend? _specificBackend;
-        private Func<CachingBackendBuilder, BuiltCachingBackendBuilder>? _cachingBackendBuildAction;
+        private Func<CachingBackendBuilder, ConcreteCachingBackendBuilder>? _cachingBackendBuildAction;
 
         internal TypeExtensionFactory<IValueAdapter> ValueAdapters { get; } = new( typeof(IValueAdapter<>), null, null );
 
@@ -136,7 +136,7 @@ public partial class CachingService
             return this;
         }
 
-        public ICachingServiceBuilder WithBackend( Func<CachingBackendBuilder, BuiltCachingBackendBuilder> action )
+        public ICachingServiceBuilder WithBackend( Func<CachingBackendBuilder, ConcreteCachingBackendBuilder> action )
         {
             this._cachingBackendBuildAction = action;
 

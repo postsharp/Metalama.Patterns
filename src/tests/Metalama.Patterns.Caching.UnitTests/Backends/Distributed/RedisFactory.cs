@@ -65,7 +65,7 @@ internal static class RedisFactory
         var backend = CachingBackend.Create(
             b =>
             {
-                var redis = (DistributedCachingBackendBuilder) b.Redis( connection ).WithConfiguration( configuration );
+                var redis = (OutOfProcessCachingBackendBuilder) b.Redis( connection ).WithConfiguration( configuration );
 
                 if ( nonBlocking )
                 {

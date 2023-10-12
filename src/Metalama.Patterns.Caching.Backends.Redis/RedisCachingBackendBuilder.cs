@@ -1,21 +1,29 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Building;
 using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-public class RedisCachingBackendBuilder : DistributedCachingBackendBuilder
+/// <summary>
+/// Builds a <see cref="CachingBackend"/> that relies on a Redis server.
+/// </summary>
+[PublicAPI]
+public sealed class RedisCachingBackendBuilder : OutOfProcessCachingBackendBuilder
 {
     private readonly IConnectionMultiplexer _connection;
     private RedisCachingBackendConfiguration? _configuration;
 
-    public RedisCachingBackendBuilder( IConnectionMultiplexer connection, RedisCachingBackendConfiguration? configuration )
+    internal RedisCachingBackendBuilder( IConnectionMultiplexer connection, RedisCachingBackendConfiguration? configuration )
     {
         this._connection = connection;
         this._configuration = configuration;
     }
 
+    /// <summary>
+    /// Specifies the configuration of the Redis <see cref="CachingBackend"/>.
+    /// </summary>
     public RedisCachingBackendBuilder WithConfiguration( RedisCachingBackendConfiguration configuration )
     {
         this._configuration = configuration;
@@ -34,7 +42,7 @@ public class RedisCachingBackendBuilder : DistributedCachingBackendBuilder
 
             this._configuration = this._configuration with
             {
-                KeyPrefix = this._configuration.KeyPrefix != null ? this._configuration.KeyPrefix + prefixSuffix : prefixSuffix
+                KeyPrefix = this._configuration.KeyPrefix != null ? this._configuration.KeyPrefix + "." + prefixSuffix : prefixSuffix
             };
         }
 

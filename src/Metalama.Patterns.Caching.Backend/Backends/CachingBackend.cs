@@ -1136,7 +1136,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     // Was [ExplicitCrossPackageInternal]. Used by Redis backend. Making protected for now.
     public virtual int BackgroundTaskExceptions => 0;
 
-    public static CachingBackend Create( Func<CachingBackendBuilder, BuiltCachingBackendBuilder> build, IServiceProvider? serviceProvider = null )
+    public static CachingBackend Create( Func<CachingBackendBuilder, ConcreteCachingBackendBuilder> build, IServiceProvider? serviceProvider = null )
     {
         var builder = build( new CachingBackendBuilder() );
 

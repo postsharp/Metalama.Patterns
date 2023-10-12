@@ -6,18 +6,18 @@ using Metalama.Patterns.Caching.Implementation;
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
 /// <summary>
-/// Options for <see cref="RedisCacheInvalidator"/>.
+/// Options for <see cref="RedisCacheSynchronizer"/>.
 /// </summary>
 [PublicAPI]
-public sealed record RedisCacheInvalidatorConfiguration : CacheInvalidatorConfiguration
+public sealed record RedisCacheSynchronizerConfiguration : CacheSynchronizerConfiguration
 {
     /// <summary>
     /// Gets or sets the name of the Redis channel to use to exchange invalidation messages. The default value is <c>RedisCacheInvalidator</c>.
     /// </summary>
-    public string ChannelName { get; set; } = nameof(RedisCacheInvalidator);
+    public string ChannelName { get; set; } = nameof(RedisCacheSynchronizer);
 
     /// <summary>
-    /// Gets or sets a value indicating whether determines whether disposing the <see cref="RedisCacheInvalidator"/> also disposes the Redis connection. The default value is <c>false</c>.
+    /// Gets or sets a value indicating whether determines whether disposing the <see cref="RedisCacheSynchronizer"/> also disposes the Redis connection. The default value is <c>false</c>.
     /// </summary>
     public bool OwnsConnection { get; set; }
 

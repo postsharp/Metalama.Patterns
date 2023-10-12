@@ -11,21 +11,21 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// a local cache, and synchronize themselves by sending invalidation messages over a publish/subscribe channel.
 /// </summary>
 [PublicAPI]
-public abstract class CacheInvalidator : CachingBackendEnhancer
+public abstract class CacheSynchronizer : CachingBackendEnhancer
 {
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler;
 
     /// <summary>
-    /// Gets the options of the current <see cref="CacheInvalidator"/>.
+    /// Gets the options of the current <see cref="CacheSynchronizer"/>.
     /// </summary>
-    public new CacheInvalidatorConfiguration Configuration { get; }
+    public new CacheSynchronizerConfiguration Configuration { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CacheInvalidator"/> class.
+    /// Initializes a new instance of the <see cref="CacheSynchronizer"/> class.
     /// </summary>
     /// <param name="underlyingBackend">The underlying <see cref="CachingBackend"/> (typically an in-memory cache).</param>
-    /// <param name="configuration">Options of the new <see cref="CacheInvalidator"/>.</param>
-    protected CacheInvalidator( CachingBackend underlyingBackend, CacheInvalidatorConfiguration configuration ) : base( underlyingBackend )
+    /// <param name="configuration">Options of the new <see cref="CacheSynchronizer"/>.</param>
+    protected CacheSynchronizer( CachingBackend underlyingBackend, CacheSynchronizerConfiguration configuration ) : base( underlyingBackend )
     {
         this.Configuration = configuration;
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( underlyingBackend.ServiceProvider );
@@ -64,7 +64,7 @@ public abstract class CacheInvalidator : CachingBackendEnhancer
     }
 
     /// <summary>
-    /// Implementations of <see cref="CacheInvalidator"/> must call this method when an invalidation message is received.
+    /// Implementations of <see cref="CacheSynchronizer"/> must call this method when an invalidation message is received.
     /// </summary>
     /// <param name="message">The serialized invalidation message.</param>
     protected void OnMessageReceived( string message )

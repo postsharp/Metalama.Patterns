@@ -7,7 +7,11 @@ namespace Metalama.Patterns.Caching.Building;
 
 #pragma warning disable CA1001
 
-public sealed class MemoryCachingBackendBuilder : BuiltCachingBackendBuilder
+/// <summary>
+/// A <see cref="CachingBackendBuilder"/> that returns an in-memory, in-process caching back-end, backed
+/// by an <see cref="IMemoryCache"/>.
+/// </summary>
+public sealed class MemoryCachingBackendBuilder : ConcreteCachingBackendBuilder
 {
     private IMemoryCache? _memoryCache;
     private MemoryCachingBackendConfiguration? _configuration;
@@ -17,6 +21,9 @@ public sealed class MemoryCachingBackendBuilder : BuiltCachingBackendBuilder
         this._configuration = configuration;
     }
 
+    /// <summary>
+    /// Specifies the <see cref="IMemoryCache"/> to use.
+    /// </summary>
     public MemoryCachingBackendBuilder WithMemoryCache( IMemoryCache memoryCache )
     {
         this._memoryCache = memoryCache;
@@ -24,6 +31,10 @@ public sealed class MemoryCachingBackendBuilder : BuiltCachingBackendBuilder
         return this;
     }
 
+    /// <summary>
+    /// Specifies the options of the <see cref="MemoryCache"/>. This method is ignored if the <see cref="WithMemoryCache"/>
+    /// method is called.
+    /// </summary>
     public MemoryCachingBackendBuilder WithMemoryCacheOptions( MemoryCacheOptions memoryCacheOptions )
     {
         this._memoryCache = new MemoryCache( memoryCacheOptions );
@@ -31,6 +42,11 @@ public sealed class MemoryCachingBackendBuilder : BuiltCachingBackendBuilder
         return this;
     }
 
+    /// <summary>
+    /// Specifies the configuration of the in-memory caching back-end.
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
     public MemoryCachingBackendBuilder WithConfiguration( MemoryCachingBackendConfiguration configuration )
     {
         this._configuration = configuration;

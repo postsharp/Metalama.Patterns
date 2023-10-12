@@ -7,14 +7,18 @@ namespace Metalama.Patterns.Caching.Building;
 
 #pragma warning disable CA1001
 
-public sealed class LayeredCachingBackendBuilder : BuiltCachingBackendBuilder
+/// <summary>
+/// A <see cref="CachingBackendBuilder"/> that adds an in-memory L1 cache in front a another, typically out-of-process,
+/// cache.
+/// </summary>
+public sealed class LayeredCachingBackendBuilder : ConcreteCachingBackendBuilder
 {
-    private readonly BuiltCachingBackendBuilder _underlying;
+    private readonly ConcreteCachingBackendBuilder _underlying;
 
     private IMemoryCache? _memoryCache;
     private MemoryCachingBackendConfiguration? _memoryCacheConfiguration;
 
-    internal LayeredCachingBackendBuilder( BuiltCachingBackendBuilder underlying )
+    internal LayeredCachingBackendBuilder( ConcreteCachingBackendBuilder underlying )
     {
         this._underlying = underlying;
     }

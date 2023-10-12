@@ -4,11 +4,14 @@ using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-public static class RedisCachingBackendUtilities
+/// <summary>
+/// Exposes methods that perform garbage collection in a Redis server used as a cache where dependencies are enabled.
+/// </summary>
+public static class RedisGarbageCollectionUtilities
 {
     /// <summary>
-    /// Performs a full garbage collection on all Redis servers. This operation enumerates and validates all keys in the database, and can possibly last several
-    /// minutes and affect performance in production.
+    /// Performs a full garbage collection on all Redis servers of a <see cref="IConnectionMultiplexer"/>.
+    /// This operation enumerates and validates all keys in the database, and can possibly last several minutes and affect performance in production.
     /// </summary>
     public static Task PerformFullCollectionAsync(
         IConnectionMultiplexer connection,

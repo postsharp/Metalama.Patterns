@@ -4,12 +4,15 @@ using Metalama.Patterns.Caching.Building;
 
 namespace Metalama.Patterns.Caching.Backends.Azure;
 
-public sealed class AzureInvalidatedCachingBackendBuilder : BuiltCachingBackendBuilder
+/// <summary>
+/// A <see cref="CachingBackendBuilder"/> that synchronizes the underlying in-memory cache thanks to Azure Service Bus.
+/// </summary>
+public sealed class AzureCacheSynchronizerBuilder : ConcreteCachingBackendBuilder
 {
     private readonly MemoryCachingBackendBuilder _underlying;
-    private readonly AzureCacheInvalidatorConfiguration _configuration;
+    private readonly AzureCacheSynchronizerConfiguration _configuration;
 
-    internal AzureInvalidatedCachingBackendBuilder( MemoryCachingBackendBuilder underlying, AzureCacheInvalidatorConfiguration configuration )
+    internal AzureCacheSynchronizerBuilder( MemoryCachingBackendBuilder underlying, AzureCacheSynchronizerConfiguration configuration )
     {
         this._underlying = underlying;
         this._configuration = configuration;
@@ -19,6 +22,6 @@ public sealed class AzureInvalidatedCachingBackendBuilder : BuiltCachingBackendB
     {
         var underlying = this._underlying.CreateBackend( args );
 
-        return new AzureCacheInvalidator( underlying, this._configuration );
+        return new AzureCacheSynchronizer( underlying, this._configuration );
     }
 }

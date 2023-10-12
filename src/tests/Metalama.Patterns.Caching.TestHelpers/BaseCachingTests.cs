@@ -4,7 +4,6 @@ using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Building;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
@@ -26,10 +25,7 @@ public abstract class BaseCachingTests
 
     private static void ResetCachingServices()
     {
-        Assert.True(
-            CachingService.Default.DefaultBackend is UninitializedCachingBackend or NullCachingBackend,
-            "Each test has to use the TestProfileConfigurationFactory." );
-
+        CachingService.Default.Dispose();
         var uninitialized = CachingService.CreateUninitialized();
         CachingService.Default = uninitialized;
     }

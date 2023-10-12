@@ -38,7 +38,7 @@ public interface ICachingServiceBuilder
 
     ICachingServiceBuilder WithBackend( CachingBackend backend );
 
-    ICachingServiceBuilder WithBackend( Func<CachingBackendBuilder, BuiltCachingBackendBuilder> action );
+    ICachingServiceBuilder WithBackend( Func<CachingBackendBuilder, ConcreteCachingBackendBuilder> action );
 
     ICachingServiceBuilder ConfigureFormatters( Action<FormatterRepository.Builder> action );
 

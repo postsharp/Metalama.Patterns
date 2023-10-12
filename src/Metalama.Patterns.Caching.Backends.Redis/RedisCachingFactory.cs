@@ -1,0 +1,71 @@
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Building;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
+
+namespace Metalama.Patterns.Caching.Backends.Redis;
+
+/// <summary>
+/// Extensions methods for <see cref="CachingBackendBuilder"/> and <see cref="IServiceCollection"/> that builds components
+/// of the <c>Metalama.Patterns.Caching.Backends.Redis</c> namespace.
+/// </summary>
+[PublicAPI]
+public static class RedisCachingFactory
+{
+    /// <summary>
+    /// Builds a <see cref="CachingBackend"/> based on a Redis server.
+    /// </summary>
+    public static RedisCachingBackendBuilder Redis(
+        this CachingBackendBuilder builder,
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration? configuration = null )
+        => new( connection, configuration );
+
+    /// <summary>
+    /// Enhances an in-memory cache with a component that synchronizes several local, in-memory caches, using Redis Pub/Syb. 
+    /// </summary>
+    public static RedisCacheSynchronizerBuilder WithRedisSynchronizer(
+        this MemoryCachingBackendBuilder builder,
+        IConnectionMultiplexer connection,
+        RedisCacheSynchronizerConfiguration? configuration = null )
+        => new( builder, connection, configuration );
+
+    /// <summary>
+    /// Adds a service (implementing <see cref="IHostedService"/>) that removes dependencies added when a <see cref="RedisCachingBackend"/> when items
+    /// are expired or evicted from the cache. 
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// It is necessary to have at least one instance of the garbage collector active at any time, otherwise the cache will use storage to store dependencies
+    /// that are no longer relevant, and will not be removed otherwise. It is allowed but redundant to have several concurrent instances of the garbage collector,
+    /// but having a large number of them can hurt performance of the Redis server.
+    /// </para>
+    /// <para>
+    /// If no instance of this service is running during some time,
+    /// you must initiate full garbage collection by calling the &lt;see cref="RedisGarbageCollectionUtilities.PerformFullCollectionAsync(StackExchange.Redis.IConnectionMultiplexer,Metalama.Patterns.Caching.Backends.Redis.RedisCachingBackendConfiguration?,System.IServiceProvider?,System.Threading.CancellationToken)"/&gt; method.
+    /// </para>
+    /// </remarks>
+    public static IServiceCollection AddRedisCacheDependencyGarbageCollector(
+        this IServiceCollection serviceCollection,
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration configuration )
+    {
+        serviceCollection.AddHostedService<RedisCacheDependencyGarbageCollector>(
+            serviceProvider => new RedisCacheDependencyGarbageCollector( connection, configuration, serviceProvider ) );
+
+        return serviceCollection;
+    }
+
+    /// <summary>
+    /// Creates an instance of the garbage collector service described in <see cref="AddRedisCacheDependencyGarbageCollector"/>.
+    /// So start the instance, use <see cref="IHostedService.StartAsync"/>.
+    /// </summary>
+    public static IHostedService CreateRedisCacheDependencyGarbageCollector(
+        IConnectionMultiplexer connection,
+        RedisCachingBackendConfiguration? configuration = null,
+        IServiceProvider? serviceProvider = null )
+        => new RedisCacheDependencyGarbageCollector( connection, configuration ?? new RedisCachingBackendConfiguration(), serviceProvider );
+}

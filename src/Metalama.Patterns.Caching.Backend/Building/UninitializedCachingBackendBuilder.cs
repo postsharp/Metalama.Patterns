@@ -4,7 +4,7 @@ using Metalama.Patterns.Caching.Backends;
 
 namespace Metalama.Patterns.Caching.Building;
 
-public sealed class UninitializedCachingBackendBuilder : BuiltCachingBackendBuilder
+internal sealed class UninitializedCachingBackendBuilder : ConcreteCachingBackendBuilder
 {
     public override CachingBackend CreateBackend( CreateBackendArgs args ) => new UninitializedCachingBackend();
 

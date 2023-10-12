@@ -8,11 +8,11 @@ using System.Collections.Immutable;
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
 /// <summary>
-/// An implementation of <see cref="CacheInvalidator"/>  that uses Redis publish/subscribe channels to invalidate several
+/// An implementation of <see cref="CacheSynchronizer"/>  that uses Redis publish/subscribe channels to invalidate several
 /// instances of local caches.
 /// </summary>
 [PublicAPI]
-internal sealed class RedisCacheInvalidator : CacheInvalidator
+internal sealed class RedisCacheSynchronizer : CacheSynchronizer
 {
     private readonly bool _ownsConnection;
     private readonly RedisChannel _channel;
@@ -21,14 +21,14 @@ internal sealed class RedisCacheInvalidator : CacheInvalidator
     private RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
 
     /// <summary>
-    /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current <see cref="RedisCacheInvalidator"/>.
+    /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current <see cref="RedisCacheSynchronizer"/>.
     /// </summary>
     private IConnectionMultiplexer Connection { get; }
 
-    public RedisCacheInvalidator(
+    public RedisCacheSynchronizer(
         CachingBackend underlyingBackend,
         IConnectionMultiplexer connection,
-        RedisCacheInvalidatorConfiguration configuration ) : base( underlyingBackend, configuration )
+        RedisCacheSynchronizerConfiguration configuration ) : base( underlyingBackend, configuration )
     {
         this.Connection = connection;
         this._ownsConnection = configuration.OwnsConnection;

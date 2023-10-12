@@ -10,15 +10,15 @@ using System.Text;
 namespace Metalama.Patterns.Caching.Backends.Azure
 {
     /// <summary>
-    /// An implementation of <see cref="CacheInvalidator"/> based on Microsoft Azure Service Bus, using the <c>Microsoft.Azure.ServiceBus</c> API
+    /// An implementation of <see cref="CacheSynchronizer"/> based on Microsoft Azure Service Bus, using the <c>Azure.Messaging.ServiceBus</c> API
     /// meant for .NET Standard.
     /// </summary>
     [PublicAPI]
-    internal sealed class AzureCacheInvalidator : CacheInvalidator
+    internal sealed class AzureCacheSynchronizer : CacheSynchronizer
     {
         private const string _subject = "Metalama.Patterns.Caching.Backends.Azure.Invalidation";
 
-        private readonly AzureCacheInvalidatorConfiguration _configuration;
+        private readonly AzureCacheSynchronizerConfiguration _configuration;
         private readonly CancellationTokenSource _receiverCancellation = new();
 
         private string _subscriptionName = null!;
@@ -26,7 +26,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         private ServiceBusSender? _sender;
         private int _backgroundTaskExceptions;
 
-        public AzureCacheInvalidator( CachingBackend underlyingBackend, AzureCacheInvalidatorConfiguration configuration ) : base(
+        public AzureCacheSynchronizer( CachingBackend underlyingBackend, AzureCacheSynchronizerConfiguration configuration ) : base(
             underlyingBackend,
             configuration )
         {
@@ -35,7 +35,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
 
         public override int BackgroundTaskExceptions => base.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
-        public event EventHandler<AzureCacheInvalidatorExceptionEventArgs>? ReceiverException;
+        public event EventHandler<AzureCacheSynchronizerExceptionEventArgs>? ReceiverException;
 
         protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
         {
@@ -81,8 +81,8 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                 }
                 catch ( Exception e )
                 {
-                    this.ReceiverException?.Invoke( this, new AzureCacheInvalidatorExceptionEventArgs( e ) );
-                    await Task.Delay( ((AzureCacheInvalidatorConfiguration) this.Configuration).RetryOnReceiveError );
+                    this.ReceiverException?.Invoke( this, new AzureCacheSynchronizerExceptionEventArgs( e ) );
+                    await Task.Delay( ((AzureCacheSynchronizerConfiguration) this.Configuration).RetryOnReceiveError );
                 }
             }
 
@@ -148,14 +148,14 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="AzureCacheInvalidator"/> class.
+        /// Finalizes an instance of the <see cref="AzureCacheSynchronizer"/> class.
         /// </summary>
-        ~AzureCacheInvalidator()
+        ~AzureCacheSynchronizer()
         {
             this.DisposeCore( false );
         }
 
-        private async Task<string> CreateSubscriptionAsync( AzureCacheInvalidatorConfiguration configuration, CancellationToken cancellationToken )
+        private async Task<string> CreateSubscriptionAsync( AzureCacheSynchronizerConfiguration configuration, CancellationToken cancellationToken )
         {
             try
             {

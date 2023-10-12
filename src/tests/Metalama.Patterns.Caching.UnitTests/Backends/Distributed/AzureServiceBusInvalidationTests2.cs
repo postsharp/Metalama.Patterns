@@ -24,8 +24,8 @@ internal
         cachingTestOptions,
         testOutputHelper ) { }
 
-    protected override BuiltCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix )
-        => builder.WithAzureInvalidation( new AzureCacheInvalidatorConfiguration( _connectionString ) { Prefix = prefix } );
+    protected override ConcreteCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix )
+        => builder.WithAzureSynchronization( new AzureCacheSynchronizerConfiguration( _connectionString ) { Prefix = prefix } );
 }
 
 #endif

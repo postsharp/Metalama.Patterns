@@ -4,11 +4,15 @@ using Metalama.Patterns.Caching.Backends;
 
 namespace Metalama.Patterns.Caching.Building;
 
-public sealed class NonBlockingCachingBackendBuilder : DistributedCachingBackendBuilder
+/// <summary>
+/// A <see cref="CachingBackendBuilder"/> that modifies the underlying <see cref="OutOfProcessCachingBackendBuilder"/> by making
+/// all write and invalidate operations non-blocking, i.e. these methods return before completion of the operation.
+/// </summary>
+public sealed class NonBlockingCachingBackendBuilder : OutOfProcessCachingBackendBuilder
 {
-    private readonly DistributedCachingBackendBuilder _underlying;
+    private readonly OutOfProcessCachingBackendBuilder _underlying;
 
-    internal NonBlockingCachingBackendBuilder( DistributedCachingBackendBuilder underlying )
+    internal NonBlockingCachingBackendBuilder( OutOfProcessCachingBackendBuilder underlying )
     {
         this._underlying = underlying;
     }
