@@ -1138,9 +1138,9 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
 
     public static CachingBackend Create( Func<CachingBackendBuilder, ConcreteCachingBackendBuilder> build, IServiceProvider? serviceProvider = null )
     {
-        var builder = build( new CachingBackendBuilder() );
+        var builder = build( new CachingBackendBuilder( serviceProvider ) );
 
-        var backend = builder.CreateBackend( new CreateBackendArgs { ServiceProvider = serviceProvider, Layer = 1 } );
+        var backend = builder.CreateBackend( new CreateBackendArgs { Layer = 1 } );
 
         return backend;
     }

@@ -13,4 +13,6 @@ public abstract class ConcreteCachingBackendBuilder : CachingBackendBuilder
     /// Creates the <see cref="CachingBackend"/>.
     /// </summary>
     public abstract CachingBackend CreateBackend( CreateBackendArgs args );
+
+    protected ConcreteCachingBackendBuilder( IServiceProvider? serviceProvider ) : base( serviceProvider ) { }
 }

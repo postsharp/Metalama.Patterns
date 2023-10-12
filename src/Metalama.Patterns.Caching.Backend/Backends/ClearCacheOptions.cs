@@ -16,7 +16,7 @@ public enum ClearCacheOptions
 
     /// <summary>
     /// Clears only the local cache, but does not attempt to clear the remote cache.
-    /// (for use with <see cref="CachingBackendFactory.WithLocalLayer(OutOfProcessCachingBackendBuilder)"/>).
+    /// (for use with <see cref="CachingBackendFactory.WithL1"/>).
     /// </summary>
     Local = 1
 }

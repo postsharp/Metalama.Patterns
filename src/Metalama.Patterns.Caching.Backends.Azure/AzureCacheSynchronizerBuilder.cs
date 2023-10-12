@@ -12,7 +12,10 @@ public sealed class AzureCacheSynchronizerBuilder : ConcreteCachingBackendBuilde
     private readonly MemoryCachingBackendBuilder _underlying;
     private readonly AzureCacheSynchronizerConfiguration _configuration;
 
-    internal AzureCacheSynchronizerBuilder( MemoryCachingBackendBuilder underlying, AzureCacheSynchronizerConfiguration configuration )
+    internal AzureCacheSynchronizerBuilder(
+        MemoryCachingBackendBuilder underlying,
+        AzureCacheSynchronizerConfiguration configuration,
+        IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
         this._underlying = underlying;
         this._configuration = configuration;

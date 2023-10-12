@@ -8,5 +8,5 @@ internal sealed class UninitializedCachingBackendBuilder : ConcreteCachingBacken
 {
     public override CachingBackend CreateBackend( CreateBackendArgs args ) => new UninitializedCachingBackend();
 
-    internal UninitializedCachingBackendBuilder() { }
+    internal UninitializedCachingBackendBuilder( IServiceProvider? serviceProvider ) : base( serviceProvider ) { }
 }

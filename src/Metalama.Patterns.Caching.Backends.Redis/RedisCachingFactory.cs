@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace;
+using Flashtrace.Loggers;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Building;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,22 +18,33 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 public static class RedisCachingFactory
 {
     /// <summary>
-    /// Builds a <see cref="CachingBackend"/> based on a Redis server.
+    /// Builds a <see cref="CachingBackend"/> based on a Redis server given an existing <see cref="IConnectionMultiplexer"/>.
     /// </summary>
     public static RedisCachingBackendBuilder Redis(
         this CachingBackendBuilder builder,
-        IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration? configuration = null )
-        => new( connection, configuration );
+        RedisCachingBackendConfiguration configuration )
+        => new( configuration, builder.ServiceProvider );
 
     /// <summary>
-    /// Enhances an in-memory cache with a component that synchronizes several local, in-memory caches, using Redis Pub/Syb. 
+    /// Enhances an in-memory cache with a component that synchronizes several local, in-memory caches, using Redis Pub/Sub, given an <see cref="IConnectionMultiplexer"/>. 
     /// </summary>
     public static RedisCacheSynchronizerBuilder WithRedisSynchronizer(
         this MemoryCachingBackendBuilder builder,
-        IConnectionMultiplexer connection,
-        RedisCacheSynchronizerConfiguration? configuration = null )
-        => new( builder, connection, configuration );
+        RedisCacheSynchronizerConfiguration configuration )
+        => new( builder, configuration, builder.ServiceProvider );
+
+    /// <summary>
+    /// Enhances an in-memory cache with a component that synchronizes several local, in-memory caches, using Redis Pub/Sub, given
+    /// a Redis <see cref="ConfigurationOptions"/> object. 
+    /// </summary>
+    /// <param name="redisOptions"></param>
+    /// <param name="configuration">A <see cref="RedisCachingBackendConfiguration"/>. The <see cref="RedisCachingBackendConfiguration.OwnsConnection"/>
+    /// is overridden to <c>true</c>.</param> 
+    public static RedisCacheSynchronizerBuilder WithRedisSynchronizer(
+        this MemoryCachingBackendBuilder builder,
+        ConfigurationOptions redisOptions,
+        RedisCacheSynchronizerConfiguration configuration )
+        => new( builder, configuration, builder.ServiceProvider );
 
     /// <summary>
     /// Adds a service (implementing <see cref="IHostedService"/>) that removes dependencies added when a <see cref="RedisCachingBackend"/> when items
@@ -50,11 +63,20 @@ public static class RedisCachingFactory
     /// </remarks>
     public static IServiceCollection AddRedisCacheDependencyGarbageCollector(
         this IServiceCollection serviceCollection,
-        IConnectionMultiplexer connection,
         RedisCachingBackendConfiguration configuration )
     {
         serviceCollection.AddHostedService<RedisCacheDependencyGarbageCollector>(
-            serviceProvider => new RedisCacheDependencyGarbageCollector( connection, configuration, serviceProvider ) );
+            serviceProvider => new RedisCacheDependencyGarbageCollector( configuration, serviceProvider ) );
+
+        return serviceCollection;
+    }
+
+    public static IServiceCollection AddRedisCacheDependencyGarbageCollector(
+        this IServiceCollection serviceCollection,
+        Func<IServiceProvider, RedisCachingBackendConfiguration> configurationFactory )
+    {
+        serviceCollection.AddHostedService<RedisCacheDependencyGarbageCollector>(
+            serviceProvider => new RedisCacheDependencyGarbageCollector( configurationFactory(serviceProvider), serviceProvider ) );
 
         return serviceCollection;
     }
@@ -64,8 +86,7 @@ public static class RedisCachingFactory
     /// So start the instance, use <see cref="IHostedService.StartAsync"/>.
     /// </summary>
     public static IHostedService CreateRedisCacheDependencyGarbageCollector(
-        IConnectionMultiplexer connection,
-        RedisCachingBackendConfiguration? configuration = null,
+        RedisCachingBackendConfiguration configuration,
         IServiceProvider? serviceProvider = null )
-        => new RedisCacheDependencyGarbageCollector( connection, configuration ?? new RedisCachingBackendConfiguration(), serviceProvider );
+        => new RedisCacheDependencyGarbageCollector( configuration, serviceProvider );
 }

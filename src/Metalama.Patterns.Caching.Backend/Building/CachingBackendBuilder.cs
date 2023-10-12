@@ -7,4 +7,12 @@ namespace Metalama.Patterns.Caching.Building;
 /// <summary>
 /// The initial object of the <see cref="CachingBackend"/> factory fluent API.
 /// </summary>
-public class CachingBackendBuilder { }
+public class CachingBackendBuilder
+{
+    public IServiceProvider? ServiceProvider { get; }
+
+    public CachingBackendBuilder( IServiceProvider? serviceProvider )
+    {
+        this.ServiceProvider = serviceProvider;
+    }
+}

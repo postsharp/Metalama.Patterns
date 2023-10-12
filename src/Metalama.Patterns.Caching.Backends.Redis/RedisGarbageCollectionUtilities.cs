@@ -19,8 +19,8 @@ public static class RedisGarbageCollectionUtilities
         IServiceProvider? serviceProvider = null,
         CancellationToken cancellationToken = default )
     {
-        configuration ??= new RedisCachingBackendConfiguration() { SupportsDependencies = true };
-        var backend = new DependenciesRedisCachingBackend( connection, configuration, serviceProvider );
+        configuration ??= new RedisCachingBackendConfiguration( connection ) { SupportsDependencies = true, OwnsConnection = false };
+        var backend = new DependenciesRedisCachingBackend( configuration, serviceProvider );
 
         return backend.CleanUpAsync( cancellationToken );
     }
@@ -35,8 +35,8 @@ public static class RedisGarbageCollectionUtilities
         IServiceProvider? serviceProvider = null,
         CancellationToken cancellationToken = default )
     {
-        configuration ??= new RedisCachingBackendConfiguration() { SupportsDependencies = true };
-        var backend = new DependenciesRedisCachingBackend( server.Multiplexer, configuration, serviceProvider );
+        configuration ??= new RedisCachingBackendConfiguration( server.Multiplexer ) { SupportsDependencies = true, OwnsConnection = false };
+        var backend = new DependenciesRedisCachingBackend( configuration, serviceProvider );
 
         return backend.CleanUpAsync( server, cancellationToken );
     }

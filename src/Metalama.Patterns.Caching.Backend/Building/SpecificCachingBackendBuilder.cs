@@ -8,7 +8,7 @@ internal sealed class SpecificCachingBackendBuilder : ConcreteCachingBackendBuil
 {
     private readonly Func<CreateBackendArgs, CachingBackend> _factory;
 
-    public SpecificCachingBackendBuilder( Func<CreateBackendArgs, CachingBackend> factory )
+    public SpecificCachingBackendBuilder( Func<CreateBackendArgs, CachingBackend> factory, IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
         this._factory = factory;
     }

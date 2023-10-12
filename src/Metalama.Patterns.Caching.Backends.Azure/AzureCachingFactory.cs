@@ -27,5 +27,5 @@ public static class AzureCachingFactory
     public static AzureCacheSynchronizerBuilder WithAzureSynchronization(
         this MemoryCachingBackendBuilder builder,
         AzureCacheSynchronizerConfiguration configuration )
-        => new( builder, configuration );
+        => new( builder, configuration, builder.ServiceProvider );
 }

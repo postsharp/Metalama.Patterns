@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Building;
-using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
@@ -13,13 +12,14 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 public sealed class RedisCacheSynchronizerBuilder : ConcreteCachingBackendBuilder
 {
     private readonly MemoryCachingBackendBuilder _underlying;
-    private readonly IConnectionMultiplexer _connection;
-    private RedisCacheSynchronizerConfiguration? _configuration;
+    private RedisCacheSynchronizerConfiguration _configuration;
 
-    internal RedisCacheSynchronizerBuilder( MemoryCachingBackendBuilder underlying, IConnectionMultiplexer connection, RedisCacheSynchronizerConfiguration? configuration )
+    internal RedisCacheSynchronizerBuilder(
+        MemoryCachingBackendBuilder underlying,
+        RedisCacheSynchronizerConfiguration configuration,
+        IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
         this._underlying = underlying;
-        this._connection = connection;
         this._configuration = configuration;
     }
 
@@ -37,6 +37,6 @@ public sealed class RedisCacheSynchronizerBuilder : ConcreteCachingBackendBuilde
     {
         var underlying = this._underlying.CreateBackend( args );
 
-        return new RedisCacheSynchronizer( underlying, this._connection, this._configuration ?? new RedisCacheSynchronizerConfiguration() );
+        return new RedisCacheSynchronizer( underlying, this._configuration );
     }
 }

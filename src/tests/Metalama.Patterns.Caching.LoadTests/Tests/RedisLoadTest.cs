@@ -21,13 +21,11 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
         {
             for ( var i = 0; i < collectors.Length; i++ )
             {
-                var collectorConfiguration = new RedisCachingBackendConfiguration() { KeyPrefix = this._keyPrefix, OwnsConnection = true };
-
                 var collectorConnection = CreateConnection();
 
-                var garbageCollector = RedisCachingFactory.CreateRedisCacheDependencyGarbageCollector(
-                    collectorConnection,
-                    configuration: collectorConfiguration );
+                var collectorConfiguration = new RedisCachingBackendConfiguration( collectorConnection, this._keyPrefix );
+
+                var garbageCollector = RedisCachingFactory.CreateRedisCacheDependencyGarbageCollector( collectorConfiguration );
 
                 await garbageCollector.StartAsync( default );
                 collectors[i] = garbageCollector;
@@ -64,8 +62,9 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
     {
         var connection = CreateConnection();
 
-        var configuration = new RedisCachingBackendConfiguration() { KeyPrefix = this._keyPrefix, OwnsConnection = true, SupportsDependencies = true };
+        var configuration =
+            new RedisCachingBackendConfiguration( connection ) { KeyPrefix = this._keyPrefix, OwnsConnection = true, SupportsDependencies = true };
 
-        return CachingBackend.Create( b => b.Redis( connection ).WithConfiguration( configuration ) );
+        return CachingBackend.Create( b => b.Redis( configuration ) );
     }
 }

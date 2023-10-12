@@ -45,14 +45,15 @@ internal static class RedisFactory
         string? prefix = null,
         bool supportsDependencies = false,
         bool collector = false,
-        bool nonBlocking = false,
         IServiceProvider? serviceProvider = null,
         bool locallyCached = false )
     {
         _ = CreateTestInstance( cachingTestOptions, redisSetupFixture );
 
+        IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
+
         var configuration =
-            new RedisCachingBackendConfiguration
+            new RedisCachingBackendConfiguration( connection )
             {
                 KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
                 OwnsConnection = true,
@@ -60,21 +61,14 @@ internal static class RedisFactory
                 RunGarbageCollector = collector
             };
 
-        IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
-
         var backend = CachingBackend.Create(
             b =>
             {
-                var redis = (OutOfProcessCachingBackendBuilder) b.Redis( connection ).WithConfiguration( configuration );
-
-                if ( nonBlocking )
-                {
-                    redis = redis.NonBlocking();
-                }
+                var redis = (OutOfProcessCachingBackendBuilder) b.Redis( configuration );
 
                 if ( locallyCached )
                 {
-                    return redis.WithLocalLayer();
+                    return redis.WithL1();
                 }
                 else
                 {

@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
+using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
@@ -15,6 +16,29 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 public record RedisCachingBackendConfiguration : CachingBackendConfiguration
 {
     private string? _keyPrefix = "cache";
+
+    internal RedisConnectionFactory RedisConnectionFactory { get; }
+
+    public RedisCachingBackendConfiguration( ConfigurationOptions redisConnectionOptions, string? keyPrefix = null )
+    {
+        this.RedisConnectionFactory = new RedisConnectionFactory( redisConnectionOptions );
+        this.OwnsConnection = true;
+
+        if ( keyPrefix != null )
+        {
+            this.KeyPrefix = keyPrefix;
+        }
+    }
+
+    public RedisCachingBackendConfiguration( IConnectionMultiplexer connection, string? keyPrefix = null )
+    {
+        this.RedisConnectionFactory = new RedisConnectionFactory( connection );
+        
+        if ( keyPrefix != null )
+        {
+            this.KeyPrefix = keyPrefix;
+        }
+    }
 
     /// <summary>
     /// Gets or sets the prefix for the key of all Redis items created by the <see cref="RedisCachingBackend"/>. The default value is <c>cache</c>.
@@ -59,7 +83,7 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
 
     /// <summary>
     /// Gets or sets a value indicating whether determines whether the <see cref="RedisCachingBackend"/> should dispose the Redis connection when the <see cref="RedisCachingBackend"/>
-    /// itself is disposed.
+    /// itself is disposed. The default value is <c>false</c>.
     /// </summary>
     public bool OwnsConnection { get; init; }
 
@@ -71,8 +95,8 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
 
     /// <summary>
     /// Gets or sets a value indicating whether the <see cref="RedisCachingBackend"/> should support dependencies. When this property is used,
-    /// the <see cref="DependenciesRedisCachingBackend"/> class is used instead of <see cref="RedisCachingBackend"/>. When dependencies
-    /// are enabled, at least one instance of the <see cref="RedisCacheDependencyGarbageCollector"/> MUST run.
+    /// the <see cref="DependenciesRedisCachingBackend"/> class is used instead of <see cref="RedisCachingBackend"/>. Note that when dependencies
+    /// are enabled, at least one instance of the Redis garbage collection must run. See <see cref="RunGarbageCollector"/> for details.
     /// </summary>
     public bool SupportsDependencies { get; init; }
 

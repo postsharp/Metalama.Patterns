@@ -16,7 +16,7 @@ public sealed class MemoryCachingBackendBuilder : ConcreteCachingBackendBuilder
     private IMemoryCache? _memoryCache;
     private MemoryCachingBackendConfiguration? _configuration;
 
-    internal MemoryCachingBackendBuilder( MemoryCachingBackendConfiguration? configuration )
+    internal MemoryCachingBackendBuilder( MemoryCachingBackendConfiguration? configuration, IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
         this._configuration = configuration;
     }
@@ -55,5 +55,5 @@ public sealed class MemoryCachingBackendBuilder : ConcreteCachingBackendBuilder
     }
 
     public override CachingBackend CreateBackend( CreateBackendArgs args )
-        => new MemoryCachingBackend( this._memoryCache ?? new MemoryCache( new MemoryCacheOptions() ), this._configuration, args.ServiceProvider );
+        => new MemoryCachingBackend( this._memoryCache ?? new MemoryCache( new MemoryCacheOptions() ), this._configuration, this.ServiceProvider );
 }

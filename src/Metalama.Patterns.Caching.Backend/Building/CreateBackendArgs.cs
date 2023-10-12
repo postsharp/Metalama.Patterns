@@ -1,3 +1,5 @@
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
 namespace Metalama.Patterns.Caching.Building;
 
 /// <summary>
@@ -5,11 +7,6 @@ namespace Metalama.Patterns.Caching.Building;
 /// </summary>
 public sealed record CreateBackendArgs
 {
-    /// <summary>
-    /// Gets the <see cref="IServiceProvider"/>, if any.
-    /// </summary>
-    public IServiceProvider? ServiceProvider { get; internal init; }
-
     /// <summary>
     /// Gets the number of the cache layer, e.g. 1 for L1 or 2 for L2.
     /// </summary>

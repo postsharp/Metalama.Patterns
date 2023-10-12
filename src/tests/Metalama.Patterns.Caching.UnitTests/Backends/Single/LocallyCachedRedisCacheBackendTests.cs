@@ -27,8 +27,6 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
 
     protected virtual bool EnableGarbageCollector => false;
 
-    protected virtual bool NonBlocking => false;
-
     protected override void Cleanup()
     {
         base.Cleanup();
@@ -53,7 +51,6 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
                 this._redisSetupFixture,
                 supportsDependencies: true,
                 collector: this.EnableGarbageCollector,
-                nonBlocking: this.NonBlocking,
                 serviceProvider: this.ServiceProvider,
                 locallyCached: true ) );
     }
