@@ -12,4 +12,18 @@ public partial class StaticOnChangingDependencyPropertyAndInstance : DependencyO
     private static void OnFooChanging( DependencyProperty d, StaticOnChangingDependencyPropertyAndInstance instance )
     {
     }
+
+    [DependencyProperty]
+    public int AcceptsDependencyObjectForInstance { get; set; }
+
+    private static void OnAcceptsDependencyObjectForInstanceChanging( DependencyProperty d, DependencyObject instance )
+    {
+    }
+
+    [DependencyProperty]
+    public int AcceptsObjectForInstance { get; set; }
+
+    private static void OnAcceptsObjectForInstanceChanging( DependencyProperty d, object instance )
+    {
+    }
 }

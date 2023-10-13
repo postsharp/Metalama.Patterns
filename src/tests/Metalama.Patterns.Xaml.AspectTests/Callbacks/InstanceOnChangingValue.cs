@@ -12,4 +12,26 @@ public partial class InstanceOnChangingValue : DependencyObject
     private void OnFooChanging( int value )
     {
     }
+
+    [DependencyProperty]
+    public List<int> AcceptAssignable { get; set; }
+
+    private void OnAcceptAssignableChanging( IEnumerable<int> value )
+    {
+    }
+
+    [DependencyProperty]
+    public int AcceptGeneric { get; set; }
+
+    private void OnAcceptGenericChanging<T>( T value )
+    {
+    }
+
+    [DependencyProperty]
+    public int AcceptObject { get; set; }
+
+    private void OnAcceptObjectChanging( object value )
+    {
+    }
+
 }

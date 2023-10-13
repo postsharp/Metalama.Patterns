@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace Metalama.Patterns.Xaml.AspectTests.Callbacks.NoCallbacks;
 
-public class NoCallbacks : DependencyObject
+public partial class NoCallbacks : DependencyObject
 {
     [DependencyProperty]
     public int Foo { get; set; }

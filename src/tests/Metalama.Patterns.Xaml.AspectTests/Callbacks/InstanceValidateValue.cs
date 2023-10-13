@@ -2,35 +2,27 @@
 
 using System.Windows;
 
-namespace Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedValue;
+namespace Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceValidateValue;
 
-public partial class InstanceOnChangedValue : DependencyObject
+public partial class InstanceValidateValue : DependencyObject
 {
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private void OnFooChanged( int value )
-    {
-    }
+    private bool ValidateFoo( int value ) => true;
 
     [DependencyProperty]
     public List<int> AcceptAssignable { get; set; }
 
-    private void OnAcceptAssignableChanged( IEnumerable<int> value )
-    {
-    }
+    private bool ValidateAcceptAssignable( IEnumerable<int> value ) => true;
 
     [DependencyProperty]
     public int AcceptGeneric { get; set; }
 
-    private void OnAcceptGenericChanged<T>( T value )
-    {
-    }
+    private bool ValidateAcceptGeneric<T>( T value ) => true;
 
     [DependencyProperty]
     public int AcceptObject { get; set; }
 
-    private void OnAcceptObjectChanged( object value )
-    {
-    }
+    private bool ValidateAcceptObject( object value ) => true;
 }
