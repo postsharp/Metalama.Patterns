@@ -7,15 +7,15 @@ namespace Metalama.Patterns.Xaml;
 // See project README.md for details of supported signatures.
 
 [CompileTime]
-internal enum ChangeHandlerParametersKind
+internal enum ChangeHandlerSignatureKind
 {
     MethodNotFound,
     Invalid,
-    None,
-    Value,
-    OldValueAndNewValue,
-    DependencyProperty,
-    StaticNone,
+    InstanceNoParameters,
+    InstanceValue,
+    InstanceOldValueAndNewValue,
+    InstanceDependencyProperty,
+    StaticNoParameters,
     StaticDependencyProperty,
     StaticInstance,
     StaticDependencyPropertyAndInstance

@@ -6,6 +6,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Patterns.Xaml.Options;
 using System.Windows;
 
 namespace Metalama.Patterns.Xaml.Implementation;
@@ -22,7 +23,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         private static void InvokeChangeHandler(
             [CompileTime] IField dependencyPropertyField,
             [CompileTime] IMethod handlerMethod,
-            [CompileTime] ChangeHandlerParametersKind parametersKind,
+            [CompileTime] ChangeHandlerSignatureKind parametersKind,
             [CompileTime] INamedType propertyType,
             [CompileTime] INamedType declaringType,
             [CompileTime] IExpression instanceExpr,
@@ -38,45 +39,45 @@ internal sealed partial class DependencyPropertyAspectBuilder
             {
                 // TODO: Some casts may not be required depending on the type of the method parameter.
 
-                case ChangeHandlerParametersKind.None:
+                case ChangeHandlerSignatureKind.InstanceNoParameters:
                     handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
 
                     break;
 
-                case ChangeHandlerParametersKind.StaticNone:
+                case ChangeHandlerSignatureKind.StaticNoParameters:
                     handlerMethod!.Invoke();
 
                     break;
 
-                case ChangeHandlerParametersKind.Value:
+                case ChangeHandlerSignatureKind.InstanceValue:
                     handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke( handlerMethod.Parameters[0].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
 
                     break;
 
-                case ChangeHandlerParametersKind.OldValueAndNewValue:
+                case ChangeHandlerSignatureKind.InstanceOldValueAndNewValue:
                     handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke(
                             handlerMethod.Parameters[0].Type.SpecialType == SpecialType.Object ? oldValueExpr!.Value : meta.Cast( propertyType, oldValueExpr!.Value ),
                             handlerMethod.Parameters[1].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
                     break;
 
-                case ChangeHandlerParametersKind.DependencyProperty:
+                case ChangeHandlerSignatureKind.InstanceDependencyProperty:
                     handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
 
                     break;
 
-                case ChangeHandlerParametersKind.StaticDependencyProperty:
+                case ChangeHandlerSignatureKind.StaticDependencyProperty:
                     handlerMethod!.Invoke( dependencyPropertyField.Value );
 
                     break;
 
-                case ChangeHandlerParametersKind.StaticDependencyPropertyAndInstance:
+                case ChangeHandlerSignatureKind.StaticDependencyPropertyAndInstance:
                     handlerMethod!.Invoke( dependencyPropertyField.Value, meta.Cast( declaringType, instanceExpr.Value ) );
 
                     break;
 
-                case ChangeHandlerParametersKind.StaticInstance:
+                case ChangeHandlerSignatureKind.StaticInstance:
                     handlerMethod!.Invoke( meta.Cast( declaringType, instanceExpr.Value ) );
 
                     break;
@@ -102,15 +103,15 @@ internal sealed partial class DependencyPropertyAspectBuilder
         [Template]
         internal static void InitializeDependencyProperty(
             [CompileTime] IField dependencyPropertyField,
-            [CompileTime] bool registerAsReadOnly,
+            [CompileTime] DependencyPropertyOptions options,
             [CompileTime] string propertyName,
             [CompileTime] INamedType propertyType,
             [CompileTime] INamedType declaringType,
             [CompileTime] IExpression? defaultValueExpr,
             [CompileTime] IMethod? onChangingHandlerMethod,
-            [CompileTime] ChangeHandlerParametersKind onChangingHandlerParametersKind,
+            [CompileTime] ChangeHandlerSignatureKind onChangingHandlerParametersKind,
             [CompileTime] IMethod? onChangedHandlerMethod,
-            [CompileTime] ChangeHandlerParametersKind onChangedHandlerParametersKind )
+            [CompileTime] ChangeHandlerSignatureKind onChangedHandlerParametersKind )
         {
             /* The PostSharp implementation:
              * 
@@ -119,6 +120,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
              * - Uses PropertyChanged callback to notify "changed"
              * 
              */
+
+            if ( options.InitializerProvidesDefaultValue != true )
+            {
+                defaultValueExpr = null;
+            }
 
             if ( onChangingHandlerMethod != null || onChangedHandlerMethod != null || defaultValueExpr != null )
             {
@@ -273,7 +279,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     metadataExpr = ExpressionFactory.Capture( metadata );
                 }
 
-                if ( registerAsReadOnly )
+                if ( options.IsReadOnly == true )
                 {
                     dependencyPropertyField.Value = DependencyProperty.RegisterReadOnly(
                         propertyName,
@@ -293,7 +299,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             }
             else
             {
-                if ( registerAsReadOnly )
+                if ( options.IsReadOnly == true )
                 {
                     dependencyPropertyField.Value = DependencyProperty.RegisterReadOnly(
                         propertyName,
@@ -314,10 +320,10 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         [Template]
         internal static void Assign(
-            [CompileTime] IExpression lhs,
-            [CompileTime] IExpression rhs )
+            [CompileTime] IExpression left,
+            [CompileTime] IExpression right )
         {
-            lhs.Value = rhs.Value;
+            left.Value = right.Value;
         }
     }
 }

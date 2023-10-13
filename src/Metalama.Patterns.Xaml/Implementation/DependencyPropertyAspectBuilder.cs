@@ -32,9 +32,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
     public void Build()
     {
-        // NB: WPF convention requires a specific field name.
+        // NB: WPF convention requires a specific field name, so we don't try to find an unused name.
 
-        var introduceFieldResult = this._builder.Advice.IntroduceField(
+        var introduceDependencyPropertyFieldResult = this._builder.Advice.IntroduceField(
             this._declaringType,
             this._options.RegistrationField ?? $"{this._propertyName}Property",
             typeof( DependencyProperty ),
@@ -44,57 +44,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             {
                 b.Accessibility = Framework.Code.Accessibility.Public;
                 b.Writeability = Writeability.ConstructorOnly;
-            } );
-
-        // TODO: CapturesNonObservableTransformations handling: stopping here may lead to warnings in user code that handler methods are not used, because we don't generate calls to them.
-
-        if ( introduceFieldResult.Outcome != AdviceOutcome.Default || !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
-        {
-            return;
-        }
-
-        IField? initialValueField = null;
-
-        if ( this._builder.Target.InitializerExpression != null && this._options.SetInitialValueFromInitializer == true )
-        {
-            var exprToAssign = this._builder.Target.InitializerExpression;
-
-            if ( this._builder.Target.InitializerExpression is not ISourceExpression { AsTypedConstant: not null } )
-            {
-                // The initializer is not a simple constant, create a static readonly field to hold the value.
-
-                var initialValueFieldName = this.GetAndReserveUnusedMemberName( $"_initialValueOf{this._propertyName}" );
-
-                var result = this._builder.Advice.IntroduceField(
-                    this._declaringType,
-                    initialValueFieldName,
-                    this._propertyType,
-                    IntroductionScope.Static,
-                    OverrideStrategy.Fail,
-                    b =>
-                    {
-                        b.InitializerExpression = this._builder.Target.InitializerExpression;
-                        b.Writeability = Writeability.ConstructorOnly;
-                    } );
-
-                if ( result.Outcome == AdviceOutcome.Default )
-                {
-                    initialValueField = result.Declaration;
-
-                    exprToAssign = (IExpression) initialValueField.Value!;
-                }
-            }
-
-            this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
-                    this._declaringType,
-                    nameof( Templates.Assign ),
-                    InitializerKind.BeforeInstanceConstructor,
-                    args: new
-                    {
-                        lhs = (IExpression) this._builder.Target.Value!,
-                        rhs = exprToAssign
-                    } );
-        }
+            } );        
 
         // TODO: Cache methodsByName?
         var methodsByName = this._declaringType.Methods.ToLookup( m => m.Name );
@@ -105,14 +55,32 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var (onChangingHandlerMethod, onChangingHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangingHandlerName, allowOldValue: false );
         var (onChangedHandlerMethod, onChangedHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangedHandlerName, allowOldValue: true );
 
-        if ( this._options.PropertyChangingMethod != null && onChangingHandlerParametersKind == ChangeHandlerParametersKind.MethodNotFound )
+        if ( this._options.PropertyChangingMethod != null && onChangingHandlerParametersKind == ChangeHandlerSignatureKind.MethodNotFound )
         {
             // TODO: Diagnostic, explicit method not found.
         }
 
-        if ( this._options.PropertyChangedMethod != null && onChangedHandlerParametersKind == ChangeHandlerParametersKind.MethodNotFound )
+        if ( this._options.PropertyChangedMethod != null && onChangedHandlerParametersKind == ChangeHandlerSignatureKind.MethodNotFound )
         {
             // TODO: Diagnostic, explicit method not found.
+        }
+
+        if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue != true && this._options.InitializerProvidesDefaultValue != true )
+        {
+            // TODO: Diagnostic, initializer will not be used.
+        }
+
+        if ( !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
+        {
+            // TODO: CapturesNonObservableTransformations handling: stopping here may lead to warnings in user code that handler methods are not used, because we don't generate calls to them.
+
+            return;
+        }
+
+        if ( introduceDependencyPropertyFieldResult.Outcome != AdviceOutcome.Default )
+        {
+            // We cannot proceed with other transformations if we could not introduce the DependencyProperty field.
+            return;
         }
 
         this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
@@ -121,12 +89,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
             InitializerKind.BeforeTypeConstructor,
             args: new
             {
-                dependencyPropertyField = introduceFieldResult.Declaration,
-                registerAsReadOnly = this._options.IsReadOnly == true,
+                dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration,
+                options = this._options,
                 propertyName = this._propertyName,
                 propertyType = this._propertyType,
                 declaringType = this._declaringType,
-                defaultValueExpr = initialValueField == null ? this._builder.Target.InitializerExpression : (IExpression?) initialValueField.Value,
+                defaultValueExpr = this._builder.Target.InitializerExpression,
                 onChangingHandlerMethod,
                 onChangingHandlerParametersKind,
                 onChangedHandlerMethod,
@@ -139,7 +107,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             args: new
             {
                 propertyType = this._propertyType,
-                dependencyPropertyField = introduceFieldResult.Declaration
+                dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration
             } );
 
         if ( this._builder.Target.Writeability != Writeability.None )
@@ -149,12 +117,31 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 setTemplate: nameof( Templates.OverrideSetter ),
                 args: new
                 {
-                    dependencyPropertyField = introduceFieldResult.Declaration
+                    dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration
                 } );
+        }
+
+        // NB: In a previous implementation, we would generate a static field to store the result of the initializer expression
+        // and use the same result for the default value and as the initial value of all instances of the declaring type. This
+        // pattern does not have the same semantics as a regular property initializer, which would be invoked for each instance
+        // of the declaring type. So we now emulate normal semantics to avoid surprise. If required, the user can themself implement
+        // singleton semantics as they would for any regular property initializer.
+
+        if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue == true )
+        {
+            this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
+                    this._declaringType,
+                    nameof( Templates.Assign ),
+                    InitializerKind.BeforeInstanceConstructor,
+                    args: new
+                    {
+                        left = (IExpression) this._builder.Target.Value!,
+                        right = this._builder.Target.InitializerExpression
+                    } );
         }
     }
 
-    private (IMethod? ChangeHanlderMethod, ChangeHandlerParametersKind ParametersKind) GetHandlerMethod(
+    private (IMethod? ChangeHanlderMethod, ChangeHandlerSignatureKind ParametersKind) GetHandlerMethod(
         ILookup<string, IMethod> methodsByName,
         string methodName,
         bool allowOldValue )
@@ -166,7 +153,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         switch ( onChangingGroup.Count() )
         {
             case 0:
-                return (null, ChangeHandlerParametersKind.MethodNotFound);
+                return (null, ChangeHandlerSignatureKind.MethodNotFound);
 
             case 1:
                 method = onChangingGroup.First();
@@ -177,13 +164,13 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 throw new NotSupportedException( $"Ambiguous handler method for {methodName}" );
         }
 
-        var parametersKind = ChangeHandlerParametersKind.Invalid;
+        var parametersKind = ChangeHandlerSignatureKind.Invalid;
 
         if ( method != null )
         {
-            parametersKind = GetChangeHandlerParametersKind( method, this._declaringType, this._propertyType, allowOldValue, this._assets );
+            parametersKind = GetChangeHandlerSignature( method, this._declaringType, this._propertyType, allowOldValue, this._assets );
 
-            if ( parametersKind == ChangeHandlerParametersKind.Invalid )
+            if ( parametersKind == ChangeHandlerSignatureKind.Invalid )
             {
                 Debugger.Break();
                 // TODO: Invalid method signature diagnostic
@@ -194,7 +181,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         return (method, parametersKind);
     }
 
-    private static ChangeHandlerParametersKind GetChangeHandlerParametersKind(
+    private static ChangeHandlerSignatureKind GetChangeHandlerSignature(
         IMethod method,
         INamedType declaringType,
         IType propertyType,
@@ -206,7 +193,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         switch ( p.Count )
         {
             case 0:
-                return method.IsStatic ? ChangeHandlerParametersKind.StaticNone : ChangeHandlerParametersKind.None;
+                return method.IsStatic ? ChangeHandlerSignatureKind.StaticNoParameters : ChangeHandlerSignatureKind.InstanceNoParameters;
 
             case 1:
 
@@ -214,21 +201,21 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 {
                     if ( p[0].Type.Equals( assets.DependencyProperty ) )
                     {
-                        return method.IsStatic ? ChangeHandlerParametersKind.StaticDependencyProperty : ChangeHandlerParametersKind.DependencyProperty;
+                        return method.IsStatic ? ChangeHandlerSignatureKind.StaticDependencyProperty : ChangeHandlerSignatureKind.InstanceDependencyProperty;
                     }
                     else if ( method.IsStatic
                              && (p[0].Type.SpecialType == SpecialType.Object
                                   || p[0].Type.Equals( declaringType )
                                   || p[0].Type.Equals( assets.DependencyObject )) )
                     {
-                        return ChangeHandlerParametersKind.StaticInstance;
+                        return ChangeHandlerSignatureKind.StaticInstance;
                     }
                     else if ( !method.IsStatic
                               && (p[0].Type.SpecialType == SpecialType.Object
                                    || propertyType.Is( p[0].Type )
                                    || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
                     {
-                        return ChangeHandlerParametersKind.Value;
+                        return ChangeHandlerSignatureKind.InstanceValue;
                     }
                 }
                 break;
@@ -243,7 +230,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                               || p[1].Type.Equals( declaringType )
                               || p[1].Type.Equals( assets.DependencyObject )) )
                     {
-                        return ChangeHandlerParametersKind.StaticDependencyPropertyAndInstance;
+                        return ChangeHandlerSignatureKind.StaticDependencyPropertyAndInstance;
                     }
                     else if ( allowOldValue
                               && !method.IsStatic
@@ -254,43 +241,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
                                    || propertyType.Is( p[1].Type )
                                    || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
                     {
-                        return ChangeHandlerParametersKind.OldValueAndNewValue;
+                        return ChangeHandlerSignatureKind.InstanceOldValueAndNewValue;
                     }
                 }
                 break;
         }
 
-        return ChangeHandlerParametersKind.Invalid;
-    }
-
-    private HashSet<string>? _existingMemberNames;
-
-    /// <summary>
-    /// Gets an unused member name for the declaring type of the target property by adding an numeric suffix until an unused name is found.
-    /// </summary>
-    /// <param name="desiredName"></param>
-    /// <returns></returns>
-    private string GetAndReserveUnusedMemberName( string desiredName )
-    {
-        this._existingMemberNames ??= new HashSet<string>(
-            ((IEnumerable<INamedDeclaration>) this._builder.Target.DeclaringType.AllMembers()).Concat( this._builder.Target.DeclaringType.NestedTypes ).Select( m => m.Name ) );
-
-        if ( this._existingMemberNames.Add( desiredName ) )
-        {
-            return desiredName;
-        }
-        else
-        {
-            // ReSharper disable once BadSemicolonSpaces
-            for ( var i = 1; /* Intentionally empty */; i++ )
-            {
-                var adjustedName = $"{desiredName}_{i}";
-
-                if ( this._existingMemberNames.Add( adjustedName ) )
-                {
-                    return adjustedName;
-                }
-            }
-        }
+        return ChangeHandlerSignatureKind.Invalid;
     }
 }

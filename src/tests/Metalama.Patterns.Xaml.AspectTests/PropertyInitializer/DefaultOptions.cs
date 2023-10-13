@@ -2,9 +2,9 @@
 
 using System.Windows;
 
-namespace Metalama.Patterns.Xaml.AspectTests.DefaultValue.NotConstant;
+namespace Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.DefaultOptions;
 
-public class NotConstant : DependencyObject
+public class DefaultOptions : DependencyObject
 {
     [DependencyProperty]
     public List<int> Foo { get; set; } = new List<int>( 3 ) { 1, 2, 3 };

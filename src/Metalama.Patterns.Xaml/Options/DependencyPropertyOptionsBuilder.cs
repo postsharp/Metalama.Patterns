@@ -16,10 +16,16 @@ public sealed class DependencyPropertyOptionsBuilder
     public bool? IsReadOnly { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the property initializer (if present) should be set as the initial value of the <see cref="DependencyProperty"/>.
+    /// Gets or sets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>.
     /// The default is <see langword="true"/>.
     /// </summary>
-    public bool? SetInitialValueFromInitializer { get; set; }
+    public bool? InitializerProvidesInitialValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
+    /// The default is <see langword="true"/>.
+    /// </summary>
+    public bool? InitializerProvidesDefaultValue { get; set; }
 
     // TODO: Document the valid signatures of PropertyChangedMethod and PropertyChangingMethod, see project README.md.
 
@@ -63,7 +69,8 @@ public sealed class DependencyPropertyOptionsBuilder
         new DependencyPropertyOptions()
         {
             IsReadOnly = this.IsReadOnly,
-            SetInitialValueFromInitializer = this.SetInitialValueFromInitializer,
+            InitializerProvidesInitialValue = this.InitializerProvidesInitialValue,
+            InitializerProvidesDefaultValue = this.InitializerProvidesDefaultValue,
             PropertyChangedMethod = this.PropertyChangedMethod,
             RegistrationField = this.RegistrationField,
             PropertyChangingMethod = this.PropertyChangingMethod

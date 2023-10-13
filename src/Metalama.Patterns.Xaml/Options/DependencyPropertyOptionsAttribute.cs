@@ -21,16 +21,28 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
         set => this._isReadOnly = value;            
     }
 
-    private bool? _setInitialValueFromInitializer;
+    private bool? _initializerProvidesInitialValue;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the object provided by the property initializer (if present) should be set as the initial value of the <see cref="DependencyProperty"/>.
+    /// Gets or sets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>.
     /// The default is <see langword="true"/>.
     /// </summary>
-    public bool SetInitialValueFromInitializer
+    public bool InitializerProvidesInitialValue
     {
-        get => this._setInitialValueFromInitializer ?? true;
-        set => this._setInitialValueFromInitializer = value;
+        get => this._initializerProvidesInitialValue ?? true;
+        set => this._initializerProvidesInitialValue = value;
+    }
+
+    private bool? _InitializerProvidesDefaultValue;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
+    /// The default is <see langword="true"/>.
+    /// </summary>
+    public bool InitializerProvidesDefaultValue 
+    { 
+        get => this._InitializerProvidesDefaultValue ?? true;
+        set => this._InitializerProvidesDefaultValue = value;
     }
 
     // TODO: Document the valid signatures of PropertyChangedMethod and PropertyChangingMethod, see project README.md.
@@ -78,7 +90,8 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
             new DependencyPropertyOptions()
             {
                 IsReadOnly = this._isReadOnly,
-                SetInitialValueFromInitializer = this._setInitialValueFromInitializer,
+                InitializerProvidesInitialValue = this._initializerProvidesInitialValue,
+                InitializerProvidesDefaultValue = this._InitializerProvidesDefaultValue,
                 PropertyChangingMethod = this.PropertyChangingMethod,
                 PropertyChangedMethod = this.PropertyChangedMethod,
                 RegistrationField = this.RegistrationField

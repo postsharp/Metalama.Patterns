@@ -14,10 +14,16 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     public bool? IsReadOnly { get; init; }
 
     /// <summary>
-    /// Gets a value indicating whether the property initializer (if present) should be set as the initial value of the <see cref="DependencyProperty"/>.
+    /// Gets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>.
     /// The default is <see langword="true"/>.
     /// </summary>
-    public bool? SetInitialValueFromInitializer { get; init; }
+    public bool? InitializerProvidesInitialValue { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
+    /// The default is <see langword="true"/>.
+    /// </summary>
+    public bool? InitializerProvidesDefaultValue { get; init; }
 
     // TODO: Document the valid signatures of PropertyChangedMethod and PropertyChangingMethod, see project README.md.
 
@@ -62,7 +68,8 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         return new DependencyPropertyOptions()
         {
             IsReadOnly = false,
-            SetInitialValueFromInitializer = true,
+            InitializerProvidesInitialValue = true,
+            InitializerProvidesDefaultValue = true
         };
     }
 
@@ -73,7 +80,8 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         return new DependencyPropertyOptions
         {
             IsReadOnly = other.IsReadOnly ?? this.IsReadOnly,
-            SetInitialValueFromInitializer = other.SetInitialValueFromInitializer ?? this.SetInitialValueFromInitializer,
+            InitializerProvidesInitialValue = other.InitializerProvidesInitialValue ?? this.InitializerProvidesInitialValue,
+            InitializerProvidesDefaultValue = other.InitializerProvidesDefaultValue ?? this.InitializerProvidesDefaultValue,
             PropertyChangedMethod = other.PropertyChangedMethod ?? this.PropertyChangedMethod,
             PropertyChangingMethod = other.PropertyChangingMethod ?? this.PropertyChangingMethod,
             RegistrationField = other.RegistrationField ?? this.RegistrationField,
