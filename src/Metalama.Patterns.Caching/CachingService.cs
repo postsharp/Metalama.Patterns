@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Caching;
 public sealed partial class CachingService : ICachingService
 {
     private readonly FormatterRepository _formatters;
-    private bool _ownsBackend;
+    private readonly bool _ownsBackend;
 
     public static CachingService Default { get; set; } = CreateUninitialized();
 
