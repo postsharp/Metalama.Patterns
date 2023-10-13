@@ -230,7 +230,14 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
 
     public void Initialize()
     {
-        this._backend.Initialize();
+        if ( this._ownsBackend )
+        {
+            this._backend.Initialize();
+        }
+        else if ( this._backend.Status == CachingBackendStatus.Default )
+        {
+            throw new InvalidOperationException( "The back-end is neither owned nor initialized." );
+        }
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         this.NotificationQueue = RedisNotificationQueue.Create(
@@ -244,7 +251,14 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
 
     public async Task InitializeAsync( CancellationToken cancellationToken = default )
     {
-        await this._backend.InitializeAsync( cancellationToken );
+        if ( this._ownsBackend )
+        {
+            await this._backend.InitializeAsync( cancellationToken );
+        }
+        else if ( this._backend.Status == CachingBackendStatus.Default )
+        {
+            throw new InvalidOperationException( "The back-end is neither owned nor initialized." );
+        }
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
@@ -260,7 +274,6 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
     public async Task PerformFullCollectionAsync( CancellationToken cancellationToken = default )
     {
         await this._backend.InitializeAsync( cancellationToken );
-
         await this._backend.CleanUpAsync( cancellationToken );
     }
 

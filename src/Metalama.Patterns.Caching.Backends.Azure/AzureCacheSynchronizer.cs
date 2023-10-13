@@ -76,13 +76,24 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                         {
                             this.OnMessageReceived( message.Body.ToString() );
                         }
-                        catch ( OperationCanceledException ) { }
+                        catch ( OperationCanceledException )
+                        {
+                            this.Source.Debug.Write( FormattedMessageBuilder.Formatted( "Cancellation received. Exiting." ) );
+
+                            return;
+                        }
                         catch ( Exception e )
                         {
                             this.Source.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
                             this._backgroundTaskExceptions++;
                         }
                     }
+                }
+                catch ( OperationCanceledException )
+                {
+                    this.Source.Debug.Write( FormattedMessageBuilder.Formatted( "Cancellation received. Exiting." ) );
+
+                    return;
                 }
                 catch ( Exception e )
                 {
