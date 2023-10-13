@@ -50,8 +50,9 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
                 this.TestOptions,
                 this._redisSetupFixture,
                 supportsDependencies: true,
-                locallyCached: true,
-                collector: this.EnableGarbageCollector ) );
+                collector: this.EnableGarbageCollector,
+                serviceProvider: this.ServiceProvider,
+                locallyCached: true ) );
     }
 
     #region TestIssue15680

@@ -5,10 +5,10 @@ using JetBrains.Annotations;
 namespace Metalama.Patterns.Caching.Locking;
 
 /// <summary>
-/// An implementation of <see cref="ILockManager"/> which does not acquire any lock.
+/// An implementation of <see cref="ILockingStrategy"/> which does not acquire any lock.
 /// </summary>
 [PublicAPI]
-public class NullLockManager : ILockManager
+public class NullLockingStrategy : ILockingStrategy
 {
     /// <inheritdoc />
     public ILockHandle GetLock( string key ) => LockHandle.Instance;
@@ -16,13 +16,12 @@ public class NullLockManager : ILockManager
     private class LockHandle : ILockHandle
     {
         public static readonly LockHandle Instance = new();
-        private static readonly Task<bool> _doneTask = Task.FromResult( true );
-
-        public Task ReleaseAsync() => _doneTask;
+        
+        public ValueTask ReleaseAsync() => default;
 
         public bool Acquire( TimeSpan timeout, CancellationToken cancellationToken ) => true;
 
-        public Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken ) => _doneTask;
+        public ValueTask<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken ) => new ValueTask<bool>( true );
 
         public void Release() { }
 

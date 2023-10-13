@@ -45,11 +45,13 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
 
     public string? DebugName { get; set; }
 
+    // ReSharper disable once MemberInitializerValueIgnored 
+
     /// <summary>
     /// Gets the <see cref="FlashtraceSource"/> that implementations can use to emit
     /// log records.
     /// </summary>
-    protected FlashtraceSource Source { get; }
+    protected FlashtraceSource Source { get; } = FlashtraceSource.Null; /* Make sure we have a default value in case of exception in the constructor. */
 
     /// <summary>
     /// Gets the <see cref="Guid"/> of the current <see cref="CachingBackend"/>.
@@ -91,7 +93,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                 return;
             }
 
-            this.InitializeCoreAsync();
+            this.InitializeCore();
 
             if ( !this.TryChangeStatus( CachingBackendStatus.Initializing, CachingBackendStatus.Initialized ) )
             {
@@ -541,7 +543,8 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     protected abstract void InvalidateDependencyCore( string key );
 
     /// <summary>
-    /// Asynchronously removes from the cache all items that have a specific dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
+    /// Asynchronously removes from the cache all items that have a specific dependency.
+    /// This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
     /// </summary>
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
@@ -582,7 +585,35 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     }
 
     /// <summary>
-    /// Asynchronously removes from the cache all items that have a specific dependency.  This protected method is part of the implementation API and is meant to be overridden in user code, not invoked. Arguments are already validated by the consumer API.
+    /// Removes from the cache all items that have a specific dependency.
+    /// </summary>
+    public void InvalidateDependencies( IReadOnlyCollection<string> keys )
+    {
+        using ( var activity = this.Source.Default.OpenActivity( Formatted( "InvalidateDependencies( \"{Keys}\" )", keys ) ) )
+        {
+            try
+            {
+                this.CheckStatus();
+                this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
+
+                foreach ( var key in keys )
+                {
+                    this.InvalidateDependencyCore( key );
+                }
+
+                activity.SetSuccess();
+            }
+            catch ( Exception e )
+            {
+                activity.SetException( e );
+
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously removes from the cache all items that have a specific dependency. 
     /// </summary>
     /// <param name="key">The dependency key.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
@@ -600,6 +631,53 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                 cancellationToken.ThrowIfCancellationRequested();
 
                 await this.InvalidateDependencyAsyncCore( key, cancellationToken );
+
+                activity.SetSuccess();
+            }
+            catch ( Exception e )
+            {
+                activity.SetException( e );
+
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously removes from the cache all items that have one of the specified dependencies.
+    /// </summary>
+    /// <param name="keys">The dependency keys.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A <see cref="Task"/>.</returns>
+    public async ValueTask InvalidateDependenciesAsync( IReadOnlyCollection<string> keys, CancellationToken cancellationToken = default )
+    {
+        using ( var activity =
+               this.Source.Default.OpenAsyncActivity( Formatted( "InvalidateDependenciesAsync( Backend=\"{Backend}\", Keys=\"{Keys}\" )", this, keys ) ) )
+        {
+            try
+            {
+                await this.CheckStatusAsync( cancellationToken );
+                this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                List<Task>? tasks = null;
+
+                foreach ( var key in keys )
+                {
+                    var task = this.InvalidateDependencyAsyncCore( key, cancellationToken );
+
+                    if ( !task.IsCompleted )
+                    {
+                        tasks ??= new List<Task>( keys.Count );
+                        tasks.Add( task.AsTask() );
+                    }
+                }
+
+                if ( tasks != null )
+                {
+                    await Task.WhenAll( tasks );
+                }
 
                 activity.SetSuccess();
             }
@@ -1060,11 +1138,11 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     // Was [ExplicitCrossPackageInternal]. Used by Redis backend. Making protected for now.
     public virtual int BackgroundTaskExceptions => 0;
 
-    public static CachingBackend Create( Func<CachingBackendBuilder, BuiltCachingBackendBuilder> build, IServiceProvider? serviceProvider = null )
+    public static CachingBackend Create( Func<CachingBackendBuilder, ConcreteCachingBackendBuilder> build, IServiceProvider? serviceProvider = null )
     {
-        var builder = build( new CachingBackendBuilder() );
+        var builder = build( new CachingBackendBuilder( serviceProvider ) );
 
-        var backend = builder.CreateBackend( new CreateBackendArgs { ServiceProvider = serviceProvider, Layer = 1 } );
+        var backend = builder.CreateBackend( new CreateBackendArgs { Layer = 1 } );
 
         return backend;
     }

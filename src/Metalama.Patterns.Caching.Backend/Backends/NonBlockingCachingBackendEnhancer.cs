@@ -94,7 +94,5 @@ internal class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
         public Features( CachingBackendFeatures underlyingBackendFeatures ) : base( underlyingBackendFeatures ) { }
 
         public override bool Blocking => false;
-
-        public override bool NonBlockingModifierNotRecommended => false;
     }
 }

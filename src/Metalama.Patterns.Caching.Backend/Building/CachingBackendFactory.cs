@@ -2,24 +2,45 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Metalama.Patterns.Caching.Building;
 
 [PublicAPI]
 public static class CachingBackendFactory
 {
-    public static UninitializedCachingBackendBuilder Uninitialized( this CachingBackendBuilder builder ) => new();
+    /// <summary>
+    /// Creates a <see cref="CachingBackend"/> that throws an exception whenever it is used.
+    /// </summary>
+    public static ConcreteCachingBackendBuilder Uninitialized( this CachingBackendBuilder builder )
+        => new UninitializedCachingBackendBuilder( builder.ServiceProvider );
 
+    /// <summary>
+    /// Creates an in-memory caching backend based on a <see cref="MemoryCache"/>.
+    /// </summary>
     public static MemoryCachingBackendBuilder Memory( this CachingBackendBuilder builder, MemoryCachingBackendConfiguration? configuration = null )
-        => new( configuration );
+        => new( configuration, builder.ServiceProvider );
 
-    public static NonBlockingCachingBackendBuilder NonBlocking( this DistributedCachingBackendBuilder builder ) => new( builder );
+    /// <summary>
+    /// Adds an in-memory, in-process L1 cache in front of an out-of-process cache.
+    /// </summary>
+    public static LayeredCachingBackendBuilder WithL1( this OutOfProcessCachingBackendBuilder builder ) => new( builder, builder.ServiceProvider );
 
-    public static LayeredCachingBackendBuilder WithLocalLayer( this DistributedCachingBackendBuilder builder ) => new( builder );
-
+    /// <summary>
+    /// Adds an in-memory, in-process L1 cache in front of another in-memory back-end. This method is used for tests.
+    /// </summary>
     [Obsolete( "Adding a memory cache on the top of another memory cache should only be used in tests." )]
-    public static LayeredCachingBackendBuilder WithLocalLayer( this MemoryCachingBackendBuilder builder ) => new( builder );
+    public static LayeredCachingBackendBuilder WithL1( this MemoryCachingBackendBuilder builder ) => new( builder, builder.ServiceProvider );
 
-    public static BuiltCachingBackendBuilder Specific( this CachingBackendBuilder builder, CachingBackend backend )
-        => new SpecificCachingBackendBuilder( _ => backend );
+    /// <summary>
+    /// Creates a <see cref="CachingBackendBuilder"/> that returns a specific instance of the <see cref="CachingBackend"/> class.
+    /// This method is used in tests.
+    /// </summary>
+    public static ConcreteCachingBackendBuilder Specific( this CachingBackendBuilder builder, CachingBackend backend )
+        => new SpecificCachingBackendBuilder( _ => backend, builder.ServiceProvider );
+
+    /// <summary>
+    /// Creates a <see cref="CachingBackendBuilder"/> that returns an instance of the <see cref="CachingBackend"/> class that does not do anything.
+    /// </summary>
+    public static ConcreteCachingBackendBuilder Null( this CachingBackendBuilder builder ) => builder.Specific( new NullCachingBackend() );
 }

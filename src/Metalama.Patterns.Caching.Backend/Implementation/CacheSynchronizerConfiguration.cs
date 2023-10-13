@@ -5,14 +5,14 @@ using JetBrains.Annotations;
 namespace Metalama.Patterns.Caching.Implementation;
 
 /// <summary>
-/// Options for the <see cref="CacheInvalidator"/> class.
+/// Options for the <see cref="CacheSynchronizer"/> class.
 /// </summary>
 [PublicAPI]
-public record CacheInvalidatorConfiguration
+public record CacheSynchronizerConfiguration
 {
     /// <summary>
-    /// Gets the prefix of messages sent by the <see cref="CacheInvalidator"/>.
-    /// Messages received by the <see cref="CacheInvalidator.OnMessageReceived"/> method are
+    /// Gets the prefix of messages sent by the <see cref="CacheSynchronizer"/>.
+    /// Messages received by the <see cref="CacheSynchronizer.OnMessageReceived"/> method are
     /// ignored if they don't start with the proper prefix.
     /// </summary>
     public string Prefix { get; init; } = "invalidate";

@@ -8,29 +8,29 @@ using System.Collections.Immutable;
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
 /// <summary>
-/// An implementation of <see cref="CacheInvalidator"/>  that uses Redis publish/subscribe channels to invalidate several
+/// An implementation of <see cref="CacheSynchronizer"/>  that uses Redis publish/subscribe channels to invalidate several
 /// instances of local caches.
 /// </summary>
 [PublicAPI]
-internal sealed class RedisCacheInvalidator : CacheInvalidator
+internal sealed class RedisCacheSynchronizer : CacheSynchronizer
 {
     private readonly bool _ownsConnection;
     private readonly RedisChannel _channel;
     private readonly TimeSpan _connectionTimeout;
 
+    private IConnectionMultiplexer? _connection;
+
     private RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
 
     /// <summary>
-    /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current <see cref="RedisCacheInvalidator"/>.
+    /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current <see cref="RedisCacheSynchronizer"/>.
     /// </summary>
-    private IConnectionMultiplexer Connection { get; }
+    private IConnectionMultiplexer Connection => this._connection ?? throw new InvalidOperationException( "The component is not initialized." );
 
-    public RedisCacheInvalidator(
+    public RedisCacheSynchronizer(
         CachingBackend underlyingBackend,
-        IConnectionMultiplexer connection,
-        RedisCacheInvalidatorConfiguration configuration ) : base( underlyingBackend, configuration )
+        RedisCacheSynchronizerConfiguration configuration ) : base( underlyingBackend, configuration )
     {
-        this.Connection = connection;
         this._ownsConnection = configuration.OwnsConnection;
         this._connectionTimeout = configuration.ConnectionTimeout;
         this._channel = new RedisChannel( configuration.ChannelName, RedisChannel.PatternMode.Literal );
@@ -38,6 +38,8 @@ internal sealed class RedisCacheInvalidator : CacheInvalidator
 
     protected override void InitializeCore()
     {
+        this._connection = ((RedisCacheSynchronizerConfiguration) this.Configuration).RedisConnectionFactory.GetConnection( this.ServiceProvider );
+
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
@@ -51,6 +53,11 @@ internal sealed class RedisCacheInvalidator : CacheInvalidator
 
     protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
+        this._connection =
+            await ((RedisCacheSynchronizerConfiguration) this.Configuration).RedisConnectionFactory.GetConnectionAsync(
+                this.ServiceProvider,
+                cancellationToken );
+
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
             this.Connection,

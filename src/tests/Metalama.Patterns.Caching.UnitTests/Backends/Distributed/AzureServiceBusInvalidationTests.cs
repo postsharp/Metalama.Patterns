@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Distributed
             cachingTestOptions,
             testOutputHelper ) { }
 
-        protected override BuiltCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix )
-            => builder.WithAzureInvalidation( new AzureCacheInvalidatorConfiguration( this._connectionString ) { Prefix = prefix } );
+        protected override ConcreteCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix )
+            => builder.WithAzureSynchronization( new AzureCacheSynchronizerConfiguration( this._connectionString ) { Prefix = prefix } );
     }
 }

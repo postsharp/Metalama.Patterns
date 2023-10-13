@@ -3,8 +3,8 @@
 using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Building;
+using Metalama.Patterns.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
@@ -15,9 +15,16 @@ public abstract class BaseCachingTests
     {
         this.TestOutputHelper = testOutputHelper;
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
+
+        // ReSharper disable once VirtualMemberCallInConstructor
+        this.AddLogging( serviceCollection, testOutputHelper );
         this.ServiceProvider = serviceCollection.BuildServiceProvider();
         CachingService.Default = CachingService.CreateUninitialized( this.ServiceProvider );
+    }
+
+    protected virtual void AddLogging( IServiceCollection serviceCollection, ITestOutputHelper testOutputHelper )
+    {
+        serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitFlashtraceLoggerFactory( testOutputHelper ) );
     }
 
     protected ServiceProvider ServiceProvider { get; }
@@ -26,10 +33,7 @@ public abstract class BaseCachingTests
 
     private static void ResetCachingServices()
     {
-        Assert.True(
-            CachingService.Default.DefaultBackend is UninitializedCachingBackend or NullCachingBackend,
-            "Each test has to use the TestProfileConfigurationFactory." );
-
+        CachingService.Default.Dispose();
         var uninitialized = CachingService.CreateUninitialized();
         CachingService.Default = uninitialized;
     }

@@ -4,11 +4,14 @@ using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-public static class RedisCachingBackendUtilities
+/// <summary>
+/// Exposes methods that perform garbage collection in a Redis server used as a cache where dependencies are enabled.
+/// </summary>
+public static class RedisGarbageCollectionUtilities
 {
     /// <summary>
-    /// Performs a full garbage collection on all Redis servers. This operation enumerates and validates all keys in the database, and can possibly last several
-    /// minutes and affect performance in production.
+    /// Performs a full garbage collection on all Redis servers of a <see cref="IConnectionMultiplexer"/>.
+    /// This operation enumerates and validates all keys in the database, and can possibly last several minutes and affect performance in production.
     /// </summary>
     public static Task PerformFullCollectionAsync(
         IConnectionMultiplexer connection,
@@ -16,8 +19,8 @@ public static class RedisCachingBackendUtilities
         IServiceProvider? serviceProvider = null,
         CancellationToken cancellationToken = default )
     {
-        configuration ??= new RedisCachingBackendConfiguration() { SupportsDependencies = true };
-        var backend = new DependenciesRedisCachingBackend( connection, configuration, serviceProvider );
+        configuration ??= new RedisCachingBackendConfiguration( connection ) { SupportsDependencies = true, OwnsConnection = false };
+        var backend = new DependenciesRedisCachingBackend( configuration, serviceProvider );
 
         return backend.CleanUpAsync( cancellationToken );
     }
@@ -32,8 +35,8 @@ public static class RedisCachingBackendUtilities
         IServiceProvider? serviceProvider = null,
         CancellationToken cancellationToken = default )
     {
-        configuration ??= new RedisCachingBackendConfiguration() { SupportsDependencies = true };
-        var backend = new DependenciesRedisCachingBackend( server.Multiplexer, configuration, serviceProvider );
+        configuration ??= new RedisCachingBackendConfiguration( server.Multiplexer ) { SupportsDependencies = true, OwnsConnection = false };
+        var backend = new DependenciesRedisCachingBackend( configuration, serviceProvider );
 
         return backend.CleanUpAsync( server, cancellationToken );
     }

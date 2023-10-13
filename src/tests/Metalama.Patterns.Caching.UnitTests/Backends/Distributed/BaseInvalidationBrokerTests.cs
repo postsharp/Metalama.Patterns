@@ -13,7 +13,7 @@ public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
         cachingTestOptions,
         testOutputHelper ) { }
 
-    protected abstract BuiltCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix );
+    protected abstract ConcreteCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix );
 
     protected override async Task<CachingBackend[]> CreateBackendsAsync()
     {

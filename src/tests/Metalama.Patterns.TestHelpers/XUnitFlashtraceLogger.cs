@@ -5,14 +5,14 @@ using Flashtrace.Loggers;
 using Flashtrace.Records;
 using Xunit.Abstractions;
 
-namespace Metalama.Patterns.Caching.TestHelpers;
+namespace Metalama.Patterns.TestHelpers;
 
-internal class XUnitLogger : IFlashtraceRoleLoggerFactory
+public class XUnitFlashtraceLogger : IFlashtraceRoleLoggerFactory
 {
     private readonly FlashtraceRole _role;
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public XUnitLogger( FlashtraceRole role, ITestOutputHelper testOutputHelper )
+    public XUnitFlashtraceLogger( FlashtraceRole role, ITestOutputHelper testOutputHelper )
     {
         this._role = role;
         this._testOutputHelper = testOutputHelper;

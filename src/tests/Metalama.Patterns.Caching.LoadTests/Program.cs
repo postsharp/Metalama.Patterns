@@ -6,7 +6,7 @@ namespace Metalama.Patterns.Caching.LoadTests;
 
 internal static class Program
 {
-    private static void Main()
+    private static async Task Main()
     {
         Console.WriteLine( "create" );
 
@@ -30,6 +30,6 @@ internal static class Program
 
         var test = new RedisLoadTest();
 
-        test.Test( configuration, duration );
+        await test.TestAsync( configuration, duration );
     }
 }

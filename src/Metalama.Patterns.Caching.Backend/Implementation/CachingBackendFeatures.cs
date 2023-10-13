@@ -25,8 +25,6 @@ public class CachingBackendFeatures
     /// </summary>
     public virtual bool Blocking => true;
 
-    public virtual bool NonBlockingModifierNotRecommended => true;
-
     /// <summary>
     /// Gets a value indicating whether dependencies are supported.
     /// </summary>
