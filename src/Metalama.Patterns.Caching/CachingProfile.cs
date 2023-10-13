@@ -49,7 +49,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     public string Name { get; }
 
     /// <summary>
-    /// Gets the <see cref="CachingBackend"/> active for the current <see cref="CachingProfile"/>
+    /// Gets the <see cref="CachingBackend"/> active for the current <see cref="CachingProfile"/>.
     /// </summary>
     /// <exception cref="InvalidOperationException">The <see cref="CachingProfile"/> has not been added to a <see cref="CachingService"/> yet.</exception>
     [AllowNull]
