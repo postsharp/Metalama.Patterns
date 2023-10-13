@@ -47,6 +47,8 @@ public partial class CachingService
 
         public IServiceProvider ServiceProvider { get; }
 
+        public bool OwnsBackend { get; set; }
+
         public CachingBackend? CreateBackend()
         {
             var backend = this._specificBackend;
@@ -129,16 +131,18 @@ public partial class CachingService
             return this;
         }
 
-        public ICachingServiceBuilder WithBackend( CachingBackend backend )
+        public ICachingServiceBuilder WithBackend( CachingBackend backend, bool ownsBackend )
         {
             this._specificBackend = backend;
+            this.OwnsBackend = ownsBackend;
 
             return this;
         }
 
-        public ICachingServiceBuilder WithBackend( Func<CachingBackendBuilder, ConcreteCachingBackendBuilder> action )
+        public ICachingServiceBuilder WithBackend( Func<CachingBackendBuilder, ConcreteCachingBackendBuilder> action, bool ownsBackend )
         {
             this._cachingBackendBuildAction = action;
+            this.OwnsBackend = ownsBackend;
 
             return this;
         }

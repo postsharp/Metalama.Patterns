@@ -15,6 +15,7 @@ namespace Metalama.Patterns.Caching;
 public sealed partial class CachingService : ICachingService
 {
     private readonly FormatterRepository _formatters;
+    private bool _ownsBackend;
 
     public static CachingService Default { get; set; } = CreateUninitialized();
 
@@ -44,8 +45,9 @@ public sealed partial class CachingService : ICachingService
     /// <param name="serviceProvider">An optional <see cref="IServiceProvider"/>.</param>
     private CachingService( IServiceProvider? serviceProvider, CachingBackend? defaultBackend, Builder builder )
     {
-        // Run the builder.
+        this._ownsBackend = builder.OwnsBackend;
 
+        // Run the builder.
         this.DefaultBackend = defaultBackend ?? CachingBackend.Create( b => b.Memory(), serviceProvider );
 
         // Set profiles.
@@ -54,14 +56,14 @@ public sealed partial class CachingService : ICachingService
         foreach ( var profile in builder.Profiles )
         {
             profilesDictionary.Add( profile.Name, profile );
-            profile.Initialize( this.DefaultBackend );
+            profile.Initialize( this.DefaultBackend, serviceProvider );
         }
 
         if ( !profilesDictionary.ContainsKey( CachingProfile.DefaultName ) )
         {
             var profile = new CachingProfile();
             profilesDictionary.Add( CachingProfile.DefaultName, profile );
-            profile.Initialize( this.DefaultBackend );
+            profile.Initialize( this.DefaultBackend, serviceProvider );
         }
 
         this._formatters = FormatterRepository.Create(
@@ -96,6 +98,19 @@ public sealed partial class CachingService : ICachingService
 
     public async Task InitializeAsync( CancellationToken cancellationToken )
     {
+        if ( this._ownsBackend )
+        {
+            await this.DefaultBackend.InitializeAsync( cancellationToken );
+        }
+
+        foreach ( var profile in this.Profiles )
+        {
+            if ( profile.OwnsBackend )
+            {
+                await profile.Backend.InitializeAsync( cancellationToken );
+            }
+        }
+
         foreach ( var backend in this.AllBackends )
         {
             await backend.InitializeAsync( cancellationToken );
@@ -124,10 +139,36 @@ public sealed partial class CachingService : ICachingService
     public void Dispose()
     {
         this.AutoReloadManager.Dispose();
+
+        if ( this._ownsBackend )
+        {
+            this.DefaultBackend.Dispose();
+        }
+
+        foreach ( var profile in this.Profiles )
+        {
+            if ( profile.OwnsBackend )
+            {
+                profile.Backend.Dispose();
+            }
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
         await this.AutoReloadManager.DisposeAsync();
+
+        if ( this._ownsBackend )
+        {
+            await this.DefaultBackend.DisposeAsync();
+        }
+
+        foreach ( var profile in this.Profiles )
+        {
+            if ( profile.OwnsBackend )
+            {
+                await profile.Backend.DisposeAsync();
+            }
+        }
     }
 }

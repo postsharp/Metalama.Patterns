@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Locking;
 using System.Collections.Concurrent;
@@ -21,15 +22,15 @@ namespace Metalama.Patterns.Caching;
 [RunTime]
 public sealed class CachingProfile : ICacheItemConfiguration
 {
-    private readonly ConcurrentDictionary<int, ICacheItemConfiguration> _mergedMethodConfigurations = new();
-
-    private bool _attached;
-
     /// <summary>
     /// The name of the default profile.
     /// </summary>
     public const string DefaultName = "default";
 
+    private readonly ConcurrentDictionary<int, ICacheItemConfiguration> _mergedMethodConfigurations = new();
+    private readonly bool? _ownsBackend;
+
+    private bool _attached;
     private CachingBackend? _backend;
 
     /// <summary>
@@ -47,10 +48,14 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public string Name { get; }
 
+    /// <summary>
+    /// Gets the <see cref="CachingBackend"/> active for the current <see cref="CachingProfile"/>
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The <see cref="CachingProfile"/> has not been added to a <see cref="CachingService"/> yet.</exception>
     [AllowNull]
     public CachingBackend Backend => this._backend ?? throw new InvalidOperationException();
 
-    internal void Initialize( CachingBackend backend )
+    internal void Initialize( CachingBackend defaultBackend, IServiceProvider? serviceProvider )
     {
         if ( this._attached )
         {
@@ -58,7 +63,31 @@ public sealed class CachingProfile : ICacheItemConfiguration
         }
 
         this._attached = true;
-        this._backend ??= backend;
+
+        if ( this.BackendFactory != null )
+        {
+            this._backend = CachingBackend.Create( this.BackendFactory, serviceProvider );
+        }
+        else
+        {
+            this._backend ??= defaultBackend;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets a delegate creating the <see cref="CachingBackend"/>.
+    /// </summary>
+    public Func<CachingBackendBuilder, ConcreteCachingBackendBuilder>? BackendFactory { get; init; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the <see cref="CachingService"/> owns the <see cref="Backend"/>. The default value of this property
+    /// is <c>true</c> if <see cref="BackendFactory"/> is non-null and <c>false</c> otherwise. When the profile owns the <see cref="CachingBackend"/>,
+    /// When the backend is owned, the <see cref="CachingService"/> will initialize it and dispose it. Otherwise, this should be performed by the caller.
+    /// </summary>
+    public bool OwnsBackend
+    {
+        get => this._ownsBackend ?? this.BackendFactory != null;
+        init => this._ownsBackend = value;
     }
 
     /// <summary>
