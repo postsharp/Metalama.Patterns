@@ -24,8 +24,8 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
     private bool? _initializerProvidesInitialValue;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>.
-    /// The default is <see langword="true"/>.
+    /// Gets or sets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>
+    /// in the instance constructor of the declaring class of the target property. The default is <see langword="false"/>.
     /// </summary>
     public bool InitializerProvidesInitialValue
     {

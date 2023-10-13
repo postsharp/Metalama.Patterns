@@ -106,6 +106,22 @@ internal sealed partial class DependencyPropertyAspectBuilder
             return;
         }
 
+        /* Regarding setting the initial value, the PostSharp implementation takes care to:
+         * 
+         * - Only set the initial value when definitely supplied via an initializer and not when supplied via the DefaultValue property of the aspect.
+         * - Set the initial value using DependencyObject.SetCurrentValue ("otherwise we override value coming from templates").
+         * - Suspend enforcement of contracts and explicit validation around that call.
+         * 
+         * See also https://tp.postsharp.net/entity/26136-dependencyproperty-values-are-not-set-when
+         * 
+         * TG: My understanding from a Metalama perspective is that we have easy access and control of the initializer expression, and it can be used
+         * to provide the PropertyMetadata.DefaultValue. PostSharp could not do this, so it provided the DefaultValue attribute property as a
+         * compromised alternative (only constant default values can be provided that way). So in ML, we should not need the Start/StopIgnoringContracts
+         * concept. By default (according to DependencyPropertyOptions), we will use the initializer to set PropertyMetadata.DefaultValue
+         * (controlled by DependencyPropertyOptions.IntiializerProvidesDefaultValue), and we will *not* call DependencyObject.SetValue (controlled by
+         * DependencyPropertyOptions.IntiializerProvidesInitialValue).
+         */
+
         this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
             this._declaringType,
             nameof( Templates.InitializeDependencyProperty ),
@@ -146,7 +162,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 } );
         }
 
-        // NB: In a previous implementation, we would generate a static field to store the result of the initializer expression
+        // Here we avoid the temptation to generate a static field to store the result of the initializer expression
         // and use the same result for the default value and as the initial value of all instances of the declaring type. This
         // pattern does not have the same semantics as a regular property initializer, which would be invoked for each instance
         // of the declaring type. So we now emulate normal semantics to avoid surprise. If required, the user can themself implement

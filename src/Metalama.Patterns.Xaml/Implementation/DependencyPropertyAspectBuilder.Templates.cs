@@ -229,8 +229,6 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
             switch ( signatureKind )
             {
-                // TODO: Some casts may not be required depending on the type of the method parameter.
-
                 case ValidationHandlerSignatureKind.InstanceValue:
                     method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke( method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
@@ -292,8 +290,6 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
             switch ( signatureKind )
             {
-                // TODO: Some casts may not be required depending on the type of the method parameter.
-
                 case ChangeHandlerSignatureKind.InstanceNoParameters:
                     method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
 

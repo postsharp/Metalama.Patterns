@@ -14,8 +14,8 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     public bool? IsReadOnly { get; init; }
 
     /// <summary>
-    /// Gets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>.
-    /// The default is <see langword="true"/>.
+    /// Gets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>
+    /// in the instance constructor of the declaring class of the target property. The default is <see langword="false"/>.
     /// </summary>
     public bool? InitializerProvidesInitialValue { get; init; }
 
@@ -81,7 +81,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         return new DependencyPropertyOptions()
         {
             IsReadOnly = false,
-            InitializerProvidesInitialValue = true,
+            InitializerProvidesInitialValue = false,
             InitializerProvidesDefaultValue = true
         };
     }
