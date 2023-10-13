@@ -1,10 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-// TODO: Clean up unused references in project file.
-
-// TODO: Investigating compile time exception inside Metalma. Remove conditions when resolved.
-#define ENABLE_LOCALFUNCTIONS_WORKAROUND_WA1_WA2
-
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;

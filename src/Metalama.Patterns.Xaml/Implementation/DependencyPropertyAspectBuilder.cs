@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Project;
 using Metalama.Patterns.Xaml.Options;
-using System.Diagnostics;
 using System.Windows;
 
 namespace Metalama.Patterns.Xaml.Implementation;
@@ -46,28 +45,29 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 b.Writeability = Writeability.ConstructorOnly;
             } );        
 
-        // TODO: Cache methodsByName?
         var methodsByName = this._declaringType.Methods.ToLookup( m => m.Name );
 
         var onChangingHandlerName = this._options.PropertyChangingMethod ?? $"On{this._propertyName}Changing";
         var onChangedHandlerName = this._options.PropertyChangedMethod ?? $"On{this._propertyName}Changed";
 
-        var (onChangingHandlerMethod, onChangingHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangingHandlerName, allowOldValue: false );
-        var (onChangedHandlerMethod, onChangedHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangedHandlerName, allowOldValue: true );
+        var (onChangingHandlerMethod, onChangingHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangingHandlerName, allowOldValue: false, nameof( this._options.PropertyChangingMethod ) );
+        var (onChangedHandlerMethod, onChangedHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangedHandlerName, allowOldValue: true, nameof( this._options.PropertyChangedMethod ) );
 
-        if ( this._options.PropertyChangingMethod != null && onChangingHandlerParametersKind == ChangeHandlerSignatureKind.MethodNotFound )
+        if ( this._options.PropertyChangingMethod != null && onChangingHandlerParametersKind == ChangeHandlerSignatureKind.NotFound )
         {
-            // TODO: Diagnostic, explicit method not found.
+            this._builder.Diagnostics.Report( 
+                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments( (this._declaringType, this._options.PropertyChangingMethod, nameof( this._options.PropertyChangingMethod )) ) );
         }
 
-        if ( this._options.PropertyChangedMethod != null && onChangedHandlerParametersKind == ChangeHandlerSignatureKind.MethodNotFound )
+        if ( this._options.PropertyChangedMethod != null && onChangedHandlerParametersKind == ChangeHandlerSignatureKind.NotFound )
         {
-            // TODO: Diagnostic, explicit method not found.
+            this._builder.Diagnostics.Report(
+                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments( (this._declaringType, this._options.PropertyChangedMethod, nameof( this._options.PropertyChangedMethod )) ) );
         }
 
         if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue != true && this._options.InitializerProvidesDefaultValue != true )
         {
-            // TODO: Diagnostic, initializer will not be used.
+            this._builder.Diagnostics.Report( Diagnostics.WarningDependencyPropertyInitializerWillNotBeUsed.WithArguments( this._builder.Target ) );
         }
 
         if ( !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
@@ -80,6 +80,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         if ( introduceDependencyPropertyFieldResult.Outcome != AdviceOutcome.Default )
         {
             // We cannot proceed with other transformations if we could not introduce the DependencyProperty field.
+
             return;
         }
 
@@ -144,7 +145,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
     private (IMethod? ChangeHanlderMethod, ChangeHandlerSignatureKind ParametersKind) GetHandlerMethod(
         ILookup<string, IMethod> methodsByName,
         string methodName,
-        bool allowOldValue )
+        bool allowOldValue,
+        string optionName )
     {
         IMethod? method;
 
@@ -153,15 +155,17 @@ internal sealed partial class DependencyPropertyAspectBuilder
         switch ( onChangingGroup.Count() )
         {
             case 0:
-                return (null, ChangeHandlerSignatureKind.MethodNotFound);
+                return (null, ChangeHandlerSignatureKind.NotFound);
 
             case 1:
                 method = onChangingGroup.First();
                 break;
 
             default:
-                // TODO: Ambiguous method diagnostic
-                throw new NotSupportedException( $"Ambiguous handler method for {methodName}" );
+
+                this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsAmbiguous.WithArguments( (this._declaringType, methodName, optionName) ) );
+                
+                return (null, ChangeHandlerSignatureKind.Ambiguous);
         }
 
         var parametersKind = ChangeHandlerSignatureKind.Invalid;
@@ -172,9 +176,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
             if ( parametersKind == ChangeHandlerSignatureKind.Invalid )
             {
-                Debugger.Break();
-                // TODO: Invalid method signature diagnostic
-                throw new NotSupportedException( $"Invalid handler method signature for {methodName}" );
+                this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsInvalid.WithArguments( (optionName, this._builder.Target) ), method );
             }
         }
 

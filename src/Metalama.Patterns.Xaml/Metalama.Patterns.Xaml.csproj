@@ -16,18 +16,6 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
     <Reference Include="WindowsBase" />
-  <!--
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="PresentationFramework.Aero" />
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Core" />
-    
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    -->
   </ItemGroup>
 
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />

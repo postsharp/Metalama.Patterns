@@ -4,9 +4,9 @@
 
 using System.Windows;
 
-namespace Metalama.Patterns.Xaml.AspectTests.Diagnostics.InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsFalse;
+namespace Metalama.Patterns.Xaml.AspectTests.Diagnostics.DependencyPropertyInitializerWillNotBeUsed;
 
-public class InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsFalse : DependencyObject
+public class DependencyPropertyInitializerWillNotBeUsed : DependencyObject
 {
     [DependencyProperty( InitializerProvidesDefaultValue = false, InitializerProvidesInitialValue = false )]
     public List<int> Foo { get; set; } = new List<int>( 3 ) { 1, 2, 3 };
