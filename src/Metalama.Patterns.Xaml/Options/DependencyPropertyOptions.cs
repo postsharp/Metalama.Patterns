@@ -25,14 +25,14 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     /// </summary>
     public bool? InitializerProvidesDefaultValue { get; init; }
 
-    // TODO: Document the valid signatures of PropertyChangedMethod and PropertyChangingMethod, see project README.md.
+    // TODO: Document the valid signatures of PropertyChangedMethod, PropertyChangingMethod and ValidationMethod, see project README.md.
 
     /// <summary>
     /// Gets the name of the method that will be called when the the property value has changed.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The <c>OnPropertyChanged</c> method must be declared in the same class as the target property.
+    /// The method must be declared in the same class as the target property.
     /// </para>
     /// <para>
     /// If this property is not set then the default <c>OnFooChanged</c> value is used, where <c>Foo</c> is the name of the target property.
@@ -41,17 +41,30 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     public string? PropertyChangedMethod { get; init; }
 
     /// <summary>
-    /// Gets the name of the method that reacts to the changes of the property value.
+    /// Gets the name of the method will be called when the the property value is about to change.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The <c>OnPropertyChanged</c> method must be declared in the same class as the target property.
+    /// The method must be declared in the same class as the target property.
     /// </para>
     /// <para>
     /// If this property is not set then the default <c>OnFooChanging</c> value is used, where <c>Foo</c> is the name of the target property.
     /// </para>
     /// </remarks>
     public string? PropertyChangingMethod { get; init; }
+
+    /// <summary>
+    /// Gets the name of the method that validates the value of the property.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The method must be declared in the same class as the target property.
+    /// </para>
+    /// <para>
+    /// If this property is not set then the default <c>ValidateFoo</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// </para>
+    /// </remarks>
+    public string? ValidateMethod { get; init; }
 
     /// <summary>
     /// Gets the name of the static readonly field that will be generated to expose the instance of the registered <see cref="DependencyProperty"/>.
@@ -84,6 +97,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
             InitializerProvidesDefaultValue = other.InitializerProvidesDefaultValue ?? this.InitializerProvidesDefaultValue,
             PropertyChangedMethod = other.PropertyChangedMethod ?? this.PropertyChangedMethod,
             PropertyChangingMethod = other.PropertyChangingMethod ?? this.PropertyChangingMethod,
+            ValidateMethod = other.ValidateMethod ?? this.ValidateMethod,
             RegistrationField = other.RegistrationField ?? this.RegistrationField,
         };
     }

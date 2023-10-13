@@ -27,14 +27,14 @@ public sealed class DependencyPropertyOptionsBuilder
     /// </summary>
     public bool? InitializerProvidesDefaultValue { get; set; }
 
-    // TODO: Document the valid signatures of PropertyChangedMethod and PropertyChangingMethod, see project README.md.
+    // TODO: Document the valid signatures of PropertyChangedMethod, PropertyChangingMethod and ValidateMethod, see project README.md.
 
     /// <summary>
     /// Gets or sets the name of the method that will be called when the the property value has changed.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The <c>OnPropertyChanged</c> method must be declared in the same class as the target property.
+    /// The method must be declared in the same class as the target property.
     /// </para>
     /// <para>
     /// If this property is not set then the default <c>OnFooChanged</c> value is used, where <c>Foo</c> is the name of the target property.
@@ -43,17 +43,30 @@ public sealed class DependencyPropertyOptionsBuilder
     public string? PropertyChangedMethod { get; set; }
 
     /// <summary>
-    /// Gets or sets the name of the method that reacts to the changes of the property value.
+    /// Gets or sets the name of the method that will be called when the property value is about to change.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The <c>OnPropertyChanged</c> method must be declared in the same class as the target property.
+    /// The method must be declared in the same class as the target property.
     /// </para>
     /// <para>
     /// If this property is not set then the default <c>OnFooChanging</c> value is used, where <c>Foo</c> is the name of the target property.
     /// </para>
     /// </remarks>
     public string? PropertyChangingMethod { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the method that validates the value of the property.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The method must be declared in the same class as the target property.
+    /// </para>
+    /// <para>
+    /// If this property is not set then the default <c>ValidateFoo</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// </para>
+    /// </remarks>
+    public string? ValidateMethod { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the static readonly field that will be generated to expose the instance of the registered <see cref="DependencyProperty"/>.
@@ -72,7 +85,8 @@ public sealed class DependencyPropertyOptionsBuilder
             InitializerProvidesInitialValue = this.InitializerProvidesInitialValue,
             InitializerProvidesDefaultValue = this.InitializerProvidesDefaultValue,
             PropertyChangedMethod = this.PropertyChangedMethod,
+            PropertyChangingMethod = this.PropertyChangingMethod,
+            ValidateMethod = this.ValidateMethod,
             RegistrationField = this.RegistrationField,
-            PropertyChangingMethod = this.PropertyChangingMethod
         };
 }

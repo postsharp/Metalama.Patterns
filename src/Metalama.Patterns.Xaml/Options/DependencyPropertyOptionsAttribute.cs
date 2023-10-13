@@ -33,7 +33,7 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
         set => this._initializerProvidesInitialValue = value;
     }
 
-    private bool? _InitializerProvidesDefaultValue;
+    private bool? _initializerProvidesDefaultValue;
 
     /// <summary>
     /// Gets or sets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
@@ -41,18 +41,18 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
     /// </summary>
     public bool InitializerProvidesDefaultValue 
     { 
-        get => this._InitializerProvidesDefaultValue ?? true;
-        set => this._InitializerProvidesDefaultValue = value;
+        get => this._initializerProvidesDefaultValue ?? true;
+        set => this._initializerProvidesDefaultValue = value;
     }
 
-    // TODO: Document the valid signatures of PropertyChangedMethod and PropertyChangingMethod, see project README.md.
+    // TODO: Document the valid signatures of PropertyChangedMethod, PropertyChangingMethod and ValidateMethod, see project README.md.
 
     /// <summary>
     /// Gets or sets the name of the method that will be called when the the property value has changed.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The <c>OnPropertyChanged</c> method must be declared in the same class as the target property.
+    /// The method must be declared in the same class as the target property.
     /// </para>
     /// <para>
     /// If this property is not set then the default <c>OnFooChanged</c> value is used, where <c>Foo</c> is the name of the target property.
@@ -61,17 +61,30 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
     public string? PropertyChangedMethod { get; set; }
 
     /// <summary>
-    /// Gets or sets the name of the method that reacts to the changes of the property value.
+    /// Gets or sets the name of the method that will be called when the property value is about to change.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The <c>OnPropertyChanged</c> method must be declared in the same class as the target property.
+    /// The method must be declared in the same class as the target property.
     /// </para>
     /// <para>
     /// If this property is not set then the default <c>OnFooChanging</c> value is used, where <c>Foo</c> is the name of the target property.
     /// </para>
     /// </remarks>
     public string? PropertyChangingMethod { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the method that validates the value of the property.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The method must be declared in the same class as the target property.
+    /// </para>
+    /// <para>
+    /// If this property is not set then the default <c>ValidateFoo</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// </para>
+    /// </remarks>
+    public string? ValidateMethod { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the static readonly field that will be generated to expose the instance of the registered <see cref="DependencyProperty"/>.
@@ -91,9 +104,10 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
             {
                 IsReadOnly = this._isReadOnly,
                 InitializerProvidesInitialValue = this._initializerProvidesInitialValue,
-                InitializerProvidesDefaultValue = this._InitializerProvidesDefaultValue,
+                InitializerProvidesDefaultValue = this._initializerProvidesDefaultValue,
                 PropertyChangingMethod = this.PropertyChangingMethod,
                 PropertyChangedMethod = this.PropertyChangedMethod,
+                ValidateMethod = this.ValidateMethod,
                 RegistrationField = this.RegistrationField
             }
         };

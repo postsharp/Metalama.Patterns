@@ -21,7 +21,7 @@ The following signatures originate from the PostSharp implementation:
 * `void OnFooChanged()`
 * `void OnFooChanged(DependencyProperty property)`
 
-where TDeclaringType is the declaring type of the target property, or DependencyObject, or object.
+where `TDeclaringType` is the declaring type of the target property, or `DependencyObject`, or `object`.
 
 The following signatures are inspired by `ObservableProperty` from the Windows Community Toolkit:
 
@@ -35,3 +35,18 @@ The following signatures are inspired by `ObservableProperty` from the Windows C
 where `value_type` is any type assignable from the actual type of the target property.
 
 Note that `oldValue` does not appear to fit the purely DependencyProperty-backed GetValue/SetValue/callbacks model for OnChanging, so `void OnNameChanging(value_type? oldValue, value_type? newValue)` is not supported.
+
+## Valid ValidateValue Method Signatures
+
+All the supported signatures originate fromt the PostSharp implementation:
+
+* `static bool ValidatePropertyName(TPropertyType value)`
+* `static bool ValidatePropertyName(DependencyProperty property, TPropertyType value)`
+* `static bool ValidatePropertyName(TDeclaringType instance, TPropertyType value)`
+* `static bool ValidatePropertyName(DependencyProperty property, TDeclaringType instance, TPropertyType value)`
+* `bool ValidatePropertyName(TPropertyType value)`
+* `bool ValidatePropertyName(DependencyProperty property, TPropertyType value)`
+
+where `TDeclaringType` is the declaring type of the target property, or `DependencyObject`, or `object`, and
+where `TPropertyType` is any type assignable from the actual type of the target property.
+`TPropertyType` can also be a generic type parameter, in which case the method must have exactly one generic parameter. Note that support for the generic forms is implemented in PostSharp but not documented.

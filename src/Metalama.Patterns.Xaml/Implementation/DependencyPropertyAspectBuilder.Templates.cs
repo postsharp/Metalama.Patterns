@@ -20,65 +20,127 @@ internal sealed partial class DependencyPropertyAspectBuilder
         public static TemplateProvider Provider { get; } = TemplateProvider.FromInstance( new Templates() );
 
         [Template]
-        private static void InvokeChangeHandler(
+        private static void InvokeValidateMethod(
             [CompileTime] IField dependencyPropertyField,
-            [CompileTime] IMethod handlerMethod,
-            [CompileTime] ChangeHandlerSignatureKind parametersKind,
+            [CompileTime] IMethod method,
+            [CompileTime] ValidationHandlerSignatureKind signatureKind,
+            [CompileTime] INamedType propertyType,
+            [CompileTime] INamedType declaringType,
+            [CompileTime] IExpression instanceExpr,
+            [CompileTime] IExpression valueExpr )
+        {
+            if ( method.TypeParameters.Count == 1 )
+            {
+                method = method.WithTypeArguments( propertyType );
+            }
+
+            switch ( signatureKind )
+            {
+                // TODO: Some casts may not be required depending on the type of the method parameter.
+
+                case ValidationHandlerSignatureKind.InstanceValue:
+                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                        .Invoke( method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
+
+                    break;
+
+                case ValidationHandlerSignatureKind.InstanceDependencyPropertyAndValue:
+                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                        .Invoke( 
+                            dependencyPropertyField.Value,
+                            method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
+
+                    break;
+
+                case ValidationHandlerSignatureKind.StaticValue:
+                    method!.Invoke( method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
+
+                    break;
+
+                case ValidationHandlerSignatureKind.StaticDependencyPropertyAndValue:
+                    method!.Invoke(
+                        dependencyPropertyField.Value,
+                        method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
+
+                    break;
+
+                case ValidationHandlerSignatureKind.StaticDependencyPropertyAndInstanceAndValue:
+                    method!.Invoke(
+                        dependencyPropertyField.Value,
+                        meta.Cast( declaringType, instanceExpr.Value ),
+                        method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
+
+                    break;
+
+                case ValidationHandlerSignatureKind.StaticInstanceAndValue:
+                    method!.Invoke(
+                        meta.Cast( declaringType, instanceExpr.Value ),
+                        method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
+
+                    break;
+            }
+        }
+
+        [Template]
+        private static void InvokeChangeMethod(
+            [CompileTime] IField dependencyPropertyField,
+            [CompileTime] IMethod method,
+            [CompileTime] ChangeHandlerSignatureKind signatureKind,
             [CompileTime] INamedType propertyType,
             [CompileTime] INamedType declaringType,
             [CompileTime] IExpression instanceExpr,
             [CompileTime] IExpression? oldValueExpr,
             [CompileTime] IExpression newValueExpr )
         {
-            if ( handlerMethod.TypeParameters.Count == 1 )
+            if ( method.TypeParameters.Count == 1 )
             {
-                handlerMethod = handlerMethod.WithTypeArguments( propertyType );
+                method = method.WithTypeArguments( propertyType );
             }
 
-            switch ( parametersKind )
+            switch ( signatureKind )
             {
                 // TODO: Some casts may not be required depending on the type of the method parameter.
 
                 case ChangeHandlerSignatureKind.InstanceNoParameters:
-                    handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
+                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
 
                     break;
 
                 case ChangeHandlerSignatureKind.StaticNoParameters:
-                    handlerMethod!.Invoke();
+                    method!.Invoke();
 
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceValue:
-                    handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
-                        .Invoke( handlerMethod.Parameters[0].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
+                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                        .Invoke( method.Parameters[0].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
 
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceOldValueAndNewValue:
-                    handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke(
-                            handlerMethod.Parameters[0].Type.SpecialType == SpecialType.Object ? oldValueExpr!.Value : meta.Cast( propertyType, oldValueExpr!.Value ),
-                            handlerMethod.Parameters[1].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
+                            method.Parameters[0].Type.SpecialType == SpecialType.Object ? oldValueExpr!.Value : meta.Cast( propertyType, oldValueExpr!.Value ),
+                            method.Parameters[1].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceDependencyProperty:
-                    handlerMethod!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
+                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
 
                     break;
 
                 case ChangeHandlerSignatureKind.StaticDependencyProperty:
-                    handlerMethod!.Invoke( dependencyPropertyField.Value );
+                    method!.Invoke( dependencyPropertyField.Value );
 
                     break;
 
                 case ChangeHandlerSignatureKind.StaticDependencyPropertyAndInstance:
-                    handlerMethod!.Invoke( dependencyPropertyField.Value, meta.Cast( declaringType, instanceExpr.Value ) );
+                    method!.Invoke( dependencyPropertyField.Value, meta.Cast( declaringType, instanceExpr.Value ) );
 
                     break;
 
                 case ChangeHandlerSignatureKind.StaticInstance:
-                    handlerMethod!.Invoke( meta.Cast( declaringType, instanceExpr.Value ) );
+                    method!.Invoke( meta.Cast( declaringType, instanceExpr.Value ) );
 
                     break;
             }
@@ -108,10 +170,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
             [CompileTime] INamedType propertyType,
             [CompileTime] INamedType declaringType,
             [CompileTime] IExpression? defaultValueExpr,
-            [CompileTime] IMethod? onChangingHandlerMethod,
-            [CompileTime] ChangeHandlerSignatureKind onChangingHandlerParametersKind,
-            [CompileTime] IMethod? onChangedHandlerMethod,
-            [CompileTime] ChangeHandlerSignatureKind onChangedHandlerParametersKind )
+            [CompileTime] IMethod? onChangingMethod,
+            [CompileTime] ChangeHandlerSignatureKind onChangingSignatureKind,
+            [CompileTime] IMethod? onChangedMethod,
+            [CompileTime] ChangeHandlerSignatureKind onChangedSignatureKind,
+            [CompileTime] IMethod? validateMethod,
+            [CompileTime] ValidationHandlerSignatureKind validateSignatureKind )
         {
             /* The PostSharp implementation:
              * 
@@ -126,7 +190,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 defaultValueExpr = null;
             }
 
-            if ( onChangingHandlerMethod != null || onChangedHandlerMethod != null || defaultValueExpr != null )
+            if ( onChangingMethod != null || onChangedMethod != null || validateMethod != null || defaultValueExpr != null )
             {
                 IExpression? coerceValueCallbackExpr = null;
 
@@ -137,16 +201,27 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 {
                     // As per PostSharp implementation, this callback is used for validation and notifying "changing", throwing ArgumentException if invalid.
                     // NB: Validation (eg, a configured explicit validation method and/or integration with Contracts) is not yet implemented.
-
-                    // TODO: Validation
+                    
                     // TODO: Integration with INotifyPropertyChanging
 
-                    if ( onChangingHandlerMethod != null )
+                    if ( validateMethod != null )
                     {
-                        InvokeChangeHandler(
+                        InvokeValidateMethod(
                             dependencyPropertyField,
-                            onChangingHandlerMethod,
-                            onChangingHandlerParametersKind,
+                            validateMethod,
+                            validateSignatureKind,
+                            propertyType,
+                            declaringType,
+                            ExpressionFactory.Capture( d ),
+                            ExpressionFactory.Capture( value ) );
+                    }
+
+                    if ( onChangingMethod != null )
+                    {
+                        InvokeChangeMethod(
+                            dependencyPropertyField,
+                            onChangingMethod,
+                            onChangingSignatureKind,
                             propertyType,
                             declaringType,
                             ExpressionFactory.Capture( d ),
@@ -158,7 +233,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 }
 #endif
 
-                if ( onChangingHandlerMethod != null )
+                if ( onChangingMethod != null )
                 {
                     coerceValueCallbackExpr = ExpressionFactory.Capture( (CoerceValueCallback) CoerceValue );
 
@@ -194,12 +269,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 // The method below should be inside the 'if' block below (see [WA2]), and the outer 'if' in the method should be removed.
                 void PropertyChanged( DependencyObject d, DependencyPropertyChangedEventArgs e )
                 {
-                    if ( onChangedHandlerMethod != null )
+                    if ( onChangedMethod != null )
                     {
-                        InvokeChangeHandler(
+                        InvokeChangeMethod(
                             dependencyPropertyField,
-                            onChangedHandlerMethod,
-                            onChangedHandlerParametersKind,
+                            onChangedMethod,
+                            onChangedSignatureKind,
                             propertyType,
                             declaringType,
                             ExpressionFactory.Capture( d ),
@@ -209,7 +284,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 }
 #endif
 
-                if ( onChangedHandlerMethod != null )
+                if ( onChangedMethod != null )
                 {
                     // TODO: Integration with INotifyPropertyChanged
 

@@ -47,22 +47,30 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         var methodsByName = this._declaringType.Methods.ToLookup( m => m.Name );
 
-        var onChangingHandlerName = this._options.PropertyChangingMethod ?? $"On{this._propertyName}Changing";
-        var onChangedHandlerName = this._options.PropertyChangedMethod ?? $"On{this._propertyName}Changed";
+        var onChangingMethodName = this._options.PropertyChangingMethod ?? $"On{this._propertyName}Changing";
+        var onChangedMethodName = this._options.PropertyChangedMethod ?? $"On{this._propertyName}Changed";
+        var validateMethodName = this._options.ValidateMethod ?? $"Validate{this._propertyName}";
 
-        var (onChangingHandlerMethod, onChangingHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangingHandlerName, allowOldValue: false, nameof( this._options.PropertyChangingMethod ) );
-        var (onChangedHandlerMethod, onChangedHandlerParametersKind) = this.GetHandlerMethod( methodsByName, onChangedHandlerName, allowOldValue: true, nameof( this._options.PropertyChangedMethod ) );
+        var (onChangingMethod, onChangingSignatureKind) = this.GetChangeHandlerMethod( methodsByName, onChangingMethodName, allowOldValue: false, nameof( this._options.PropertyChangingMethod ) );
+        var (onChangedMethod, onChangedSignatureKind) = this.GetChangeHandlerMethod( methodsByName, onChangedMethodName, allowOldValue: true, nameof( this._options.PropertyChangedMethod ) );
+        var (validateMethod, validateSignatureKind) = this.GetValidationHandlerMethod( methodsByName, validateMethodName, nameof( this._options.ValidateMethod ) );
 
-        if ( this._options.PropertyChangingMethod != null && onChangingHandlerParametersKind == ChangeHandlerSignatureKind.NotFound )
+        if ( this._options.PropertyChangingMethod != null && onChangingSignatureKind == ChangeHandlerSignatureKind.NotFound )
         {
             this._builder.Diagnostics.Report( 
                 Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments( (this._declaringType, this._options.PropertyChangingMethod, nameof( this._options.PropertyChangingMethod )) ) );
         }
 
-        if ( this._options.PropertyChangedMethod != null && onChangedHandlerParametersKind == ChangeHandlerSignatureKind.NotFound )
+        if ( this._options.PropertyChangedMethod != null && onChangedSignatureKind == ChangeHandlerSignatureKind.NotFound )
         {
             this._builder.Diagnostics.Report(
                 Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments( (this._declaringType, this._options.PropertyChangedMethod, nameof( this._options.PropertyChangedMethod )) ) );
+        }
+
+        if ( this._options.ValidateMethod != null && onChangedSignatureKind == ChangeHandlerSignatureKind.NotFound )
+        {
+            this._builder.Diagnostics.Report(
+                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments( (this._declaringType, this._options.ValidateMethod, nameof( this._options.PropertyChangedMethod )) ) );
         }
 
         if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue != true && this._options.InitializerProvidesDefaultValue != true )
@@ -96,10 +104,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 propertyType = this._propertyType,
                 declaringType = this._declaringType,
                 defaultValueExpr = this._builder.Target.InitializerExpression,
-                onChangingHandlerMethod,
-                onChangingHandlerParametersKind,
-                onChangedHandlerMethod,
-                onChangedHandlerParametersKind
+                onChangingMethod,
+                onChangingSignatureKind,
+                onChangedMethod,
+                onChangedSignatureKind,
+                validateMethod,
+                validateSignatureKind
             } );
 
         this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
@@ -142,7 +152,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         }
     }
 
-    private (IMethod? ChangeHanlderMethod, ChangeHandlerSignatureKind ParametersKind) GetHandlerMethod(
+    private (IMethod? ChangeHanlderMethod, ChangeHandlerSignatureKind SignatureKind) GetChangeHandlerMethod(
         ILookup<string, IMethod> methodsByName,
         string methodName,
         bool allowOldValue,
@@ -168,29 +178,33 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 return (null, ChangeHandlerSignatureKind.Ambiguous);
         }
 
-        var parametersKind = ChangeHandlerSignatureKind.Invalid;
+        var signatureKind = ChangeHandlerSignatureKind.Invalid;
 
         if ( method != null )
         {
-            parametersKind = GetChangeHandlerSignature( method, this._declaringType, this._propertyType, allowOldValue, this._assets );
+            signatureKind = this.GetChangeHandlerSignature( method, this._declaringType, this._propertyType, allowOldValue );
 
-            if ( parametersKind == ChangeHandlerSignatureKind.Invalid )
+            if ( signatureKind == ChangeHandlerSignatureKind.Invalid )
             {
                 this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsInvalid.WithArguments( (optionName, this._builder.Target) ), method );
             }
         }
 
-        return (method, parametersKind);
+        return (method, signatureKind);
     }
 
-    private static ChangeHandlerSignatureKind GetChangeHandlerSignature(
+    private ChangeHandlerSignatureKind GetChangeHandlerSignature(
         IMethod method,
         INamedType declaringType,
         IType propertyType,
-        bool allowOldValue,
-        Assets assets )
+        bool allowOldValue )
     {
         var p = method.Parameters;
+
+        if ( method.ReturnType.SpecialType != SpecialType.Void || p.Count > 2 || p.Any( p => p.RefKind is not RefKind.None or RefKind.In ) )
+        {
+            return ChangeHandlerSignatureKind.Invalid;
+        }
 
         switch ( p.Count )
         {
@@ -199,56 +213,164 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
             case 1:
 
-                if ( p[0].RefKind is RefKind.None or RefKind.In )
+                if ( p[0].Type.Equals( this._assets.DependencyProperty ) )
                 {
-                    if ( p[0].Type.Equals( assets.DependencyProperty ) )
-                    {
-                        return method.IsStatic ? ChangeHandlerSignatureKind.StaticDependencyProperty : ChangeHandlerSignatureKind.InstanceDependencyProperty;
-                    }
-                    else if ( method.IsStatic
-                             && (p[0].Type.SpecialType == SpecialType.Object
-                                  || p[0].Type.Equals( declaringType )
-                                  || p[0].Type.Equals( assets.DependencyObject )) )
-                    {
-                        return ChangeHandlerSignatureKind.StaticInstance;
-                    }
-                    else if ( !method.IsStatic
-                              && (p[0].Type.SpecialType == SpecialType.Object
-                                   || propertyType.Is( p[0].Type )
-                                   || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
-                    {
-                        return ChangeHandlerSignatureKind.InstanceValue;
-                    }
+                    return method.IsStatic ? ChangeHandlerSignatureKind.StaticDependencyProperty : ChangeHandlerSignatureKind.InstanceDependencyProperty;
                 }
+                else if ( method.IsStatic
+                            && (p[0].Type.SpecialType == SpecialType.Object
+                                || p[0].Type.Equals( declaringType )
+                                || p[0].Type.Equals( this._assets.DependencyObject )) )
+                {
+                    return ChangeHandlerSignatureKind.StaticInstance;
+                }
+                else if ( !method.IsStatic
+                            && (p[0].Type.SpecialType == SpecialType.Object
+                                || propertyType.Is( p[0].Type )
+                                || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
+                {
+                    return ChangeHandlerSignatureKind.InstanceValue;
+                }
+
                 break;
 
             case 2:
 
-                if ( p[0].RefKind is RefKind.None or RefKind.In && p[1].RefKind is RefKind.None or RefKind.In )
+                if ( method.IsStatic
+                        && p[0].Type.Equals( this._assets.DependencyProperty )
+                        && (p[1].Type.SpecialType == SpecialType.Object
+                            || p[1].Type.Equals( declaringType )
+                            || p[1].Type.Equals( this._assets.DependencyObject )) )
                 {
-                    if ( method.IsStatic
-                         && p[0].Type.Equals( assets.DependencyProperty )
-                         && (p[1].Type.SpecialType == SpecialType.Object
-                              || p[1].Type.Equals( declaringType )
-                              || p[1].Type.Equals( assets.DependencyObject )) )
-                    {
-                        return ChangeHandlerSignatureKind.StaticDependencyPropertyAndInstance;
-                    }
-                    else if ( allowOldValue
-                              && !method.IsStatic
-                              && (p[0].Type.SpecialType == SpecialType.Object
-                                   || propertyType.Is( p[0].Type )
-                                   || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1))
-                              && (p[1].Type.SpecialType == SpecialType.Object
-                                   || propertyType.Is( p[1].Type )
-                                   || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
-                    {
-                        return ChangeHandlerSignatureKind.InstanceOldValueAndNewValue;
-                    }
+                    return ChangeHandlerSignatureKind.StaticDependencyPropertyAndInstance;
                 }
+                else if ( allowOldValue
+                            && !method.IsStatic
+                            && (p[0].Type.SpecialType == SpecialType.Object
+                                || propertyType.Is( p[0].Type )
+                                || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1))
+                            && (p[1].Type.SpecialType == SpecialType.Object
+                                || propertyType.Is( p[1].Type )
+                                || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
+                {
+                    return ChangeHandlerSignatureKind.InstanceOldValueAndNewValue;
+                }
+
                 break;
         }
 
         return ChangeHandlerSignatureKind.Invalid;
+    }
+
+    private (IMethod? ChangeHanlderMethod, ValidationHandlerSignatureKind SignatureKind) GetValidationHandlerMethod(
+        ILookup<string, IMethod> methodsByName,
+        string methodName,
+        string optionName )
+    {
+        IMethod? method;
+
+        var onChangingGroup = methodsByName[methodName];
+
+        switch ( onChangingGroup.Count() )
+        {
+            case 0:
+                return (null, ValidationHandlerSignatureKind.NotFound);
+
+            case 1:
+                method = onChangingGroup.First();
+                break;
+
+            default:
+
+                this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsAmbiguous.WithArguments( (this._declaringType, methodName, optionName) ) );
+
+                return (null, ValidationHandlerSignatureKind.Ambiguous);
+        }
+
+        var signatureKind = ValidationHandlerSignatureKind.Invalid;
+
+        if ( method != null )
+        {
+            signatureKind = this.GetValidationHandlerSignature( method, this._declaringType, this._propertyType );
+            if ( signatureKind == ValidationHandlerSignatureKind.Invalid )
+            {
+                this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsInvalid.WithArguments( (optionName, this._builder.Target) ), method );
+            }
+        }
+
+        return (method, signatureKind);
+    }
+
+    private ValidationHandlerSignatureKind GetValidationHandlerSignature(
+        IMethod method,
+        INamedType declaringType,
+        IType propertyType )
+    {
+        var p = method.Parameters;
+
+        if ( method.ReturnType.SpecialType != SpecialType.Boolean
+            || method.ReturnParameter.RefKind != RefKind.None
+            || p.Count > 3
+            || p.Any( p => p.RefKind is not RefKind.None or RefKind.In ) )
+        {
+            return ValidationHandlerSignatureKind.Invalid;
+        }
+
+        switch ( p.Count )
+        {
+            case 0:
+                return ValidationHandlerSignatureKind.Invalid;
+
+            case 1:
+
+                if ( p[0].Type.SpecialType == SpecialType.Object
+                     || propertyType.Is( p[0].Type )
+                     || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1) )
+                {
+                    return method.IsStatic ? ValidationHandlerSignatureKind.StaticValue : ValidationHandlerSignatureKind.InstanceValue;
+                }
+
+                break;
+
+            case 2:
+
+                if ( p[0].Type.Equals( this._assets.DependencyProperty )
+                     && (p[1].Type.SpecialType == SpecialType.Object
+                        || propertyType.Is( p[1].Type )
+                        || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1) ) )
+                {
+                    return method.IsStatic ? ValidationHandlerSignatureKind.StaticDependencyPropertyAndValue : ValidationHandlerSignatureKind.InstanceDependencyPropertyAndValue;
+                }
+                else if ( method.IsStatic
+                          && (p[0].Type.SpecialType == SpecialType.Object
+                              || p[0].Type.Equals( declaringType )
+                              || p[0].Type.Equals( this._assets.DependencyObject ))
+                          && (p[1].Type.SpecialType == SpecialType.Object
+                              || propertyType.Is( p[1].Type )
+                              || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
+                {
+                    return ValidationHandlerSignatureKind.StaticInstanceAndValue;
+                }
+
+                break;
+
+            case 3:
+
+                if ( method.IsStatic
+                        && p[0].Type.Equals( this._assets.DependencyProperty )
+                        && (p[1].Type.SpecialType == SpecialType.Object
+                            || p[1].Type.Equals( declaringType )
+                            || p[1].Type.Equals( this._assets.DependencyObject ))
+                        && (p[2].Type.SpecialType == SpecialType.Object
+                            || propertyType.Is( p[2].Type )
+                            || (p[2].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
+                {
+                    return ValidationHandlerSignatureKind.StaticDependencyPropertyAndInstanceAndValue;
+                }
+
+                break;
+        }
+
+        return ValidationHandlerSignatureKind.Invalid;
     }
 }

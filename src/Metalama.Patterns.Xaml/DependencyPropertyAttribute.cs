@@ -21,7 +21,7 @@ public sealed partial class DependencyPropertyAttribute : DependencyPropertyOpti
         builder.DeclaringType().MustBe( typeof( DependencyObject ), ConversionKind.Reference );
     }
 
-    void IAspect<IProperty>.BuildAspect(Metalama.Framework.Aspects.IAspectBuilder<Metalama.Framework.Code.IProperty> builder)
+    void IAspect<IProperty>.BuildAspect( IAspectBuilder<IProperty> builder )
     {
         var aspectBuilder = new DependencyPropertyAspectBuilder( builder );
         aspectBuilder.Build();
