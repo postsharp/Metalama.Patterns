@@ -6,9 +6,9 @@ namespace Metalama.Patterns.Caching.Locking;
 /// Provides instances of named locks. 
 /// </summary>
 /// <remarks>
-/// Two implementations are provided: <see cref="NullLockManager"/> and <see cref="LocalLockManager"/>.
+/// Two implementations are provided: <see cref="NullLockFactory"/> and <see cref="LocalLockFactory"/>.
 /// </remarks>
-public interface ILockManager
+public interface ILockFactory
 {
     /// <summary>
     /// Gets a handle to a named lock. This method must return immediately. Waiting, if any, must be done in the <see cref="ILockHandle.Acquire"/> method.

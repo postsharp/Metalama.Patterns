@@ -29,18 +29,26 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
     /// <param name="name">The source name.</param>
     protected SimpleFlashtraceLogger( FlashtraceRole role, string name )
     {
-        this.Name = name;
         this.Role = role;
+
+        if ( role.IsDefault )
+        {
+            this.Category = name;
+        }
+        else
+        {
+            this.Category = role.Name + "." + name;
+        }
     }
+
+    public string Category { get; }
+
+    public FlashtraceRole Role { get; }
 
     /// <inheritdoc/>
     public abstract bool IsEnabled( FlashtraceLevel level );
 
     public abstract IFlashtraceRoleLoggerFactory Factory { get; }
-
-    public string Name { get; }
-
-    public FlashtraceRole Role { get; }
 
     private static string? GetRecordKindText( LogRecordKind recordKind )
     {

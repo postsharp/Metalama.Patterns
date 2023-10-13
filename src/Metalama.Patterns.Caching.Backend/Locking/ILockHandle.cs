@@ -3,7 +3,7 @@
 namespace Metalama.Patterns.Caching.Locking;
 
 /// <summary>
-/// Allows to acquire and release a named lock returned by <see cref="ILockManager.GetLock"/>.
+/// Allows to acquire and release a named lock returned by <see cref="ILockFactory.GetLock"/>.
 /// </summary>
 public interface ILockHandle : IDisposable
 {

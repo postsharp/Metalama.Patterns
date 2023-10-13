@@ -1,27 +1,32 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Flashtrace;
 using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests;
 
-public sealed class DependencyInjectionTests : BaseCachingTests
+public sealed class DependencyInjectionTests
 {
-    public DependencyInjectionTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public DependencyInjectionTests( ITestOutputHelper testOutputHelper )
+    {
+        this._testOutputHelper = testOutputHelper;
+    }
 
     [Fact]
     public async Task TestDependencyInjection()
     {
+        TestingCacheBackend? backend = null;
         ServiceCollection serviceCollection = new();
-        var backend = new TestingCacheBackend( "test", this.ServiceProvider );
-        serviceCollection.AddLogging();
-        serviceCollection.AddFlashtrace( b => b.EnabledRoles.Add( FlashtraceRole.Caching ) );
-        serviceCollection.AddCaching( b => b.WithBackend( backend ) );
+        serviceCollection.AddLogging( logging => logging.AddXUnitLogger( this._testOutputHelper ).SetMinimumLevel( LogLevel.Debug ) );
+        serviceCollection.AddCaching( b => b.WithBackend( backend = new TestingCacheBackend( "test", b.ServiceProvider ) ) );
         serviceCollection.AddSingleton<C>();
         var serviceProvider = serviceCollection.BuildServiceProvider();
         await using var initializer = serviceProvider.GetRequiredService<ICachingService>();
@@ -30,8 +35,12 @@ public sealed class DependencyInjectionTests : BaseCachingTests
         var c = (C) serviceProvider.GetService( typeof(C) )!;
         _ = c.Method();
 
-        Assert.NotNull( backend.LastCachedItem );
+        Assert.NotNull( backend!.LastCachedItem );
         Assert.Equal( "DependencyInjection!", backend.LastCachedItem.Value );
+
+        var observer = serviceProvider.GetRequiredService<LogObserver>();
+        Assert.NotEmpty( observer.Lines );
+        Assert.StartsWith( "Debug Cache.Metalama.Patterns.Caching.Tests.DependencyInjectionTests+C:", observer.Lines[0], StringComparison.Ordinal );
     }
 
     private sealed class C

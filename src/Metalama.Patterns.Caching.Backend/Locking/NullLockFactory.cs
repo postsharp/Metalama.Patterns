@@ -5,10 +5,10 @@ using JetBrains.Annotations;
 namespace Metalama.Patterns.Caching.Locking;
 
 /// <summary>
-/// An implementation of <see cref="ILockManager"/> which does not acquire any lock.
+/// An implementation of <see cref="ILockFactory"/> which does not acquire any lock.
 /// </summary>
 [PublicAPI]
-public class NullLockManager : ILockManager
+public class NullLockFactory : ILockFactory
 {
     /// <inheritdoc />
     public ILockHandle GetLock( string key ) => LockHandle.Instance;
@@ -21,7 +21,7 @@ public class NullLockManager : ILockManager
 
         public bool Acquire( TimeSpan timeout, CancellationToken cancellationToken ) => true;
 
-        public ValueTask<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken ) => default;
+        public ValueTask<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken ) => new ValueTask<bool>( true );
 
         public void Release() { }
 

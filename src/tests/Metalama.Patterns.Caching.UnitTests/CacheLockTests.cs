@@ -24,9 +24,9 @@ namespace Metalama.Patterns.Caching.Tests
                 b => b.WithProfile(
                     new CachingProfile( "LocalLock" )
                     {
-                        LockManager = new LocalLockManager(),
+                        LockFactory = new LocalLockFactory(),
                         AcquireLockTimeout = TimeSpan.FromMilliseconds( acquireLockTimeout ),
-                        OnLockTimeout = acquireLockTimeoutStrategy ?? throw new TimeoutException()
+                        OnLockTimeout = acquireLockTimeoutStrategy ?? (_ => throw new TimeoutException())
                     } ),
                 passServiceProvider: false /* Disable caching because it's too slow */ );
         }

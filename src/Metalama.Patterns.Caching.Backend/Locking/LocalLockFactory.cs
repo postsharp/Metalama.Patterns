@@ -6,12 +6,12 @@ using System.Collections.Concurrent;
 namespace Metalama.Patterns.Caching.Locking;
 
 /// <summary>
-/// An implementation of <see cref="ILockManager"/> in which every instance of the <see cref="LocalLockManager"/>
-/// has its own set of named locks that are not shared in any way with other instances. The <see cref="LocalLockManager"/> can
+/// An implementation of <see cref="ILockFactory"/> in which every instance of the <see cref="LocalLockFactory"/>
+/// has its own set of named locks that are not shared in any way with other instances. The <see cref="LocalLockFactory"/> can
 /// be used to synchronize the execution of methods in the current process and <see cref="AppDomain"/>.
 /// </summary>
 [PublicAPI]
-public sealed class LocalLockManager : ILockManager
+public sealed class LocalLockFactory : ILockFactory
 {
     private readonly ConcurrentDictionary<string, Lock> _locks = new( StringComparer.OrdinalIgnoreCase );
 
@@ -109,7 +109,7 @@ public sealed class LocalLockManager : ILockManager
 
     private class Lock : SemaphoreSlim
     {
-        private readonly LocalLockManager _parent;
+        private readonly LocalLockFactory _parent;
         private readonly string _key;
 
         public int References { get; private set; } = 1;
@@ -118,7 +118,7 @@ public sealed class LocalLockManager : ILockManager
         // It enforces the following invariant: this.References == 0 and 'this' is not present in in this.parent.lock.
         private SpinLock _spinLock;
 
-        public Lock( LocalLockManager parent, string key ) : base( 1 )
+        public Lock( LocalLockFactory parent, string key ) : base( 1 )
         {
             this._parent = parent;
             this._key = key;

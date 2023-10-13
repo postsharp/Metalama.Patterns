@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Building;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,6 +65,7 @@ public static class RedisCachingFactory
         this IServiceCollection serviceCollection,
         RedisCachingBackendConfiguration configuration )
     {
+        serviceCollection.AddFlashtrace();
         serviceCollection.AddHostedService<RedisCacheDependencyGarbageCollector>(
             serviceProvider => new RedisCacheDependencyGarbageCollector( configuration, serviceProvider ) );
 
@@ -74,6 +76,7 @@ public static class RedisCachingFactory
         this IServiceCollection serviceCollection,
         Func<IServiceProvider, RedisCachingBackendConfiguration> configurationFactory )
     {
+        serviceCollection.AddFlashtrace();
         serviceCollection.AddHostedService<RedisCacheDependencyGarbageCollector>(
             serviceProvider => new RedisCacheDependencyGarbageCollector( configurationFactory(serviceProvider), serviceProvider ) );
 

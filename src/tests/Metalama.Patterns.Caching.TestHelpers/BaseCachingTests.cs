@@ -3,6 +3,7 @@
 using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Building;
+using Metalama.Patterns.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
@@ -14,9 +15,16 @@ public abstract class BaseCachingTests
     {
         this.TestOutputHelper = testOutputHelper;
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
+
+        // ReSharper disable once VirtualMemberCallInConstructor
+        this.AddLogging( serviceCollection, testOutputHelper );
         this.ServiceProvider = serviceCollection.BuildServiceProvider();
         CachingService.Default = CachingService.CreateUninitialized( this.ServiceProvider );
+    }
+
+    protected virtual void AddLogging( IServiceCollection serviceCollection, ITestOutputHelper testOutputHelper )
+    {
+        serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitFlashtraceLoggerFactory( testOutputHelper ) );
     }
 
     protected ServiceProvider ServiceProvider { get; }

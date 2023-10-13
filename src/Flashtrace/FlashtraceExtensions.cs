@@ -18,19 +18,11 @@ public static class FlashtraceExtensions
 {
     private static readonly ConcurrentDictionary<CacheKey, FlashtraceSource> _cache = new();
 
-    public static IServiceCollection AddFlashtrace( this IServiceCollection serviceCollection, Action<FlashtraceServiceBuilder>? build = null )
+    public static IServiceCollection AddFlashtrace( this IServiceCollection serviceCollection )
     {
         serviceCollection.Add(
             ServiceDescriptor.Singleton<IFlashtraceLoggerFactory, NetCoreSourceLoggerFactory>(
-                serviceProvider =>
-                {
-                    var builder = new FlashtraceServiceBuilder( serviceProvider );
-                    build?.Invoke( builder );
-
-                    return new NetCoreSourceLoggerFactory(
-                        serviceProvider.GetRequiredService<ILoggerFactory>(),
-                        builder.EnabledRoles );
-                } ) );
+                serviceProvider => new NetCoreSourceLoggerFactory( serviceProvider.GetRequiredService<ILoggerFactory>() ) ) );
 
         return serviceCollection;
     }

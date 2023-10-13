@@ -10,16 +10,23 @@ namespace Flashtrace;
 [PublicAPI]
 public class FlashtraceRole
 {
-    public bool IsSystemRole { get; }
+    public bool IsDefault { get; }
 
-    private FlashtraceRole( string name, bool isSystemRole )
+    /// <summary>
+    /// Gets a value indicating whether the role is used by Metalama itself.
+    /// </summary>
+    public bool IsSystem { get; }
+
+    private FlashtraceRole( string name, bool isSystem, bool isDefault = false )
     {
         if ( string.IsNullOrWhiteSpace( name ) )
         {
             throw new ArgumentNullException( nameof(name) );
         }
 
-        this.IsSystemRole = isSystemRole;
+        this.IsDefault = isDefault;
+
+        this.IsSystem = isSystem;
         this.Name = name;
     }
 
@@ -43,7 +50,7 @@ public class FlashtraceRole
     /// <summary>
     /// Gets the default <see cref="FlashtraceRole"/> instance, which should be used for manual logging.
     /// </summary>
-    public static FlashtraceRole Logging { get; } = new( "Log" );
+    public static FlashtraceRole Logging { get; } = new( "Log", false, true );
 
     /// <summary>
     /// Gets the <see cref="FlashtraceRole"/> used by the logging component itself.
