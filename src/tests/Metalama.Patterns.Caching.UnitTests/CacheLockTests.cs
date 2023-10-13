@@ -17,16 +17,16 @@ namespace Metalama.Patterns.Caching.Tests
 
         private CachingTestContext<CachingBackend> InitializeTest(
             int acquireLockTimeout = -1,
-            IAcquireLockTimeoutStrategy? acquireLockTimeoutStrategy = null )
+            Action<LockTimeoutContext>? acquireLockTimeoutStrategy = null )
         {
             return this.InitializeTest(
                 "CacheLockTests",
                 b => b.WithProfile(
                     new CachingProfile( "LocalLock" )
                     {
-                        LockManager = new LocalLockManager(),
+                        LockingStrategy = new LocalLockingStrategy(),
                         AcquireLockTimeout = TimeSpan.FromMilliseconds( acquireLockTimeout ),
-                        AcquireLockTimeoutStrategy = acquireLockTimeoutStrategy ?? new DefaultAcquireLockTimeoutStrategy()
+                        OnLockTimeout = acquireLockTimeoutStrategy ?? (_ => throw new TimeoutException())
                     } ),
                 passServiceProvider: false /* Disable caching because it's too slow */ );
         }
@@ -145,7 +145,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestSyncLockTimeoutIgnoreLock()
         {
-            await using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
+            await using var context = this.InitializeTest( 2, _ => { } );
 
             Task t1 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
             Task t2 = Task.Run( () => this.CachedMethod( 100, assert: false ) );
@@ -160,7 +160,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public async Task TestAsyncLockTimeoutAsync()
         {
-            await using var context = this.InitializeTest( 2, new IgnoreLockStrategy() );
+            await using var context = this.InitializeTest( 2, _ => { } );
 
             var barrier = new AsyncBarrier( 2 );
             var t1State = 0;

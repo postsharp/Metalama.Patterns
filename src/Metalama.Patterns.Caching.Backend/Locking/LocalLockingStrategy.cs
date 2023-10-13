@@ -6,12 +6,12 @@ using System.Collections.Concurrent;
 namespace Metalama.Patterns.Caching.Locking;
 
 /// <summary>
-/// An implementation of <see cref="ILockManager"/> in which every instance of the <see cref="LocalLockManager"/>
-/// has its own set of named locks that are not shared in any way with other instances. The <see cref="LocalLockManager"/> can
+/// An implementation of <see cref="ILockingStrategy"/> in which every instance of the <see cref="LocalLockingStrategy"/>
+/// has its own set of named locks that are not shared in any way with other instances. The <see cref="LocalLockingStrategy"/> can
 /// be used to synchronize the execution of methods in the current process and <see cref="AppDomain"/>.
 /// </summary>
 [PublicAPI]
-public sealed class LocalLockManager : ILockManager
+public sealed class LocalLockingStrategy : ILockingStrategy
 {
     private readonly ConcurrentDictionary<string, Lock> _locks = new( StringComparer.OrdinalIgnoreCase );
 
@@ -30,8 +30,6 @@ public sealed class LocalLockManager : ILockManager
 
     private class LockHandle : ILockHandle
     {
-        private static readonly Task _doneTask = Task.FromResult( true );
-
         private readonly Lock _lock;
         private bool _disposed;
         private bool _acquired;
@@ -53,13 +51,13 @@ public sealed class LocalLockManager : ILockManager
             return this._acquired;
         }
 
-        public async Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken )
+        public async ValueTask<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken )
         {
             if ( this._acquired )
             {
                 throw new InvalidOperationException();
             }
-
+            
             this._acquired = await this._lock.WaitAsync( timeout, cancellationToken );
 
             return this._acquired;
@@ -74,11 +72,11 @@ public sealed class LocalLockManager : ILockManager
             }
         }
 
-        public Task ReleaseAsync()
+        public ValueTask ReleaseAsync()
         {
             this.Release();
 
-            return _doneTask;
+            return default;
         }
 
         public void Dispose()
@@ -111,7 +109,7 @@ public sealed class LocalLockManager : ILockManager
 
     private class Lock : SemaphoreSlim
     {
-        private readonly LocalLockManager _parent;
+        private readonly LocalLockingStrategy _parent;
         private readonly string _key;
 
         public int References { get; private set; } = 1;
@@ -120,7 +118,7 @@ public sealed class LocalLockManager : ILockManager
         // It enforces the following invariant: this.References == 0 and 'this' is not present in in this.parent.lock.
         private SpinLock _spinLock;
 
-        public Lock( LocalLockManager parent, string key ) : base( 1 )
+        public Lock( LocalLockingStrategy parent, string key ) : base( 1 )
         {
             this._parent = parent;
             this._key = key;

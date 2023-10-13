@@ -423,7 +423,5 @@ internal sealed class MemoryCachingBackend : CachingBackend
         }
 
         public override bool Clear { get; }
-
-        public override bool NonBlockingModifierNotRecommended => false;
     }
 }

@@ -11,11 +11,10 @@ using static Flashtrace.Messages.FormattedMessageBuilder;
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
 [PublicAPI] // Comments above indicate use case.
-internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisposable, IAsyncDisposable
+public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisposable, IAsyncDisposable
 {
     private readonly RedisCachingBackendConfiguration _configuration;
     private readonly FlashtraceSource _logger;
-    private RedisKeyBuilder _keyBuilder = null!; // "Guaranteed" to be initialized via Init et al.
 
     internal RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
 
@@ -23,16 +22,12 @@ internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDi
     private readonly DependenciesRedisCachingBackend _backend;
 
     internal RedisCacheDependencyGarbageCollector(
-        IConnectionMultiplexer connection,
         RedisCachingBackendConfiguration configuration,
         IServiceProvider? serviceProvider )
     {
         this._configuration = configuration;
         this.ServiceProvider = serviceProvider;
-        this.Connection = connection;
-        this.Database = this.Connection.GetDatabase( configuration.Database );
-        this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
-        this._backend = new DependenciesRedisCachingBackend( connection, this.Database, this._keyBuilder, configuration, serviceProvider );
+        this._backend = new DependenciesRedisCachingBackend( c => c.GetDatabase( configuration.Database ), configuration, serviceProvider );
         this._ownsBackend = true;
         this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
@@ -40,8 +35,6 @@ internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDi
     internal RedisCacheDependencyGarbageCollector( DependenciesRedisCachingBackend backend )
     {
         this._configuration = backend.Configuration;
-        this.Connection = backend.Connection;
-        this.Database = backend.Database;
         this._backend = backend;
         this._ownsBackend = false;
         this._logger = backend.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
@@ -65,14 +58,16 @@ internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDi
     /// <summary>
     /// Gets the Redis <see cref="IDatabase"/> used by the current object.
     /// </summary>
-    public IDatabase Database { get; }
+    public IDatabase Database => this._backend.Database;
 
-    public IServiceProvider? ServiceProvider { get; }
+    private RedisKeyBuilder KeyBuilder => this._backend.KeyBuilder;
+
+    private IServiceProvider? ServiceProvider { get; }
 
     /// <summary>
     /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current object.
     /// </summary>
-    public IConnectionMultiplexer Connection { get; }
+    internal IConnectionMultiplexer Connection => this._backend.Connection;
 
     private void ProcessKeyspaceNotification( RedisNotification notification )
     {
@@ -85,7 +80,7 @@ internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDi
 
         var prefix = tokenizer.GetNext( ':' );
 
-        if ( !prefix.Equals( this._keyBuilder.KeyPrefix.AsSpan(), StringComparison.Ordinal ) )
+        if ( !prefix.Equals( this.KeyBuilder.KeyPrefix.AsSpan(), StringComparison.Ordinal ) )
         {
             return;
         }
@@ -103,7 +98,7 @@ internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDi
                 {
                     case "expired":
                     case "evicted":
-                        if ( this.Database.KeyDelete( this._keyBuilder.GetValueKey( itemKey ) ) )
+                        if ( this.Database.KeyDelete( this.KeyBuilder.GetValueKey( itemKey ) ) )
                         {
                             // ReSharper disable once StringLiteralTypo
                             this._logger.Warning.Write(
@@ -154,8 +149,8 @@ internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDi
 
     private async Task OnValueEvictedAsync( string key )
     {
-        string valueKey = this._keyBuilder.GetValueKey( key );
-        string dependenciesKey = this._keyBuilder.GetDependenciesKey( key );
+        string valueKey = this.KeyBuilder.GetValueKey( key );
+        string dependenciesKey = this.KeyBuilder.GetDependenciesKey( key );
 
         for ( var attempt = 0; attempt < this._backend.Configuration.TransactionMaxRetries + 1; attempt++ )
         {
@@ -235,32 +230,31 @@ internal sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDi
 
     public void Initialize()
     {
-        this._keyBuilder = new RedisKeyBuilder( this.Database, this._configuration );
-
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString()!,
             this.Connection,
-            ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
+            ImmutableArray.Create( this.KeyBuilder.NotificationChannel ),
             this.ProcessKeyspaceNotification,
             this._configuration.ConnectionTimeout,
             this.ServiceProvider );
     }
 
-    public async Task InitializeAsync( CancellationToken cancellationToken )
+    public async Task InitializeAsync( CancellationToken cancellationToken = default )
     {
-        this._keyBuilder = new RedisKeyBuilder( this.Database, this._configuration );
-
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString()!,
             this.Connection,
-            ImmutableArray.Create( this._keyBuilder.NotificationChannel ),
+            ImmutableArray.Create( this.KeyBuilder.NotificationChannel ),
             this.ProcessKeyspaceNotification,
             this._configuration.ConnectionTimeout,
             this.ServiceProvider,
             cancellationToken );
     }
+
+    public Task PerformFullCollectionAsync( CancellationToken cancellationToken = default ) 
+        => this._backend.CleanUpAsync( cancellationToken );
 
     public ValueTask DisposeAsync() => this.DisposeAsync( default );
 }

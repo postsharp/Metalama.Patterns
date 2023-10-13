@@ -7,16 +7,23 @@ namespace Metalama.Patterns.Caching.Building;
 
 #pragma warning disable CA1001
 
-public sealed class MemoryCachingBackendBuilder : BuiltCachingBackendBuilder
+/// <summary>
+/// A <see cref="CachingBackendBuilder"/> that returns an in-memory, in-process caching back-end, backed
+/// by an <see cref="IMemoryCache"/>.
+/// </summary>
+public sealed class MemoryCachingBackendBuilder : ConcreteCachingBackendBuilder
 {
+    private readonly MemoryCachingBackendConfiguration? _configuration;
     private IMemoryCache? _memoryCache;
-    private MemoryCachingBackendConfiguration? _configuration;
 
-    internal MemoryCachingBackendBuilder( MemoryCachingBackendConfiguration? configuration )
+    internal MemoryCachingBackendBuilder( MemoryCachingBackendConfiguration? configuration, IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
         this._configuration = configuration;
     }
 
+    /// <summary>
+    /// Specifies the <see cref="IMemoryCache"/> to use.
+    /// </summary>
     public MemoryCachingBackendBuilder WithMemoryCache( IMemoryCache memoryCache )
     {
         this._memoryCache = memoryCache;
@@ -24,20 +31,17 @@ public sealed class MemoryCachingBackendBuilder : BuiltCachingBackendBuilder
         return this;
     }
 
+    /// <summary>
+    /// Specifies the options of the <see cref="MemoryCache"/>. This method is ignored if the <see cref="WithMemoryCache"/>
+    /// method is called.
+    /// </summary>
     public MemoryCachingBackendBuilder WithMemoryCacheOptions( MemoryCacheOptions memoryCacheOptions )
     {
         this._memoryCache = new MemoryCache( memoryCacheOptions );
 
         return this;
     }
-
-    public MemoryCachingBackendBuilder WithConfiguration( MemoryCachingBackendConfiguration configuration )
-    {
-        this._configuration = configuration;
-
-        return this;
-    }
-
+    
     public override CachingBackend CreateBackend( CreateBackendArgs args )
-        => new MemoryCachingBackend( this._memoryCache ?? new MemoryCache( new MemoryCacheOptions() ), this._configuration, args.ServiceProvider );
+        => new MemoryCachingBackend( this._memoryCache ?? new MemoryCache( new MemoryCacheOptions() ), this._configuration, this.ServiceProvider );
 }

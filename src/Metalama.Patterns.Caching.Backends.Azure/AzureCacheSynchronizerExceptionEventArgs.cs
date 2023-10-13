@@ -2,11 +2,11 @@
 
 namespace Metalama.Patterns.Caching.Backends.Azure;
 
-public sealed class AzureCacheInvalidatorExceptionEventArgs : EventArgs
+internal sealed class AzureCacheSynchronizerExceptionEventArgs : EventArgs
 {
     public Exception Exception { get; }
 
-    public AzureCacheInvalidatorExceptionEventArgs( Exception exception )
+    public AzureCacheSynchronizerExceptionEventArgs( Exception exception )
     {
         this.Exception = exception;
     }
