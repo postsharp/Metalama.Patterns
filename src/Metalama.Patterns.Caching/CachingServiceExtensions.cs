@@ -52,7 +52,10 @@ public static partial class CachingServiceExtensions
         cachingService.AddDependencies( dependencies.Select( d => d.GetCacheKey( cachingService ) ) );
     }
 
-    private static IReadOnlyCollection<string> GetAllDependencies( ICachingService cachingService, ICacheDependency dependency, IReadOnlyCollection<ICacheDependency> cascadeDependencies )
+    private static IReadOnlyCollection<string> GetAllDependencies(
+        ICachingService cachingService,
+        ICacheDependency dependency,
+        IReadOnlyCollection<ICacheDependency> cascadeDependencies )
     {
         // We require the cascadeDependencies parameter to avoid evaluating twice the ICacheDependency.CascadeDependencies property.
         var allDependencies = new List<string>( 1 + cascadeDependencies.Count ) { dependency.GetCacheKey( cachingService ) };
@@ -265,7 +268,7 @@ public static partial class CachingServiceExtensions
     {
         var all = new string[otherDependencyKeys.Length + 1];
         all[0] = dependencyKey;
-        Array.Copy( otherDependencyKeys, all, 1 );
+        Array.Copy( otherDependencyKeys, 0, all, 1, otherDependencyKeys.Length );
         cachingService.Invalidate( all );
     }
 
