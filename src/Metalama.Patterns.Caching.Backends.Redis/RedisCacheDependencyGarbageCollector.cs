@@ -230,6 +230,8 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
 
     public void Initialize()
     {
+        this._backend.Initialize();
+
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString()!,
@@ -242,6 +244,8 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
 
     public async Task InitializeAsync( CancellationToken cancellationToken = default )
     {
+        await this._backend.InitializeAsync( cancellationToken );
+
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString()!,
@@ -253,8 +257,12 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
             cancellationToken );
     }
 
-    public Task PerformFullCollectionAsync( CancellationToken cancellationToken = default ) 
-        => this._backend.CleanUpAsync( cancellationToken );
+    public async Task PerformFullCollectionAsync( CancellationToken cancellationToken = default )
+    {
+        await this._backend.InitializeAsync( cancellationToken );
+
+        await this._backend.CleanUpAsync( cancellationToken );
+    }
 
     public ValueTask DisposeAsync() => this.DisposeAsync( default );
 }

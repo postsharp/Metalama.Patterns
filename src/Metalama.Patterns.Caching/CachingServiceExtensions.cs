@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Utilities;
 using System.Reflection;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
@@ -266,10 +267,7 @@ public static partial class CachingServiceExtensions
 
     public static void Invalidate( this ICachingService cachingService, string dependencyKey, params string[] otherDependencyKeys )
     {
-        var all = new string[otherDependencyKeys.Length + 1];
-        all[0] = dependencyKey;
-        Array.Copy( otherDependencyKeys, 0, all, 1, otherDependencyKeys.Length );
-        cachingService.Invalidate( all );
+        cachingService.Invalidate( otherDependencyKeys.Prepend( dependencyKey ) );
     }
 
     /// <summary>
@@ -344,11 +342,7 @@ public static partial class CachingServiceExtensions
 
     public static ValueTask InvalidateAsync( this ICachingService cachingService, string dependencyKey, params string[] otherDependencyKeys )
     {
-        var all = new string[otherDependencyKeys.Length + 1];
-        all[0] = dependencyKey;
-        Array.Copy( otherDependencyKeys, all, 1 );
-
-        return cachingService.InvalidateAsync( all );
+        return cachingService.InvalidateAsync( otherDependencyKeys.Prepend( dependencyKey ) );
     }
 
     /// <summary>
