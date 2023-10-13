@@ -65,7 +65,8 @@ public static class RedisCachingFactory
         this IServiceCollection serviceCollection,
         RedisCachingBackendConfiguration configuration )
     {
-        serviceCollection.AddFlashtrace();
+        serviceCollection.AddFlashtrace( false );
+
         serviceCollection.AddHostedService<RedisCacheDependencyGarbageCollector>(
             serviceProvider => new RedisCacheDependencyGarbageCollector( configuration, serviceProvider ) );
 
@@ -76,9 +77,10 @@ public static class RedisCachingFactory
         this IServiceCollection serviceCollection,
         Func<IServiceProvider, RedisCachingBackendConfiguration> configurationFactory )
     {
-        serviceCollection.AddFlashtrace();
+        serviceCollection.AddFlashtrace( false );
+
         serviceCollection.AddHostedService<RedisCacheDependencyGarbageCollector>(
-            serviceProvider => new RedisCacheDependencyGarbageCollector( configurationFactory(serviceProvider), serviceProvider ) );
+            serviceProvider => new RedisCacheDependencyGarbageCollector( configurationFactory( serviceProvider ), serviceProvider ) );
 
         return serviceCollection;
     }

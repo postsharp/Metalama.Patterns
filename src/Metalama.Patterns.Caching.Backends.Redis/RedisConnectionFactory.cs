@@ -31,7 +31,7 @@ internal class RedisConnectionFactory
         else
         {
             var textWriter = serviceProvider != null
-                ? new FlashTraceTextWriter( serviceProvider.GetFlashtraceSource( "Redis", FlashtraceRole.Caching ).Information )
+                ? new FlashTraceTextWriter( serviceProvider.GetFlashtraceSource( "Redis", FlashtraceRole.Caching ).Debug )
                 : null;
 
             return Task.Run( () => ConnectionMultiplexer.ConnectAsync( this.RedisConnectionOptions!, textWriter ) ).Result;
@@ -49,7 +49,7 @@ internal class RedisConnectionFactory
             cancellationToken.ThrowIfCancellationRequested();
 
             var textWriter = serviceProvider != null
-                ? new FlashTraceTextWriter( serviceProvider.GetFlashtraceSource( "Redis", FlashtraceRole.Caching ).Information )
+                ? new FlashTraceTextWriter( serviceProvider.GetFlashtraceSource( "Redis", FlashtraceRole.Caching ).Debug )
                 : null;
 
             return await ConnectionMultiplexer.ConnectAsync( this.RedisConnectionOptions!, textWriter );

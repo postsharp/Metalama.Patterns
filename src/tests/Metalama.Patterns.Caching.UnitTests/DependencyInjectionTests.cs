@@ -40,7 +40,7 @@ public sealed class DependencyInjectionTests
 
         var observer = serviceProvider.GetRequiredService<LogObserver>();
         Assert.NotEmpty( observer.Lines );
-        Assert.StartsWith( "Debug Cache.Metalama.Patterns.Caching.Tests.DependencyInjectionTests+C:", observer.Lines[0], StringComparison.Ordinal );
+        Assert.StartsWith( "Debug Caching.Metalama.Patterns.Caching.Tests.DependencyInjectionTests+C:", observer.Lines[0], StringComparison.Ordinal );
     }
 
     private sealed class C

@@ -13,11 +13,11 @@ using System.Text;
 namespace Flashtrace.Loggers;
 
 /// <summary>
-/// A base class for simple and low-performance implementations of <see cref="IFlashtraceLogger"/>.
+/// A base class for simple but low-performance and low-feature implementations of <see cref="IFlashtraceLogger"/>.
 /// </summary>
 /// <remarks>
 /// <para>The simplification stems from the wrapping of all message arguments in an object array, which
-/// allocates memory.</para>
+/// allocates memory. Also, the logger does not support indentation.</para>
 /// </remarks>
 [PublicAPI]
 public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalLogger
@@ -31,7 +31,7 @@ public abstract partial class SimpleFlashtraceLogger : IFlashtraceLogger, IFlash
     {
         this.Role = role;
 
-        if ( role.IsDefault )
+        if ( string.IsNullOrEmpty( role.Name ) )
         {
             this.Category = name;
         }

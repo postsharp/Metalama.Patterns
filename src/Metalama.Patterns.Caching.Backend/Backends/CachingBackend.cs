@@ -45,11 +45,13 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
 
     public string? DebugName { get; set; }
 
+    // ReSharper disable once MemberInitializerValueIgnored 
+
     /// <summary>
     /// Gets the <see cref="FlashtraceSource"/> that implementations can use to emit
     /// log records.
     /// </summary>
-    protected FlashtraceSource Source { get; }
+    protected FlashtraceSource Source { get; } = FlashtraceSource.Null; /* Make sure we have a default value in case of exception in the constructor. */
 
     /// <summary>
     /// Gets the <see cref="Guid"/> of the current <see cref="CachingBackend"/>.

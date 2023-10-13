@@ -16,7 +16,7 @@ public static class CachingServiceFactory
         this IServiceCollection serviceCollection,
         Action<ICachingServiceBuilder>? build = null )
     {
-        serviceCollection.AddFlashtrace();
+        serviceCollection.AddFlashtrace( false );
 
         serviceCollection.Add(
             ServiceDescriptor.Singleton<ICachingService, CachingService>( serviceProvider => CachingService.Create( build, serviceProvider ) ) );
