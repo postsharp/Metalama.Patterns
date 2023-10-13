@@ -13,7 +13,7 @@ internal static class Diagnostics
 {
     private const string _category = "Metalama.Patterns.Xaml";
 
-    // Reserved range 5200-
+    // Reserved range 5200-5220
 
     /// <summary>
     /// Class {0} does not contain a method named '{1}' as configured by the {2} option.
@@ -59,5 +59,16 @@ internal static class Diagnostics
             // TODO: The list of valid signatures is quite lengthy. Should they be listed in the diagnostic message? At the moment they are not.
             "The signature of the {0} handler method for dependency property {1} is not valid. Refer to documentation for valid signatures.",
             "Handler method signature is invalid.",
+            _category );
+
+    /// <summary>
+    /// The name of existing member {0} that is defined in or inherited by class {1} conflicts with the required dependency property field name {2}.
+    /// </summary>
+    public static readonly DiagnosticDefinition<(IMemberOrNamedType Member, INamedType DeclaringType, string FieldName)> ErrorRequiredDependencyPropertyFieldNameIsAlreadyUsed =
+        new(
+            "LAMA5204",
+            Error,
+            "The name of existing member {0}, that is defined in or inherited by class {1}, conflicts with the required dependency property field name {2}.",
+            "Required dependency property field name is already used.",
             _category );
 }

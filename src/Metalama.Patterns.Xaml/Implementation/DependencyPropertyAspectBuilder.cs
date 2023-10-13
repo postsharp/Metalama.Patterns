@@ -32,18 +32,32 @@ internal sealed partial class DependencyPropertyAspectBuilder
     public void Build()
     {
         // NB: WPF convention requires a specific field name, so we don't try to find an unused name.
+        var dependencyPropertyFieldName = this._options.RegistrationField ?? $"{this._propertyName}Property";
 
-        var introduceDependencyPropertyFieldResult = this._builder.Advice.IntroduceField(
-            this._declaringType,
-            this._options.RegistrationField ?? $"{this._propertyName}Property",
-            typeof( DependencyProperty ),
-            IntroductionScope.Static,
-            OverrideStrategy.Fail,
-            b =>
-            {
-                b.Accessibility = Framework.Code.Accessibility.Public;
-                b.Writeability = Writeability.ConstructorOnly;
-            } );        
+        IIntroductionAdviceResult<IField>? introduceDependencyPropertyFieldResult = null;
+
+        // Check for a conflicting member name explicitly because introduction won't fail unless the conflict comes from another field.
+
+        var conflictingMember = (IMemberOrNamedType) this._declaringType.AllMembers().FirstOrDefault( m => m.Name == dependencyPropertyFieldName ) ?? this._declaringType.NestedTypes.FirstOrDefault( t => t.Name == dependencyPropertyFieldName );
+        
+        if ( conflictingMember != null )
+        {
+            this._builder.Diagnostics.Report( Diagnostics.ErrorRequiredDependencyPropertyFieldNameIsAlreadyUsed.WithArguments( (conflictingMember, this._declaringType, dependencyPropertyFieldName) ) );
+        }
+        else
+        {
+            introduceDependencyPropertyFieldResult = this._builder.Advice.IntroduceField(
+                this._declaringType,
+                this._options.RegistrationField ?? $"{this._propertyName}Property",
+                typeof( DependencyProperty ),
+                IntroductionScope.Static,
+                OverrideStrategy.Fail,
+                b =>
+                {
+                    b.Accessibility = Framework.Code.Accessibility.Public;
+                    b.Writeability = Writeability.ConstructorOnly;
+                } );
+        }
 
         var methodsByName = this._declaringType.Methods.ToLookup( m => m.Name );
 
@@ -85,7 +99,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             return;
         }
 
-        if ( introduceDependencyPropertyFieldResult.Outcome != AdviceOutcome.Default )
+        if ( introduceDependencyPropertyFieldResult is not { Outcome: AdviceOutcome.Default } )
         {
             // We cannot proceed with other transformations if we could not introduce the DependencyProperty field.
 
