@@ -8,41 +8,11 @@ namespace Metalama.Patterns.Caching.Dependencies;
 /// A cache dependency that is already represented as a string.
 /// </summary>
 [PublicAPI]
-public sealed class StringDependency : ICacheDependency
+public sealed record StringDependency( string Key ) : ICacheDependency
 {
-    private readonly string _key;
-
+    /// <param name="cachingService"></param>
     /// <inheritdoc />
-    public string GetCacheKey() => this._key;
+    string ICacheDependency.GetCacheKey( ICachingService cachingService ) => this.Key;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StringDependency"/> class.
-    /// </summary>
-    /// <param name="key">The cache dependency.</param>
-    public StringDependency( string key )
-    {
-        this._key = key;
-    }
-
-    /// <summary>Determines whether the specified object is equal to the current object.</summary>
-    /// <param name="other">The object to compare with the current object.</param>
-    /// <returns>
-    /// <see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
-    public bool Equals( ICacheDependency? other )
-    {
-        if ( other is StringDependency otherStringDependency )
-        {
-            return string.Equals( this.GetCacheKey(), otherStringDependency.GetCacheKey(), StringComparison.Ordinal );
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    /// <inheritdoc />
-    public override bool Equals( object? obj ) => this.Equals( obj as StringDependency );
-
-    /// <inheritdoc />  
-    public override int GetHashCode() => StringComparer.Ordinal.GetHashCode( this.GetCacheKey() );
+    IReadOnlyCollection<ICacheDependency> ICacheDependency.CascadeDependencies => Array.Empty<ICacheDependency>();
 }

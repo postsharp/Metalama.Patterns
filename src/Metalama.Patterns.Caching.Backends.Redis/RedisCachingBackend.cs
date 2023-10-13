@@ -22,13 +22,12 @@ internal class RedisCachingBackend : CachingBackend
     private readonly ConcurrentStack<ICachingSerializer> _serializerPool = new();
     private readonly bool _ownsConnection;
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler;
+    private readonly Func<IConnectionMultiplexer, IDatabase> _databaseFactory;
     private int _backgroundTaskExceptions;
-
-#pragma warning disable SA1401
-    private protected readonly RedisKeyBuilder _keyBuilder;
-#pragma warning restore SA1401
-
     private RedisNotificationQueue? _notificationQueue;
+    private IConnectionMultiplexer? _connection;
+    private IDatabase? _database;
+    private RedisKeyBuilder? _keyBuilder;
 
     /// <summary>
     /// Gets <see cref="_notificationQueue"/> if not null, otherwise throws <see cref="CachingAssertionFailedException"/>.
@@ -36,15 +35,17 @@ internal class RedisCachingBackend : CachingBackend
     private RedisNotificationQueue NotificationQueue
         => this._notificationQueue ?? throw new CachingAssertionFailedException( nameof(this._notificationQueue) + " has not been initialized." );
 
+    public RedisKeyBuilder KeyBuilder => this._keyBuilder ?? throw new InvalidOperationException( "The component has not been initialized." );
+
     /// <summary>
     /// Gets the Redis database used by the current <see cref="RedisCachingBackend"/>.
     /// </summary>
-    public IDatabase Database { get; }
+    public IDatabase Database => this._database ?? throw new InvalidOperationException( "The component has not been initialized." );
 
     /// <summary>
     /// Gets the Redis connection used by the current <see cref="RedisCachingBackend"/>.
     /// </summary>
-    public IConnectionMultiplexer Connection { get; }
+    public IConnectionMultiplexer Connection => this._connection ?? throw new InvalidOperationException( "The component has not been initialized." );
 
     /// <summary>
     /// Gets the configuration of the current <see cref="RedisCachingBackend"/>.
@@ -57,30 +58,25 @@ internal class RedisCachingBackend : CachingBackend
     /// <param name="connection">The Redis connection.</param>
     /// <param name="configuration">Configuration.</param>
     /// <param name="serviceProvider"></param>
-    internal RedisCachingBackend( IConnectionMultiplexer connection, RedisCachingBackendConfiguration configuration, IServiceProvider? serviceProvider ) : base(
+    internal RedisCachingBackend(
+        RedisCachingBackendConfiguration configuration,
+        IServiceProvider? serviceProvider ) : base(
         configuration,
         serviceProvider )
     {
-        this.Connection = connection;
+        this._databaseFactory = ( connection ) => connection.GetDatabase( configuration.Database );
+
         this._ownsConnection = configuration.OwnsConnection;
-        this.Database = this.Connection.GetDatabase( configuration.Database );
-
-        this._keyBuilder = new RedisKeyBuilder( this.Database, configuration );
-
         this._createSerializerFunc = configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
     }
 
     internal RedisCachingBackend(
-        IConnectionMultiplexer connection,
-        IDatabase database,
-        RedisKeyBuilder keyBuilder,
+        Func<IConnectionMultiplexer, IDatabase> databaseFactory,
         RedisCachingBackendConfiguration configuration,
         IServiceProvider? serviceProvider ) : base( configuration, serviceProvider )
     {
-        this.Connection = connection;
-        this.Database = database;
-        this._keyBuilder = keyBuilder;
+        this._databaseFactory = databaseFactory;
         this._ownsConnection = false;
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
         this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
@@ -88,10 +84,14 @@ internal class RedisCachingBackend : CachingBackend
 
     protected override void InitializeCore()
     {
+        this._connection = this.Configuration.RedisConnectionFactory.GetConnection( this.ServiceProvider );
+        this._database = this._databaseFactory( this._connection );
+        this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
+
         this._notificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this._keyBuilder.EventsChannel, this._keyBuilder.NotificationChannel ),
+            ImmutableArray.Create( this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider );
@@ -101,12 +101,16 @@ internal class RedisCachingBackend : CachingBackend
 
     protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
+        this._connection = await this.Configuration.RedisConnectionFactory.GetConnectionAsync( this.ServiceProvider, cancellationToken );
+        this._database = this._databaseFactory( this._connection );
+        this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
+
         this._notificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
             this.Connection,
             ImmutableArray.Create(
-                this._keyBuilder.EventsChannel,
-                this._keyBuilder.NotificationChannel ),
+                this.KeyBuilder.EventsChannel,
+                this.KeyBuilder.NotificationChannel ),
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider,
@@ -120,7 +124,7 @@ internal class RedisCachingBackend : CachingBackend
 
     private void ProcessNotification( RedisNotification notification )
     {
-        if ( notification.Channel == this._keyBuilder.EventsChannel )
+        if ( notification.Channel == this.KeyBuilder.EventsChannel )
         {
             this.ProcessEvent( notification );
         }
@@ -134,7 +138,7 @@ internal class RedisCachingBackend : CachingBackend
     {
         string channelName = notification.Channel;
 
-        if ( !this._keyBuilder.TryParseKeyspaceNotification( channelName, out var keyKind, out var itemKey ) )
+        if ( !this.KeyBuilder.TryParseKeyspaceNotification( channelName, out var keyKind, out var itemKey ) )
         {
             return;
         }
@@ -230,9 +234,9 @@ internal class RedisCachingBackend : CachingBackend
     protected Task SendEventAsync( string kind, string key )
     {
         var value = kind + ":" + this.Id + ":" + key;
-        this.Source.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
+        this.Source.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
 
-        return this.NotificationQueue.Subscriber.PublishAsync( this._keyBuilder.EventsChannel, value );
+        return this.NotificationQueue.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
     }
 
     /// <summary>
@@ -243,21 +247,21 @@ internal class RedisCachingBackend : CachingBackend
     protected void SendEvent( string kind, string key )
     {
         var value = kind + ":" + this.Id + ":" + key;
-        this.Source.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this._keyBuilder.EventsChannel ) );
+        this.Source.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
 
-        this.NotificationQueue.Subscriber.Publish( this._keyBuilder.EventsChannel, value );
+        this.NotificationQueue.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
     }
 
     /// <exclude />
     protected virtual async Task DeleteItemAsync( string key )
     {
-        await this.Database.KeyDeleteAsync( this._keyBuilder.GetValueKey( key ) );
+        await this.Database.KeyDeleteAsync( this.KeyBuilder.GetValueKey( key ) );
     }
 
     /// <exclude />
     protected virtual void DeleteItem( string key )
     {
-        this.Database.KeyDelete( this._keyBuilder.GetValueKey( key ) );
+        this.Database.KeyDelete( this.KeyBuilder.GetValueKey( key ) );
     }
 
     private TimeSpan? CreateExpiry( CacheItem policy )
@@ -355,7 +359,7 @@ internal class RedisCachingBackend : CachingBackend
     {
         // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
         var value = this.CreateRedisValue( item );
-        var valueKey = this._keyBuilder.GetValueKey( key );
+        var valueKey = this.KeyBuilder.GetValueKey( key );
 
         var expiry = this.CreateExpiry( item );
 
@@ -368,7 +372,7 @@ internal class RedisCachingBackend : CachingBackend
         // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
         var value = this.CreateRedisValue( item );
 
-        var valueKey = this._keyBuilder.GetValueKey( key );
+        var valueKey = this.KeyBuilder.GetValueKey( key );
 
         var expiry = this.CreateExpiry( item );
 
@@ -378,13 +382,13 @@ internal class RedisCachingBackend : CachingBackend
     /// <inheritdoc />
     protected override bool ContainsItemCore( string key )
     {
-        return this.Database.KeyExists( this._keyBuilder.GetValueKey( key ) );
+        return this.Database.KeyExists( this.KeyBuilder.GetValueKey( key ) );
     }
 
     /// <inheritdoc />
     protected override async ValueTask<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
     {
-        return await this.Database.KeyExistsAsync( this._keyBuilder.GetValueKey( key ) );
+        return await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ) );
     }
 
     /// <exclude />
@@ -404,7 +408,7 @@ internal class RedisCachingBackend : CachingBackend
     /// <exclude />
     protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
-        var valueKey = this._keyBuilder.GetValueKey( key );
+        var valueKey = this.KeyBuilder.GetValueKey( key );
         var serializedValue = this.Database.StringGet( valueKey );
 
         if ( !serializedValue.HasValue )
@@ -420,7 +424,7 @@ internal class RedisCachingBackend : CachingBackend
     /// <exclude />
     protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
-        var valueKey = this._keyBuilder.GetValueKey( key );
+        var valueKey = this.KeyBuilder.GetValueKey( key );
         var serializedValue = await this.Database.StringGetAsync( valueKey );
 
         if ( !serializedValue.HasValue )
@@ -476,7 +480,7 @@ internal class RedisCachingBackend : CachingBackend
 
         if ( disposing )
         {
-            if ( this._ownsConnection )
+            if ( this._ownsConnection && this._connection != null )
             {
                 this.Connection.Close();
                 this.Connection.Dispose();
@@ -498,7 +502,7 @@ internal class RedisCachingBackend : CachingBackend
 
         await base.DisposeAsyncCore( cancellationToken );
 
-        if ( this._ownsConnection )
+        if ( this._ownsConnection && this._connection != null )
         {
             await this.Connection.CloseAsync();
             this.Connection.Dispose();

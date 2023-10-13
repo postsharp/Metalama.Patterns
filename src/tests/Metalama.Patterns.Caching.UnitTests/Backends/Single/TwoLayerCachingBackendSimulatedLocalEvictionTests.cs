@@ -20,7 +20,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
 
             var backend = CachingBackend.Create(
                 b => b.Memory( new MemoryCachingBackendConfiguration { DebugName = "Remote" } )
-                    .WithLocalLayer()
+                    .WithL1()
                     .WithLocalCacheConfiguration( new MemoryCachingBackendConfiguration { DebugName = "Local" } ) );
 
             backend.DebugName = "TwoLayer";

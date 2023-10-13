@@ -38,5 +38,5 @@ public sealed class CacheParameterClassification
         => new(
             ( parameter, classifier )
                 => CachingDiagnosticDescriptors.Cache.ParameterClassifiedAsIneligible.WithArguments(
-                    ((IMethod) parameter.DeclaringMember, classifier.ToString() ?? classifier.GetType().Name, parameter.Name) ) );
+                    ((IMethod) parameter.DeclaringMember, classifier.ToString()!, parameter.Name) ) );
 }

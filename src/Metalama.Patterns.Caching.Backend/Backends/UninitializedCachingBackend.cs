@@ -7,7 +7,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// <summary>
 /// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend.
 /// </summary>
-public sealed class UninitializedCachingBackend : CachingBackend
+internal sealed class UninitializedCachingBackend : CachingBackend
 {
     private static void Throw() => throw new CachingException( "The caching service has not been initialized." );
 

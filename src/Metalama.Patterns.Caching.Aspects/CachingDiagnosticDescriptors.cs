@@ -33,7 +33,7 @@ internal static class CachingDiagnosticDescriptors
             new(
                 "LAMA5100",
                 Error,
-                "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: this method is not cached by the [Cache] aspect.",
+                "The [InvalidateCache] aspect applied to '{0}' cannot invalidate '{1}': this method is not cached by the [Cache] aspect.",
                 "Method is not cached.",
                 _category );
 
@@ -47,9 +47,8 @@ internal static class CachingDiagnosticDescriptors
                 new(
                     "LAMA5101",
                     Error,
-                    "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the 'this' parameter cannot be mapped because " +
-                    "(a) this is an instance method, (b) the method, class or assembly is not annotated with the " +
-                    "[CacheConfiguration( IgnoreThisParameter = true )]] attribute and (c) the type {2} is not derived from {3}.",
+                    "The [InvalidateCache] aspect applied to '{0}' cannot invalidate '{1}': the 'this' parameter cannot be mapped because " +
+                    "(a) '{1}' is an instance method, (b) the IgnoreThisParameter is not enabled and (c) the type {2} is either static or not derived from '{3}'.",
                     "'this' parameter cannot be mapped.",
                     _category );
 
@@ -62,8 +61,9 @@ internal static class CachingDiagnosticDescriptors
                 new(
                     "LAMA5102",
                     Error,
-                    "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the invalidating method does not contain a parameter named '{2}'. " +
-                    "Make sure {0} contains a parameter named '{2}' or add the [NotCachedKey] attribute to the '{2}' parameter in {1}.",
+                    "The [InvalidateCache] aspect applied to '{0}' cannot invalidate '{1}': the invalidating method does not contain a parameter named '{2}'. "
+                    +
+                    "Make sure '{0}' contains a parameter named '{2}' or add the [NotCachedKey] attribute to the '{2}' parameter in '{1}'.",
                     "No matching parameter in invalidating method.",
                     _category );
 
@@ -76,7 +76,7 @@ internal static class CachingDiagnosticDescriptors
                 new(
                     "LAMA5103",
                     Error,
-                    "The [InvalidateCache] aspect applied to {0} cannot invalidate {1}: the type of the '{2}' parameter of the cached method is not compatible "
+                    "The [InvalidateCache] aspect applied to '{0}' cannot invalidate '{1}': the type of the '{2}' parameter of the cached method is not compatible "
                     +
                     "with the type of the '{2}' parameter in the invalidating method.",
                     "Parameter type is not compatible.",
@@ -90,7 +90,7 @@ internal static class CachingDiagnosticDescriptors
             new(
                 "LAMA5104",
                 Error,
-                "Invalid [InvalidateCache] aspect on {0}: the constructor parameters cannot contain a null, empty or whitespace-only string.",
+                "Invalid [InvalidateCache] aspect on '{0}': the constructor parameters cannot contain a null, empty or whitespace-only string.",
                 "[InvalidateCache] parameters cannot contain a null, empty or whitespace string.",
                 _category );
 
@@ -102,7 +102,7 @@ internal static class CachingDiagnosticDescriptors
             new(
                 "LAMA5105",
                 Error,
-                "Invalid [InvalidateCache] aspect on {0}: the constructor parameters must contain at least one method name.",
+                "Invalid [InvalidateCache] aspect on '{0}': the constructor parameters must contain at least one method name.",
                 "[InvalidateCache] must contain at least one method name.",
                 _category );
 
@@ -115,7 +115,7 @@ internal static class CachingDiagnosticDescriptors
                 new(
                     "LAMA5106",
                     Error,
-                    "Invalid [InvalidateCache] aspect on {0}: there is no method named {1} in type {2}.",
+                    "Invalid [InvalidateCache] aspect on '{0}': there is no method named '{1}' in type '{2}'.",
                     "Cached method not found.",
                     _category );
 
@@ -127,7 +127,7 @@ internal static class CachingDiagnosticDescriptors
             new(
                 "LAMA5107",
                 Error,
-                "Invalid [InvalidateCache] aspect on {0}: there are several suitable overloads of the {1} method. Set the AllowMultipleOverloads property to \"true\" to allow invalidation of all of them.",
+                "Invalid [InvalidateCache] aspect on '{0}': there are several suitable overloads of the '{1}' method. Set the AllowMultipleOverloads property to \"true\" to allow invalidation of all of them.",
                 "Multiple suitable overloads found.",
                 _category );
 

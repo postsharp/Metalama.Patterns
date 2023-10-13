@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +16,8 @@ public static class CachingServiceFactory
         this IServiceCollection serviceCollection,
         Action<ICachingServiceBuilder>? build = null )
     {
+        serviceCollection.AddFlashtrace( false );
+
         serviceCollection.Add(
             ServiceDescriptor.Singleton<ICachingService, CachingService>( serviceProvider => CachingService.Create( build, serviceProvider ) ) );
 

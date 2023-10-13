@@ -2,6 +2,7 @@
 
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
+using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.LoadTests.Tests;
@@ -10,30 +11,34 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
 {
     private readonly string _keyPrefix = Guid.NewGuid().ToString();
 
-    public override void Test( RedisLoadTestConfiguration configuration, TimeSpan duration )
+    public override async Task TestAsync( RedisLoadTestConfiguration configuration, TimeSpan duration )
     {
         Console.WriteLine( "collector init" );
 
-        var collectors = new IAsyncDisposable[configuration.CollectorsCount];
+        var collectors = new IHostedService[configuration.CollectorsCount];
 
         try
         {
             for ( var i = 0; i < collectors.Length; i++ )
             {
-                var collectorConfiguration = new RedisCachingBackendConfiguration() { KeyPrefix = this._keyPrefix, OwnsConnection = true };
-
                 var collectorConnection = CreateConnection();
 
-                collectors[i] = RedisCachingBackendFactory.CreateRedisCacheDependencyGarbageCollector(
-                    collectorConnection,
-                    configuration: collectorConfiguration );
+                var collectorConfiguration = new RedisCachingBackendConfiguration( collectorConnection, this._keyPrefix );
+
+                var garbageCollector = RedisCachingFactory.CreateRedisCacheDependencyGarbageCollector( collectorConfiguration );
+
+                await garbageCollector.StartAsync( default );
+                collectors[i] = garbageCollector;
             }
 
-            base.Test( configuration, duration );
+            await base.TestAsync( configuration, duration );
         }
         finally
         {
-            Task.WaitAll( collectors.Select( c => c.DisposeAsync().AsTask() ).ToArray() );
+            foreach ( var collector in collectors )
+            {
+                await collector.StopAsync( default );
+            }
         }
     }
 
@@ -57,8 +62,9 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
     {
         var connection = CreateConnection();
 
-        var configuration = new RedisCachingBackendConfiguration() { KeyPrefix = this._keyPrefix, OwnsConnection = true, SupportsDependencies = true };
+        var configuration =
+            new RedisCachingBackendConfiguration( connection ) { KeyPrefix = this._keyPrefix, OwnsConnection = true, SupportsDependencies = true };
 
-        return CachingBackend.Create( b => b.Redis( connection ).WithConfiguration( configuration ) );
+        return CachingBackend.Create( b => b.Redis( configuration ) );
     }
 }

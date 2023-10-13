@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// An implementation of <see cref="CachingBackend"/> that does not cache at all.
 /// </summary>
 [PublicAPI]
-public class NullCachingBackend : CachingBackend
+internal class NullCachingBackend : CachingBackend
 {
     /// <inheritdoc />
     protected override void SetItemCore( string key, CacheItem item ) { }
