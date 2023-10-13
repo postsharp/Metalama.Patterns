@@ -20,11 +20,7 @@ public partial class StaticOnChangedNoParameters : DependencyObject
   public static readonly global::System.Windows.DependencyProperty FooProperty;
   static StaticOnChangedNoParameters()
   {
-    object CoerceValue_1(global::System.Windows.DependencyObject d, object value)
-    {
-      return (global::System.Object)value;
-    }
-    void PropertyChanged(global::System.Windows.DependencyObject d_1, global::System.Windows.DependencyPropertyChangedEventArgs e)
+    void PropertyChanged(global::System.Windows.DependencyObject d, global::System.Windows.DependencyPropertyChangedEventArgs e)
     {
       global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedNoParameters.StaticOnChangedNoParameters.OnFooChanged();
     }

@@ -20,11 +20,7 @@ public partial class StaticOnChangedDependencyProperty : DependencyObject
   public static readonly global::System.Windows.DependencyProperty FooProperty;
   static StaticOnChangedDependencyProperty()
   {
-    object CoerceValue_1(global::System.Windows.DependencyObject d_1, object value)
-    {
-      return (global::System.Object)value;
-    }
-    void PropertyChanged(global::System.Windows.DependencyObject d_2, global::System.Windows.DependencyPropertyChangedEventArgs e)
+    void PropertyChanged(global::System.Windows.DependencyObject d_1, global::System.Windows.DependencyPropertyChangedEventArgs e)
     {
       global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyProperty.StaticOnChangedDependencyProperty.OnFooChanged(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyProperty.StaticOnChangedDependencyProperty.FooProperty);
     }

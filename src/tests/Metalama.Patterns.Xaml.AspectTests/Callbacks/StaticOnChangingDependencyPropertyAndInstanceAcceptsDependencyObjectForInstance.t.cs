@@ -25,9 +25,6 @@ public partial class StaticOnChangingDependencyPropertyAndInstanceAcceptsDepende
       global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance.OnFooChanging(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance.FooProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance)d_1);
       return (global::System.Object)value;
     }
-    void PropertyChanged(global::System.Windows.DependencyObject d_2, global::System.Windows.DependencyPropertyChangedEventArgs e)
-    {
-    }
     var metadata = new global::System.Windows.PropertyMetadata();
     metadata.CoerceValueCallback = (global::System.Windows.CoerceValueCallback)CoerceValue_1;
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance.StaticOnChangingDependencyPropertyAndInstanceAcceptsDependencyObjectForInstance), metadata);

@@ -20,13 +20,9 @@ public partial class StaticOnChangedInstance : DependencyObject
   public static readonly global::System.Windows.DependencyProperty FooProperty;
   static StaticOnChangedInstance()
   {
-    object CoerceValue_1(global::System.Windows.DependencyObject d, object value)
+    void PropertyChanged(global::System.Windows.DependencyObject d, global::System.Windows.DependencyPropertyChangedEventArgs e)
     {
-      return (global::System.Object)value;
-    }
-    void PropertyChanged(global::System.Windows.DependencyObject d_1, global::System.Windows.DependencyPropertyChangedEventArgs e)
-    {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedInstance.StaticOnChangedInstance.OnFooChanged((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedInstance.StaticOnChangedInstance)d_1);
+      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedInstance.StaticOnChangedInstance.OnFooChanged((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedInstance.StaticOnChangedInstance)d);
     }
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedInstance.StaticOnChangedInstance.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedInstance.StaticOnChangedInstance), new global::System.Windows.PropertyMetadata((global::System.Windows.PropertyChangedCallback)PropertyChanged));
   }

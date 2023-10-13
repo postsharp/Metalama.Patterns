@@ -25,9 +25,6 @@ public partial class StaticOnChangingInstanceAcceptsObject : DependencyObject
       global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstanceAcceptsObject.StaticOnChangingInstanceAcceptsObject.OnFooChanging((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstanceAcceptsObject.StaticOnChangingInstanceAcceptsObject)d);
       return (global::System.Object)value;
     }
-    void PropertyChanged(global::System.Windows.DependencyObject d_1, global::System.Windows.DependencyPropertyChangedEventArgs e)
-    {
-    }
     var metadata = new global::System.Windows.PropertyMetadata();
     metadata.CoerceValueCallback = (global::System.Windows.CoerceValueCallback)CoerceValue_1;
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstanceAcceptsObject.StaticOnChangingInstanceAcceptsObject.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstanceAcceptsObject.StaticOnChangingInstanceAcceptsObject), metadata);

@@ -25,9 +25,6 @@ public partial class InstanceOnChangingValueAcceptsAssignable : DependencyObject
       ((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingValueAcceptsAssignable.InstanceOnChangingValueAcceptsAssignable)d).OnFooChanging((global::System.Collections.Generic.List<global::System.Int32>)value_1);
       return (global::System.Object)value_1;
     }
-    void PropertyChanged(global::System.Windows.DependencyObject d_1, global::System.Windows.DependencyPropertyChangedEventArgs e)
-    {
-    }
     var metadata = new global::System.Windows.PropertyMetadata();
     metadata.CoerceValueCallback = (global::System.Windows.CoerceValueCallback)CoerceValue_1;
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingValueAcceptsAssignable.InstanceOnChangingValueAcceptsAssignable.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Collections.Generic.List<global::System.Int32>), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingValueAcceptsAssignable.InstanceOnChangingValueAcceptsAssignable), metadata);

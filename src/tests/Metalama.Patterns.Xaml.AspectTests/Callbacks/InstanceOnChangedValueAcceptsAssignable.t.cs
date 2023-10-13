@@ -20,13 +20,9 @@ public partial class InstanceOnChangedValueAcceptsAssignable : DependencyObject
   public static readonly global::System.Windows.DependencyProperty FooProperty;
   static InstanceOnChangedValueAcceptsAssignable()
   {
-    object CoerceValue_1(global::System.Windows.DependencyObject d, object value_1)
+    void PropertyChanged(global::System.Windows.DependencyObject d, global::System.Windows.DependencyPropertyChangedEventArgs e)
     {
-      return (global::System.Object)value_1;
-    }
-    void PropertyChanged(global::System.Windows.DependencyObject d_1, global::System.Windows.DependencyPropertyChangedEventArgs e)
-    {
-      ((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedValueAcceptsAssignable.InstanceOnChangedValueAcceptsAssignable)d_1).OnFooChanged((global::System.Collections.Generic.List<global::System.Int32>)e.NewValue);
+      ((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedValueAcceptsAssignable.InstanceOnChangedValueAcceptsAssignable)d).OnFooChanged((global::System.Collections.Generic.List<global::System.Int32>)e.NewValue);
     }
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedValueAcceptsAssignable.InstanceOnChangedValueAcceptsAssignable.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Collections.Generic.List<global::System.Int32>), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedValueAcceptsAssignable.InstanceOnChangedValueAcceptsAssignable), new global::System.Windows.PropertyMetadata((global::System.Windows.PropertyChangedCallback)PropertyChanged));
   }
