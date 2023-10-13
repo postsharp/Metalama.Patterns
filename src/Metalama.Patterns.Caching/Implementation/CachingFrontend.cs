@@ -45,7 +45,7 @@ internal sealed class CachingFrontend
                 if ( item == null )
                 {
                     // The item was not found in the cache, so we have to acquire a lock.
-                    lockHandle = profile.LockFactory.GetLock( key );
+                    lockHandle = profile.LockingStrategy.GetLock( key );
 
                     if ( lockHandle.Acquire( TimeSpan.Zero, CancellationToken.None ) )
                     {
@@ -80,7 +80,7 @@ internal sealed class CachingFrontend
             else
             {
                 // When we recache, we have to acquire the lock without doing a cache lookup.
-                lockHandle = profile.LockFactory.GetLock( key );
+                lockHandle = profile.LockingStrategy.GetLock( key );
 
                 if ( !lockHandle.Acquire( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {
@@ -172,7 +172,7 @@ internal sealed class CachingFrontend
                 if ( item == null )
                 {
                     // The item was not found in the cache, so we have to acquire a lock.
-                    lockHandle = profile.LockFactory.GetLock( key );
+                    lockHandle = profile.LockingStrategy.GetLock( key );
 
                     if ( await lockHandle.AcquireAsync( TimeSpan.Zero, CancellationToken.None ) )
                     {
@@ -207,7 +207,7 @@ internal sealed class CachingFrontend
             else
             {
                 // When we recache, we have to acquire the lock without doing a cache lookup.
-                lockHandle = profile.LockFactory.GetLock( key );
+                lockHandle = profile.LockingStrategy.GetLock( key );
 
                 if ( !await lockHandle.AcquireAsync( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {
@@ -304,7 +304,7 @@ internal sealed class CachingFrontend
                 if ( item == null )
                 {
                     // The item was not found in the cache, so we have to acquire a lock.
-                    lockHandle = profile.LockFactory.GetLock( key );
+                    lockHandle = profile.LockingStrategy.GetLock( key );
 
                     if ( await lockHandle.AcquireAsync( TimeSpan.Zero, CancellationToken.None ) )
                     {
@@ -339,7 +339,7 @@ internal sealed class CachingFrontend
             else
             {
                 // When we recache, we have to acquire the lock without doing a cache lookup.
-                lockHandle = profile.LockFactory.GetLock( key );
+                lockHandle = profile.LockingStrategy.GetLock( key );
 
                 if ( !await lockHandle.AcquireAsync( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {

@@ -129,14 +129,14 @@ public sealed class CachingProfile : ICacheItemConfiguration
 
     /// <summary>
     /// Gets or sets the lock manager used to synchronize the execution of methods
-    /// that are cached with the current profile.  The default lock manager is <see cref="NullLockFactory"/>,
-    /// which allows for concurrent execution of all methods. An alternative implementation is <see cref="LocalLockFactory"/>,
+    /// that are cached with the current profile.  The default lock manager is <see cref="NullLockingStrategy"/>,
+    /// which allows for concurrent execution of all methods. An alternative implementation is <see cref="LocalLockingStrategy"/>,
     /// which prevents concurrent execution of the same method with the same parameters, in the current process (or AppDomain).
     /// </summary>
-    public ILockFactory LockFactory { get; init; } = new NullLockFactory();
+    public ILockingStrategy LockingStrategy { get; init; } = new NullLockingStrategy();
 
     /// <summary>
-    /// Gets or sets the maximum time that the caching aspect will wait for the <see cref="LockFactory"/> to acquire a lock.
+    /// Gets or sets the maximum time that the caching aspect will wait for the <see cref="LockingStrategy"/> to acquire a lock.
     /// To specify an infinite waiting time, set this property to <c>TimeSpan.FromMilliseconds( -1 )</c>. The default
     /// behavior is to wait infinitely.
     /// </summary>
