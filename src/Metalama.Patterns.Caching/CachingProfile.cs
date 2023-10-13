@@ -150,7 +150,7 @@ public sealed class CachingProfile : ICacheItemConfiguration
     public Action<LockTimeoutContext> OnLockTimeout { get; init; } =
         _ => throw new TimeoutException( "Time out while waiting for the cache lock." );
 
-    public ICacheItemConfiguration GetMergedConfiguration( CachedMethodMetadata metadata )
+    internal ICacheItemConfiguration GetMergedConfiguration( CachedMethodMetadata metadata )
     {
         if ( this._mergedMethodConfigurations.TryGetValue( metadata.Id, out var configuration ) )
         {
