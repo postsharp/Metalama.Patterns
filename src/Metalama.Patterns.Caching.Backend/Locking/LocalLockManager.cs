@@ -30,8 +30,6 @@ public sealed class LocalLockManager : ILockManager
 
     private class LockHandle : ILockHandle
     {
-        private static readonly Task _doneTask = Task.FromResult( true );
-
         private readonly Lock _lock;
         private bool _disposed;
         private bool _acquired;
@@ -53,13 +51,13 @@ public sealed class LocalLockManager : ILockManager
             return this._acquired;
         }
 
-        public async Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken )
+        public async ValueTask<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken )
         {
             if ( this._acquired )
             {
                 throw new InvalidOperationException();
             }
-
+            
             this._acquired = await this._lock.WaitAsync( timeout, cancellationToken );
 
             return this._acquired;
@@ -74,11 +72,11 @@ public sealed class LocalLockManager : ILockManager
             }
         }
 
-        public Task ReleaseAsync()
+        public ValueTask ReleaseAsync()
         {
             this.Release();
 
-            return _doneTask;
+            return default;
         }
 
         public void Dispose()

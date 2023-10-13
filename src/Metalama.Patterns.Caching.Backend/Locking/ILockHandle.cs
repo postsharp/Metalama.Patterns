@@ -21,7 +21,7 @@ public interface ILockHandle : IDisposable
     /// <param name="timeout">Timeout.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
     /// <returns><c>true</c> if the lock was acquired, or <c>false</c> if the operation has timed out before the lock could be acquired.</returns>
-    Task<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken );
+    ValueTask<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken );
 
     /// <summary>
     /// Synchronously releases the lock bound to the current handle.
@@ -31,5 +31,5 @@ public interface ILockHandle : IDisposable
     /// <summary>
     /// Asynchronously releases the lock bound to the current handle.
     /// </summary>
-    Task ReleaseAsync();
+    ValueTask ReleaseAsync();
 }
