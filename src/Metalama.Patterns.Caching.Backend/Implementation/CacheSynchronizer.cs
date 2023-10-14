@@ -36,7 +36,7 @@ public abstract class CacheSynchronizer : CachingBackendEnhancer
     {
         await base.RemoveItemAsyncCore( key, cancellationToken );
 
-        this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Item, CancellationToken.None ) );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( ct => this.PublishInvalidationAsync( key, CacheKeyKind.Item, ct ) );
     }
 
     /// <inheritdoc />
@@ -44,7 +44,7 @@ public abstract class CacheSynchronizer : CachingBackendEnhancer
     {
         base.RemoveItemCore( key );
 
-        this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Item, CancellationToken.None ) );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( ct => this.PublishInvalidationAsync( key, CacheKeyKind.Item, ct ) );
     }
 
     /// <inheritdoc />
@@ -52,7 +52,7 @@ public abstract class CacheSynchronizer : CachingBackendEnhancer
     {
         await base.InvalidateDependencyAsyncCore( key, cancellationToken );
 
-        this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Dependency, CancellationToken.None ) );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( ct => this.PublishInvalidationAsync( key, CacheKeyKind.Dependency, ct ) );
     }
 
     /// <inheritdoc />
@@ -60,7 +60,7 @@ public abstract class CacheSynchronizer : CachingBackendEnhancer
     {
         base.InvalidateDependencyCore( key );
 
-        this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.PublishInvalidationAsync( key, CacheKeyKind.Dependency, CancellationToken.None ) );
+        this._backgroundTaskScheduler.EnqueueBackgroundTask( ct => this.PublishInvalidationAsync( key, CacheKeyKind.Dependency, ct ) );
     }
 
     /// <summary>
@@ -168,9 +168,25 @@ public abstract class CacheSynchronizer : CachingBackendEnhancer
     /// Sends an invalidation message over the message bus of the implementation.
     /// </summary>
     /// <param name="message">A serialized, opaque serialization message.</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/>.</returns>
     protected abstract Task SendMessageAsync( string message, CancellationToken cancellationToken );
+
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
+    {
+        // Complete the processing of background tasks before disposing the underlying backend.
+        this._backgroundTaskScheduler.Dispose( cancellationToken );
+        base.DisposeCore( disposing, cancellationToken );
+    }
+
+    public override Task WhenBackgroundTasksCompleted( CancellationToken cancellationToken )
+        => this._backgroundTaskScheduler.WhenBackgroundTasksCompleted( cancellationToken );
+
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
+    {
+        this._backgroundTaskScheduler.StopAcceptingBackgroundTasks();
+        await base.DisposeAsyncCore( cancellationToken );
+    }
 
     private enum CacheKeyKind
     {

@@ -82,9 +82,9 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
     }
 
     /// <inheritdoc />
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
 
         this.NotificationQueue.Dispose();
 
