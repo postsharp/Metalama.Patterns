@@ -4,7 +4,6 @@ using Metalama.Patterns.Caching.Aspects;
 
 namespace Metalama.Patterns.Caching.Tests.Assets;
 
-[Serializable]
 public class MultipleInvalidationClass
 {
     private int _id;
