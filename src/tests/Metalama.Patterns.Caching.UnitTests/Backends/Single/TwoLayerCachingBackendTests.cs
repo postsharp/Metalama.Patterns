@@ -20,10 +20,11 @@ public class TwoLayerCachingBackendTests : BaseCacheBackendTests
 
         var backend = CachingBackend.Create(
             b => b.Memory( new MemoryCachingBackendConfiguration { DebugName = "Remote" } )
-                .WithL1()
-                .WithLocalCacheConfiguration( new MemoryCachingBackendConfiguration { DebugName = "Local" } ) );
-
-        backend.DebugName = "TwoLayer";
+                .WithL1(
+                    new LayeredCachingBackendConfiguration
+                    {
+                        L1Configuration = new MemoryCachingBackendConfiguration { DebugName = "Local" }, DebugName = "TwoLayer"
+                    } ) );
 
         return new CheckAfterDisposeCachingBackend( backend );
 

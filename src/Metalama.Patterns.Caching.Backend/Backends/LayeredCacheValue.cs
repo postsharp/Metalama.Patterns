@@ -2,6 +2,7 @@
 
 using Metalama.Patterns.Caching.Implementation;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Metalama.Patterns.Caching.Backends;
 
@@ -10,13 +11,13 @@ namespace Metalama.Patterns.Caching.Backends;
 /// </summary>
 [Serializable]
 [DataContract]
-internal sealed class TwoLayerCacheValue
+internal sealed class LayeredCacheValue
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="TwoLayerCacheValue"/> class.
+    /// Initializes a new instance of the <see cref="LayeredCacheValue"/> class.
     /// </summary>
     /// <param name="item">The original <see cref="CacheItem"/>.</param>
-    public TwoLayerCacheValue( CacheItem item )
+    public LayeredCacheValue( CacheItem item )
     {
         this.Value = item.Value;
         this.SlidingExpiration = item.Configuration?.SlidingExpiration;
@@ -28,11 +29,20 @@ internal sealed class TwoLayerCacheValue
         }
     }
 
+    [JsonConstructor]
+    public LayeredCacheValue( object? value, DateTime? absoluteExpiration, TimeSpan? slidingExpiration, CacheItemPriority? priority )
+    {
+        this.Value = value;
+        this.AbsoluteExpiration = absoluteExpiration;
+        this.SlidingExpiration = slidingExpiration;
+        this.Priority = priority;
+    }
+
     /// <summary>
     /// Gets or sets the timestamp of the cache item.
     /// </summary>
     [DataMember]
-    public long Timestamp { get; set; } = TwoLayerCachingBackendEnhancer.GetTimestamp();
+    public long Timestamp { get; set; } = LayeredCachingBackendEnhancer.GetTimestamp();
 
     /// <summary>
     /// Gets or sets the cached value.

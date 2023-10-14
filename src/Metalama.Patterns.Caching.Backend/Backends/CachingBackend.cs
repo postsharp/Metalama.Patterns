@@ -4,6 +4,7 @@ using Flashtrace;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Implementation;
+using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
@@ -18,7 +19,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     private static readonly ValueTask<bool> _falseTaskResult = new( false );
     private static readonly ValueTask<bool> _trueTaskResult = new( true );
     private static readonly ValueTask _completedTask = new( Task.CompletedTask );
-
+    private readonly ICachingExceptionObserver? _exceptionObserver;
     private readonly TaskCompletionSource<bool> _disposeTask = new();
     private readonly SemaphoreSlim _initializeSemaphore = new( 1, 1 );
     private readonly CancellationTokenSource _disposeCancellationTokenSource = new();
@@ -34,6 +35,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     protected CachingBackend( CachingBackendConfiguration? configuration = null, IServiceProvider? serviceProvider = null )
     {
         this.ServiceProvider = serviceProvider ?? NullServiceProvider.Instance;
+        this._exceptionObserver = serviceProvider?.GetService<ICachingExceptionObserver>();
         this.Configuration = configuration ?? new MemoryCachingBackendConfiguration();
         this.LogSource = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
         this.DebugName = this.Configuration.DebugName ?? this.Id.ToString();
@@ -49,7 +51,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     /// </summary>
     protected CancellationToken DisposeCancellationToken { get; }
 
-    public string? DebugName { get; set; }
+    public string? DebugName { get; }
 
     // ReSharper disable once MemberInitializerValueIgnored 
 
@@ -398,6 +400,11 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                 }
                 catch ( Exception e ) when ( e is InvalidCacheItemException or InvalidCastException )
                 {
+                    if ( this._exceptionObserver.OnException( e, false ) )
+                    {
+                        throw;
+                    }
+
                     this.LogSource.Warning.Write(
                         Formatted(
                             "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item. "
@@ -449,9 +456,15 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                 }
                 catch ( Exception e ) when ( e is InvalidCacheItemException or InvalidCastException )
                 {
-                    this.LogSource.Information.Write(
+                    if ( this._exceptionObserver.OnException( e, false ) )
+                    {
+                        throw;
+                    }
+
+                    this.LogSource.Warning.Write(
                         Formatted(
-                            "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item." ),
+                            "The cached object or method source code or caching settings may have changed since the value has been cached. Removing the item." +
+                            "To avoid this warning, change the cache key prefix when you do breaking changes to the source code." ),
                         e );
 
                     await this.RemoveItemAsyncCore( key, cancellationToken );

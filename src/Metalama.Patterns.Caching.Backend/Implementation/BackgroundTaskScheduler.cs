@@ -4,6 +4,7 @@ using Flashtrace;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
+using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 
 #if DEBUG
@@ -24,6 +25,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     private readonly CancellationTokenSource _disposeCancellationTokenSource = new();
     private readonly bool _sequential;
     private readonly object _sync = new();
+    private readonly ICachingExceptionObserver? _exceptionObserver;
 
 #if DEBUG
     private readonly ConcurrentDictionary<int, PendingTask> _pendingBackgroundTasks = new();
@@ -47,6 +49,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     public BackgroundTaskScheduler( IServiceProvider? serviceProvider, bool sequential = false )
     {
         this._sequential = sequential;
+        this._exceptionObserver = serviceProvider?.GetService<ICachingExceptionObserver>();
         this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
@@ -141,7 +144,17 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     {
         if ( lastTask != null )
         {
-            await lastTask;
+            try
+            {
+                await lastTask;
+            }
+            catch ( Exception e )
+            {
+                if ( this.OnBackgroundTaskException( e ) )
+                {
+                    throw;
+                }
+            }
         }
 
         try
@@ -154,15 +167,15 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         }
         catch ( Exception e )
         {
-            this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
+            if ( this.OnBackgroundTaskException( e ) )
+            {
+                throw;
+            }
 
 #if DEBUG
             this._logger.Debug.IfEnabled?.Write(
                 FormattedMessageBuilder.Formatted( "Stack trace that created the failing task: {StackTrace}", pendingTask.StackTrace ) );
 #endif
-
-            Interlocked.Increment( ref this._backgroundTaskExceptions );
-            Interlocked.Increment( ref _allBackgroundTaskExceptions );
         }
         finally
         {
@@ -181,6 +194,20 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
             this._pendingBackgroundTasks.TryRemove( pendingTask.Id, out _ );
 #endif
         }
+    }
+
+    private bool OnBackgroundTaskException( Exception e )
+    {
+        if ( this._exceptionObserver.OnException( e, true ) )
+        {
+            return true;
+        }
+
+        this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
+        Interlocked.Increment( ref this._backgroundTaskExceptions );
+        Interlocked.Increment( ref _allBackgroundTaskExceptions );
+
+        return false;
     }
 
     /// <summary>

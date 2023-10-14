@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Caching.Backends;
 /// This class is typically instantiated in the back-end factory method. You should normally not use this class unless you develop a custom caching back-end.
 /// </summary>
 [PublicAPI]
-internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
+internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
 {
     private readonly TimeSpan _removedItemTransitionPeriod = TimeSpan.FromMinutes( 1 );
 
@@ -22,16 +22,22 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     public MemoryCachingBackend LocalCache { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TwoLayerCachingBackendEnhancer"/> class.
-    /// Initializes a new <see cref="TwoLayerCachingBackendEnhancer"/>.
+    /// Initializes a new instance of the <see cref="LayeredCachingBackendEnhancer"/> class.
+    /// Initializes a new <see cref="LayeredCachingBackendEnhancer"/>.
     /// </summary>
     /// <param name="remoteCache">The remote <see cref="CachingBackend"/>.</param>
     /// <param name="memoryCache">A <see cref="MemoryCachingBackend"/>, or <c>null</c> to use a new default <see cref="MemoryCachingBackend"/>.</param>
-    public TwoLayerCachingBackendEnhancer( CachingBackend remoteCache, MemoryCachingBackend? memoryCache = null ) : base(
+    /// <param name="l1CachingBackendConfiguration"></param>
+    public LayeredCachingBackendEnhancer(
+        CachingBackend remoteCache,
+        MemoryCachingBackend? memoryCache,
+        LayeredCachingBackendConfiguration? configuration ) : base(
         remoteCache,
-        new CachingBackendConfiguration() )
+        configuration )
     {
-        this.LocalCache = memoryCache ?? new MemoryCachingBackend( serviceProvider: remoteCache.ServiceProvider );
+        this.LocalCache = memoryCache ?? new MemoryCachingBackend(
+            serviceProvider: remoteCache.ServiceProvider,
+            configuration: configuration?.L1Configuration );
     }
 
     protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
@@ -71,7 +77,7 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     /// <inheritdoc />
     protected override void SetItemCore( string key, CacheItem item )
     {
-        var value = new TwoLayerCacheValue( item );
+        var value = new LayeredCacheValue( item );
 
         var newItem = item with { Value = value, Configuration = item.Configuration.WithoutAutoReload() };
 
@@ -82,7 +88,7 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     /// <inheritdoc />
     protected override ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
-        var value = new TwoLayerCacheValue( item );
+        var value = new LayeredCacheValue( item );
 
         var newItem = item with { Value = value, Configuration = item.Configuration.WithoutAutoReload() };
 
@@ -131,7 +137,7 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
                 string.Format(
                     CultureInfo.InvariantCulture,
                     "ContainsDependency is not supported with in {0} with a non-blocking remote backend.",
-                    nameof(TwoLayerCachingBackendEnhancer) ) );
+                    nameof(LayeredCachingBackendEnhancer) ) );
         }
     }
 
@@ -149,7 +155,7 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
                 string.Format(
                     CultureInfo.InvariantCulture,
                     "ContainsDependencyAsync is not supported with in {0} with a non-blocking remote backend.",
-                    nameof(TwoLayerCachingBackendEnhancer) ) );
+                    nameof(LayeredCachingBackendEnhancer) ) );
         }
     }
 
@@ -191,8 +197,8 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
                         }
                         else
                         {
-                            var multiLayerCacheValue = (TwoLayerCacheValue) (remoteCacheValue.Value
-                                                                             ?? throw new CachingAssertionFailedException( "null not expected." ));
+                            var multiLayerCacheValue = (LayeredCacheValue) (remoteCacheValue.Value
+                                                                            ?? throw new CachingAssertionFailedException( "null not expected." ));
 
                             if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
                             {
@@ -240,7 +246,7 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
 
     private static CacheValue GetReturnValue( CacheValue storedCacheValue )
     {
-        var multiLayerCacheValue = (TwoLayerCacheValue) (
+        var multiLayerCacheValue = (LayeredCacheValue) (
             storedCacheValue.Value ?? throw new CachingAssertionFailedException( "null not expected." ));
 
         return new CacheValue( multiLayerCacheValue.Value, storedCacheValue.Dependencies );
@@ -249,7 +255,7 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     private void SetMemoryCacheFromRemote( string key, CacheValue remoteCacheValue )
     {
         var multiLayerCacheValue =
-            (TwoLayerCacheValue) (remoteCacheValue.Value ?? throw new CachingAssertionFailedException( "null not expected." ));
+            (LayeredCacheValue) (remoteCacheValue.Value ?? throw new CachingAssertionFailedException( "null not expected." ));
 
         var cacheItem = new CacheItem(
             multiLayerCacheValue.Value,
@@ -298,8 +304,8 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
                         }
                         else
                         {
-                            var multiLayerCacheValue = (TwoLayerCacheValue) (remoteCacheValue.Value
-                                                                             ?? throw new CachingAssertionFailedException( "null not expected." ));
+                            var multiLayerCacheValue = (LayeredCacheValue) (remoteCacheValue.Value
+                                                                            ?? throw new CachingAssertionFailedException( "null not expected." ));
 
                             if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
                             {
