@@ -17,4 +17,16 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
             return new CheckAfterDisposeCachingBackend( MemoryCacheFactory.CreateBackend( this.ServiceProvider ) );
         }
     }
+
+    public sealed class SerializingMemoryCachingBackendTests : BaseCacheBackendTests
+    {
+        public SerializingMemoryCachingBackendTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
+            cachingTestOptions,
+            testOutputHelper ) { }
+
+        protected override CheckAfterDisposeCachingBackend CreateBackend()
+        {
+            return new CheckAfterDisposeCachingBackend( MemoryCacheFactory.CreateBackend( this.ServiceProvider, withSerializer: true ) );
+        }
+    }
 }
