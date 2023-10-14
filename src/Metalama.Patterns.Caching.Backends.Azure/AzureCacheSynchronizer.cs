@@ -78,20 +78,20 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                         }
                         catch ( OperationCanceledException )
                         {
-                            this.Source.Debug.Write( FormattedMessageBuilder.Formatted( "Cancellation received. Exiting." ) );
+                            this.LogSource.Debug.Write( FormattedMessageBuilder.Formatted( "Cancellation received. Exiting." ) );
 
                             return;
                         }
                         catch ( Exception e )
                         {
-                            this.Source.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
+                            this.LogSource.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus message." ), e );
                             this._backgroundTaskExceptions++;
                         }
                     }
                 }
                 catch ( OperationCanceledException )
                 {
-                    this.Source.Debug.Write( FormattedMessageBuilder.Formatted( "Cancellation received. Exiting." ) );
+                    this.LogSource.Debug.Write( FormattedMessageBuilder.Formatted( "Cancellation received. Exiting." ) );
 
                     return;
                 }
@@ -191,7 +191,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
             }
             catch ( Exception e )
             {
-                this.Source.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
+                this.LogSource.Error.Write( FormattedMessageBuilder.Formatted( "Exception while processing Azure Service Bus subscription." ), e );
 
                 throw;
             }
