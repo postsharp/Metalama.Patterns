@@ -10,9 +10,9 @@ public class CheckAfterDisposeCachingBackend : CachingBackendEnhancer
 {
     public CheckAfterDisposeCachingBackend( CachingBackend underlyingBackend ) : base( underlyingBackend ) { }
 
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
         Assert.Equal( 0, this.BackgroundTaskExceptions );
     }
 

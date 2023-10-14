@@ -26,27 +26,28 @@ internal class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
         this._taskScheduler = new BackgroundTaskScheduler( underlyingBackend.ServiceProvider, true );
     }
 
-    private void EnqueueBackgroundTask( Func<Task> task ) => this._taskScheduler.EnqueueBackgroundTask( task );
+    private void EnqueueBackgroundTask( Func<CancellationToken, Task> task ) => this._taskScheduler.EnqueueBackgroundTask( task );
 
     /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore( ClearCacheOptions options ) => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync().AsTask() );
+    protected override void ClearCore( ClearCacheOptions options )
+        => this.EnqueueBackgroundTask( ct => this.UnderlyingBackend.ClearAsync( cancellationToken: ct ).AsTask() );
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key )
-        => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.InvalidateDependencyAsync( key ).AsTask() );
+        => this.EnqueueBackgroundTask( ct => this.UnderlyingBackend.InvalidateDependencyAsync( key, ct ).AsTask() );
 
     /// <inheritdoc />
     protected override void SetItemCore( string key, CacheItem item )
-        => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.SetItemAsync( key, item ).AsTask() );
+        => this.EnqueueBackgroundTask( ct => this.UnderlyingBackend.SetItemAsync( key, item, ct ).AsTask() );
 
     /// <inheritdoc />
-    protected override void RemoveItemCore( string key ) => this.EnqueueBackgroundTask( () => this.UnderlyingBackend.RemoveItemAsync( key ).AsTask() );
+    protected override void RemoveItemCore( string key ) => this.EnqueueBackgroundTask( ct => this.UnderlyingBackend.RemoveItemAsync( key, ct ).AsTask() );
 
     /// <inheritdoc />
     protected override ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.SetItemAsync( key, item, cancellationToken ).AsTask() );
+        this.EnqueueBackgroundTask( ct => this.UnderlyingBackend.SetItemAsync( key, item, ct ).AsTask() );
 
         return _finishedTask;
     }
@@ -54,7 +55,7 @@ internal class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     /// <inheritdoc />
     protected override ValueTask InvalidateDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.InvalidateDependencyAsync( key, cancellationToken ).AsTask() );
+        this.EnqueueBackgroundTask( ct => this.UnderlyingBackend.InvalidateDependencyAsync( key, ct ).AsTask() );
 
         return _finishedTask;
     }
@@ -62,7 +63,7 @@ internal class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     /// <inheritdoc />
     protected override ValueTask RemoveItemAsyncCore( string key, CancellationToken cancellationToken )
     {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.RemoveItemAsync( key, cancellationToken ).AsTask() );
+        this.EnqueueBackgroundTask( ct => this.UnderlyingBackend.RemoveItemAsync( key, ct ).AsTask() );
 
         return _finishedTask;
     }
@@ -70,7 +71,7 @@ internal class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     /// <inheritdoc />
     protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
     {
-        this.EnqueueBackgroundTask( () => this.UnderlyingBackend.ClearAsync( options, cancellationToken ).AsTask() );
+        this.EnqueueBackgroundTask( ct => this.UnderlyingBackend.ClearAsync( options, ct ).AsTask() );
 
         return _finishedTask;
     }
@@ -83,10 +84,10 @@ internal class NonBlockingCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
-        this._taskScheduler.Dispose();
-        base.DisposeCore( disposing );
+        this._taskScheduler.Dispose( cancellationToken );
+        base.DisposeCore( disposing, cancellationToken );
     }
 
     private class Features : CachingBackendEnhancerFeatures

@@ -68,10 +68,10 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         }
     }
 
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
         this.Collector?.Dispose();
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
     }
 
     protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )

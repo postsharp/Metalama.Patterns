@@ -398,7 +398,7 @@ internal class RedisCachingBackend : CachingBackend
 
         if ( cacheValue is RedisCacheValue withSlidingExpiration )
         {
-            this.ExecuteNonBlockingTask( () => this.Database.KeyExpireAsync( valueKey, withSlidingExpiration.SlidingExpiration ) );
+            this.ExecuteNonBlockingTask( _ => this.Database.KeyExpireAsync( valueKey, withSlidingExpiration.SlidingExpiration ) );
             cacheValue = withSlidingExpiration.Value;
         }
 
@@ -464,7 +464,7 @@ internal class RedisCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
         // Do not dispose Redis-related resources during finalization: it blocks the finalizer thread and
         // causes timeouts, and things are probably being disposed in the wrong order anyway.
@@ -474,9 +474,9 @@ internal class RedisCachingBackend : CachingBackend
             this._notificationQueue?.Dispose();
         }
 
-        this._backgroundTaskScheduler.Dispose();
+        this._backgroundTaskScheduler.Dispose( cancellationToken );
 
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
 
         if ( disposing )
         {
@@ -517,7 +517,7 @@ internal class RedisCachingBackend : CachingBackend
     {
         try
         {
-            this.Dispose( false );
+            this.Dispose( false, default );
         }
         catch ( Exception e )
         {
@@ -540,7 +540,7 @@ internal class RedisCachingBackend : CachingBackend
     }
 
     // Change the visibility of the method.
-    internal void ExecuteNonBlockingTask( Func<Task> task )
+    internal void ExecuteNonBlockingTask( Func<CancellationToken, Task> task )
     {
         this._backgroundTaskScheduler.EnqueueBackgroundTask( task );
     }

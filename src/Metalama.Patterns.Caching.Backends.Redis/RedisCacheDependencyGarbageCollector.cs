@@ -136,7 +136,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
 
             case RedisKeyBuilder.ValueKindPrefix:
                 this._logger.Debug.IfEnabled?.Write( Formatted( "Enqueue processing of cache eviction." ) );
-                this._backend.ExecuteNonBlockingTask( () => this.OnValueEvictedAsync( itemKey ) );
+                this._backend.ExecuteNonBlockingTask( ct => this.OnValueEvictedAsync( itemKey, ct ) );
 
                 break;
 
@@ -147,7 +147,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
         }
     }
 
-    private async Task OnValueEvictedAsync( string key )
+    private async Task OnValueEvictedAsync( string key, CancellationToken cancellationToken )
     {
         string valueKey = this.KeyBuilder.GetValueKey( key );
         string dependenciesKey = this.KeyBuilder.GetDependenciesKey( key );
