@@ -117,8 +117,10 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         }
 
         /// <inheritdoc />
-        protected override void DisposeCore( bool disposing )
+        protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
         {
+            base.DisposeCore( disposing, cancellationToken );
+
             this._receiverCancellation.Cancel();
 
             if ( this._receiver is { IsClosed: false } || this._sender is { IsClosed: false } )
@@ -128,15 +130,16 @@ namespace Metalama.Patterns.Caching.Backends.Azure
                         {
                             if ( this._receiver is { IsClosed: false } )
                             {
-                                await this._receiver.CloseAsync();
+                                await this._receiver.CloseAsync( cancellationToken );
                             }
 
                             if ( this._sender is { IsClosed: false } )
                             {
-                                await this._sender.CloseAsync();
+                                await this._sender.CloseAsync( cancellationToken );
                             }
-                        } )
-                    .Wait();
+                        },
+                        cancellationToken )
+                    .Wait( cancellationToken );
             }
 
             if ( disposing )
@@ -148,6 +151,8 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// <inheritdoc />
         protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
         {
+            await base.DisposeAsyncCore( cancellationToken );
+
             this._receiverCancellation.Cancel();
 
             if ( this._receiver != null )
@@ -168,7 +173,7 @@ namespace Metalama.Patterns.Caching.Backends.Azure
         /// </summary>
         ~AzureCacheSynchronizer()
         {
-            this.DisposeCore( false );
+            this.DisposeCore( false, default );
         }
 
         private async Task<string> CreateSubscriptionAsync( AzureCacheSynchronizerConfiguration configuration, CancellationToken cancellationToken )

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using System.Collections.Concurrent;
 using static Flashtrace.Messages.FormattedMessageBuilder;
@@ -29,11 +30,11 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         {
             if ( autoRefreshInfo.IsAsync )
             {
-                this._backgroundTaskScheduler.EnqueueBackgroundTask( () => this.AutoRefreshCoreAsync( backend, key, autoRefreshInfo, CancellationToken.None ) );
+                this._backgroundTaskScheduler.EnqueueBackgroundTask( ct => this.AutoRefreshCoreAsync( backend, key, autoRefreshInfo, ct ) );
             }
             else
             {
-                this._backgroundTaskScheduler.EnqueueBackgroundTask( () => Task.Run( () => this.AutoRefreshCore( backend, key, autoRefreshInfo ) ) );
+                this._backgroundTaskScheduler.EnqueueBackgroundTask( ct => Task.Run( () => this.AutoRefreshCore( backend, key, autoRefreshInfo ), ct ) );
             }
         }
     }
@@ -138,15 +139,21 @@ internal sealed class AutoReloadManager : IDisposable, IAsyncDisposable
         }
     }
 
-    public void Dispose()
+    [PublicAPI]
+    public void Dispose( CancellationToken cancellationToken )
     {
         this.Unsubscribe();
-        this._backgroundTaskScheduler.Dispose();
+        this._backgroundTaskScheduler.Dispose( cancellationToken );
     }
 
-    public async ValueTask DisposeAsync()
+    [PublicAPI]
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken )
     {
         this.Unsubscribe();
-        await this._backgroundTaskScheduler.DisposeAsync();
+        await this._backgroundTaskScheduler.DisposeAsync( cancellationToken );
     }
+
+    public void Dispose() => this.Dispose( default );
+
+    public ValueTask DisposeAsync() => this.DisposeAsync( default );
 }
