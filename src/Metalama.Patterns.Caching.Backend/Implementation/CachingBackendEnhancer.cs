@@ -124,17 +124,17 @@ public abstract class CachingBackendEnhancer : CachingBackend
         => this.UnderlyingBackend.ClearAsync( options, cancellationToken );
 
     /// <inheritdoc />
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
         // It is important to dispose 'this' before local and remote caches because we need to empty the current queue before disposing
         // the remote cache.
 
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
 
         this.UnderlyingBackend.ItemRemoved -= this.OnBackendItemRemoved;
         this.UnderlyingBackend.DependencyInvalidated -= this.OnBackendDependencyInvalidated;
 
-        this.UnderlyingBackend.Dispose();
+        this.UnderlyingBackend.Dispose( cancellationToken );
     }
 
     /// <inheritdoc />

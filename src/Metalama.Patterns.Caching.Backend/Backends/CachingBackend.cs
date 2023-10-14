@@ -15,13 +15,13 @@ namespace Metalama.Patterns.Caching.Backends;
 [PublicAPI]
 public abstract class CachingBackend : IDisposable, IAsyncDisposable
 {
-    private const int _disposeTimeout = 30000;
     private static readonly ValueTask<bool> _falseTaskResult = new( false );
     private static readonly ValueTask<bool> _trueTaskResult = new( true );
     private static readonly ValueTask _completedTask = new( Task.CompletedTask );
 
     private readonly TaskCompletionSource<bool> _disposeTask = new();
     private readonly SemaphoreSlim _initializeSemaphore = new( 1, 1 );
+    private readonly CancellationTokenSource _disposeCancellationTokenSource = new();
 
     private CachingBackendFeatures? _features;
     private int _status;
@@ -42,6 +42,12 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     public IServiceProvider ServiceProvider { get; }
 
     protected CachingBackendConfiguration Configuration { get; }
+
+    /// <summary>
+    /// Gets a <see cref="CancellationToken"/> signalled when the <see cref="CancellationToken"/> passed to <see cref="Dispose()"/> or <see cref="DisposeAsync()"/>
+    /// is signalled.
+    /// </summary>
+    protected CancellationToken DisposeCancellationToken { get; }
 
     public string? DebugName { get; set; }
 
@@ -84,6 +90,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
             return;
         }
 
+        // ReSharper disable once MethodSupportsCancellation
         this._initializeSemaphore.Wait();
 
         try
@@ -991,133 +998,148 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
 
     /// <summary>
     /// Synchronously disposes the current <see cref="CachingBackend"/>.
+    /// In case the <see cref="CachingBackend"/> has pending background tasks (typically cache non-blocking cache update tasks for distributed backends),
+    /// it will wait until all tasks are processed.
     /// </summary>
-    public void Dispose() => this.Dispose( true );
+    public void Dispose() => this.Dispose( true, default );
+
+    /// <summary>
+    /// Synchronously disposes the current <see cref="CachingBackend"/>. This overloads accepts a <see cref="CancellationToken"/>.
+    /// In case the <see cref="CachingBackend"/> has pending background tasks (typically cache non-blocking cache update tasks for distributed backends),
+    /// it will wait until all tasks are processed.
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>. Cancelling this operation may cause cache inconsistencies, in case of distributed cache,
+    /// or failure to properly dispose of other resources owned by this object.</param>
+    public void Dispose( CancellationToken cancellationToken ) => this.Dispose( true, cancellationToken );
 
     /// <summary>
     /// Synchronously disposes the current <see cref="CachingBackend"/>, with a parameter instructing whether this method is called because
     /// of a call to the <see cref="Dispose()"/> method or because of object finalizing.
     /// </summary>
     /// <param name="disposing"><c>true</c> if this method is called because the <see cref="Dispose()"/> method has been called, or <c>false</c> if the object is being finalized.</param>
-    protected void Dispose( bool disposing )
+    protected void Dispose( bool disposing, CancellationToken cancellationToken )
     {
-        if ( this.Status == CachingBackendStatus.Initializing )
+        using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
         {
-            this._initializeSemaphore.Wait();
-        }
-
-        if ( this.TryChangeStatus( CachingBackendStatus.Initialized, CachingBackendStatus.Disposing ) ||
-             this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) ||
-             this.TryChangeStatus( CachingBackendStatus.Failed, CachingBackendStatus.Disposing ) )
-        {
-            using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "Disposing( backend = {Backend}", this ) ) )
+            if ( this.Status == CachingBackendStatus.Initializing )
             {
-                try
+                this._initializeSemaphore.Wait( cancellationToken );
+            }
+
+            if ( this.TryChangeStatus( CachingBackendStatus.Initialized, CachingBackendStatus.Disposing ) ||
+                 this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) ||
+                 this.TryChangeStatus( CachingBackendStatus.Failed, CachingBackendStatus.Disposing ) )
+            {
+                using ( var activity = this.LogSource.Default.OpenActivity( Formatted( "Disposing( backend = {Backend}", this ) ) )
                 {
-                    this.DisposeCore( disposing );
-
-                    this._initializeSemaphore.Dispose();
-
-                    if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
+                    try
                     {
+                        this.DisposeCore( disposing, cancellationToken );
+
+                        this._initializeSemaphore.Dispose();
+
+                        if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
+                        {
 #if DEBUG
-                        throw new CachingAssertionFailedException();
+                            throw new CachingAssertionFailedException();
 #else
                         this.LogSource.Error.Write( Formatted( "Cannot dispose back-end: cannot change the status to Disposed." ) );
 
                         return;
 #endif
-                    }
+                        }
 
-                    this._disposeTask.SetResult( true );
-                    activity.SetSuccess();
-                }
-                catch ( Exception e )
-                {
-                    if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
+                        this._disposeTask.SetResult( true );
+                        activity.SetSuccess();
+                    }
+                    catch ( Exception e )
                     {
+                        if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
+                        {
 #if DEBUG
-                        throw new CachingAssertionFailedException();
+                            throw new CachingAssertionFailedException();
 #else
                         this.LogSource.Error.Write( Formatted( "Cannot dispose back-end: cannot change the status to DisposeFailed." ) );
 
                         return;
 #endif
+                        }
+
+                        this._disposeTask.SetException( e );
+                        activity.SetException( e );
+
+                        throw;
                     }
-
-                    this._disposeTask.SetException( e );
-                    activity.SetException( e );
-
-                    throw;
                 }
             }
-        }
-        else
-        {
-            this._disposeTask.Task.Wait();
+            else
+            {
+                this._disposeTask.Task.Wait( cancellationToken );
+            }
         }
     }
 
     /// <summary>
     /// Synchronously disposes the current <see cref="CachingBackend"/>. This protected method is part of the implementation API and is meant to be overridden in user code, not invoked.
     /// </summary>
-    protected virtual void DisposeCore( bool disposing )
-    {
-        if ( !this.WhenBackgroundTasksCompleted( CancellationToken.None ).Wait( _disposeTimeout ) )
-        {
-            throw new TimeoutException( "Timeout when waiting for background tasks to complete." );
-        }
-    }
+    protected virtual void DisposeCore( bool disposing, CancellationToken cancellationToken )
+        => this.WhenBackgroundTasksCompleted( this.DisposeCancellationToken ).Wait( this.DisposeCancellationToken );
 
-    /// <summary>
-    /// Asynchronously dispose the current <see cref="CachingBackend"/>.
+    /// <summary> 
+    /// Asynchronously dispose the current <see cref="CachingBackend"/>. This overload accepts a <see cref="CancellationToken"/>.
+    /// In case the <see cref="CachingBackend"/> has pending background tasks (typically cache non-blocking cache update tasks for distributed backends),
+    /// it will wait until all tasks are processed.
     /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>. Cancelling this operation may cause cache inconsistencies, in case of distributed cache,
+    /// or failure to properly dispose of other resources owned by this object.</param>
     /// <returns>A <see cref="Task"/>.</returns>
     public async ValueTask DisposeAsync( CancellationToken cancellationToken )
     {
-        if ( this.Status == CachingBackendStatus.Initializing )
+        using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
         {
-            await this._initializeSemaphore.WaitAsync( cancellationToken );
-        }
-
-        if ( this.TryChangeStatus( CachingBackendStatus.Initialized, CachingBackendStatus.Disposing ) ||
-             this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) ||
-             this.TryChangeStatus( CachingBackendStatus.Failed, CachingBackendStatus.Disposing ) )
-        {
-            using ( var activity = this.LogSource.Default.OpenAsyncActivity( Formatted( "Disposing" ) ) )
+            if ( this.Status == CachingBackendStatus.Initializing )
             {
-                try
+                await this._initializeSemaphore.WaitAsync( cancellationToken );
+            }
+
+            if ( this.TryChangeStatus( CachingBackendStatus.Initialized, CachingBackendStatus.Disposing ) ||
+                 this.TryChangeStatus( CachingBackendStatus.Default, CachingBackendStatus.Disposing ) ||
+                 this.TryChangeStatus( CachingBackendStatus.Failed, CachingBackendStatus.Disposing ) )
+            {
+                using ( var activity = this.LogSource.Default.OpenAsyncActivity( Formatted( "Disposing" ) ) )
                 {
-                    await this.DisposeAsyncCore( cancellationToken );
-
-                    if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
+                    try
                     {
-                        throw new CachingAssertionFailedException();
+                        await this.DisposeAsyncCore( cancellationToken );
+
+                        if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
+                        {
+                            throw new CachingAssertionFailedException();
+                        }
+
+                        this._initializeSemaphore.Dispose();
+
+                        this._disposeTask.SetResult( true );
+                        activity.SetSuccess();
                     }
-
-                    this._initializeSemaphore.Dispose();
-
-                    this._disposeTask.SetResult( true );
-                    activity.SetSuccess();
-                }
-                catch ( Exception e )
-                {
-                    if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
+                    catch ( Exception e )
                     {
-                        throw new CachingAssertionFailedException();
+                        if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.DisposeFailed ) )
+                        {
+                            throw new CachingAssertionFailedException();
+                        }
+
+                        this._disposeTask.SetException( e );
+                        activity.SetException( e );
+
+                        throw;
                     }
-
-                    this._disposeTask.SetException( e );
-                    activity.SetException( e );
-
-                    throw;
                 }
             }
-        }
-        else
-        {
-            await this._disposeTask.Task;
+            else
+            {
+                await this._disposeTask.Task;
+            }
         }
     }
 
@@ -1128,12 +1150,9 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     /// <returns>A <see cref="Task"/>.</returns>
     protected virtual async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
     {
-        var delay = Task.Delay( _disposeTimeout, cancellationToken );
-        var task = await Task.WhenAny( this.WhenBackgroundTasksCompleted( cancellationToken ), delay );
-
-        if ( task == delay )
+        using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
         {
-            throw new TimeoutException( "Timeout when waiting for background tasks to complete." );
+            await this.WhenBackgroundTasksCompleted( this.DisposeCancellationToken );
         }
     }
 

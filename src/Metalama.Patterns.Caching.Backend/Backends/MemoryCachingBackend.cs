@@ -32,9 +32,9 @@ internal sealed class MemoryCachingBackend : CachingBackend
     private readonly Func<PSCacheItem, long>? _sizeCalculator;
 
     /// <inheritdoc />
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
         this._cache.Dispose();
     }
 

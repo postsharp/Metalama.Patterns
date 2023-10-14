@@ -409,11 +409,11 @@ internal sealed class TwoLayerCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
 
-        this.LocalCache.Dispose();
+        this.LocalCache.Dispose( cancellationToken );
     }
 
     /// <inheritdoc />

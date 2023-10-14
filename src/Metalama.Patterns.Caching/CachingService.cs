@@ -136,38 +136,42 @@ public sealed partial class CachingService : ICachingService
     /// </summary>
     public CachingProfileRegistry Profiles { get; }
 
-    public void Dispose()
+    public void Dispose() => this.Dispose( default );
+
+    public void Dispose( CancellationToken cancellationToken )
     {
-        this.AutoReloadManager.Dispose();
+        this.AutoReloadManager.Dispose( cancellationToken );
 
         if ( this._ownsBackend )
         {
-            this.DefaultBackend.Dispose();
+            this.DefaultBackend.Dispose( cancellationToken );
         }
 
         foreach ( var profile in this.Profiles )
         {
             if ( profile.OwnsBackend )
             {
-                profile.Backend.Dispose();
+                profile.Backend.Dispose( cancellationToken );
             }
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync() => this.DisposeAsync( default );
+
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken )
     {
-        await this.AutoReloadManager.DisposeAsync();
+        await this.AutoReloadManager.DisposeAsync( cancellationToken );
 
         if ( this._ownsBackend )
         {
-            await this.DefaultBackend.DisposeAsync();
+            await this.DefaultBackend.DisposeAsync( cancellationToken );
         }
 
         foreach ( var profile in this.Profiles )
         {
             if ( profile.OwnsBackend )
             {
-                await profile.Backend.DisposeAsync();
+                await profile.Backend.DisposeAsync( cancellationToken );
             }
         }
     }
