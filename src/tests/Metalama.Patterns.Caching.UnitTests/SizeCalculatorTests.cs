@@ -18,7 +18,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             var backend =
                 CachingBackend.Create(
-                    x => x.Memory( new MemoryCachingBackendConfiguration { SizeCalculator = ( cItem ) => (int) cItem } )
+                    x => x.Memory( new MemoryCachingBackendConfiguration { SizeCalculator = ( cItem ) => (int) cItem! } )
                         .WithMemoryCacheOptions(
                             new MemoryCacheOptions()
                             {

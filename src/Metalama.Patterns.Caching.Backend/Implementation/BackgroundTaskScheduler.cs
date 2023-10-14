@@ -4,6 +4,7 @@ using Flashtrace;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
+using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 
 #if DEBUG
@@ -24,6 +25,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     private readonly CancellationTokenSource _disposeCancellationTokenSource = new();
     private readonly bool _sequential;
     private readonly object _sync = new();
+    private readonly ICachingExceptionObserver? _exceptionObserver;
 
 #if DEBUG
     private readonly ConcurrentDictionary<int, PendingTask> _pendingBackgroundTasks = new();
@@ -47,6 +49,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     public BackgroundTaskScheduler( IServiceProvider? serviceProvider, bool sequential = false )
     {
         this._sequential = sequential;
+        this._exceptionObserver = serviceProvider?.GetService<ICachingExceptionObserver>();
         this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
@@ -147,7 +150,10 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
             }
             catch ( Exception e )
             {
-                this.OnBackgroundTaskException( e );
+                if ( this.OnBackgroundTaskException( e ) )
+                {
+                    throw;
+                }
             }
         }
 
@@ -161,7 +167,10 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         }
         catch ( Exception e )
         {
-            this.OnBackgroundTaskException( e );
+            if ( this.OnBackgroundTaskException( e ) )
+            {
+                throw;
+            }
 
 #if DEBUG
             this._logger.Debug.IfEnabled?.Write(
@@ -187,11 +196,18 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         }
     }
 
-    private void OnBackgroundTaskException( Exception e )
+    private bool OnBackgroundTaskException( Exception e )
     {
+        if ( this._exceptionObserver.OnException( e, true ) )
+        {
+            return true;
+        }
+
         this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
         Interlocked.Increment( ref this._backgroundTaskExceptions );
         Interlocked.Increment( ref _allBackgroundTaskExceptions );
+
+        return false;
     }
 
     /// <summary>

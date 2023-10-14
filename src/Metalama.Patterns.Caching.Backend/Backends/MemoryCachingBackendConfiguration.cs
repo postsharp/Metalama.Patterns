@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Serializers;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -7,6 +8,7 @@ namespace Metalama.Patterns.Caching.Backends;
 
 #pragma warning disable SA1623
 
+[PublicAPI]
 public sealed record MemoryCachingBackendConfiguration : CachingBackendConfiguration
 {
     /// <summary>
@@ -15,7 +17,7 @@ public sealed record MemoryCachingBackendConfiguration : CachingBackendConfigura
     /// (see  <see cref="MemoryCacheOptions.SizeLimit"/>). The default value is a delegate returning the constant 1. This property is ignored
     /// if <see cref="Serializer"/> has a non-null value, because in this case the size is the number of bytes in the serialized item.
     /// </summary>
-    public Func<object, long> SizeCalculator { get; init; } = _ => 1;
+    public Func<object?, long> SizeCalculator { get; init; } = _ => 1;
 
     /// <summary>
     /// Gets or sets an optional <see cref="ICachingSerializer"/>. By default, this property is <c>null</c>, and cached objects are referenced

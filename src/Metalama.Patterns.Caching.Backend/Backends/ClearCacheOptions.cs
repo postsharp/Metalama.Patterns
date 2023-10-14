@@ -16,7 +16,7 @@ public enum ClearCacheOptions
 
     /// <summary>
     /// Clears only the local cache, but does not attempt to clear the remote cache.
-    /// (for use with <see cref="CachingBackendFactory.WithL1(Metalama.Patterns.Caching.Building.OutOfProcessCachingBackendBuilder,Metalama.Patterns.Caching.Backends.MemoryCachingBackendConfiguration?)"/>
+    /// (for use with <see cref="CachingBackendFactory.WithL1(Metalama.Patterns.Caching.Building.OutOfProcessCachingBackendBuilder,Metalama.Patterns.Caching.Backends.LayeredCachingBackendConfiguration?)"/>.
     /// </summary>
     Local = 1
 }

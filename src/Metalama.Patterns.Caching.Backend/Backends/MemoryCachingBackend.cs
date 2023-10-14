@@ -30,7 +30,7 @@ namespace Metalama.Patterns.Caching.Backends;
 internal class MemoryCachingBackend : CachingBackend
 {
     private readonly IMemoryCache _cache;
-    private readonly Func<object, long> _sizeCalculator;
+    private readonly Func<object?, long> _sizeCalculator;
     private readonly ICachingSerializer? _serializer;
 
     /// <summary>

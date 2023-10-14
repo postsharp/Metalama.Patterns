@@ -2,6 +2,7 @@
 
 using Metalama.Patterns.Caching.Implementation;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Metalama.Patterns.Caching.Backends;
 
@@ -26,6 +27,15 @@ internal sealed class LayeredCacheValue
         {
             this.AbsoluteExpiration = DateTime.UtcNow + item.Configuration?.AbsoluteExpiration.Value;
         }
+    }
+
+    [JsonConstructor]
+    public LayeredCacheValue( object? value, DateTime? absoluteExpiration, TimeSpan? slidingExpiration, CacheItemPriority? priority )
+    {
+        this.Value = value;
+        this.AbsoluteExpiration = absoluteExpiration;
+        this.SlidingExpiration = slidingExpiration;
+        this.Priority = priority;
     }
 
     /// <summary>
