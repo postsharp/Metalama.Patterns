@@ -34,7 +34,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
     protected override async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync() => await this.CreateBackendAsync( null );
 
-    private async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync( string? keyPrefix )
+    protected async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync( string? keyPrefix )
         => await RedisFactory.CreateBackendAsync(
             this.TestOptions,
             this._redisSetupFixture,
@@ -42,180 +42,14 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
             supportsDependencies: true,
             collector: this.GarbageCollectorEnabled );
 
-    private static string GeneratePrefix()
+    protected static string GeneratePrefix()
     {
         var keyPrefix = Guid.NewGuid().ToString();
 
         return keyPrefix;
     }
 
-    [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
-    public Task TestGarbageCollectionAsync()
-    {
-        var prefix = GeneratePrefix();
-
-        var redisTestInstance = this._redisSetupFixture.TestInstance;
-        this.TestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
-
-        Assert.Empty( this.GetAllKeys( prefix ) );
-
-        // [Porting] The null passed to CreateAsync in the second using below will throw because that parameter is [Required]. This test
-        // is currently skipped (as per original code), but would throw here if re-enabled. Not fixing, as can't be certain of original intent.
-        throw new NotImplementedException( "This test was identified as known-broken during porting, see comment above." );
-/*
-        using ( var cache = await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, prefix: prefix, supportsDependencies: true ) )
-        using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
-        {
-            cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-            cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-            cache.SetItem( "i3", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-
-            // ReSharper restore MethodHasAsyncOverload
-
-            Assert.True( this.GetAllKeys( prefix ).Count > 0 );
-
-            await cache.InvalidateDependencyAsync( "d1" );
-
-            await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
-        }
-
-        // ReSharper restore UseAwaitUsing
-
-        // Make sure we dispose the back-end so that the GC key gets removed too.
-
-        IList<string> keys = this.GetAllKeys( prefix );
-
-        this._testOutputHelper.WriteLine( "Remaining keys:" + string.Join( ", ", keys ) );
-
-        Assert.Equal( 0, keys.Count );
-*/
-    }
-
-    [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
-    public async Task TestGarbageCollectionByExpiration()
-    {
-        var keyPrefix = GeneratePrefix();
-
-        // [Porting] Not fixing, can't be certain of original intent.
-        // ReSharper disable UseAwaitUsing
-        await using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
-        {
-            var redisBackend = (DependenciesRedisCachingBackend) cache.UnderlyingBackend;
-            var collector = redisBackend.Collector!;
-
-            const string valueSmallKey = "i";
-            const string dependencySmallKey = "d";
-            var offset = this.GetExpirationQuantum();
-
-            var keyBuilder = new RedisKeyBuilder( redisBackend.Database, redisBackend.Configuration );
-
-            var valueKey = keyBuilder.GetValueKey( valueSmallKey );
-            var dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
-            var dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
-
-            collector.NotificationQueue.SuspendProcessing();
-
-            var itemExpiredEvent = new TaskCompletionSource<bool>();
-
-            // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-            cache.ItemRemoved += ( _, args ) =>
-            {
-                Assert.Equal( valueSmallKey, args.Key );
-                Assert.Equal( CacheItemRemovedReason.Expired, args.RemovedReason );
-                Assert.False( itemExpiredEvent.Task.IsCompleted );
-                itemExpiredEvent.SetResult( true );
-            };
-
-            var cacheItem = new CacheItem(
-                "v",
-                ImmutableList.Create( dependencySmallKey ),
-                new CacheItemConfiguration { AbsoluteExpiration = offset } );
-
-            await cache.SetItemAsync( valueSmallKey, cacheItem );
-
-            Assert.True( await redisBackend.Database.KeyExistsAsync( valueKey ) );
-            Assert.True( await redisBackend.Database.KeyExistsAsync( dependenciesKey ) );
-            Assert.True( await redisBackend.Database.KeyExistsAsync( dependencyKey ) );
-
-            collector.NotificationQueue.ResumeProcessing();
-
-            Assert.True( await itemExpiredEvent.Task.WithTimeout( TimeoutTimeSpan ) );
-
-            await Task.Delay( this.GetExpirationQuantum( 2 ) );
-
-            Assert.False( await redisBackend.Database.KeyExistsAsync( valueKey ) );
-            Assert.False( await redisBackend.Database.KeyExistsAsync( dependenciesKey ) );
-            Assert.False( await redisBackend.Database.KeyExistsAsync( dependencyKey ) );
-        }
-
-        // ReSharper restore UseAwaitUsing
-    }
-
-    [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
-    public Task TestSetBeforeGarbageCollectionByExpiration()
-    {
-        // [Porting] The null passed to CreateAsync in the second using below will throw because that parameter is [Required]. This test
-        // is currently skipped (as per original code), but would throw here if re-enabled. Not fixing, as can't be certain of original intent.
-        throw new NotImplementedException( "This test was identified as known-broken during porting, see comment above." );
-/*
-        var keyPrefix = GeneratePrefix();
-
-        using ( var cache = await this.CreateBackendAsync( keyPrefix ) )
-        using ( var collector = await RedisCacheDependencyGarbageCollector.CreateAsync( cache.Connection, null ) )
-        {
-            const string valueSmallKey = "i";
-            const string dependencySmallKey = "d";
-            var offset = this.GetExpirationTolerance();
-
-            var keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
-
-            string valueKey = keyBuilder.GetValueKey( valueSmallKey );
-            string dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
-            string dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
-
-            collector.NotificationQueue.SuspendProcessing();
-
-            var expiringCacheItem = new CacheItem(
-                "v",
-                ImmutableList.Create( dependencySmallKey ),
-                new CacheItemConfiguration { AbsoluteExpiration = offset } );
-
-            var nonExpiringCacheItem = new CacheItem(
-                "v",
-                ImmutableList.Create( dependencySmallKey ) );
-
-            await cache.SetItemAsync( valueSmallKey, expiringCacheItem );
-
-            Assert.True( await cache.Database.KeyExistsAsync( valueKey ) );
-            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
-            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
-
-            await Task.Delay( this.GetExpirationTolerance( 2 ) );
-
-            Assert.False( await cache.Database.KeyExistsAsync( valueKey ) );
-            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
-            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
-
-            await cache.SetItemAsync( valueSmallKey, nonExpiringCacheItem );
-
-            Assert.True( await cache.Database.KeyExistsAsync( valueKey ) );
-            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
-            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
-
-            collector.NotificationQueue.ResumeProcessing();
-
-            Assert.True( await cache.Database.KeyExistsAsync( valueKey ) );
-            Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
-            Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
-
-            await TestableCachingComponentDisposer.DisposeAsync<ITestableCachingComponent>( cache, collector );
-        }
-*/
-
-        // ReSharper restore UseAwaitUsing
-    }
-
-    [Fact( Timeout = Timeout, Skip = "Ignore Redis" )]
+    [Fact( Timeout = Timeout )]
     public async Task TestCleanUp()
     {
         var keyPrefix = GeneratePrefix();
@@ -346,7 +180,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         return cache.Database.KeyExists( GetDependencyKey( cache, valueSmallKey ) );
     }
 
-    private IList<string> GetAllKeys( string prefix )
+    protected IList<string> GetAllKeys( string prefix )
     {
         using ( var connection = RedisFactory.CreateConnection( this.TestOptions ) )
         {

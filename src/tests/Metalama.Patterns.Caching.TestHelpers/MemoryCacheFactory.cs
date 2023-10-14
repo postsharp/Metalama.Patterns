@@ -12,8 +12,9 @@ public static class MemoryCacheFactory
 
     public static CachingBackend CreateBackend( IServiceProvider? serviceProvider, string debugName = "test" )
     {
-        var backend = CachingBackend.Create( b => b.Memory().WithMemoryCache( CreateCache() ), serviceProvider );
-        backend.DebugName = debugName;
+        var backend = CachingBackend.Create(
+            b => b.Memory( new MemoryCachingBackendConfiguration() { DebugName = debugName } ).WithMemoryCache( CreateCache() ),
+            serviceProvider );
 
         return backend;
     }

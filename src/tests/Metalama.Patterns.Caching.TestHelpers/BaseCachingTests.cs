@@ -66,8 +66,9 @@ public abstract class BaseCachingTests
         Action<CachingTestBuilder>? buildTest = null,
         bool passServiceProvider = true )
     {
-        var backend = CachingBackend.Create( b => b.Memory(), passServiceProvider ? this.ServiceProvider : null );
-        backend.DebugName = name;
+        var backend = CachingBackend.Create(
+            b => b.Memory( new MemoryCachingBackendConfiguration() { DebugName = name } ),
+            passServiceProvider ? this.ServiceProvider : null );
 
         return this.InitializeTest( name, backend, buildTest, passServiceProvider );
     }

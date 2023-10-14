@@ -14,13 +14,17 @@ namespace Metalama.Patterns.Caching.Building;
 public sealed class LayeredCachingBackendBuilder : ConcreteCachingBackendBuilder
 {
     private readonly ConcreteCachingBackendBuilder _underlying;
+    private readonly LayeredCachingBackendConfiguration? _configuration;
 
     private IMemoryCache? _memoryCache;
-    private MemoryCachingBackendConfiguration? _memoryCacheConfiguration;
 
-    internal LayeredCachingBackendBuilder( ConcreteCachingBackendBuilder underlying, IServiceProvider? serviceProvider ) : base( serviceProvider )
+    internal LayeredCachingBackendBuilder(
+        ConcreteCachingBackendBuilder underlying,
+        IServiceProvider? serviceProvider,
+        LayeredCachingBackendConfiguration? configuration ) : base( serviceProvider )
     {
         this._underlying = underlying;
+        this._configuration = configuration;
     }
 
     public LayeredCachingBackendBuilder WithMemoryCache( IMemoryCache memoryCache )
@@ -37,28 +41,17 @@ public sealed class LayeredCachingBackendBuilder : ConcreteCachingBackendBuilder
         return this;
     }
 
-    public LayeredCachingBackendBuilder WithLocalCacheConfiguration( MemoryCachingBackendConfiguration configuration )
-    {
-        this._memoryCacheConfiguration = configuration;
-
-        return this;
-    }
-
     public override CachingBackend CreateBackend( CreateBackendArgs args )
     {
         // ReSharper disable once WithExpressionModifiesAllMembers
         var underlying = this._underlying.CreateBackend( args with { Layer = args.Layer + 1 } );
 
-        // We always add a non-blocking modifier to a layered caching because it improves latency without worsening
-        // the cross-node cache consistency which, anyway, is not guaranteed.
-        // There is no other way for the user to enable non-blocking operations because using it without a local layer
-        // almost guarantees to cause cache consistency issues within the same application node, which is a nightmare 
-        // to avoid.
+        // We don't add a non-blocking modifier because it may reorder reads and writes if we don't order wait for the
+        // completion of background tasks before executing reads. However, because we have a single queue, this may make
+        // performance even worse than with blocking operations.
 
-        var nonBlocking = new NonBlockingCachingBackendEnhancer( underlying );
+        var memoryCache = new MemoryCachingBackend( this._memoryCache, this._configuration?.L1Configuration, this.ServiceProvider );
 
-        var memoryCache = new MemoryCachingBackend( this._memoryCache, this._memoryCacheConfiguration, this.ServiceProvider );
-
-        return new TwoLayerCachingBackendEnhancer( nonBlocking, memoryCache );
+        return new LayeredCachingBackendEnhancer( underlying, memoryCache, this._configuration );
     }
 }

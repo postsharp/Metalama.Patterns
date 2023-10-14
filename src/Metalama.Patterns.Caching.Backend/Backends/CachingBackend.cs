@@ -49,7 +49,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     /// </summary>
     protected CancellationToken DisposeCancellationToken { get; }
 
-    public string? DebugName { get; set; }
+    public string? DebugName { get; }
 
     // ReSharper disable once MemberInitializerValueIgnored 
 

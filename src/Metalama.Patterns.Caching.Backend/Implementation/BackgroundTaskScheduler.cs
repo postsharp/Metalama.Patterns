@@ -141,7 +141,14 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     {
         if ( lastTask != null )
         {
-            await lastTask;
+            try
+            {
+                await lastTask;
+            }
+            catch ( Exception e )
+            {
+                this.OnBackgroundTaskException( e );
+            }
         }
 
         try
@@ -154,15 +161,12 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         }
         catch ( Exception e )
         {
-            this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
+            this.OnBackgroundTaskException( e );
 
 #if DEBUG
             this._logger.Debug.IfEnabled?.Write(
                 FormattedMessageBuilder.Formatted( "Stack trace that created the failing task: {StackTrace}", pendingTask.StackTrace ) );
 #endif
-
-            Interlocked.Increment( ref this._backgroundTaskExceptions );
-            Interlocked.Increment( ref _allBackgroundTaskExceptions );
         }
         finally
         {
@@ -181,6 +185,13 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
             this._pendingBackgroundTasks.TryRemove( pendingTask.Id, out _ );
 #endif
         }
+    }
+
+    private void OnBackgroundTaskException( Exception e )
+    {
+        this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
+        Interlocked.Increment( ref this._backgroundTaskExceptions );
+        Interlocked.Increment( ref _allBackgroundTaskExceptions );
     }
 
     /// <summary>
