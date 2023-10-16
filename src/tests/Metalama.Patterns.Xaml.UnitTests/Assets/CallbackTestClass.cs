@@ -4,6 +4,8 @@ using FluentAssertions;
 using System.Runtime.CompilerServices;
 using System.Windows;
 
+// ReSharper disable UnusedMember.Local
+
 namespace Metalama.Patterns.Xaml.UnitTests.Assets;
 
 public sealed partial class CallbackTestClass : DependencyObject

@@ -57,6 +57,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 OverrideStrategy.Fail,
                 b =>
                 {
+                    // ReSharper disable once RedundantNameQualifier
                     b.Accessibility = Framework.Code.Accessibility.Public;
                     b.Writeability = Writeability.ConstructorOnly;
                 } );
@@ -136,8 +137,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
          * to provide the PropertyMetadata.DefaultValue. PostSharp could not do this, so it provided the DefaultValue attribute property as a
          * compromised alternative (only constant default values can be provided that way). So in ML, we should not need the Start/StopIgnoringContracts
          * concept. By default (according to DependencyPropertyOptions), we will use the initializer to set PropertyMetadata.DefaultValue
-         * (controlled by DependencyPropertyOptions.IntiializerProvidesDefaultValue), and we will *not* call DependencyObject.SetValue (controlled by
-         * DependencyPropertyOptions.IntiializerProvidesInitialValue).
+         * (controlled by DependencyPropertyOptions.InitializerProvidesDefaultValue), and we will *not* call DependencyObject.SetValue (controlled by
+         * DependencyPropertyOptions.InitializerProvidesInitialValue).
          */
 
         this._builder.Advice.WithTemplateProvider( Templates.Provider )
@@ -201,15 +202,15 @@ internal sealed partial class DependencyPropertyAspectBuilder
     {
         IMethod? method;
 
-        var onChangingGroup = methodsByName[methodName];
+        var onChangingGroup = methodsByName[methodName].ToList();
 
-        switch ( onChangingGroup.Count() )
+        switch ( onChangingGroup.Count )
         {
             case 0:
                 return (null, ChangeHandlerSignatureKind.NotFound);
 
             case 1:
-                method = onChangingGroup.First();
+                method = onChangingGroup[0];
 
                 break;
 
@@ -220,16 +221,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 return (null, ChangeHandlerSignatureKind.Ambiguous);
         }
 
-        var signatureKind = ChangeHandlerSignatureKind.Invalid;
+        var signatureKind = this.GetChangeHandlerSignature( method, this._declaringType, this._propertyType, allowOldValue );
 
-        if ( method != null )
+        if ( signatureKind == ChangeHandlerSignatureKind.Invalid )
         {
-            signatureKind = this.GetChangeHandlerSignature( method, this._declaringType, this._propertyType, allowOldValue );
-
-            if ( signatureKind == ChangeHandlerSignatureKind.Invalid )
-            {
-                this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsInvalid.WithArguments( (optionName, this._builder.Target) ), method );
-            }
+            this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsInvalid.WithArguments( (optionName, this._builder.Target) ), method );
         }
 
         return (method, signatureKind);
@@ -243,7 +239,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
     {
         var p = method.Parameters;
 
-        if ( method.ReturnType.SpecialType != SpecialType.Void || p.Count > 2 || p.Any( p => p.RefKind is not RefKind.None or RefKind.In ) )
+        if ( method.ReturnType.SpecialType != SpecialType.Void || p.Count > 2 || p.Any( parameter => parameter.RefKind is not (RefKind.None or RefKind.In) ) )
         {
             return ChangeHandlerSignatureKind.Invalid;
         }
@@ -311,16 +307,16 @@ internal sealed partial class DependencyPropertyAspectBuilder
     {
         IMethod? method;
 
-        var onChangingGroup = methodsByName[methodName];
+        var onChangingGroup = methodsByName[methodName].ToList();
 
-        switch ( onChangingGroup.Count() )
+        switch ( onChangingGroup.Count )
         {
             case 0:
                 return (null, ValidationHandlerSignatureKind.NotFound);
 
             case 1:
-                method = onChangingGroup.First();
-
+                method = onChangingGroup[0];
+                
                 break;
 
             default:
@@ -330,16 +326,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 return (null, ValidationHandlerSignatureKind.Ambiguous);
         }
 
-        var signatureKind = ValidationHandlerSignatureKind.Invalid;
+        var signatureKind = this.GetValidationHandlerSignature( method, this._declaringType, this._propertyType );
 
-        if ( method != null )
+        if ( signatureKind == ValidationHandlerSignatureKind.Invalid )
         {
-            signatureKind = this.GetValidationHandlerSignature( method, this._declaringType, this._propertyType );
-
-            if ( signatureKind == ValidationHandlerSignatureKind.Invalid )
-            {
-                this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsInvalid.WithArguments( (optionName, this._builder.Target) ), method );
-            }
+            this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsInvalid.WithArguments( (optionName, this._builder.Target) ), method );
         }
 
         return (method, signatureKind);
@@ -355,7 +346,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         if ( method.ReturnType.SpecialType != SpecialType.Boolean
              || method.ReturnParameter.RefKind != RefKind.None
              || p.Count > 3
-             || p.Any( p => p.RefKind is not RefKind.None or RefKind.In ) )
+             || p.Any( parameter => parameter.RefKind is not (RefKind.None or RefKind.In) ) )
         {
             return ValidationHandlerSignatureKind.Invalid;
         }

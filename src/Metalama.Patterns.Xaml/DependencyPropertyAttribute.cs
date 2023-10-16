@@ -10,11 +10,13 @@ using System.Windows;
 namespace Metalama.Patterns.Xaml;
 
 [AttributeUsage( AttributeTargets.Property )]
-public sealed partial class DependencyPropertyAttribute : DependencyPropertyOptionsAttribute, IAspect<IProperty>
+public sealed class DependencyPropertyAttribute : DependencyPropertyOptionsAttribute, IAspect<IProperty>
 {
     void IEligible<IProperty>.BuildEligibility( IEligibilityBuilder<IProperty> builder )
     {
         builder.MustNotBeStatic();
+        
+        // ReSharper disable once RedundantNameQualifier
         builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
         builder.MustBeReadable();
         builder.MustSatisfy( p => p.IsAutoPropertyOrField == true, p => $"{p} must be an auto-property." );

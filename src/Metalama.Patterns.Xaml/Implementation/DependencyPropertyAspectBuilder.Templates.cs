@@ -6,6 +6,8 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Xaml.Options;
 using System.Windows;
 
+// ReSharper disable NotResolvedInText
+
 namespace Metalama.Patterns.Xaml.Implementation;
 
 internal sealed partial class DependencyPropertyAspectBuilder
@@ -126,6 +128,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     propertyChangedCallbackExpr = ExpressionFactory.Capture( (PropertyChangedCallback) PropertyChanged );
                 }
 
+                // ReSharper disable once RedundantAssignment
                 IExpression? metadataExpr = null;
 
                 if ( defaultValueExpr != null && defaultValueExpr.Type.SpecialType != SpecialType.Object )
@@ -237,7 +240,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             switch ( signatureKind )
             {
                 case ValidationHandlerSignatureKind.InstanceValue:
-                    if ( !method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    if ( !method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                             .Invoke(
                                 method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
                     {
@@ -247,7 +250,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ValidationHandlerSignatureKind.InstanceDependencyPropertyAndValue:
-                    if ( !method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    if ( !method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                             .Invoke(
                                 dependencyPropertyField.Value,
                                 method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
@@ -258,7 +261,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ValidationHandlerSignatureKind.StaticValue:
-                    if ( !method!.Invoke(
+                    if ( !method.Invoke(
                             method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
                     {
                         throw new ArgumentException( "Invalid property value.", "value" );
@@ -267,7 +270,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ValidationHandlerSignatureKind.StaticDependencyPropertyAndValue:
-                    if ( !method!.Invoke(
+                    if ( !method.Invoke(
                             dependencyPropertyField.Value,
                             method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
                     {
@@ -277,7 +280,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ValidationHandlerSignatureKind.StaticDependencyPropertyAndInstanceAndValue:
-                    if ( !method!.Invoke(
+                    if ( !method.Invoke(
                             dependencyPropertyField.Value,
                             instanceExpr.Type.Is( method.Parameters[1].Type, ConversionKind.Reference )
                                 ? instanceExpr.Value
@@ -290,7 +293,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ValidationHandlerSignatureKind.StaticInstanceAndValue:
-                    if ( !method!.Invoke(
+                    if ( !method.Invoke(
                             instanceExpr.Type.Is( method.Parameters[0].Type, ConversionKind.Reference )
                                 ? instanceExpr.Value
                                 : meta.Cast( declaringType, instanceExpr.Value ),
@@ -322,24 +325,24 @@ internal sealed partial class DependencyPropertyAspectBuilder
             switch ( signatureKind )
             {
                 case ChangeHandlerSignatureKind.InstanceNoParameters:
-                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
+                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
 
                     break;
 
                 case ChangeHandlerSignatureKind.StaticNoParameters:
-                    method!.Invoke();
+                    method.Invoke();
 
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceValue:
-                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke(
                             method.Parameters[0].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
 
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceOldValueAndNewValue:
-                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke(
                             method.Parameters[0].Type.SpecialType == SpecialType.Object ? oldValueExpr!.Value : meta.Cast( propertyType, oldValueExpr!.Value ),
                             method.Parameters[1].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
@@ -347,17 +350,17 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceDependencyProperty:
-                    method!.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
+                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
 
                     break;
 
                 case ChangeHandlerSignatureKind.StaticDependencyProperty:
-                    method!.Invoke( dependencyPropertyField.Value );
+                    method.Invoke( dependencyPropertyField.Value );
 
                     break;
 
                 case ChangeHandlerSignatureKind.StaticDependencyPropertyAndInstance:
-                    method!.Invoke(
+                    method.Invoke(
                         dependencyPropertyField.Value,
                         instanceExpr.Type.Is( method.Parameters[1].Type, ConversionKind.Reference )
                             ? instanceExpr.Value
@@ -366,7 +369,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ChangeHandlerSignatureKind.StaticInstance:
-                    method!.Invoke(
+                    method.Invoke(
                         instanceExpr.Type.Is( method.Parameters[0].Type, ConversionKind.Reference )
                             ? instanceExpr.Value
                             : meta.Cast( declaringType, instanceExpr.Value ) );

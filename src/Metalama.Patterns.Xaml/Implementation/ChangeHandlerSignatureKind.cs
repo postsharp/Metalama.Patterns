@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Patterns.Xaml;
+namespace Metalama.Patterns.Xaml.Implementation;
 
 // See project README.md for details of supported signatures.
 
