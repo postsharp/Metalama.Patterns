@@ -7,5 +7,5 @@ namespace Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.InitializerProv
 public class InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue : DependencyObject
 {
     [DependencyProperty( InitializerProvidesDefaultValue = false, InitializerProvidesInitialValue = true )]
-    public List<int> Foo { get; set; } = new List<int>( 3 ) { 1, 2, 3 };
+    public List<int> Foo { get; set; } = new( 3 ) { 1, 2, 3 };
 }

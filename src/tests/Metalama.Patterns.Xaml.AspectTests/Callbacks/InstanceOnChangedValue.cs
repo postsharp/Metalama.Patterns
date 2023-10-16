@@ -9,28 +9,20 @@ public partial class InstanceOnChangedValue : DependencyObject
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private void OnFooChanged( int value )
-    {
-    }
+    private void OnFooChanged( int value ) { }
 
     [DependencyProperty]
     public List<int> AcceptAssignable { get; set; }
 
-    private void OnAcceptAssignableChanged( IEnumerable<int> value )
-    {
-    }
+    private void OnAcceptAssignableChanged( IEnumerable<int> value ) { }
 
     [DependencyProperty]
     public int AcceptGeneric { get; set; }
 
-    private void OnAcceptGenericChanged<T>( T value )
-    {
-    }
+    private void OnAcceptGenericChanged<T>( T value ) { }
 
     [DependencyProperty]
     public int AcceptObject { get; set; }
 
-    private void OnAcceptObjectChanged( object value )
-    {
-    }
+    private void OnAcceptObjectChanged( object value ) { }
 }

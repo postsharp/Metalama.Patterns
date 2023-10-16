@@ -15,10 +15,10 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
     /// <summary>
     /// Gets or sets a value indicating whether the property should be registered as a read-only property.
     /// </summary>
-    public bool IsReadOnly 
+    public bool IsReadOnly
     {
         get => this._isReadOnly ?? false;
-        set => this._isReadOnly = value;            
+        set => this._isReadOnly = value;
     }
 
     private bool? _initializerProvidesInitialValue;
@@ -39,8 +39,8 @@ public class DependencyPropertyOptionsAttribute : Attribute, IHierarchicalOption
     /// Gets or sets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
     /// The default is <see langword="true"/>.
     /// </summary>
-    public bool InitializerProvidesDefaultValue 
-    { 
+    public bool InitializerProvidesDefaultValue
+    {
         get => this._initializerProvidesDefaultValue ?? true;
         set => this._initializerProvidesDefaultValue = value;
     }

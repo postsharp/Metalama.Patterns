@@ -38,18 +38,21 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         // Check for a conflicting member name explicitly because introduction won't fail unless the conflict comes from another field.
 
-        var conflictingMember = (IMemberOrNamedType) this._declaringType.AllMembers().FirstOrDefault( m => m.Name == dependencyPropertyFieldName ) ?? this._declaringType.NestedTypes.FirstOrDefault( t => t.Name == dependencyPropertyFieldName );
-        
+        var conflictingMember = (IMemberOrNamedType?) this._declaringType.AllMembers().FirstOrDefault( m => m.Name == dependencyPropertyFieldName )
+                                ?? this._declaringType.NestedTypes.FirstOrDefault( t => t.Name == dependencyPropertyFieldName );
+
         if ( conflictingMember != null )
         {
-            this._builder.Diagnostics.Report( Diagnostics.ErrorRequiredDependencyPropertyFieldNameIsAlreadyUsed.WithArguments( (conflictingMember, this._declaringType, dependencyPropertyFieldName) ) );
+            this._builder.Diagnostics.Report(
+                Diagnostics.ErrorRequiredDependencyPropertyFieldNameIsAlreadyUsed.WithArguments(
+                    (conflictingMember, this._declaringType, dependencyPropertyFieldName) ) );
         }
         else
         {
             introduceDependencyPropertyFieldResult = this._builder.Advice.IntroduceField(
                 this._declaringType,
                 this._options.RegistrationField ?? $"{this._propertyName}Property",
-                typeof( DependencyProperty ),
+                typeof(DependencyProperty),
                 IntroductionScope.Static,
                 OverrideStrategy.Fail,
                 b =>
@@ -65,29 +68,44 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var onChangedMethodName = this._options.PropertyChangedMethod ?? $"On{this._propertyName}Changed";
         var validateMethodName = this._options.ValidateMethod ?? $"Validate{this._propertyName}";
 
-        var (onChangingMethod, onChangingSignatureKind) = this.GetChangeHandlerMethod( methodsByName, onChangingMethodName, allowOldValue: false, nameof( this._options.PropertyChangingMethod ) );
-        var (onChangedMethod, onChangedSignatureKind) = this.GetChangeHandlerMethod( methodsByName, onChangedMethodName, allowOldValue: true, nameof( this._options.PropertyChangedMethod ) );
-        var (validateMethod, validateSignatureKind) = this.GetValidationHandlerMethod( methodsByName, validateMethodName, nameof( this._options.ValidateMethod ) );
+        var (onChangingMethod, onChangingSignatureKind) = this.GetChangeHandlerMethod(
+            methodsByName,
+            onChangingMethodName,
+            allowOldValue: false,
+            nameof(this._options.PropertyChangingMethod) );
+
+        var (onChangedMethod, onChangedSignatureKind) = this.GetChangeHandlerMethod(
+            methodsByName,
+            onChangedMethodName,
+            allowOldValue: true,
+            nameof(this._options.PropertyChangedMethod) );
+
+        var (validateMethod, validateSignatureKind) =
+            this.GetValidationHandlerMethod( methodsByName, validateMethodName, nameof(this._options.ValidateMethod) );
 
         if ( this._options.PropertyChangingMethod != null && onChangingSignatureKind == ChangeHandlerSignatureKind.NotFound )
         {
-            this._builder.Diagnostics.Report( 
-                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments( (this._declaringType, this._options.PropertyChangingMethod, nameof( this._options.PropertyChangingMethod )) ) );
+            this._builder.Diagnostics.Report(
+                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments(
+                    (this._declaringType, this._options.PropertyChangingMethod, nameof(this._options.PropertyChangingMethod)) ) );
         }
 
         if ( this._options.PropertyChangedMethod != null && onChangedSignatureKind == ChangeHandlerSignatureKind.NotFound )
         {
             this._builder.Diagnostics.Report(
-                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments( (this._declaringType, this._options.PropertyChangedMethod, nameof( this._options.PropertyChangedMethod )) ) );
+                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments(
+                    (this._declaringType, this._options.PropertyChangedMethod, nameof(this._options.PropertyChangedMethod)) ) );
         }
 
         if ( this._options.ValidateMethod != null && onChangedSignatureKind == ChangeHandlerSignatureKind.NotFound )
         {
             this._builder.Diagnostics.Report(
-                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments( (this._declaringType, this._options.ValidateMethod, nameof( this._options.PropertyChangedMethod )) ) );
+                Diagnostics.WarningConfiguredHandlerMethodNotFound.WithArguments(
+                    (this._declaringType, this._options.ValidateMethod, nameof(this._options.PropertyChangedMethod)) ) );
         }
 
-        if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue != true && this._options.InitializerProvidesDefaultValue != true )
+        if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue != true
+                                                                && this._options.InitializerProvidesDefaultValue != true )
         {
             this._builder.Diagnostics.Report( Diagnostics.WarningDependencyPropertyInitializerWillNotBeUsed.WithArguments( this._builder.Target ) );
         }
@@ -122,44 +140,40 @@ internal sealed partial class DependencyPropertyAspectBuilder
          * DependencyPropertyOptions.IntiializerProvidesInitialValue).
          */
 
-        this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
-            this._declaringType,
-            nameof( Templates.InitializeDependencyProperty ),
-            InitializerKind.BeforeTypeConstructor,
-            args: new
-            {
-                dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration,
-                options = this._options,
-                propertyName = this._propertyName,
-                propertyType = this._propertyType,
-                declaringType = this._declaringType,
-                defaultValueExpr = this._builder.Target.InitializerExpression,
-                onChangingMethod,
-                onChangingSignatureKind,
-                onChangedMethod,
-                onChangedSignatureKind,
-                validateMethod,
-                validateSignatureKind
-            } );
+        this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            .AddInitializer(
+                this._declaringType,
+                nameof(Templates.InitializeDependencyProperty),
+                InitializerKind.BeforeTypeConstructor,
+                args: new
+                {
+                    dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration,
+                    options = this._options,
+                    propertyName = this._propertyName,
+                    propertyType = this._propertyType,
+                    declaringType = this._declaringType,
+                    defaultValueExpr = this._builder.Target.InitializerExpression,
+                    onChangingMethod,
+                    onChangingSignatureKind,
+                    onChangedMethod,
+                    onChangedSignatureKind,
+                    validateMethod,
+                    validateSignatureKind
+                } );
 
-        this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
-            this._builder.Target,
-            new GetterTemplateSelector( nameof( Templates.OverrideGetter ) ),
-            args: new
-            {
-                propertyType = this._propertyType,
-                dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration
-            } );
+        this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            .OverrideAccessors(
+                this._builder.Target,
+                new GetterTemplateSelector( nameof(Templates.OverrideGetter) ),
+                args: new { propertyType = this._propertyType, dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration } );
 
         if ( this._builder.Target.Writeability != Writeability.None )
         {
-            this._builder.Advice.WithTemplateProvider( Templates.Provider ).OverrideAccessors(
-                this._builder.Target,
-                setTemplate: nameof( Templates.OverrideSetter ),
-                args: new
-                {
-                    dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration
-                } );
+            this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                .OverrideAccessors(
+                    this._builder.Target,
+                    setTemplate: nameof(Templates.OverrideSetter),
+                    args: new { dependencyPropertyField = introduceDependencyPropertyFieldResult.Declaration } );
         }
 
         // Here we avoid the temptation to generate a static field to store the result of the initializer expression
@@ -170,15 +184,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue == true )
         {
-            this._builder.Advice.WithTemplateProvider( Templates.Provider ).AddInitializer(
+            this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                .AddInitializer(
                     this._declaringType,
-                    nameof( Templates.Assign ),
+                    nameof(Templates.Assign),
                     InitializerKind.BeforeInstanceConstructor,
-                    args: new
-                    {
-                        left = (IExpression) this._builder.Target.Value!,
-                        right = this._builder.Target.InitializerExpression
-                    } );
+                    args: new { left = (IExpression) this._builder.Target.Value!, right = this._builder.Target.InitializerExpression } );
         }
     }
 
@@ -199,12 +210,13 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
             case 1:
                 method = onChangingGroup.First();
+
                 break;
 
             default:
 
                 this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsAmbiguous.WithArguments( (this._declaringType, methodName, optionName) ) );
-                
+
                 return (null, ChangeHandlerSignatureKind.Ambiguous);
         }
 
@@ -248,16 +260,16 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     return method.IsStatic ? ChangeHandlerSignatureKind.StaticDependencyProperty : ChangeHandlerSignatureKind.InstanceDependencyProperty;
                 }
                 else if ( method.IsStatic
-                            && (p[0].Type.SpecialType == SpecialType.Object
-                                || p[0].Type.Equals( declaringType )
-                                || p[0].Type.Equals( this._assets.DependencyObject )) )
+                          && (p[0].Type.SpecialType == SpecialType.Object
+                              || p[0].Type.Equals( declaringType )
+                              || p[0].Type.Equals( this._assets.DependencyObject )) )
                 {
                     return ChangeHandlerSignatureKind.StaticInstance;
                 }
                 else if ( !method.IsStatic
-                            && (p[0].Type.SpecialType == SpecialType.Object
-                                || propertyType.Is( p[0].Type )
-                                || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
+                          && (p[0].Type.SpecialType == SpecialType.Object
+                              || propertyType.Is( p[0].Type )
+                              || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
                 {
                     return ChangeHandlerSignatureKind.InstanceValue;
                 }
@@ -267,21 +279,21 @@ internal sealed partial class DependencyPropertyAspectBuilder
             case 2:
 
                 if ( method.IsStatic
-                        && p[0].Type.Equals( this._assets.DependencyProperty )
-                        && (p[1].Type.SpecialType == SpecialType.Object
-                            || p[1].Type.Equals( declaringType )
-                            || p[1].Type.Equals( this._assets.DependencyObject )) )
+                     && p[0].Type.Equals( this._assets.DependencyProperty )
+                     && (p[1].Type.SpecialType == SpecialType.Object
+                         || p[1].Type.Equals( declaringType )
+                         || p[1].Type.Equals( this._assets.DependencyObject )) )
                 {
                     return ChangeHandlerSignatureKind.StaticDependencyPropertyAndInstance;
                 }
                 else if ( allowOldValue
-                            && !method.IsStatic
-                            && (p[0].Type.SpecialType == SpecialType.Object
-                                || propertyType.Is( p[0].Type )
-                                || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1))
-                            && (p[1].Type.SpecialType == SpecialType.Object
-                                || propertyType.Is( p[1].Type )
-                                || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
+                          && !method.IsStatic
+                          && (p[0].Type.SpecialType == SpecialType.Object
+                              || propertyType.Is( p[0].Type )
+                              || (p[0].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1))
+                          && (p[1].Type.SpecialType == SpecialType.Object
+                              || propertyType.Is( p[1].Type )
+                              || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
                 {
                     return ChangeHandlerSignatureKind.InstanceOldValueAndNewValue;
                 }
@@ -308,6 +320,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
             case 1:
                 method = onChangingGroup.First();
+
                 break;
 
             default:
@@ -322,6 +335,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         if ( method != null )
         {
             signatureKind = this.GetValidationHandlerSignature( method, this._declaringType, this._propertyType );
+
             if ( signatureKind == ValidationHandlerSignatureKind.Invalid )
             {
                 this._builder.Diagnostics.Report( Diagnostics.ErrorHandlerMethodIsInvalid.WithArguments( (optionName, this._builder.Target) ), method );
@@ -339,9 +353,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var p = method.Parameters;
 
         if ( method.ReturnType.SpecialType != SpecialType.Boolean
-            || method.ReturnParameter.RefKind != RefKind.None
-            || p.Count > 3
-            || p.Any( p => p.RefKind is not RefKind.None or RefKind.In ) )
+             || method.ReturnParameter.RefKind != RefKind.None
+             || p.Count > 3
+             || p.Any( p => p.RefKind is not RefKind.None or RefKind.In ) )
         {
             return ValidationHandlerSignatureKind.Invalid;
         }
@@ -366,10 +380,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
                 if ( p[0].Type.Equals( this._assets.DependencyProperty )
                      && (p[1].Type.SpecialType == SpecialType.Object
-                        || propertyType.Is( p[1].Type )
-                        || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1) ) )
+                         || propertyType.Is( p[1].Type )
+                         || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
                 {
-                    return method.IsStatic ? ValidationHandlerSignatureKind.StaticDependencyPropertyAndValue : ValidationHandlerSignatureKind.InstanceDependencyPropertyAndValue;
+                    return method.IsStatic
+                        ? ValidationHandlerSignatureKind.StaticDependencyPropertyAndValue
+                        : ValidationHandlerSignatureKind.InstanceDependencyPropertyAndValue;
                 }
                 else if ( method.IsStatic
                           && (p[0].Type.SpecialType == SpecialType.Object
@@ -387,13 +403,13 @@ internal sealed partial class DependencyPropertyAspectBuilder
             case 3:
 
                 if ( method.IsStatic
-                        && p[0].Type.Equals( this._assets.DependencyProperty )
-                        && (p[1].Type.SpecialType == SpecialType.Object
-                            || p[1].Type.Equals( declaringType )
-                            || p[1].Type.Equals( this._assets.DependencyObject ))
-                        && (p[2].Type.SpecialType == SpecialType.Object
-                            || propertyType.Is( p[2].Type )
-                            || (p[2].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
+                     && p[0].Type.Equals( this._assets.DependencyProperty )
+                     && (p[1].Type.SpecialType == SpecialType.Object
+                         || p[1].Type.Equals( declaringType )
+                         || p[1].Type.Equals( this._assets.DependencyObject ))
+                     && (p[2].Type.SpecialType == SpecialType.Object
+                         || propertyType.Is( p[2].Type )
+                         || (p[2].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
                 {
                     return ValidationHandlerSignatureKind.StaticDependencyPropertyAndInstanceAndValue;
                 }

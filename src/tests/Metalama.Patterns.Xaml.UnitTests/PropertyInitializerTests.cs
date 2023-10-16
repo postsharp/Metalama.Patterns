@@ -14,6 +14,7 @@ public sealed class PropertyInitializerTests
         PropertyInitializerTestClass.DefaultConfigurationProperty.DefaultMetadata.DefaultValue
             .Should()
             .Be( 42 );
+
         PropertyInitializerTestClass.DefaultConfigurationInitializerCallCount.Should().Be( 1 );
         var instance = new PropertyInitializerTestClass();
         PropertyInitializerTestClass.DefaultConfigurationInitializerCallCount.Should().Be( 1 );
@@ -24,7 +25,9 @@ public sealed class PropertyInitializerTests
     public void NotDefaultNotInitial()
     {
         PropertyInitializerTestClass.NotDefaultNotInitialProperty.DefaultMetadata.DefaultValue
-            .Should().Be( 0 );
+            .Should()
+            .Be( 0 );
+
         PropertyInitializerTestClass.NotDefaultNotInitialInitializerCallCount.Should().Be( 0 );
         var instance = new PropertyInitializerTestClass();
         PropertyInitializerTestClass.NotDefaultNotInitialInitializerCallCount.Should().Be( 0 );

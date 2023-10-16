@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Xaml.AspectTests.Diagnostics.ConfiguredPropertyChang
 
 public class ConfiguredPropertyChangingMethodIsInvalid : DependencyObject
 {
-    [DependencyProperty( PropertyChangingMethod = nameof( Changing ) )]
+    [DependencyProperty( PropertyChangingMethod = nameof(Changing) )]
     public int Foo { get; set; }
 
     private void Changing( DBNull blah ) { }

@@ -18,7 +18,7 @@ public sealed partial class DependencyPropertyAttribute : DependencyPropertyOpti
         builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
         builder.MustBeReadable();
         builder.MustSatisfy( p => p.IsAutoPropertyOrField == true, p => $"{p} must be an auto-property." );
-        builder.DeclaringType().MustBe( typeof( DependencyObject ), ConversionKind.Reference );
+        builder.DeclaringType().MustBe( typeof(DependencyObject), ConversionKind.Reference );
     }
 
     void IAspect<IProperty>.BuildAspect( IAspectBuilder<IProperty> builder )

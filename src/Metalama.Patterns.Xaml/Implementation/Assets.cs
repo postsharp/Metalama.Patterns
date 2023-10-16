@@ -9,10 +9,10 @@ namespace Metalama.Patterns.Xaml.Implementation;
 [CompileTime]
 internal sealed class Assets
 {
-    public Assets() 
+    public Assets()
     {
-        this.DependencyObject = (INamedType) TypeFactory.GetType( typeof( DependencyObject ) );
-        this.DependencyProperty = (INamedType) TypeFactory.GetType( typeof( DependencyProperty ) );
+        this.DependencyObject = (INamedType) TypeFactory.GetType( typeof(DependencyObject) );
+        this.DependencyProperty = (INamedType) TypeFactory.GetType( typeof(DependencyProperty) );
     }
 
     public INamedType DependencyObject { get; }

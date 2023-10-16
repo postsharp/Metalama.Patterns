@@ -14,17 +14,23 @@ public partial class StaticValidateDependencyPropertyAndInstanceAndValue : Depen
     [DependencyProperty]
     public List<int> AcceptsAssignableForValue { get; set; }
 
-    private static bool ValidateAcceptsAssignableForValue( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, IEnumerable<int> value ) => true;
+    private static bool ValidateAcceptsAssignableForValue(
+        DependencyProperty d,
+        StaticValidateDependencyPropertyAndInstanceAndValue instance,
+        IEnumerable<int> value )
+        => true;
 
     [DependencyProperty]
     public int AcceptsGenericForValue { get; set; }
 
-    private static bool ValidateAcceptsGenericForValue<T>( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, T value ) => true;
+    private static bool ValidateAcceptsGenericForValue<T>( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, T value )
+        => true;
 
     [DependencyProperty]
     public int AcceptsObjectForValue { get; set; }
 
-    private static bool ValidateAcceptsObjectForValue( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, object value ) => true;
+    private static bool ValidateAcceptsObjectForValue( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, object value )
+        => true;
 
     [DependencyProperty]
     public int AcceptsDependencyObjectForInstance { get; set; }

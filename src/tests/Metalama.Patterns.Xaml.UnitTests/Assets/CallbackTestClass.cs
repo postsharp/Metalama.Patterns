@@ -10,7 +10,7 @@ public sealed partial class CallbackTestClass : DependencyObject
 {
     public sealed class ThreadContext
     {
-        private static readonly ThreadLocal<ThreadContext> _current = new ThreadLocal<ThreadContext>( () => new ThreadContext() );
+        private static readonly ThreadLocal<ThreadContext> _current = new( () => new ThreadContext() );
 
         public static ThreadContext Current => _current.Value!;
 
@@ -20,14 +20,14 @@ public sealed partial class CallbackTestClass : DependencyObject
             this.OnValidate = onValidate;
         }
 
-        public List<string> Log { get; } = new List<string>();
+        public List<string> Log { get; } = new();
 
         public Func<int, bool>? OnValidate { get; set; }
     }
 
     public string Id { get; } = Guid.NewGuid().ToString();
 
-    private static void LogCall( string? suffix = null, [CallerMemberName] string? name = null)
+    private static void LogCall( string? suffix = null, [CallerMemberName] string? name = null )
     {
         ThreadContext.Current.Log.Add( suffix == null ? name! : $"{name}|{suffix}" );
     }
@@ -157,6 +157,7 @@ public sealed partial class CallbackTestClass : DependencyObject
     {
         LogCall( $"{value}" );
         dependencyProperty.Should().BeSameAs( ImplicitInstanceValidateDependencyPropertyAndValueProperty );
+
         return Validate( value );
     }
 
@@ -176,6 +177,7 @@ public sealed partial class CallbackTestClass : DependencyObject
     private bool ValidateImplicitInstanceValidateValue( int value )
     {
         LogCall( $"{value}" );
+
         return Validate( value );
     }
 
@@ -192,10 +194,14 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitStaticValidateDependencyPropertyAndInstanceAndValue { get; set; }
 
-    private static bool ValidateImplicitStaticValidateDependencyPropertyAndInstanceAndValue( DependencyProperty dependencyProperty, CallbackTestClass instance, int value )
+    private static bool ValidateImplicitStaticValidateDependencyPropertyAndInstanceAndValue(
+        DependencyProperty dependencyProperty,
+        CallbackTestClass instance,
+        int value )
     {
         LogCall( $"{instance.Id}|{value}" );
         dependencyProperty.Should().BeSameAs( ImplicitStaticValidateDependencyPropertyAndInstanceAndValueProperty );
+
         return Validate( value );
     }
 
@@ -216,6 +222,7 @@ public sealed partial class CallbackTestClass : DependencyObject
     {
         LogCall( $"{value}" );
         dependencyProperty.Should().BeSameAs( ImplicitStaticValidateDependencyPropertyAndValueProperty );
+
         return Validate( value );
     }
 
@@ -235,6 +242,7 @@ public sealed partial class CallbackTestClass : DependencyObject
     private bool ValidateImplicitStaticValidateValue( int value )
     {
         LogCall( $"{value}" );
+
         return Validate( value );
     }
 

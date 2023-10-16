@@ -6,7 +6,8 @@ using System.Windows;
 
 namespace Metalama.Patterns.Xaml.Options;
 
-internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>, IHierarchicalOptions<IProperty>
+internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>,
+                                                   IHierarchicalOptions<IProperty>
 {
     /// <summary>
     /// Gets a value indicating whether the property should be registered as a read-only property.
@@ -78,12 +79,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
     {
-        return new DependencyPropertyOptions()
-        {
-            IsReadOnly = false,
-            InitializerProvidesInitialValue = false,
-            InitializerProvidesDefaultValue = true
-        };
+        return new DependencyPropertyOptions() { IsReadOnly = false, InitializerProvidesInitialValue = false, InitializerProvidesDefaultValue = true };
     }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
@@ -98,7 +94,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
             PropertyChangedMethod = other.PropertyChangedMethod ?? this.PropertyChangedMethod,
             PropertyChangingMethod = other.PropertyChangingMethod ?? this.PropertyChangingMethod,
             ValidateMethod = other.ValidateMethod ?? this.ValidateMethod,
-            RegistrationField = other.RegistrationField ?? this.RegistrationField,
+            RegistrationField = other.RegistrationField ?? this.RegistrationField
         };
     }
 }

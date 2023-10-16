@@ -9,7 +9,5 @@ public partial class InstanceOnChangedDependencyProperty : DependencyObject
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private void OnFooChanged( DependencyProperty d )
-    {
-    }
+    private void OnFooChanged( DependencyProperty d ) { }
 }

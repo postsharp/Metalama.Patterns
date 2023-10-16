@@ -9,7 +9,5 @@ public partial class StaticOnChangingDependencyProperty : DependencyObject
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private static void OnFooChanging( DependencyProperty d )
-    {
-    }
+    private static void OnFooChanging( DependencyProperty d ) { }
 }

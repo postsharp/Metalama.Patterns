@@ -9,7 +9,5 @@ public partial class StaticOnChangedNoParameters : DependencyObject
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private static void OnFooChanged()
-    {
-    }
+    private static void OnFooChanged() { }
 }

@@ -22,7 +22,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
     private static bool ValidateAcceptsGenericForValue<T>( StaticValidateInstanceAndValue instance, T value ) => true;
 
     [DependencyProperty]
-    public int AcceptsObjectForValue{ get; set; }
+    public int AcceptsObjectForValue { get; set; }
 
     private static bool ValidateAcceptsObjectForValue( StaticValidateInstanceAndValue instance, object value ) => true;
 

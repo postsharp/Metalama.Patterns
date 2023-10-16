@@ -11,6 +11,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
     private static int DefaultConfigurationInitializer()
     {
         ++DefaultConfigurationInitializerCallCount;
+
         return 42;
     }
 
@@ -22,6 +23,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
     private static int NotDefaultNotInitialInitializer()
     {
         ++NotDefaultNotInitialInitializerCallCount;
+
         return 42;
     }
 
@@ -30,11 +32,12 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
     public int NotDefaultNotInitial { get; set; } = NotDefaultNotInitialInitializer();
 #pragma warning restore LAMA5201 // Initializer will not be used.
 
-    public static int InitialOnlyInitializerCallCount {  get; private set; }
+    public static int InitialOnlyInitializerCallCount { get; private set; }
 
     private static int InitialOnlyInitializer()
     {
         ++InitialOnlyInitializerCallCount;
+
         return 42;
     }
 
@@ -46,6 +49,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
     private static int DefaultAndInitialInitializer()
     {
         ++DefaultAndInitialInitializerCallCount;
+
         return 42;
     }
 

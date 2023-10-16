@@ -34,7 +34,7 @@ internal static class Diagnostics
             "LAMA5201",
             Warning,
             "Property {0} has an initializer, but it will not be used because options " + nameof(DependencyPropertyOptions.InitializerProvidesDefaultValue) +
-            " and " + nameof( DependencyPropertyOptions.InitializerProvidesInitialValue ) + " are both configured as false.",
+            " and " + nameof(DependencyPropertyOptions.InitializerProvidesInitialValue) + " are both configured as false.",
             "Initializer will not be used.",
             _category );
 
@@ -56,6 +56,7 @@ internal static class Diagnostics
         new(
             "LAMA5203",
             Error,
+
             // TODO: The list of valid signatures is quite lengthy. Should they be listed in the diagnostic message? At the moment they are not.
             "The signature of the {0} handler method for dependency property {1} is not valid. Refer to documentation for valid signatures.",
             "Handler method signature is invalid.",
@@ -64,11 +65,12 @@ internal static class Diagnostics
     /// <summary>
     /// The name of existing member {0} that is defined in or inherited by class {1} conflicts with the required dependency property field name {2}.
     /// </summary>
-    public static readonly DiagnosticDefinition<(IMemberOrNamedType Member, INamedType DeclaringType, string FieldName)> ErrorRequiredDependencyPropertyFieldNameIsAlreadyUsed =
-        new(
-            "LAMA5204",
-            Error,
-            "The name of existing member {0}, that is defined in or inherited by class {1}, conflicts with the required dependency property field name {2}.",
-            "Required dependency property field name is already used.",
-            _category );
+    public static readonly DiagnosticDefinition<(IMemberOrNamedType Member, INamedType DeclaringType, string FieldName)>
+        ErrorRequiredDependencyPropertyFieldNameIsAlreadyUsed =
+            new(
+                "LAMA5204",
+                Error,
+                "The name of existing member {0}, that is defined in or inherited by class {1}, conflicts with the required dependency property field name {2}.",
+                "Required dependency property field name is already used.",
+                _category );
 }

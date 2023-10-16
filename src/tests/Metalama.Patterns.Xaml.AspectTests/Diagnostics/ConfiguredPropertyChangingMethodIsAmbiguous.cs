@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Xaml.AspectTests.Diagnostics.ConfiguredPropertyChang
 
 public class ConfiguredPropertyChangingMethodIsAmbiguous : DependencyObject
 {
-    [DependencyProperty( PropertyChangedMethod = nameof( Changing ) )]
+    [DependencyProperty( PropertyChangedMethod = nameof(Changing) )]
     public int Foo { get; set; }
 
     private void Changing() { }

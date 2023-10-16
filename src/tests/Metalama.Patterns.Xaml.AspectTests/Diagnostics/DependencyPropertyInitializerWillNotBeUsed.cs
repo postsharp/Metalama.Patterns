@@ -9,5 +9,5 @@ namespace Metalama.Patterns.Xaml.AspectTests.Diagnostics.DependencyPropertyIniti
 public class DependencyPropertyInitializerWillNotBeUsed : DependencyObject
 {
     [DependencyProperty( InitializerProvidesDefaultValue = false, InitializerProvidesInitialValue = false )]
-    public List<int> Foo { get; set; } = new List<int>( 3 ) { 1, 2, 3 };
+    public List<int> Foo { get; set; } = new( 3 ) { 1, 2, 3 };
 }

@@ -9,7 +9,5 @@ public partial class InstanceOnChangingNoParameters : DependencyObject
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private void OnFooChanging()
-    {
-    }
+    private void OnFooChanging() { }
 }

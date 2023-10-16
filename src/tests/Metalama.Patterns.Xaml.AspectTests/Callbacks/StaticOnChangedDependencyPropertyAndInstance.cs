@@ -9,21 +9,15 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private static void OnFooChanged( DependencyProperty d, StaticOnChangedDependencyPropertyAndInstance instance )
-    {
-    }
+    private static void OnFooChanged( DependencyProperty d, StaticOnChangedDependencyPropertyAndInstance instance ) { }
 
     [DependencyProperty]
     public int AcceptsDependencyObjectForInstance { get; set; }
 
-    private static void OnAcceptsDependencyObjectForInstanceChanged( DependencyProperty d, DependencyObject instance )
-    {
-    }
+    private static void OnAcceptsDependencyObjectForInstanceChanged( DependencyProperty d, DependencyObject instance ) { }
 
     [DependencyProperty]
     public int AcceptsObjectForInstance { get; set; }
 
-    private static void OnAcceptsObjectForInstanceChanged( DependencyProperty d, object instance )
-    {
-    }
+    private static void OnAcceptsObjectForInstanceChanged( DependencyProperty d, object instance ) { }
 }

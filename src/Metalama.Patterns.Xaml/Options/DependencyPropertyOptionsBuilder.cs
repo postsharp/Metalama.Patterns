@@ -78,8 +78,8 @@ public sealed class DependencyPropertyOptionsBuilder
     /// </remarks>
     public string? RegistrationField { get; set; }
 
-    internal DependencyPropertyOptions Build() =>
-        new DependencyPropertyOptions()
+    internal DependencyPropertyOptions Build()
+        => new()
         {
             IsReadOnly = this.IsReadOnly,
             InitializerProvidesInitialValue = this.InitializerProvidesInitialValue,
@@ -87,6 +87,6 @@ public sealed class DependencyPropertyOptionsBuilder
             PropertyChangedMethod = this.PropertyChangedMethod,
             PropertyChangingMethod = this.PropertyChangingMethod,
             ValidateMethod = this.ValidateMethod,
-            RegistrationField = this.RegistrationField,
+            RegistrationField = this.RegistrationField
         };
 }
