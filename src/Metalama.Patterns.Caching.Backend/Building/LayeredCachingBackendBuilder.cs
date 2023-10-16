@@ -7,16 +7,24 @@ namespace Metalama.Patterns.Caching.Building;
 
 #pragma warning disable CA1001
 
-public sealed class LayeredCachingBackendBuilder : BuiltCachingBackendBuilder
+/// <summary>
+/// A <see cref="CachingBackendBuilder"/> that adds an in-memory L1 cache in front a another, typically out-of-process,
+/// cache.
+/// </summary>
+public sealed class LayeredCachingBackendBuilder : ConcreteCachingBackendBuilder
 {
-    private readonly BuiltCachingBackendBuilder _underlying;
+    private readonly ConcreteCachingBackendBuilder _underlying;
+    private readonly LayeredCachingBackendConfiguration? _configuration;
 
     private IMemoryCache? _memoryCache;
-    private MemoryCachingBackendConfiguration? _memoryCacheConfiguration;
 
-    internal LayeredCachingBackendBuilder( BuiltCachingBackendBuilder underlying )
+    internal LayeredCachingBackendBuilder(
+        ConcreteCachingBackendBuilder underlying,
+        IServiceProvider? serviceProvider,
+        LayeredCachingBackendConfiguration? configuration ) : base( serviceProvider )
     {
         this._underlying = underlying;
+        this._configuration = configuration;
     }
 
     public LayeredCachingBackendBuilder WithMemoryCache( IMemoryCache memoryCache )
@@ -33,18 +41,17 @@ public sealed class LayeredCachingBackendBuilder : BuiltCachingBackendBuilder
         return this;
     }
 
-    public LayeredCachingBackendBuilder WithLocalCacheConfiguration( MemoryCachingBackendConfiguration configuration )
-    {
-        this._memoryCacheConfiguration = configuration;
-
-        return this;
-    }
-
     public override CachingBackend CreateBackend( CreateBackendArgs args )
     {
+        // ReSharper disable once WithExpressionModifiesAllMembers
         var underlying = this._underlying.CreateBackend( args with { Layer = args.Layer + 1 } );
-        var memoryCache = new MemoryCachingBackend( this._memoryCache, this._memoryCacheConfiguration, args.ServiceProvider );
 
-        return new TwoLayerCachingBackendEnhancer( underlying, memoryCache );
+        // We don't add a non-blocking modifier because it may reorder reads and writes if we don't order wait for the
+        // completion of background tasks before executing reads. However, because we have a single queue, this may make
+        // performance even worse than with blocking operations.
+
+        var memoryCache = new MemoryCachingBackend( this._memoryCache, this._configuration?.L1Configuration, this.ServiceProvider );
+
+        return new LayeredCachingBackendEnhancer( underlying, memoryCache, this._configuration );
     }
 }

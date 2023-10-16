@@ -29,9 +29,9 @@ internal sealed class DisposingRedisCachingBackend : CachingBackendEnhancer
         this._disposables = disposables;
     }
 
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
 
         foreach ( var d in this._disposables )
         {

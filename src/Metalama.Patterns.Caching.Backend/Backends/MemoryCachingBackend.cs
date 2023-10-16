@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Serializers;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -26,24 +27,11 @@ namespace Metalama.Patterns.Caching.Backends;
 /// </list>
 /// </remarks>
 [PublicAPI]
-internal sealed class MemoryCachingBackend : CachingBackend
+internal class MemoryCachingBackend : CachingBackend
 {
     private readonly IMemoryCache _cache;
-    private readonly Func<PSCacheItem, long>? _sizeCalculator;
-
-    /// <inheritdoc />
-    protected override void DisposeCore( bool disposing )
-    {
-        base.DisposeCore( disposing );
-        this._cache.Dispose();
-    }
-
-    /// <inheritdoc />
-    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
-    {
-        await base.DisposeAsyncCore( cancellationToken ).ConfigureAwait( false );
-        this._cache.Dispose();
-    }
+    private readonly Func<object?, long> _sizeCalculator;
+    private readonly ICachingSerializer? _serializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
@@ -67,8 +55,10 @@ internal sealed class MemoryCachingBackend : CachingBackend
         configuration,
         serviceProvider )
     {
+        configuration ??= new MemoryCachingBackendConfiguration();
         this._cache = cache ?? new MemoryCache( new MemoryCacheOptions() );
-        this._sizeCalculator = configuration?.SizeCalculator;
+        this._serializer = configuration.Serializer;
+        this._sizeCalculator = this._serializer != null ? item => ((byte[]?) item)?.Length ?? 0 : configuration.SizeCalculator;
     }
 
     private static string GetItemKey( string key )
@@ -106,7 +96,7 @@ internal sealed class MemoryCachingBackend : CachingBackend
         }
     }
 
-    private MemoryCacheEntryOptions CreatePolicy( PSCacheItem item )
+    private MemoryCacheEntryOptions CreatePolicy( PSCacheItem item, object? value )
     {
         var targetPolicy = new MemoryCacheEntryOptions();
         targetPolicy.RegisterPostEvictionCallback( this.OnCacheItemRemoved );
@@ -154,10 +144,7 @@ internal sealed class MemoryCachingBackend : CachingBackend
             }
         }
 
-        if ( this._sizeCalculator != null )
-        {
-            targetPolicy.Size = this._sizeCalculator( item );
-        }
+        targetPolicy.Size = this._sizeCalculator( value );
 
         return targetPolicy;
     }
@@ -254,10 +241,12 @@ internal sealed class MemoryCachingBackend : CachingBackend
                 this.AddDependencies( key, item.Dependencies );
             }
 
+            var cacheValue = this.Serialize( new MemoryCacheValue( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ) );
+
             this._cache.Set(
                 itemKey,
-                new MemoryCacheValue( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ),
-                this.CreatePolicy( item ) );
+                cacheValue,
+                this.CreatePolicy( item, cacheValue.Value ) );
         }
         finally
         {
@@ -277,7 +266,35 @@ internal sealed class MemoryCachingBackend : CachingBackend
     /// <inheritdoc />  
     protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
-        return (CacheValue?) this._cache.Get( GetItemKey( key ) );
+        return this.Deserialize( (MemoryCacheValue?) this._cache.Get( GetItemKey( key ) ) );
+    }
+
+    protected MemoryCacheValue? Deserialize( MemoryCacheValue? cacheValue )
+    {
+        if ( cacheValue == null )
+        {
+            return null;
+        }
+        else if ( this._serializer != null )
+        {
+            return cacheValue with { Value = this._serializer.Deserialize( (byte[]) cacheValue.Value! ) };
+        }
+        else
+        {
+            return cacheValue;
+        }
+    }
+
+    protected MemoryCacheValue Serialize( MemoryCacheValue cacheValue )
+    {
+        if ( this._serializer != null )
+        {
+            return cacheValue with { Value = this._serializer.Serialize( cacheValue.Value! ) };
+        }
+        else
+        {
+            return cacheValue;
+        }
     }
 
     /// <inheritdoc />
@@ -415,6 +432,20 @@ internal sealed class MemoryCachingBackend : CachingBackend
         return new Features( this._cache is MemoryCache );
     }
 
+    /// <inheritdoc />
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
+    {
+        base.DisposeCore( disposing, cancellationToken );
+        this._cache.Dispose();
+    }
+
+    /// <inheritdoc />
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
+    {
+        await base.DisposeAsyncCore( cancellationToken ).ConfigureAwait( false );
+        this._cache.Dispose();
+    }
+
     private class Features : CachingBackendFeatures
     {
         public Features( bool supportsClear )
@@ -423,7 +454,5 @@ internal sealed class MemoryCachingBackend : CachingBackend
         }
 
         public override bool Clear { get; }
-
-        public override bool NonBlockingModifierNotRecommended => false;
     }
 }

@@ -16,8 +16,10 @@ public sealed class BrokenRedisTests
     {
         try
         {
+            var connection = CreateConnection( false );
+
             var configuration =
-                new RedisCachingBackendConfiguration
+                new RedisCachingBackendConfiguration( connection )
                 {
                     KeyPrefix = Guid.NewGuid().ToString(),
                     OwnsConnection = true,
@@ -25,8 +27,7 @@ public sealed class BrokenRedisTests
                     ConnectionTimeout = TimeSpan.FromMilliseconds( 10 )
                 };
 
-            var connection = CreateConnection( false );
-            await using var backend = CachingBackend.Create( b => b.Redis( connection, configuration ) );
+            await using var backend = CachingBackend.Create( b => b.Redis( configuration ) );
 
             using var cancellation = new CancellationTokenSource( 20 );
 

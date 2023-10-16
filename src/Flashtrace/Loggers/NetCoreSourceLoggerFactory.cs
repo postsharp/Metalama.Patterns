@@ -9,18 +9,11 @@ namespace Flashtrace.Loggers;
 internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
 {
     private readonly ILoggerFactory _underlyingLoggerFactory;
-    private readonly HashSet<FlashtraceRole> _enabledRoles;
     private readonly ConcurrentDictionary<FlashtraceRole, IFlashtraceRoleLoggerFactory> _roleLoggerFactories = new();
 
-    public NetCoreSourceLoggerFactory( ILoggerFactory underlyingLoggerFactory, IEnumerable<FlashtraceRole> enabledRoles )
+    public NetCoreSourceLoggerFactory( ILoggerFactory underlyingLoggerFactory )
     {
         this._underlyingLoggerFactory = underlyingLoggerFactory;
-        this._enabledRoles = new HashSet<FlashtraceRole>();
-
-        foreach ( var role in enabledRoles )
-        {
-            this._enabledRoles.Add( role );
-        }
     }
 
     public IFlashtraceRoleLoggerFactory ForRole( FlashtraceRole role )
@@ -32,28 +25,19 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
 
         return this._roleLoggerFactories.GetOrAdd(
             role,
-            _ =>
-            {
-                if ( this._enabledRoles.Contains( role ) )
-                {
-                    return new RoleLoggerFactory( this._underlyingLoggerFactory, role );
-                }
-                else
-                {
-                    return NullFlashtraceLogger.Instance;
-                }
-            } );
+            _ => new RoleLoggerFactory( this._underlyingLoggerFactory, role ) );
     }
 
     private sealed class RoleLoggerFactory : IFlashtraceRoleLoggerFactory
     {
-        private readonly ILoggerFactory _underlyingLoggerFactory;
+        public ILoggerFactory UnderlyingLoggerFactory { get; }
+
         private readonly ConcurrentDictionary<string, Logger> _loggers = new();
         private readonly FlashtraceRole _role;
 
         public RoleLoggerFactory( ILoggerFactory underlyingLoggerFactory, FlashtraceRole role )
         {
-            this._underlyingLoggerFactory = underlyingLoggerFactory;
+            this.UnderlyingLoggerFactory = underlyingLoggerFactory;
             this._role = role;
         }
 
@@ -66,7 +50,7 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
                 return logger;
             }
 
-            return this._loggers.GetOrAdd( sourceName, s => new Logger( this._role, s, this._underlyingLoggerFactory.CreateLogger( sourceName ), this ) );
+            return this._loggers.GetOrAdd( sourceName, s => new Logger( this._role, s, this ) );
         }
     }
 
@@ -74,9 +58,9 @@ internal sealed class NetCoreSourceLoggerFactory : IFlashtraceLoggerFactory
     {
         private readonly ILogger _underlyingLogger;
 
-        public Logger( FlashtraceRole role, string name, ILogger underlyingLogger, IFlashtraceRoleLoggerFactory factory ) : base( role, name )
+        public Logger( FlashtraceRole role, string name, RoleLoggerFactory factory ) : base( role, name )
         {
-            this._underlyingLogger = underlyingLogger;
+            this._underlyingLogger = factory.UnderlyingLoggerFactory.CreateLogger( this.Category );
             this.Factory = factory;
         }
 
