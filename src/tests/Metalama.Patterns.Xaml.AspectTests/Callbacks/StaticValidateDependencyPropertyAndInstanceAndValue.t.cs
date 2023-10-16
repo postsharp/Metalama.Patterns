@@ -90,7 +90,10 @@ public partial class StaticValidateDependencyPropertyAndInstanceAndValue : Depen
   {
     object CoerceValue_6(global::System.Windows.DependencyObject d_6, object value_6)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsObjectForInstance(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsObjectForInstanceProperty, d_6, (global::System.Int32)value_6);
+      if (!global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsObjectForInstance(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsObjectForInstanceProperty, d_6, (global::System.Int32)value_6))
+      {
+        throw new global::System.ArgumentException("Invalid property value.", "value");
+      }
       return (global::System.Object)value_6;
     }
     var metadata_5 = new global::System.Windows.PropertyMetadata();
@@ -98,7 +101,10 @@ public partial class StaticValidateDependencyPropertyAndInstanceAndValue : Depen
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsObjectForInstanceProperty = global::System.Windows.DependencyProperty.Register("AcceptsObjectForInstance", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue), metadata_5);
     object CoerceValue_5(global::System.Windows.DependencyObject d_5, object value_5)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsDependencyObjectForInstance(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsDependencyObjectForInstanceProperty, d_5, (global::System.Int32)value_5);
+      if (!global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsDependencyObjectForInstance(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsDependencyObjectForInstanceProperty, d_5, (global::System.Int32)value_5))
+      {
+        throw new global::System.ArgumentException("Invalid property value.", "value");
+      }
       return (global::System.Object)value_5;
     }
     var metadata_4 = new global::System.Windows.PropertyMetadata();
@@ -106,7 +112,10 @@ public partial class StaticValidateDependencyPropertyAndInstanceAndValue : Depen
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsDependencyObjectForInstanceProperty = global::System.Windows.DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue), metadata_4);
     object CoerceValue_4(global::System.Windows.DependencyObject d_4, object value_4)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsObjectForValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsObjectForValueProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue)d_4, value_4);
+      if (!global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsObjectForValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsObjectForValueProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue)d_4, value_4))
+      {
+        throw new global::System.ArgumentException("Invalid property value.", "value");
+      }
       return (global::System.Object)value_4;
     }
     var metadata_3 = new global::System.Windows.PropertyMetadata();
@@ -114,7 +123,10 @@ public partial class StaticValidateDependencyPropertyAndInstanceAndValue : Depen
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsObjectForValueProperty = global::System.Windows.DependencyProperty.Register("AcceptsObjectForValue", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue), metadata_3);
     object CoerceValue_3(global::System.Windows.DependencyObject d_3, object value_3)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsGenericForValue<global::System.Int32>(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsGenericForValueProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue)d_3, (global::System.Int32)value_3);
+      if (!global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsGenericForValue<global::System.Int32>(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsGenericForValueProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue)d_3, (global::System.Int32)value_3))
+      {
+        throw new global::System.ArgumentException("Invalid property value.", "value");
+      }
       return (global::System.Object)value_3;
     }
     var metadata_2 = new global::System.Windows.PropertyMetadata();
@@ -122,7 +134,10 @@ public partial class StaticValidateDependencyPropertyAndInstanceAndValue : Depen
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsGenericForValueProperty = global::System.Windows.DependencyProperty.Register("AcceptsGenericForValue", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue), metadata_2);
     object CoerceValue_2(global::System.Windows.DependencyObject d_2, object value_2)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsAssignableForValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsAssignableForValueProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue)d_2, (global::System.Collections.Generic.List<global::System.Int32>)value_2);
+      if (!global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateAcceptsAssignableForValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsAssignableForValueProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue)d_2, (global::System.Collections.Generic.List<global::System.Int32>)value_2))
+      {
+        throw new global::System.ArgumentException("Invalid property value.", "value");
+      }
       return (global::System.Object)value_2;
     }
     var metadata_1 = new global::System.Windows.PropertyMetadata();
@@ -130,7 +145,10 @@ public partial class StaticValidateDependencyPropertyAndInstanceAndValue : Depen
     global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.AcceptsAssignableForValueProperty = global::System.Windows.DependencyProperty.Register("AcceptsAssignableForValue", typeof(global::System.Collections.Generic.List<global::System.Int32>), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue), metadata_1);
     object CoerceValue_1(global::System.Windows.DependencyObject d_1, object value_1)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateFoo(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.FooProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue)d_1, (global::System.Int32)value_1);
+      if (!global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.ValidateFoo(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue.FooProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticValidateDependencyPropertyAndInstanceAndValue.StaticValidateDependencyPropertyAndInstanceAndValue)d_1, (global::System.Int32)value_1))
+      {
+        throw new global::System.ArgumentException("Invalid property value.", "value");
+      }
       return (global::System.Object)value_1;
     }
     var metadata = new global::System.Windows.PropertyMetadata();

@@ -19,13 +19,4 @@ public class DefaultOptions : DependencyObject
   {
     global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.DefaultOptions.DefaultOptions.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Collections.Generic.List<global::System.Int32>), typeof(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.DefaultOptions.DefaultOptions), new global::System.Windows.PropertyMetadata(((global::System.Object)new List<int>(3) { 1, 2, 3 })));
   }
-  public DefaultOptions()
-  {
-    this.Foo = new List<int>(3)
-    {
-      1,
-      2,
-      3
-    };
-  }
 }
