@@ -33,7 +33,7 @@ internal class DeferredOptional<T> : IReadOnlyDeferredOptional<T>
     /// Gets a value indicating whether the future final state of <see cref="Value"/> will be defined (ie, not <see langword="null"/>).
     /// If <see cref="WillBeDefined"/> is <see langword="null"/>, this indicates that the value may or may not be defined.
     /// </summary>
-    public bool? WillBeDefined { get; }    
+    public bool? WillBeDefined { get; }
 
     /// <summary>
     /// Gets a value indicating whether the <see cref="Value"/> setter has been successfully invoked. The

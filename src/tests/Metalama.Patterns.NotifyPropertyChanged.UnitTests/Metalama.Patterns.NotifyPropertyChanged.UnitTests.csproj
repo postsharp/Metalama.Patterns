@@ -4,10 +4,11 @@
     <TargetFrameworks>net471;net6.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;LamaDebug</Configurations>
+    <Configurations>Debug;Release;LamaDebug</Configurations>    
   </PropertyGroup>
 
   <ItemGroup>
+    <CompilerVisibleProperty Include="InpcDiagnosticCommentVerbosity"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
