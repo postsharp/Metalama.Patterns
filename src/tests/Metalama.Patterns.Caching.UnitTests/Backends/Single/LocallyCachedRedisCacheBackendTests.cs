@@ -1,16 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Xunit;
+
+namespace Metalama.Patterns.Caching.Tests.Backends.Single;
+
+#if !ENABLE_FLAKY_REDIS_TESTS
+public class LocallyCachedRedisCacheBackendTests
+{
+    [Fact( Skip = "#33990: Skipping all tests in class LocallyCachedRedisCacheBackendTests" )]
+    public void PlaceholderForInheritedTestsInCommonBaseClass()
+    { }
+}
+#else
 using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
-using Xunit;
 using Xunit.Abstractions;
-
-namespace Metalama.Patterns.Caching.Tests.Backends.Single;
-
 public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
@@ -130,3 +138,4 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
     [Fact( Skip = "https://postsharp.tpondemand.com/entity/33937-test-locallycachedrediscachebackendteststestremovaleventbydependencyasync-is-flaky" )]
     public override Task TestRemovalEventByDependencyAsync() => base.TestRemovalEventByDependencyAsync();
 }
+#endif

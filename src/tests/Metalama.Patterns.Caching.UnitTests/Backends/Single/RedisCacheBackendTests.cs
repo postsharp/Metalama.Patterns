@@ -1,16 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Xunit;
+
+namespace Metalama.Patterns.Caching.Tests.Backends.Single;
+
+#if !ENABLE_FLAKY_REDIS_TESTS
+public class RedisCacheBackendTests
+{
+    [Fact( Skip = "#33990: Skipping all tests in class RedisCacheBackendTests" )]
+    public void PlaceholderForInheritedTestsInCommonBaseClass()
+    { }
+}
+#else
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using StackExchange.Redis;
 using System.Collections.Immutable;
-using Xunit;
 using Xunit.Abstractions;
-
-namespace Metalama.Patterns.Caching.Tests.Backends.Single;
-
 public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
@@ -191,3 +199,4 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         }
     }
 }
+#endif
