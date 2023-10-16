@@ -2,6 +2,12 @@ using System.Windows;
 namespace Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue;
 public class InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue : DependencyObject
 {
+  private static List<int> InitMethod() => new List<int>(3)
+  {
+    1,
+    2,
+    3
+  };
   [DependencyProperty(InitializerProvidesInitialValue = true, InitializerProvidesDefaultValue = true)]
   public List<int> Foo
   {
@@ -17,15 +23,10 @@ public class InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultV
   public static readonly global::System.Windows.DependencyProperty FooProperty;
   static InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue()
   {
-    global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Collections.Generic.List<global::System.Int32>), typeof(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue), new global::System.Windows.PropertyMetadata(((global::System.Object)new List<int>(3) { 1, 2, 3 })));
+    global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Collections.Generic.List<global::System.Int32>), typeof(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue), new global::System.Windows.PropertyMetadata(((global::System.Object)((global::System.Collections.Generic.List<global::System.Int32>)InitMethod()))));
   }
   public InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue()
   {
-    this.Foo = new List<int>(3)
-    {
-      1,
-      2,
-      3
-    };
+    this.Foo = InitMethod();
   }
 }

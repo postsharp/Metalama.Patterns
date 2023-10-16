@@ -6,6 +6,8 @@ namespace Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.DefaultOptions;
 
 public class DefaultOptions : DependencyObject
 {
+    private static List<int> InitMethod() => new List<int>( 3 ) { 1, 2, 3 };
+
     [DependencyProperty]
-    public List<int> Foo { get; set; } = new( 3 ) { 1, 2, 3 };
+    public List<int> Foo { get; set; } = InitMethod();
 }

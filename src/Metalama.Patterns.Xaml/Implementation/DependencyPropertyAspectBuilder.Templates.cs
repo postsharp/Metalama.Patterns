@@ -130,9 +130,15 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
                 if ( defaultValueExpr != null && defaultValueExpr.Type.SpecialType != SpecialType.Object )
                 {
-                    // Cast to ensure that the correct overload of the PropertyMetadata ctor is used.
+                    // Add an explicit cast to the property type so that initializers using target-typed new (aka ImplicitObjectCreationExpressionSyntax)
+                    // will work when the target type is `object`, as applies when constructing PropertyMetadata below.
+                    // Note that accurately checking if this cast is actually required does not appear trivial, as complex expressions
+                    // (eg, conditional (aka ternary)) can include target-typed child expressions. However, some expressions
+                    // could be ruled out quite easily if desired.
+                    defaultValueExpr = (IExpression) meta.Cast( propertyType, defaultValueExpr.Value );
 
-                    defaultValueExpr = (IExpression?) meta.Cast( TypeFactory.GetType( SpecialType.Object ), defaultValueExpr.Value );
+                    // And then add a cast to `object` to ensure that the correct overload of the PropertyMetadata ctor is used unambiguously.
+                    defaultValueExpr = (IExpression) meta.Cast( TypeFactory.GetType( SpecialType.Object ), defaultValueExpr.Value );
                 }
 
                 if ( defaultValueExpr != null && propertyChangedCallbackExpr != null && coerceValueCallbackExpr != null )
