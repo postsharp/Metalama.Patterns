@@ -8,7 +8,7 @@ For an informative discussion of how default value handling was implemented in P
 
 The Metalama implementation differs from the PostSharp implementation with the intention of being more in the spirit of Metalama.
 
-If the target property has an initializer, this is used as `PropertyMetadata.DefaultValue` when `DependencyPropertyOptions.InitializerProvidesDefaultValue` is `true` (the default) and as the initial value when `DependencyPropertyOptions.InitializerProvidesInitialValue` is `true` (the default). 
+If the target property has an initializer, this is used as `PropertyMetadata.DefaultValue` when `DependencyPropertyOptions.InitializerProvidesDefaultValue` is `true` (the default) and as the initial value when `DependencyPropertyOptions.InitializerProvidesInitialValue` is `true` (the default is `false`).
 
 ## Valid PropertyChanging and PropertyChanged Method Signatures
 
