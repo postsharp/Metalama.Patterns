@@ -114,7 +114,7 @@ public sealed class NotEmptyAttributeTests
         var cut = new NotEmptyTestClass();
 
         var p = "abc";
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithRef( "", ref p ) );
+        var e = TestHelpers.RecordException<PostconditionViolationException>( () => cut.StringMethodWithRef( "", ref p ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
@@ -125,7 +125,7 @@ public sealed class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithOut( "", out _ ) );
+        var e = TestHelpers.RecordException<PostconditionViolationException>( () => cut.StringMethodWithOut( "", out _ ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
@@ -136,7 +136,7 @@ public sealed class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.StringMethodWithRetVal( "" ) );
+        var e = TestHelpers.RecordException<PostconditionViolationException>( () => cut.StringMethodWithRetVal( "" ) );
 
         Assert.NotNull( e );
         Assert.Contains( "return value", e!.Message, StringComparison.Ordinal );

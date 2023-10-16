@@ -61,7 +61,7 @@ public sealed class LogEventDataTests
 
         var properties = data.ToDictionary();
 
-        Assert.Equal( 1, properties.Count );
+        Assert.Single( properties );
         Assert.Equal( 1.2, properties["Name3"] );
     }
 
@@ -90,6 +90,6 @@ public sealed class LogEventDataTests
 
         var properties = eventData.ToDictionary();
 
-        Assert.Equal( 1, properties.Count );
+        Assert.Single( properties );
     }
 }

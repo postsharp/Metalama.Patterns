@@ -1,34 +1,89 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
 
-public abstract class BaseCachingTests
+public abstract class BaseCachingTests : ICachingExceptionObserver
 {
     protected BaseCachingTests( ITestOutputHelper testOutputHelper )
     {
         this.TestOutputHelper = testOutputHelper;
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSingleton<ILoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
+
+        // ReSharper disable once VirtualMemberCallInConstructor
+        this.AddLogging( serviceCollection, testOutputHelper );
+        serviceCollection.AddSingleton<ICachingExceptionObserver>( this );
+
         this.ServiceProvider = serviceCollection.BuildServiceProvider();
-        CachingService.Default = new CachingService( this.ServiceProvider );
+        CachingService.Default = CachingService.CreateUninitialized( this.ServiceProvider );
+    }
+
+    protected virtual void AddLogging( IServiceCollection serviceCollection, ITestOutputHelper testOutputHelper )
+    {
+        serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitFlashtraceLoggerFactory( testOutputHelper ) );
     }
 
     protected ServiceProvider ServiceProvider { get; }
 
     protected ITestOutputHelper TestOutputHelper { get; }
 
-    protected CachingBackend InitializeTestWithCachingBackend( string name )
+    private static void ResetCachingServices()
     {
-        return TestProfileConfigurationFactory.InitializeTestWithCachingBackend( name, this.ServiceProvider );
+        CachingService.Default.Dispose();
+        var uninitialized = CachingService.CreateUninitialized();
+        CachingService.Default = uninitialized;
     }
 
-    protected TestingCacheBackend InitializeTestWithTestingBackend( string name )
+    protected CachingTestContext<T> InitializeTest<T>(
+        string name,
+        T backend,
+        Action<CachingTestBuilder>? buildTest = null,
+        bool passServiceProvider = true )
+        where T : CachingBackend
     {
-        return TestProfileConfigurationFactory.InitializeTestWithTestingBackend( name, this.ServiceProvider );
+        ResetCachingServices();
+
+        CachingService.Default = CachingService.Create(
+            b =>
+            {
+                b.WithBackend( x => x.Specific( backend ) );
+
+                var testBuilder = new CachingTestBuilder( b );
+                buildTest?.Invoke( testBuilder );
+                b.AddProfile( new CachingProfile( name ), true );
+            },
+            passServiceProvider ? this.ServiceProvider : null );
+
+        return new CachingTestContext<T>( backend );
     }
+
+    protected CachingTestContext<CachingBackend> InitializeTest(
+        string name,
+        Action<CachingTestBuilder>? buildTest = null,
+        bool passServiceProvider = true )
+    {
+        var backend = CachingBackend.Create(
+            b => b.Memory( new MemoryCachingBackendConfiguration() { DebugName = name } ),
+            passServiceProvider ? this.ServiceProvider : null );
+
+        return this.InitializeTest( name, backend, buildTest, passServiceProvider );
+    }
+
+    protected CachingTestContext<TestingCacheBackend> InitializeTestWithTestingBackend(
+        string name,
+        Action<CachingTestBuilder>? buildTest = null )
+    {
+        var backend = new TestingCacheBackend( "test-" + name, this.ServiceProvider );
+
+        return this.InitializeTest( name, backend, buildTest );
+    }
+
+    public virtual void OnException( CachingExceptionInfo exceptionInfo ) => exceptionInfo.Rethrow = true;
 }

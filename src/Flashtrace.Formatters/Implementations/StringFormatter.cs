@@ -19,7 +19,7 @@ internal sealed class StringFormatter : Formatter<string>
     }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, string? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, string? value )
     {
         if ( value == null )
         {
@@ -58,7 +58,7 @@ internal sealed class StringFormatter : Formatter<string>
             this._defaultStringFormatter = defaultStringFormatter;
         }
 
-        public override void Write( UnsafeStringBuilder stringBuilder, string? value )
+        public override void Format( UnsafeStringBuilder stringBuilder, string? value )
         {
             if ( value == null )
             {

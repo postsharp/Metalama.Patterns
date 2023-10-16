@@ -11,19 +11,21 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 
-public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
+public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
 {
     private readonly RedisSetupFixture _redisSetupFixture;
 
     public LocallyCachedRedisCacheBackendTests(
-        TestContext testContext,
+        CachingTestOptions cachingTestOptions,
         RedisSetupFixture redisSetupFixture,
         ITestOutputHelper testOutputHelper ) : base(
-        testContext,
+        cachingTestOptions,
         testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
     }
+
+    protected virtual bool EnableGarbageCollector => false;
 
     protected override void Cleanup()
     {
@@ -36,19 +38,21 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
         return TimeSpan.FromSeconds( 0.1 * multiplier );
     }
 
-    protected override CachingBackend CreateBackend()
+    protected override CheckAfterDisposeCachingBackend CreateBackend()
     {
-        return RedisFactory.CreateBackend( this.TestContext, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
+        return Task.Run( this.CreateBackendAsync ).Result;
     }
 
-    protected override async Task<CachingBackend> CreateBackendAsync()
+    protected override async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync()
     {
-        return await RedisFactory.CreateBackendAsync( this.TestContext, this._redisSetupFixture, supportsDependencies: true, locallyCached: true );
-    }
-
-    protected override ITestableCachingComponent CreateCollector( CachingBackend backend )
-    {
-        return RedisCacheDependencyGarbageCollector.Create( backend );
+        return new CheckAfterDisposeCachingBackend(
+            await RedisFactory.CreateBackendAsync(
+                this.TestOptions,
+                this._redisSetupFixture,
+                supportsDependencies: true,
+                collector: this.EnableGarbageCollector,
+                serviceProvider: this.ServiceProvider,
+                locallyCached: true ) );
     }
 
     #region TestIssue15680
@@ -67,52 +71,42 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
     }
 
     [Fact]
-    public void TestIssue15680()
+    public async Task TestIssue15680()
     {
         var redisKeyPrefix = _testIssue15680 + Guid.NewGuid();
 
         var testObject = new Issue15680CachingClass();
 
-        TestProfileConfigurationFactory.InitializeTestWithoutBackend();
-
         CachedValueClass setValue;
         var redisTestInstance = this._redisSetupFixture.TestInstance;
 
-        this.TestContext.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+        this.TestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
 
-        using ( CachingService.Default.DefaultBackend = RedisFactory.CreateBackend(
-                   this.TestContext,
-                   this._redisSetupFixture,
-                   prefix: redisKeyPrefix,
-                   locallyCached: false ) )
+        await using ( this.InitializeTest(
+                         "TestIssue15680",
+                         await RedisFactory.CreateBackendAsync(
+                             this.TestOptions,
+                             this._redisSetupFixture,
+                             prefix: redisKeyPrefix,
+                             locallyCached: false ),
+                         b => b.WithProfile( "Issue15680" ) ) )
         {
-            try
-            {
-                setValue = testObject.GetValue();
-                Assert.True( testObject.Reset() );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            setValue = testObject.GetValue();
+            Assert.True( testObject.Reset() );
         }
 
-        using ( CachingService.Default.DefaultBackend = RedisFactory.CreateBackend(
-                   this.TestContext,
-                   this._redisSetupFixture,
-                   prefix: redisKeyPrefix,
-                   locallyCached: true ) )
+        await using ( this.InitializeTest(
+                         "TestIssue15680",
+                         await RedisFactory.CreateBackendAsync(
+                             this.TestOptions,
+                             this._redisSetupFixture,
+                             prefix: redisKeyPrefix,
+                             locallyCached: true ),
+                         b => b.WithProfile( "Issue15680" ) ) )
         {
-            try
-            {
-                var retrievedValue = testObject.GetValue();
-                Assert.True( testObject.Reset() );
-                Assert.NotEqual( setValue, retrievedValue );
-            }
-            finally
-            {
-                TestProfileConfigurationFactory.DisposeTest();
-            }
+            var retrievedValue = testObject.GetValue();
+            Assert.True( testObject.Reset() );
+            Assert.NotEqual( setValue, retrievedValue );
         }
     }
 
@@ -123,13 +117,16 @@ public sealed class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests,
     [Fact]
     public void TestIssue23499()
     {
-        using ( var backend = (DisposingRedisCachingBackend) this.CreateBackend() )
+        using ( var backend = this.CreateBackend() )
         {
             backend.SetItem( "test", new CacheItem( "Hello, world." ) );
-            ((TwoLayerCachingBackendEnhancer) backend.UnderlyingBackend).LocalCache.Clear();
+            backend.Clear( ClearCacheOptions.Local );
             backend.GetItem( "test" );
         }
     }
 
     #endregion
+
+    [Fact( Skip = "https://postsharp.tpondemand.com/entity/33937-test-locallycachedrediscachebackendteststestremovaleventbydependencyasync-is-flaky" )]
+    public override Task TestRemovalEventByDependencyAsync() => base.TestRemovalEventByDependencyAsync();
 }

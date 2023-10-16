@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Backends;
 
 namespace Metalama.Patterns.Caching.LoadTests.Tests;
 
 internal abstract class BaseTestClass<TLoadTestConfigurationT>
     where TLoadTestConfigurationT : LoadTestConfiguration
 {
-    public virtual void Test( TLoadTestConfigurationT configuration, TimeSpan duration )
+    public virtual Task TestAsync( TLoadTestConfigurationT configuration, TimeSpan duration )
     {
         using ( var test = new LoadTest( configuration ) )
         {
@@ -33,6 +33,8 @@ internal abstract class BaseTestClass<TLoadTestConfigurationT>
         }
 
         Console.WriteLine( "end" );
+
+        return Task.CompletedTask;
     }
 
     protected abstract CachingBackend CreateCachingBackend();

@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Serializers;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -26,30 +27,18 @@ namespace Metalama.Patterns.Caching.Backends;
 /// </list>
 /// </remarks>
 [PublicAPI]
-public sealed class MemoryCachingBackend : CachingBackend
+internal class MemoryCachingBackend : CachingBackend
 {
     private readonly IMemoryCache _cache;
-    private readonly Func<PSCacheItem, long>? _sizeCalculator;
-
-    /// <inheritdoc />
-    protected override void DisposeCore( bool disposing )
-    {
-        base.DisposeCore( disposing );
-        this._cache.Dispose();
-    }
-
-    /// <inheritdoc />
-    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
-    {
-        await base.DisposeAsyncCore( cancellationToken ).ConfigureAwait( false );
-        this._cache.Dispose();
-    }
+    private readonly Func<object?, long> _sizeCalculator;
+    private readonly ICachingSerializer? _serializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
     /// </summary>
-    public MemoryCachingBackend( MemoryCachingBackendConfiguration? serviceProvider = null ) : this(
-        new MemoryCache( new MemoryCacheOptions() ),
+    internal MemoryCachingBackend( MemoryCachingBackendConfiguration? configuration = null, IServiceProvider? serviceProvider = null ) : this(
+        null,
+        configuration,
         serviceProvider ) { }
 
     /// <summary>
@@ -58,10 +47,18 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// </summary>
     /// <param name="cache">An <see cref="IMemoryCache"/>.</param>
     /// <param name="configuration"></param>
-    public MemoryCachingBackend( IMemoryCache cache, MemoryCachingBackendConfiguration? configuration = null ) : base( configuration )
+    /// <param name="serviceProvider"></param>
+    internal MemoryCachingBackend(
+        IMemoryCache? cache,
+        MemoryCachingBackendConfiguration? configuration = null,
+        IServiceProvider? serviceProvider = null ) : base(
+        configuration,
+        serviceProvider )
     {
-        this._cache = cache;
-        this._sizeCalculator = configuration?.SizeCalculator;
+        configuration ??= new MemoryCachingBackendConfiguration();
+        this._cache = cache ?? new MemoryCache( new MemoryCacheOptions() );
+        this._serializer = configuration.Serializer;
+        this._sizeCalculator = this._serializer != null ? item => ((byte[]?) item)?.Length ?? 0 : configuration.SizeCalculator;
     }
 
     private static string GetItemKey( string key )
@@ -99,7 +96,7 @@ public sealed class MemoryCachingBackend : CachingBackend
         }
     }
 
-    private MemoryCacheEntryOptions CreatePolicy( PSCacheItem item )
+    private MemoryCacheEntryOptions CreatePolicy( PSCacheItem item, object? value )
     {
         var targetPolicy = new MemoryCacheEntryOptions();
         targetPolicy.RegisterPostEvictionCallback( this.OnCacheItemRemoved );
@@ -147,10 +144,7 @@ public sealed class MemoryCachingBackend : CachingBackend
             }
         }
 
-        if ( this._sizeCalculator != null )
-        {
-            targetPolicy.Size = this._sizeCalculator( item );
-        }
+        targetPolicy.Size = this._sizeCalculator( value );
 
         return targetPolicy;
     }
@@ -247,10 +241,12 @@ public sealed class MemoryCachingBackend : CachingBackend
                 this.AddDependencies( key, item.Dependencies );
             }
 
+            var cacheValue = this.Serialize( new MemoryCacheValue( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ) );
+
             this._cache.Set(
                 itemKey,
-                new MemoryCacheValue( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ),
-                this.CreatePolicy( item ) );
+                cacheValue,
+                this.CreatePolicy( item, cacheValue.Value ) );
         }
         finally
         {
@@ -270,7 +266,35 @@ public sealed class MemoryCachingBackend : CachingBackend
     /// <inheritdoc />  
     protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
-        return (CacheValue?) this._cache.Get( GetItemKey( key ) );
+        return this.Deserialize( (MemoryCacheValue?) this._cache.Get( GetItemKey( key ) ) );
+    }
+
+    protected MemoryCacheValue? Deserialize( MemoryCacheValue? cacheValue )
+    {
+        if ( cacheValue == null )
+        {
+            return null;
+        }
+        else if ( this._serializer != null )
+        {
+            return cacheValue with { Value = this._serializer.Deserialize( (byte[]) cacheValue.Value! ) };
+        }
+        else
+        {
+            return cacheValue;
+        }
+    }
+
+    protected MemoryCacheValue Serialize( MemoryCacheValue cacheValue )
+    {
+        if ( this._serializer != null )
+        {
+            return cacheValue with { Value = this._serializer.Serialize( cacheValue.Value! ) };
+        }
+        else
+        {
+            return cacheValue;
+        }
     }
 
     /// <inheritdoc />
@@ -379,8 +403,9 @@ public sealed class MemoryCachingBackend : CachingBackend
         return this._cache.Get( GetDependencyKey( key ) ) != null;
     }
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore()
+    protected override void ClearCore( ClearCacheOptions options )
     {
         if ( this._cache is MemoryCache classicMemoryCache )
         {
@@ -405,6 +430,20 @@ public sealed class MemoryCachingBackend : CachingBackend
     protected override CachingBackendFeatures CreateFeatures()
     {
         return new Features( this._cache is MemoryCache );
+    }
+
+    /// <inheritdoc />
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
+    {
+        base.DisposeCore( disposing, cancellationToken );
+        this._cache.Dispose();
+    }
+
+    /// <inheritdoc />
+    protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
+    {
+        await base.DisposeAsyncCore( cancellationToken ).ConfigureAwait( false );
+        this._cache.Dispose();
     }
 
     private class Features : CachingBackendFeatures

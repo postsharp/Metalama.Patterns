@@ -10,7 +10,7 @@ internal sealed class SpanFormattableFormatter<[BindToExtendedType] TValue> : Fo
 {
     public SpanFormattableFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-    public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, TValue? value )
     {
         if ( value == null )
         {

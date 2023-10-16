@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Patterns.Caching.Backends;
-using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit.Abstractions;
 
@@ -9,21 +9,28 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
 {
-    protected BaseInvalidationBrokerTests( TestContext testContext, ITestOutputHelper testOutputHelper ) : base( testContext, testOutputHelper ) { }
+    protected BaseInvalidationBrokerTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
+        cachingTestOptions,
+        testOutputHelper ) { }
 
-    protected abstract Task<CacheInvalidator> CreateInvalidationBrokerAsync( CachingBackend backend, string prefix );
+    protected abstract ConcreteCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix );
 
     protected override async Task<CachingBackend[]> CreateBackendsAsync()
     {
         var testId = Guid.NewGuid().ToString();
-        var configuration = new MemoryCachingBackendConfiguration { ServiceProvider = this.ServiceProvider };
 
-        return new CachingBackend[]
+        async Task<CachingBackend> CreateCacheInvalidator()
         {
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId ),
-            await this.CreateInvalidationBrokerAsync( new MemoryCachingBackend( configuration ), testId )
-        };
+            var backend = CachingBackend.Create(
+                b => this.AddInvalidationBroker( b.Memory(), testId ),
+                this.ServiceProvider );
+
+            await backend.InitializeAsync();
+
+            return backend;
+        }
+
+        return new[] { await CreateCacheInvalidator(), await CreateCacheInvalidator(), await CreateCacheInvalidator() };
     }
 
     protected override CachingBackend[] CreateBackends()

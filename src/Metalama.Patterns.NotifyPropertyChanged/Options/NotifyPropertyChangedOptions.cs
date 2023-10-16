@@ -11,7 +11,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 
 [PublicAPI]
 [RunTimeOrCompileTime]
-public sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
+internal sealed record NotifyPropertyChangedOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
 {
     /// <summary>
     /// Gets the <see cref="IImplementationStrategyFactory"/> used to provide <see cref="IImplementationStrategyBuilder"/> instances.

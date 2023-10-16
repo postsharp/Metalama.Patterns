@@ -53,7 +53,7 @@ internal sealed class DefaultFormatter<TValue> : Formatter<TValue>
     }
 
     /// <inheritdoc />
-    public override void Write( UnsafeStringBuilder stringBuilder, TValue? value )
+    public override void Format( UnsafeStringBuilder stringBuilder, TValue? value )
     {
         var useToString = _hasCustomToStringMethod;
         var thisValueType = _valueType;
@@ -64,7 +64,7 @@ internal sealed class DefaultFormatter<TValue> : Formatter<TValue>
 
             if ( (formatter.Attributes & FormatterAttributes.Default) == 0 )
             {
-                formatter.Write( stringBuilder, value );
+                formatter.Format( stringBuilder, value );
 
                 return;
             }
@@ -85,7 +85,7 @@ internal sealed class DefaultFormatter<TValue> : Formatter<TValue>
 
             if ( (formatter.Attributes & FormatterAttributes.Default) == 0 )
             {
-                formatter.Write( stringBuilder, value );
+                formatter.Format( stringBuilder, value );
 
                 return;
             }
@@ -141,7 +141,7 @@ internal sealed class DefaultFormatter<TValue> : Formatter<TValue>
         else
         {
             stringBuilder.Append( '{' );
-            this.Repository.Get<Type>().Write( stringBuilder, thisValueType );
+            this.Repository.Get<Type>().Format( stringBuilder, thisValueType );
             stringBuilder.Append( '}' );
         }
     }

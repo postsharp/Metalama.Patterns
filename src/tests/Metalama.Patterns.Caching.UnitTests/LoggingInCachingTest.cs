@@ -29,14 +29,14 @@ namespace Metalama.Patterns.Caching.Tests
             // By default, logging is disabled:
             Assert.False(
                 LoggingServices.DefaultBackend.CurrentContextLocalConfiguration.Verbosity.GetSource( LoggingRoles.Caching, typeof(LoggingInitializer) )
-                    .IsEnabled( LogLevel.Debug ) );
+                    .IsEnabled( FlashtraceLevel.Debug ) );
 
             // But we enable it:
-            LoggingServices.DefaultBackend.DefaultContextLocalConfiguration.Verbosity.SetMinimalLevel( LogLevel.Debug, LoggingRoles.Caching );
+            LoggingServices.DefaultBackend.DefaultContextLocalConfiguration.Verbosity.SetMinimalLevel( FlashtraceLevel.Debug, LoggingRoles.Caching );
 
             Assert.True(
                 LoggingServices.DefaultBackend.CurrentContextLocalConfiguration.Verbosity.GetSource( LoggingRoles.Caching, typeof(LoggingInitializer) )
-                    .IsEnabled( LogLevel.Debug ) );
+                    .IsEnabled( FlashtraceLevel.Debug ) );
         }
     }
 
@@ -56,7 +56,7 @@ namespace Metalama.Patterns.Caching.Tests
 
             // But then we enable it:
             Assert.Equal( 0, selfLoggingBackend.RecordCount );
-            LoggingServices.DefaultBackend.CurrentContextLocalConfiguration.Verbosity.SetMinimalLevel( LogLevel.Debug, LoggingRoles.Caching );
+            LoggingServices.DefaultBackend.CurrentContextLocalConfiguration.Verbosity.SetMinimalLevel( FlashtraceLevel.Debug, LoggingRoles.Caching );
             this.Return4();
             this.Return4();
             Assert.NotEqual( 0, selfLoggingBackend.RecordCount );
@@ -101,7 +101,7 @@ namespace Metalama.Patterns.Caching.Tests
 #pragma warning restore 618
             { }
 
-            protected override bool IsBackendEnabled( LogLevel level )
+            protected override bool IsBackendEnabled( FlashtraceLevel level )
             {
                 return true;
             }

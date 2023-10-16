@@ -8,7 +8,7 @@ using Metalama.Framework.Serialization;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 [CompileTime]
-public interface IImplementationStrategyFactory : ICompileTimeSerializable
+internal interface IImplementationStrategyFactory : ICompileTimeSerializable
 {
     /// <summary>
     /// Gets an <see cref="IImplementationStrategyBuilder"/> instance initialized with the given <see cref="IAspectBuilder{TAspectTarget}"/>.

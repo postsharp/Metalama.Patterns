@@ -9,7 +9,8 @@ namespace Flashtrace.Formatters;
 /// Logging and caching components rely on the <see cref="IFormattable"/> interface.
 /// </summary>
 [PublicAPI]
-public interface IFormattable
+public interface IFormattable<T>
+    where T : FormattingRole
 {
     /// <summary>
     /// Appends a description of the current object to a given <see cref="UnsafeStringBuilder"/>.

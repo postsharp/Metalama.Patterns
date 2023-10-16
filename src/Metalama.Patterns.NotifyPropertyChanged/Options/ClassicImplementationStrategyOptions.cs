@@ -13,7 +13,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 /// </summary>
 [PublicAPI]
 [CompileTime]
-public sealed record ClassicImplementationStrategyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>,
+internal sealed record ClassicImplementationStrategyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>,
                                                             IHierarchicalOptions<INamedType>
 {
     /// <summary>

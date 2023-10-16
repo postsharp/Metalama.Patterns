@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
-using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -11,11 +10,11 @@ using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-internal sealed class RedisNotificationQueue : ITestableCachingComponent
+internal sealed class RedisNotificationQueue : IDisposable
 {
     private const int _connectDelay = 10;
 
-    private readonly LogSource _logger;
+    private readonly FlashtraceSource _logger;
     private readonly BlockingCollection<RedisNotification> _notificationQueue = new();
     private readonly ManualResetEventSlim _notificationProcessingLock = new( true );
     private readonly TaskCompletionSource<bool> _disposeTask = new();
@@ -45,7 +44,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         this._handler = handler;
         this._connectionTimeout = connectionTimeout;
         this.Subscriber = connection.GetSubscriber();
-        this._logger = serviceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
+        this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
 
         this._notificationProcessingThread = new Thread( ProcessNotificationQueue )
         {
@@ -319,7 +318,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
             {
                 if ( !this.TryChangeStatus( Status.Default, Status.DisposingPhase1 ) )
                 {
-                    activity.SetOutcome( LogLevel.Debug, Formatted( "The method was already called." ) );
+                    activity.SetOutcome( FlashtraceLevel.Debug, Formatted( "The method was already called." ) );
                     this._disposeTask.Task.Wait();
 
                     return;
@@ -380,8 +379,6 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
         }
     }
 
-    ValueTask IAsyncDisposable.DisposeAsync() => this.DisposeAsync();
-
     public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {
         using ( var activity = this._logger.Default.IfEnabled?.OpenAsyncActivity( Formatted( "Disposing" ) ) )
@@ -390,7 +387,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
             {
                 if ( !this.TryChangeStatus( Status.Default, Status.DisposingPhase1 ) )
                 {
-                    activity?.SetOutcome( LogLevel.Debug, Formatted( "The method was already called." ) );
+                    activity?.SetOutcome( FlashtraceLevel.Debug, Formatted( "The method was already called." ) );
                     await this._disposeTask.Task;
 
                     return;
@@ -417,7 +414,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
 #if NETCOREAPP
                         await
 #endif
-                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                            using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                         {
                             await this._notificationProcessingThreadCompleted.Task;
 
@@ -459,7 +456,7 @@ internal sealed class RedisNotificationQueue : ITestableCachingComponent
     /// Gets the default connection timeout when creating a Redis backend. 
     /// </summary>
     /// <remarks>
-    /// When you change this value, please also change the documentation for <see cref="RedisCacheInvalidatorOptions.ConnectionTimeout"/>
+    /// When you change this value, please also change the documentation for <see cref="RedisCacheSynchronizerConfiguration.ConnectionTimeout"/>
     /// and <see cref="RedisCachingBackendConfiguration.ConnectionTimeout"/>.
     /// </remarks>
     public static TimeSpan DefaultSubscriptionTimeout { get; } = TimeSpan.FromMinutes( 1 );

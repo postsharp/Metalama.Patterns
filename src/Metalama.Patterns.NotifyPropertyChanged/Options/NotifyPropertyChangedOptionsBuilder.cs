@@ -15,7 +15,7 @@ public sealed class NotifyPropertyChangedOptionsBuilder
     /// <summary>
     /// Sets the <see cref="IImplementationStrategyFactory"/> used to provide <see cref="IImplementationStrategyBuilder"/> instances.
     /// </summary>
-    public IImplementationStrategyFactory ImplementationStrategyFactory
+    internal IImplementationStrategyFactory ImplementationStrategyFactory
     {
         set => this._options = this._options with { ImplementationStrategyFactory = value };
     }
@@ -29,5 +29,5 @@ public sealed class NotifyPropertyChangedOptionsBuilder
         set => this._options = this._options with { DiagnosticCommentVerbosity = value };
     }
 
-    public NotifyPropertyChangedOptions Build() => this._options;
+    internal NotifyPropertyChangedOptions Build() => this._options;
 }

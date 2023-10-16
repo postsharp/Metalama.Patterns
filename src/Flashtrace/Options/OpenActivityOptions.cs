@@ -12,7 +12,7 @@ namespace Flashtrace.Options;
 // TODO: Modernize. Consider readonly (record) struct and 'with' pattern for non-destructive mutability.
 // ReSharper disable InvalidXmlDocComment
 /// <summary>
-/// Argument of the <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> method and
+/// Argument of the <see cref="FlashtraceLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> method and
 /// related overloads.
 /// </summary>
 [PublicAPI]
@@ -83,8 +83,8 @@ public readonly struct OpenActivityOptions
 
     /// <summary>
     /// Gets the <see cref="TransactionRequirement"/> for the current activity. These requirements can be set
-    /// by the caller of <see cref="LogLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> or
-    /// by <see cref="LogSource.ApplyTransactionRequirements(ref OpenActivityOptions)"/>.
+    /// by the caller of <see cref="FlashtraceLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> or
+    /// by <see cref="FlashtraceSource.ApplyTransactionRequirements(ref OpenActivityOptions)"/>.
     /// </summary>
     public TransactionRequirement TransactionRequirement { get; init; }
 
@@ -116,9 +116,9 @@ public readonly struct OpenActivityOptions
         init => this._kind = (short) value;
     }
 
-    internal LogLevel Level
+    internal FlashtraceLevel Level
     {
-        get => (LogLevel) ((short) this._flags >> 4);
+        get => (FlashtraceLevel) ((short) this._flags >> 4);
         init => this._flags = (Flags) (((short) this._flags & ~0xf) | ((int) value << 4));
     }
 

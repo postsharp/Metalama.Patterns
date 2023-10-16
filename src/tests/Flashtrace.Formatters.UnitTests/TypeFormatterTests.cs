@@ -13,13 +13,13 @@ public class TypeFormatterTests : FormattersTestsBase
 
     public TypeFormatterTests( ITestOutputHelper logger ) : base( logger )
     {
-        this.DefaultTypeFormatter = new TypeFormatter( this.DefaultRepository );
+        this.DefaultTypeFormatter = new TypeFormatter( CreateRepository() );
     }
 
     private void TestFormatter( Type type, string expectedString )
     {
         var sb = new UnsafeStringBuilder();
-        this.DefaultTypeFormatter.Write( sb, type );
+        this.DefaultTypeFormatter.Format( sb, type );
         Assert.Equal( expectedString, sb.ToString() );
     }
 

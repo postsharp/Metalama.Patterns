@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
 
 [CompileTime]
-public interface IImplementationStrategyBuilder
+internal interface IImplementationStrategyBuilder
 {
     /// <summary>
     /// Build the aspect. This method will be called at most once for any <see cref="IImplementationStrategyBuilder"/> returned by <see cref="IImplementationStrategyFactory.GetBuilder(IAspectBuilder{INamedType})"/>.

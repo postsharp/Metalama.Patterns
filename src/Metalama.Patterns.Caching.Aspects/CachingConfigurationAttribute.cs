@@ -15,9 +15,6 @@ namespace Metalama.Patterns.Caching.Aspects;
 /// on the assembly, even if the base class is in a different assembly.</para>
 /// </remarks>
 [PublicAPI]
-
 [AttributeUsage( AttributeTargets.Class | AttributeTargets.Assembly )]
 [RunTimeOrCompileTime]
-public sealed class CachingConfigurationAttribute : BaseCachingAttribute
-{
-}
+public sealed class CachingConfigurationAttribute : CachingBaseAttribute { }

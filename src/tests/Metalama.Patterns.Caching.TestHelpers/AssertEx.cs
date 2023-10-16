@@ -39,7 +39,7 @@ public static class AssertEx
             // Xunit doesn't support inconclusive tests
             Assert.True( true, message );
 
-    public static void Fail( string message ) => Assert.True( false, message );
+    public static void Fail( string message ) => Assert.Fail( message );
 
     public static void Fail() => Assert.True( false );
 
@@ -76,7 +76,7 @@ public static class AssertEx
             return;
         }
 
-        Assert.True( false, $"Expected exception of type {typeof(T)} but no exception was thrown." );
+        Assert.Fail( $"Expected exception of type {typeof(T)} but no exception was thrown." );
     }
 
     public static async Task ThrowsAsync<T>( string expectedMessage, Func<Task> task )
@@ -94,7 +94,7 @@ public static class AssertEx
             return;
         }
 
-        Assert.True( false, $"Expected exception of type {typeof(T)} but no exception was thrown." );
+        Assert.Fail( $"Expected exception of type {typeof(T)} but no exception was thrown." );
     }
 
     private static void AssertExceptionType<T>( Exception ex ) => Assert.True( ex.GetType() == typeof(T), "Expected exception type failed." );

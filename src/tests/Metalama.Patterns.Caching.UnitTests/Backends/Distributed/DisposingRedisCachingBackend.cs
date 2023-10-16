@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using StackExchange.Redis;
@@ -23,16 +24,14 @@ internal sealed class DisposingRedisCachingBackend : CachingBackendEnhancer
 
     private RedisCachingBackend RedisBackend => GetRedisCachingBackend( this );
 
-    public DisposingRedisCachingBackend( CachingBackend underlyingBackend, params IDisposable[] disposables ) : base(
-        underlyingBackend,
-        new CachingBackendConfiguration { ServiceProvider = underlyingBackend.Configuration.ServiceProvider } )
+    public DisposingRedisCachingBackend( CachingBackend underlyingBackend, params IDisposable[] disposables ) : base( underlyingBackend )
     {
         this._disposables = disposables;
     }
 
-    protected override void DisposeCore( bool disposing )
+    protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
     {
-        base.DisposeCore( disposing );
+        base.DisposeCore( disposing, cancellationToken );
 
         foreach ( var d in this._disposables )
         {

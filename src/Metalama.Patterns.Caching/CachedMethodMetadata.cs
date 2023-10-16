@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -102,12 +103,7 @@ public sealed partial class CachedMethodMetadata
     public static CachedMethodMetadata ForCallingMethod( CachedMethodConfiguration? configuration = null, int skipFrames = 0 )
     {
         var stackFrame = new StackFrame( 1 + skipFrames );
-        var methodInfo = (MethodInfo?) stackFrame.GetMethod();
-
-        if ( methodInfo == null )
-        {
-            throw new InvalidOperationException( "Cannot get the calling method." );
-        }
+        var methodInfo = (MethodInfo?) stackFrame.GetMethod() ?? throw new InvalidOperationException( "Cannot get the calling method." );
 
         var existingMetadata = CachedMethodMetadataRegistry.Instance.Get( methodInfo );
 

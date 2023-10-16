@@ -7,12 +7,13 @@ namespace Metalama.Patterns.Caching.Backends;
 /// <summary>
 /// A <see cref="CachingBackend"/> that throws an exception when it's used. This is the active default backend.
 /// </summary>
-public sealed class UninitializedCachingBackend : CachingBackend
+internal sealed class UninitializedCachingBackend : CachingBackend
 {
     private static void Throw() => throw new CachingException( "The caching service has not been initialized." );
 
+    /// <param name="options"></param>
     /// <inheritdoc />
-    protected override void ClearCore() => Throw();
+    protected override void ClearCore( ClearCacheOptions options ) => Throw();
 
     /// <inheritdoc />
     protected override bool ContainsDependencyCore( string key )
@@ -46,6 +47,4 @@ public sealed class UninitializedCachingBackend : CachingBackend
 
     /// <inheritdoc />
     protected override void SetItemCore( string key, CacheItem item ) => Throw();
-
-    public UninitializedCachingBackend() : base( null ) { }
 }

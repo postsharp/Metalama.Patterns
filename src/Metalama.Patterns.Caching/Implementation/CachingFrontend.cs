@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Locking;
 using System.Collections.Immutable;
 using System.ComponentModel;
@@ -27,7 +28,7 @@ internal sealed class CachingFrontend
         Func<object?, object?[], object?> invokeOriginalMethod,
         object? instance,
         object?[] args,
-        LogSource logger )
+        FlashtraceSource logger )
     {
         ILockHandle? lockHandle = null;
         CacheValue? item = null;
@@ -37,14 +38,14 @@ internal sealed class CachingFrontend
 
         try
         {
-            if ( (CachingContext.Current.Kind & CachingContextKind.Recache) == 0 )
+            if ( (CachingContext.Current.Kind & CachingContextKind.Refresh) == 0 )
             {
                 item = backend.GetItem( key );
 
                 if ( item == null )
                 {
                     // The item was not found in the cache, so we have to acquire a lock.
-                    lockHandle = profile.LockManager.GetLock( key );
+                    lockHandle = profile.LockingStrategy.GetLock( key );
 
                     if ( lockHandle.Acquire( TimeSpan.Zero, CancellationToken.None ) )
                     {
@@ -61,7 +62,7 @@ internal sealed class CachingFrontend
                     else
                     {
                         // Time out condition.
-                        profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                        profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                     }
                 }
 
@@ -79,12 +80,12 @@ internal sealed class CachingFrontend
             else
             {
                 // When we recache, we have to acquire the lock without doing a cache lookup.
-                lockHandle = profile.LockManager.GetLock( key );
+                lockHandle = profile.LockingStrategy.GetLock( key );
 
                 if ( !lockHandle.Acquire( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {
                     // Time out condition.
-                    profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                    profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                 }
             }
 
@@ -111,7 +112,7 @@ internal sealed class CachingFrontend
 
                 logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     value = invokeOriginalMethod( instance, args );
 
@@ -151,7 +152,7 @@ internal sealed class CachingFrontend
         Func<object?, object?[], CancellationToken, Task<object?>> invokeOriginalMethod,
         object? instance,
         object?[] args,
-        LogSource logger,
+        FlashtraceSource logger,
         CancellationToken cancellationToken )
     {
         // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
@@ -164,14 +165,14 @@ internal sealed class CachingFrontend
 
         try
         {
-            if ( (CachingContext.Current.Kind & CachingContextKind.Recache) == 0 )
+            if ( (CachingContext.Current.Kind & CachingContextKind.Refresh) == 0 )
             {
                 item = await backend.GetItemAsync( key, cancellationToken: cancellationToken );
 
                 if ( item == null )
                 {
                     // The item was not found in the cache, so we have to acquire a lock.
-                    lockHandle = profile.LockManager.GetLock( key );
+                    lockHandle = profile.LockingStrategy.GetLock( key );
 
                     if ( await lockHandle.AcquireAsync( TimeSpan.Zero, CancellationToken.None ) )
                     {
@@ -188,7 +189,7 @@ internal sealed class CachingFrontend
                     else
                     {
                         // Time out condition.
-                        profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                        profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                     }
                 }
 
@@ -206,12 +207,12 @@ internal sealed class CachingFrontend
             else
             {
                 // When we recache, we have to acquire the lock without doing a cache lookup.
-                lockHandle = profile.LockManager.GetLock( key );
+                lockHandle = profile.LockingStrategy.GetLock( key );
 
                 if ( !await lockHandle.AcquireAsync( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {
                     // Time out condition.
-                    profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                    profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                 }
             }
 
@@ -239,7 +240,7 @@ internal sealed class CachingFrontend
 
                 logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     var invokeValueProviderTask = invokeOriginalMethod( instance, args, cancellationToken );
 
@@ -283,7 +284,7 @@ internal sealed class CachingFrontend
         Func<object?, object?[], CancellationToken, ValueTask<object?>> invokeOriginalMethod,
         object? instance,
         object?[] args,
-        LogSource logger,
+        FlashtraceSource logger,
         CancellationToken cancellationToken )
     {
         // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
@@ -296,14 +297,14 @@ internal sealed class CachingFrontend
 
         try
         {
-            if ( (CachingContext.Current.Kind & CachingContextKind.Recache) == 0 )
+            if ( (CachingContext.Current.Kind & CachingContextKind.Refresh) == 0 )
             {
                 item = await backend.GetItemAsync( key, cancellationToken: cancellationToken );
 
                 if ( item == null )
                 {
                     // The item was not found in the cache, so we have to acquire a lock.
-                    lockHandle = profile.LockManager.GetLock( key );
+                    lockHandle = profile.LockingStrategy.GetLock( key );
 
                     if ( await lockHandle.AcquireAsync( TimeSpan.Zero, CancellationToken.None ) )
                     {
@@ -320,7 +321,7 @@ internal sealed class CachingFrontend
                     else
                     {
                         // Time out condition.
-                        profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                        profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                     }
                 }
 
@@ -338,12 +339,12 @@ internal sealed class CachingFrontend
             else
             {
                 // When we recache, we have to acquire the lock without doing a cache lookup.
-                lockHandle = profile.LockManager.GetLock( key );
+                lockHandle = profile.LockingStrategy.GetLock( key );
 
                 if ( !await lockHandle.AcquireAsync( profile.AcquireLockTimeout, CancellationToken.None ) )
                 {
                     // Time out condition.
-                    profile.AcquireLockTimeoutStrategy.OnTimeout( key );
+                    profile.OnLockTimeout( new LockTimeoutContext( key, lockHandle, backend, this._cachingService ) );
                 }
             }
 
@@ -371,7 +372,7 @@ internal sealed class CachingFrontend
 
                 logger.Debug.IfEnabled?.Write( Formatted( "Cache miss: Key=\"{Key}\".", key ) );
 
-                using ( var context = CachingContext.OpenCacheContext( key, this._cachingService ) )
+                using ( var context = CachingContext.OpenCacheContext( key ) )
                 {
                     var invokeValueProviderTask = invokeOriginalMethod( instance, args, cancellationToken );
 
@@ -411,10 +412,7 @@ internal sealed class CachingFrontend
     {
         if ( backend.SupportedFeatures.Dependencies )
         {
-            if ( item.Dependencies != null )
-            {
-                CachingContext.Current.AddDependencies( item.Dependencies );
-            }
+            if ( item.Dependencies != null ) { }
 
             CachingContext.Current.AddDependency( key );
         }

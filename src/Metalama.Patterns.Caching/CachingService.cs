@@ -3,6 +3,7 @@
 using Flashtrace;
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.ValueAdapters;
@@ -11,87 +12,167 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Caching;
 
-public sealed partial class CachingService : IDisposable, IAsyncDisposable, ICachingService
+public sealed partial class CachingService : ICachingService
 {
-    public static CachingService Default { get; set; } = new();
+    private readonly FormatterRepository _formatters;
+    private readonly bool _ownsBackend;
+
+    public static CachingService Default { get; set; } = CreateUninitialized();
+
+    public static CachingService Create( Action<ICachingServiceBuilder>? build = null, IServiceProvider? serviceProvider = null )
+    {
+        var builder = new Builder( serviceProvider );
+        build?.Invoke( builder );
+        builder.Dispose();
+
+        var backend = builder.CreateBackend();
+
+        return new CachingService( serviceProvider, backend, builder );
+    }
 
     internal IServiceProvider? ServiceProvider { get; }
-
-    private volatile CacheKeyBuilder _keyBuilder;
-    private volatile CachingBackend _backend = new UninitializedCachingBackend();
-
-    public FormatterRepository Formatters { get; } = new CachingFormatterRepository();
 
     internal AutoReloadManager AutoReloadManager { get; }
 
     internal CachingFrontend Frontend { get; }
 
-    public ValueAdapterFactory ValueAdapters { get; } = new();
+    internal ValueAdapterFactory ValueAdapters { get; }
 
-    public CachingService( IServiceProvider? serviceProvider = null )
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CachingService"/> class.
+    /// </summary>
+    /// <param name="backend">The default back-end. If null, a new <see cref="MemoryCachingBackend"/> is created.</param>
+    /// <param name="serviceProvider">An optional <see cref="IServiceProvider"/>.</param>
+    private CachingService( IServiceProvider? serviceProvider, CachingBackend? defaultBackend, Builder builder )
     {
-        this.ServiceProvider = serviceProvider;
-        this._keyBuilder = new CacheKeyBuilder( this.Formatters );
-        this.Profiles = new CachingProfileRegistry( this );
+        this._ownsBackend = builder.OwnsBackend;
+
+        // Run the builder.
+        this.DefaultBackend = defaultBackend ?? CachingBackend.Create( b => b.Memory(), serviceProvider );
+
+        // Set profiles.
+        var profilesDictionary = ImmutableDictionary.CreateBuilder<string, CachingProfile>( StringComparer.Ordinal );
+
+        foreach ( var profile in builder.Profiles )
+        {
+            profilesDictionary.Add( profile.Name, profile );
+            profile.Initialize( this.DefaultBackend, serviceProvider );
+        }
+
+        if ( !profilesDictionary.ContainsKey( CachingProfile.DefaultName ) )
+        {
+            var profile = new CachingProfile();
+            profilesDictionary.Add( CachingProfile.DefaultName, profile );
+            profile.Initialize( this.DefaultBackend, serviceProvider );
+        }
+
+        this._formatters = FormatterRepository.Create(
+            CacheKeyFormatting.Instance,
+            formattersBuilder =>
+            {
+                formattersBuilder.AddFormatter( typeof(IEnumerable<>), typeof(CollectionFormatter<>) );
+
+                foreach ( var action in builder.FormattersBuildActions )
+                {
+                    action( formattersBuilder );
+                }
+            } );
+
+        this.ValueAdapters = new ValueAdapterFactory( builder.ValueAdapters );
+        this.ServiceProvider = builder.ServiceProvider;
+        this.Profiles = new CachingProfileRegistry( profilesDictionary.ToImmutable() );
+        this.AllBackends = this.Profiles.AllBackends.ToImmutableArray();
         this.Frontend = new CachingFrontend( this );
         this.AutoReloadManager = new AutoReloadManager( this );
-        this._defaultLogger = serviceProvider.GetLogSource( this.GetType(), LoggingRoles.Caching );
+        this.KeyBuilder = builder.CreateKeyBuilder( this._formatters );
+        this.Logger = builder.ServiceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
+
+    internal static CachingService CreateUninitialized( IServiceProvider? serviceProvider = null )
+        => Create( b => b.WithBackend( x => x.Uninitialized() ), serviceProvider );
 
     /// <summary>
     /// Gets the set of distinct backends used in the service.
     /// </summary>
-    public ImmutableHashSet<CachingBackend> AllBackends => this.Profiles.AllBackends;
+    public ImmutableArray<CachingBackend> AllBackends { get; }
 
-    public void AddDependency( string key ) => CachingContext.Current.AddDependency( key );
-
-    public void AddDependencies( IEnumerable<string> keys ) => CachingContext.Current.AddDependencies( keys );
-
-    public IDisposable SuspendDependencyPropagation() => CachingContext.OpenSuspendedCacheContext();
-
-    string ICachingService.GetDependencyKey( object o ) => this.KeyBuilder.BuildDependencyKey( o );
-
-    /// <summary>
-    /// Gets or sets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
-    /// </summary>
-    [AllowNull]
-    public CacheKeyBuilder KeyBuilder
+    public async Task InitializeAsync( CancellationToken cancellationToken )
     {
-        get => this._keyBuilder;
-        set => this._keyBuilder = value ?? new CacheKeyBuilder( this.Formatters );
-    }
-
-    /// <summary>
-    /// Gets or sets the default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
-    /// </summary>
-    [AllowNull]
-    public CachingBackend DefaultBackend
-    {
-        get => this._backend;
-        set
+        if ( this._ownsBackend )
         {
-            if ( this._backend == value )
-            {
-                return;
-            }
+            await this.DefaultBackend.InitializeAsync( cancellationToken );
+        }
 
-            this._backend = value ?? new NullCachingBackend();
-            this.Profiles.OnChange();
+        foreach ( var profile in this.Profiles )
+        {
+            if ( profile.OwnsBackend )
+            {
+                await profile.Backend.InitializeAsync( cancellationToken );
+            }
+        }
+
+        foreach ( var backend in this.AllBackends )
+        {
+            await backend.InitializeAsync( cancellationToken );
         }
     }
+
+    public FlashtraceSource Logger { get; }
+
+    /// <summary>
+    /// Gets the <see cref="CacheKeyBuilder"/> used to generate caching keys, i.e. to serialize objects into a <see cref="string"/>.
+    /// </summary>
+    [AllowNull]
+    public ICacheKeyBuilder KeyBuilder { get; }
+
+    /// <summary>
+    /// Gets default <see cref="CachingBackend"/>, i.e. the physical storage of cache items.
+    /// </summary>
+    [AllowNull]
+    public CachingBackend DefaultBackend { get; }
 
     /// <summary>
     /// Gets the repository of caching profiles (<see cref="CachingProfile"/>).
     /// </summary>
     public CachingProfileRegistry Profiles { get; }
 
-    public void Dispose()
+    public void Dispose() => this.Dispose( default );
+
+    public void Dispose( CancellationToken cancellationToken )
     {
-        this.AutoReloadManager.Dispose();
+        this.AutoReloadManager.Dispose( cancellationToken );
+
+        if ( this._ownsBackend )
+        {
+            this.DefaultBackend.Dispose( cancellationToken );
+        }
+
+        foreach ( var profile in this.Profiles )
+        {
+            if ( profile.OwnsBackend )
+            {
+                profile.Backend.Dispose( cancellationToken );
+            }
+        }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync() => this.DisposeAsync( default );
+
+    public async ValueTask DisposeAsync( CancellationToken cancellationToken )
     {
-        await this.AutoReloadManager.DisposeAsync();
+        await this.AutoReloadManager.DisposeAsync( cancellationToken );
+
+        if ( this._ownsBackend )
+        {
+            await this.DefaultBackend.DisposeAsync( cancellationToken );
+        }
+
+        foreach ( var profile in this.Profiles )
+        {
+            if ( profile.OwnsBackend )
+            {
+                await profile.Backend.DisposeAsync( cancellationToken );
+            }
+        }
     }
 }

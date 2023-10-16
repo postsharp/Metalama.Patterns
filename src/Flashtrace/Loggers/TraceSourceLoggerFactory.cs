@@ -1,22 +1,25 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Flashtrace.Loggers;
 
-internal sealed class TraceSourceLoggerFactory : ILoggerFactory
+[PublicAPI]
+public sealed class TraceSourceLoggerFactory : IFlashtraceLoggerFactory
 {
-    IRoleLoggerFactory ILoggerFactory.ForRole( string role ) => new RoleLoggerFactory( role );
+    IFlashtraceRoleLoggerFactory IFlashtraceLoggerFactory.ForRole( FlashtraceRole role ) => new RoleLoggerFactory( role );
 
-    private sealed class RoleLoggerFactory : IRoleLoggerFactory
+    private sealed class RoleLoggerFactory : IFlashtraceRoleLoggerFactory
     {
-        private readonly string _role;
+        private readonly FlashtraceRole _role;
 
-        public RoleLoggerFactory( string role )
+        public RoleLoggerFactory( FlashtraceRole role )
         {
             this._role = role;
         }
 
-        ILogger IRoleLoggerFactory.GetLogger( Type type ) => new TraceSourceLogger( this, this._role, type.FullName! );
+        IFlashtraceLogger IFlashtraceRoleLoggerFactory.GetLogger( Type type ) => new TraceSourceFlashtraceLogger( this, this._role, type.FullName! );
 
-        public ILogger GetLogger( string sourceName ) => new TraceSourceLogger( this, this._role, sourceName );
+        public IFlashtraceLogger GetLogger( string sourceName ) => new TraceSourceFlashtraceLogger( this, this._role, sourceName );
     }
 }

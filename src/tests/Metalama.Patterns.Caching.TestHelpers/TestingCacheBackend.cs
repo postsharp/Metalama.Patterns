@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using CacheItem = Metalama.Patterns.Caching.Implementation.CacheItem;
 
@@ -36,8 +37,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         protected override CachingBackendFeatures CreateFeatures() => this._backend.SupportedFeatures;
 
-        public TestingCacheBackend( string name, IServiceProvider? serviceProvider ) : base(
-            new CachingBackendConfiguration() { ServiceProvider = serviceProvider } )
+        public TestingCacheBackend( string name, IServiceProvider? serviceProvider = null ) : base( serviceProvider: serviceProvider )
         {
             this._name = name;
             this.ResetExpectations();
@@ -59,7 +59,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             this.ExpectedInvalidateCount = 0;
         }
 
-        public void ResetTest( string locationDescription )
+        public void AssertAndReset( string locationDescription )
         {
             AssertEx.Equal(
                 this.ExpectedSetCount,
@@ -162,26 +162,26 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return this._backend.ContainsDependencyAsync( key, cancellationToken );
         }
 
-        protected override void DisposeCore( bool disposing )
+        protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
         {
-            TestableCachingComponentDisposer.Dispose( this._backend );
+            this._backend.Dispose();
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
         }
 
         protected override async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
         {
-            await TestableCachingComponentDisposer.DisposeAsync( this._backend );
+            await this._backend.DisposeAsync( cancellationToken );
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
         }
 
-        protected override void ClearCore()
+        protected override void ClearCore( ClearCacheOptions options )
         {
             this._backend.Clear();
         }
 
-        protected override ValueTask ClearAsyncCore( CancellationToken cancellationToken )
+        protected override ValueTask ClearAsyncCore( ClearCacheOptions options, CancellationToken cancellationToken )
         {
-            return this._backend.ClearAsync( cancellationToken );
+            return this._backend.ClearAsync( options, cancellationToken );
         }
 
         protected override void RemoveItemCore( string key )

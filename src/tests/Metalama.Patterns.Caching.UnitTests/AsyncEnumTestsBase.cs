@@ -2,6 +2,7 @@
 
 #if NETCOREAPP3_0_OR_GREATER
 using Metalama.Patterns.Caching.Aspects;
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.TestHelpers;
 using System.Text;
 using Xunit.Abstractions;
@@ -10,6 +11,8 @@ namespace Metalama.Patterns.Caching.Tests;
 
 public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
 {
+    private readonly CachingTestContext<CachingBackend> _context;
+
     protected StringBuilder StringBuilder { get; }
 
     protected TestClass Instance { get; }
@@ -19,13 +22,14 @@ public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
         this.StringBuilder = new StringBuilder();
         this.Instance = new TestClass( this.Log );
 
-        this.InitializeTestWithCachingBackend( nameof(AsyncEnumerableTests) );
+        this._context = this.InitializeTest( nameof(AsyncEnumerableTests) );
     }
 
     public void Dispose()
     {
-        TestProfileConfigurationFactory.DisposeTest();
+        this.Instance.FinishBlockingTask();
         this.TestOutputHelper.WriteLine( this.StringBuilder.ToString() );
+        this._context.Dispose();
     }
 
     // ReSharper disable once MemberCanBePrivate.Global
@@ -60,11 +64,36 @@ public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
             this._log = log;
         }
 
+        private readonly TaskCompletionSource _blockingTask = new();
+
+        public void FinishBlockingTask()
+        {
+            this._blockingTask.TrySetResult();
+        }
+
         [Cache( IgnoreThisParameter = true )]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async IAsyncEnumerable<int> CachedEnumerable()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             this._log( "E1" );
-            await Task.Delay( 1 );
+
+            yield return 42;
+
+            this._log( "E2" );
+
+            yield return 99;
+
+            this._log( "E3" );
+        }
+
+        [Cache( IgnoreThisParameter = true )]
+        public async IAsyncEnumerable<int> BlockedCachedEnumerable()
+        {
+            this._log( "E1" );
+
+            await this._blockingTask.Task;
+
             this._log( "E2" );
 
             yield return 42;
@@ -77,10 +106,28 @@ public abstract class AsyncEnumTestsBase : BaseCachingTests, IDisposable
         }
 
         [Cache( IgnoreThisParameter = true )]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async IAsyncEnumerator<int> CachedEnumerator()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             this._log( "E1" );
-            await Task.Delay( 1 );
+
+            yield return 42;
+
+            this._log( "E2" );
+
+            yield return 99;
+
+            this._log( "E3" );
+        }
+
+        [Cache( IgnoreThisParameter = true )]
+        public async IAsyncEnumerator<int> BlockedCachedEnumerator()
+        {
+            this._log( "E1" );
+
+            await this._blockingTask.Task;
+
             this._log( "E2" );
 
             yield return 42;

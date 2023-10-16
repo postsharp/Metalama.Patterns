@@ -2,9 +2,9 @@
 
 using Flashtrace.Formatters;
 using Metalama.Patterns.Caching.Formatters;
-using Metalama.Patterns.Caching.Implementation;
 using Xunit;
-using IFormattable = Flashtrace.Formatters.IFormattable;
+
+// ReSharper disable RedundantTypeDeclarationBody
 
 namespace Metalama.Patterns.Caching.Tests
 {
@@ -13,15 +13,14 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClass()
         {
-            var formatters = new CachingFormatterRepository();
-            formatters.Register( new DogFormatter( formatters ) );
+            var formatters = FormatterRepository.Create( CacheKeyFormatting.Instance, b => b.AddFormatter( r => new DogFormatter( r ) ) );
 
             AssertKey( formatters, "FormattedDog", new Dog() );
         }
 
         private static void AssertKey( FormatterRepository formatters, string expectedKey, object o )
         {
-            var cacheKeyBuilder = new CacheKeyBuilder( formatters );
+            var cacheKeyBuilder = new CacheKeyBuilder( formatters, new CacheKeyBuilderOptions() );
             var key = cacheKeyBuilder.BuildDependencyKey( o );
 
             Assert.Equal( expectedKey, key );
@@ -30,9 +29,13 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestSameClassOverwritingFormatter()
         {
-            var formatters = new CachingFormatterRepository();
-            formatters.Register( new AnimalFormatter( formatters ) );
-            formatters.Register( new DogFormatter( formatters ) );
+            var formatters = FormatterRepository.Create(
+                CacheKeyFormatting.Instance,
+                b =>
+                {
+                    b.AddFormatter( r => new AnimalFormatter( r ) );
+                    b.AddFormatter( r => new DogFormatter( r ) );
+                } );
 
             AssertKey( formatters, "FormattedDog", new Dog() );
         }
@@ -40,16 +43,19 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestDerivedClass()
         {
-            var formatters = new CachingFormatterRepository();
-            formatters.Register( new DogFormatter( formatters ) );
+            var formatters = FormatterRepository.Create(
+                CacheKeyFormatting.Instance,
+                b => b.AddFormatter( r => new DogFormatter( r ) ) );
+
             AssertKey( formatters, "FormattedDog", new Chihuahua() );
         }
 
         [Fact]
         public void TestInterface()
         {
-            var formatters = new CachingFormatterRepository();
-            formatters.Register( new AnimalFormatter( formatters ) );
+            var formatters = FormatterRepository.Create(
+                CacheKeyFormatting.Instance,
+                b => b.AddFormatter( r => new AnimalFormatter( r ) ) );
 
             AssertKey( formatters, "FormattedAnimal", new Cat() );
         }
@@ -57,7 +63,7 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestManuallyFormatted()
         {
-            var formatters = new CachingFormatterRepository();
+            var formatters = FormatterRepository.Create( CacheKeyFormatting.Instance );
 
             AssertKey( formatters, "ManuallyFormatted:Caching", new ManuallyFormatted() );
         }
@@ -74,7 +80,7 @@ namespace Metalama.Patterns.Caching.Tests
         {
             public AnimalFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-            public override void Write( UnsafeStringBuilder stringBuilder, IAnimal? value )
+            public override void Format( UnsafeStringBuilder stringBuilder, IAnimal? value )
             {
                 stringBuilder.Append( "FormattedAnimal" );
             }
@@ -84,15 +90,15 @@ namespace Metalama.Patterns.Caching.Tests
         {
             public DogFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-            public override void Write( UnsafeStringBuilder stringBuilder, Dog? value )
+            public override void Format( UnsafeStringBuilder stringBuilder, Dog? value )
             {
                 stringBuilder.Append( "FormattedDog" );
             }
         }
 
-        private sealed class ManuallyFormatted : IFormattable
+        private sealed class ManuallyFormatted : IFormattable<CacheKeyFormatting>
         {
-            void IFormattable.Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
+            void IFormattable<CacheKeyFormatting>.Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
             {
                 stringBuilder.Append( "ManuallyFormatted:" + formatterRepository.Role.Name );
             }

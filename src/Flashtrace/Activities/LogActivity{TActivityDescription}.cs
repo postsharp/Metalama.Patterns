@@ -19,12 +19,12 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
 {
     private readonly TActivityDescription _description;
 
-    internal IContextLocalLogger Logger { get; }
+    internal IFlashtraceLocalLogger Logger { get; }
 
-    private readonly ActivityLogLevels _levels;
+    private readonly ActivityLevels _levels;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
-    internal LogActivity( IContextLocalLogger logger, in ActivityLogLevels levels, ILoggingContext? context, in TActivityDescription description )
+    internal LogActivity( IFlashtraceLocalLogger logger, in ActivityLevels levels, ILoggingContext? context, in TActivityDescription description )
     {
         this._description = description;
         this.Logger = logger;
@@ -37,7 +37,7 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
 
     [MethodImpl( MethodImplOptions.NoInlining )]
     private void SetOutcomeImpl<TMessage>(
-        LogLevel level,
+        FlashtraceLevel level,
         in TMessage message,
         Exception? exception,
         in CloseActivityOptions options,
@@ -130,7 +130,7 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
         {
             if ( this.Context is { IsDisposed: false } )
             {
-                this.SetOutcome( LogLevel.Warning, SemanticMessageBuilder.Semantic( "Indeterminate" ) );
+                this.SetOutcome( FlashtraceLevel.Warning, SemanticMessageBuilder.Semantic( "Indeterminate" ) );
             }
         }
         catch ( Exception e )
@@ -168,7 +168,7 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
     }
 
     /// <inheritdoc />
-    public void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception? exception = null, in CloseActivityOptions options = default )
+    public void SetOutcome<TMessage>( FlashtraceLevel level, in TMessage message, Exception? exception = null, in CloseActivityOptions options = default )
         where TMessage : IMessage
     {
         this.SetOutcomeImpl( level, message, exception, options, default );
@@ -176,7 +176,12 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception exception, in CloseActivityOptions options, in CallerInfo callerInfo )
+    public void SetOutcome<TMessage>(
+        FlashtraceLevel level,
+        in TMessage message,
+        Exception exception,
+        in CloseActivityOptions options,
+        in CallerInfo callerInfo )
         where TMessage : IMessage
     {
         this.SetOutcomeImpl( level, message, exception, options, default );

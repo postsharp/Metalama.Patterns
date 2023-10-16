@@ -1,3 +1,4 @@
+using System;
 using Metalama.Framework.Fabrics;
 namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
 {
@@ -20,15 +21,15 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
       {
         if (value == null !)
         {
-          throw new global::System.ArgumentNullException("value", "The 'PublicProperty' property must not be null.");
+          throw new ArgumentNullException("value", "The 'PublicProperty' property must not be null.");
         }
         this._publicProperty = value;
       }
     }
     internal string InternalProperty { get; set; }
     public string? PublicNullableProperty { get; set; }
-    private global::System.String _publicField = default !;
-    public global::System.String PublicField
+    private string _publicField = default !;
+    public string PublicField
     {
       get
       {
@@ -38,14 +39,14 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
       {
         if (value == null !)
         {
-          throw new global::System.ArgumentNullException("value", "The 'PublicField' property must not be null.");
+          throw new ArgumentNullException("value", "The 'PublicField' property must not be null.");
         }
         this._publicField = value;
       }
     }
     internal string InternalField;
-    private global::System.String _publicNullableField = default !;
-    public global::System.String PublicNullableField
+    private string _publicNullableField = default !;
+    public string PublicNullableField
     {
       get
       {
@@ -55,7 +56,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
       {
         if (value == null !)
         {
-          throw new global::System.ArgumentNullException("value", "The 'PublicNullableField' property must not be null.");
+          throw new ArgumentNullException("value", "The 'PublicNullableField' property must not be null.");
         }
         this._publicNullableField = value;
       }
@@ -64,7 +65,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
     {
       if (nonNullableParam == null !)
       {
-        throw new global::System.ArgumentNullException("nonNullableParam", "The 'nonNullableParam' parameter must not be null.");
+        throw new ArgumentNullException("nonNullableParam", "The 'nonNullableParam' parameter must not be null.");
       }
     }
     internal void InternalMethod(string nonNullableParam, string? nullableParam)

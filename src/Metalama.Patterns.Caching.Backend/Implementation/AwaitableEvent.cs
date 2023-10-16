@@ -55,52 +55,32 @@ internal sealed class AwaitableEvent
         this.SignalState = signaled ? SIGNALED : NOT_SIGNALED;
     }
 
-    public bool Wait()
+    public void Wait( CancellationToken cancellationToken = default )
     {
-        return this.WaitInternal( _infiniteTimeSpan );
+        this.WaitInternal( _infiniteTimeSpan, cancellationToken );
     }
 
-    public bool Wait( TimeSpan timeout )
+    public bool Wait( TimeSpan timeout, CancellationToken cancellationToken = default )
     {
-        return this.WaitInternal( timeout );
+        return this.WaitInternal( timeout, cancellationToken );
     }
 
-    public Awaiter WaitAsync()
-    {
-        return this.WaitOneAsyncInternal( _infiniteTimeSpan, CancellationToken.None );
-    }
-
-    public Awaiter WaitAsync( TimeSpan timeout )
-    {
-        return this.WaitOneAsyncInternal( timeout, CancellationToken.None );
-    }
-
-    public Awaiter WaitAsync( CancellationToken cancellationToken )
+    public Awaiter WaitAsync( CancellationToken cancellationToken = default )
     {
         return this.WaitOneAsyncInternal( _infiniteTimeSpan, cancellationToken );
     }
 
-    public Awaiter WaitAsync( TimeSpan timeout, CancellationToken cancellationToken )
+    public Awaiter WaitAsync( TimeSpan timeout, CancellationToken cancellationToken = default )
     {
         return this.WaitOneAsyncInternal( timeout, cancellationToken );
     }
 
-    public Awaiter<TData> WaitAsync<TData>()
-    {
-        return this.WaitOneAsyncInternal<TData>( _infiniteTimeSpan, CancellationToken.None );
-    }
-
-    public Awaiter<TData> WaitAsync<TData>( TimeSpan timeout )
-    {
-        return this.WaitOneAsyncInternal<TData>( timeout, CancellationToken.None );
-    }
-
-    public Awaiter<TData> WaitAsync<TData>( CancellationToken cancellationToken )
+    public Awaiter<TData> WaitAsync<TData>( CancellationToken cancellationToken = default )
     {
         return this.WaitOneAsyncInternal<TData>( _infiniteTimeSpan, cancellationToken );
     }
 
-    public Awaiter<TData> WaitAsync<TData>( TimeSpan timeout, CancellationToken cancellationToken )
+    public Awaiter<TData> WaitAsync<TData>( TimeSpan timeout, CancellationToken cancellationToken = default )
     {
         return this.WaitOneAsyncInternal<TData>( timeout, cancellationToken );
     }
@@ -315,7 +295,7 @@ internal sealed class AwaitableEvent
         return _threadLocalEvent;
     }
 
-    private bool WaitInternal( TimeSpan timeout )
+    private bool WaitInternal( TimeSpan timeout, CancellationToken cancellationToken )
     {
         ConcurrencyTestingApi.TraceEvent( "Begin Wait operation." );
 
@@ -339,11 +319,11 @@ internal sealed class AwaitableEvent
             {
                 if ( this._resetMode == (int) EventResetMode.AutoReset )
                 {
-                    return this.WaitAutoReset( timeout );
+                    return this.WaitAutoReset( timeout, cancellationToken );
                 }
                 else
                 {
-                    return this.WaitManualReset( timeout );
+                    return this.WaitManualReset( timeout, cancellationToken );
                 }
             }
         }
@@ -374,7 +354,7 @@ internal sealed class AwaitableEvent
         return this.SignalState == SIGNALED;
     }
 
-    private bool WaitAutoReset( TimeSpan timeout )
+    private bool WaitAutoReset( TimeSpan timeout, CancellationToken cancellationToken )
     {
         // AUTO RESET:
         // if the event is signaled, consume the signal and go through if successful
@@ -438,7 +418,7 @@ internal sealed class AwaitableEvent
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal not taken, wait." );
 
-                    if ( op.Event.Wait( timeout ) )
+                    if ( op.Event.Wait( timeout, cancellationToken ) )
                     {
                         Debug.Assert( op.State == WAITING );
                         op.State = SUCCESS;
@@ -480,7 +460,7 @@ internal sealed class AwaitableEvent
         }
     }
 
-    private bool WaitManualReset( TimeSpan timeout )
+    private bool WaitManualReset( TimeSpan timeout, CancellationToken cancellationToken )
     {
         // MANUAL RESET:
         // if the event is signaled, just go through
@@ -533,7 +513,7 @@ internal sealed class AwaitableEvent
                 {
                     ConcurrencyTestingApi.TraceEvent( "Signal not observed, wait." );
 
-                    if ( op.Event.Wait( timeout ) )
+                    if ( op.Event.Wait( timeout, cancellationToken ) )
                     {
                         Debug.Assert( op.State == WAITING );
                         op.State = SUCCESS;

@@ -46,7 +46,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         private T CreateNextValueAsDependency()
         {
             var value = this.CreateNextValue();
-            CachingService.Default.AddDependency( value );
+            CachingService.Default.AddObjectDependency( value );
 
             return value;
         }
@@ -54,7 +54,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         private async Task<T> CreateNextValueAsDependencyAsync()
         {
             var value = await this.CreateNextValueAsync();
-            CachingService.Default.AddDependency( value );
+            CachingService.Default.AddObjectDependency( value );
 
             return value;
         }
