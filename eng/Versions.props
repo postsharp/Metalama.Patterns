@@ -39,7 +39,7 @@
         <XUnitRunnerVisualStudioVersion>2.5.1</XUnitRunnerVisualStudioVersion>
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
         <xUnitVersion>2.5.1</xUnitVersion>
-        <PostSharpEngineeringVersion>2023.2.49</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>2023.2.50</PostSharpEngineeringVersion>
         <MetalamaExtensionsVersion></MetalamaExtensionsVersion>
     </PropertyGroup>
 
@@ -48,6 +48,11 @@
 
     <!-- Import overrides for the local build -->
     <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
+
+    <!-- Override versions of preview packages -->
+    <PropertyGroup>
+        <NotifyPropertyChangedVersion>$(MetalamaPatternsPreviewVersion)</NotifyPropertyChangedVersion>
+    </PropertyGroup>
 
     <PropertyGroup>
         <AssemblyVersion>$(MetalamaPatternsAssemblyVersion)</AssemblyVersion>
