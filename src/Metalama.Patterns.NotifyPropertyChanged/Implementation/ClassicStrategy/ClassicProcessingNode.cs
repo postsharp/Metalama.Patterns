@@ -96,7 +96,7 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
     /// will throw if it has not been set. This provides defense against incorrect program design
     /// that could otherwise lead to subtle incorrect behaviour.
     /// </remarks>
-    public DeferredOptional<IMethod> UpdateMethod { get; } = new DeferredOptional<IMethod>( mustBeSetBeforeGet: true );
+    public DeferredOptional<IMethod> UpdateMethod { get; } = new( mustBeSetBeforeGet: true );
 
     private Deferred<IMethod>? _subscribeMethod;
 

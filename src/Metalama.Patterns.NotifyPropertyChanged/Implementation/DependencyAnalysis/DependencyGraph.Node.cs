@@ -76,11 +76,21 @@ internal static partial class DependencyGraph
 
         Node IGraphBuildingNode.GetOrAddChild( ISymbol childSymbol )
         {
+            if ( childSymbol == null )
+            {
+                throw new ArgumentNullException( nameof(childSymbol) );
+            }
+
+            if ( childSymbol.Equals( this.Symbol ) )
+            {
+                throw new InvalidOperationException( "Cannot add a child with the same symbol as the current node." );
+            }
+
             Node? result;
 
             if ( this._children == null )
             {
-                this._children = new Dictionary<ISymbol, Node>();
+                this._children = new Dictionary<ISymbol, Node>( SymbolEqualityComparer.Default );
                 result = new Node( this, childSymbol );
                 this._children.Add( childSymbol, result );
             }
@@ -98,6 +108,17 @@ internal static partial class DependencyGraph
 
         void IGraphBuildingNode.AddReferencedBy( Node node )
         {
+            if ( node == null )
+            {
+                throw new ArgumentNullException( nameof(node) );
+            }
+
+            if ( node == this )
+            {
+                // Ignore reference to self.
+                return;
+            }
+
             this._referencedBy ??= new HashSet<Node>();
             this._referencedBy.Add( node );
         }

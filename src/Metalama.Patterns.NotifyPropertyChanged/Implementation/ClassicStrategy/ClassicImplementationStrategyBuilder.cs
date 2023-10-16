@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.DependencyAnalysis;
 using Metalama.Patterns.NotifyPropertyChanged.Implementation.Graph;
@@ -136,7 +137,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
         foreach ( var p in relevantProperties )
         {
-            allValid &= this.ValidateFieldOrProperty( p );
+            allValid &= this.ValidateFieldOrPropertyIntrinsicCharacteristics( p );
         }
 
         return allValid;
@@ -522,7 +523,13 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 hasErrors |= diagnostic.Definition.Severity == Severity.Error;
                 this._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
             },
-            this._builder.CancellationToken );
+            typeSymbol =>
+            {
+                var typeDecl = this._builder.Target.Compilation.GetDeclaration( typeSymbol ) as IType;
+                
+                return typeDecl != null && this._inpcInstrumentationKindLookup.Get( typeDecl ) != InpcInstrumentationKind.None;
+            },
+            cancellationToken: this._builder.CancellationToken );
 
         var processingGraph =
             structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>(
@@ -530,7 +537,7 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
 
         foreach ( var node in processingGraph.DescendantsDepthFirst() )
         {
-            hasErrors |= !this.ValidateFieldOrProperty( node.FieldOrProperty );
+            hasErrors |= !this.ValidateFieldOrPropertyIntrinsicCharacteristics( node.FieldOrProperty );
         }
 
         this._dependencyGraph.Value = processingGraph;
@@ -698,11 +705,11 @@ internal sealed class ClassicImplementationStrategyBuilder : IImplementationStra
                 && m.Parameters[2].Type == assets.NullableINotifyPropertyChanged );
 
     /// <summary>
-    /// Validates the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. The result is cached
-    /// so that diagnostics are not repeated.
+    /// Validates the the intrinsic characteristics of the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. 
+    /// The result is cached so that diagnostics are not repeated.
     /// </summary>
     /// <returns><see langword="true"/> if valid, or <see langword="false"/> if invalid.</returns>
-    private bool ValidateFieldOrProperty( IFieldOrProperty fieldOrProperty )
+    private bool ValidateFieldOrPropertyIntrinsicCharacteristics( IFieldOrProperty fieldOrProperty )
     {
         if ( !this._validateFieldOrPropertyResults.TryGetValue( fieldOrProperty, out var result ) )
         {
