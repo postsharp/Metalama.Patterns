@@ -19,13 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace", "src\Flashtrac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flashtrace.UnitTests", "src\tests\Flashtrace.UnitTests\Flashtrace.UnitTests.csproj", "{900FC057-DB84-486F-81C2-ED3F8D284E61}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.NotifyPropertyChanged", "src\Metalama.Patterns.NotifyPropertyChanged\Metalama.Patterns.NotifyPropertyChanged.csproj", "{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Observability", "src\Metalama.Patterns.Observability\Metalama.Patterns.Observability.csproj", "{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests", "src\tests\Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests\Metalama.Patterns.NotifyPropertyChanged.CompileTimeTests.csproj", "{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Observability.CompileTimeTests", "src\tests\Metalama.Patterns.Observability.CompileTimeTests\Metalama.Patterns.Observability.CompileTimeTests.csproj", "{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.NotifyPropertyChanged.UnitTests", "src\tests\Metalama.Patterns.NotifyPropertyChanged.UnitTests\Metalama.Patterns.NotifyPropertyChanged.UnitTests.csproj", "{001C141A-3D0F-4057-9D9F-3E221DF45B77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Observability.UnitTests", "src\tests\Metalama.Patterns.Observability.UnitTests\Metalama.Patterns.Observability.UnitTests.csproj", "{001C141A-3D0F-4057-9D9F-3E221DF45B77}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.NotifyPropertyChanged.AspectTests", "src\tests\Metalama.Patterns.NotifyPropertyChanged.AspectTests\Metalama.Patterns.NotifyPropertyChanged.AspectTests.csproj", "{4D5776D8-9A13-4AA6-9378-7097BFC8BBEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Observability.AspectTests", "src\tests\Metalama.Patterns.Observability.AspectTests\Metalama.Patterns.Observability.AspectTests.csproj", "{4D5776D8-9A13-4AA6-9378-7097BFC8BBEA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching", "src\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj", "{84209D4B-E033-4F2E-8E87-7AEA55A36E4C}"
 EndProject

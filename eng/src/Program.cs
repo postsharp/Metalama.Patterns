@@ -27,7 +27,7 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         BuildConfiguration.Public,
         Product.DefaultConfigurations.Public with
         {
-            // This is the first version of Patters.
+            // This is the first version of Patterns.
             // This line should be removed in the next version.
             RequiresUpstreamCheck = false
         } )
