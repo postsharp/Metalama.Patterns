@@ -19,7 +19,7 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         "Metalama.Patterns.Caching.Backends.Redis.$(PackageVersion).nupkg",
         "Metalama.Patterns.Contracts.$(PackageVersion).nupkg",
         "Metalama.Patterns.Memoization.$(PackageVersion).nupkg",
-        "Metalama.Patterns.NotifyPropertyChanged.$(PackagePreviewVersion).nupkg",
+        "Metalama.Patterns.Observability.$(PackagePreviewVersion).nupkg",
         "Flashtrace.$(PackageVersion).nupkg",
         "Flashtrace.Formatters.$(PackageVersion).nupkg" ),
     Dependencies = new[] { DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions },

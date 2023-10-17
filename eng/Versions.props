@@ -51,7 +51,7 @@
 
     <!-- Override versions of preview packages -->
     <PropertyGroup>
-        <NotifyPropertyChangedVersion>$(MetalamaPatternsPreviewVersion)</NotifyPropertyChangedVersion>
+        <ObservabilityVersion>$(MetalamaPatternsPreviewVersion)</ObservabilityVersion>
     </PropertyGroup>
 
     <PropertyGroup>
