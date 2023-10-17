@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.UnitTests.Assets.Core;
@@ -130,4 +131,91 @@ public abstract class ExistingAbstractInpcImplWithValidOPCMethod : INotifyProper
     {
         this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
+}
+
+[NotifyPropertyChanged]
+public partial class FieldBackedInpcProperty
+{
+    public FieldBackedInpcProperty()
+    {
+        this._value = new();
+    }
+
+    public void SetValue( Simple v ) => this._value = v;
+
+#pragma warning disable IDE0032 // Use auto property
+    private Simple _value;
+#pragma warning restore IDE0032 // Use auto property
+
+#pragma warning disable IDE0032 // Use auto property
+    
+    // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+    public Simple P1 => this._value;
+#pragma warning restore IDE0032 // Use auto property
+
+    public int P2 => this._value.S1;
+}
+
+[NotifyPropertyChanged]
+public partial class FieldBackedIntProperty
+{
+    public void SetValue( int v ) => this._value = v;
+
+#pragma warning disable IDE0032 // Use auto property
+    private int _value;
+#pragma warning restore IDE0032 // Use auto property
+
+#pragma warning disable IDE0032 // Use auto property
+
+    // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+    // ReSharper disable once MemberCanBePrivate.Global
+    public int P1 => this._value;
+#pragma warning restore IDE0032 // Use auto property
+
+    public int P2 => this.P1;
+}
+
+[NotifyPropertyChanged]
+public partial class PrivateIntProperty
+{
+    public void SetP1( int v ) => this.P1 = v;
+    
+    private int P1 { get; set; }
+
+    public int P2 => this.P1;
+}
+
+[NotifyPropertyChanged]
+public partial class PrivateInpcProperty
+{
+    public PrivateInpcProperty()
+    {
+        this.P1 = new Simple();
+    }
+
+    public void SetP1( Simple v ) => this.P1 = v;
+
+    private Simple P1 { get; set; }
+
+    public int P2 => this.P1.S1;    
+}
+
+[ExcludeAspect( typeof(NotifyPropertyChangedAttribute) )]
+public class PrivateInpcPropertyWithExposedOnChildPropertyChanged : PrivateInpcProperty
+{
+    protected override void OnChildPropertyChanged( string parentPropertyPath, string propertyName )
+    {
+        this.ExposeOnChildPropertyChanged?.Invoke( parentPropertyPath, propertyName );
+        base.OnChildPropertyChanged( parentPropertyPath, propertyName );
+    }
+
+    public event Action<string, string>? ExposeOnChildPropertyChanged;
+}
+
+[NotifyPropertyChanged]
+public partial class ReferenceToNonInpcPropertyOfTargetType
+{
+    public int P1 { get; set; }
+
+    public int P2 => this.P1;
 }

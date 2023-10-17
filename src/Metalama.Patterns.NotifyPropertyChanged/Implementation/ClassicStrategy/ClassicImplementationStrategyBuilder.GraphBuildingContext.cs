@@ -41,6 +41,9 @@ internal sealed partial class ClassicImplementationStrategyBuilder
             return options.IsSafe == true;
         }
 
+        public bool IsAutoPropertyOrField( ISymbol symbol )
+            => this._strategyBuilder._builder.Target.Compilation.GetDeclaration( symbol ) is IFieldOrProperty { IsAutoPropertyOrField: true };
+
         public void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null )
         {
             this.HasReportedErrors |= diagnostic.Definition.Severity == Severity.Error;

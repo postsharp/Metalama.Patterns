@@ -88,8 +88,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
             // Introduce methods like UpdateA1B1()
             this.IntroduceUpdateMethods();
 
-            // Override auto properties
-            this.ProcessAutoProperties();
+            this.ProcessAutoPropertiesAndReferencedFields();
 
             this.AddPropertyPathsForOnChildPropertyChangedMethodAttribute();
 
@@ -384,26 +383,37 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         }
     }
 
-    private void ProcessAutoProperties()
+    [CompileTime]
+    private record struct MemberAndNode( IFieldOrProperty FieldOrProperty, ClassicProcessingNode? Node );
+
+    private void ProcessAutoPropertiesAndReferencedFields()
     {
         var target = this._builder.Target;
 
-        // PS appears to consider all instance properties regardless of accessibility.
-        var autoProperties =
+        // Override all auto properties, and only those fields that are referenced in the graph.
+
+        var toProcess =
             target.Properties
+                .Select( p => new MemberAndNode( p, this.DependencyGraph.Children.FirstOrDefault( n => n.FieldOrProperty == p ) ) )
+                .Concat(
+                    this._dependencyGraph.Value
+                        .Children
+                        .Where( n => n.FieldOrProperty.DeclarationKind == DeclarationKind.Field )
+                        .Select( n => new MemberAndNode( n.FieldOrProperty, n ) ) )
                 .Where(
-                    p =>
-                        p is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !p.Attributes.Any( this._assets.IgnoreAutoChangeNotificationAttribute ) )
+                    memberAndNode =>
+                        memberAndNode.FieldOrProperty is { IsStatic: false, IsAutoPropertyOrField: true }
+                        && !memberAndNode.FieldOrProperty.Attributes.Any( this._assets.IgnoreAutoChangeNotificationAttribute ) )
                 .ToList();
 
-        foreach ( var p in autoProperties )
+        foreach ( var memberAndNode in toProcess )
         {
-            var propertyTypeInstrumentationKind = this._inpcInstrumentationKindLookup.Get( p.Type );
+            var fp = memberAndNode.FieldOrProperty;
+            var node = memberAndNode.Node;
+            var propertyTypeInstrumentationKind = this._inpcInstrumentationKindLookup.Get( fp.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
-            var node = this.DependencyGraph.Children.FirstOrDefault( n => n.FieldOrProperty == p );
 
-            switch ( p.Type.IsReferenceType )
+            switch ( fp.Type.IsReferenceType )
             {
                 case true:
 
@@ -418,26 +428,33 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                         {
                             handlerField = this.GetOrCreateHandlerField( node! );
                             subscribeMethod = this.GetOrCreateRootPropertySubscribeMethod( node! );
-                            this._propertyPathsForOnChildPropertyChangedMethodAttribute.Add( p.Name );
+                            
+                            if ( fp.DeclarationKind == DeclarationKind.Property )
+                            {
+                                this._propertyPathsForOnChildPropertyChangedMethodAttribute.Add( fp.Name );
+                            }
 
-                            if ( p.InitializerExpression != null )
+                            if ( fp.InitializerExpression != null )
                             {
                                 this._builder.Advice.WithTemplateProvider( Templates.Provider )
                                     .AddInitializer(
                                         this._builder.Target,
                                         nameof(Templates.SubscribeInitializer),
                                         InitializerKind.BeforeInstanceConstructor,
-                                        args: new { fieldOrProperty = p, subscribeMethod } );
+                                        args: new { fieldOrProperty = fp, subscribeMethod } );
                             }
                         }
                         else
                         {
-                            this._propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.Add( p.Name );
+                            if ( fp.DeclarationKind == DeclarationKind.Property )
+                            {
+                                this._propertyNamesForOnUnmonitoredObservablePropertyChangedMethodAttribute.Add( fp.Name );
+                            }
                         }
 
                         this._builder.Advice.WithTemplateProvider( Templates.Provider )
                             .OverrideAccessors(
-                                p,
+                                fp,
                                 setTemplate: nameof(Templates.OverrideInpcRefTypePropertySetter),
                                 args: new { deferredExecutionContext = this._deferredTemplateExecutionContext, handlerField, node, subscribeMethod } );
                     }
@@ -445,7 +462,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                     {
                         this._builder.Advice.WithTemplateProvider( Templates.Provider )
                             .OverrideAccessors(
-                                p,
+                                fp,
                                 setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
                                 args: new
                                 {
@@ -460,13 +477,13 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
                 case false:
 
-                    var comparisonKind = p.Type is INamedType nt && nt.SpecialType != SpecialType.ValueTask_T
+                    var comparisonKind = fp.Type is INamedType nt && nt.SpecialType != SpecialType.ValueTask_T
                         ? EqualityComparisonKind.EqualityOperator
                         : EqualityComparisonKind.DefaultEqualityComparer;
 
                     this._builder.Advice.WithTemplateProvider( Templates.Provider )
                         .OverrideAccessors(
-                            p,
+                            fp,
                             setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
                             args: new
                             {

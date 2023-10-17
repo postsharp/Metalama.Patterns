@@ -381,6 +381,43 @@ public class A
 
     [Trait( "Supported", "Yes" )]
     [Fact]
+    public void TimeSpan()
+    {
+        using var testContext = this.CreateTestContext();
+        
+        const string code = @"
+using System;
+public class A
+{
+    public TimeSpan X { get; set; }
+
+    public long Y => DateTime.Now.Add( this.X ).Ticks;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+
+        const string expected = @"<root>
+  X [ Y ]
+  Y
+";
+
+        diagnostics.Should().BeEmpty();
+        result.ToString().Should().Be( expected );
+    }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
     public void StringSplitAndJoin()
     {
         using var testContext = this.CreateTestContext();
@@ -1073,5 +1110,352 @@ public class A
 
         diagnostics.Should().Equal( "LAMA5161: Field or property type does not implement INotifyPropertyChanged. (B)@(12,22)-(12,24)" );
         result.ToString().Should().Be( expected );
+    }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void StaticReadOnlyPrimitiveFieldOfOtherType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public static class Other
+{
+    public static readonly int Foo = 42;
+}
+
+public class A
+{
+    public int X => Other.Foo;
+
+    public int Y { get; set; }
+
+    public int Z => this.X + this.Y;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        const string expected = @"<root>
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+
+        result.ToString().Should().Be( expected );
+        diagnostics.Should().BeEmpty();
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    [Trait( "Supported", "No" )]
+    [Fact]
+    public void StaticMutablePrimitiveFieldOfOtherType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public static class Other
+{
+    public static int Foo = 42;
+}
+
+public class A
+{
+    public int X => Other.Foo;
+
+    public int Y { get; set; }
+
+    public int Z => this.X + this.Y;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        const string expected = @"<root>
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+
+        result.ToString().Should().Be( expected );
+        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(8,26)-(8,29)" );
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    [Trait( "Supported", "No" )]
+    [Fact]
+    public void StaticReadOnlyNonPrimitiveFieldOfOtherType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class B
+{
+    public int Q => 42;
+}
+public static class Other
+{
+    public static readonly B Foo;
+}
+public class A
+{
+    public int X => Other.Foo.Q;
+
+    public int Y { get; set; }
+
+    public int Z => this.X + this.Y;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        const string expected = @"<root>
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+
+        result.ToString().Should().Be( expected );
+        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(11,26)-(11,29)" );
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void PublicStaticReadOnlyPrimitiveFieldOfTargetType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class A
+{
+    public static readonly int Foo = 42;
+
+    public int X => Foo;
+
+    public int Y { get; set; }
+
+    public int Z => this.X + this.Y;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        const string expected = @"<root>
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+
+        result.ToString().Should().Be( expected );
+        diagnostics.Should().BeEmpty();
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    [Trait( "Supported", "No" )]
+    [Fact]
+    public void PrivateStaticMutablePrimitiveFieldOfTargetType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class A
+{
+    private static int Foo = 42;
+
+    public int X => Foo;
+
+    public int Y { get; set; }
+
+    public int Z => this.X + this.Y;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        const string expected = @"<root>
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+
+        result.ToString().Should().Be( expected );
+        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void PrivateMutablePrimitiveFieldOfTargetType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class A
+{
+    private int _foo = 42;
+
+    public int X => this._foo;
+
+    public int Y { get; set; }
+
+    public int Z => this.X + this.Y;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        const string expected = @"<root>
+  _foo [ X, Z ]
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+
+        result.ToString().Should().Be( expected );
+        diagnostics.Should().BeEmpty();
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void PrivateMutableNonPrimitiveFieldOfTargetType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class B
+{
+    public int Q => 42;
+}
+public class A
+{
+    private B _foo;
+
+    public int X => this._foo.Q;
+
+    public int Y { get; set; }
+
+    public int Z => this.X + this.Y;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        const string expected = @"<root>
+  _foo
+    Q [ X, Z ]
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+
+        result.ToString().Should().Be( expected );
+        diagnostics.Should().BeEmpty();
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    [Trait( "Supported", "No" )]
+    [Fact]
+    public void PublicStaticMutablePrimitiveFieldOfTargetType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+public class A
+{
+    public static int Foo = 42;
+
+    public int X => Foo;
+
+    public int Y { get; set; }
+
+    public int Z => this.X + this.Y;
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        const string expected = @"<root>
+  X [ Z ]
+  Y [ Z ]
+  Z
+";
+
+        result.ToString().Should().Be( expected );
+        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
+
+        // this.TestOutput.WriteLines( diagnostics );
+        // this.TestOutput.WriteLine( result.ToString() );
     }
 }

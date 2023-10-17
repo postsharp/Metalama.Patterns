@@ -37,6 +37,7 @@ internal static partial class DependencyGraph
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
+        var assets = type.Compilation.Cache.GetOrAdd( c => new RoslynAssets( c.GetRoslynCompilation() ) );
         var tree = new Node();
 
         foreach ( var p in type.Properties )
@@ -53,6 +54,7 @@ internal static partial class DependencyGraph
                 tree,
                 propertySymbol,
                 context,
+                assets,
                 trace,
                 cancellationToken );
         }

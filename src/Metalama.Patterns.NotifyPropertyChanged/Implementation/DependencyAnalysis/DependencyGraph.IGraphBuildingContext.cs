@@ -22,5 +22,7 @@ internal static partial class DependencyGraph
         /// Configuration is by <see cref="Options.SafeForDependencyAnalysisAttribute"/> or <see cref="Options.DependencyAnalysisOptions"/>.
         /// </remarks>
         bool IsConfiguredAsSafe( ISymbol symbol );
+
+        bool IsAutoPropertyOrField( ISymbol symbol );
     }
 }
