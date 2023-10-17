@@ -193,7 +193,9 @@ internal static partial class DependencyGraph
                                         // Warn if this is a non-leaf reference to an INPC non-auto property of the target type because we can't
                                         // (yet) track changes to children of indirectly-referenced INPC properties.
 
-                                        if ( !this._context.IsAutoPropertyOrField( sr.Symbol ) && this._context.TreatAsImplementingInpc( fieldOrPropertyType ) )
+                                        if ( !this._context.IsAutoPropertyOrField( sr.Symbol )
+                                             && this._context.TreatAsImplementingInpc( fieldOrPropertyType )
+                                             && sr.Symbol.ContainingType.Equals( this._declaringType ) )
                                         {
                                             this._context.ReportDiagnostic(
                                                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
