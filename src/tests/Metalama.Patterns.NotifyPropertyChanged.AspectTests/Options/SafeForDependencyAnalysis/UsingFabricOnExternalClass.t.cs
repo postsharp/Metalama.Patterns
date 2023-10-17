@@ -1,1 +1,18 @@
-// Pending TP-33954: Error LAMA0041 on `UsingFabricOnExternalClass`: `'Exception of type 'Metalama.Framework.Engine.AssertionFailedException' thrown while executing BuildAspect for aspect [Metalama.Patterns.NotifyPropertyChanged.NotifyPropertyChangedAttribute] applied to 'UsingFabricOnExternalClass': The reference to IHierarchicalOptions must not be not null. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+[NotifyPropertyChanged]
+public class UsingFabricOnExternalClass : global::System.ComponentModel.INotifyPropertyChanged
+{
+  public int Count => ExternalClass.Foo();
+  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
+  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  {
+  }
+  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  {
+    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+  }
+  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  {
+  }
+  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+}
