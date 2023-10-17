@@ -7,11 +7,11 @@ public partial class StaticOnChangingInstance : DependencyObject
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.FooProperty));
+      return (int)GetValue(FooProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.FooProperty, value);
+      this.SetValue(StaticOnChangingInstance.FooProperty, value);
     }
   }
   private static void OnFooChanging(StaticOnChangingInstance instance)
@@ -22,11 +22,11 @@ public partial class StaticOnChangingInstance : DependencyObject
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.AcceptsDependencyObjectProperty));
+      return (int)GetValue(AcceptsDependencyObjectProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.AcceptsDependencyObjectProperty, value);
+      this.SetValue(StaticOnChangingInstance.AcceptsDependencyObjectProperty, value);
     }
   }
   private static void OnAcceptsDependencyObjectChanging(DependencyObject instance)
@@ -37,44 +37,44 @@ public partial class StaticOnChangingInstance : DependencyObject
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.AcceptsObjectProperty));
+      return (int)GetValue(AcceptsObjectProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.AcceptsObjectProperty, value);
+      this.SetValue(StaticOnChangingInstance.AcceptsObjectProperty, value);
     }
   }
   private static void OnAcceptsObjectChanging(object instance)
   {
   }
-  public static readonly global::System.Windows.DependencyProperty AcceptsDependencyObjectProperty;
-  public static readonly global::System.Windows.DependencyProperty AcceptsObjectProperty;
-  public static readonly global::System.Windows.DependencyProperty FooProperty;
+  public static readonly DependencyProperty AcceptsDependencyObjectProperty;
+  public static readonly DependencyProperty AcceptsObjectProperty;
+  public static readonly DependencyProperty FooProperty;
   static StaticOnChangingInstance()
   {
-    object CoerceValue_3(global::System.Windows.DependencyObject d_2, object value_2)
+    object CoerceValue_3(DependencyObject d_2, object value_2)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.OnAcceptsObjectChanging(d_2);
-      return (global::System.Object)value_2;
+      StaticOnChangingInstance.OnAcceptsObjectChanging(d_2);
+      return value_2;
     }
-    var metadata_2 = new global::System.Windows.PropertyMetadata();
-    metadata_2.CoerceValueCallback = (global::System.Windows.CoerceValueCallback)CoerceValue_3;
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.AcceptsObjectProperty = global::System.Windows.DependencyProperty.Register("AcceptsObject", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance), metadata_2);
-    object CoerceValue_2(global::System.Windows.DependencyObject d_1, object value_1)
+    var metadata_2 = new PropertyMetadata();
+    metadata_2.CoerceValueCallback = CoerceValue_3;
+    StaticOnChangingInstance.AcceptsObjectProperty = DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticOnChangingInstance), metadata_2);
+    object CoerceValue_2(DependencyObject d_1, object value_1)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.OnAcceptsDependencyObjectChanging(d_1);
-      return (global::System.Object)value_1;
+      StaticOnChangingInstance.OnAcceptsDependencyObjectChanging(d_1);
+      return value_1;
     }
-    var metadata_1 = new global::System.Windows.PropertyMetadata();
-    metadata_1.CoerceValueCallback = (global::System.Windows.CoerceValueCallback)CoerceValue_2;
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.AcceptsDependencyObjectProperty = global::System.Windows.DependencyProperty.Register("AcceptsDependencyObject", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance), metadata_1);
-    object CoerceValue_1(global::System.Windows.DependencyObject d, object value)
+    var metadata_1 = new PropertyMetadata();
+    metadata_1.CoerceValueCallback = CoerceValue_2;
+    StaticOnChangingInstance.AcceptsDependencyObjectProperty = DependencyProperty.Register("AcceptsDependencyObject", typeof(int), typeof(StaticOnChangingInstance), metadata_1);
+    object CoerceValue_1(DependencyObject d, object value)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.OnFooChanging((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance)d);
-      return (global::System.Object)value;
+      StaticOnChangingInstance.OnFooChanging((StaticOnChangingInstance)d);
+      return value;
     }
-    var metadata = new global::System.Windows.PropertyMetadata();
-    metadata.CoerceValueCallback = (global::System.Windows.CoerceValueCallback)CoerceValue_1;
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangingInstance.StaticOnChangingInstance), metadata);
+    var metadata = new PropertyMetadata();
+    metadata.CoerceValueCallback = CoerceValue_1;
+    StaticOnChangingInstance.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingInstance), metadata);
   }
 }

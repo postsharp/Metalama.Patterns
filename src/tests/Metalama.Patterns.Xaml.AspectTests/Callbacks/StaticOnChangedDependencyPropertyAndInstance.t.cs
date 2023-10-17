@@ -7,11 +7,11 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.FooProperty));
+      return (int)GetValue(FooProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.FooProperty, value);
+      this.SetValue(StaticOnChangedDependencyPropertyAndInstance.FooProperty, value);
     }
   }
   private static void OnFooChanged(DependencyProperty d, StaticOnChangedDependencyPropertyAndInstance instance)
@@ -22,11 +22,11 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty));
+      return (int)GetValue(AcceptsDependencyObjectForInstanceProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty, value);
+      this.SetValue(StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty, value);
     }
   }
   private static void OnAcceptsDependencyObjectForInstanceChanged(DependencyProperty d, DependencyObject instance)
@@ -37,35 +37,35 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty));
+      return (int)GetValue(AcceptsObjectForInstanceProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty, value);
+      this.SetValue(StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty, value);
     }
   }
   private static void OnAcceptsObjectForInstanceChanged(DependencyProperty d, object instance)
   {
   }
-  public static readonly global::System.Windows.DependencyProperty AcceptsDependencyObjectForInstanceProperty;
-  public static readonly global::System.Windows.DependencyProperty AcceptsObjectForInstanceProperty;
-  public static readonly global::System.Windows.DependencyProperty FooProperty;
+  public static readonly DependencyProperty AcceptsDependencyObjectForInstanceProperty;
+  public static readonly DependencyProperty AcceptsObjectForInstanceProperty;
+  public static readonly DependencyProperty FooProperty;
   static StaticOnChangedDependencyPropertyAndInstance()
   {
-    void PropertyChanged_2(global::System.Windows.DependencyObject d_3, global::System.Windows.DependencyPropertyChangedEventArgs e_2)
+    void PropertyChanged_2(DependencyObject d_3, DependencyPropertyChangedEventArgs e_2)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.OnAcceptsObjectForInstanceChanged(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty, d_3);
+      StaticOnChangedDependencyPropertyAndInstance.OnAcceptsObjectForInstanceChanged(StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty, d_3);
     }
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty = global::System.Windows.DependencyProperty.Register("AcceptsObjectForInstance", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance), new global::System.Windows.PropertyMetadata((global::System.Windows.PropertyChangedCallback)PropertyChanged_2));
-    void PropertyChanged_1(global::System.Windows.DependencyObject d_2, global::System.Windows.DependencyPropertyChangedEventArgs e_1)
+    StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty = DependencyProperty.Register("AcceptsObjectForInstance", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged_2));
+    void PropertyChanged_1(DependencyObject d_2, DependencyPropertyChangedEventArgs e_1)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.OnAcceptsDependencyObjectForInstanceChanged(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty, d_2);
+      StaticOnChangedDependencyPropertyAndInstance.OnAcceptsDependencyObjectForInstanceChanged(StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty, d_2);
     }
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty = global::System.Windows.DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance), new global::System.Windows.PropertyMetadata((global::System.Windows.PropertyChangedCallback)PropertyChanged_1));
-    void PropertyChanged(global::System.Windows.DependencyObject d_1, global::System.Windows.DependencyPropertyChangedEventArgs e)
+    StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty = DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged_1));
+    void PropertyChanged(DependencyObject d_1, DependencyPropertyChangedEventArgs e)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.OnFooChanged(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.FooProperty, (global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance)d_1);
+      StaticOnChangedDependencyPropertyAndInstance.OnFooChanged(StaticOnChangedDependencyPropertyAndInstance.FooProperty, (StaticOnChangedDependencyPropertyAndInstance)d_1);
     }
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyPropertyAndInstance.StaticOnChangedDependencyPropertyAndInstance), new global::System.Windows.PropertyMetadata((global::System.Windows.PropertyChangedCallback)PropertyChanged));
+    StaticOnChangedDependencyPropertyAndInstance.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged));
   }
 }

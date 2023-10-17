@@ -1,5 +1,5 @@
 [NotifyPropertyChanged]
-public sealed class SealedInpcAutoPropertyWithRef : global::System.ComponentModel.INotifyPropertyChanged
+public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
 {
   private SimpleInpcByHand _x = default !;
   public SimpleInpcByHand X
@@ -10,7 +10,7 @@ public sealed class SealedInpcAutoPropertyWithRef : global::System.ComponentMode
     }
     set
     {
-      if (!global::System.Object.ReferenceEquals(value, this._x))
+      if (!object.ReferenceEquals(value, this._x))
       {
         var oldValue = this._x;
         if (oldValue != null)
@@ -25,23 +25,23 @@ public sealed class SealedInpcAutoPropertyWithRef : global::System.ComponentMode
     }
   }
   public int Y => this.X.A;
-  private global::System.ComponentModel.PropertyChangedEventHandler? _onXPropertyChangedHandler;
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { "X" })]
-  private void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  private PropertyChangedEventHandler? _onXPropertyChangedHandler;
+  [OnChildPropertyChangedMethod(new string[] { "X" })]
+  private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  private void OnPropertyChanged(global::System.String propertyName)
+  private void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  private void SubscribeToX(global::Metalama.Patterns.NotifyPropertyChanged.AspectTests.Include.SimpleInpcByHand value)
+  private void SubscribeToX(SimpleInpcByHand value)
   {
     if (value != null)
     {
-      this._onXPropertyChangedHandler ??= (global::System.ComponentModel.PropertyChangedEventHandler)OnChildPropertyChanged_1;
+      this._onXPropertyChangedHandler ??= OnChildPropertyChanged_1;
       value.PropertyChanged += this._onXPropertyChangedHandler;
     }
-    void OnChildPropertyChanged_1(object? sender, global::System.ComponentModel.PropertyChangedEventArgs e)
+    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;
@@ -51,9 +51,9 @@ public sealed class SealedInpcAutoPropertyWithRef : global::System.ComponentMode
           this.OnChildPropertyChanged("X", "A");
           return;
         }
-        this.OnChildPropertyChanged("X", (global::System.String)propertyName);
+        this.OnChildPropertyChanged("X", propertyName);
       }
     }
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }

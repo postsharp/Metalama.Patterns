@@ -7,23 +7,23 @@ public partial class InstanceOnChangedNoParameters : DependencyObject
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedNoParameters.InstanceOnChangedNoParameters.FooProperty));
+      return (int)GetValue(FooProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedNoParameters.InstanceOnChangedNoParameters.FooProperty, value);
+      this.SetValue(InstanceOnChangedNoParameters.FooProperty, value);
     }
   }
   private void OnFooChanged()
   {
   }
-  public static readonly global::System.Windows.DependencyProperty FooProperty;
+  public static readonly DependencyProperty FooProperty;
   static InstanceOnChangedNoParameters()
   {
-    void PropertyChanged(global::System.Windows.DependencyObject d, global::System.Windows.DependencyPropertyChangedEventArgs e)
+    void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      ((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedNoParameters.InstanceOnChangedNoParameters)d).OnFooChanged();
+      ((InstanceOnChangedNoParameters)d).OnFooChanged();
     }
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedNoParameters.InstanceOnChangedNoParameters.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangedNoParameters.InstanceOnChangedNoParameters), new global::System.Windows.PropertyMetadata((global::System.Windows.PropertyChangedCallback)PropertyChanged));
+    InstanceOnChangedNoParameters.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangedNoParameters), new PropertyMetadata(PropertyChanged));
   }
 }

@@ -7,26 +7,26 @@ public partial class InstanceOnChangingDependencyProperty : DependencyObject
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingDependencyProperty.InstanceOnChangingDependencyProperty.FooProperty));
+      return (int)GetValue(FooProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingDependencyProperty.InstanceOnChangingDependencyProperty.FooProperty, value);
+      this.SetValue(InstanceOnChangingDependencyProperty.FooProperty, value);
     }
   }
   private void OnFooChanging(DependencyProperty d)
   {
   }
-  public static readonly global::System.Windows.DependencyProperty FooProperty;
+  public static readonly DependencyProperty FooProperty;
   static InstanceOnChangingDependencyProperty()
   {
-    object CoerceValue_1(global::System.Windows.DependencyObject d_1, object value)
+    object CoerceValue_1(DependencyObject d_1, object value)
     {
-      ((global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingDependencyProperty.InstanceOnChangingDependencyProperty)d_1).OnFooChanging(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingDependencyProperty.InstanceOnChangingDependencyProperty.FooProperty);
-      return (global::System.Object)value;
+      ((InstanceOnChangingDependencyProperty)d_1).OnFooChanging(InstanceOnChangingDependencyProperty.FooProperty);
+      return value;
     }
-    var metadata = new global::System.Windows.PropertyMetadata();
-    metadata.CoerceValueCallback = (global::System.Windows.CoerceValueCallback)CoerceValue_1;
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingDependencyProperty.InstanceOnChangingDependencyProperty.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.InstanceOnChangingDependencyProperty.InstanceOnChangingDependencyProperty), metadata);
+    var metadata = new PropertyMetadata();
+    metadata.CoerceValueCallback = CoerceValue_1;
+    InstanceOnChangingDependencyProperty.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangingDependencyProperty), metadata);
   }
 }

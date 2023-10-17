@@ -13,16 +13,16 @@ public class DefaultOptions : DependencyObject
   {
     get
     {
-      return ((global::System.Collections.Generic.List<global::System.Int32>)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.DefaultOptions.DefaultOptions.FooProperty));
+      return (List<int>)GetValue(FooProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.DefaultOptions.DefaultOptions.FooProperty, value);
+      this.SetValue(DefaultOptions.FooProperty, value);
     }
   }
-  public static readonly global::System.Windows.DependencyProperty FooProperty;
+  public static readonly DependencyProperty FooProperty;
   static DefaultOptions()
   {
-    global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.DefaultOptions.DefaultOptions.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Collections.Generic.List<global::System.Int32>), typeof(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.DefaultOptions.DefaultOptions), new global::System.Windows.PropertyMetadata(((global::System.Object)((global::System.Collections.Generic.List<global::System.Int32>)InitMethod()))));
+    DefaultOptions.FooProperty = DependencyProperty.Register("Foo", typeof(List<int>), typeof(DefaultOptions), new PropertyMetadata(InitMethod()));
   }
 }

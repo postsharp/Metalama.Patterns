@@ -7,16 +7,16 @@ public partial class NoCallbacks : DependencyObject
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.NoCallbacks.NoCallbacks.FooProperty));
+      return (int)GetValue(FooProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.NoCallbacks.NoCallbacks.FooProperty, value);
+      this.SetValue(NoCallbacks.FooProperty, value);
     }
   }
-  public static readonly global::System.Windows.DependencyProperty FooProperty;
+  public static readonly DependencyProperty FooProperty;
   static NoCallbacks()
   {
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.NoCallbacks.NoCallbacks.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.NoCallbacks.NoCallbacks));
+    NoCallbacks.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(NoCallbacks));
   }
 }

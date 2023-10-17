@@ -1,6 +1,8 @@
+using System.ComponentModel;
+using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests.ChildPropertiesFourDeep;
 [NotifyPropertyChanged]
-public partial class A : global::System.ComponentModel.INotifyPropertyChanged
+public partial class A : INotifyPropertyChanged
 {
   public A()
   {
@@ -15,7 +17,7 @@ public partial class A : global::System.ComponentModel.INotifyPropertyChanged
     }
     set
     {
-      if ((this._a1 != value))
+      if (this._a1 != value)
       {
         this._a1 = value;
         this.OnPropertyChanged("A1");
@@ -31,7 +33,7 @@ public partial class A : global::System.ComponentModel.INotifyPropertyChanged
     }
     set
     {
-      if (!global::System.Object.ReferenceEquals(value, this._a2))
+      if (!object.ReferenceEquals(value, this._a2))
       {
         var oldValue = this._a2;
         if (oldValue != null)
@@ -46,31 +48,31 @@ public partial class A : global::System.ComponentModel.INotifyPropertyChanged
     }
   }
   public int A3 => this.A2.B2.C2.D1;
-  private global::Metalama.Patterns.NotifyPropertyChanged.AspectTests.ChildPropertiesFourDeep.C? _lastA2B2;
-  private global::Metalama.Patterns.NotifyPropertyChanged.AspectTests.ChildPropertiesFourDeep.D? _lastA2B2C2;
-  private global::System.ComponentModel.PropertyChangedEventHandler? _onA2B2C2PropertyChangedHandler;
-  private global::System.ComponentModel.PropertyChangedEventHandler? _onA2B2PropertyChangedHandler;
-  private global::System.ComponentModel.PropertyChangedEventHandler? _onA2PropertyChangedHandler;
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { "A2", "A2.B2", "A2.B2.C2" })]
-  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  private C? _lastA2B2;
+  private D? _lastA2B2C2;
+  private PropertyChangedEventHandler? _onA2B2C2PropertyChangedHandler;
+  private PropertyChangedEventHandler? _onA2B2PropertyChangedHandler;
+  private PropertyChangedEventHandler? _onA2PropertyChangedHandler;
+  [OnChildPropertyChangedMethod(new string[] { "A2", "A2.B2", "A2.B2.C2" })]
+  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
-  private void SubscribeToA2(global::Metalama.Patterns.NotifyPropertyChanged.AspectTests.ChildPropertiesFourDeep.B value)
+  private void SubscribeToA2(B value)
   {
     if (value != null)
     {
-      this._onA2PropertyChangedHandler ??= (global::System.ComponentModel.PropertyChangedEventHandler)OnChildPropertyChanged_1;
+      this._onA2PropertyChangedHandler ??= OnChildPropertyChanged_1;
       value.PropertyChanged += this._onA2PropertyChangedHandler;
     }
-    void OnChildPropertyChanged_1(object? sender, global::System.ComponentModel.PropertyChangedEventArgs e)
+    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;
@@ -79,24 +81,24 @@ public partial class A : global::System.ComponentModel.INotifyPropertyChanged
           this.UpdateA2B2();
           return;
         }
-        this.OnChildPropertyChanged("A2", (global::System.String)propertyName);
+        this.OnChildPropertyChanged("A2", propertyName);
       }
     }
   }
   private void UpdateA2B2()
   {
     var newValue = A2?.B2;
-    if (!global::System.Object.ReferenceEquals(newValue, this._lastA2B2))
+    if (!object.ReferenceEquals(newValue, this._lastA2B2))
     {
-      if (!global::System.Object.ReferenceEquals(this._lastA2B2, null))
+      if (!object.ReferenceEquals(this._lastA2B2, null))
       {
         this._lastA2B2!.PropertyChanged -= this._onA2B2PropertyChangedHandler;
       }
       if (newValue != null)
       {
-        this._onA2B2PropertyChangedHandler ??= (global::System.ComponentModel.PropertyChangedEventHandler)OnChildPropertyChanged_1;
+        this._onA2B2PropertyChangedHandler ??= OnChildPropertyChanged_1;
         newValue.PropertyChanged += this._onA2B2PropertyChangedHandler;
-        void OnChildPropertyChanged_1(object? sender, global::System.ComponentModel.PropertyChangedEventArgs e)
+        void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
         {
           {
             var propertyName = e.PropertyName;
@@ -105,7 +107,7 @@ public partial class A : global::System.ComponentModel.INotifyPropertyChanged
               this.UpdateA2B2C2();
               return;
             }
-            this.OnChildPropertyChanged("A2.B2", (global::System.String)propertyName);
+            this.OnChildPropertyChanged("A2.B2", propertyName);
           }
         }
       }
@@ -117,17 +119,17 @@ public partial class A : global::System.ComponentModel.INotifyPropertyChanged
   private void UpdateA2B2C2()
   {
     var newValue = A2?.B2?.C2;
-    if (!global::System.Object.ReferenceEquals(newValue, this._lastA2B2C2))
+    if (!object.ReferenceEquals(newValue, this._lastA2B2C2))
     {
-      if (!global::System.Object.ReferenceEquals(this._lastA2B2C2, null))
+      if (!object.ReferenceEquals(this._lastA2B2C2, null))
       {
         this._lastA2B2C2!.PropertyChanged -= this._onA2B2C2PropertyChangedHandler;
       }
       if (newValue != null)
       {
-        this._onA2B2C2PropertyChangedHandler ??= (global::System.ComponentModel.PropertyChangedEventHandler)OnChildPropertyChanged_1;
+        this._onA2B2C2PropertyChangedHandler ??= OnChildPropertyChanged_1;
         newValue.PropertyChanged += this._onA2B2C2PropertyChangedHandler;
-        void OnChildPropertyChanged_1(object? sender, global::System.ComponentModel.PropertyChangedEventArgs e)
+        void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
         {
           {
             var propertyName = e.PropertyName;
@@ -137,7 +139,7 @@ public partial class A : global::System.ComponentModel.INotifyPropertyChanged
               this.OnChildPropertyChanged("A2.B2.C2", "D1");
               return;
             }
-            this.OnChildPropertyChanged("A2.B2.C2", (global::System.String)propertyName);
+            this.OnChildPropertyChanged("A2.B2.C2", propertyName);
           }
         }
       }
@@ -146,10 +148,10 @@ public partial class A : global::System.ComponentModel.INotifyPropertyChanged
       this.OnChildPropertyChanged("A2.B2", "C2");
     }
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }
 [NotifyPropertyChanged]
-public partial class B : global::System.ComponentModel.INotifyPropertyChanged
+public partial class B : INotifyPropertyChanged
 {
   public B()
   {
@@ -164,7 +166,7 @@ public partial class B : global::System.ComponentModel.INotifyPropertyChanged
     }
     set
     {
-      if ((this._b1 != value))
+      if (this._b1 != value)
       {
         this._b1 = value;
         this.OnPropertyChanged("B1");
@@ -180,31 +182,31 @@ public partial class B : global::System.ComponentModel.INotifyPropertyChanged
     }
     set
     {
-      if (!global::System.Object.ReferenceEquals(value, this._b2))
+      if (!object.ReferenceEquals(value, this._b2))
       {
         var oldValue = this._b2;
         this._b2 = value;
-        this.OnUnmonitoredObservablePropertyChanged("B2", (global::System.ComponentModel.INotifyPropertyChanged? )oldValue, (global::System.ComponentModel.INotifyPropertyChanged? )value);
+        this.OnUnmonitoredObservablePropertyChanged("B2", (INotifyPropertyChanged? )oldValue, (INotifyPropertyChanged? )value);
         this.OnPropertyChanged("B2");
       }
     }
   }
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  [OnChildPropertyChangedMethod(new string[] { })]
+  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { "B2" })]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { "B2" })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }
 [NotifyPropertyChanged]
-public partial class C : global::System.ComponentModel.INotifyPropertyChanged
+public partial class C : INotifyPropertyChanged
 {
   public C()
   {
@@ -219,7 +221,7 @@ public partial class C : global::System.ComponentModel.INotifyPropertyChanged
     }
     set
     {
-      if ((this._c1 != value))
+      if (this._c1 != value)
       {
         this._c1 = value;
         this.OnPropertyChanged("C1");
@@ -235,31 +237,31 @@ public partial class C : global::System.ComponentModel.INotifyPropertyChanged
     }
     set
     {
-      if (!global::System.Object.ReferenceEquals(value, this._c2))
+      if (!object.ReferenceEquals(value, this._c2))
       {
         var oldValue = this._c2;
         this._c2 = value;
-        this.OnUnmonitoredObservablePropertyChanged("C2", (global::System.ComponentModel.INotifyPropertyChanged? )oldValue, (global::System.ComponentModel.INotifyPropertyChanged? )value);
+        this.OnUnmonitoredObservablePropertyChanged("C2", (INotifyPropertyChanged? )oldValue, (INotifyPropertyChanged? )value);
         this.OnPropertyChanged("C2");
       }
     }
   }
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  [OnChildPropertyChangedMethod(new string[] { })]
+  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { "C2" })]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { "C2" })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }
 [NotifyPropertyChanged]
-public partial class D : global::System.ComponentModel.INotifyPropertyChanged
+public partial class D : INotifyPropertyChanged
 {
   private int _d1;
   public int D1
@@ -270,7 +272,7 @@ public partial class D : global::System.ComponentModel.INotifyPropertyChanged
     }
     set
     {
-      if ((this._d1 != value))
+      if (this._d1 != value)
       {
         this._d1 = value;
         this.OnPropertyChanged("D1");
@@ -286,24 +288,24 @@ public partial class D : global::System.ComponentModel.INotifyPropertyChanged
     }
     set
     {
-      if ((this._d2 != value))
+      if (this._d2 != value)
       {
         this._d2 = value;
         this.OnPropertyChanged("D2");
       }
     }
   }
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  [OnChildPropertyChangedMethod(new string[] { })]
+  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }

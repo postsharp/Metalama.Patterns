@@ -7,23 +7,23 @@ public partial class StaticOnChangedDependencyProperty : DependencyObject
   {
     get
     {
-      return ((global::System.Int32)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyProperty.StaticOnChangedDependencyProperty.FooProperty));
+      return (int)GetValue(FooProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyProperty.StaticOnChangedDependencyProperty.FooProperty, value);
+      this.SetValue(StaticOnChangedDependencyProperty.FooProperty, value);
     }
   }
   private static void OnFooChanged(DependencyProperty d)
   {
   }
-  public static readonly global::System.Windows.DependencyProperty FooProperty;
+  public static readonly DependencyProperty FooProperty;
   static StaticOnChangedDependencyProperty()
   {
-    void PropertyChanged(global::System.Windows.DependencyObject d_1, global::System.Windows.DependencyPropertyChangedEventArgs e)
+    void PropertyChanged(DependencyObject d_1, DependencyPropertyChangedEventArgs e)
     {
-      global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyProperty.StaticOnChangedDependencyProperty.OnFooChanged(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyProperty.StaticOnChangedDependencyProperty.FooProperty);
+      StaticOnChangedDependencyProperty.OnFooChanged(StaticOnChangedDependencyProperty.FooProperty);
     }
-    global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyProperty.StaticOnChangedDependencyProperty.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Int32), typeof(global::Metalama.Patterns.Xaml.AspectTests.Callbacks.StaticOnChangedDependencyProperty.StaticOnChangedDependencyProperty), new global::System.Windows.PropertyMetadata((global::System.Windows.PropertyChangedCallback)PropertyChanged));
+    StaticOnChangedDependencyProperty.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedDependencyProperty), new PropertyMetadata(PropertyChanged));
   }
 }

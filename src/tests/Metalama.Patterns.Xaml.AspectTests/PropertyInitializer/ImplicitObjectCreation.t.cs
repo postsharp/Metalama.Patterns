@@ -7,16 +7,16 @@ public class ImplicitObjectCreation : DependencyObject
   {
     get
     {
-      return ((global::System.Collections.Generic.List<global::System.Int32>)this.GetValue(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.ImplicitObjectCreation.ImplicitObjectCreation.FooProperty));
+      return (List<int>)GetValue(FooProperty);
     }
     set
     {
-      this.SetValue(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.ImplicitObjectCreation.ImplicitObjectCreation.FooProperty, value);
+      this.SetValue(ImplicitObjectCreation.FooProperty, value);
     }
   }
-  public static readonly global::System.Windows.DependencyProperty FooProperty;
+  public static readonly DependencyProperty FooProperty;
   static ImplicitObjectCreation()
   {
-    global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.ImplicitObjectCreation.ImplicitObjectCreation.FooProperty = global::System.Windows.DependencyProperty.Register("Foo", typeof(global::System.Collections.Generic.List<global::System.Int32>), typeof(global::Metalama.Patterns.Xaml.AspectTests.PropertyInitializer.ImplicitObjectCreation.ImplicitObjectCreation), new global::System.Windows.PropertyMetadata(((global::System.Object)((global::System.Collections.Generic.List<global::System.Int32>)(new(3) { 1, 2, 3 })))));
+    ImplicitObjectCreation.FooProperty = DependencyProperty.Register("Foo", typeof(List<int>), typeof(ImplicitObjectCreation), new PropertyMetadata((List<int>)new(3) { 1, 2, 3 }));
   }
 }
