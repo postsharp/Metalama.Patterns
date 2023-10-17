@@ -11,7 +11,7 @@ public static class FlashtraceSourceFactory
 {
     public static IFlashtraceLoggerFactory DefaultFactory { get; set; } = NullFlashtraceLogger.Instance;
 
-    public static IFlashtraceRoleLoggerFactory Default => DefaultFactory.ForRole( FlashtraceRole.Logging );
+    public static IFlashtraceRoleLoggerFactory Default => DefaultFactory.ForRole( FlashtraceRole.Default );
 
     public static IFlashtraceRoleLoggerFactory ForRole( FlashtraceRole role ) => DefaultFactory.ForRole( role );
 }

@@ -1,9 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Formatters;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Dependencies;
 using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.Caching.Utilities;
 using System.Reflection;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
@@ -38,30 +40,63 @@ public static partial class CachingServiceExtensions
 
     public static void AddDependency( this ICachingService cachingService, ICacheDependency dependency )
     {
-        cachingService.AddDependency( dependency.GetCacheKey() );
+        cachingService.AddDependency( dependency.GetCacheKey( cachingService ) );
+
+        if ( dependency.CascadeDependencies.Count > 0 )
+        {
+            cachingService.AddDependencies( dependency.CascadeDependencies );
+        }
     }
 
     public static void AddDependencies( this ICachingService cachingService, IEnumerable<ICacheDependency> dependencies )
     {
-        cachingService.AddDependencies( dependencies.Select( x => x.GetCacheKey() ) );
+        cachingService.AddDependencies( dependencies.Select( d => d.GetCacheKey( cachingService ) ) );
     }
 
-    public static void AddDependency( this ICachingService cachingService, object dependency )
+    private static IReadOnlyCollection<string> GetAllDependencies(
+        ICachingService cachingService,
+        ICacheDependency dependency,
+        IReadOnlyCollection<ICacheDependency> cascadeDependencies )
+    {
+        // We require the cascadeDependencies parameter to avoid evaluating twice the ICacheDependency.CascadeDependencies property.
+        var allDependencies = new List<string>( 1 + cascadeDependencies.Count ) { dependency.GetCacheKey( cachingService ) };
+        ProcessDependency( cascadeDependencies, 1 );
+
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        void ProcessDependency( IEnumerable<ICacheDependency> theDependencies, int recursion )
+        {
+            if ( recursion > 31 )
+            {
+                throw new ArgumentOutOfRangeException( nameof(dependency), "Excessive recursion level in the tree of dependencies. Is there a cycle?" );
+            }
+
+            foreach ( var d in theDependencies )
+            {
+                allDependencies.Add( d.GetCacheKey( cachingService ) );
+
+                if ( d.CascadeDependencies.Count > 0 )
+                {
+                    ProcessDependency( d.CascadeDependencies, recursion + 1 );
+                }
+            }
+        }
+
+        return allDependencies;
+    }
+
+    public static void AddObjectDependency( this ICachingService cachingService, object dependency )
     {
         switch ( dependency )
         {
-            case ICacheDependency cacheDependency:
-                cachingService.AddDependency( cacheDependency );
-
-                return;
-
-            case string str:
-                cachingService.AddDependency( str );
-
-                return;
+            case ICacheDependency:
+            case string:
+                throw new ArgumentOutOfRangeException(
+                    nameof(dependency),
+                    $"Use the strongly-typed AddDependency method for objects of type '{dependency.GetType()}'." );
 
             default:
-                cachingService.AddDependency( new ObjectDependency( dependency, cachingService ) );
+                var key = cachingService.KeyBuilder.BuildDependencyKey( dependency );
+                cachingService.AddDependency( key );
 
                 return;
         }
@@ -69,31 +104,26 @@ public static partial class CachingServiceExtensions
 
     /// <summary>
     /// Invalidates a cache dependency given an <see cref="object"/>, i.e. removes all cached items that are dependent on that object.
+    /// The cache key is generated from the object using the same mechanism as with parameters, i.e. using <see cref="Flashtrace.Formatters.IFormattable{T}"/>,
+    /// <see cref="Formatter{T}"/>, <see cref="object.ToString"/> or <c>ISpanFormattable</c>.
     /// </summary>
     /// <param name="cachingService">The <see cref="ICachingService"/>.</param>
-    /// <param name="dependency">Typically, an <see cref="object"/>. If a <see cref="string"/>, <see cref="Delegate"/> or <see cref="ICacheDependency"/>
-    /// is passed, the proper overload of the method is invoked. Otherwise, <paramref name="dependency"/> is wrapped into an <see cref="ObjectDependency"/> object.</param>
-    public static void Invalidate( this ICachingService cachingService, object dependency )
+    public static void InvalidateObject( this ICachingService cachingService, object dependency )
     {
         switch ( dependency )
         {
-            case Delegate method:
-                cachingService.InvalidateDelegate( method );
-
-                break;
-
-            case string key:
-                cachingService.Invalidate( key );
-
-                break;
-
-            case ICacheDependency cacheDependency:
-                cachingService.Invalidate( cacheDependency );
-
-                break;
+            case Delegate:
+            case string:
+            case IEnumerable<string>:
+            case ICacheDependency:
+            case IEnumerable<ICacheDependency>:
+                throw new ArgumentOutOfRangeException(
+                    nameof(dependency),
+                    $"Use the strongly-typed Invalidate method for an object of type {dependency.GetType()}." );
 
             default:
-                cachingService.Invalidate( new ObjectDependency( dependency, cachingService ), dependency.GetType() );
+                var key = cachingService.KeyBuilder.BuildDependencyKey( dependency );
+                cachingService.Invalidate( key );
 
                 break;
         }
@@ -101,27 +131,30 @@ public static partial class CachingServiceExtensions
 
     /// <summary>
     /// Asynchronously invalidates a cache dependency given an <see cref="object"/>, i.e. removes all cached items that are dependent on that object.
+    /// The cache key is generated from the object using the same mechanism as with parameters, i.e. using <see cref="Flashtrace.Formatters.IFormattable{T}"/>,
+    /// <see cref="Formatter{T}"/>, <see cref="object.ToString"/> or <c>ISpanFormattable</c>.
     /// </summary>
     /// <param name="cachingService">The <see cref="ICachingService"/>.</param>
-    /// <param name="dependency">Typically, an <see cref="object"/>. If a <see cref="string"/>, <see cref="Delegate"/> or <see cref="ICacheDependency"/>
-    /// is passed, the proper overload of the method is invoked. Otherwise, <paramref name="dependency"/> is wrapped into an <see cref="ObjectDependency"/> object.</param>
+    /// <param name="dependency"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/>.</returns>
-    public static ValueTask InvalidateAsync( this ICachingService cachingService, object dependency, CancellationToken cancellationToken = default )
+    public static ValueTask InvalidateObjectAsync( this ICachingService cachingService, object dependency, CancellationToken cancellationToken = default )
     {
         switch ( dependency )
         {
-            case Delegate method:
-                return cachingService.InvalidateDelegateAsync( method, Array.Empty<object?>(), cancellationToken );
-
-            case string key:
-                return cachingService.InvalidateAsync( key, cancellationToken );
-
-            case ICacheDependency cacheDependency:
-                return cachingService.InvalidateAsync( cacheDependency, cancellationToken );
+            case Delegate:
+            case string:
+            case IEnumerable<string>:
+            case ICacheDependency:
+            case IEnumerable<ICacheDependency>:
+                throw new ArgumentOutOfRangeException(
+                    nameof(dependency),
+                    $"Use the strongly-typed Invalidate method for an object of type {dependency.GetType()}." );
 
             default:
-                return cachingService.InvalidateAsync( new ObjectDependency( dependency, cachingService ), dependency.GetType(), cancellationToken );
+                var key = cachingService.KeyBuilder.BuildDependencyKey( dependency );
+
+                return cachingService.InvalidateAsync( key, cancellationToken );
         }
     }
 
@@ -131,16 +164,23 @@ public static partial class CachingServiceExtensions
     /// <param name="cachingService">The <see cref="ICachingService"/>.</param>
     /// <param name="dependency">A dependency.</param>
     public static void Invalidate( this ICachingService cachingService, ICacheDependency dependency )
-        => cachingService.Invalidate( dependency, dependency.GetType() );
-
-    private static void Invalidate( this ICachingService cachingService, ICacheDependency dependency, Type dependencyType )
     {
         using ( var activity =
-               cachingService.Logger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependencyType ) ) )
+               cachingService.Logger.Default.OpenActivity( Formatted( "Invalidating object dependency of type {DependencyType}", dependency.GetType() ) ) )
         {
             try
             {
-                cachingService.Invalidate( dependency.GetCacheKey() );
+                var cascadeDependencies = dependency.CascadeDependencies;
+
+                if ( cascadeDependencies.Count == 0 )
+                {
+                    cachingService.Invalidate( dependency.GetCacheKey( cachingService ) );
+                }
+                else
+                {
+                    var allDependencies = GetAllDependencies( cachingService, dependency, cascadeDependencies );
+                    cachingService.Invalidate( allDependencies );
+                }
 
                 activity.SetSuccess();
             }
@@ -174,7 +214,17 @@ public static partial class CachingServiceExtensions
         {
             try
             {
-                await cachingService.InvalidateAsync( dependency.GetCacheKey(), cancellationToken );
+                var cascadeDependencies = dependency.CascadeDependencies;
+
+                if ( cascadeDependencies.Count == 0 )
+                {
+                    await cachingService.InvalidateAsync( dependency.GetCacheKey( cachingService ), cancellationToken );
+                }
+                else
+                {
+                    var allDependencies = GetAllDependencies( cachingService, dependency, cascadeDependencies );
+                    await cachingService.InvalidateAsync( allDependencies, cancellationToken );
+                }
 
                 activity.SetSuccess();
             }
@@ -215,11 +265,49 @@ public static partial class CachingServiceExtensions
         }
     }
 
+    public static void Invalidate( this ICachingService cachingService, string dependencyKey, params string[] otherDependencyKeys )
+    {
+        cachingService.Invalidate( otherDependencyKeys.Prepend( dependencyKey ) );
+    }
+
+    /// <summary>
+    /// Invalidates a set of cache dependencies given as <see cref="string"/>, i.e. removes all cache items that are dependent on these dependency keys.
+    /// </summary>
+    /// <param name="cachingService">The <see cref="ICachingService"/>.</param>
+    /// <param name="dependencyKeys">Dependency keys.</param>
+    public static void Invalidate( this ICachingService cachingService, IReadOnlyCollection<string> dependencyKeys )
+    {
+        foreach ( var backend in cachingService.AllBackends )
+        {
+            using ( var activity =
+                   cachingService.Logger.Default.OpenActivity( Formatted( "Invalidate( key = {Key}, backend = {Backend} )", dependencyKeys, backend ) ) )
+            {
+                try
+                {
+                    cachingService.InvalidateImpl( backend, dependencyKeys );
+
+                    activity.SetSuccess();
+                }
+                catch ( Exception e )
+                {
+                    activity.SetException( e );
+
+                    throw;
+                }
+            }
+        }
+    }
+
     private static void InvalidateImpl( this ICachingService cachingService, CachingBackend backend, string dependencyKey )
     {
         cachingService.Logger.Debug.IfEnabled?.Write( Formatted( "The dependency key is {Key}.", dependencyKey ) );
 
         backend.InvalidateDependency( dependencyKey );
+    }
+
+    private static void InvalidateImpl( this ICachingService cachingService, CachingBackend backend, IReadOnlyCollection<string> dependencyKeys )
+    {
+        backend.InvalidateDependencies( dependencyKeys );
     }
 
     /// <summary>
@@ -239,6 +327,44 @@ public static partial class CachingServiceExtensions
                 try
                 {
                     await backend.InvalidateDependencyAsync( dependencyKey, cancellationToken );
+
+                    activity.SetSuccess();
+                }
+                catch ( Exception e )
+                {
+                    activity.SetException( e );
+
+                    throw;
+                }
+            }
+        }
+    }
+
+    public static ValueTask InvalidateAsync( this ICachingService cachingService, string dependencyKey, params string[] otherDependencyKeys )
+    {
+        return cachingService.InvalidateAsync( otherDependencyKeys.Prepend( dependencyKey ) );
+    }
+
+    /// <summary>
+    /// Asynchronously invalidates a cache dependency given as <see cref="string"/>, i.e. removes all cache items that are dependent on this dependency key.
+    /// </summary>
+    /// <param name="cachingService">The <see cref="ICachingService"/>.</param>
+    /// <param name="dependencyKeys"></param>
+    /// <param name="cancellationToken"></param>
+    public static async ValueTask InvalidateAsync(
+        this ICachingService cachingService,
+        IReadOnlyCollection<string> dependencyKeys,
+        CancellationToken cancellationToken = default )
+    {
+        foreach ( var backend in cachingService.AllBackends )
+        {
+            using ( var activity =
+                   cachingService.Logger.Default.OpenAsyncActivity(
+                       Formatted( "InvalidateAsync( keys = {Key}, backend = {Backend} )", dependencyKeys, backend ) ) )
+            {
+                try
+                {
+                    await backend.InvalidateDependenciesAsync( dependencyKeys, cancellationToken );
 
                     activity.SetSuccess();
                 }

@@ -50,8 +50,10 @@ internal static class RedisFactory
     {
         _ = CreateTestInstance( cachingTestOptions, redisSetupFixture );
 
+        IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
+
         var configuration =
-            new RedisCachingBackendConfiguration
+            new RedisCachingBackendConfiguration( connection )
             {
                 KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
                 OwnsConnection = true,
@@ -59,16 +61,14 @@ internal static class RedisFactory
                 RunGarbageCollector = collector
             };
 
-        IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
-
         var backend = CachingBackend.Create(
             b =>
             {
-                var redis = b.Redis( connection ).WithConfiguration( configuration );
+                var redis = (OutOfProcessCachingBackendBuilder) b.Redis( configuration );
 
                 if ( locallyCached )
                 {
-                    return redis.WithLocalLayer();
+                    return redis.WithL1();
                 }
                 else
                 {

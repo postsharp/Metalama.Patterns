@@ -219,7 +219,7 @@ public sealed class FlashtraceSource
     /// <returns>A new <see cref="FlashtraceSource"/> with the specified log levels.</returns>
     public FlashtraceSource WithLevels( FlashtraceLevel defaultLevel, FlashtraceLevel failureLevel ) => new( this.Logger, defaultLevel, failureLevel );
 
-    private FlashtraceLevelSource GetWriteMessage( ref FlashtraceLevelSource? field, FlashtraceLevel level )
+    private FlashtraceLevelSource GetLevelSource( ref FlashtraceLevelSource? field, FlashtraceLevel level )
         => field ??= new FlashtraceLevelSource( this, level );
 
     /// <summary>
@@ -255,7 +255,7 @@ public sealed class FlashtraceSource
     /// <remarks>
     ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
     /// </remarks>
-    public FlashtraceLevelSource Critical => this.GetWriteMessage( ref this._criticalFlashtraceLevelSource, FlashtraceLevel.Critical );
+    public FlashtraceLevelSource Critical => this.GetLevelSource( ref this._criticalFlashtraceLevelSource, FlashtraceLevel.Critical );
 
     /// <summary>
     /// Gets a <see cref="FlashtraceLevelSource"/> that can be used to write messages and open activities with the <see cref="FlashtraceLevel.Error"/> severity.
@@ -263,7 +263,7 @@ public sealed class FlashtraceSource
     /// <remarks>
     ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
     /// </remarks>
-    public FlashtraceLevelSource Error => this.GetWriteMessage( ref this._errorFlashtraceLevelSource, FlashtraceLevel.Error );
+    public FlashtraceLevelSource Error => this.GetLevelSource( ref this._errorFlashtraceLevelSource, FlashtraceLevel.Error );
 
     /// <summary>
     /// Gets a <see cref="FlashtraceLevelSource"/> that can be used to write messages and open activities with the <see cref="FlashtraceLevel.Warning"/> severity.
@@ -271,7 +271,7 @@ public sealed class FlashtraceSource
     /// <remarks>
     ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
     /// </remarks>
-    public FlashtraceLevelSource Warning => this.GetWriteMessage( ref this._warningFlashtraceLevelSource, FlashtraceLevel.Warning );
+    public FlashtraceLevelSource Warning => this.GetLevelSource( ref this._warningFlashtraceLevelSource, FlashtraceLevel.Warning );
 
     /// <summary>
     /// Gets a <see cref="FlashtraceLevelSource"/> that can be used to write messages and open activities with the <see cref="FlashtraceLevel.Info"/> severity.
@@ -279,7 +279,7 @@ public sealed class FlashtraceSource
     /// <remarks>
     ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
     /// </remarks>
-    public FlashtraceLevelSource Information => this.GetWriteMessage( ref this._infoFlashtraceLevelSource, FlashtraceLevel.Info );
+    public FlashtraceLevelSource Information => this.GetLevelSource( ref this._infoFlashtraceLevelSource, FlashtraceLevel.Info );
 
     /// <summary>
     /// Gets a <see cref="FlashtraceLevelSource"/> that can be used to write messages and open activities with the <see cref="FlashtraceLevel.Trace"/> severity.
@@ -287,7 +287,7 @@ public sealed class FlashtraceSource
     /// <remarks>
     ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
     /// </remarks>
-    public FlashtraceLevelSource Trace => this.GetWriteMessage( ref this._traceFlashtraceLevelSource, FlashtraceLevel.Trace );
+    public FlashtraceLevelSource Trace => this.GetLevelSource( ref this._traceFlashtraceLevelSource, FlashtraceLevel.Trace );
 
     /// <summary>
     /// Gets a <see cref="FlashtraceLevelSource"/> that can be used to write messages and open activities with the <see cref="FlashtraceLevel.Debug"/> severity.
@@ -295,7 +295,7 @@ public sealed class FlashtraceSource
     /// <remarks>
     ///   <para>This property is properly optimized. Subsequent calls will return the same instance.</para>
     /// </remarks>
-    public FlashtraceLevelSource Debug => this.GetWriteMessage( ref this._debugFlashtraceLevelSource, FlashtraceLevel.Debug );
+    public FlashtraceLevelSource Debug => this.GetLevelSource( ref this._debugFlashtraceLevelSource, FlashtraceLevel.Debug );
 
     /// <summary>
     /// Emits a log record with the source file and line of the caller.

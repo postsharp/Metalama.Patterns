@@ -3,21 +3,31 @@
 using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Building;
+using Metalama.Patterns.Caching.Implementation;
+using Metalama.Patterns.TestHelpers;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
 
-public abstract class BaseCachingTests
+public abstract class BaseCachingTests : ICachingExceptionObserver
 {
     protected BaseCachingTests( ITestOutputHelper testOutputHelper )
     {
         this.TestOutputHelper = testOutputHelper;
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitLoggerFactory( testOutputHelper ) );
+
+        // ReSharper disable once VirtualMemberCallInConstructor
+        this.AddLogging( serviceCollection, testOutputHelper );
+        serviceCollection.AddSingleton<ICachingExceptionObserver>( this );
+
         this.ServiceProvider = serviceCollection.BuildServiceProvider();
         CachingService.Default = CachingService.CreateUninitialized( this.ServiceProvider );
+    }
+
+    protected virtual void AddLogging( IServiceCollection serviceCollection, ITestOutputHelper testOutputHelper )
+    {
+        serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitFlashtraceLoggerFactory( testOutputHelper ) );
     }
 
     protected ServiceProvider ServiceProvider { get; }
@@ -26,10 +36,7 @@ public abstract class BaseCachingTests
 
     private static void ResetCachingServices()
     {
-        Assert.True(
-            CachingService.Default.DefaultBackend is UninitializedCachingBackend or NullCachingBackend,
-            "Each test has to use the TestProfileConfigurationFactory." );
-
+        CachingService.Default.Dispose();
         var uninitialized = CachingService.CreateUninitialized();
         CachingService.Default = uninitialized;
     }
@@ -62,8 +69,9 @@ public abstract class BaseCachingTests
         Action<CachingTestBuilder>? buildTest = null,
         bool passServiceProvider = true )
     {
-        var backend = CachingBackend.Create( b => b.Memory(), passServiceProvider ? this.ServiceProvider : null );
-        backend.DebugName = name;
+        var backend = CachingBackend.Create(
+            b => b.Memory( new MemoryCachingBackendConfiguration() { DebugName = name } ),
+            passServiceProvider ? this.ServiceProvider : null );
 
         return this.InitializeTest( name, backend, buildTest, passServiceProvider );
     }
@@ -76,4 +84,6 @@ public abstract class BaseCachingTests
 
         return this.InitializeTest( name, backend, buildTest );
     }
+
+    public virtual void OnException( CachingExceptionInfo exceptionInfo ) => exceptionInfo.Rethrow = true;
 }

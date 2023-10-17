@@ -21,14 +21,11 @@ internal sealed class TraceSourceFlashtraceLogger : SimpleFlashtraceLogger
 
     public override IFlashtraceRoleLoggerFactory Factory { get; }
 
-    private static string GetSourceName( FlashtraceRole role )
-    {
-        return "Flashtrace." + role.Name;
-    }
+    private static string GetSourceName( FlashtraceRole role ) => role.Name ?? "Logging";
 
     public static TraceSource GetTraceSource( FlashtraceRole? role = null )
     {
-        var sourceName = GetSourceName( role ?? FlashtraceRole.Logging );
+        var sourceName = GetSourceName( role ?? FlashtraceRole.Default );
 
         return _traceSources.GetOrAdd( sourceName, n => new TraceSource( n ) );
     }

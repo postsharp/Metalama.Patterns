@@ -18,18 +18,25 @@ public static class FlashtraceExtensions
 {
     private static readonly ConcurrentDictionary<CacheKey, FlashtraceSource> _cache = new();
 
-    public static IServiceCollection AddFlashtrace( this IServiceCollection serviceCollection, Action<FlashtraceServiceBuilder>? build = null )
+    public static IServiceCollection AddFlashtrace( this IServiceCollection serviceCollection, bool throwOnMissingLoggerFactory = true )
     {
         serviceCollection.Add(
-            ServiceDescriptor.Singleton<IFlashtraceLoggerFactory, NetCoreSourceLoggerFactory>(
+            ServiceDescriptor.Singleton<IFlashtraceLoggerFactory>(
                 serviceProvider =>
                 {
-                    var builder = new FlashtraceServiceBuilder( serviceProvider );
-                    build?.Invoke( builder );
+                    var loggerFactory =
+                        throwOnMissingLoggerFactory
+                            ? serviceProvider.GetRequiredService<ILoggerFactory>()
+                            : serviceProvider.GetService<ILoggerFactory>();
 
-                    return new NetCoreSourceLoggerFactory(
-                        serviceProvider.GetRequiredService<ILoggerFactory>(),
-                        builder.EnabledRoles );
+                    if ( loggerFactory != null )
+                    {
+                        return new NetCoreSourceLoggerFactory( loggerFactory );
+                    }
+                    else
+                    {
+                        return NullFlashtraceLogger.Instance;
+                    }
                 } ) );
 
         return serviceCollection;
@@ -45,7 +52,7 @@ public static class FlashtraceExtensions
         }
         else
         {
-            return factory.ForRole( role ?? FlashtraceRole.Logging ).GetFlashtraceSource( type );
+            return factory.ForRole( role ?? FlashtraceRole.Default ).GetFlashtraceSource( type );
         }
     }
 
@@ -59,7 +66,7 @@ public static class FlashtraceExtensions
         }
         else
         {
-            return factory.ForRole( role ?? FlashtraceRole.Logging ).GetFlashtraceSource( sourceName );
+            return factory.ForRole( role ?? FlashtraceRole.Default ).GetFlashtraceSource( sourceName );
         }
     }
 
@@ -71,7 +78,7 @@ public static class FlashtraceExtensions
         }
         else
         {
-            return loggerFactory.ForRole( role ?? FlashtraceRole.Logging ).GetFlashtraceSource( type );
+            return loggerFactory.ForRole( role ?? FlashtraceRole.Default ).GetFlashtraceSource( type );
         }
     }
 
@@ -83,7 +90,7 @@ public static class FlashtraceExtensions
         }
         else
         {
-            return loggerFactory.ForRole( role ?? FlashtraceRole.Logging ).GetFlashtraceSource( sourceName );
+            return loggerFactory.ForRole( role ?? FlashtraceRole.Default ).GetFlashtraceSource( sourceName );
         }
     }
 

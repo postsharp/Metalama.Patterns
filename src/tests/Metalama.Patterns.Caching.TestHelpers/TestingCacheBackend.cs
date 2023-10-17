@@ -162,7 +162,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return this._backend.ContainsDependencyAsync( key, cancellationToken );
         }
 
-        protected override void DisposeCore( bool disposing )
+        protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
         {
             this._backend.Dispose();
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );

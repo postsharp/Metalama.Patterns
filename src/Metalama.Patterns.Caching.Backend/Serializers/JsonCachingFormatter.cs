@@ -4,6 +4,9 @@ using System.Text.Json;
 
 namespace Metalama.Patterns.Caching.Serializers;
 
+/// <summary>
+/// A serialized based on <c>System.Text.Json</c>.
+/// </summary>
 public class JsonCachingFormatter : ICachingSerializer
 {
     private readonly JsonSerializerOptions _options;
