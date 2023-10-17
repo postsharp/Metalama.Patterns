@@ -1,0 +1,37 @@
+namespace Metalama.Patterns.Observability.AspectTests.FieldBackedIntProperty;
+[Observable]
+public class FieldBackedIntProperty : global::System.ComponentModel.INotifyPropertyChanged
+{
+  private global::System.Int32 _x1;
+  private global::System.Int32 _x
+  {
+    get
+    {
+      return this._x1;
+    }
+    set
+    {
+      if ((this._x1 != value))
+      {
+        this._x1 = value;
+        this.OnPropertyChanged("X");
+        this.OnPropertyChanged("Y");
+      }
+    }
+  }
+  public int X => this._x;
+  public int Y => this.X;
+  [global::Metalama.Patterns.Observability.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
+  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  {
+  }
+  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  {
+    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+  }
+  [global::Metalama.Patterns.Observability.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  {
+  }
+  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+}
