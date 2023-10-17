@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Patterns.Xaml.Options;
+using System.Windows.Navigation;
 using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.Xaml.Implementation;
@@ -73,4 +74,104 @@ internal static class Diagnostics
                 "The name of existing member {0}, that is defined in or inherited by class {1}, conflicts with the required dependency property field name {2}.",
                 "Required dependency property field name is already used.",
                 _category );
+
+    /// <summary>
+    /// Options CanExecuteMethod and CanExecuteProperty cannot both be defined at the same time.
+    /// </summary>
+    public static readonly DiagnosticDefinition ErrorCannotSpecifyBothCanExecuteMethodAndCanExecuteProperty =
+        new(
+            "LAMA5205",
+            Error,
+            "Options " + nameof( CommandOptions.CanExecuteMethod ) + " and " + nameof( CommandOptions.CanExecuteProperty ) + " cannot both be defined at the same time.",
+            "Invalid " + nameof( CommandOptions ) + "." );
+
+    /// <summary>
+    /// The {0} ExecuteMethod and {1} CanExecuteMethod cannot both have the same value '{2}'.
+    /// </summary>
+    public static readonly DiagnosticDefinition<(string ExecuteConfigurationSource, string CanExecuteConfigurationSource, string Value)> ErrorCommandExecuteAndCanExecuteCannotBeTheSame =
+        new(
+            "LAMA5206",
+            Error,
+            "The {0} " + nameof( CommandOptions.ExecuteMethod ) + " and {1} " + nameof( CommandOptions.CanExecuteMethod ) + " cannot both have the same value '{2}'.",
+            "Invalid " + nameof( CommandOptions ) + "." );
+
+    /// <summary>
+    /// The CanExecuteProperty for command property {0} must be of type bool.
+    /// </summary>
+    public static readonly DiagnosticDefinition<IProperty> ErrorCommandCanExecutePropertyIsNotValid =
+        new(
+            "LAMA5207",
+            Error,
+            "The " + nameof( CommandOptions.CanExecuteProperty ) + " for command property {0} must be of type bool.",
+            "Invalid " + nameof( CommandOptions.CanExecuteProperty ) + " type." );
+
+    /// <summary>
+    /// The configured CanExecuteProperty '{0}' was not found.
+    /// </summary>
+    public static readonly DiagnosticDefinition<string> ErrorCommandConfiguredCanExecutePropertyNotFound =
+        new(
+            "LAMA5208",
+            Error,
+            "The configured " + nameof( CommandOptions.CanExecuteProperty ) + " '{0}' was not found.",
+            "Missing " + nameof( CommandOptions.CanExecuteProperty ) + "." );
+
+    /// <summary>
+    /// The CanExecuteMethod for command property {0} must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.
+    /// </summary>
+    public static readonly DiagnosticDefinition<IProperty> ErrorCommandCanExecuteMethodIsNotValid =
+        new(
+            "LAMA5209",
+            Error,
+            "The " + nameof( CommandOptions.CanExecuteMethod ) + " for command property {0} must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.",
+            "Invalid " + nameof( CommandOptions.CanExecuteMethod ) + "." );
+
+    /// <summary>
+    /// The configured CanExecuteMethod '{0}' was not found.
+    /// </summary>
+    public static readonly DiagnosticDefinition<string> ErrorCommandConfiguredCanExecuteMethodNotFound =
+        new(
+            "LAMA5210",
+            Error,
+            "The configured " + nameof( CommandOptions.CanExecuteMethod ) + " '{0}' was not found.",
+            "Missing " + nameof( CommandOptions.CanExecuteMethod ) + "." );
+
+    /// <summary>
+    /// The type {0} contains more than one method named '{1}' or '{2}'.
+    /// </summary>
+    public static readonly DiagnosticDefinition<(IType DeclaringType, string MethodName, string? AltMethodName)> ErrorCommandCanExecuteMethodIsAmbiguous =
+        new(
+            "LAMA5211",
+            Error,
+            "The type {0} contains more than one method named '{1}' or '{2}'.",
+            "Ambiguous " + nameof( CommandOptions.CanExecuteMethod ) + "." );
+
+    /// <summary>
+    /// The ExecuteMethod named '{0}' or '{1}' was not found.
+    /// </summary>
+    public static readonly DiagnosticDefinition<(string ExecuteMethodName, string? AltExecuteMethodName)> ErrorCommandExecuteMethodNotFound =
+        new(
+            "LAMA5212",
+            Error,
+            "The " + nameof( CommandOptions.ExecuteMethod ) + " named '{0}' or '{1}' was not found.",
+            "Missing " + nameof( CommandOptions.ExecuteMethod ) + "." );
+
+    /// <summary>
+    /// The ExecuteMethod for command property {0} must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.
+    /// </summary>
+    public static readonly DiagnosticDefinition<IProperty> ErrorCommandExecuteMethodIsNotValid =
+        new(
+            "LAMA5213",
+            Error,
+            "The " + nameof( CommandOptions.ExecuteMethod ) + " for command property {0} must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.",
+            "Invalid " + nameof( CommandOptions.ExecuteMethod ) + "." );
+
+    /// <summary>
+    /// The type {0} contains more than one method named '{1}' or '{2}'.
+    /// </summary>
+    public static readonly DiagnosticDefinition<(IType DeclaringType, string MethodName, string? AltMethodName)> ErrorCommandExecuteMethodIsAmbiguous =
+        new(
+            "LAMA5214",
+            Error,
+            "The type {0} contains more than one method named '{1}' or '{2}'.",
+            "Ambiguous " + nameof( CommandOptions.ExecuteMethod ) + "." );
 }
