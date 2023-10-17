@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
+using System.Collections;
 using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching;
@@ -10,7 +11,7 @@ namespace Metalama.Patterns.Caching;
 /// Exposes the profiles registered in the <see cref="CachingService"/>.
 /// </summary>
 [PublicAPI]
-public sealed class CachingProfileRegistry
+public sealed class CachingProfileRegistry : IReadOnlyCollection<CachingProfile>
 {
     private readonly ImmutableDictionary<string, CachingProfile> _profiles;
 
@@ -46,4 +47,10 @@ public sealed class CachingProfileRegistry
             return profile;
         }
     }
+
+    public IEnumerator<CachingProfile> GetEnumerator() => this._profiles.Values.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+    public int Count => this._profiles.Count;
 }

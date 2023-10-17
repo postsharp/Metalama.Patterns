@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Patterns.Caching.Backends;
+using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Locking;
 using System.Collections.Concurrent;
@@ -21,15 +22,15 @@ namespace Metalama.Patterns.Caching;
 [RunTime]
 public sealed class CachingProfile : ICacheItemConfiguration
 {
-    private readonly ConcurrentDictionary<int, ICacheItemConfiguration> _mergedMethodConfigurations = new();
-
-    private bool _attached;
-
     /// <summary>
     /// The name of the default profile.
     /// </summary>
     public const string DefaultName = "default";
 
+    private readonly ConcurrentDictionary<int, ICacheItemConfiguration> _mergedMethodConfigurations = new();
+    private readonly bool? _ownsBackend;
+
+    private bool _attached;
     private CachingBackend? _backend;
 
     /// <summary>
@@ -47,10 +48,14 @@ public sealed class CachingProfile : ICacheItemConfiguration
     /// </summary>
     public string Name { get; }
 
+    /// <summary>
+    /// Gets the <see cref="CachingBackend"/> active for the current <see cref="CachingProfile"/>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The <see cref="CachingProfile"/> has not been added to a <see cref="CachingService"/> yet.</exception>
     [AllowNull]
     public CachingBackend Backend => this._backend ?? throw new InvalidOperationException();
 
-    internal void Initialize( CachingBackend backend )
+    internal void Initialize( CachingBackend defaultBackend, IServiceProvider? serviceProvider )
     {
         if ( this._attached )
         {
@@ -58,7 +63,31 @@ public sealed class CachingProfile : ICacheItemConfiguration
         }
 
         this._attached = true;
-        this._backend ??= backend;
+
+        if ( this.BackendFactory != null )
+        {
+            this._backend = CachingBackend.Create( this.BackendFactory, serviceProvider );
+        }
+        else
+        {
+            this._backend ??= defaultBackend;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets a delegate creating the <see cref="CachingBackend"/>.
+    /// </summary>
+    public Func<CachingBackendBuilder, ConcreteCachingBackendBuilder>? BackendFactory { get; init; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the <see cref="CachingService"/> owns the <see cref="Backend"/>. The default value of this property
+    /// is <c>true</c> if <see cref="BackendFactory"/> is non-null and <c>false</c> otherwise. When the profile owns the <see cref="CachingBackend"/>,
+    /// When the backend is owned, the <see cref="CachingService"/> will initialize it and dispose it. Otherwise, this should be performed by the caller.
+    /// </summary>
+    public bool OwnsBackend
+    {
+        get => this._ownsBackend ?? this.BackendFactory != null;
+        init => this._ownsBackend = value;
     }
 
     /// <summary>
@@ -100,14 +129,14 @@ public sealed class CachingProfile : ICacheItemConfiguration
 
     /// <summary>
     /// Gets or sets the lock manager used to synchronize the execution of methods
-    /// that are cached with the current profile.  The default lock manager is <see cref="NullLockManager"/>,
-    /// which allows for concurrent execution of all methods. An alternative implementation is <see cref="LocalLockManager"/>,
+    /// that are cached with the current profile.  The default lock manager is <see cref="NullLockingStrategy"/>,
+    /// which allows for concurrent execution of all methods. An alternative implementation is <see cref="LocalLockingStrategy"/>,
     /// which prevents concurrent execution of the same method with the same parameters, in the current process (or AppDomain).
     /// </summary>
-    public ILockManager LockManager { get; init; } = new NullLockManager();
+    public ILockingStrategy LockingStrategy { get; init; } = new NullLockingStrategy();
 
     /// <summary>
-    /// Gets or sets the maximum time that the caching aspect will wait for the <see cref="LockManager"/> to acquire a lock.
+    /// Gets or sets the maximum time that the caching aspect will wait for the <see cref="LockingStrategy"/> to acquire a lock.
     /// To specify an infinite waiting time, set this property to <c>TimeSpan.FromMilliseconds( -1 )</c>. The default
     /// behavior is to wait infinitely.
     /// </summary>
@@ -115,13 +144,13 @@ public sealed class CachingProfile : ICacheItemConfiguration
 
     /// <summary>
     /// Gets or sets the behavior in case that the caching aspect could not acquire a lock because of a timeout. 
-    /// The default behavior is to throw a <see cref="TimeoutException"/>. You can implement your own strategy by implementing
-    /// the <see cref="IAcquireLockTimeoutStrategy"/> interface. If the <see cref="IAcquireLockTimeoutStrategy.OnTimeout"/> does not return
-    /// any exception, the cached method will be evaluated (even without a lock).
+    /// The default behavior is to throw a <see cref="TimeoutException"/>.
+    /// If the delegate does not return any exception, the cached method will be evaluated (even without a lock).
     /// </summary>
-    public IAcquireLockTimeoutStrategy AcquireLockTimeoutStrategy { get; init; } = new DefaultAcquireLockTimeoutStrategy();
+    public Action<LockTimeoutContext> OnLockTimeout { get; init; } =
+        _ => throw new TimeoutException( "Time out while waiting for the cache lock." );
 
-    public ICacheItemConfiguration GetMergedConfiguration( CachedMethodMetadata metadata )
+    internal ICacheItemConfiguration GetMergedConfiguration( CachedMethodMetadata metadata )
     {
         if ( this._mergedMethodConfigurations.TryGetValue( metadata.Id, out var configuration ) )
         {

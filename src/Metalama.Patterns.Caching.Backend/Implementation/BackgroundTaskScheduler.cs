@@ -4,6 +4,7 @@ using Flashtrace;
 using Flashtrace.Messages;
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
+using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 
 #if DEBUG
@@ -21,8 +22,10 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 
     private readonly FlashtraceSource _logger;
     private readonly AwaitableEvent _backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
+    private readonly CancellationTokenSource _disposeCancellationTokenSource = new();
     private readonly bool _sequential;
     private readonly object _sync = new();
+    private readonly ICachingExceptionObserver? _exceptionObserver;
 
 #if DEBUG
     private readonly ConcurrentDictionary<int, PendingTask> _pendingBackgroundTasks = new();
@@ -36,6 +39,9 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     private volatile int _nextTaskId;
 #endif
 
+    // A CancellationToken triggered when the Dispose method is cancelled, i.e. when the caller no longer wants to wait.
+    private CancellationToken DisposeCancellationToken => this._disposeCancellationTokenSource.Token;
+
     public int BackgroundTaskExceptions => this._backgroundTaskExceptions;
 
     private volatile Task _lastTask = Task.CompletedTask;
@@ -43,21 +49,22 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     public BackgroundTaskScheduler( IServiceProvider? serviceProvider, bool sequential = false )
     {
         this._sequential = sequential;
+        this._exceptionObserver = serviceProvider?.GetService<ICachingExceptionObserver>();
         this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
     /// <summary>
-    /// Forbids the use of the <see cref="EnqueueBackgroundTask(Func{Task})"/> method. This method is used for debugging purposes only.
+    /// Forbids the use of the <see cref="EnqueueBackgroundTask(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.ValueTask})"/> method. This method is used for debugging purposes only.
     /// </summary>
     public void StopAcceptingBackgroundTasks() => this._backgroundTasksForbidden = true;
 
-    public void EnqueueBackgroundTask( Func<ValueTask> task ) => this.EnqueueBackgroundTask( () => task().AsTask() );
+    public void EnqueueBackgroundTask( Func<CancellationToken, ValueTask> task ) => this.EnqueueBackgroundTask( ct => task( ct ).AsTask() );
 
     /// <summary>
     /// Enqueues a background task.
     /// </summary>
     /// <param name="task">A function creating a <see cref="Task"/>.</param>
-    public void EnqueueBackgroundTask( Func<Task> task )
+    public void EnqueueBackgroundTask( Func<CancellationToken, Task> task )
     {
         if ( this._backgroundTasksForbidden )
         {
@@ -96,13 +103,14 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 
                 var createdTask = Task.Run(
                     () => this.RunTask(
-                        task,
+                        () => task( this.DisposeCancellationToken ),
                         previousTask
 #if DEBUG
                        ,
                         pendingTask
 #endif
-                    ) );
+                    ),
+                    this.DisposeCancellationToken );
 
                 this._lastTask = createdTask;
             }
@@ -111,13 +119,14 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         {
             Task.Run(
                 () => this.RunTask(
-                    task,
+                    () => task( this.DisposeCancellationToken ),
                     null
 #if DEBUG
                    ,
                     pendingTask
 #endif
-                ) );
+                ),
+                this.DisposeCancellationToken );
         }
     }
 
@@ -135,7 +144,17 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     {
         if ( lastTask != null )
         {
-            await lastTask;
+            try
+            {
+                await lastTask;
+            }
+            catch ( Exception e )
+            {
+                if ( this.OnBackgroundTaskException( e ) )
+                {
+                    throw;
+                }
+            }
         }
 
         try
@@ -148,15 +167,15 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         }
         catch ( Exception e )
         {
-            this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
+            if ( this.OnBackgroundTaskException( e ) )
+            {
+                throw;
+            }
 
 #if DEBUG
             this._logger.Debug.IfEnabled?.Write(
                 FormattedMessageBuilder.Formatted( "Stack trace that created the failing task: {StackTrace}", pendingTask.StackTrace ) );
 #endif
-
-            Interlocked.Increment( ref this._backgroundTaskExceptions );
-            Interlocked.Increment( ref _allBackgroundTaskExceptions );
         }
         finally
         {
@@ -177,10 +196,24 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         }
     }
 
+    private bool OnBackgroundTaskException( Exception e )
+    {
+        if ( this._exceptionObserver.OnException( e, true ) )
+        {
+            return true;
+        }
+
+        this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
+        Interlocked.Increment( ref this._backgroundTaskExceptions );
+        Interlocked.Increment( ref _allBackgroundTaskExceptions );
+
+        return false;
+    }
+
     /// <summary>
     /// Returns a <see cref="Task"/> that completes when all enqueued background tasks complete.
     /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <param name="cancellationToken">A <see cref="DisposeCancellationToken"/>.</param>
     /// <returns>A <see cref="Task"/> that completes when all enqueued background tasks complete.</returns>
     public async Task WhenBackgroundTasksCompleted( CancellationToken cancellationToken )
     {
@@ -192,19 +225,28 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 
     public static int AllBackgroundTaskExceptions => _allBackgroundTaskExceptions;
 
-    public void Dispose()
+    public void Dispose() => this.Dispose( default );
+
+    public void Dispose( CancellationToken cancellationToken )
     {
-        this.StopAcceptingBackgroundTasks();
-        this._backgroundTasksFinishedEvent.Wait();
+        using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
+        {
+            this.StopAcceptingBackgroundTasks();
+            this._backgroundTasksFinishedEvent.Wait( cancellationToken );
+        }
     }
 
     public Task DisposeAsync( CancellationToken cancellationToken = default )
     {
-        this.StopAcceptingBackgroundTasks();
+        using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
+        {
+            this.StopAcceptingBackgroundTasks();
 
-        return this.WhenBackgroundTasksCompleted( cancellationToken );
+            return this.WhenBackgroundTasksCompleted( cancellationToken );
+        }
     }
 
+    // ReSharper disable once MethodSupportsCancellation
     ValueTask IAsyncDisposable.DisposeAsync() => new( this.DisposeAsync() );
 
 #if DEBUG

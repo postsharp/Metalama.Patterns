@@ -2,6 +2,7 @@
 
 using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.TestHelpers;
+using Metalama.Patterns.Caching.Tests.Assets;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -1003,6 +1004,23 @@ namespace Metalama.Patterns.Caching.Tests
                 cachingClass.GetValueAsync,
                 () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync ),
                 cachingClass.Reset );
+        }
+
+        #endregion
+
+        #region TestInvalidateParamsOverload
+
+        [Fact]
+        public void TestInvalidateParamsOverload()
+        {
+            using var context = this.InitializeTest( "TestInvalidateParamsOverload" );
+
+            var o = new MultipleInvalidationClass();
+            Assert.Equal( 0, o.GetId1() );
+            Assert.Equal( 0, o.GetId2() );
+            o.Increment();
+            Assert.Equal( 1, o.GetId1() );
+            Assert.Equal( 1, o.GetId2() );
         }
 
         #endregion
