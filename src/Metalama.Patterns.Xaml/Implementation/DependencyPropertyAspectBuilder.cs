@@ -113,7 +113,20 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         if ( !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
         {
-            // TODO: CapturesNonObservableTransformations handling: stopping here may lead to warnings in user code that handler methods are not used, because we don't generate calls to them.
+            if ( onChangingMethod != null )
+            {
+                this._builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, onChangingMethod );
+            }
+            
+            if ( onChangedMethod != null )
+            {
+                this._builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, onChangedMethod );
+            }
+
+            if ( validateMethod != null )
+            {
+                this._builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, validateMethod );
+            }
 
             return;
         }
