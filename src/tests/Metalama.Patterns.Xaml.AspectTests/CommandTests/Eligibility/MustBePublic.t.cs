@@ -1,0 +1,3 @@
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the property 'MustBePublic.PrivateCommand' because 'MustBePublic.PrivateCommand' must be public.`
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the property 'MustBePublic.ProtectedCommand' because 'MustBePublic.ProtectedCommand' must be public.`
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the property 'MustBePublic.InternalCommand' because 'MustBePublic.InternalCommand' must be public.`

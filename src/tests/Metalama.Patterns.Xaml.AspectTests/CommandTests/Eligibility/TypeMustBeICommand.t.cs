@@ -1,0 +1,2 @@
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the property 'TypeMustBeICommand.ObjectCommand' because the type of 'TypeMustBeICommand.ObjectCommand' must be of type 'ICommand'.`
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the property 'TypeMustBeICommand.IntCommand' because the type of 'TypeMustBeICommand.IntCommand' must be of type 'ICommand'.`

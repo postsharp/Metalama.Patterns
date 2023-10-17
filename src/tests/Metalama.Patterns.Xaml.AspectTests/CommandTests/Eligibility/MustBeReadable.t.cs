@@ -1,0 +1,1 @@
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the property 'MustBeReadable.NoGetterCommand' because 'MustBeReadable.NoGetterCommand' must have a getter.`

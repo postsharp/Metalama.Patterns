@@ -1,0 +1,1 @@
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the property 'MustNotBeStatic.StaticCommand' because 'MustNotBeStatic.StaticCommand' must not be static.`

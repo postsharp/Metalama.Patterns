@@ -1,0 +1,1 @@
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the property 'MustNotHaveAnInitializerExpression.HasInitializerExpresionCommand' because 'MustNotHaveAnInitializerExpression.HasInitializerExpresionCommand' must not have an initializer expression.`

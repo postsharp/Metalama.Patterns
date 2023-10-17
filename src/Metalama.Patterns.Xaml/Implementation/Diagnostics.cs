@@ -122,7 +122,7 @@ internal static class Diagnostics
         new(
             "LAMA5209",
             Error,
-            "The " + nameof( CommandOptions.CanExecuteMethod ) + " for command property {0} must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.",
+            "The " + nameof( CommandOptions.CanExecuteMethod ) + " for command property {0} must not be generic, must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.",
             "Invalid " + nameof( CommandOptions.CanExecuteMethod ) + "." );
 
     /// <summary>
@@ -162,7 +162,7 @@ internal static class Diagnostics
         new(
             "LAMA5213",
             Error,
-            "The " + nameof( CommandOptions.ExecuteMethod ) + " for command property {0} must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.",
+            "The " + nameof( CommandOptions.ExecuteMethod ) + " for command property {0} must not be generic, must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.",
             "Invalid " + nameof( CommandOptions.ExecuteMethod ) + "." );
 
     /// <summary>

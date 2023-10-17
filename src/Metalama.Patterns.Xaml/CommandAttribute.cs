@@ -19,9 +19,12 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
     {
         builder.MustNotBeStatic();
         builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
-        builder.MustBeReadable();
-        builder.MustSatisfy( p => p.IsAutoPropertyOrField == true != (p.Writeability == Writeability.None), p => $"{p} must be an auto-property with only a getter, or a non-auto property with both a getter and setter." );
+        builder.MustSatisfy( p => p.GetMethod != null, p => $"{p} must have a getter" );
+        builder.MustSatisfy(
+            p => p is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } or { IsAutoPropertyOrField: not true, Writeability: Writeability.All or Writeability.InitOnly },
+            p => $"{p} must be an auto-property with only a getter, or a non-auto property with both a getter and setter or init" );
         builder.Type().MustBe( typeof( ICommand ) );
+        builder.MustSatisfy( p => p.InitializerExpression == null, p => $"{p} must not have an initializer expression" );
     }
 
     void IAspect<IProperty>.BuildAspect( IAspectBuilder<IProperty> builder )
@@ -204,7 +207,8 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
     private static bool IsValidMethod( IMethod method, SpecialType requiredReturnType )
         => method.ReturnType.SpecialType == requiredReturnType
-        && (method.Parameters is [] or [{ RefKind: RefKind.None or RefKind.In }]);
+        && (method.Parameters is [] or [{ RefKind: RefKind.None or RefKind.In }])
+        && method.TypeParameters.Count == 0;
 
     private static bool IsValidCanExecuteProperty( IProperty property )
         => property.Type.SpecialType == SpecialType.Boolean;
