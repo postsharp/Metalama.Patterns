@@ -53,9 +53,12 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
 
     protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
+        var configuration = (RedisCacheSynchronizerConfiguration) this.Configuration;
+
         this._connection =
-            await ((RedisCacheSynchronizerConfiguration) this.Configuration).RedisConnectionFactory.GetConnectionAsync(
+            await configuration.RedisConnectionFactory.GetConnectionAsync(
                 this.ServiceProvider,
+                configuration.LogRedisConnection,
                 cancellationToken );
 
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(

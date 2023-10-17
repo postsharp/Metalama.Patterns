@@ -38,7 +38,7 @@ internal class RedisConnectionFactory
         }
     }
 
-    internal async Task<IConnectionMultiplexer> GetConnectionAsync( IServiceProvider? serviceProvider, CancellationToken cancellationToken )
+    internal async Task<IConnectionMultiplexer> GetConnectionAsync( IServiceProvider? serviceProvider, bool logRedisConnection, CancellationToken cancellationToken )
     {
         if ( this.RedisConnection != null )
         {
@@ -48,7 +48,7 @@ internal class RedisConnectionFactory
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var textWriter = serviceProvider != null
+            var textWriter = serviceProvider != null && logRedisConnection
                 ? new FlashTraceTextWriter( serviceProvider.GetFlashtraceSource( "Redis", FlashtraceRole.Caching ).Debug )
                 : null;
 
