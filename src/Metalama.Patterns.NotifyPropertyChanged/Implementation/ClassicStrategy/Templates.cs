@@ -357,10 +357,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( refsToNotify.Count > 0
                  || childUpdateMethods.Count > 0
-                 || node is
-                 {
-                     HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged
-                 } )
+                 || node is { HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged } )
             {
                 var rootPropertyNamesToNotify = refsToNotify
                     .Select( n => n.Name )

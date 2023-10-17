@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Patterns.NotifyPropertyChanged.Options;
 using Microsoft.CodeAnalysis;
 using static Metalama.Framework.Diagnostics.Severity;
 
@@ -86,6 +87,8 @@ internal static class DiagnosticDescriptors
             _category );
 
     // TODO: Split into multiple diagnostics or keep as one? Which gives the best user experience wrt warnings-as-errors or suppressing warnings?
+    // NB: See also LAMA5162
+
     /// <summary>
     /// [no fixed message] - use messages like `Only method arguments of primary types are supported`.
     /// </summary>
@@ -139,5 +142,17 @@ internal static class DiagnosticDescriptors
             Warning,
             "The children of fields or properties of type '{0}' cannot be observed because the type does not implement INotifyPropertyChanged.",
             "Field or property type does not implement INotifyPropertyChanged.",
+            _category );
+
+    /// <summary>
+    /// Method {0} cannot be analysed, and has not been configured as safe to call. Use [SafeToCallForDependencyAnalysis] or " + nameof(Options.NotifyPropertyChangedOptionsBuilder) + " via a fabric to configure {0} as safe to call.
+    /// </summary>
+    public static readonly DiagnosticDefinition<IMethodSymbol> WarningMethodIsNotSupportedForDependencyAnalysis =
+        new(
+            "LAMA5162",
+            Warning,
+            "Method {0} cannot be analysed, and has not been configured as safe to call. Use [SafeToCallForDependencyAnalysis] or "
+            + nameof(NotifyPropertyChangedOptionsBuilder) + " via a fabric to configure {0} as safe to call.",
+            "Method call is not supported for dependency analysis.",
             _category );
 }

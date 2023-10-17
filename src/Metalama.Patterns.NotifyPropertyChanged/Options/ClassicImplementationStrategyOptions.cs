@@ -14,7 +14,7 @@ namespace Metalama.Patterns.NotifyPropertyChanged.Options;
 [PublicAPI]
 [CompileTime]
 internal sealed record ClassicImplementationStrategyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>,
-                                                            IHierarchicalOptions<INamedType>
+                                                              IHierarchicalOptions<INamedType>
 {
     /// <summary>
     /// Gets a value indicating whether the <c>OnUnmonitoredObservablePropertyChanged</c> method should be introduced.
