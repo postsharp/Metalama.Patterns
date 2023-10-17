@@ -12,12 +12,12 @@ namespace Metalama.Patterns.Xaml.Implementation;
 /// <remarks>
 /// <para>
 /// This class is paraphrased from PostSharp.Patterns.Xaml.CommandAttribute.CommandImpl, notably as regards
-/// the use of <see cref="SynchronizationContext"/>. The plubming for [NPC] has been removed pending
-/// later support.
+/// the use of <see cref="SynchronizationContext"/>. The plubming for [NPC] will likely need to be adjusted.
 /// </para>
 /// <para>
 /// As and when Metalama supports type introduction, this class could be replaced by generated nested types which
-/// could call the callbacks directly rather than via delegates.
+/// could call the callbacks directly rather than via delegates, the delegates themselves must presently originate
+/// from generated local functions.
 /// </para>
 /// </remarks>
 [PublicAPI]

@@ -1,8 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Project;
 using Metalama.Patterns.Xaml.Implementation;
 using Metalama.Patterns.Xaml.Options;
 using System.Windows.Input;
@@ -23,7 +26,236 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
     void IAspect<IProperty>.BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        var aspectBuilder = new CommandAspectBuilder( builder );
-        aspectBuilder.Build();
+        var target = builder.Target;
+        var declaringType = target.DeclaringType;
+        var options = target.Enhancements().GetOptions<CommandOptions>();
+        var propertyName = target.Name;
+
+        var commandName = propertyName.EndsWith( "Command", StringComparison.Ordinal )
+            ? propertyName.Substring( 0, propertyName.Length - 7 )
+            : propertyName;
+
+        if ( options.CanExecuteMethod != null && options.CanExecuteProperty != null )
+        {
+            builder.Diagnostics.Report( Diagnostics.ErrorCannotSpecifyBothCanExecuteMethodAndCanExecuteProperty );
+
+            // Further diagnostics would be confusing and transformation is not possible.
+
+            return;
+        }
+
+        // NB: Alternative names are implemented in PostSharp but not documented.
+
+        var defaultCanExecuteName = $"CanExecute{commandName}";
+        var defaultAltCanExecuteName = $"Can{commandName}";
+
+        var executeMethodName = options.ExecuteMethod ?? $"Execute{commandName}";
+        var altExecuteMethodName = options.ExecuteMethod != null ? null : commandName;
+
+        var canExecuteMethodName = options.CanExecuteMethod ?? defaultCanExecuteName;
+        var altCanExecuteMethodName = options.CanExecuteMethod != null ? null : defaultAltCanExecuteName;
+
+        var canExecutePropertyName = options.CanExecuteProperty ?? defaultCanExecuteName;
+        var altCanExecutePropertyName = options.CanExecuteProperty != null ? null : defaultAltCanExecuteName;
+
+        if ( executeMethodName == canExecuteMethodName )
+        {
+            builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteAndCanExecuteCannotBeTheSame.WithArguments(
+                (options.ExecuteMethod == null ? "default" : "configured", options.CanExecuteMethod == null ? "default" : "configured", executeMethodName) ) );
+
+            // Further diagnostics would be confusing and transformation is not possible.
+
+            return;
+        }
+
+        var candidateExecuteMethods = new List<IMethod>( 2 );
+        var candidateCanExecuteMethods = new List<IMethod>( 2 );
+
+        foreach ( var method in declaringType.Methods )
+        {
+            if ( (method.Name == executeMethodName || method.Name == altExecuteMethodName) && candidateExecuteMethods.Count < 2 )
+            {
+                candidateExecuteMethods.Add( method );
+            }
+            else if ( (method.Name == canExecuteMethodName || method.Name == altCanExecuteMethodName) && candidateCanExecuteMethods.Count < 2 )
+            {
+                candidateCanExecuteMethods.Add( method );
+            }
+        }
+
+        var canTransform = true;
+
+        IProperty? canExecuteProperty = null;
+
+        // Don't look for the CanExecuteProperty if an explicit CanExecuteMethod is configured.
+
+        if ( options.CanExecuteMethod == null )
+        {
+            canExecuteProperty = declaringType.Properties.FirstOrDefault( p => p.Name == canExecutePropertyName || p.Name == altCanExecutePropertyName );
+
+            if ( canExecuteProperty != null )
+            {
+                if ( !IsValidCanExecuteProperty( canExecuteProperty ) )
+                {
+                    builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecutePropertyIsNotValid.WithArguments( target ), canExecuteProperty );
+                    canTransform = false;
+                }
+            }
+            else if ( options.CanExecuteProperty != null )
+            {
+                builder.Diagnostics.Report( Diagnostics.ErrorCommandConfiguredCanExecutePropertyNotFound.WithArguments( canExecutePropertyName ) );
+                canTransform = false;
+            }
+        }
+
+        IMethod? canExecuteMethod = null;
+
+        // Don't look for the CanExecuteMethod if an explicit CanExecuteProperty is configured.
+
+        if ( options.CanExecuteProperty == null )
+        {
+            switch ( candidateCanExecuteMethods.Count )
+            {
+                case 0:
+                    if ( options.CanExecuteMethod != null )
+                    {
+                        builder.Diagnostics.Report( Diagnostics.ErrorCommandConfiguredCanExecuteMethodNotFound.WithArguments( canExecuteMethodName ) );
+                        canTransform = false;
+                    }
+                    break;
+
+                case 1:
+                    if ( IsValidMethod( candidateCanExecuteMethods[0], SpecialType.Boolean ) )
+                    {
+                        canExecuteMethod = candidateCanExecuteMethods[0];
+                    }
+                    else
+                    {
+                        builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecuteMethodIsNotValid.WithArguments( target ), candidateCanExecuteMethods[0] );
+                        canTransform = false;
+                    }
+                    break;
+
+                case > 1:
+
+                    builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecuteMethodIsAmbiguous.WithArguments( (declaringType, canExecuteMethodName, altCanExecuteMethodName) ) );
+                    canTransform = false;
+                    break;
+            }
+        }
+
+        // If neither CanExecuteMethod and CanExecuteProperty are explicitly configured, we prefer any discovered method over
+        // any discovered property, as per the PostSharp behaviour.
+
+        if ( canExecuteMethod != null && canExecuteProperty != null )
+        {
+            canExecuteProperty = null;
+        }
+
+        IMethod? executeMethod = null;
+
+        switch ( candidateExecuteMethods.Count )
+        {
+            case 0:
+                builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodNotFound.WithArguments( (executeMethodName, altExecuteMethodName) ) );
+                canTransform = false;
+                break;
+
+            case 1:
+                if ( IsValidMethod( candidateExecuteMethods[0], SpecialType.Void ) )
+                {
+                    executeMethod = candidateExecuteMethods[0];
+                }
+                else
+                {
+                    builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodIsNotValid.WithArguments( target ), candidateExecuteMethods[0] );
+                    canTransform = false;
+                }
+                break;
+
+            case > 1:
+
+                builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodIsAmbiguous.WithArguments( (declaringType, executeMethodName, altExecuteMethodName) ) );
+                canTransform = false;
+                break;
+        }
+
+        if ( !canTransform || !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
+        {
+            return;
+        }
+
+        // When reaching this point:
+        // - executeMethod is defined and valid.
+        // - zero or one of canExecuteMethod and canExecuteProperty is defined and valid.
+
+        builder.Advice.AddInitializer(
+            declaringType,
+            nameof( InitializeCommand ),
+            InitializerKind.BeforeInstanceConstructor,
+            args: new
+            {
+                commandProperty = target,
+                executeMethod,
+                canExecuteMethod,
+                canExecuteProperty
+            } );
+    }
+
+    private static bool IsValidMethod( IMethod method, SpecialType requiredReturnType )
+        => method.ReturnType.SpecialType == requiredReturnType
+        && (method.Parameters is [] or [{ RefKind: RefKind.None or RefKind.In }]);
+
+    private static bool IsValidCanExecuteProperty( IProperty property )
+        => property.Type.SpecialType == SpecialType.Boolean;
+
+    [Template]
+    private static void InitializeCommand(
+        [CompileTime] IProperty commandProperty,
+        [CompileTime] IMethod executeMethod,
+        [CompileTime] IMethod? canExecuteMethod,
+        [CompileTime] IProperty? canExecuteProperty )
+    {
+        IExpression? canExecuteExpression = null;
+
+        if ( canExecuteMethod != null || canExecuteProperty != null )
+        {
+            bool CanExecute( object parameter )
+            {
+                if ( canExecuteMethod != null )
+                {
+                    if ( canExecuteMethod.Parameters.Count == 0 )
+                    {
+                        return canExecuteMethod.Invoke();
+                    }
+                    else
+                    {
+                        return canExecuteMethod.Invoke( meta.Cast( canExecuteMethod.Parameters[0].Type, parameter ) );
+                    }
+                }
+                else
+                {
+                    return canExecuteProperty!.Value;
+                }
+            }
+
+            canExecuteExpression = ExpressionFactory.Capture( (Func<object, bool>) CanExecute );
+        }
+
+        void Execute( object parameter )
+        {
+            if ( executeMethod.Parameters.Count == 0 )
+            {
+                executeMethod.Invoke();
+            }
+            else
+            {
+                executeMethod.Invoke( meta.Cast( executeMethod.Parameters[0].Type, parameter ) );
+            }
+        }
+
+#pragma warning disable IDE0031 // Use null propagation
+        commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression == null ? null : canExecuteExpression.Value );
+#pragma warning restore IDE0031 // Use null propagation
     }
 }
