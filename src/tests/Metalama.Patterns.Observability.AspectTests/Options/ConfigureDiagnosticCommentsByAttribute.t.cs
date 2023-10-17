@@ -1,4 +1,4 @@
-[NotifyPropertyChanged(DiagnosticCommentVerbosity = 1)]
+[Observable(DiagnosticCommentVerbosity = 1)]
 public class ConfigureDiagnosticCommentsByAttribute : global::System.ComponentModel.INotifyPropertyChanged
 {
   [global::Metalama.Patterns.Observability.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
