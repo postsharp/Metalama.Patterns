@@ -7,7 +7,7 @@
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <!-- Support unit testing -->
     <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
-    <Version Condition="'$(NotifyPropertyChangedVersion)'!=''">$(NotifyPropertyChangedVersion)</Version>
+    <Version Condition="'$(ObservabilityVersion)'!=''">$(ObservabilityVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
