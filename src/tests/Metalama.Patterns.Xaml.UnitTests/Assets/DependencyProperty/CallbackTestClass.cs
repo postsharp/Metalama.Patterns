@@ -6,7 +6,7 @@ using System.Windows;
 
 // ReSharper disable UnusedMember.Local
 
-namespace Metalama.Patterns.Xaml.UnitTests.Assets;
+namespace Metalama.Patterns.Xaml.UnitTests.Assets.DependencyPropertyNS;
 
 public sealed partial class CallbackTestClass : DependencyObject
 {

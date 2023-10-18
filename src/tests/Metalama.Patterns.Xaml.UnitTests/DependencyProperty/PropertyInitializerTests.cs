@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FluentAssertions;
-using Metalama.Patterns.Xaml.UnitTests.Assets;
+using Metalama.Patterns.Xaml.UnitTests.Assets.DependencyPropertyNS;
 using Xunit;
 
-namespace Metalama.Patterns.Xaml.UnitTests;
+namespace Metalama.Patterns.Xaml.UnitTests.DependencyPropertyNS;
 
 public sealed class PropertyInitializerTests
 {
