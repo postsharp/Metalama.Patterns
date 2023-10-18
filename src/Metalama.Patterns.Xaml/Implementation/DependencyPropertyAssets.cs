@@ -7,9 +7,9 @@ using System.Windows;
 namespace Metalama.Patterns.Xaml.Implementation;
 
 [CompileTime]
-internal sealed class Assets
+internal sealed class DependencyPropertyAssets
 {
-    public Assets()
+    public DependencyPropertyAssets()
     {
         this.DependencyObject = (INamedType) TypeFactory.GetType( typeof(DependencyObject) );
         this.DependencyProperty = (INamedType) TypeFactory.GetType( typeof(DependencyProperty) );

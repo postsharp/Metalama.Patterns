@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Xaml.Implementation;
 internal sealed partial class DependencyPropertyAspectBuilder
 {
     private readonly IAspectBuilder<IProperty> _builder;
-    private readonly Assets _assets;
+    private readonly DependencyPropertyAssets _assets;
     private readonly IType _propertyType;
     private readonly INamedType _declaringType;
     private readonly string _propertyName;
@@ -22,7 +22,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
     public DependencyPropertyAspectBuilder( IAspectBuilder<IProperty> builder )
     {
         this._builder = builder;
-        this._assets = builder.Target.Compilation.Cache.GetOrAdd( _ => new Assets() );
+        this._assets = builder.Target.Compilation.Cache.GetOrAdd( _ => new DependencyPropertyAssets() );
         this._propertyType = builder.Target.Type;
         this._declaringType = builder.Target.DeclaringType;
         this._propertyName = builder.Target.Name;
