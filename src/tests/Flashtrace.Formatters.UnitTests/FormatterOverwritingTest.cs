@@ -23,16 +23,8 @@ public class FormatterOverwritingTest : FormattersTestsBase
         public override string ToString() => this.Description;
     }
 
-    private static IEnumerable<object[]> MakeSerializableBeforeBetweenPermutations( IEnumerable<TestCase> testCases )
-    {
-        foreach ( var testCase in testCases )
-        {
-            yield return new object[] { testCase.ToString() };
-            yield return new object[] { testCase.ToString() };
-            yield return new object[] { testCase.ToString() };
-            yield return new object[] { testCase.ToString() };
-        }
-    }
+    private static IEnumerable<object[]> MakeSerializableBeforeBetweenPermutations( IEnumerable<TestCase> testCases ) 
+        => testCases.Select( t => new object[] { t.ToString() } );
 
     public static IEnumerable<TestCase> EnsureOverwritesTestCases()
         => new TestCase[]
