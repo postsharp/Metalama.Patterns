@@ -215,7 +215,22 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
         {
             if ( canTransform )
             {
-                // TODO: Suppress warnings on callbacks
+                if ( executeMethod != null )
+                {
+                    builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, executeMethod );
+                }
+
+                if ( canExecuteMethod != null )
+                {
+                    builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, canExecuteMethod );
+                }
+
+                if ( canExecuteProperty != null )
+                {
+                    builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, canExecuteProperty );
+                }
+
+                builder.Diagnostics.Suppress( Suppressions.SuppressNonNullableFieldMustContainNonNullValueWhenExitingConstructorCS8618, target );
             }
 
             return;
