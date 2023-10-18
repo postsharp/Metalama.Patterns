@@ -3,12 +3,12 @@
 // TODO: Test disabled due to #34010 - [Observable] overrides the setter, framework generates unsupported `init` keyword in net471.
 
 #if NETCOREAPP
-using Metalama.Patterns.NotifyPropertyChanged;
+using Metalama.Patterns.Observability;
 using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.UnitTests.Assets.Command;
 
-[NotifyPropertyChanged]
+[Observable]
 public partial class ObservableAspectIntegrationTestClass : CommandTestBase
 {
     [Command]

@@ -1,10 +1,10 @@
-using Metalama.Patterns.NotifyPropertyChanged;
-using Metalama.Patterns.NotifyPropertyChanged.Metadata;
+using Metalama.Patterns.Observability;
+using Metalama.Patterns.Observability.Metadata;
 using Metalama.Patterns.Xaml.Implementation;
 using System.ComponentModel;
 using System.Windows.Input;
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.INotifyPropertyChangedIntegration.ImplementedByObservableAspect;
-[NotifyPropertyChanged]
+[Observable]
 public class ImplementedByObservableAspect : INotifyPropertyChanged
 {
   private readonly ICommand _foo1Command = default !;

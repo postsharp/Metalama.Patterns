@@ -12,9 +12,7 @@ using System.ComponentModel;
 using System.Windows.Input;
 
 // TODO: Skip [Observable] on [Command]-targeted auto properties. No functional impact, would just avoid unnecessary generated code.
-// TODO: Remove reference to Metalama.Patterns.NotifyPropertyChanged once the rename has been merged.
 
-[assembly: AspectOrder( "Metalama.Patterns.Xaml.CommandAttribute:*", "Metalama.Patterns.NotifyPropertyChanged.NotifyPropertyChangedAttribute:*" )]
 [assembly: AspectOrder( "Metalama.Patterns.Xaml.CommandAttribute:*", "Metalama.Patterns.Observability.ObservableAttribute:*" )]
 
 namespace Metalama.Patterns.Xaml;

@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.NotifyPropertyChanged;
+using Metalama.Patterns.Observability;
 using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.INotifyPropertyChangedIntegration.ImplementedByObservableAspect;
 
-[NotifyPropertyChanged]
+[Observable]
 public class ImplementedByObservableAspect
 {
     [Command]

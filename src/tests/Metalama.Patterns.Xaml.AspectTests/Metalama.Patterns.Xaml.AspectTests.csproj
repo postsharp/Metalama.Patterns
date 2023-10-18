@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Metalama.Patterns.NotifyPropertyChanged\Metalama.Patterns.NotifyPropertyChanged.csproj" />
+    <ProjectReference Include="..\..\Metalama.Patterns.Observability\Metalama.Patterns.Observability.csproj" />
     <ProjectReference Include="..\..\Metalama.Patterns.Xaml\Metalama.Patterns.Xaml.csproj" />
   </ItemGroup>
 
