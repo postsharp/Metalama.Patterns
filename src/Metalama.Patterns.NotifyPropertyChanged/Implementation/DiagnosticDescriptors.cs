@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Microsoft.CodeAnalysis;
 using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.NotifyPropertyChanged.Implementation;
@@ -84,26 +85,16 @@ internal static class DiagnosticDescriptors
             "'new' member is not supported.",
             _category );
 
+    // TODO: Split into multiple diagnostics or keep as one? Which gives the best user experience wrt warnings-as-errors or suppressing warnings?
     /// <summary>
-    /// {0} expressions are not supported for dependency analysis.
+    /// [no fixed message] - use messages like `Only method arguments of primary types are supported`.
     /// </summary>
-    public static readonly DiagnosticDefinition<string> ErrorMiscUnsupportedExpression =
+    public static readonly DiagnosticDefinition<string> WarningNotSupportedForDependencyAnalysis =
         new(
             "LAMA5156",
-            Error,
-            "{0} expressions are not supported for dependency analysis.",
-            "Expression not supported for dependency analysis.",
-            _category );
-
-    /// <summary>
-    /// The identifier '{0}' of kind {1} is not supported for dependency analysis.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(string Identifier, string Kind)> ErrorMiscUnsupportedIdentifier =
-        new(
-            "LAMA5157",
-            Error,
-            "The identifier '{0}' of kind {1} is not supported for dependency analysis.",
-            "Identifier not supported for dependency analysis.",
+            Warning,
+            "{0}",
+            "Not supported for dependency analysis.",
             _category );
 
     /// <summary>
@@ -126,5 +117,27 @@ internal static class DiagnosticDescriptors
             Error,
             "The type specified for {0} must implement {1}.",
             "Type must implement the required interface.",
+            _category );
+
+    /// <summary>
+    /// Handling for this syntax is not implemented and is not supported for dependency analysis (analyzer reference {0}).
+    /// </summary>
+    public static readonly DiagnosticDefinition<string> WarningNotImplementedForDependencyAnalysis =
+        new(
+            "LAMA5160",
+            Warning,
+            "Handling for this syntax is not implemented and is not supported for dependency analysis (analyzer reference {0}).",
+            "Not implemented for dependency analysis.",
+            _category );
+
+    /// <summary>
+    /// The children of fields or properties of type '{0}' cannot be observed because the type does not implement INotifyPropertyChanged.
+    /// </summary>
+    public static readonly DiagnosticDefinition<ITypeSymbol> WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable =
+        new(
+            "LAMA5161",
+            Warning,
+            "The children of fields or properties of type '{0}' cannot be observed because the type does not implement INotifyPropertyChanged.",
+            "Field or property type does not implement INotifyPropertyChanged.",
             _category );
 }

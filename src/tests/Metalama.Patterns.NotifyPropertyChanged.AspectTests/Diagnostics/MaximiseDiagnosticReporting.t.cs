@@ -1,3 +1,4 @@
 // Error LAMA5150 on `Test`: `Class Test implements INotifyPropertyChanged but does not define a public or protected OnPropertyChanged method with the following signature: virtual void OnPropertyChanged(string propertyName). The method name can also be NotifyOfPropertyChange or RaisePropertyChanged.`
 // Error LAMA5154 on `VirtualProperty`: `The property Test.VirtualProperty is virtual. This is not supported.`
-// Error LAMA5156 on `this.B ?? "n"`: `Coalesce expressions are not supported for dependency analysis.`
+// Warning LAMA5156 on `this.Method()`: `Calls to local instance methods are not supported.`
+// Warning LAMA5156 on `this`: `Method arguments (including 'this') must be of primitive types.`
