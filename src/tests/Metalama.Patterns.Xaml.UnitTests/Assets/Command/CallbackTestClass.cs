@@ -2,6 +2,9 @@
 
 using System.Windows.Input;
 
+// ReSharper disable UnusedMember.Local
+// ReSharper disable UnassignedGetOnlyAutoProperty
+
 namespace Metalama.Patterns.Xaml.UnitTests.Assets.Command;
 
 public sealed class CallbackTestClass : CommandTestBase
@@ -17,6 +20,7 @@ public sealed class CallbackTestClass : CommandTestBase
     private bool CanExecuteImplicitInstanceMethodNoParameter()
     {
         LogCall();
+
         return CanExecute();
     }
 
@@ -31,6 +35,7 @@ public sealed class CallbackTestClass : CommandTestBase
     private bool CanExecuteImplicitInstanceMethodWithParameter( int v )
     {
         LogCall( $"{v}" );
+
         return CanExecute( v );
     }
 
@@ -45,6 +50,7 @@ public sealed class CallbackTestClass : CommandTestBase
     private static bool CanExecuteImplicitStaticMethodNoParameter()
     {
         LogCall();
+
         return CanExecute();
     }
 
@@ -59,6 +65,7 @@ public sealed class CallbackTestClass : CommandTestBase
     private static bool CanExecuteImplicitStaticMethodWithParameter( int v )
     {
         LogCall( $"{v}" );
+
         return CanExecute( v );
     }
 
@@ -75,6 +82,7 @@ public sealed class CallbackTestClass : CommandTestBase
         get
         {
             LogCall();
+
             return CanExecute();
         }
     }
@@ -92,6 +100,7 @@ public sealed class CallbackTestClass : CommandTestBase
         get
         {
             LogCall();
+
             return CanExecute();
         }
     }

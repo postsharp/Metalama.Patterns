@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Diagnostics;
 
-public class WarniningCommandNotifiableCanExecutePropertyIsNotPublic : INotifyPropertyChanged
+public class WarningCommandNotifiableCanExecutePropertyIsNotPublic : INotifyPropertyChanged
 {
     [Command]
     public ICommand PrivateCanExecuteCommand { get; }

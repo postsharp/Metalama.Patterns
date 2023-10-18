@@ -25,7 +25,7 @@ public class ManualInpcIntegrationTestClass : CommandTestBase, INotifyPropertyCh
             if ( value != this._canExecuteFoo )
             {
                 this._canExecuteFoo = value;
-                this.OnPropertyChanged( nameof( this.CanExecuteFoo ) );
+                this.OnPropertyChanged( nameof(this.CanExecuteFoo) );
             }
         }
     }

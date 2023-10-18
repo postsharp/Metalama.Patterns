@@ -25,7 +25,7 @@ public class ErrorCommandCanExecuteMethodIsNotValid
 
     private void ExecuteTwoParameters() { }
 
-    private bool CanExecuteTwoParamters( int a, int b ) => true;
+    private bool CanExecuteTwoParameters( int a, int b ) => true;
 
     [Command]
     public ICommand RefParameterCommand { get; }

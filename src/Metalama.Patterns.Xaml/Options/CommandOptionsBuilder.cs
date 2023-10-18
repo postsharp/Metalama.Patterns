@@ -73,11 +73,11 @@ public sealed class CommandOptionsBuilder
     public bool? EnableINotifyPropertyChangedIntegration { get; set; }
 
     internal CommandOptions Build()
-    => new()
-    {
-        ExecuteMethod = this.ExecuteMethod,
-        CanExecuteMethod = this.CanExecuteMethod,
-        CanExecuteProperty = this.CanExecuteProperty,
-        EnableINotifyPropertyChangedIntegration = this.EnableINotifyPropertyChangedIntegration
-    };
+        => new()
+        {
+            ExecuteMethod = this.ExecuteMethod,
+            CanExecuteMethod = this.CanExecuteMethod,
+            CanExecuteProperty = this.CanExecuteProperty,
+            EnableINotifyPropertyChangedIntegration = this.EnableINotifyPropertyChangedIntegration
+        };
 }

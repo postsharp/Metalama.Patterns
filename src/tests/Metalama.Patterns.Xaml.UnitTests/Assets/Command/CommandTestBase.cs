@@ -20,6 +20,7 @@ public abstract class CommandTestBase
 
         public List<string> Log { get; } = new();
 
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         public Func<int?, bool>? CanExecute { get; set; }
     }
 

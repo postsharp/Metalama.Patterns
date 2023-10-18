@@ -10,18 +10,18 @@ public sealed class CallbackTests
 {
     private CallbackTestClass Instance { get; }
 
-    private readonly CallbackTestClass.ThreadContext _threadContext;
+    private readonly CommandTestBase.ThreadContext _threadContext;
 
     public CallbackTests()
     {
-        this._threadContext = CallbackTestClass.ThreadContext.Current;
+        this._threadContext = CommandTestBase.ThreadContext.Current;
         this._threadContext.Reset();
         this.Instance = new CallbackTestClass();
     }
 
     private void ThrowIfThreadContextHasChanged()
     {
-        if ( this._threadContext != CallbackTestClass.ThreadContext.Current )
+        if ( this._threadContext != CommandTestBase.ThreadContext.Current )
         {
             throw new InvalidOperationException( "Test harness problem: CallbackTestClass.ThreadContext.Current has changed." );
         }
@@ -42,13 +42,13 @@ public sealed class CallbackTests
         this.ThrowIfThreadContextHasChanged();
         this._threadContext.CanExecute = canExecute;
     }
-    
+
     [Fact]
     public void ImplicitInstanceMethodNoParameterCommand()
     {
         var log = this.Log;
 
-        this.Instance.ImplicitInstanceMethodNoParameterCommand.CanExecute(42).Should().BeTrue();
+        this.Instance.ImplicitInstanceMethodNoParameterCommand.CanExecute( 42 ).Should().BeTrue();
         log.Should().Equal( "CanExecuteImplicitInstanceMethodNoParameter" );
         log.Clear();
 

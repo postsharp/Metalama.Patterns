@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Xaml.UnitTests.Command;
 
 public sealed class InpcIntegrationTests
 {
-    private static void TestCanExecuteChanged( object testClass, ICommand command, Action<bool> setCanExecute )
+    private static void TestCanExecuteChanged( ICommand command, Action<bool> setCanExecute )
     {
         var events = new List<string>();
 
@@ -33,17 +33,17 @@ public sealed class InpcIntegrationTests
     public void ManualImplementationNotification()
     {
         var c = new ManualInpcIntegrationTestClass();
-        TestCanExecuteChanged( c, c.FooCommand, b => c.CanExecuteFoo = b );
+        TestCanExecuteChanged( c.FooCommand, b => c.CanExecuteFoo = b );
     }
 
-    // TODO: Test disabled due to #34010 - [Observable] overrides the setter, framework generates unspported `init` keyword in net471.
+    // TODO: Test disabled due to #34010 - [Observable] overrides the setter, framework generates unsupported `init` keyword in net471.
 
 #if NETCOREAPP
     [Fact]
     public void ObservableAspectImplementationNotification()
     {
         var c = new ObservableAspectIntegrationTestClass();
-        TestCanExecuteChanged( c, c.FooCommand, b => c.CanExecuteFoo = b );
+        TestCanExecuteChanged( c.FooCommand, b => c.CanExecuteFoo = b );
     }
 #endif
 }

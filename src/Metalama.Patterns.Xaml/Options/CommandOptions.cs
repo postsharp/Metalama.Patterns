@@ -1,4 +1,4 @@
-﻿    // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
@@ -8,7 +8,7 @@ using System.Windows.Input;
 namespace Metalama.Patterns.Xaml.Options;
 
 internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>,
-                                                   IHierarchicalOptions<IProperty>
+                                        IHierarchicalOptions<IProperty>
 {
     /// <summary>
     /// Gets the name of the method that implements the command logic. This method corresponds to the
@@ -71,7 +71,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     /// </remarks>
     public bool? EnableINotifyPropertyChangedIntegration { get; init; }
 
-    IHierarchicalOptions? IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
         => new CommandOptions { EnableINotifyPropertyChangedIntegration = true };
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )

@@ -7,5 +7,5 @@ namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Eligibility;
 public class MustNotHaveAnInitializerExpression
 {
     [Command]
-    public ICommand HasInitializerExpresionCommand { get; } = null!;
+    public ICommand HasInitializerExpressionCommand { get; } = null!;
 }

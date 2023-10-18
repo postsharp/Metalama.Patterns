@@ -11,7 +11,7 @@ using Metalama.Patterns.Xaml.Options;
 using System.ComponentModel;
 using System.Windows.Input;
 
-// TODO: Skip [Observable] on [Command]-targetted auto properties. No functional impact, would just avoid unnecessary generated code.
+// TODO: Skip [Observable] on [Command]-targeted auto properties. No functional impact, would just avoid unnecessary generated code.
 // TODO: Remove reference to Metalama.Patterns.NotifyPropertyChanged once the rename has been merged.
 
 [assembly: AspectOrder( "Metalama.Patterns.Xaml.CommandAttribute:*", "Metalama.Patterns.NotifyPropertyChanged.NotifyPropertyChangedAttribute:*" )]
@@ -25,12 +25,17 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
     void IEligible<IProperty>.BuildEligibility( IEligibilityBuilder<IProperty> builder )
     {
         builder.MustNotBeStatic();
+        
+        // ReSharper disable once RedundantNameQualifier
         builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
         builder.MustSatisfy( p => p.GetMethod != null, p => $"{p} must have a getter" );
+
         builder.MustSatisfy(
-            p => p is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } or { IsAutoPropertyOrField: not true, Writeability: Writeability.All or Writeability.InitOnly },
+            p => p is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } or
+                { IsAutoPropertyOrField: not true, Writeability: Writeability.All or Writeability.InitOnly },
             p => $"{p} must be an auto-property with only a getter, or a non-auto property with both a getter and setter or init" );
-        builder.Type().MustBe( typeof( ICommand ) );
+
+        builder.Type().MustBe( typeof(ICommand) );
         builder.MustSatisfy( p => p.InitializerExpression == null, p => $"{p} must not have an initializer expression" );
     }
 
@@ -45,7 +50,7 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
             ? propertyName.Substring( 0, propertyName.Length - 7 )
             : propertyName;
 
-        if ( options.CanExecuteMethod != null && options.CanExecuteProperty != null )
+        if ( options is { CanExecuteMethod: not null, CanExecuteProperty: not null } )
         {
             builder.Diagnostics.Report( Diagnostics.ErrorCannotSpecifyBothCanExecuteMethodAndCanExecuteProperty );
 
@@ -70,8 +75,10 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
         if ( executeMethodName == canExecuteMethodName )
         {
-            builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteAndCanExecuteCannotBeTheSame.WithArguments(
-                (options.ExecuteMethod == null ? "default" : "configured", options.CanExecuteMethod == null ? "default" : "configured", executeMethodName) ) );
+            builder.Diagnostics.Report(
+                Diagnostics.ErrorCommandExecuteAndCanExecuteCannotBeTheSame.WithArguments(
+                    (options.ExecuteMethod == null ? "default" : "configured", options.CanExecuteMethod == null ? "default" : "configured",
+                     executeMethodName) ) );
 
             // Further diagnostics would be confusing and transformation is not possible.
 
@@ -132,6 +139,7 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
                         builder.Diagnostics.Report( Diagnostics.ErrorCommandConfiguredCanExecuteMethodNotFound.WithArguments( canExecuteMethodName ) );
                         canTransform = false;
                     }
+
                     break;
 
                 case 1:
@@ -144,14 +152,18 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
                         builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecuteMethodIsNotValid.WithArguments( target ), candidateCanExecuteMethods[0] );
                         canTransform = false;
                     }
+
                     break;
 
                 case > 1:
 
-                    builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecuteMethodIsAmbiguous.WithArguments(
-                        (declaringType, altCanExecuteMethodName == null ? $"'{canExecuteMethodName}'" : $"'{canExecuteMethodName}' or '{altCanExecuteMethodName}'") ) );
-                            
+                    builder.Diagnostics.Report(
+                        Diagnostics.ErrorCommandCanExecuteMethodIsAmbiguous.WithArguments(
+                            (declaringType,
+                             altCanExecuteMethodName == null ? $"'{canExecuteMethodName}'" : $"'{canExecuteMethodName}' or '{altCanExecuteMethodName}'") ) );
+
                     canTransform = false;
+
                     break;
             }
         }
@@ -169,10 +181,12 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
         switch ( candidateExecuteMethods.Count )
         {
             case 0:
-                builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodNotFound.WithArguments(
-                    altExecuteMethodName == null ? $"'{executeMethodName}'" : $"'{executeMethodName}' or '{altExecuteMethodName}'" ) );
-                
+                builder.Diagnostics.Report(
+                    Diagnostics.ErrorCommandExecuteMethodNotFound.WithArguments(
+                        altExecuteMethodName == null ? $"'{executeMethodName}'" : $"'{executeMethodName}' or '{altExecuteMethodName}'" ) );
+
                 canTransform = false;
+
                 break;
 
             case 1:
@@ -185,14 +199,17 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
                     builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodIsNotValid.WithArguments( target ), candidateExecuteMethods[0] );
                     canTransform = false;
                 }
+
                 break;
 
             case > 1:
 
-                builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodIsAmbiguous.WithArguments(
-                    (declaringType, altExecuteMethodName == null ? $"'{executeMethodName}'" : $"'{executeMethodName}' or '{altExecuteMethodName}'") ) );
-                        
+                builder.Diagnostics.Report(
+                    Diagnostics.ErrorCommandExecuteMethodIsAmbiguous.WithArguments(
+                        (declaringType, altExecuteMethodName == null ? $"'{executeMethodName}'" : $"'{executeMethodName}' or '{altExecuteMethodName}'") ) );
+
                 canTransform = false;
+
                 break;
         }
 
@@ -200,11 +217,14 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
         if ( canTransform && canExecuteProperty != null && options.EnableINotifyPropertyChangedIntegration == true )
         {
-            if ( declaringType.AllImplementedInterfaces.Contains( typeof( INotifyPropertyChanged ) ) )
+            if ( declaringType.AllImplementedInterfaces.Contains( typeof(INotifyPropertyChanged) ) )
             {
+                // ReSharper disable once RedundantNameQualifier
                 if ( canExecuteProperty.Accessibility != Framework.Code.Accessibility.Public )
                 {
-                    builder.Diagnostics.Report( Diagnostics.WarniningCommandNotifiableCanExecutePropertyIsNotPublic.WithArguments( target ), canExecuteProperty );
+                    builder.Diagnostics.Report(
+                        Diagnostics.WarningCommandNotifiableCanExecutePropertyIsNotPublic.WithArguments( target ),
+                        canExecuteProperty );
                 }
 
                 useInpcIntegration = true;
@@ -242,7 +262,7 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
         builder.Advice.AddInitializer(
             declaringType,
-            nameof( InitializeCommand ),
+            nameof(InitializeCommand),
             InitializerKind.BeforeInstanceConstructor,
             args: new
             {
@@ -256,8 +276,8 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
     private static bool IsValidMethod( IMethod method, SpecialType requiredReturnType )
         => method.ReturnType.SpecialType == requiredReturnType
-        && (method.Parameters is [] or [{ RefKind: RefKind.None or RefKind.In }])
-        && method.TypeParameters.Count == 0;
+           && method.Parameters is [] or [{ RefKind: RefKind.None or RefKind.In }]
+           && method.TypeParameters.Count == 0;
 
     private static bool IsValidCanExecuteProperty( IProperty property )
         => property.Type.SpecialType == SpecialType.Boolean
@@ -315,6 +335,7 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
         }
         else
         {
+            // ReSharper disable once MergeConditionalExpression
 #pragma warning disable IDE0031 // Use null propagation
             commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression == null ? null : canExecuteExpression.Value );
 #pragma warning restore IDE0031 // Use null propagation
