@@ -275,7 +275,7 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
         if ( canExecuteMethod != null || canExecuteProperty != null )
         {
-            bool CanExecute( object parameter )
+            bool CanExecute( object? parameter )
             {
                 if ( canExecuteMethod != null )
                 {
@@ -297,7 +297,7 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
             canExecuteExpression = ExpressionFactory.Capture( (Func<object, bool>) CanExecute );
         }
 
-        void Execute( object parameter )
+        void Execute( object? parameter )
         {
             if ( executeMethod.Parameters.Count == 0 )
             {

@@ -13,11 +13,11 @@ public class AnyImplementation : INotifyPropertyChanged
   public bool CanExecuteFoo1 => true;
   public AnyImplementation()
   {
-    bool CanExecute(object parameter)
+    bool CanExecute(object? parameter)
     {
       return this.CanExecuteFoo1;
     }
-    void Execute(object parameter_1)
+    void Execute(object? parameter_1)
     {
       this.ExecuteFoo1();
     }
@@ -34,11 +34,11 @@ public class ImplementedByBase : AnyImplementation
   public bool CanExecuteFoo2 => true;
   public ImplementedByBase()
   {
-    bool CanExecute(object parameter)
+    bool CanExecute(object? parameter)
     {
       return this.CanExecuteFoo2;
     }
-    void Execute(object parameter_1)
+    void Execute(object? parameter_1)
     {
       this.ExecuteFoo2();
     }

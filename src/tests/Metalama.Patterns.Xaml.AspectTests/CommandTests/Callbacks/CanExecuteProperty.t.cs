@@ -17,20 +17,20 @@ public class CanExecuteProperty
   private static bool CanExecuteStatic => true;
   public CanExecuteProperty()
   {
-    bool CanExecute_1(object parameter_2)
+    bool CanExecute_1(object? parameter_2)
     {
       return CanExecuteProperty.CanExecuteStatic;
     }
-    void Execute_1(object parameter_3)
+    void Execute_1(object? parameter_3)
     {
       CanExecuteProperty.ExecuteStatic();
     }
     this.StaticCommand = new DelegateCommand(Execute_1, CanExecute_1);
-    bool CanExecute(object parameter)
+    bool CanExecute(object? parameter)
     {
       return this.CanExecuteInstance;
     }
-    void Execute(object parameter_1)
+    void Execute(object? parameter_1)
     {
       this.ExecuteInstance();
     }
