@@ -1,1 +1,1 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// Error LAMA5214 on `FooCommand`: `The type ErrorCommandExecuteMethodIsAmbiguous contains more than one method named 'ExecuteFoo' or 'Foo'.`

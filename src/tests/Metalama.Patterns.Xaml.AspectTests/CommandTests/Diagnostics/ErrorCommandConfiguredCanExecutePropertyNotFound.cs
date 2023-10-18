@@ -6,6 +6,8 @@ namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Diagnostics;
 
 public class ErrorCommandConfiguredCanExecutePropertyNotFound
 {
-    [Command( CanExecuteMethod = "DoesNotExist" )]
+    [Command( CanExecuteProperty = "DoesNotExist" )]
     public ICommand FooCommand { get; }
+
+    private void ExecuteFoo() { }
 }

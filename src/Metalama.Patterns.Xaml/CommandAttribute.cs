@@ -141,7 +141,9 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
                 case > 1:
 
-                    builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecuteMethodIsAmbiguous.WithArguments( (declaringType, canExecuteMethodName, altCanExecuteMethodName) ) );
+                    builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecuteMethodIsAmbiguous.WithArguments(
+                        (declaringType, altCanExecuteMethodName == null ? $"'{canExecuteMethodName}'" : $"'{canExecuteMethodName}' or '{altCanExecuteMethodName}'") ) );
+                            
                     canTransform = false;
                     break;
             }
@@ -160,7 +162,9 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
         switch ( candidateExecuteMethods.Count )
         {
             case 0:
-                builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodNotFound.WithArguments( (executeMethodName, altExecuteMethodName) ) );
+                builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodNotFound.WithArguments(
+                    altExecuteMethodName == null ? $"'{executeMethodName}'" : $"'{executeMethodName}' or '{altExecuteMethodName}'" ) );
+                
                 canTransform = false;
                 break;
 
@@ -178,7 +182,9 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
 
             case > 1:
 
-                builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodIsAmbiguous.WithArguments( (declaringType, executeMethodName, altExecuteMethodName) ) );
+                builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodIsAmbiguous.WithArguments(
+                    (declaringType, altExecuteMethodName == null ? $"'{executeMethodName}'" : $"'{executeMethodName}' or '{altExecuteMethodName}'") ) );
+                        
                 canTransform = false;
                 break;
         }
@@ -211,7 +217,8 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
         && method.TypeParameters.Count == 0;
 
     private static bool IsValidCanExecuteProperty( IProperty property )
-        => property.Type.SpecialType == SpecialType.Boolean;
+        => property.Type.SpecialType == SpecialType.Boolean
+           && property.GetMethod != null;
 
     [Template]
     private static void InitializeCommand(

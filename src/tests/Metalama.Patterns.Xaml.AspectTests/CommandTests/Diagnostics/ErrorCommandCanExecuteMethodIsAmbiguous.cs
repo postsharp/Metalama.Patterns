@@ -4,10 +4,14 @@ using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Diagnostics;
 
-public class ErrorCommandConfiguredCanExecuteMethodNotFound
+public class ErrorCommandCanExecuteMethodIsAmbiguous
 {
-    [Command( CanExecuteMethod = "DoesNotExist" )]
+    [Command]
     public ICommand FooCommand { get; }
 
     private void ExecuteFoo() { }
+
+    private bool CanExecuteFoo() => true;
+
+    private bool CanExecuteFoo( int v ) => true;
 }

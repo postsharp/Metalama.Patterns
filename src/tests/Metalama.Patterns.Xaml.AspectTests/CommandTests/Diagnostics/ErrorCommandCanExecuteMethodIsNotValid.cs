@@ -9,20 +9,28 @@ public class ErrorCommandCanExecuteMethodIsNotValid
     [Command]
     public ICommand GenericCommand { get; }
 
+    private void ExecuteGeneric() { }
+
     private bool CanExecuteGeneric<T>( T value ) => true;
 
     [Command]
     public ICommand NotBoolCommand { get; }
+
+    private void ExecuteNotBool() { }
 
     private int CanExecuteNotBool() => 42;
 
     [Command]
     public ICommand TwoParametersCommand { get; }
 
+    private void ExecuteTwoParameters() { }
+
     private bool CanExecuteTwoParamters( int a, int b ) => true;
 
     [Command]
     public ICommand RefParameterCommand { get; }
+
+    private void ExecuteRefParameter() { }
 
     private bool CanExecuteRefParameter( ref int a ) => true;
 }

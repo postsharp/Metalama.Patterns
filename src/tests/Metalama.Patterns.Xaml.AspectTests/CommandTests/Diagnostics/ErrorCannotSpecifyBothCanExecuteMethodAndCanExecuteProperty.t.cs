@@ -1,1 +1,1 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// Error LAMA5205 on `FooCommand`: `Options CanExecuteMethod and CanExecuteProperty cannot both be defined at the same time.`

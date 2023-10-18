@@ -1,0 +1,1 @@
+// Error LAMA5211 on `FooCommand`: `The type ErrorCommandCanExecuteMethodIsAmbiguous contains more than one method named 'CanExecuteFoo' or 'CanFoo'.`

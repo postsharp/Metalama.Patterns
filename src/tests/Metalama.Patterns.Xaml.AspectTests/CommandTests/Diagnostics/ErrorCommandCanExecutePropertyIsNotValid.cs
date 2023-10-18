@@ -7,7 +7,19 @@ namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Diagnostics;
 public class ErrorCommandCanExecutePropertyIsNotValid
 {
     [Command]
-    public ICommand FooCommand { get; }
+    public ICommand NotBoolCommand { get; }
 
-    private int CanExecuteFoo => 42;
+    private void ExecuteNotBool() { }
+
+    private int CanExecuteNotBool => 42;
+
+    [Command]
+    public ICommand NoGetterCommand { get; }
+
+    private void ExecuteNoGetter() { }
+
+    private bool CanExecuteNoGetter
+    {
+        set { }
+    }
 }

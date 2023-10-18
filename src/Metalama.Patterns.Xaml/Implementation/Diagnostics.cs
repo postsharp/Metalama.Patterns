@@ -102,7 +102,7 @@ internal static class Diagnostics
         new(
             "LAMA5207",
             Error,
-            "The " + nameof( CommandOptions.CanExecuteProperty ) + " for command property {0} must be of type bool.",
+            "The " + nameof( CommandOptions.CanExecuteProperty ) + " for command property {0} must be of type bool and have a getter.",
             "Invalid " + nameof( CommandOptions.CanExecuteProperty ) + " type." );
 
     /// <summary>
@@ -136,23 +136,23 @@ internal static class Diagnostics
             "Missing " + nameof( CommandOptions.CanExecuteMethod ) + "." );
 
     /// <summary>
-    /// The type {0} contains more than one method named '{1}' or '{2}'.
+    /// The type {0} contains more than one method named {1}.
     /// </summary>
-    public static readonly DiagnosticDefinition<(IType DeclaringType, string MethodName, string? AltMethodName)> ErrorCommandCanExecuteMethodIsAmbiguous =
+    public static readonly DiagnosticDefinition<(IType DeclaringType, string MethodName)> ErrorCommandCanExecuteMethodIsAmbiguous =
         new(
             "LAMA5211",
             Error,
-            "The type {0} contains more than one method named '{1}' or '{2}'.",
+            "The type {0} contains more than one method named {1}.",
             "Ambiguous " + nameof( CommandOptions.CanExecuteMethod ) + "." );
 
     /// <summary>
-    /// The ExecuteMethod named '{0}' or '{1}' was not found.
+    /// The ExecuteMethod named {0} was not found.
     /// </summary>
-    public static readonly DiagnosticDefinition<(string ExecuteMethodName, string? AltExecuteMethodName)> ErrorCommandExecuteMethodNotFound =
+    public static readonly DiagnosticDefinition<string> ErrorCommandExecuteMethodNotFound =
         new(
             "LAMA5212",
             Error,
-            "The " + nameof( CommandOptions.ExecuteMethod ) + " named '{0}' or '{1}' was not found.",
+            "The " + nameof( CommandOptions.ExecuteMethod ) + " named {0} was not found.",
             "Missing " + nameof( CommandOptions.ExecuteMethod ) + "." );
 
     /// <summary>
@@ -166,12 +166,12 @@ internal static class Diagnostics
             "Invalid " + nameof( CommandOptions.ExecuteMethod ) + "." );
 
     /// <summary>
-    /// The type {0} contains more than one method named '{1}' or '{2}'.
+    /// The type {0} contains more than one method named {1}.
     /// </summary>
-    public static readonly DiagnosticDefinition<(IType DeclaringType, string MethodName, string? AltMethodName)> ErrorCommandExecuteMethodIsAmbiguous =
+    public static readonly DiagnosticDefinition<(IType DeclaringType, string MethodName)> ErrorCommandExecuteMethodIsAmbiguous =
         new(
             "LAMA5214",
             Error,
-            "The type {0} contains more than one method named '{1}' or '{2}'.",
+            "The type {0} contains more than one method named {1}.",
             "Ambiguous " + nameof( CommandOptions.ExecuteMethod ) + "." );
 }

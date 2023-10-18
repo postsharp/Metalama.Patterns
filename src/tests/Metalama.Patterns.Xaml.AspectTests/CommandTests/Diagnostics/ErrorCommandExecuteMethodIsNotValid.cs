@@ -9,20 +9,15 @@ public class ErrorCommandExecuteMethodIsNotValid
     [Command]
     public ICommand GenericCommand { get; }
 
-    private bool ExecuteGeneric<T>( T value ) => true;
-
-    [Command]
-    public ICommand NotBoolCommand { get; }
-
-    private int ExecuteNotBool() => 42;
+    private void ExecuteGeneric<T>( T value ) { }
 
     [Command]
     public ICommand TwoParametersCommand { get; }
 
-    private bool ExecuteTwoParamters( int a, int b ) => true;
+    private void ExecuteTwoParameters( int a, int b ) { }
 
     [Command]
     public ICommand RefParameterCommand { get; }
 
-    private bool ExecuteRefParameter( ref int a ) => true;
+    private void ExecuteRefParameter( ref int a ) { }
 }

@@ -1,1 +1,3 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// Error LAMA5213 on `ExecuteGeneric`: `The ExecuteMethod for command property ErrorCommandExecuteMethodIsNotValid.GenericCommand must not be generic, must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.`
+// Error LAMA5213 on `ExecuteTwoParameters`: `The ExecuteMethod for command property ErrorCommandExecuteMethodIsNotValid.TwoParametersCommand must not be generic, must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.`
+// Error LAMA5213 on `ExecuteRefParameter`: `The ExecuteMethod for command property ErrorCommandExecuteMethodIsNotValid.RefParameterCommand must not be generic, must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.`

@@ -1,1 +1,1 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// Error LAMA5208 on `FooCommand`: `The configured CanExecuteProperty 'DoesNotExist' was not found.`
