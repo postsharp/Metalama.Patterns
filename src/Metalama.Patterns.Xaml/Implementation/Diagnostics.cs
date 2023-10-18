@@ -174,4 +174,16 @@ internal static class Diagnostics
             Error,
             "The type {0} contains more than one method named {1}.",
             "Ambiguous " + nameof( CommandOptions.ExecuteMethod ) + "." );
+
+    /// <summary>
+    /// The CanExecuteProperty for command property {0} is not public, and INotifyPropertyChanged integration is enabled and applicable.
+    /// Because the CanExecuteProperty is not public, INotifyPropertyChanged.PropertyChanged events might not be raised depending on the INotifyPropertyChanged implementation.
+    /// </summary>
+    public static readonly DiagnosticDefinition<IProperty> WarniningCommandNotifiableCanExecutePropertyIsNotPublic =
+        new(
+            "LAMA5215",
+            Warning,
+            "The " + nameof(CommandOptions.CanExecuteProperty) + " for command property {0} is not public, and INotifyPropertyChanged integration is enabled and applicable. " +
+            "Because the " + nameof(CommandOptions.CanExecuteProperty) + " is not public, INotifyPropertyChanged.PropertyChanged events might not be raised depending on the INotifyPropertyChanged implementation.",
+            "Notifiable " + nameof( CommandOptions.CanExecuteProperty) + " is not public." );
 }

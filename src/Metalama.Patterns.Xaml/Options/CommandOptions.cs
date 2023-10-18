@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.Options;
@@ -57,8 +58,21 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     /// </remarks>
     public string? CanExecuteProperty { get; init; }
 
+    /// <summary>
+    /// Gets a value indicating whether integration with <see cref="INotifyPropertyChanged"/> is enabled. The default is <see langword="true"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When <see cref="EnableINotifyPropertyChangedIntegration"/> is <see langword="true"/> (the default), and when a can-execute property (not a method) is used,
+    /// and when the containing type of the target property implements <see cref="INotifyPropertyChanged"/>,then the <see cref="ICommand.CanExecuteChanged"/> event of 
+    /// the command will be raised when the can-execute property changes. A warning is reported if the can-execute property is not public because <see cref="INotifyPropertyChanged"/>
+    /// implementations typically only notify changes to public properties.
+    /// </para>
+    /// </remarks>
+    public bool? EnableINotifyPropertyChangedIntegration { get; init; }
+
     IHierarchicalOptions? IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => null;
+        => new CommandOptions { EnableINotifyPropertyChangedIntegration = true };
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
@@ -68,7 +82,8 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
         {
             ExecuteMethod = other.ExecuteMethod ?? this.ExecuteMethod,
             CanExecuteMethod = other.CanExecuteMethod ?? this.CanExecuteMethod,
-            CanExecuteProperty = other.CanExecuteProperty ?? this.CanExecuteProperty
+            CanExecuteProperty = other.CanExecuteProperty ?? this.CanExecuteProperty,
+            EnableINotifyPropertyChangedIntegration = other.EnableINotifyPropertyChangedIntegration ?? this.EnableINotifyPropertyChangedIntegration
         };
     }
 }

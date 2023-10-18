@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Options;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.Options;
@@ -58,6 +59,19 @@ public class CommandOptionsAttribute : Attribute, IHierarchicalOptionsProvider
     /// </remarks>
     public string? CanExecuteProperty { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether integration with <see cref="INotifyPropertyChanged"/> is enabled. The default is <see langword="true"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When <see cref="EnableINotifyPropertyChangedIntegration"/> is <see langword="true"/> (the default), and when a can-execute property (not a method) is used,
+    /// and when the containing type of the target property implements <see cref="INotifyPropertyChanged"/>,then the <see cref="ICommand.CanExecuteChanged"/> event of 
+    /// the command will be raised when the can-execute property changes. A warning is reported if the can-execute property is not public because <see cref="INotifyPropertyChanged"/>
+    /// implementations typically only notify changes to public properties.
+    /// </para>
+    /// </remarks>
+    public bool? EnableINotifyPropertyChangedIntegration { get; set; }
+
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
     {
         return new[]
@@ -66,7 +80,8 @@ public class CommandOptionsAttribute : Attribute, IHierarchicalOptionsProvider
             {
                 ExecuteMethod = this.ExecuteMethod,
                 CanExecuteMethod = this.CanExecuteMethod,
-                CanExecuteProperty = this.CanExecuteProperty
+                CanExecuteProperty = this.CanExecuteProperty,
+                EnableINotifyPropertyChangedIntegration = this.EnableINotifyPropertyChangedIntegration
             }
         };
     }

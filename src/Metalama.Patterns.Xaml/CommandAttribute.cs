@@ -8,7 +8,14 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Patterns.Xaml.Implementation;
 using Metalama.Patterns.Xaml.Options;
+using System.ComponentModel;
 using System.Windows.Input;
+
+// TODO: Skip [Observable] on [Command]-targetted auto properties. No functional impact, would just avoid unnecessary generated code.
+// TODO: Remove reference to Metalama.Patterns.NotifyPropertyChanged once the rename has been merged.
+
+[assembly: AspectOrder( "Metalama.Patterns.Xaml.CommandAttribute:*", "Metalama.Patterns.NotifyPropertyChanged.NotifyPropertyChangedAttribute:*" )]
+[assembly: AspectOrder( "Metalama.Patterns.Xaml.CommandAttribute:*", "Metalama.Patterns.Observability.ObservableAttribute:*" )]
 
 namespace Metalama.Patterns.Xaml;
 
@@ -189,8 +196,28 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
                 break;
         }
 
+        var useInpcIntegration = false;
+
+        if ( canTransform && canExecuteProperty != null && options.EnableINotifyPropertyChangedIntegration == true )
+        {
+            if ( declaringType.AllImplementedInterfaces.Contains( typeof( INotifyPropertyChanged ) ) )
+            {
+                if ( canExecuteProperty.Accessibility != Framework.Code.Accessibility.Public )
+                {
+                    builder.Diagnostics.Report( Diagnostics.WarniningCommandNotifiableCanExecutePropertyIsNotPublic.WithArguments( target ), canExecuteProperty );
+                }
+
+                useInpcIntegration = true;
+            }
+        }
+
         if ( !canTransform || !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
         {
+            if ( canTransform )
+            {
+                // TODO: Suppress warnings on callbacks
+            }
+
             return;
         }
 
@@ -207,7 +234,8 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
                 commandProperty = target,
                 executeMethod,
                 canExecuteMethod,
-                canExecuteProperty
+                canExecuteProperty,
+                useInpcIntegration
             } );
     }
 
@@ -225,7 +253,8 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
         [CompileTime] IProperty commandProperty,
         [CompileTime] IMethod executeMethod,
         [CompileTime] IMethod? canExecuteMethod,
-        [CompileTime] IProperty? canExecuteProperty )
+        [CompileTime] IProperty? canExecuteProperty,
+        [CompileTime] bool useInpcIntegration )
     {
         IExpression? canExecuteExpression = null;
 
@@ -265,8 +294,15 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
             }
         }
 
+        if ( useInpcIntegration )
+        {
+            commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression!.Value, meta.This, canExecuteProperty!.Name );
+        }
+        else
+        {
 #pragma warning disable IDE0031 // Use null propagation
-        commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression == null ? null : canExecuteExpression.Value );
+            commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression == null ? null : canExecuteExpression.Value );
 #pragma warning restore IDE0031 // Use null propagation
+        }
     }
 }

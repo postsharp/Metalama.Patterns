@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Metalama.Patterns.NotifyPropertyChanged\Metalama.Patterns.NotifyPropertyChanged.csproj" />
     <ProjectReference Include="..\..\Metalama.Patterns.Xaml\Metalama.Patterns.Xaml.csproj" />
   </ItemGroup>
 
