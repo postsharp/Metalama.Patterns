@@ -14,6 +14,8 @@ public sealed class DependencyPropertyAttribute : DependencyPropertyOptionsAttri
 {
     void IEligible<IProperty>.BuildEligibility( IEligibilityBuilder<IProperty> builder )
     {
+        // TODO: Aspect tests for eligibility.
+
         builder.MustNotBeStatic();
         
         // ReSharper disable once RedundantNameQualifier
