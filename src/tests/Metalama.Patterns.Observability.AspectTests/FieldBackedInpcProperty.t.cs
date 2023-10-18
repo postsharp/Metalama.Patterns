@@ -1,8 +1,8 @@
 [Observable]
-public class FieldBackedInpcProperty : global::System.ComponentModel.INotifyPropertyChanged
+public class FieldBackedInpcProperty : INotifyPropertyChanged
 {
-  private global::Metalama.Patterns.Observability.AspectTests.FieldBackedInpcProperty.A _x1 = default !;
-  private global::Metalama.Patterns.Observability.AspectTests.FieldBackedInpcProperty.A _x
+  private A _x1 = default !;
+  private A _x
   {
     get
     {
@@ -10,7 +10,7 @@ public class FieldBackedInpcProperty : global::System.ComponentModel.INotifyProp
     }
     set
     {
-      if (!global::System.Object.ReferenceEquals(value, this._x1))
+      if (!object.ReferenceEquals(value, this._x1))
       {
         var oldValue = this._x1;
         if (oldValue != null)
@@ -26,27 +26,27 @@ public class FieldBackedInpcProperty : global::System.ComponentModel.INotifyProp
   }
   public A P1 => this._x;
   public int P2 => this._x.A1;
-  private global::System.ComponentModel.PropertyChangedEventHandler? _on_xPropertyChangedHandler;
-  [global::Metalama.Patterns.Observability.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  private PropertyChangedEventHandler? _on_xPropertyChangedHandler;
+  [OnChildPropertyChangedMethod(new string[] { })]
+  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [global::Metalama.Patterns.Observability.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
-  private void SubscribeTo_x(global::Metalama.Patterns.Observability.AspectTests.FieldBackedInpcProperty.A value)
+  private void SubscribeTo_x(A value)
   {
     if (value != null)
     {
-      this._on_xPropertyChangedHandler ??= (global::System.ComponentModel.PropertyChangedEventHandler)OnChildPropertyChanged_1;
+      this._on_xPropertyChangedHandler ??= OnChildPropertyChanged_1;
       value.PropertyChanged += this._on_xPropertyChangedHandler;
     }
-    void OnChildPropertyChanged_1(object? sender, global::System.ComponentModel.PropertyChangedEventArgs e)
+    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;
@@ -58,5 +58,5 @@ public class FieldBackedInpcProperty : global::System.ComponentModel.INotifyProp
       }
     }
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }

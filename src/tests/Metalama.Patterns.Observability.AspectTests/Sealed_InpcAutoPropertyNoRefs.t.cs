@@ -1,5 +1,5 @@
 [Observable]
-public sealed class SealedInpcAutoPropertyNoRefs : global::System.ComponentModel.INotifyPropertyChanged
+public sealed class SealedInpcAutoPropertyNoRefs : INotifyPropertyChanged
 {
   private SimpleInpcByHand _x = default !;
   public SimpleInpcByHand X
@@ -10,20 +10,20 @@ public sealed class SealedInpcAutoPropertyNoRefs : global::System.ComponentModel
     }
     set
     {
-      if (!global::System.Object.ReferenceEquals(value, this._x))
+      if (!object.ReferenceEquals(value, this._x))
       {
         this._x = value;
         this.OnPropertyChanged("X");
       }
     }
   }
-  [global::Metalama.Patterns.Observability.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
-  private void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  [OnChildPropertyChangedMethod(new string[] { })]
+  private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  private void OnPropertyChanged(global::System.String propertyName)
+  private void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }

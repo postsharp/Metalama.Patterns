@@ -1,20 +1,20 @@
 [Observable]
-public class ConfigureDiagnosticCommentsByFabric : global::System.ComponentModel.INotifyPropertyChanged
+public class ConfigureDiagnosticCommentsByFabric : INotifyPropertyChanged
 {
-  [global::Metalama.Patterns.Observability.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  [OnChildPropertyChangedMethod(new string[] { })]
+  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   // Template: OnChildPropertyChanged
   }
-  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  protected virtual void OnPropertyChanged(string propertyName)
   {
     // Template: OnPropertyChanged
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [global::Metalama.Patterns.Observability.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   // Template: OnUnmonitoredObservablePropertyChanged
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }

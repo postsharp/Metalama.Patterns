@@ -1,5 +1,5 @@
 [Observable]
-public class InpcAutoPropertyWithRef : global::System.ComponentModel.INotifyPropertyChanged
+public class InpcAutoPropertyWithRef : INotifyPropertyChanged
 {
   private SimpleInpcByHand _x = default !;
   public SimpleInpcByHand X
@@ -10,7 +10,7 @@ public class InpcAutoPropertyWithRef : global::System.ComponentModel.INotifyProp
     }
     set
     {
-      if (!global::System.Object.ReferenceEquals(value, this._x))
+      if (!object.ReferenceEquals(value, this._x))
       {
         var oldValue = this._x;
         if (oldValue != null)
@@ -25,27 +25,27 @@ public class InpcAutoPropertyWithRef : global::System.ComponentModel.INotifyProp
     }
   }
   public int Y => this.X.A;
-  private global::System.ComponentModel.PropertyChangedEventHandler? _onXPropertyChangedHandler;
-  [global::Metalama.Patterns.Observability.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { "X" })]
-  protected virtual void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  private PropertyChangedEventHandler? _onXPropertyChangedHandler;
+  [OnChildPropertyChangedMethod(new string[] { "X" })]
+  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  protected virtual void OnPropertyChanged(global::System.String propertyName)
+  protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [global::Metalama.Patterns.Observability.Metadata.OnUnmonitoredObservablePropertyChangedMethodAttribute(new global::System.String[] { })]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(global::System.String propertyPath, global::System.ComponentModel.INotifyPropertyChanged? oldValue, global::System.ComponentModel.INotifyPropertyChanged? newValue)
+  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
-  private void SubscribeToX(global::Metalama.Patterns.Observability.AspectTests.Include.SimpleInpcByHand value)
+  private void SubscribeToX(SimpleInpcByHand value)
   {
     if (value != null)
     {
-      this._onXPropertyChangedHandler ??= (global::System.ComponentModel.PropertyChangedEventHandler)OnChildPropertyChanged_1;
+      this._onXPropertyChangedHandler ??= OnChildPropertyChanged_1;
       value.PropertyChanged += this._onXPropertyChangedHandler;
     }
-    void OnChildPropertyChanged_1(object? sender, global::System.ComponentModel.PropertyChangedEventArgs e)
+    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;
@@ -55,9 +55,9 @@ public class InpcAutoPropertyWithRef : global::System.ComponentModel.INotifyProp
           this.OnChildPropertyChanged("X", "A");
           return;
         }
-        this.OnChildPropertyChanged("X", (global::System.String)propertyName);
+        this.OnChildPropertyChanged("X", propertyName);
       }
     }
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }
