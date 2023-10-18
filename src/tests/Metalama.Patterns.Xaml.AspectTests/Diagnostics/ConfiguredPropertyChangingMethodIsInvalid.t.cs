@@ -1,0 +1,1 @@
+// Error LAMA5203 on `Changing`: `The signature of the PropertyChangingMethod handler method for dependency property ConfiguredPropertyChangingMethodIsInvalid.Foo is not valid. Refer to documentation for valid signatures.`

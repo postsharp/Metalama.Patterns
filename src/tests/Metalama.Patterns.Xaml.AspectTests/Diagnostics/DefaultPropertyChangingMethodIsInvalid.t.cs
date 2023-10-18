@@ -1,0 +1,1 @@
+// Error LAMA5203 on `OnFooChanging`: `The signature of the PropertyChangingMethod handler method for dependency property DefaultPropertyChangingMethodIsInvalid.Foo is not valid. Refer to documentation for valid signatures.`

@@ -1,14 +1,16 @@
+using System.ComponentModel;
+using Metalama.Patterns.NotifyPropertyChanged.Metadata;
 namespace Metalama.Patterns.NotifyPropertyChanged.AspectTests;
 [NotifyPropertyChanged]
-public sealed class SealedNoProperties : global::System.ComponentModel.INotifyPropertyChanged
+public sealed class SealedNoProperties : INotifyPropertyChanged
 {
-  [global::Metalama.Patterns.NotifyPropertyChanged.Metadata.OnChildPropertyChangedMethodAttribute(new global::System.String[] { })]
-  private void OnChildPropertyChanged(global::System.String parentPropertyPath, global::System.String propertyName)
+  [OnChildPropertyChangedMethod(new string[] { })]
+  private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  private void OnPropertyChanged(global::System.String propertyName)
+  private void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+  public event PropertyChangedEventHandler? PropertyChanged;
 }

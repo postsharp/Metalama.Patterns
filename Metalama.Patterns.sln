@@ -41,15 +41,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.LoadTests", "src\tests\Metalama.Patterns.Caching.LoadTests\Metalama.Patterns.Caching.LoadTests.csproj", "{7021F96E-F2D8-4C31-83E2-4511ED59E8C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.TestHelpers", "src\tests\Metalama.Patterns.TestHelpers\Metalama.Patterns.TestHelpers.csproj", "{5F9908DA-29F6-4761-95C9-805182195BCA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.TestHelpers", "src\tests\Metalama.Patterns.TestHelpers\Metalama.Patterns.TestHelpers.csproj", "{5F9908DA-29F6-4761-95C9-805182195BCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Caching.Aspects", "src\Metalama.Patterns.Caching.Aspects\Metalama.Patterns.Caching.Aspects.csproj", "{292E6D16-1677-46CE-BB82-7084E8DEC33C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.Aspects", "src\Metalama.Patterns.Caching.Aspects\Metalama.Patterns.Caching.Aspects.csproj", "{292E6D16-1677-46CE-BB82-7084E8DEC33C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Caching.Backend", "src\Metalama.Patterns.Caching.Backend\Metalama.Patterns.Caching.Backend.csproj", "{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Caching.Backend", "src\Metalama.Patterns.Caching.Backend\Metalama.Patterns.Caching.Backend.csproj", "{04EDB75F-49B9-4588-B8E8-B778F07DC3F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Memoization", "src\Metalama.Patterns.Memoization\Metalama.Patterns.Memoization.csproj", "{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Memoization", "src\Metalama.Patterns.Memoization\Metalama.Patterns.Memoization.csproj", "{EA4BEEBE-58DB-4392-8D53-A1CF874B99A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Patterns.Memoization.AspectTests", "src\tests\Metalama.Patterns.Memoization.AspectTests\Metalama.Patterns.Memoization.AspectTests.csproj", "{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Memoization.AspectTests", "src\tests\Metalama.Patterns.Memoization.AspectTests\Metalama.Patterns.Memoization.AspectTests.csproj", "{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml", "src\Metalama.Patterns.Xaml\Metalama.Patterns.Xaml.csproj", "{3AE09DAA-B059-4062-80D2-6427B45BD7B7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml.AspectTests", "src\tests\Metalama.Patterns.Xaml.AspectTests\Metalama.Patterns.Xaml.AspectTests.csproj", "{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml.UnitTests", "src\tests\Metalama.Patterns.Xaml.UnitTests\Metalama.Patterns.Xaml.UnitTests.csproj", "{50756B08-7B60-4B7C-BB38-065413A8E818}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -196,6 +202,24 @@ Global
 		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
 		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50756B08-7B60-4B7C-BB38-065413A8E818}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50756B08-7B60-4B7C-BB38-065413A8E818}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50756B08-7B60-4B7C-BB38-065413A8E818}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
+		{50756B08-7B60-4B7C-BB38-065413A8E818}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
+		{50756B08-7B60-4B7C-BB38-065413A8E818}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50756B08-7B60-4B7C-BB38-065413A8E818}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -214,6 +238,8 @@ Global
 		{7021F96E-F2D8-4C31-83E2-4511ED59E8C7} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{5F9908DA-29F6-4761-95C9-805182195BCA} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{50756B08-7B60-4B7C-BB38-065413A8E818} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC2B6F6-5623-43F8-BBBB-ED8072670A80}

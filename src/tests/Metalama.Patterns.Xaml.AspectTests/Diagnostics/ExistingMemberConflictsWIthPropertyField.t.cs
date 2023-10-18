@@ -1,0 +1,1 @@
+// Error LAMA5204 on `Foo`: `The name of existing member ExistingMemberConflictsWithPropertyField.FooProperty(), that is defined in or inherited by class ExistingMemberConflictsWithPropertyField, conflicts with the required dependency property field name FooProperty.`

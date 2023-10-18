@@ -34,8 +34,8 @@
         <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
         <WindowsAzureServiceBusVersion>4.1.2</WindowsAzureServiceBusVersion>
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
-        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' != 'net471' " >2.2.0</xUnitAssemblyFixtureVersion>
-        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' == 'net471' " >2.0.3</xUnitAssemblyFixtureVersion>
+        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' != 'net471' ">2.2.0</xUnitAssemblyFixtureVersion>
+        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' == 'net471' ">2.0.3</xUnitAssemblyFixtureVersion>
         <XUnitRunnerVisualStudioVersion>2.5.1</XUnitRunnerVisualStudioVersion>
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
         <xUnitVersion>2.5.1</xUnitVersion>
