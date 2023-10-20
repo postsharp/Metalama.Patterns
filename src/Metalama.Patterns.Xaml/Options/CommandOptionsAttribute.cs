@@ -5,8 +5,10 @@ using Metalama.Framework.Options;
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace Metalama.Patterns.Xaml.Options;
+// TODO: Probably remove this class.
 
+namespace Metalama.Patterns.Xaml.Options;
+#if false
 [RunTimeOrCompileTime]
 [AttributeUsage( AttributeTargets.Assembly | AttributeTargets.Class )]
 public class CommandOptionsAttribute : Attribute, IHierarchicalOptionsProvider
@@ -86,3 +88,4 @@ public class CommandOptionsAttribute : Attribute, IHierarchicalOptionsProvider
         };
     }
 }
+#endif

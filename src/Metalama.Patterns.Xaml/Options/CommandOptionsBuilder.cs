@@ -7,6 +7,8 @@ using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.Options;
 
+// TODO: Rework!!!
+
 [PublicAPI]
 [CompileTime]
 public sealed class CommandOptionsBuilder
@@ -75,9 +77,11 @@ public sealed class CommandOptionsBuilder
     internal CommandOptions Build()
         => new()
         {
+            /*
             ExecuteMethod = this.ExecuteMethod,
             CanExecuteMethod = this.CanExecuteMethod,
             CanExecuteProperty = this.CanExecuteProperty,
+            */
             EnableINotifyPropertyChangedIntegration = this.EnableINotifyPropertyChangedIntegration
         };
 }

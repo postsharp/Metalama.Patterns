@@ -57,12 +57,12 @@ public static class CommandOptionsExtensions
     }
 
     /// <summary>
-    /// Configures <see cref="CommandAttribute"/> for the current property.
+    /// Configures <see cref="CommandAttribute"/> for the current method.
     /// </summary>
     /// <param name="receiver">The <see cref="IAspectReceiver{TDeclaration}"/> for the current property.</param>
     /// <param name="configure">A delegate that configures the aspect.</param>
     public static void ConfigureCommand(
-        this IAspectReceiver<IProperty> receiver,
+        this IAspectReceiver<IMethod> receiver,
         Action<CommandOptionsBuilder> configure )
     {
         var builder = new CommandOptionsBuilder();

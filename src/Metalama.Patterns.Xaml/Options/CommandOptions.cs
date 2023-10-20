@@ -2,61 +2,27 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
+using Metalama.Framework.Serialization;
+using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
+using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using System.ComponentModel;
 using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.Options;
 
 internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>,
-                                        IHierarchicalOptions<IProperty>
+                                        IHierarchicalOptions<IMethod>
 {
-    /// <summary>
-    /// Gets the name of the method that implements the command logic. This method corresponds to the
-    /// to the <see cref="ICommand.Execute"/> method. It is called every time the command is invoked.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The <c>Execute</c> method must be declared in the same class as the command property and can have zero parameter or one parameter of any type, which becomes the command parameter.
-    /// </para>
-    /// <para>
-    /// If this property is not set, then the aspect will look for a method named <c>Foo</c> or <c>ExecuteFoo</c>, where <c>Foo</c> is the name of the command without the <c>Command</c> suffix.
-    /// </para>
-    /// </remarks>
-    public string? ExecuteMethod { get; init; }
+    [NonCompileTimeSerialized]
+#pragma warning disable CS0169 // False positive
+    private IReadOnlyList<ICommandNamingConvention>? _namingConventions;
+#pragma warning restore CS0169
 
     /// <summary>
-    /// Gets the name of the method that is called to determine whether the command can be executed.
-    /// This method corresponds to the <see cref="ICommand.CanExecute"/> method.
+    /// Gets the list of naming conventions that can be used to provide names and find members used to implement the <see cref="CommandAttribute"/> aspect.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The <c>CanExecute</c> method must be declared in the same class as the command property, return a <c>bool</c> value and can have zero or one parameter.
-    /// </para>
-    /// <para>
-    /// If this property is not set, then the aspect will look for a method named <c>CanFoo</c> or <c>CanExecuteFoo</c>, where <c>Foo</c> is the name of the command without the <c>Command</c> suffix.
-    /// </para>
-    /// <para>
-    /// At most one of the <see cref="CanExecuteMethod"/> and <see cref="CanExecuteProperty"/> properties may be set.
-    /// </para>
-    /// </remarks>
-    public string? CanExecuteMethod { get; init; }
-
-    /// <summary>
-    /// Gets the name of the property that is evaluated to determine whether the command can be executed.
-    /// This property corresponds to the <see cref="ICommand.CanExecute"/> method.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The <c>CanExecute</c> property must be declared in the same class as the command property and return a <c>bool</c> value.
-    /// </para>
-    /// <para>
-    /// If this property is not set, then the aspect will look for a property named <c>CanFoo</c> or <c>CanExecuteFoo</c>, where <c>Foo</c> is the name of the command without the <c>Command</c> suffix.
-    /// </para>
-    /// <para>
-    /// At most one of the <see cref="CanExecuteMethod"/> and <see cref="CanExecuteProperty"/> properties may be set.
-    /// </para>
-    /// </remarks>
-    public string? CanExecuteProperty { get; init; }
+    public IncrementalKeyedCollection<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>> NamingConventions { get; init; } =
+        IncrementalKeyedCollection<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>>.Empty;
 
     /// <summary>
     /// Gets a value indicating whether integration with <see cref="INotifyPropertyChanged"/> is enabled. The default is <see langword="true"/>.
@@ -71,8 +37,25 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     /// </remarks>
     public bool? EnableINotifyPropertyChangedIntegration { get; init; }
 
+    internal IReadOnlyList<ICommandNamingConvention> GetSortedNamingConventions()
+    {
+        this._namingConventions ??=
+            this.NamingConventions
+                .OrderBy( v => v.Priority ?? 0 )
+                .ThenBy( v => v.NamingConvention.GetType().FullName )
+                .Select( v => v.NamingConvention )
+                .ToList();
+
+        return this._namingConventions;
+    }
+
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new CommandOptions { EnableINotifyPropertyChangedIntegration = true };
+        => new CommandOptions
+        {
+            EnableINotifyPropertyChangedIntegration = true,
+            NamingConventions = IncrementalKeyedCollection.AddOrApplyChanges<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>>(
+                new NamingConventionRegistration<ICommandNamingConvention>( new DefaultCommandNamingConvention(), 100 ) )
+        };
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
@@ -80,9 +63,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
 
         return new CommandOptions
         {
-            ExecuteMethod = other.ExecuteMethod ?? this.ExecuteMethod,
-            CanExecuteMethod = other.CanExecuteMethod ?? this.CanExecuteMethod,
-            CanExecuteProperty = other.CanExecuteProperty ?? this.CanExecuteProperty,
+            NamingConventions = this.NamingConventions.ApplyChanges( other.NamingConventions, context ),
             EnableINotifyPropertyChangedIntegration = other.EnableINotifyPropertyChangedIntegration ?? this.EnableINotifyPropertyChangedIntegration
         };
     }

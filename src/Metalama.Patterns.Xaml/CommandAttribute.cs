@@ -7,6 +7,8 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Patterns.Xaml.Implementation;
+using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
+using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using Metalama.Patterns.Xaml.Options;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -17,38 +19,79 @@ using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml;
 
-[AttributeUsage( AttributeTargets.Property )]
-public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IProperty>
+[AttributeUsage( AttributeTargets.Method )]
+public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 {
-    void IEligible<IProperty>.BuildEligibility( IEligibilityBuilder<IProperty> builder )
+    private const string _canExecuteMethodCategory = "can-execute method";
+    private const string _canExecutePropertyCategory = "can-execute property";
+
+    /// <summary>
+    /// Gets or sets the name of the <see cref="ICommand"/> property that is introduced.
+    /// </summary>
+    public string? CommandPropertyName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the method that is called to determine whether the command can be executed.
+    /// This method corresponds to the <see cref="ICommand.CanExecute"/> method.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The <c>CanExecute</c> method must be declared in the same class as the command property, return a <c>bool</c> value and can have zero or one parameter.
+    /// </para>
+    /// <para>
+    /// If this property is not set, then the aspect will look for a method named <c>CanFoo</c> or <c>CanExecuteFoo</c>, where <c>Foo</c> is the name of the command without the <c>Command</c> suffix.
+    /// </para>
+    /// <para>
+    /// At most one of the <see cref="CanExecuteMethod"/> and <see cref="CanExecuteProperty"/> properties may be set.
+    /// </para>
+    /// </remarks>
+    public string? CanExecuteMethod { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the property that is evaluated to determine whether the command can be executed.
+    /// This property corresponds to the <see cref="ICommand.CanExecute"/> method.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The <c>CanExecute</c> property must be declared in the same class as the command property and return a <c>bool</c> value.
+    /// </para>
+    /// <para>
+    /// If this property is not set, then the aspect will look for a property named <c>CanFoo</c> or <c>CanExecuteFoo</c>, where <c>Foo</c> is the name of the command without the <c>Command</c> suffix.
+    /// </para>
+    /// <para>
+    /// At most one of the <see cref="CanExecuteMethod"/> and <see cref="CanExecuteProperty"/> properties may be set.
+    /// </para>
+    /// </remarks>
+    public string? CanExecuteProperty { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether integration with <see cref="INotifyPropertyChanged"/> is enabled. The default is <see langword="true"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When <see cref="EnableINotifyPropertyChangedIntegration"/> is <see langword="true"/> (the default), and when a can-execute property (not a method) is used,
+    /// and when the containing type of the target property implements <see cref="INotifyPropertyChanged"/>,then the <see cref="ICommand.CanExecuteChanged"/> event of 
+    /// the command will be raised when the can-execute property changes. A warning is reported if the can-execute property is not public because <see cref="INotifyPropertyChanged"/>
+    /// implementations typically only notify changes to public properties.
+    /// </para>
+    /// </remarks>
+    public bool? EnableINotifyPropertyChangedIntegration { get; set; }
+
+    void IEligible<IMethod>.BuildEligibility( IEligibilityBuilder<IMethod> builder )
     {
-        builder.MustNotBeStatic();
-        
-        // ReSharper disable once RedundantNameQualifier
-        builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
-        builder.MustSatisfy( p => p.GetMethod != null, p => $"{p} must have a getter" );
-
-        builder.MustSatisfy(
-            p => p is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } or
-                { IsAutoPropertyOrField: not true, Writeability: Writeability.All or Writeability.InitOnly },
-            p => $"{p} must be an auto-property with only a getter, or a non-auto property with both a getter and setter or init" );
-
-        builder.Type().MustBe( typeof(ICommand) );
-        builder.MustSatisfy( p => p.InitializerExpression == null, p => $"{p} must not have an initializer expression" );
+        builder.ReturnType().MustBe( typeof( void ) );
+        builder.MustSatisfy( m => m.Parameters.Count is 0 or 1, m => $"{m} must have zero or one parameter" );
+        builder.MustNotHaveRefOrOutParameter();
+        builder.MustSatisfy( m => m.TypeParameters.Count == 0, m => $"{m} must not be generic" );
     }
 
-    void IAspect<IProperty>.BuildAspect( IAspectBuilder<IProperty> builder )
+    void IAspect<IMethod>.BuildAspect( IAspectBuilder<IMethod> builder )
     {
         var target = builder.Target;
         var declaringType = target.DeclaringType;
         var options = target.Enhancements().GetOptions<CommandOptions>();
-        var propertyName = target.Name;
 
-        var commandName = propertyName.EndsWith( "Command", StringComparison.Ordinal )
-            ? propertyName.Substring( 0, propertyName.Length - 7 )
-            : propertyName;
-
-        if ( options is { CanExecuteMethod: not null, CanExecuteProperty: not null } )
+        if ( this is { CanExecuteMethod: not null, CanExecuteProperty: not null } )
         {
             builder.Diagnostics.Report( Diagnostics.ErrorCannotSpecifyBothCanExecuteMethodAndCanExecuteProperty );
 
@@ -57,158 +100,157 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
             return;
         }
 
-        // NB: Alternative names are implemented in PostSharp but not documented.
+        var hasExplicitCanExecuteNaming = this.CanExecuteMethod != null || this.CanExecuteProperty != null;
 
-        var defaultCanExecuteName = $"CanExecute{commandName}";
-        var defaultAltCanExecuteName = $"Can{commandName}";
+        var ncResult =
+            this.CanExecuteMethod != null || this.CanExecuteProperty != null
+                ? NamingConventionEvaluator<ICommandNamingMatchContext, NameMatchingContext>.Evaluate( new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ), target, default( NameMatchingContextFactory ) )
+                : NamingConventionEvaluator<ICommandNamingMatchContext, NameMatchingContext>.Evaluate( options.GetSortedNamingConventions(), target, default( NameMatchingContextFactory ) );
 
-        var executeMethodName = options.ExecuteMethod ?? $"Execute{commandName}";
-        var altExecuteMethodName = options.ExecuteMethod != null ? null : commandName;
-
-        var canExecuteMethodName = options.CanExecuteMethod ?? defaultCanExecuteName;
-        var altCanExecuteMethodName = options.CanExecuteMethod != null ? null : defaultAltCanExecuteName;
-
-        var canExecutePropertyName = options.CanExecuteProperty ?? defaultCanExecuteName;
-        var altCanExecutePropertyName = options.CanExecuteProperty != null ? null : defaultAltCanExecuteName;
-
-        if ( executeMethodName == canExecuteMethodName )
-        {
-            builder.Diagnostics.Report(
-                Diagnostics.ErrorCommandExecuteAndCanExecuteCannotBeTheSame.WithArguments(
-                    (options.ExecuteMethod == null ? "default" : "configured", options.CanExecuteMethod == null ? "default" : "configured",
-                     executeMethodName) ) );
-
-            // Further diagnostics would be confusing and transformation is not possible.
-
-            return;
-        }
-
-        var candidateExecuteMethods = new List<IMethod>( 2 );
-        var candidateCanExecuteMethods = new List<IMethod>( 2 );
-
-        foreach ( var method in declaringType.Methods )
-        {
-            if ( (method.Name == executeMethodName || method.Name == altExecuteMethodName) && candidateExecuteMethods.Count < 2 )
-            {
-                candidateExecuteMethods.Add( method );
-            }
-            else if ( (method.Name == canExecuteMethodName || method.Name == altCanExecuteMethodName) && candidateCanExecuteMethods.Count < 2 )
-            {
-                candidateCanExecuteMethods.Add( method );
-            }
-        }
+        var successfulMatch = ncResult.SuccessfulMatch;       
 
         var canTransform = true;
-
+        IProperty? commandProperty = null;
+        IMethod? canExecuteMethod = null;
         IProperty? canExecuteProperty = null;
 
-        // Don't look for the CanExecuteProperty if an explicit CanExecuteMethod is configured.
-
-        if ( options.CanExecuteMethod == null )
-        {
-            canExecuteProperty = declaringType.Properties.FirstOrDefault( p => p.Name == canExecutePropertyName || p.Name == altCanExecutePropertyName );
-
-            if ( canExecuteProperty != null )
+        if ( successfulMatch != null )
+        {            
+            if ( successfulMatch.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound && successfulMatch.CanExecuteMatch.CandidateNames != null )
             {
-                if ( !IsValidCanExecuteProperty( canExecuteProperty ) )
+                // Report candidate names with a specific warning for easy suppression, as this is a
+                // weaker warning and more likley to be an intended scenario.
+
+                var names = string.Join( ", ", successfulMatch.CanExecuteMatch.CandidateNames );
+
+                if ( names.Length > 0 )
                 {
-                    builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecutePropertyIsNotValid.WithArguments( target ), canExecuteProperty );
-                    canTransform = false;
+                    builder.Diagnostics.Report(
+                        Diagnostics.WarningCandidateNamesNotFound.WithArguments(
+                            (
+                                $"{_canExecuteMethodCategory} or {_canExecutePropertyCategory}",                                
+                                successfulMatch.NamingConvention.DiagnosticName,
+                                names
+                            ) ) );
                 }
             }
-            else if ( options.CanExecuteProperty != null )
+            
+            switch ( successfulMatch.CanExecuteMatch.Declaration )
             {
-                builder.Diagnostics.Report( Diagnostics.ErrorCommandConfiguredCanExecutePropertyNotFound.WithArguments( canExecutePropertyName ) );
-                canTransform = false;
+                case null:
+                    break;
+
+                case IProperty property:
+                    canExecuteProperty = property;
+                    break;
+
+                case IMethod method:
+                    canExecuteMethod = method;
+                    break;
+
+                default:
+                    throw new NotSupportedException( "Expected a method or property." );
             }
-        }
 
-        IMethod? canExecuteMethod = null;
+            // Check for a conflicting member name explicitly because introduction won't fail unless the conflict comes from another field.
 
-        // Don't look for the CanExecuteMethod if an explicit CanExecuteProperty is configured.
+            var conflictingMember = (IMemberOrNamedType?) declaringType.AllMembers().FirstOrDefault( m => m.Name == successfulMatch.CommandPropertyName )
+                                    ?? declaringType.NestedTypes.FirstOrDefault( t => t.Name == successfulMatch.CommandPropertyName );
 
-        if ( options.CanExecuteProperty == null )
-        {
-            switch ( candidateCanExecuteMethods.Count )
+            if ( conflictingMember != null )
             {
-                case 0:
-                    if ( options.CanExecuteMethod != null )
-                    {
-                        builder.Diagnostics.Report( Diagnostics.ErrorCommandConfiguredCanExecuteMethodNotFound.WithArguments( canExecuteMethodName ) );
-                        canTransform = false;
-                    }
-
-                    break;
-
-                case 1:
-                    if ( IsValidMethod( candidateCanExecuteMethods[0], SpecialType.Boolean ) )
-                    {
-                        canExecuteMethod = candidateCanExecuteMethods[0];
-                    }
-                    else
-                    {
-                        builder.Diagnostics.Report( Diagnostics.ErrorCommandCanExecuteMethodIsNotValid.WithArguments( target ), candidateCanExecuteMethods[0] );
-                        canTransform = false;
-                    }
-
-                    break;
-
-                case > 1:
-
-                    builder.Diagnostics.Report(
-                        Diagnostics.ErrorCommandCanExecuteMethodIsAmbiguous.WithArguments(
-                            (declaringType,
-                             altCanExecuteMethodName == null ? $"'{canExecuteMethodName}'" : $"'{canExecuteMethodName}' or '{altCanExecuteMethodName}'") ) );
-
-                    canTransform = false;
-
-                    break;
-            }
-        }
-
-        // If neither CanExecuteMethod and CanExecuteProperty are explicitly configured, we prefer any discovered method over
-        // any discovered property, as per the PostSharp behaviour.
-
-        if ( canExecuteMethod != null && canExecuteProperty != null )
-        {
-            canExecuteProperty = null;
-        }
-
-        IMethod? executeMethod = null;
-
-        switch ( candidateExecuteMethods.Count )
-        {
-            case 0:
                 builder.Diagnostics.Report(
-                    Diagnostics.ErrorCommandExecuteMethodNotFound.WithArguments(
-                        altExecuteMethodName == null ? $"'{executeMethodName}'" : $"'{executeMethodName}' or '{altExecuteMethodName}'" ) );
+                    Diagnostics.ErrorRequiredCommandPropertyNameIsAlreadyUsed.WithArguments(
+                        (conflictingMember, declaringType, successfulMatch.CommandPropertyName!) ) );
 
                 canTransform = false;
+            }
+            else
+            {   
+                var introducePropertyResult = builder.Advice.IntroduceProperty(
+                    declaringType,                    
+                    nameof(CommandProperty),
+                    IntroductionScope.Instance,
+                    OverrideStrategy.Fail,
+                    b =>
+                    {
+                        b.Name = successfulMatch.CommandPropertyName!;
 
-                break;
+                        // ReSharper disable once RedundantNameQualifier
+                        b.Accessibility = Framework.Code.Accessibility.Public;
 
-            case 1:
-                if ( IsValidMethod( candidateExecuteMethods[0], SpecialType.Void ) )
+                        // ReSharper disable once RedundantNameQualifier
+                        b.GetMethod!.Accessibility = Framework.Code.Accessibility.Public;
+                    } );
+
+                if ( introducePropertyResult.Outcome == AdviceOutcome.Default )
                 {
-                    executeMethod = candidateExecuteMethods[0];
+                    commandProperty = introducePropertyResult.Declaration;
                 }
                 else
                 {
-                    builder.Diagnostics.Report( Diagnostics.ErrorCommandExecuteMethodIsNotValid.WithArguments( target ), candidateExecuteMethods[0] );
                     canTransform = false;
+                }                    
+            }
+        }
+        else
+        {
+            canTransform = false;
+
+            if ( ncResult.UnsuccessfulMatches != null )
+            {
+                foreach ( var um in ncResult.UnsuccessfulMatches )
+                {
+                    if ( um.Match.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Ambiguous )
+                    {                        
+                        // Report the ambiguous (valid) matches.
+
+                        foreach ( var c in um.InspectedDeclarations.Where( i => i.IsValid ) )
+                        {
+                            builder.Diagnostics.Report(
+                                Diagnostics.WarningValidCandidateMemberIsAmbiguous.WithArguments(
+                                    (
+                                    c.Declaration.DeclarationKind,
+                                    c.Category,
+                                    "[Command] method ",
+                                    target,
+                                    um.Match.NamingConvention.DiagnosticName
+                                    ) ),
+                                c.Declaration );
+                        }
+                    }
+                    else if ( um.Match.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Invalid )
+                    {
+                        // Report invalid inspections, as these are strong candidates for being intended matches.
+
+                        foreach ( var c in um.InspectedDeclarations.Where( i => !i.IsValid ))
+                        {
+                            builder.Diagnostics.Report( 
+                                Diagnostics.WarningInvalidCandidateMemberSignature.WithArguments(
+                                    (
+                                    c.Declaration.DeclarationKind, 
+                                    c.Category, 
+                                    "[Command] method ", 
+                                    target, 
+                                    um.Match.NamingConvention.DiagnosticName,
+                                    c.Declaration.DeclarationKind == DeclarationKind.Property
+                                        ? " The property must be of type bool and have a getter."
+                                        : " The method must not be generic, must return bool and may optionally have a single parameter of any type, but which must not be a ref or out parameter."
+                                    ) ),
+                                c.Declaration );
+                        }
+                    }
                 }
+            }
+        }
 
-                break;
-
-            case > 1:
-
-                builder.Diagnostics.Report(
-                    Diagnostics.ErrorCommandExecuteMethodIsAmbiguous.WithArguments(
-                        (declaringType, altExecuteMethodName == null ? $"'{executeMethodName}'" : $"'{executeMethodName}' or '{altExecuteMethodName}'") ) );
-
-                canTransform = false;
-
-                break;
+        if ( hasExplicitCanExecuteNaming && successfulMatch?.CanExecuteMatch.Outcome != DeclarationMatchOutcome.Success )
+        {
+            builder.Diagnostics.Report( Diagnostics.ErrorMemberNotFound.WithArguments(
+                (
+                $"unambiguous valid explicitly-configured can-execute {(this.CanExecuteMethod != null ? "method" : "property")} named '{this.CanExecuteMethod ?? this.CanExecuteProperty}'",
+                declaringType
+                ) ) );
         }
 
         var useInpcIntegration = false;
@@ -233,10 +275,7 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
         {
             if ( canTransform )
             {
-                if ( executeMethod != null )
-                {
-                    builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, executeMethod );
-                }
+                builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, target );
 
                 if ( canExecuteMethod != null )
                 {
@@ -247,16 +286,10 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
                 {
                     builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, canExecuteProperty );
                 }
-
-                builder.Diagnostics.Suppress( Suppressions.SuppressNonNullableFieldMustContainNonNullValueWhenExitingConstructorCS8618, target );
             }
 
             return;
         }
-
-        // When reaching this point:
-        // - executeMethod is defined and valid.
-        // - zero or one of canExecuteMethod and canExecuteProperty is defined and valid.
 
         builder.Advice.AddInitializer(
             declaringType,
@@ -264,22 +297,27 @@ public sealed class CommandAttribute : CommandOptionsAttribute, IAspect<IPropert
             InitializerKind.BeforeInstanceConstructor,
             args: new
             {
-                commandProperty = target,
-                executeMethod,
+                commandProperty,
+                executeMethod = target,
                 canExecuteMethod,
                 canExecuteProperty,
                 useInpcIntegration
             } );
     }
 
-    private static bool IsValidMethod( IMethod method, SpecialType requiredReturnType )
-        => method.ReturnType.SpecialType == requiredReturnType
+    private static bool IsValidCanExecuteMethod( IMethod method )
+        => method.ReturnType.SpecialType == SpecialType.Boolean
            && method.Parameters is [] or [{ RefKind: RefKind.None or RefKind.In }]
            && method.TypeParameters.Count == 0;
 
     private static bool IsValidCanExecuteProperty( IProperty property )
         => property.Type.SpecialType == SpecialType.Boolean
            && property.GetMethod != null;
+
+    [Template]
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    private static ICommand CommandProperty { get; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     [Template]
     private static void InitializeCommand(
