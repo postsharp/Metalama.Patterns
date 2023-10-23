@@ -31,24 +31,33 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
     {
         var useName = name;
 
-        _ = TrimStartIgnoringCase( ref useName, "execute" )
-            || TrimStartIgnoringCase( ref useName, "m_execute" )
-            || TrimStartIgnoringCase( ref useName, "m_" );
+        TrimStart( ref useName, "_", StringComparison.OrdinalIgnoreCase );
+        TrimStart( ref useName, "m_", StringComparison.OrdinalIgnoreCase );
+        TrimStart( ref useName, "execute", StringComparison.OrdinalIgnoreCase );
+        TrimStart( ref useName, "_", StringComparison.OrdinalIgnoreCase );
 
-        _ = TrimEnd( ref useName, "Command" )
-            || TrimEnd( ref useName, "_command" );
+        _ = TrimEnd( ref useName, "_command", StringComparison.OrdinalIgnoreCase )
+            || TrimEnd( ref useName, "Command", StringComparison.Ordinal );
 
         if ( string.IsNullOrEmpty( useName ) )
         {
-            useName = name;
+            // It's an unusual name comprised of expected prefixes and/or suffixes.
+            // Just use it as-is.
+
+            return name;
+        }
+
+        if ( char.IsLower( useName[0] ) )
+        {
+            useName = char.ToUpperInvariant( useName[0] ) + useName.Substring( 1 );
         }
 
         return useName;
     }
 
-    public static bool TrimStartIgnoringCase( ref string s, string trim )
+    public static bool TrimStart( ref string s, string trim, StringComparison stringComparison )
     {
-        if ( s.StartsWith( trim, StringComparison.OrdinalIgnoreCase ) )
+        if ( s.StartsWith( trim, stringComparison ) )
         {
             s = s.Substring( trim.Length );
             return true;
@@ -57,11 +66,11 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
         return false;
     }
 
-    public static bool TrimEnd( ref string s, string trim )
+    public static bool TrimEnd( ref string s, string trim, StringComparison stringComparison )
     {
-        if ( s.EndsWith( trim, StringComparison.Ordinal ) )
+        if ( s.EndsWith( trim, stringComparison ) )
         {
-            s = s.Substring( s.Length - trim.Length );
+            s = s.Substring( 0, s.Length - trim.Length );
             return true;
         }
 
