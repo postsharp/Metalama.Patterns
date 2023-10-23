@@ -1,15 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.ComponentModel;
-using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.UnitTests.Assets.Command;
 
-public class ManualInpcIntegrationTestClass : CommandTestBase, INotifyPropertyChanged
+public partial class ManualInpcIntegrationTestClass : CommandTestBase, INotifyPropertyChanged
 {
     [Command]
-    public ICommand FooCommand { get; }
-
     private void ExecuteFoo( int v )
     {
         LogCall( $"{v}" );

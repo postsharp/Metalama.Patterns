@@ -1,17 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Windows.Input;
-
 // ReSharper disable UnusedMember.Local
 // ReSharper disable UnassignedGetOnlyAutoProperty
 
 namespace Metalama.Patterns.Xaml.UnitTests.Assets.Command;
 
-public sealed class CallbackTestClass : CommandTestBase
+public sealed partial class CallbackTestClass : CommandTestBase
 {
     [Command]
-    public ICommand ImplicitInstanceMethodNoParameterCommand { get; }
-
     private void ExecuteImplicitInstanceMethodNoParameter()
     {
         LogCall();
@@ -25,8 +21,6 @@ public sealed class CallbackTestClass : CommandTestBase
     }
 
     [Command]
-    public ICommand ImplicitInstanceMethodWithParameterCommand { get; }
-
     private void ExecuteImplicitInstanceMethodWithParameter( int v )
     {
         LogCall( $"{v}" );
@@ -40,8 +34,6 @@ public sealed class CallbackTestClass : CommandTestBase
     }
 
     [Command]
-    public ICommand ImplicitStaticMethodNoParameterCommand { get; }
-
     private static void ExecuteImplicitStaticMethodNoParameter()
     {
         LogCall();
@@ -55,8 +47,6 @@ public sealed class CallbackTestClass : CommandTestBase
     }
 
     [Command]
-    public ICommand ImplicitStaticMethodWithParameterCommand { get; }
-
     private static void ExecuteImplicitStaticMethodWithParameter( int v )
     {
         LogCall( $"{v}" );
@@ -70,8 +60,6 @@ public sealed class CallbackTestClass : CommandTestBase
     }
 
     [Command]
-    public ICommand ImplicitInstancePropertyCommand { get; }
-
     private void ExecuteImplicitInstanceProperty()
     {
         LogCall();
@@ -88,8 +76,6 @@ public sealed class CallbackTestClass : CommandTestBase
     }
 
     [Command]
-    public ICommand ImplicitStaticPropertyCommand { get; }
-
     private static void ExecuteImplicitStaticProperty()
     {
         LogCall();
