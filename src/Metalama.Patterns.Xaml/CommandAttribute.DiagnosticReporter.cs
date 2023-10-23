@@ -54,7 +54,7 @@ public sealed partial class CommandAttribute
                     (
                         applicableCategories.PrettyList( " or " ),
                         namingConvention.DiagnosticName,
-                        candidateNames.PrettyList( " or " )
+                        candidateNames.PrettyList( " or ", '\'' )
                     ) ) );
         }
     }

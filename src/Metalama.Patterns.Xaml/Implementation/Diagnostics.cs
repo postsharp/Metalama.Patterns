@@ -143,7 +143,7 @@ internal static class Diagnostics
         new(
             "LAMA5210",
             Warning,
-            "No {0} was found using the {1} naming convention candidate member names {2}.",
+            "No {0} was found using the {1} naming convention candidate member names: {2}.",
             "Optional member not found.",
             _category );
 
@@ -155,7 +155,7 @@ internal static class Diagnostics
         new(
             "LAMA5211",
             Error,
-            "No configured naming convention matched, see other warnings for details. Tried naming conventions {0}",
+            "No configured naming convention matched, see other warnings for details. Tried naming conventions: {0}",
             "No configured naming convention matched.",
             _category );
 

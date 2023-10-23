@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Xaml.Implementation;
 [CompileTime]
 internal static class FormattingExtensions
 {
-    public static string PrettyList( this IEnumerable<string> words, string conjunction )
+    public static string PrettyList( this IEnumerable<string> words, string conjunction, char quote = default )
     {
         var iter = words.GetEnumerator();
 
@@ -23,21 +23,35 @@ internal static class FormattingExtensions
 
         if ( b == null )
         {
-            return a;
+            return quote == default
+                ? a
+                : new StringBuilder().AppendQuoted( a, quote ).ToString();
         }
 
         var sb = new StringBuilder();
 
         while ( iter.MoveNext() )
         {
-            sb.Append( a ).Append( ',' ).Append( ' ' );
+            sb.AppendQuoted( a, quote ).Append( ',' ).Append( ' ' );
 
             a = b;
             b = iter.Current;
         }
 
-        sb.Append( a ).Append( conjunction ).Append( b );
-
+        sb.AppendQuoted( a, quote ).Append( conjunction ).Append( b );
+        
         return sb.ToString();
+    }
+
+    private static StringBuilder AppendQuoted( this StringBuilder sb, string s, char quote )
+    {
+        if ( quote == default )
+        {
+            return sb.Append( s );
+        }
+        else
+        {
+            return sb.Append(quote).Append(s).Append( quote );
+        }
     }
 }

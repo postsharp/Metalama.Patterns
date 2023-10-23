@@ -126,7 +126,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                         (
                             $"{_canExecuteMethodCategory} or {_canExecutePropertyCategory}",
                             successfulMatch.NamingConvention.DiagnosticName,
-                            successfulMatch.CanExecuteMatch.CandidateNames.PrettyList( " or " )
+                            successfulMatch.CanExecuteMatch.CandidateNames.PrettyList( " or ", '\'' )
                         ) ) );
             }
             
