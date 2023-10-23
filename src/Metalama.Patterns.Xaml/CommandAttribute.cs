@@ -22,8 +22,8 @@ namespace Metalama.Patterns.Xaml;
 [AttributeUsage( AttributeTargets.Method )]
 public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 {
-    private const string _canExecuteMethodCategory = "can-execute method";
-    private const string _canExecutePropertyCategory = "can-execute property";
+    internal const string _canExecuteMethodCategory = "can-execute method";
+    internal const string _canExecutePropertyCategory = "can-execute property";
 
     /// <summary>
     /// Gets or sets the name of the <see cref="ICommand"/> property that is introduced.
@@ -121,18 +121,13 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                 // Report candidate names with a specific warning for easy suppression, as this is a
                 // weaker warning and more likley to be an intended scenario.
 
-                var names = string.Join( ", ", successfulMatch.CanExecuteMatch.CandidateNames );
-
-                if ( names.Length > 0 )
-                {
-                    builder.Diagnostics.Report(
-                        Diagnostics.WarningCandidateNamesNotFound.WithArguments(
-                            (
-                                $"{_canExecuteMethodCategory} or {_canExecutePropertyCategory}",                                
-                                successfulMatch.NamingConvention.DiagnosticName,
-                                names
-                            ) ) );
-                }
+                builder.Diagnostics.Report(
+                    Diagnostics.WarningCandidateNamesNotFound.WithArguments(
+                        (
+                            $"{_canExecuteMethodCategory} or {_canExecutePropertyCategory}",
+                            successfulMatch.NamingConvention.DiagnosticName,
+                            successfulMatch.CanExecuteMatch.CandidateNames.PrettyList( " or " )
+                        ) ) );
             }
             
             switch ( successfulMatch.CanExecuteMatch.Declaration )
@@ -196,57 +191,21 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
         else
         {
             canTransform = false;
-
+            
             if ( ncResult.UnsuccessfulMatches != null )
             {
                 builder.Diagnostics.Report(
-                    Diagnostics.ErrorNoNamingConventionMatched.WithArguments( string.Join( ", ", ncResult.UnsuccessfulMatches.Select( um => um.Match.NamingConvention.DiagnosticName ) ) ) );
+                    Diagnostics.ErrorNoNamingConventionMatched.WithArguments( ncResult.UnsuccessfulMatches.Select( um => um.Match.NamingConvention.DiagnosticName ).PrettyList( " and " ) ) );
 
-                foreach ( var um in ncResult.UnsuccessfulMatches )
-                {
-                    if ( um.Match.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Ambiguous )
-                    {                        
-                        // Report the ambiguous (valid) matches.
+                var diagnosticReporter = new DiagnosticReporter() { Builder = builder };
 
-                        // NB: If there was more than one declaration to match (ie, another property like Match.CanExecuteMatch existed),
-                        // the Where condition below would also need to filter based on i.Category.
+                ncResult.ReportUnsuccessfulMatchDiagnostics( diagnosticReporter );
+            }
+            else
+            {
+                // Not expected. Has the user has somehow managed to remove the DefaultCommandNamingConvention?
 
-                        foreach ( var c in um.InspectedDeclarations.Where( i => i.IsValid ) )
-                        {
-                            builder.Diagnostics.Report(
-                                Diagnostics.WarningValidCandidateMemberIsAmbiguous.WithArguments(
-                                    (
-                                    c.Declaration.DeclarationKind,
-                                    c.Category,
-                                    "[Command] method ",
-                                    target,
-                                    um.Match.NamingConvention.DiagnosticName
-                                    ) ),
-                                c.Declaration );
-                        }
-                    }
-                    else if ( um.Match.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Invalid )
-                    {
-                        // Report invalid inspections, as these are strong candidates for being intended matches.
-
-                        foreach ( var c in um.InspectedDeclarations.Where( i => !i.IsValid ))
-                        {
-                            builder.Diagnostics.Report( 
-                                Diagnostics.WarningInvalidCandidateMemberSignature.WithArguments(
-                                    (
-                                    c.Declaration.DeclarationKind, 
-                                    c.Category, 
-                                    "[Command] method ", 
-                                    target, 
-                                    um.Match.NamingConvention.DiagnosticName,
-                                    c.Declaration.DeclarationKind == DeclarationKind.Property
-                                        ? " The property must be of type bool and have a getter."
-                                        : " The method must not be generic, must return bool and may optionally have a single parameter of any type, but which must not be a ref or out parameter."
-                                    ) ),
-                                c.Declaration );
-                        }
-                    }
-                }
+                builder.Diagnostics.Report( Diagnostics.ErrorNoConfiguredNamingConventions );
             }
         }
 

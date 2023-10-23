@@ -10,4 +10,7 @@ public interface INamingConventionMatch
     INamingConvention NamingConvention { get; }
 
     bool Success { get; }
+
+    void VisitDeclarationMatches<TVisitor>( in TVisitor visitor )
+        where TVisitor : IDeclarationMatchVisitor;
 }

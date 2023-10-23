@@ -114,8 +114,8 @@ internal static class Diagnostics
     /// The {0} was identified as candidate {1} for {2}{3} by the {4} naming convention, but the signature is not valid.{5}
     /// For example, "The `method` was a candidate `can-execute method` for `[Command] method ``Foo()`, but the signature is not valid.` The method must blah blah.`".
     /// </summary>
-    public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetMemberDescription, IMember TargetMember, string NamingConvention, string? InvalidityReason)>
-        WarningInvalidCandidateMemberSignature =
+    public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetDeclarationDescription, IDeclaration TargetDeclaration, string NamingConvention, string? InvalidityReason)>
+        WarningInvalidCandidateDeclarationSignature =
             new(
                 "LAMA5208",
                 Warning,
@@ -126,8 +126,8 @@ internal static class Diagnostics
     /// <summary>
     /// The {0} was identified as a valid candidate {1} for {2}{3} by the {4} naming convention, but other members also matched.
     /// </summary>
-    public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetMemberDescription, IMember TargetMember, string NamingConvention)>
-        WarningValidCandidateMemberIsAmbiguous =
+    public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetDeclarationDescription, IDeclaration TargetDeclaration, string NamingConvention)>
+        WarningValidCandidateDeclarationIsAmbiguous =
         new(
             "LAMA5209",
             Warning,
@@ -136,26 +136,38 @@ internal static class Diagnostics
             _category );
 
     /// <summary>
-    /// No {0} was found using the {1} naming convention candidate member names: {2}.
+    /// No {0} was found using the {1} naming convention candidate member names {2}.
     /// </summary>
     public static readonly DiagnosticDefinition<(string CandidateDescription, string NamingConvention, string CandidateNames)>
         WarningCandidateNamesNotFound =
         new(
             "LAMA5210",
             Warning,
-            "No {0} was found using the {1} naming convention candidate member names: {2}.",
+            "No {0} was found using the {1} naming convention candidate member names {2}.",
             "Optional member not found.",
             _category );
 
     /// <summary>
-    /// No configured naming convention matched, see other warnings for details. Tried naming conventions: {0}.
+    /// No configured naming convention matched, see other warnings for details. Tried naming conventions {0}.
     /// </summary>
     public static readonly DiagnosticDefinition<string>
         ErrorNoNamingConventionMatched =
         new(
             "LAMA5211",
             Error,
-            "No configured naming convention matched, see other warnings for details. Tried naming conventions: {0}",
+            "No configured naming convention matched, see other warnings for details. Tried naming conventions {0}",
             "No configured naming convention matched.",
+            _category );
+
+    /// <summary>
+    /// No naming conventions are configured. At least one naming convention must be configured.
+    /// </summary>
+    public static readonly DiagnosticDefinition
+        ErrorNoConfiguredNamingConventions =
+        new(
+            "LAMA5212",
+            Error,
+            "No naming conventions are configured. At least one naming convention must be configured.",
+            "No configured naming conventions.",
             _category );
 }

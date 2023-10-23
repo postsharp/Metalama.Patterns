@@ -13,4 +13,12 @@ public sealed record CommandNamingConventionMatch( INamingConvention NamingConve
         !string.IsNullOrWhiteSpace( this.CommandPropertyName )
         && (this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Success
             || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound));
+
+    private static readonly IReadOnlyList<string> _canExecuteCategories = new[] { CommandAttribute._canExecuteMethodCategory, CommandAttribute._canExecutePropertyCategory };
+
+    public void VisitDeclarationMatches<TVisitor>( in TVisitor visitor ) 
+        where TVisitor : IDeclarationMatchVisitor
+    {
+        visitor.Visit( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories );
+    }
 }
