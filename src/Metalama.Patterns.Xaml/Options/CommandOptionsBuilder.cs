@@ -2,64 +2,94 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
+using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using System.ComponentModel;
 using System.Windows.Input;
 
 namespace Metalama.Patterns.Xaml.Options;
 
-// TODO: Rework!!!
-
 [PublicAPI]
 [CompileTime]
 public sealed class CommandOptionsBuilder
 {
-    /// <summary>
-    /// Gets or sets the name of the method that implements the command logic. This method corresponds to the
-    /// to the <see cref="ICommand.Execute"/> method. It is called every time the command is invoked.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The <c>Execute</c> method must be declared in the same class as the command property and can have zero parameter or one parameter of any type, which becomes the command parameter.
-    /// </para>
-    /// <para>
-    /// If this property is not set, then the aspect will look for a method named <c>Foo</c> or <c>ExecuteFoo</c>, where <c>Foo</c> is the name of the command without the <c>Command</c> suffix.
-    /// </para>
-    /// </remarks>
-    public string? ExecuteMethod { get; set; }
+    private CommandOptions _options = new();
+
+    public static class Names
+    {
+        public const string CommandNameGroup = RegexCommandNamingConvention.CommandNameGroup;
+        public const string CommandNameToken = RegexCommandNamingConvention.CommandNameToken;
+    }
 
     /// <summary>
-    /// Gets or sets the name of the method that is called to determine whether the command can be executed.
-    /// This method corresponds to the <see cref="ICommand.CanExecute"/> method.
+    /// Registers a naming convention using a regular expression to select the command name from the target method of the <see cref="CommandAttribute"/>,
+    /// and a substituion pattern to determine the command property name and the name of the can-execute method or property.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The <c>CanExecute</c> method must be declared in the same class as the command property, return a <c>bool</c> value and can have zero or one parameter.
-    /// </para>
-    /// <para>
-    /// If this property is not set, then the aspect will look for a method named <c>CanFoo</c> or <c>CanExecuteFoo</c>, where <c>Foo</c> is the name of the command without the <c>Command</c> suffix.
-    /// </para>
-    /// <para>
-    /// At most one of the <see cref="CanExecuteMethod"/> and <see cref="CanExecuteProperty"/> properties may be set.
-    /// </para>
-    /// </remarks>
-    public string? CanExecuteMethod { get; set; }
+    /// <param name="conventionName">A short name describing the convention. This is used when reporting diagnostics.</param>
+    /// <param name="matchCommandName">
+    /// A regex match expression that will be evaluated against the name of the method upon which <see cref="CommandAttribute"/> is applied. 
+    /// The expression should yield a match group named <see cref="Names.CommandNameGroup"/>. If <paramref name="matchCommandName"/> is <see langword="null"/>,
+    /// the name produced by <see cref="DefaultCommandNamingConvention.GetCommandNameFromExecuteMethodName(string)"/> is used.
+    /// </param>
+    /// <param name="commandPropertyNamePattern">
+    /// The name of the command property. A string in which the substring <see cref="Names.CommandNameToken"/> will be replaced with the command name.
+    /// </param>
+    /// <param name="canExecuteNamePattern">
+    /// The name of the can-execute member. A string in which the substring <see cref="Names.CommandNameToken"/> will be replaced with the command name.
+    /// </param>
+    /// <param name="priority">
+    /// The priority of the naming convention. The default priority is 0. The system-registered default naming convention has priority 100. Naming conventions are
+    /// matched in ascending priority. The first successful match is used.
+    /// </param>
+    /// <param name="requireCanExecuteMatch">
+    /// If <see langword="true"/> (the default), a matching valid unambiguous can-execute method or property must be found for a match to be considered successful.
+    /// </param>
+    /// <param name="considerCanExecuteMethod">
+    /// If <see langword="true"/> (the default), can-execute methods named according to <paramref name="canExecuteNamePattern"/> will be considered.
+    /// At least one of <paramref name="considerCanExecuteMethod"/> and <paramref name="considerCanExecuteProperty"/> must be <see langword="true"/>.
+    /// </param>
+    /// <param name="considerCanExecuteProperty">
+    /// If <see langword="true"/> (the default), a can-execute property named according to <paramref name="canExecuteNamePattern"/> will be considered.
+    /// At least one of <paramref name="considerCanExecuteMethod"/> and <paramref name="considerCanExecuteProperty"/> must be <see langword="true"/>.
+    /// </param>
+    public void RegisterRegexNamingConvention(
+        string conventionName,
+        string? matchCommandName,
+        string commandPropertyNamePattern,
+        string canExecuteNamePattern,
+        int priority = 0,
+        bool requireCanExecuteMatch = true,
+        bool considerCanExecuteMethod = true,
+        bool considerCanExecuteProperty = true )
+    {
+        this.RegisterOrUpdateNamingConvention( 
+            new RegexCommandNamingConvention(
+                conventionName,
+                matchCommandName,
+                commandPropertyNamePattern,
+                canExecuteNamePattern,
+                requireCanExecuteMatch: requireCanExecuteMatch,
+                considerCanExecuteMethod: considerCanExecuteMethod,
+                considerCanExecuteProperty: considerCanExecuteProperty ), 
+            priority );
+    }
 
-    /// <summary>
-    /// Gets or sets the name of the property that is evaluated to determine whether the command can be executed.
-    /// This property corresponds to the <see cref="ICommand.CanExecute"/> method.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The <c>CanExecute</c> property must be declared in the same class as the command property and return a <c>bool</c> value.
-    /// </para>
-    /// <para>
-    /// If this property is not set, then the aspect will look for a property named <c>CanFoo</c> or <c>CanExecuteFoo</c>, where <c>Foo</c> is the name of the command without the <c>Command</c> suffix.
-    /// </para>
-    /// <para>
-    /// At most one of the <see cref="CanExecuteMethod"/> and <see cref="CanExecuteProperty"/> properties may be set.
-    /// </para>
-    /// </remarks>
-    public string? CanExecuteProperty { get; set; }
+    private void RegisterOrUpdateNamingConvention( ICommandNamingConvention namingConvention, int priority = 0 )
+    {
+        this._options = this._options with
+        {
+            NamingConventionRegistrations =
+                this._options.NamingConventionRegistrations.AddOrApplyChanges( new NamingConventionRegistration<ICommandNamingConvention>( namingConvention, priority ) )
+        };
+    }
+
+    private void UnregisterNamingConvention( ICommandNamingConvention namingConvention )
+    {
+        this._options = this._options with
+        {
+            NamingConventionRegistrations = this._options.NamingConventionRegistrations.Remove( namingConvention )
+        };
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether integration with <see cref="INotifyPropertyChanged"/> is enabled. The default is <see langword="true"/>.
@@ -74,14 +104,5 @@ public sealed class CommandOptionsBuilder
     /// </remarks>
     public bool? EnableINotifyPropertyChangedIntegration { get; set; }
 
-    internal CommandOptions Build()
-        => new()
-        {
-            /*
-            ExecuteMethod = this.ExecuteMethod,
-            CanExecuteMethod = this.CanExecuteMethod,
-            CanExecuteProperty = this.CanExecuteProperty,
-            */
-            EnableINotifyPropertyChangedIntegration = this.EnableINotifyPropertyChangedIntegration
-        };
+    internal CommandOptions Build() => this._options;
 }

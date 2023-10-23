@@ -21,7 +21,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     /// <summary>
     /// Gets the list of naming conventions that can be used to provide names and find members used to implement the <see cref="CommandAttribute"/> aspect.
     /// </summary>
-    public IncrementalKeyedCollection<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>> NamingConventions { get; init; } =
+    public IncrementalKeyedCollection<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>> NamingConventionRegistrations { get; init; } =
         IncrementalKeyedCollection<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>>.Empty;
 
     /// <summary>
@@ -40,7 +40,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     internal IReadOnlyList<ICommandNamingConvention> GetSortedNamingConventions()
     {
         this._namingConventions ??=
-            this.NamingConventions
+            this.NamingConventionRegistrations
                 .OrderBy( v => v.Priority ?? 0 )
                 .ThenBy( v => v.NamingConvention.GetType().FullName )
                 .Select( v => v.NamingConvention )
@@ -53,7 +53,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
         => new CommandOptions
         {
             EnableINotifyPropertyChangedIntegration = true,
-            NamingConventions = IncrementalKeyedCollection.AddOrApplyChanges<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>>(
+            NamingConventionRegistrations = IncrementalKeyedCollection.AddOrApplyChanges<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>>(
                 new NamingConventionRegistration<ICommandNamingConvention>( new DefaultCommandNamingConvention(), 100 ) )
         };
 
@@ -63,7 +63,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
 
         return new CommandOptions
         {
-            NamingConventions = this.NamingConventions.ApplyChanges( other.NamingConventions, context ),
+            NamingConventionRegistrations = this.NamingConventionRegistrations.ApplyChanges( other.NamingConventionRegistrations, context ),
             EnableINotifyPropertyChangedIntegration = other.EnableINotifyPropertyChangedIntegration ?? this.EnableINotifyPropertyChangedIntegration
         };
     }
