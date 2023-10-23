@@ -1,1 +1,1 @@
-// Error LAMA5205 on `FooCommand`: `Options CanExecuteMethod and CanExecuteProperty cannot both be defined at the same time.`
+// Error LAMA5205 on `Foo`: `The CanExecuteMethod and CanExecuteProperty properties cannot both be defined at the same time.`

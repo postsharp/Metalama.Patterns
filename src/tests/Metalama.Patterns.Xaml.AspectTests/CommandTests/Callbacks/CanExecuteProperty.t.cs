@@ -4,13 +4,11 @@ namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Callbacks;
 public class CanExecuteProperty
 {
   [Command]
-  public ICommand InstanceCommand { get; }
   private void ExecuteInstance()
   {
   }
   private bool CanExecuteInstance => true;
   [Command]
-  public ICommand StaticCommand { get; }
   private static void ExecuteStatic()
   {
   }
@@ -36,4 +34,6 @@ public class CanExecuteProperty
     }
     this.InstanceCommand = new DelegateCommand(Execute, CanExecute);
   }
+  public ICommand InstanceCommand { get; }
+  public ICommand StaticCommand { get; }
 }

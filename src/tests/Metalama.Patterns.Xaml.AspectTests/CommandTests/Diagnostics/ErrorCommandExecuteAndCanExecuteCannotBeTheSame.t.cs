@@ -1,2 +1,0 @@
-// Error LAMA5206 on `FooCommand`: `The configured ExecuteMethod and configured CanExecuteMethod cannot both have the same value 'A'.`
-// Error LAMA5206 on `Foo2Command`: `The configured ExecuteMethod and default CanExecuteMethod cannot both have the same value 'CanExecuteFoo2'.`

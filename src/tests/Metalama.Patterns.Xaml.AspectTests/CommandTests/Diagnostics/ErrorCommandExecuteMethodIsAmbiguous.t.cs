@@ -1,1 +1,0 @@
-// Error LAMA5214 on `FooCommand`: `The type ErrorCommandExecuteMethodIsAmbiguous contains more than one method named 'ExecuteFoo' or 'Foo'.`

@@ -1,1 +1,0 @@
-// Error LAMA5212 on `FooCommand`: `The ExecuteMethod named 'DoesNotExist' was not found.`

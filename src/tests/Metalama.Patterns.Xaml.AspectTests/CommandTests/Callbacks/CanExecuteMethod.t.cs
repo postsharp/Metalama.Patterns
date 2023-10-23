@@ -4,25 +4,21 @@ namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Callbacks;
 public class CanExecuteMethod
 {
   [Command]
-  public ICommand InstanceNoParametersCommand { get; }
   private void ExecuteInstanceNoParameters()
   {
   }
   private bool CanExecuteInstanceNoParameters() => true;
   [Command]
-  public ICommand StaticNoParametersCommand { get; }
   private static void ExecuteStaticNoParameters()
   {
   }
   private static bool CanExecuteStaticNoParameters() => true;
   [Command]
-  public ICommand InstanceWithParameterCommand { get; }
   private void ExecuteInstanceWithParameter(int v)
   {
   }
   private bool CanExecuteInstanceWithParameter(int v) => true;
   [Command]
-  public ICommand StaticWithParameterCommand { get; }
   private static void ExecuteStaticWithParameter(int v)
   {
   }
@@ -66,4 +62,8 @@ public class CanExecuteMethod
     }
     this.InstanceNoParametersCommand = new DelegateCommand(Execute, CanExecute);
   }
+  public ICommand InstanceNoParametersCommand { get; }
+  public ICommand InstanceWithParameterCommand { get; }
+  public ICommand StaticNoParametersCommand { get; }
+  public ICommand StaticWithParameterCommand { get; }
 }

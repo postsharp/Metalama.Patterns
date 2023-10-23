@@ -1,27 +1,25 @@
 using System.Windows.Input;
 using Metalama.Patterns.Xaml.Implementation;
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Callbacks;
-public class Configured
+public class ExplictlyConfiguredByCommandAttribute
 {
-  [Command(ExecuteMethod = nameof(Exec1))]
-  public ICommand ConfiguredExecuteMethodCommand { get; }
+  [Command(CanExecuteMethod = nameof(SomeWeirdName1))]
   private void Exec1()
   {
   }
-  private bool CanExecuteConfiguredExecuteMethod() => true;
+  private bool SomeWeirdName1() => true;
   [Command(CanExecuteMethod = nameof(CanExec1))]
-  public ICommand ConfiguredCanExecuteMethodCommand { get; }
   private void ExecuteConfiguredCanExecuteMethod()
   {
   }
+  // Has the default can-execute name for Exec1() above, don't be fooled.
   private bool CanExec1() => true;
   [Command(CanExecuteProperty = nameof(CanExec2))]
-  public ICommand ConfiguredCanExecutePropertyCommand { get; }
   private void ExecuteConfiguredCanExecuteProperty()
   {
   }
   private bool CanExec2 => true;
-  public Configured()
+  public ExplictlyConfiguredByCommandAttribute()
   {
     bool CanExecute_2(object? parameter_4)
     {
@@ -43,12 +41,15 @@ public class Configured
     this.ConfiguredCanExecuteMethodCommand = new DelegateCommand(Execute_1, CanExecute_1);
     bool CanExecute(object? parameter)
     {
-      return this.CanExecuteConfiguredExecuteMethod();
+      return this.SomeWeirdName1();
     }
     void Execute(object? parameter_1)
     {
       this.Exec1();
     }
-    this.ConfiguredExecuteMethodCommand = new DelegateCommand(Execute, CanExecute);
+    this.Exec1Command = new DelegateCommand(Execute, CanExecute);
   }
+  public ICommand ConfiguredCanExecuteMethodCommand { get; }
+  public ICommand ConfiguredCanExecutePropertyCommand { get; }
+  public ICommand Exec1Command { get; }
 }

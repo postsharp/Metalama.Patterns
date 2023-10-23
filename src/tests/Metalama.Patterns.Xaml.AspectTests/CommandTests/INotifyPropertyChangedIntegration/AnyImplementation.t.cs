@@ -6,7 +6,6 @@ public class AnyImplementation : INotifyPropertyChanged
 {
   public event PropertyChangedEventHandler? PropertyChanged;
   [Command]
-  public ICommand Foo1Command { get; }
   private void ExecuteFoo1()
   {
   }
@@ -23,11 +22,11 @@ public class AnyImplementation : INotifyPropertyChanged
     }
     this.Foo1Command = new DelegateCommand(Execute, CanExecute, this, "CanExecuteFoo1");
   }
+  public ICommand Foo1Command { get; }
 }
 public class ImplementedByBase : AnyImplementation
 {
   [Command]
-  public ICommand Foo2Command { get; }
   private void ExecuteFoo2()
   {
   }
@@ -44,4 +43,5 @@ public class ImplementedByBase : AnyImplementation
     }
     this.Foo2Command = new DelegateCommand(Execute, CanExecute, this, "CanExecuteFoo2");
   }
+  public ICommand Foo2Command { get; }
 }

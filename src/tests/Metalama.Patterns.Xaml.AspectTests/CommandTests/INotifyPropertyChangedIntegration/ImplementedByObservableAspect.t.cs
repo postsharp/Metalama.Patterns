@@ -1,29 +1,13 @@
+using System.ComponentModel;
+using System.Windows.Input;
 using Metalama.Patterns.Observability;
 using Metalama.Patterns.Observability.Metadata;
 using Metalama.Patterns.Xaml.Implementation;
-using System.ComponentModel;
-using System.Windows.Input;
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.INotifyPropertyChangedIntegration.ImplementedByObservableAspect;
 [Observable]
 public class ImplementedByObservableAspect : INotifyPropertyChanged
 {
-  private readonly ICommand _foo1Command = default !;
   [Command]
-  public ICommand Foo1Command
-  {
-    get
-    {
-      return this._foo1Command;
-    }
-    private init
-    {
-      if (!object.ReferenceEquals(value, this._foo1Command))
-      {
-        this._foo1Command = value;
-        this.OnPropertyChanged("Foo1Command");
-      }
-    }
-  }
   private void ExecuteFoo1()
   {
   }
@@ -55,6 +39,7 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
     }
     this.Foo1Command = new DelegateCommand(Execute, CanExecute, this, "CanExecuteFoo1");
   }
+  public ICommand Foo1Command { get; }
   [OnChildPropertyChangedMethod(new string[] { })]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
@@ -71,23 +56,7 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
 }
 public class ImplementedByBase : ImplementedByObservableAspect
 {
-  private readonly ICommand _foo2Command = default !;
   [Command]
-  public ICommand Foo2Command
-  {
-    get
-    {
-      return this._foo2Command;
-    }
-    private init
-    {
-      if (!object.ReferenceEquals(value, this._foo2Command))
-      {
-        this._foo2Command = value;
-        this.OnPropertyChanged("Foo2Command");
-      }
-    }
-  }
   private void ExecuteFoo2()
   {
   }
@@ -119,6 +88,7 @@ public class ImplementedByBase : ImplementedByObservableAspect
     }
     this.Foo2Command = new DelegateCommand(Execute, CanExecute, this, "CanExecuteFoo2");
   }
+  public ICommand Foo2Command { get; }
   [OnChildPropertyChangedMethod(new string[] { })]
   protected override void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {

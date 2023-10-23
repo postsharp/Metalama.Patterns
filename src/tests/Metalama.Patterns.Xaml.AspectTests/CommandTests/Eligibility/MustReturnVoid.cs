@@ -2,11 +2,11 @@
 
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Eligibility;
 
-public class TypeMustBeICommand
+internal class MustReturnVoid
 {
     [Command]
-    public object ObjectCommand { get; }
+    private void ReturnsVoid() { }
 
     [Command]
-    public int IntCommand { get; }
+    private int ReturnsInt() => 42;
 }

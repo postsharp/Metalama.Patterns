@@ -1,1 +1,2 @@
-// Error LAMA5208 on `FooCommand`: `The configured CanExecuteProperty 'DoesNotExist' was not found.`
+// Warning LAMA5210 on `ExecuteFoo`: `No can-execute method or can-execute property was found using the explicitly-configured naming convention candidate member names: 'DoesNotExist'.`
+// Error LAMA5211 on `ExecuteFoo`: `No configured naming convention matched, see other warnings for details. Tried naming conventions: explicitly-configured`

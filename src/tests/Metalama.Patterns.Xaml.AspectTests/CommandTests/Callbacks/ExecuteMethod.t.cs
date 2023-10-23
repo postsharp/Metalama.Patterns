@@ -1,25 +1,25 @@
+// Warning LAMA5210 on `ExecuteInstanceNoParameters`: `No can-execute method or can-execute property was found using the default naming convention candidate member names: 'CanExecuteInstanceNoParameters'.`
+// Warning LAMA5210 on `ExecuteStaticNoParameters`: `No can-execute method or can-execute property was found using the default naming convention candidate member names: 'CanExecuteStaticNoParameters'.`
+// Warning LAMA5210 on `ExecuteInstanceWithParameter`: `No can-execute method or can-execute property was found using the default naming convention candidate member names: 'CanExecuteInstanceWithParameter'.`
+// Warning LAMA5210 on `ExecuteStaticWithParameter`: `No can-execute method or can-execute property was found using the default naming convention candidate member names: 'CanExecuteStaticWithParameter'.`
 using System.Windows.Input;
 using Metalama.Patterns.Xaml.Implementation;
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Callbacks;
 public class ExecuteMethod
 {
   [Command]
-  public ICommand InstanceNoParametersCommand { get; }
   private void ExecuteInstanceNoParameters()
   {
   }
   [Command]
-  public ICommand StaticNoParametersCommand { get; }
   private static void ExecuteStaticNoParameters()
   {
   }
   [Command]
-  public ICommand InstanceWithParameterCommand { get; }
   private void ExecuteInstanceWithParameter(int v)
   {
   }
   [Command]
-  public ICommand StaticWithParameterCommand { get; }
   private static void ExecuteStaticWithParameter(int v)
   {
   }
@@ -46,4 +46,8 @@ public class ExecuteMethod
     }
     this.InstanceNoParametersCommand = new DelegateCommand(Execute, null);
   }
+  public ICommand InstanceNoParametersCommand { get; }
+  public ICommand InstanceWithParameterCommand { get; }
+  public ICommand StaticNoParametersCommand { get; }
+  public ICommand StaticWithParameterCommand { get; }
 }
