@@ -15,7 +15,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
         return other is DefaultCommandNamingConvention;
     }
 
-    public CommandNamingConventionMatch Match<TContextImpl>( IMethod executeMethod, TContextImpl context )
+    public CommandNamingConventionMatch Match<TContextImpl>( in IMethod executeMethod, in TContextImpl context )
         where TContextImpl : ICommandNamingMatchContext
     {
         var commandName = GetCommandNameFromExecuteMethodName( executeMethod.Name );

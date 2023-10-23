@@ -14,6 +14,6 @@ public interface INamingConvention
 public interface INamingConvention<TArguments, TContext, TMatch> : INamingConvention
     where TMatch : INamingConventionMatch
 {
-    TMatch Match<TContextImpl>( TArguments arguments, TContextImpl context )
+    TMatch Match<TContextImpl>( in TArguments arguments, in TContextImpl context )
         where TContextImpl : TContext;
 }

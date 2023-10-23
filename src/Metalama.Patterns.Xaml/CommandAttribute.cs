@@ -199,11 +199,17 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
             if ( ncResult.UnsuccessfulMatches != null )
             {
+                builder.Diagnostics.Report(
+                    Diagnostics.ErrorNoNamingConventionMatched.WithArguments( string.Join( ", ", ncResult.UnsuccessfulMatches.Select( um => um.Match.NamingConvention.DiagnosticName ) ) ) );
+
                 foreach ( var um in ncResult.UnsuccessfulMatches )
                 {
                     if ( um.Match.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Ambiguous )
                     {                        
                         // Report the ambiguous (valid) matches.
+
+                        // NB: If there was more than one declaration to match (ie, another property like Match.CanExecuteMatch existed),
+                        // the Where condition below would also need to filter based on i.Category.
 
                         foreach ( var c in um.InspectedDeclarations.Where( i => i.IsValid ) )
                         {
@@ -242,15 +248,6 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                     }
                 }
             }
-        }
-
-        if ( hasExplicitCanExecuteNaming && successfulMatch?.CanExecuteMatch.Outcome != DeclarationMatchOutcome.Success )
-        {
-            builder.Diagnostics.Report( Diagnostics.ErrorMemberNotFound.WithArguments(
-                (
-                $"unambiguous valid explicitly-configured can-execute {(this.CanExecuteMethod != null ? "method" : "property")} named '{this.CanExecuteMethod ?? this.CanExecuteProperty}'",
-                declaringType
-                ) ) );
         }
 
         var useInpcIntegration = false;

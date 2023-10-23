@@ -23,12 +23,12 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
 
     public bool Equals( ICommandNamingConvention? other )
         => ReferenceEquals( this, other ) || (
-        other is ExplicitCommandNamingConvention e
-        && e._commandPropertyName == this._commandPropertyName
-        && e._canExecuteMethodName == this._canExecuteMethodName
-        && e._canExecutePropertyName == this._canExecutePropertyName);
+        other is ExplicitCommandNamingConvention c
+        && c._commandPropertyName == this._commandPropertyName
+        && c._canExecuteMethodName == this._canExecuteMethodName
+        && c._canExecutePropertyName == this._canExecutePropertyName);
 
-    public CommandNamingConventionMatch Match<TContextImpl>( IMethod executeMethod, TContextImpl context )
+    public CommandNamingConventionMatch Match<TContextImpl>( in IMethod executeMethod, in TContextImpl context )
         where TContextImpl : ICommandNamingMatchContext
     {
         var commandName = DefaultCommandNamingConvention.GetCommandNameFromExecuteMethodName( executeMethod.Name );
@@ -41,6 +41,7 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
             commandPropertyName,
             this._canExecuteMethodName ?? this._canExecutePropertyName ?? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ),
             considerMethod: this._canExecuteMethodName != null || this._canExecutePropertyName == null,
-            considerProperty: this._canExecutePropertyName != null || this._canExecuteMethodName == null );
+            considerProperty: this._canExecutePropertyName != null || this._canExecuteMethodName == null,
+            requireCanExecuteMatch: this._canExecuteMethodName != null || this._canExecutePropertyName != null );
     }
 }

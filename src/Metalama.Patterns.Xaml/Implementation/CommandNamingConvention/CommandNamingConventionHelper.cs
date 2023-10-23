@@ -12,11 +12,12 @@ internal static class CommandNamingConventionHelper
     public static CommandNamingConventionMatch Match<TContextImpl>(
         INamingConvention namingConvention,
         IMethod executeMethod,
-        TContextImpl context,
+        in TContextImpl context,
         string commandPropertyName,
         string canExecuteName,
         bool considerMethod = true,
-        bool considerProperty = true )
+        bool considerProperty = true,
+        bool requireCanExecuteMatch = false )
         where TContextImpl : ICommandNamingMatchContext
     {
         IMethod? selectedCandidateCanExecuteMethod = null;
@@ -26,7 +27,18 @@ internal static class CommandNamingConventionHelper
         {
             var candiateCanExecuteMethods = executeMethod.DeclaringType.Methods.OfName( canExecuteName ).ToList();
 
-            var eligibleCanExecuteMethods = candiateCanExecuteMethods.Where( m => context.IsValidCanExecuteMethod( m ) ).ToList();
+            IReadOnlyList<IMethod> eligibleCanExecuteMethods;
+
+            if ( candiateCanExecuteMethods.Count > 0 )
+            {
+                var contextCopy = context;
+
+                eligibleCanExecuteMethods = candiateCanExecuteMethods.Where( m => contextCopy.IsValidCanExecuteMethod( m ) ).ToList();
+            }
+            else
+            {
+                eligibleCanExecuteMethods = Array.Empty<IMethod>();
+            }
 
             canExecuteMethodMatchOutcome = DeclarationMatchOutcome.NotFound;
 
@@ -64,27 +76,27 @@ internal static class CommandNamingConventionHelper
         
         if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Success && canExecutePropertyMatchOutcome == DeclarationMatchOutcome.Success )
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Ambiguous( canExecuteName ) );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Ambiguous( canExecuteName ), requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Success )
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Success( selectedCandidateCanExecuteMethod! ) );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Success( selectedCandidateCanExecuteMethod! ), requireCanExecuteMatch );
         }
         else if ( canExecutePropertyMatchOutcome == DeclarationMatchOutcome.Success )
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Success( candiateCanExecuteProperty! ) );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Success( candiateCanExecuteProperty! ), requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Ambiguous )
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Ambiguous( canExecuteName ) );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Ambiguous( canExecuteName ), requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Invalid || canExecutePropertyMatchOutcome == DeclarationMatchOutcome.Invalid )
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Invalid() );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Invalid(), requireCanExecuteMatch );
         }
         else
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.NotFound( canExecuteName ) );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.NotFound( canExecuteName ), requireCanExecuteMatch );
         }
     }
 }

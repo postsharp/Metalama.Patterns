@@ -42,7 +42,7 @@ internal static class NamingConventionEvaluator<TContext, TContextImplementation
     private sealed class Evaluator<TArguments, TMatch, TMatchContextFactory> : INamingConventionEvaluationResult<TMatch>
         where TMatch : INamingConventionMatch
         where TMatchContextFactory : INamingConventionMatchContextFactory<TContextImplementation>
-    {
+    {        
         private List<InspectedDeclaration> _inspectedDeclarations = new();
         private List<(INamingConvention<TArguments, TContext, TMatch> NamingConvention, TMatch Match, int InspectedDeclarationsStartIndex, int InspectedDeclarationsEndIndex)>? _unsuccessfulMatchDetails;
 
@@ -56,7 +56,7 @@ internal static class NamingConventionEvaluator<TContext, TContextImplementation
         {
             var firstInspectedIndex = this._inspectedDeclarations.Count;
 
-            var nameMatchingContext = matchContextFactory.Create( new InspectedDeclarationsAdder(/* namingConvention,*/ this._inspectedDeclarations ) );
+            var nameMatchingContext = matchContextFactory.Create( new InspectedDeclarationsAdder( this._inspectedDeclarations ) );
 
             var match = namingConvention.Match( arguments, nameMatchingContext );
 
