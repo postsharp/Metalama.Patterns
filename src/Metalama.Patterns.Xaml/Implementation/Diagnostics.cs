@@ -85,133 +85,17 @@ internal static class Diagnostics
             + " properties cannot both be defined at the same time.",
             "Invalid " + nameof(CommandAttribute) + " properties." );
 
-#if false
-    /// <summary>
-    /// The {0} ExecuteMethod and {1} CanExecuteMethod cannot both have the same value '{2}'.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(string ExecuteConfigurationSource, string CanExecuteConfigurationSource, string Value)>
-        ErrorCommandExecuteAndCanExecuteCannotBeTheSame =
-            new(
-                "LAMA5206",
-                Error,
-                "The {0} " + nameof(CommandOptions.ExecuteMethod) + " and {1} " + nameof(CommandOptions.CanExecuteMethod)
-                + " cannot both have the same value '{2}'.",
-                "Invalid " + nameof(CommandOptions) + "." );
-
-    /// <summary>
-    /// The CanExecuteProperty for command property {0} must be of type bool.
-    /// </summary>
-    public static readonly DiagnosticDefinition<IProperty> ErrorCommandCanExecutePropertyIsNotValid =
-        new(
-            "LAMA5207",
-            Error,
-            "The " + nameof(CommandOptions.CanExecuteProperty) + " for command property {0} must be of type bool and have a getter.",
-            "Invalid " + nameof(CommandOptions.CanExecuteProperty) + " type." );
-
-    /// <summary>
-    /// The configured CanExecuteProperty '{0}' was not found.
-    /// </summary>
-    public static readonly DiagnosticDefinition<string> ErrorCommandConfiguredCanExecutePropertyNotFound =
-        new(
-            "LAMA5208",
-            Error,
-            "The configured " + nameof(CommandOptions.CanExecuteProperty) + " '{0}' was not found.",
-            "Missing " + nameof(CommandOptions.CanExecuteProperty) + "." );
-
-    /// <summary>
-    /// The CanExecuteMethod for command property {0} must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.
-    /// </summary>
-    public static readonly DiagnosticDefinition<IProperty> ErrorCommandCanExecuteMethodIsNotValid =
-        new(
-            "LAMA5209",
-            Error,
-            "The " + nameof(CommandOptions.CanExecuteMethod)
-                   + " for command property {0} must not be generic, must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.",
-            "Invalid " + nameof(CommandOptions.CanExecuteMethod) + "." );
-
-    /// <summary>
-    /// The configured CanExecuteMethod '{0}' was not found.
-    /// </summary>
-    public static readonly DiagnosticDefinition<string> ErrorCommandConfiguredCanExecuteMethodNotFound =
-        new(
-            "LAMA5210",
-            Error,
-            "The configured " + nameof(CommandOptions.CanExecuteMethod) + " '{0}' was not found.",
-            "Missing " + nameof(CommandOptions.CanExecuteMethod) + "." );
-
-    /// <summary>
-    /// The type {0} contains more than one method named {1}.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(IType DeclaringType, string MethodName)> ErrorCommandCanExecuteMethodIsAmbiguous =
-        new(
-            "LAMA5211",
-            Error,
-            "The type {0} contains more than one method named {1}.",
-            "Ambiguous " + nameof(CommandOptions.CanExecuteMethod) + "." );
-
-    /// <summary>
-    /// The ExecuteMethod named {0} was not found.
-    /// </summary>
-    public static readonly DiagnosticDefinition<string> ErrorCommandExecuteMethodNotFound =
-        new(
-            "LAMA5212",
-            Error,
-            "The " + nameof(CommandOptions.ExecuteMethod) + " named {0} was not found.",
-            "Missing " + nameof(CommandOptions.ExecuteMethod) + "." );
-
-    /// <summary>
-    /// The ExecuteMethod for command property {0} must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.
-    /// </summary>
-    public static readonly DiagnosticDefinition<IProperty> ErrorCommandExecuteMethodIsNotValid =
-        new(
-            "LAMA5213",
-            Error,
-            "The " + nameof(CommandOptions.ExecuteMethod)
-                   + " for command property {0} must not be generic, must return bool and may optionally have a single parameter of any type, and which must not be a ref or out parameter.",
-            "Invalid " + nameof(CommandOptions.ExecuteMethod) + "." );
-
-    /// <summary>
-    /// The type {0} contains more than one method named {1}.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(IType DeclaringType, string MethodName)> ErrorCommandExecuteMethodIsAmbiguous =
-        new(
-            "LAMA5214",
-            Error,
-            "The type {0} contains more than one method named {1}.",
-            "Ambiguous " + nameof(CommandOptions.ExecuteMethod) + "." );
-#endif
     /// <summary>
     /// The can-execute property for command method {0} is not public, and INotifyPropertyChanged integration is enabled and applicable.
     /// Because the can-execute property is not public, INotifyPropertyChanged.PropertyChanged events might not be raised depending on the INotifyPropertyChanged implementation.
     /// </summary>
     public static readonly DiagnosticDefinition<IMethod> WarningCommandNotifiableCanExecutePropertyIsNotPublic =
         new(
-            "LAMA5215",
+            "LAMA5206",
             Warning,
             "The can-execute property for command method {0} is not public, and INotifyPropertyChanged integration is enabled and applicable. " +
             "Because the can-execute property is not public, INotifyPropertyChanged.PropertyChanged events might not be raised depending on the INotifyPropertyChanged implementation.",
             "Notifiable can-execute property is not public." );
-
-    /// <summary>
-    /// The type {0} contains more than one {1}.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(IType DeclaringType, string What)> ErrorMemberMatchIsAmbiguous =
-        new(
-            "LAMA5216",
-            Error,
-            "The type {0} contains more than one {1}.",
-            "More than one member matches." );
-
-    /// <summary>
-    /// No {0} was found in type {1}.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(string What, IType DeclaringType)> ErrorMemberNotFound =
-        new(
-            "LAMA5217",
-            Error,
-            "No {0} was found in type {1}.",
-            "Member not found.",
-            _category );
 
     /// <summary>
     /// The name of existing member {0} that is defined in or inherited by class {1} conflicts with the required command property name {2}.
@@ -219,7 +103,7 @@ internal static class Diagnostics
     public static readonly DiagnosticDefinition<(IMemberOrNamedType Member, INamedType DeclaringType, string FieldName)>
         ErrorRequiredCommandPropertyNameIsAlreadyUsed =
             new(
-                "LAMA5218",
+                "LAMA5207",
                 Error,
                 "The name of existing member {0}, that is defined in or inherited by class {1}, conflicts with the required command property name {2}.",
                 "Required command property name is already used.",
@@ -233,7 +117,7 @@ internal static class Diagnostics
     public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetMemberDescription, IMember TargetMember, string NamingConvention, string? InvalidityReason)>
         WarningInvalidCandidateMemberSignature =
             new(
-                "LAMA5219",
+                "LAMA5208",
                 Warning,
                 "The {0} was identified as a candidate {1} for {2}{3} by the {4} naming convention, but the signature is not valid.{5}",
                 "Invalid candidate member signature.",
@@ -245,7 +129,7 @@ internal static class Diagnostics
     public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetMemberDescription, IMember TargetMember, string NamingConvention)>
         WarningValidCandidateMemberIsAmbiguous =
         new(
-            "LAMA5220",
+            "LAMA5209",
             Warning,
             "The {0} was identified as a valid candidate {1} for {2}{3} by the {4} naming convention, but other members also matched.",
             "Ambiguous candidate member.",
@@ -257,9 +141,21 @@ internal static class Diagnostics
     public static readonly DiagnosticDefinition<(string CandidateDescription, string NamingConvention, string CandidateNames)>
         WarningCandidateNamesNotFound =
         new(
-            "LAMA5221",
+            "LAMA5210",
             Warning,
             "No {0} was found using the {1} naming convention candidate member names: {2}.",
             "Optional member not found.",
+            _category );
+
+    /// <summary>
+    /// No configured naming convention matched, see other warnings for details. Tried naming conventions: {0}.
+    /// </summary>
+    public static readonly DiagnosticDefinition<string>
+        ErrorNoNamingConventionMatched =
+        new(
+            "LAMA5211",
+            Error,
+            "No configured naming convention matched, see other warnings for details. Tried naming conventions: {0}",
+            "No configured naming convention matched.",
             _category );
 }
