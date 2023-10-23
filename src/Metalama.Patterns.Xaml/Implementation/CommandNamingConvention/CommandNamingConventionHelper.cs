@@ -69,9 +69,16 @@ internal static class CommandNamingConventionHelper
         {
             candiateCanExecuteProperty = executeMethod.DeclaringType.Properties.OfName( canExecuteName ).SingleOrDefault();
 
-            canExecutePropertyMatchOutcome = candiateCanExecuteProperty != null && context.IsValidCanExecuteProperty( candiateCanExecuteProperty )
-                ? DeclarationMatchOutcome.Success
-                : DeclarationMatchOutcome.NotFound;
+            if ( candiateCanExecuteProperty == null )
+            {
+                canExecutePropertyMatchOutcome = DeclarationMatchOutcome.NotFound;
+            }
+            else
+            {
+                canExecutePropertyMatchOutcome = context.IsValidCanExecuteProperty( candiateCanExecuteProperty )
+                    ? DeclarationMatchOutcome.Success
+                    : DeclarationMatchOutcome.Invalid;
+            }
         }
         
         if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Success && canExecutePropertyMatchOutcome == DeclarationMatchOutcome.Success )
