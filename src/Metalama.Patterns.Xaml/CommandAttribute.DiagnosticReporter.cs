@@ -4,8 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
-using System.Net.NetworkInformation;
-using System.Text;
 
 namespace Metalama.Patterns.Xaml;
 

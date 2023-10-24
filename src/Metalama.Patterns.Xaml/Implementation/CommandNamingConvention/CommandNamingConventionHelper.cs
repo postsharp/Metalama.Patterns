@@ -9,50 +9,59 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 [CompileTime]
 internal static class CommandNamingConventionHelper
 {
-    public static CommandNamingConventionMatch Match<TContextImpl>(
+    public static CommandNamingConventionMatch Match<TContextImpl, TCanExecutePredicate>(
         INamingConvention namingConvention,
         IMethod executeMethod,
         in TContextImpl context,
         string commandPropertyName,
-        string canExecuteName,
+        in TCanExecutePredicate canExecutePredicate,
         bool considerMethod = true,
         bool considerProperty = true,
         bool requireCanExecuteMatch = false )
         where TContextImpl : ICommandNamingMatchContext
+        where TCanExecutePredicate : INameMatchPredicate
     {
         IMethod? selectedCandidateCanExecuteMethod = null;
         DeclarationMatchOutcome? canExecuteMethodMatchOutcome = null;
 
         if ( considerMethod )
         {
-            var candiateCanExecuteMethods = executeMethod.DeclaringType.Methods.OfName( canExecuteName ).ToList();
+            List<IMethod>? candidateCanExecuteMethods = null;
 
-            IReadOnlyList<IMethod> eligibleCanExecuteMethods;
-
-            if ( candiateCanExecuteMethods.Count > 0 )
+            foreach ( var method in executeMethod.DeclaringType.Methods )
             {
-                var contextCopy = context;
-
-                eligibleCanExecuteMethods = candiateCanExecuteMethods.Where( m => contextCopy.IsValidCanExecuteMethod( m ) ).ToList();
+                if ( canExecutePredicate.IsMatch( method.Name ) )
+                {
+                    (candidateCanExecuteMethods ??= new()).Add( method );
+                }
             }
-            else
+
+            List<IMethod>? eligibleCanExecuteMethods = null;
+
+            if ( candidateCanExecuteMethods is { Count: > 0 } )
             {
-                eligibleCanExecuteMethods = Array.Empty<IMethod>();
+                foreach ( var method in candidateCanExecuteMethods )
+                {
+                    if ( context.IsValidCanExecuteMethod( method ) )
+                    {
+                        (eligibleCanExecuteMethods ??= new()).Add( method );
+                    }
+                }
             }
 
             canExecuteMethodMatchOutcome = DeclarationMatchOutcome.NotFound;
 
-            switch ( eligibleCanExecuteMethods.Count )
+            switch ( eligibleCanExecuteMethods?.Count ?? 0 )
             {
                 case 0:
-                    if ( candiateCanExecuteMethods.Count > 0 )
+                    if ( candidateCanExecuteMethods is { Count: > 0 } )
                     {
                         canExecuteMethodMatchOutcome = DeclarationMatchOutcome.Invalid;
                     }
                     break;
 
                 case 1:
-                    selectedCandidateCanExecuteMethod = eligibleCanExecuteMethods[0];
+                    selectedCandidateCanExecuteMethod = eligibleCanExecuteMethods![0];
                     canExecuteMethodMatchOutcome = DeclarationMatchOutcome.Success;
                     break;
 
@@ -62,28 +71,59 @@ internal static class CommandNamingConventionHelper
             }
         }
 
-        IProperty? candiateCanExecuteProperty = null;
+        IProperty? selectedCandidateCanExecuteProperty = null;
         DeclarationMatchOutcome? canExecutePropertyMatchOutcome = null;
 
         if ( considerProperty )
         {
-            candiateCanExecuteProperty = executeMethod.DeclaringType.Properties.OfName( canExecuteName ).SingleOrDefault();
+            List<IProperty>? candiateCanExecuteProperties = null;
 
-            if ( candiateCanExecuteProperty == null )
+            foreach ( var property in executeMethod.DeclaringType.Properties )
             {
-                canExecutePropertyMatchOutcome = DeclarationMatchOutcome.NotFound;
+                if ( canExecutePredicate.IsMatch( property.Name ) )
+                {
+                    (candiateCanExecuteProperties ??= new()).Add( property );
+                }
             }
-            else
+
+            List<IProperty>? eligibleCanExecuteProperties = null;
+
+            if ( candiateCanExecuteProperties is { Count: > 0 } )
             {
-                canExecutePropertyMatchOutcome = context.IsValidCanExecuteProperty( candiateCanExecuteProperty )
-                    ? DeclarationMatchOutcome.Success
-                    : DeclarationMatchOutcome.Invalid;
+                foreach ( var property in candiateCanExecuteProperties )
+                {
+                    if ( context.IsValidCanExecuteProperty( property ) )
+                    {
+                        (eligibleCanExecuteProperties ??= new()).Add( property );
+                    }
+                }
+            }
+
+            canExecutePropertyMatchOutcome = DeclarationMatchOutcome.NotFound;
+
+            switch ( eligibleCanExecuteProperties?.Count ?? 0 )
+            {
+                case 0:
+                    if ( candiateCanExecuteProperties is { Count: > 0 } )
+                    {
+                        canExecutePropertyMatchOutcome = DeclarationMatchOutcome.Invalid;
+                    }
+                    break;
+
+                case 1:
+                    selectedCandidateCanExecuteProperty = eligibleCanExecuteProperties![0];
+                    canExecutePropertyMatchOutcome = DeclarationMatchOutcome.Success;
+                    break;
+
+                case > 1:
+                    canExecutePropertyMatchOutcome = DeclarationMatchOutcome.Ambiguous;
+                    break;
             }
         }
-        
+
         if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Success && canExecutePropertyMatchOutcome == DeclarationMatchOutcome.Success )
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Ambiguous( canExecuteName ), requireCanExecuteMatch );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Ambiguous(), requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Success )
         {
@@ -91,11 +131,11 @@ internal static class CommandNamingConventionHelper
         }
         else if ( canExecutePropertyMatchOutcome == DeclarationMatchOutcome.Success )
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Success( candiateCanExecuteProperty! ), requireCanExecuteMatch );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Success( selectedCandidateCanExecuteProperty! ), requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Ambiguous )
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Ambiguous( canExecuteName ), requireCanExecuteMatch );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.Ambiguous(), requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Invalid || canExecutePropertyMatchOutcome == DeclarationMatchOutcome.Invalid )
         {
@@ -103,7 +143,7 @@ internal static class CommandNamingConventionHelper
         }
         else
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.NotFound( canExecuteName ), requireCanExecuteMatch );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.NotFound( canExecutePredicate ), requireCanExecuteMatch );
         }
     }
 }

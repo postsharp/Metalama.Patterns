@@ -2,18 +2,16 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
 [CompileTime]
 internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 {
-    public string DiagnosticName => "default";
+    public static string RegistrationKey { get; } = "{43954F4F-1606-4A44-9DEB-41E7C686C149}";
 
-    bool IEquatable<ICommandNamingConvention>.Equals( ICommandNamingConvention? other )
-    {
-        return other is DefaultCommandNamingConvention;
-    }
+    public string DiagnosticName => "default";
 
     public CommandNamingConventionMatch Match<TContextImpl>( in IMethod executeMethod, in TContextImpl context )
         where TContextImpl : ICommandNamingMatchContext
@@ -24,7 +22,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
         var canExecuteName = GetCanExecuteNameFromCommandName( commandName );
 
-        return CommandNamingConventionHelper.Match( this, executeMethod, context, commandPropertyName, canExecuteName );
+        return CommandNamingConventionHelper.Match( this, executeMethod, context, commandPropertyName, new StringNameMatchPredicate( canExecuteName ) );
     }
 
     public static string GetCommandNameFromExecuteMethodName( string name )

@@ -5,12 +5,9 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal interface INamingConventionMatch
+internal interface INameMatchPredicate
 {
-    INamingConvention NamingConvention { get; }
+    bool IsMatch( string name );
 
-    bool Success { get; }
-
-    void VisitDeclarationMatches<TVisitor>( in TVisitor visitor )
-        where TVisitor : IDeclarationMatchVisitor;
+    void GetCandidateNames( out string? singleValue, out IEnumerable<string>? collection );
 }

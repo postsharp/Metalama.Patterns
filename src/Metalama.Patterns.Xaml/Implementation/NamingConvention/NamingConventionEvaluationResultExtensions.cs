@@ -41,7 +41,7 @@ internal static class NamingConventionEvaluationResultExtensions
                     }
                 }
             }
-            else if ( match.Outcome == DeclarationMatchOutcome.NotFound && match.CandidateNames != null )
+            else if ( match.Outcome == DeclarationMatchOutcome.NotFound && match.HasCandidateNames )
             {
                 this.DiagnosticReporter.ReportNotFound( this.NamingConvention, match.CandidateNames, applicableCategories );
             }

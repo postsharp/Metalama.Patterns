@@ -21,8 +21,8 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     /// <summary>
     /// Gets the list of naming conventions that can be used to provide names and find members used to implement the <see cref="CommandAttribute"/> aspect.
     /// </summary>
-    public IncrementalKeyedCollection<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>> NamingConventionRegistrations { get; init; } =
-        IncrementalKeyedCollection<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>>.Empty;
+    public IncrementalKeyedCollection<string, NamingConventionRegistration<ICommandNamingConvention>> NamingConventionRegistrations { get; init; } =
+        IncrementalKeyedCollection<string, NamingConventionRegistration<ICommandNamingConvention>>.Empty;
 
     /// <summary>
     /// Gets a value indicating whether integration with <see cref="INotifyPropertyChanged"/> is enabled. The default is <see langword="true"/>.
@@ -41,9 +41,10 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     {
         this._namingConventions ??=
             this.NamingConventionRegistrations
+                .Where( r => r.NamingConvention != null )
                 .OrderBy( v => v.Priority ?? 0 )
-                .ThenBy( v => v.NamingConvention.GetType().FullName )
-                .Select( v => v.NamingConvention )
+                .ThenBy( v => v.NamingConvention!.DiagnosticName )
+                .Select( v => v.NamingConvention! )
                 .ToList();
 
         return this._namingConventions;
@@ -53,9 +54,14 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
         => new CommandOptions
         {
             EnableINotifyPropertyChangedIntegration = true,
-            NamingConventionRegistrations = IncrementalKeyedCollection.AddOrApplyChanges<ICommandNamingConvention, NamingConventionRegistration<ICommandNamingConvention>>(
-                new NamingConventionRegistration<ICommandNamingConvention>( new DefaultCommandNamingConvention(), 100 ) )
+            NamingConventionRegistrations = DefaultNamingConventionRegistrations()
         };
+
+    internal static IncrementalKeyedCollection<string, NamingConventionRegistration<ICommandNamingConvention>> DefaultNamingConventionRegistrations()
+    {
+        return IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<ICommandNamingConvention>>(
+                new NamingConventionRegistration<ICommandNamingConvention>( DefaultCommandNamingConvention.RegistrationKey, new DefaultCommandNamingConvention(), 1000 ) );
+    }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {

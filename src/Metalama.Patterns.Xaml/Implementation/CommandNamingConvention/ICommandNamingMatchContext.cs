@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
 [CompileTime]
-public interface ICommandNamingMatchContext
+internal interface ICommandNamingMatchContext
 {
     bool IsValidCanExecuteMethod( IMethod method );
 

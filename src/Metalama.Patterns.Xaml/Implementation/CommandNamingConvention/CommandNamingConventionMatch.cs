@@ -7,7 +7,7 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
 [CompileTime]
-public sealed record CommandNamingConventionMatch( INamingConvention NamingConvention, string? CommandPropertyName, DeclarationMatch<IMember> CanExecuteMatch, bool RequireCanExecuteMatch = false ) : INamingConventionMatch
+internal sealed record CommandNamingConventionMatch( INamingConvention NamingConvention, string? CommandPropertyName, DeclarationMatch<IMember> CanExecuteMatch, bool RequireCanExecuteMatch = false ) : INamingConventionMatch
 {
     public bool Success =>
         !string.IsNullOrWhiteSpace( this.CommandPropertyName )

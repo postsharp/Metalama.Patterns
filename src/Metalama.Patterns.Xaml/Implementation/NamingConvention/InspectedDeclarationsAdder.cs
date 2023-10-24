@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-public readonly struct InspectedDeclarationsAdder
+internal readonly struct InspectedDeclarationsAdder
 {
     private readonly ICollection<InspectedDeclaration> _inspectedDeclarations;
 

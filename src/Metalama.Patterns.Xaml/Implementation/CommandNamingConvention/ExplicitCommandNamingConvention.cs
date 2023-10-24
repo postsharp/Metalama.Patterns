@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
@@ -21,13 +22,6 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
 
     public string DiagnosticName => "explicitly-configured";
 
-    public bool Equals( ICommandNamingConvention? other )
-        => ReferenceEquals( this, other ) || (
-        other is ExplicitCommandNamingConvention c
-        && c._commandPropertyName == this._commandPropertyName
-        && c._canExecuteMethodName == this._canExecuteMethodName
-        && c._canExecutePropertyName == this._canExecutePropertyName);
-
     public CommandNamingConventionMatch Match<TContextImpl>( in IMethod executeMethod, in TContextImpl context )
         where TContextImpl : ICommandNamingMatchContext
     {
@@ -39,7 +33,7 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
             executeMethod,
             context,
             commandPropertyName,
-            this._canExecuteMethodName ?? this._canExecutePropertyName ?? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ),
+            new StringNameMatchPredicate( this._canExecuteMethodName ?? this._canExecutePropertyName ?? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) ),
             considerMethod: this._canExecuteMethodName != null || this._canExecutePropertyName == null,
             considerProperty: this._canExecutePropertyName != null || this._canExecuteMethodName == null,
             requireCanExecuteMatch: this._canExecuteMethodName != null || this._canExecutePropertyName != null );

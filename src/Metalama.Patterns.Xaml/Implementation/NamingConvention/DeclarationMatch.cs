@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
@@ -14,31 +15,47 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 /// </remarks>
 /// <typeparam name="TDeclaration"></typeparam>
 [CompileTime]
-public readonly struct DeclarationMatch<TDeclaration>
+internal readonly struct DeclarationMatch<TDeclaration>
     where TDeclaration : class, IDeclaration
 {
     public static DeclarationMatch<TDeclaration> Success( TDeclaration declaration )
         => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Success, declaration ?? throw new ArgumentNullException( nameof( declaration ) ) );
 
-    public static DeclarationMatch<TDeclaration> Ambiguous( params string[] candidateNames )
-        => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Ambiguous, candidateNames: candidateNames );
+    public static DeclarationMatch<TDeclaration> Ambiguous()
+        => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Ambiguous );
 
-    public static DeclarationMatch<TDeclaration> NotFound( params string[] candidateNames )
+    public static DeclarationMatch<TDeclaration> NotFound<TNameMatchPredicate>( in TNameMatchPredicate predicate )
+        where TNameMatchPredicate : INameMatchPredicate
+    {
+        predicate.GetCandidateNames( out var singleValue, out var collection );
+        return new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.NotFound, candidateNames: (object?) collection ?? singleValue );
+    }
+
+    public static DeclarationMatch<TDeclaration> NotFound( string candidateName )
+        => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.NotFound, candidateNames: candidateName );
+
+    public static DeclarationMatch<TDeclaration> NotFound( IEnumerable<string>? candidateNames = null )
         => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.NotFound, candidateNames: candidateNames );
 
     public static DeclarationMatch<TDeclaration> Invalid()
         => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Invalid );
 
-    internal DeclarationMatch( DeclarationMatchOutcome outcome, TDeclaration? declaration = null, IEnumerable<string>? candidateNames = null )
+    private readonly object? _candidateNames;
+
+    private DeclarationMatch( DeclarationMatchOutcome outcome, TDeclaration? declaration = null, object? candidateNames = null )
     {
         this.Declaration = declaration;
         this.Outcome = outcome;
-        this.CandidateNames = candidateNames;
+        this._candidateNames = candidateNames;
     }
 
     public DeclarationMatchOutcome? Outcome { get; }
 
     public TDeclaration? Declaration { get; }
 
-    public IEnumerable<string>? CandidateNames { get; }
+    [MemberNotNullWhen( true, nameof( CandidateNames ) )]
+    public bool HasCandidateNames => this._candidateNames != null;
+
+    public IEnumerable<string>? CandidateNames
+        => this._candidateNames == null ? null : this._candidateNames as IEnumerable<string> ?? new string[] { (string) this._candidateNames };
 }

@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-public interface IDeclarationMatchVisitor
+internal interface IDeclarationMatchVisitor
 {
     void Visit<TDeclaration>( in DeclarationMatch<TDeclaration> match, bool isRequired, IReadOnlyList<string> applicableCategories )
         where TDeclaration : class, IDeclaration;

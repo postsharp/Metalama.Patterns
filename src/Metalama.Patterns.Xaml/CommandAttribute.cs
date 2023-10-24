@@ -116,7 +116,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         if ( successfulMatch != null )
         {            
-            if ( successfulMatch.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound && successfulMatch.CanExecuteMatch.CandidateNames != null )
+            if ( successfulMatch.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound && successfulMatch.CanExecuteMatch.HasCandidateNames )
             {
                 // Report candidate names with a specific warning for easy suppression, as this is a
                 // weaker warning and more likley to be an intended scenario.
