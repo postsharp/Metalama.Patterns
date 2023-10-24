@@ -22,8 +22,7 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
 
     public string DiagnosticName => "explicitly-configured";
 
-    public CommandNamingConventionMatch Match<TContextImpl>( in IMethod executeMethod, in TContextImpl context )
-        where TContextImpl : ICommandNamingMatchContext
+    public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
     {
         var commandName = DefaultCommandNamingConvention.GetCommandNameFromExecuteMethodName( executeMethod.Name );
         var commandPropertyName = this._commandPropertyName ?? DefaultCommandNamingConvention.GetCommandPropertyNameFromCommandName( commandName );
@@ -31,7 +30,7 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
         return CommandNamingConventionHelper.Match(
             this,
             executeMethod,
-            context,
+            inspectedDeclarations,
             commandPropertyName,
             new StringNameMatchPredicate( this._canExecuteMethodName ?? this._canExecutePropertyName ?? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) ),
             considerMethod: this._canExecuteMethodName != null || this._canExecutePropertyName == null,

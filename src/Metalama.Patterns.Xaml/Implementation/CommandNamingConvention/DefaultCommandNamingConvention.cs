@@ -13,8 +13,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
     public string DiagnosticName => "default";
 
-    public CommandNamingConventionMatch Match<TContextImpl>( in IMethod executeMethod, in TContextImpl context )
-        where TContextImpl : ICommandNamingMatchContext
+    public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
     {
         var commandName = GetCommandNameFromExecuteMethodName( executeMethod.Name );
 
@@ -22,7 +21,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
         var canExecuteName = GetCanExecuteNameFromCommandName( commandName );
 
-        return CommandNamingConventionHelper.Match( this, executeMethod, context, commandPropertyName, new StringNameMatchPredicate( canExecuteName ) );
+        return CommandNamingConventionHelper.Match( this, executeMethod, inspectedDeclarations, commandPropertyName, new StringNameMatchPredicate( canExecuteName ) );
     }
 
     public static string GetCommandNameFromExecuteMethodName( string name )

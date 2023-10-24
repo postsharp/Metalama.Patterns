@@ -9,66 +9,24 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 [CompileTime]
 internal static class CommandNamingConventionHelper
 {
-    public static CommandNamingConventionMatch Match<TContextImpl, TCanExecutePredicate>(
+    public static CommandNamingConventionMatch Match<TMatchCanExecuteNamePredicate>(
         INamingConvention namingConvention,
         IMethod executeMethod,
-        in TContextImpl context,
+        InspectedDeclarationsAdder inspectedDeclarations,
         string commandPropertyName,
-        in TCanExecutePredicate canExecutePredicate,
+        in TMatchCanExecuteNamePredicate matchCanExecuteNamePredicate,
         bool considerMethod = true,
         bool considerProperty = true,
         bool requireCanExecuteMatch = false )
-        where TContextImpl : ICommandNamingMatchContext
-        where TCanExecutePredicate : INameMatchPredicate
+        where TMatchCanExecuteNamePredicate : INameMatchPredicate
     {
         IMethod? selectedCandidateCanExecuteMethod = null;
         DeclarationMatchOutcome? canExecuteMethodMatchOutcome = null;
 
         if ( considerMethod )
         {
-            List<IMethod>? candidateCanExecuteMethods = null;
-
-            foreach ( var method in executeMethod.DeclaringType.Methods )
-            {
-                if ( canExecutePredicate.IsMatch( method.Name ) )
-                {
-                    (candidateCanExecuteMethods ??= new()).Add( method );
-                }
-            }
-
-            List<IMethod>? eligibleCanExecuteMethods = null;
-
-            if ( candidateCanExecuteMethods is { Count: > 0 } )
-            {
-                foreach ( var method in candidateCanExecuteMethods )
-                {
-                    if ( context.IsValidCanExecuteMethod( method ) )
-                    {
-                        (eligibleCanExecuteMethods ??= new()).Add( method );
-                    }
-                }
-            }
-
-            canExecuteMethodMatchOutcome = DeclarationMatchOutcome.NotFound;
-
-            switch ( eligibleCanExecuteMethods?.Count ?? 0 )
-            {
-                case 0:
-                    if ( candidateCanExecuteMethods is { Count: > 0 } )
-                    {
-                        canExecuteMethodMatchOutcome = DeclarationMatchOutcome.Invalid;
-                    }
-                    break;
-
-                case 1:
-                    selectedCandidateCanExecuteMethod = eligibleCanExecuteMethods![0];
-                    canExecuteMethodMatchOutcome = DeclarationMatchOutcome.Success;
-                    break;
-
-                case > 1:
-                    canExecuteMethodMatchOutcome = DeclarationMatchOutcome.Ambiguous;
-                    break;
-            }
+            (canExecuteMethodMatchOutcome, selectedCandidateCanExecuteMethod) =
+                executeMethod.DeclaringType.Methods.FindValidMatchingDeclaration( matchCanExecuteNamePredicate, CommandAttribute.IsValidCanExecuteMethodDelegate, inspectedDeclarations );
         }
 
         IProperty? selectedCandidateCanExecuteProperty = null;
@@ -76,49 +34,8 @@ internal static class CommandNamingConventionHelper
 
         if ( considerProperty )
         {
-            List<IProperty>? candiateCanExecuteProperties = null;
-
-            foreach ( var property in executeMethod.DeclaringType.Properties )
-            {
-                if ( canExecutePredicate.IsMatch( property.Name ) )
-                {
-                    (candiateCanExecuteProperties ??= new()).Add( property );
-                }
-            }
-
-            List<IProperty>? eligibleCanExecuteProperties = null;
-
-            if ( candiateCanExecuteProperties is { Count: > 0 } )
-            {
-                foreach ( var property in candiateCanExecuteProperties )
-                {
-                    if ( context.IsValidCanExecuteProperty( property ) )
-                    {
-                        (eligibleCanExecuteProperties ??= new()).Add( property );
-                    }
-                }
-            }
-
-            canExecutePropertyMatchOutcome = DeclarationMatchOutcome.NotFound;
-
-            switch ( eligibleCanExecuteProperties?.Count ?? 0 )
-            {
-                case 0:
-                    if ( candiateCanExecuteProperties is { Count: > 0 } )
-                    {
-                        canExecutePropertyMatchOutcome = DeclarationMatchOutcome.Invalid;
-                    }
-                    break;
-
-                case 1:
-                    selectedCandidateCanExecuteProperty = eligibleCanExecuteProperties![0];
-                    canExecutePropertyMatchOutcome = DeclarationMatchOutcome.Success;
-                    break;
-
-                case > 1:
-                    canExecutePropertyMatchOutcome = DeclarationMatchOutcome.Ambiguous;
-                    break;
-            }
+            (canExecutePropertyMatchOutcome, selectedCandidateCanExecuteProperty) =
+                executeMethod.DeclaringType.Properties.FindValidMatchingDeclaration( matchCanExecuteNamePredicate, CommandAttribute.IsValidCanExecutePropertyDelegate, inspectedDeclarations );
         }
 
         if ( canExecuteMethodMatchOutcome == DeclarationMatchOutcome.Success && canExecutePropertyMatchOutcome == DeclarationMatchOutcome.Success )
@@ -143,7 +60,7 @@ internal static class CommandNamingConventionHelper
         }
         else
         {
-            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.NotFound( canExecutePredicate ), requireCanExecuteMatch );
+            return new CommandNamingConventionMatch( namingConvention, commandPropertyName, DeclarationMatch<IMember>.NotFound( matchCanExecuteNamePredicate ), requireCanExecuteMatch );
         }
     }
 }

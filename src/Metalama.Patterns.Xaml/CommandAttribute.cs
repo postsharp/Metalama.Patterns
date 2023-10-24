@@ -104,8 +104,8 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         var ncResult =
             this.CanExecuteMethod != null || this.CanExecuteProperty != null
-                ? NamingConventionEvaluator<ICommandNamingMatchContext, NameMatchingContext>.Evaluate( new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ), target, default( NameMatchingContextFactory ) )
-                : NamingConventionEvaluator<ICommandNamingMatchContext, NameMatchingContext>.Evaluate( options.GetSortedNamingConventions(), target, default( NameMatchingContextFactory ) );
+                ? NamingConventionEvaluator.Evaluate( new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ), target )
+                : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
 
         var successfulMatch = ncResult.SuccessfulMatch;       
 
@@ -203,8 +203,6 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             }
             else
             {
-                // Not expected. Has the user has somehow managed to remove the DefaultCommandNamingConvention?
-
                 builder.Diagnostics.Report( Diagnostics.ErrorNoConfiguredNamingConventions );
             }
         }
@@ -259,6 +257,24 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                 canExecuteProperty,
                 useInpcIntegration
             } );
+    }
+
+    internal static Func<IMethod, InspectedDeclarationsAdder, bool> IsValidCanExecuteMethodDelegate { get; } = IsValidCanExecuteMethod;
+
+    private static bool IsValidCanExecuteMethod( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
+    {
+        var isValid = IsValidCanExecuteMethod( method );
+        inspectedDeclarations.Add( method, isValid, _canExecuteMethodCategory );
+        return isValid;
+    }
+
+    internal static Func<IProperty, InspectedDeclarationsAdder, bool> IsValidCanExecutePropertyDelegate { get; } = IsValidCanExecuteProperty;
+
+    private static bool IsValidCanExecuteProperty( IProperty property, InspectedDeclarationsAdder inspectedDeclarations )
+    {
+        var isValid = IsValidCanExecuteProperty( property );
+        inspectedDeclarations.Add( property, isValid, _canExecutePropertyCategory );
+        return isValid;
     }
 
     private static bool IsValidCanExecuteMethod( IMethod method )

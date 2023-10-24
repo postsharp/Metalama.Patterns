@@ -8,6 +8,6 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
 [CompileTime]
-internal interface ICommandNamingConvention : INamingConvention<IMethod, ICommandNamingMatchContext, CommandNamingConventionMatch>, ICompileTimeSerializable
+internal interface ICommandNamingConvention : INamingConvention<IMethod, CommandNamingConventionMatch>, ICompileTimeSerializable
 {
 }

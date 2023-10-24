@@ -11,9 +11,8 @@ internal interface INamingConvention
 }
 
 [CompileTime]
-internal interface INamingConvention<TArguments, TContext, TMatch> : INamingConvention
+internal interface INamingConvention<TArguments, TMatch> : INamingConvention
     where TMatch : INamingConventionMatch
 {
-    TMatch Match<TContextImpl>( in TArguments arguments, in TContextImpl context )
-        where TContextImpl : TContext;
+    TMatch Match( TArguments arguments, InspectedDeclarationsAdder inspectedDeclarations );
 }

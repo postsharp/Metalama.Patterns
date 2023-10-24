@@ -75,8 +75,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
 
     public string DiagnosticName => $"'{this._conventionName}' regex";
     
-    public CommandNamingConventionMatch Match<TContextImpl>( in IMethod executeMethod, in TContextImpl context )
-        where TContextImpl : ICommandNamingMatchContext
+    public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
     {
         string? commandName = null;
 
@@ -125,7 +124,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
         return CommandNamingConventionHelper.Match(
             this,
             executeMethod,
-            context,
+            inspectedDeclarations,
             commandPropertyName,
             new RegexNameMatchPredicate( matchCanExecuteNameRegex ),
             considerMethod: this._considerCanExecuteMethod,

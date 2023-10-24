@@ -5,18 +5,16 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal static class NamingConventionEvaluator<TContext, TContextImplementation>
-    where TContextImplementation : TContext
+internal static class NamingConventionEvaluator
 {
-    public static INamingConventionEvaluationResult<TMatch> Evaluate<TArguments, TMatch, TMatchContextFactory>( IEnumerable<INamingConvention<TArguments, TContext, TMatch>> namingConventions, TArguments arguments, in TMatchContextFactory matchContextFactory )
+    public static INamingConventionEvaluationResult<TMatch> Evaluate<TArguments, TMatch>( IEnumerable<INamingConvention<TArguments, TMatch>> namingConventions, TArguments arguments )
         where TMatch : INamingConventionMatch
-        where TMatchContextFactory : INamingConventionMatchContextFactory<TContextImplementation>
     {
-        var e = new Evaluator<TArguments, TMatch, TMatchContextFactory>();
+        var e = new Evaluator<TArguments, TMatch>();
         
         foreach ( var nc in namingConventions )
         {
-            if ( e.Evaluate( nc, arguments, matchContextFactory ) )
+            if ( e.Evaluate( nc, arguments ) )
             {
                 break;
             }
@@ -27,24 +25,22 @@ internal static class NamingConventionEvaluator<TContext, TContextImplementation
         return e;
     }
 
-    public static INamingConventionEvaluationResult<TMatch> Evaluate<TArguments, TMatch, TMatchContextFactory>( INamingConvention<TArguments, TContext, TMatch> namingConvention, TArguments arguments, in TMatchContextFactory matchContextFactory )
+    public static INamingConventionEvaluationResult<TMatch> Evaluate<TArguments, TMatch>( INamingConvention<TArguments, TMatch> namingConvention, TArguments arguments )
         where TMatch : INamingConventionMatch
-        where TMatchContextFactory : INamingConventionMatchContextFactory<TContextImplementation>
     {
-        var e = new Evaluator<TArguments, TMatch, TMatchContextFactory>();
-        e.Evaluate( namingConvention, arguments, matchContextFactory );
+        var e = new Evaluator<TArguments, TMatch>();
+        e.Evaluate( namingConvention, arguments );
         e.Finish();
         
         return e;
     }
 
     [CompileTime]
-    private sealed class Evaluator<TArguments, TMatch, TMatchContextFactory> : INamingConventionEvaluationResult<TMatch>
+    private sealed class Evaluator<TArguments, TMatch> : INamingConventionEvaluationResult<TMatch>
         where TMatch : INamingConventionMatch
-        where TMatchContextFactory : INamingConventionMatchContextFactory<TContextImplementation>
     {        
         private List<InspectedDeclaration> _inspectedDeclarations = new();
-        private List<(INamingConvention<TArguments, TContext, TMatch> NamingConvention, TMatch Match, int InspectedDeclarationsStartIndex, int InspectedDeclarationsEndIndex)>? _unsuccessfulMatchDetails;
+        private List<(INamingConvention<TArguments, TMatch> NamingConvention, TMatch Match, int InspectedDeclarationsStartIndex, int InspectedDeclarationsEndIndex)>? _unsuccessfulMatchDetails;
 
         public bool Success => this.SuccessfulMatch != null;
 
@@ -52,13 +48,11 @@ internal static class NamingConventionEvaluator<TContext, TContextImplementation
 
         public IEnumerable<UnsuccesfulNamingConventionMatch<TMatch>>? UnsuccessfulMatches { get; private set;  }
 
-        public bool Evaluate( INamingConvention<TArguments,TContext,TMatch> namingConvention, in TArguments arguments, in TMatchContextFactory matchContextFactory )
+        public bool Evaluate( INamingConvention<TArguments, TMatch> namingConvention, in TArguments arguments )
         {
             var firstInspectedIndex = this._inspectedDeclarations.Count;
 
-            var nameMatchingContext = matchContextFactory.Create( new InspectedDeclarationsAdder( this._inspectedDeclarations ) );
-
-            var match = namingConvention.Match( arguments, nameMatchingContext );
+            var match = namingConvention.Match( arguments, new InspectedDeclarationsAdder( this._inspectedDeclarations ) );
 
             if ( match.Success )
             {

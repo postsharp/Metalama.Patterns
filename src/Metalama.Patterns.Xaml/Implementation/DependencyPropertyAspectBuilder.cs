@@ -12,6 +12,10 @@ namespace Metalama.Patterns.Xaml.Implementation;
 [CompileTime]
 internal sealed partial class DependencyPropertyAspectBuilder
 {
+    internal const string _propertyChangingMethodCategory = "property-changing method";
+    internal const string _propertyChangedMethodCategory = "property-changed method";
+    internal const string _validateMethodCategory = "validate method";
+
     private readonly IAspectBuilder<IProperty> _builder;
     private readonly DependencyPropertyAssets _assets;
     private readonly IType _propertyType;
