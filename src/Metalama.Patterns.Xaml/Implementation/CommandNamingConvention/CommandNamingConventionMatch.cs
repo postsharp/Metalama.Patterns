@@ -7,18 +7,26 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
 [CompileTime]
-internal sealed record CommandNamingConventionMatch( INamingConvention NamingConvention, string? CommandPropertyName, DeclarationMatch<IMember> CanExecuteMatch, bool RequireCanExecuteMatch = false ) : INamingConventionMatch
+internal sealed record CommandNamingConventionMatch(
+    INamingConvention NamingConvention,
+    string? CommandPropertyName,
+    DeclarationMatch<IMemberOrNamedType> CommandPropertyConflictMatch,
+    DeclarationMatch<IMember> CanExecuteMatch,
+    bool RequireCanExecuteMatch = false ) : INamingConventionMatch
 {
     public bool Success =>
         !string.IsNullOrWhiteSpace( this.CommandPropertyName )
+        && this.CommandPropertyConflictMatch.Outcome == DeclarationMatchOutcome.Success
         && (this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Success
             || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound));
 
+    private static readonly IReadOnlyList<string> _commandPropertyCategories = new[] { CommandAttribute._commandPropertyCategory };
     private static readonly IReadOnlyList<string> _canExecuteCategories = new[] { CommandAttribute._canExecuteMethodCategory, CommandAttribute._canExecutePropertyCategory };
 
     public void VisitDeclarationMatches<TVisitor>( in TVisitor visitor ) 
         where TVisitor : IDeclarationMatchVisitor
     {
+        visitor.Visit( this.CommandPropertyConflictMatch, true, _commandPropertyCategories );
         visitor.Visit( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories );
     }
 }

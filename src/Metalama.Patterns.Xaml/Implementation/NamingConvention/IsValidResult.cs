@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal readonly record struct UnsuccesfulNamingConventionMatch<TMatch>( TMatch Match, IEnumerable<InspectedDeclaration> InspectedDeclarations )
-    where TMatch : INamingConventionMatch
+internal readonly record struct IsValidResult<TMetadata>( bool IsValid, TMetadata? Metadata )
 {
 }

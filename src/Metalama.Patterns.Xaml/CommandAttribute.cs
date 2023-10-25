@@ -11,6 +11,7 @@ using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using Metalama.Patterns.Xaml.Options;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 // TODO: Skip [Observable] on [Command]-targeted auto properties. No functional impact, would just avoid unnecessary generated code.
@@ -22,6 +23,7 @@ namespace Metalama.Patterns.Xaml;
 [AttributeUsage( AttributeTargets.Method )]
 public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 {
+    internal const string _commandPropertyCategory = "command property";
     internal const string _canExecuteMethodCategory = "can-execute method";
     internal const string _canExecutePropertyCategory = "can-execute property";
 
@@ -102,12 +104,13 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         var hasExplicitCanExecuteNaming = this.CanExecuteMethod != null || this.CanExecuteProperty != null;
 
-        var ncResult =
-            this.CanExecuteMethod != null || this.CanExecuteProperty != null
-                ? NamingConventionEvaluator.Evaluate( new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ), target )
-                : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
+        var ncResult = hasExplicitCanExecuteNaming
+            ? NamingConventionEvaluator.Evaluate( new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ), target )
+            : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
 
-        var successfulMatch = ncResult.SuccessfulMatch;       
+        ncResult.ReportDiagnostics( new DiagnosticReporter() { Builder = builder } );
+
+        var successfulMatch = ncResult.SuccessfulMatch?.Match;
 
         var canTransform = true;
         IProperty? commandProperty = null;
@@ -115,21 +118,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
         IProperty? canExecuteProperty = null;
 
         if ( successfulMatch != null )
-        {            
-            if ( successfulMatch.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound && successfulMatch.CanExecuteMatch.HasCandidateNames )
-            {
-                // Report candidate names with a specific warning for easy suppression, as this is a
-                // weaker warning and more likley to be an intended scenario.
-
-                builder.Diagnostics.Report(
-                    Diagnostics.WarningCandidateNamesNotFound.WithArguments(
-                        (
-                            $"{_canExecuteMethodCategory} or {_canExecutePropertyCategory}",
-                            successfulMatch.NamingConvention.DiagnosticName,
-                            successfulMatch.CanExecuteMatch.CandidateNames.PrettyList( " or ", '\'' )
-                        ) ) );
-            }
-            
+        {
             switch ( successfulMatch.CanExecuteMatch.Declaration )
             {
                 case null:
@@ -147,64 +136,34 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                     throw new NotSupportedException( "Expected a method or property." );
             }
 
-            // Check for a conflicting member name explicitly because introduction won't fail unless the conflict comes from another field.
+            var introducePropertyResult = builder.Advice.IntroduceProperty(
+                declaringType,                    
+                nameof(CommandProperty),
+                IntroductionScope.Instance,
+                OverrideStrategy.Fail,
+                b =>
+                {
+                    b.Name = successfulMatch.CommandPropertyName!;
 
-            var conflictingMember = (IMemberOrNamedType?) declaringType.AllMembers().FirstOrDefault( m => m.Name == successfulMatch.CommandPropertyName )
-                                    ?? declaringType.NestedTypes.FirstOrDefault( t => t.Name == successfulMatch.CommandPropertyName );
+                    // ReSharper disable once RedundantNameQualifier
+                    b.Accessibility = Framework.Code.Accessibility.Public;
 
-            if ( conflictingMember != null )
+                    // ReSharper disable once RedundantNameQualifier
+                    b.GetMethod!.Accessibility = Framework.Code.Accessibility.Public;
+                } );
+
+            if ( introducePropertyResult.Outcome == AdviceOutcome.Default )
             {
-                builder.Diagnostics.Report(
-                    Diagnostics.ErrorRequiredCommandPropertyNameIsAlreadyUsed.WithArguments(
-                        (conflictingMember, declaringType, successfulMatch.CommandPropertyName!) ) );
-
-                canTransform = false;
+                commandProperty = introducePropertyResult.Declaration;
             }
             else
-            {   
-                var introducePropertyResult = builder.Advice.IntroduceProperty(
-                    declaringType,                    
-                    nameof(CommandProperty),
-                    IntroductionScope.Instance,
-                    OverrideStrategy.Fail,
-                    b =>
-                    {
-                        b.Name = successfulMatch.CommandPropertyName!;
-
-                        // ReSharper disable once RedundantNameQualifier
-                        b.Accessibility = Framework.Code.Accessibility.Public;
-
-                        // ReSharper disable once RedundantNameQualifier
-                        b.GetMethod!.Accessibility = Framework.Code.Accessibility.Public;
-                    } );
-
-                if ( introducePropertyResult.Outcome == AdviceOutcome.Default )
-                {
-                    commandProperty = introducePropertyResult.Declaration;
-                }
-                else
-                {
-                    canTransform = false;
-                }                    
-            }
+            {
+                canTransform = false;
+            }                    
         }
         else
         {
             canTransform = false;
-            
-            if ( ncResult.UnsuccessfulMatches != null )
-            {
-                builder.Diagnostics.Report(
-                    Diagnostics.ErrorNoNamingConventionMatched.WithArguments( ncResult.UnsuccessfulMatches.Select( um => um.Match.NamingConvention.DiagnosticName ).PrettyList( " and " ) ) );
-
-                var diagnosticReporter = new DiagnosticReporter() { Builder = builder };
-
-                ncResult.ReportUnsuccessfulMatchDiagnostics( diagnosticReporter );
-            }
-            else
-            {
-                builder.Diagnostics.Report( Diagnostics.ErrorNoConfiguredNamingConventions );
-            }
         }
 
         var useInpcIntegration = false;
@@ -258,33 +217,6 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                 useInpcIntegration
             } );
     }
-
-    internal static Func<IMethod, InspectedDeclarationsAdder, bool> IsValidCanExecuteMethodDelegate { get; } = IsValidCanExecuteMethod;
-
-    private static bool IsValidCanExecuteMethod( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
-    {
-        var isValid = IsValidCanExecuteMethod( method );
-        inspectedDeclarations.Add( method, isValid, _canExecuteMethodCategory );
-        return isValid;
-    }
-
-    internal static Func<IProperty, InspectedDeclarationsAdder, bool> IsValidCanExecutePropertyDelegate { get; } = IsValidCanExecuteProperty;
-
-    private static bool IsValidCanExecuteProperty( IProperty property, InspectedDeclarationsAdder inspectedDeclarations )
-    {
-        var isValid = IsValidCanExecuteProperty( property );
-        inspectedDeclarations.Add( property, isValid, _canExecutePropertyCategory );
-        return isValid;
-    }
-
-    private static bool IsValidCanExecuteMethod( IMethod method )
-        => method.ReturnType.SpecialType == SpecialType.Boolean
-           && method.Parameters is [] or [{ RefKind: RefKind.None or RefKind.In }]
-           && method.TypeParameters.Count == 0;
-
-    private static bool IsValidCanExecuteProperty( IProperty property )
-        => property.Type.SpecialType == SpecialType.Boolean
-           && property.GetMethod != null;
 
     [Template]
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

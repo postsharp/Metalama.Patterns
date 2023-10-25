@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using static Metalama.Patterns.Xaml.Implementation.StringHelper;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
@@ -21,7 +22,12 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
         var canExecuteName = GetCanExecuteNameFromCommandName( commandName );
 
-        return CommandNamingConventionHelper.Match( this, executeMethod, inspectedDeclarations, commandPropertyName, new StringNameMatchPredicate( canExecuteName ) );
+        return CommandNamingConventionHelper.Match(
+            this,
+            executeMethod,
+            inspectedDeclarations,
+            commandPropertyName,
+            new StringNameMatchPredicate( canExecuteName ) );
     }
 
     public static string GetCommandNameFromExecuteMethodName( string name )
@@ -50,28 +56,6 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
         }
 
         return useName;
-    }
-
-    public static bool TrimStart( ref string s, string trim, StringComparison stringComparison )
-    {
-        if ( s.StartsWith( trim, stringComparison ) )
-        {
-            s = s.Substring( trim.Length );
-            return true;
-        }
-
-        return false;
-    }
-
-    public static bool TrimEnd( ref string s, string trim, StringComparison stringComparison )
-    {
-        if ( s.EndsWith( trim, stringComparison ) )
-        {
-            s = s.Substring( 0, s.Length - trim.Length );
-            return true;
-        }
-
-        return false;
     }
 
     public static string GetCommandPropertyNameFromCommandName( string commandName )

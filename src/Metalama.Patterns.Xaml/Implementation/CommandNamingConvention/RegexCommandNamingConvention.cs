@@ -100,7 +100,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
 
         if ( string.IsNullOrWhiteSpace( commandName ) )
         {
-            return new CommandNamingConventionMatch( this, null, DeclarationMatch<IMember>.NotFound(), this._requireCanExecuteMatch );
+            return new CommandNamingConventionMatch( this, null, DeclarationMatch<IMemberOrNamedType>.Invalid(), DeclarationMatch<IMember>.NotFound(), this._requireCanExecuteMatch );
         }
 
 #if NETCOREAPP

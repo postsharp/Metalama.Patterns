@@ -84,9 +84,11 @@ public sealed class DependencyPropertyOptionsBuilder
             IsReadOnly = this.IsReadOnly,
             InitializerProvidesInitialValue = this.InitializerProvidesInitialValue,
             InitializerProvidesDefaultValue = this.InitializerProvidesDefaultValue,
+            /*
             PropertyChangedMethod = this.PropertyChangedMethod,
             PropertyChangingMethod = this.PropertyChangingMethod,
             ValidateMethod = this.ValidateMethod,
             RegistrationField = this.RegistrationField
+            */
         };
 }

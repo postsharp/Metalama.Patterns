@@ -8,9 +8,9 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 internal static class NamingConventionEvaluationResultExtensions
 {
     [CompileTime]
-    private readonly struct DeclarationMatchVisitor : IDeclarationMatchVisitor
+    private readonly struct ReportDiagnosticsVisitor : IDeclarationMatchVisitor
     {
-        public IDeclarationDiagnosticReporter DiagnosticReporter { get; init; }
+        public IDiagnosticReporter DiagnosticReporter { get; init; }
 
         public IEnumerable<InspectedDeclaration> InspectedDeclarations { get; init; }
 
@@ -18,52 +18,86 @@ internal static class NamingConventionEvaluationResultExtensions
 
         void IDeclarationMatchVisitor.Visit<TDeclaration>( in DeclarationMatch<TDeclaration> match, bool isRequired, IReadOnlyList<string> applicableCategories )
         {
-            if ( match.Outcome == DeclarationMatchOutcome.Ambiguous )
+            switch ( match.Outcome )
             {
-                // Report the ambiguous (valid) matches.
-                foreach ( var inspectedDeclaration in this.InspectedDeclarations )
-                {
-                    if ( inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
-                    {
-                        this.DiagnosticReporter.ReportAmbiguousDeclaration( this.NamingConvention, inspectedDeclaration );
-                    }
-                }
-            }
-            else if ( match.Outcome == DeclarationMatchOutcome.Invalid )
-            {
-                // Report invalid inspections, as these are strong candidates for being intended matches.
+                case DeclarationMatchOutcome.Ambiguous:
 
-                foreach ( var inspectedDeclaration in this.InspectedDeclarations )
-                {
-                    if ( !inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
+                    foreach ( var inspectedDeclaration in this.InspectedDeclarations )
                     {
-                        this.DiagnosticReporter.ReportInvalidDeclaration( this.NamingConvention, inspectedDeclaration );
+                        if ( inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
+                        {
+                            this.DiagnosticReporter.ReportAmbiguousDeclaration( this.NamingConvention, inspectedDeclaration );
+                        }
                     }
-                }
-            }
-            else if ( match.Outcome == DeclarationMatchOutcome.NotFound && match.HasCandidateNames )
-            {
-                this.DiagnosticReporter.ReportNotFound( this.NamingConvention, match.CandidateNames, applicableCategories );
+
+                    break;
+
+                case DeclarationMatchOutcome.Invalid:
+
+                    foreach ( var inspectedDeclaration in this.InspectedDeclarations )
+                    {
+                        if ( !inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
+                        {
+                            this.DiagnosticReporter.ReportInvalidDeclaration( this.NamingConvention, inspectedDeclaration );
+                        }
+                    }
+
+                    break;
+
+                case DeclarationMatchOutcome.NotFound:
+
+                    if ( match.HasCandidateNames )
+                    {
+                        this.DiagnosticReporter.ReportDeclarationNotFound( this.NamingConvention, match.CandidateNames, applicableCategories );
+                    }
+
+                    break;
+
+                case DeclarationMatchOutcome.Conflict:
+
+                    this.DiagnosticReporter.ReportConflictingDeclaration( this.NamingConvention, match.Declaration, applicableCategories );
+                    
+                    break;
             }
         }
     }
 
-    public static void ReportUnsuccessfulMatchDiagnostics<TMatch, TDiagnosticReporter>( this INamingConventionEvaluationResult<TMatch> evaluationResult, in TDiagnosticReporter diagnosticReporter )
+    public static void ReportDiagnostics<TMatch, TDiagnosticReporter>( this INamingConventionEvaluationResult<TMatch> evaluationResult, in TDiagnosticReporter diagnosticReporter )
         where TMatch : INamingConventionMatch
-        where TDiagnosticReporter : IDeclarationDiagnosticReporter
+        where TDiagnosticReporter : IDiagnosticReporter
     {
-        if ( evaluationResult.UnsuccessfulMatches != null )
+        if ( evaluationResult.SuccessfulMatch != null )
         {
-            foreach ( var unsuccessfulMatch in evaluationResult.UnsuccessfulMatches )
+            var visitor = new ReportDiagnosticsVisitor()
             {
-                var visitor = new DeclarationMatchVisitor()
-                {
-                    InspectedDeclarations = unsuccessfulMatch.InspectedDeclarations,
-                    NamingConvention = unsuccessfulMatch.Match.NamingConvention,
-                    DiagnosticReporter = diagnosticReporter
-                };
+                InspectedDeclarations = evaluationResult.SuccessfulMatch.Value.InspectedDeclarations,
+                NamingConvention = evaluationResult.SuccessfulMatch.Value.Match.NamingConvention,
+                DiagnosticReporter = diagnosticReporter
+            };
 
-                unsuccessfulMatch.Match.VisitDeclarationMatches( visitor );
+            evaluationResult.SuccessfulMatch.Value.Match.VisitDeclarationMatches( visitor );
+        }
+        else
+        {
+            if ( evaluationResult.UnsuccessfulMatches != null )
+            {
+                diagnosticReporter.ReportNoNamingConventionMatched( evaluationResult.UnsuccessfulMatches.Select( um => um.Match.NamingConvention ) );
+
+                foreach ( var unsuccessfulMatch in evaluationResult.UnsuccessfulMatches )
+                {
+                    var visitor = new ReportDiagnosticsVisitor()
+                    {
+                        InspectedDeclarations = unsuccessfulMatch.InspectedDeclarations,
+                        NamingConvention = unsuccessfulMatch.Match.NamingConvention,
+                        DiagnosticReporter = diagnosticReporter
+                    };
+
+                    unsuccessfulMatch.Match.VisitDeclarationMatches( visitor );
+                }
+            }
+            else
+            {
+                diagnosticReporter.ReportNoConfiguredNamingConventions();
             }
         }
     }

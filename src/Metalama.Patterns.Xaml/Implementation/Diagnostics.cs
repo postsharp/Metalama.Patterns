@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Patterns.Xaml.Options;
+using System.Web;
 using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.Xaml.Implementation;
@@ -98,15 +99,15 @@ internal static class Diagnostics
             "Notifiable can-execute property is not public." );
 
     /// <summary>
-    /// The name of existing member {0} that is defined in or inherited by class {1} conflicts with the required command property name {2}.
+    /// The name of existing member {0}, that is defined in or inherited by class {1}, conflicts with the required {2} name deterimed by the {3} naming convention.
     /// </summary>
-    public static readonly DiagnosticDefinition<(IMemberOrNamedType Member, INamedType DeclaringType, string FieldName)>
-        ErrorRequiredCommandPropertyNameIsAlreadyUsed =
+    public static readonly DiagnosticDefinition<(DeclarationKind ConflictingDeclarationKind, IDeclaration ConflictingDeclaration, INamedType DeclaringType, string IntroducedMemberDescription, string NamingConvention)>
+        WarningExistingMemberNameConflict =
             new(
                 "LAMA5207",
-                Error,
-                "The name of existing member {0}, that is defined in or inherited by class {1}, conflicts with the required command property name {2}.",
-                "Required command property name is already used.",
+                Warning,
+                "The name of existing {0} {1}, that is defined in or inherited by class {2}, conflicts with the required {3} name deterimed by the {4} naming convention.",
+                "Existing member conflicts with member to be introduced.",
                 _category );
 
     /// <summary>

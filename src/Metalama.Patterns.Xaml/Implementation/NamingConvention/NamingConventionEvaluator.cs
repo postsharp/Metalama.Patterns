@@ -40,13 +40,13 @@ internal static class NamingConventionEvaluator
         where TMatch : INamingConventionMatch
     {        
         private List<InspectedDeclaration> _inspectedDeclarations = new();
-        private List<(INamingConvention<TArguments, TMatch> NamingConvention, TMatch Match, int InspectedDeclarationsStartIndex, int InspectedDeclarationsEndIndex)>? _unsuccessfulMatchDetails;
+        private List<(TMatch Match, int InspectedDeclarationsStartIndex, int InspectedDeclarationsEndIndex)>? _unsuccessfulMatchDetails;
 
         public bool Success => this.SuccessfulMatch != null;
 
-        public TMatch? SuccessfulMatch { get; private set; }
+        public InspectedNamingConventionMatch<TMatch>? SuccessfulMatch { get; private set; }
 
-        public IEnumerable<UnsuccesfulNamingConventionMatch<TMatch>>? UnsuccessfulMatches { get; private set;  }
+        public IEnumerable<InspectedNamingConventionMatch<TMatch>>? UnsuccessfulMatches { get; private set;  }
 
         public bool Evaluate( INamingConvention<TArguments, TMatch> namingConvention, in TArguments arguments )
         {
@@ -56,22 +56,37 @@ internal static class NamingConventionEvaluator
 
             if ( match.Success )
             {
-                this.SuccessfulMatch = match;
+                this.SuccessfulMatch = new InspectedNamingConventionMatch<TMatch>(
+                    match,
+                    this.GetInspectedDeclarationsSlice( firstInspectedIndex, this._inspectedDeclarations.Count, true ) );
                 return true;
             }
             else
             {
-                (this._unsuccessfulMatchDetails ??= new()).Add( (namingConvention, match, firstInspectedIndex, this._inspectedDeclarations.Count) );
+                (this._unsuccessfulMatchDetails ??= new()).Add( (match, firstInspectedIndex, this._inspectedDeclarations.Count) );
                 return false;
             }
+        }
+
+        private IEnumerable<InspectedDeclaration> GetInspectedDeclarationsSlice( int startIndex, int endIndex, bool isSuccess )
+        {
+            if ( startIndex == endIndex )
+            {
+                return Array.Empty<InspectedDeclaration>();
+            }
+
+            if ( isSuccess && startIndex == 0 && endIndex == this._inspectedDeclarations.Count )
+            {
+                return this._inspectedDeclarations;
+            }
+
+            return this._inspectedDeclarations.Skip( startIndex ).Take( endIndex - startIndex );
         }
 
         public void Finish()
         {
             if ( this.Success )
             {
-                // If finally successful, discard failure details.
-
                 this._unsuccessfulMatchDetails = null;
                 this._inspectedDeclarations = null!;
 
@@ -80,11 +95,11 @@ internal static class NamingConventionEvaluator
 
             if ( this._unsuccessfulMatchDetails != null )
             {
-                // Organize inspected declarations to be suitable for reporting diagnostics:
-
                 this.UnsuccessfulMatches =
                     this._unsuccessfulMatchDetails
-                    .Select( m => new UnsuccesfulNamingConventionMatch<TMatch>( /* m.NamingConvention, */ m.Match, m.InspectedDeclarationsStartIndex == m.InspectedDeclarationsEndIndex ? Array.Empty<InspectedDeclaration>() : this._inspectedDeclarations.Skip( m.InspectedDeclarationsStartIndex ).Take( m.InspectedDeclarationsEndIndex - m.InspectedDeclarationsStartIndex ) ) );
+                    .Select( m => new InspectedNamingConventionMatch<TMatch>(
+                        m.Match,
+                        this.GetInspectedDeclarationsSlice( m.InspectedDeclarationsStartIndex, m.InspectedDeclarationsEndIndex, false ) ) );
             }
         }
     }

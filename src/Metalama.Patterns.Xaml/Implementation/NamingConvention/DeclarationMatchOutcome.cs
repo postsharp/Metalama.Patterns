@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 internal enum DeclarationMatchOutcome
 {
     /// <summary>
-    /// A single elligble member matched.
+    /// A single elligble member matched, or a member can be introduced without conflict.
     /// </summary>
     Success,
 
@@ -25,5 +25,10 @@ internal enum DeclarationMatchOutcome
     /// <summary>
     /// The only matches found were invalid.
     /// </summary>
-    Invalid
+    Invalid,
+
+    /// <summary>
+    /// A member cannot be introduced because a member with the same name already exists.
+    /// </summary>
+    Conflict
 }

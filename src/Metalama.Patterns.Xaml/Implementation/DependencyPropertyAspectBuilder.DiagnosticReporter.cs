@@ -2,17 +2,15 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Patterns.Xaml.Implementation;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
-namespace Metalama.Patterns.Xaml;
+namespace Metalama.Patterns.Xaml.Implementation;
 
-public sealed partial class CommandAttribute
+internal sealed partial class DependencyPropertyAspectBuilder
 {
-    [CompileTime]
     private readonly struct DiagnosticReporter : IDiagnosticReporter
     {
-        public IAspectBuilder<IMethod> Builder { get; init; }
+        public IAspectBuilder<IProperty> Builder { get; init; }
 
         public void ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration )
         {
@@ -21,7 +19,7 @@ public sealed partial class CommandAttribute
                     (
                     inspectedDeclaration.Declaration.DeclarationKind,
                     inspectedDeclaration.Category,
-                    "[Command] method ",
+                    "[DependencyProperty] property ",
                     this.Builder.Target,
                     namingConvention.DiagnosticName
                     ) ),
@@ -42,12 +40,10 @@ public sealed partial class CommandAttribute
                     (
                     inspectedDeclaration.Declaration.DeclarationKind,
                     inspectedDeclaration.Category,
-                    "[Command] method ",
+                    "[DependencyProperty] property ",
                     this.Builder.Target,
                     namingConvention.DiagnosticName,
-                    inspectedDeclaration.Declaration.DeclarationKind == DeclarationKind.Property
-                        ? " The property must be of type bool and have a getter."
-                        : " The method must not be generic, must return bool and may optionally have a single parameter of any type, but which must not be a ref or out parameter."
+                    " Refer to documentation for supported method signatures."
                     ) ),
                 inspectedDeclaration.Declaration );
         }

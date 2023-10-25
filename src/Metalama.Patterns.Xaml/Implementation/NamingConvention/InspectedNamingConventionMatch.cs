@@ -5,10 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal interface INamingConventionEvaluationResult<TMatch>
+internal readonly record struct InspectedNamingConventionMatch<TMatch>( TMatch Match, IEnumerable<InspectedDeclaration> InspectedDeclarations )
     where TMatch : INamingConventionMatch
 {
-    InspectedNamingConventionMatch<TMatch>? SuccessfulMatch { get; }
-
-    IEnumerable<InspectedNamingConventionMatch<TMatch>>? UnsuccessfulMatches { get; }
 }

@@ -18,8 +18,12 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 internal readonly struct DeclarationMatch<TDeclaration>
     where TDeclaration : class, IDeclaration
 {
+
     public static DeclarationMatch<TDeclaration> Success( TDeclaration declaration )
         => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Success, declaration ?? throw new ArgumentNullException( nameof( declaration ) ) );
+
+    public static DeclarationMatch<TDeclaration> SuccessOrConflict( TDeclaration? conflictingDeclaration )
+        => new DeclarationMatch<TDeclaration>( conflictingDeclaration == null ? DeclarationMatchOutcome.Success : DeclarationMatchOutcome.Conflict, conflictingDeclaration );
 
     public static DeclarationMatch<TDeclaration> Ambiguous()
         => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Ambiguous );
@@ -40,9 +44,22 @@ internal readonly struct DeclarationMatch<TDeclaration>
     public static DeclarationMatch<TDeclaration> Invalid()
         => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Invalid );
 
+    public static DeclarationMatch<TDeclaration> FromOutcome( DeclarationMatchOutcome outcome, TDeclaration? declaration = null, string? candidateName = null )
+        => new DeclarationMatch<TDeclaration>( outcome, declaration, candidateName );
+
+    public static DeclarationMatch<TDeclaration> FromOutcome( DeclarationMatchOutcome outcome, TDeclaration? declaration, IEnumerable<string>? candidateNames )
+        => new DeclarationMatch<TDeclaration>( outcome, declaration, candidateNames );
+
     private readonly object? _candidateNames;
 
     private DeclarationMatch( DeclarationMatchOutcome outcome, TDeclaration? declaration = null, object? candidateNames = null )
+    {
+        this.Declaration = declaration;
+        this.Outcome = outcome;
+        this._candidateNames = candidateNames;
+    }
+
+    private DeclarationMatch( DeclarationMatchOutcome? outcome, TDeclaration? declaration, object? candidateNames )
     {
         this.Declaration = declaration;
         this.Outcome = outcome;
@@ -58,4 +75,8 @@ internal readonly struct DeclarationMatch<TDeclaration>
 
     public IEnumerable<string>? CandidateNames
         => this._candidateNames == null ? null : this._candidateNames as IEnumerable<string> ?? new string[] { (string) this._candidateNames };
+
+    public DeclarationMatch<TBaseDeclaration> ForDeclarationType<TBaseDeclaration>()
+        where TBaseDeclaration : class, IDeclaration
+        => new DeclarationMatch<TBaseDeclaration>( this.Outcome, (TBaseDeclaration?) (IDeclaration?) this.Declaration, this._candidateNames );    
 }
