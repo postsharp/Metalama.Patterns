@@ -26,9 +26,11 @@ internal static class DependencyPropertyNamingConventionHelper
         where TMatchPropertyChangedNamePredicate : INameMatchPredicate
         where TMatchValidateNamePredicate : INameMatchPredicate
     {
+        var assets = targetProperty.Compilation.Cache.GetOrAdd( _ => new DependencyPropertyAssets() );
+
         IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangingMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
         {
-            var signature = GetChangeHandlerSignature( method, targetProperty, false );
+            var signature = GetChangeHandlerSignature( method, targetProperty, assets, false );
             var isValid = signature != ChangeHandlerSignatureKind.Invalid;
             inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangingMethodCategory );
             return new IsValidResult<ChangeHandlerSignatureKind>( isValid, signature );
@@ -36,7 +38,7 @@ internal static class DependencyPropertyNamingConventionHelper
 
         IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangedMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
         {
-            var signature = GetChangeHandlerSignature( method, targetProperty, true );
+            var signature = GetChangeHandlerSignature( method, targetProperty, assets, true );
             var isValid = signature != ChangeHandlerSignatureKind.Invalid;
             inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangedMethodCategory );
             return new IsValidResult<ChangeHandlerSignatureKind>( isValid, signature );
@@ -44,7 +46,7 @@ internal static class DependencyPropertyNamingConventionHelper
 
         IsValidResult<ValidationHandlerSignatureKind> IsValidateMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
         {
-            var signature = GetValidationHandlerSignature( method, targetProperty );
+            var signature = GetValidationHandlerSignature( method, targetProperty, assets );
             var isValid = signature != ValidationHandlerSignatureKind.Invalid;
             inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangedMethodCategory );
             return new IsValidResult<ValidationHandlerSignatureKind>( isValid, signature );
@@ -90,6 +92,7 @@ internal static class DependencyPropertyNamingConventionHelper
     private static ChangeHandlerSignatureKind GetChangeHandlerSignature(
         IMethod method,
         IProperty targetProperty,
+        DependencyPropertyAssets assets,
         bool allowOldValue )
     {
         var declaringType = targetProperty.DeclaringType;
@@ -109,14 +112,14 @@ internal static class DependencyPropertyNamingConventionHelper
 
             case 1:
 
-                if ( p[0].Type.Equals( typeof( DependencyProperty ) ) )
+                if ( p[0].Type.Equals( assets.DependencyProperty ) )
                 {
                     return method.IsStatic ? ChangeHandlerSignatureKind.StaticDependencyProperty : ChangeHandlerSignatureKind.InstanceDependencyProperty;
                 }
                 else if ( method.IsStatic
                           && (p[0].Type.SpecialType == SpecialType.Object
                               || p[0].Type.Equals( declaringType )
-                              || p[0].Type.Equals( typeof( DependencyObject ) )) )
+                              || p[0].Type.Equals( assets.DependencyObject )) )
                 {
                     return ChangeHandlerSignatureKind.StaticInstance;
                 }
@@ -133,10 +136,10 @@ internal static class DependencyPropertyNamingConventionHelper
             case 2:
 
                 if ( method.IsStatic
-                     && p[0].Type.Equals( typeof( DependencyProperty ) )
+                     && p[0].Type.Equals( assets.DependencyProperty )
                      && (p[1].Type.SpecialType == SpecialType.Object
                          || p[1].Type.Equals( declaringType )
-                         || p[1].Type.Equals( typeof( DependencyObject ) )) )
+                         || p[1].Type.Equals( assets.DependencyObject )) )
                 {
                     return ChangeHandlerSignatureKind.StaticDependencyPropertyAndInstance;
                 }
@@ -160,7 +163,8 @@ internal static class DependencyPropertyNamingConventionHelper
 
     private static ValidationHandlerSignatureKind GetValidationHandlerSignature(
         IMethod method,
-        IProperty targetProperty )
+        IProperty targetProperty,
+        DependencyPropertyAssets assets )
     {
         var declaringType = targetProperty.DeclaringType;
         var propertyType = targetProperty.Type;
@@ -193,7 +197,7 @@ internal static class DependencyPropertyNamingConventionHelper
 
             case 2:
 
-                if ( p[0].Type.Equals( typeof( DependencyProperty ) )
+                if ( p[0].Type.Equals( assets.DependencyProperty )
                      && (p[1].Type.SpecialType == SpecialType.Object
                          || propertyType.Is( p[1].Type )
                          || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
@@ -205,7 +209,7 @@ internal static class DependencyPropertyNamingConventionHelper
                 else if ( method.IsStatic
                           && (p[0].Type.SpecialType == SpecialType.Object
                               || p[0].Type.Equals( declaringType )
-                              || p[0].Type.Equals( typeof( DependencyObject ) ))
+                              || p[0].Type.Equals( assets.DependencyObject ))
                           && (p[1].Type.SpecialType == SpecialType.Object
                               || propertyType.Is( p[1].Type )
                               || (p[1].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
@@ -218,10 +222,10 @@ internal static class DependencyPropertyNamingConventionHelper
             case 3:
 
                 if ( method.IsStatic
-                     && p[0].Type.Equals( typeof( DependencyProperty ) )
+                     && p[0].Type.Equals( assets.DependencyProperty )
                      && (p[1].Type.SpecialType == SpecialType.Object
                          || p[1].Type.Equals( declaringType )
-                         || p[1].Type.Equals( typeof( DependencyObject ) ))
+                         || p[1].Type.Equals( assets.DependencyObject ))
                      && (p[2].Type.SpecialType == SpecialType.Object
                          || propertyType.Is( p[2].Type )
                          || (p[2].Type.TypeKind == TypeKind.TypeParameter && method.TypeParameters.Count == 1)) )
