@@ -1,1 +1,5 @@
-// Error LAMA5204 on `Foo`: `The name of existing member ExistingMemberConflictsWithPropertyField.FooProperty(), that is defined in or inherited by class ExistingMemberConflictsWithPropertyField, conflicts with the required dependency property field name FooProperty.`
+// Error LAMA5207 on `Foo`: `No match was found using the default naming convention. See other warnings for details.`
+// Warning LAMA5206 on `Foo`: `No property-changed method was found using the default naming convention, with candidate member name 'OnFooChanged'.`
+// Warning LAMA5206 on `Foo`: `No property-changing method was found using the default naming convention, with candidate member name 'OnFooChanging'.`
+// Warning LAMA5206 on `Foo`: `No validate method was found using the default naming convention, with candidate member name 'ValidateFoo'.`
+// Warning LAMA5203 on `Foo`: `The name of existing method ExistingMemberConflictsWithPropertyField.FooProperty(), that is defined in or inherited by class ExistingMemberConflictsWithPropertyField, conflicts with the required registration field name deterimed by the default naming convention.`

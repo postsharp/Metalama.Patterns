@@ -1,1 +1,4 @@
-// Warning LAMA5200 on `Foo`: `Class ConfiguredPropertyChangedMethodDoesNotExist does not contain a method named 'DoesNotExist' as configured by the PropertyChangedMethod option.`
+// Error LAMA5207 on `Foo`: `No match was found using the explicitly-configured naming convention. See other warnings for details.`
+// Warning LAMA5206 on `Foo`: `No property-changed method was found using the explicitly-configured naming convention, with candidate member name 'DoesNotExist'.`
+// Warning LAMA5206 on `Foo`: `No property-changing method was found using the explicitly-configured naming convention, with candidate member name 'OnFooChanging'.`
+// Warning LAMA5206 on `Foo`: `No validate method was found using the explicitly-configured naming convention, with candidate member name 'ValidateFoo'.`

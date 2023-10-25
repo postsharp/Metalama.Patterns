@@ -1,1 +1,4 @@
-// Warning LAMA5201 on `Foo`: `Property DependencyPropertyInitializerWillNotBeUsed.Foo has an initializer, but it will not be used because options InitializerProvidesDefaultValue and InitializerProvidesInitialValue are both configured as false.`
+// Warning LAMA5206 on `Foo`: `No property-changed method was found using the default naming convention, with candidate member name 'OnFooChanged'.`
+// Warning LAMA5206 on `Foo`: `No property-changing method was found using the default naming convention, with candidate member name 'OnFooChanging'.`
+// Warning LAMA5206 on `Foo`: `No validate method was found using the default naming convention, with candidate member name 'ValidateFoo'.`
+// Warning LAMA5200 on `Foo`: `Property DependencyPropertyInitializerWillNotBeUsed.Foo has an initializer, but it will not be used because options InitializerProvidesDefaultValue and InitializerProvidesInitialValue are both configured as false.`

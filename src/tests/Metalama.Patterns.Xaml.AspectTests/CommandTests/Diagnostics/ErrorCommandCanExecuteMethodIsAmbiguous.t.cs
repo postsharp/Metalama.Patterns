@@ -1,3 +1,3 @@
-// Error LAMA5211 on `ExecuteFoo`: `No configured naming convention matched, see other warnings for details. Tried naming conventions: default`
-// Warning LAMA5209 on `CanExecuteFoo`: `The method was identified as a valid candidate can-execute method for [Command] method ErrorCommandCanExecuteMethodIsAmbiguous.ExecuteFoo() by the default naming convention, but other members also matched.`
-// Warning LAMA5209 on `CanExecuteFoo`: `The method was identified as a valid candidate can-execute method for [Command] method ErrorCommandCanExecuteMethodIsAmbiguous.ExecuteFoo() by the default naming convention, but other members also matched.`
+// Error LAMA5207 on `ExecuteFoo`: `No match was found using the default naming convention. See other warnings for details.`
+// Warning LAMA5205 on `CanExecuteFoo`: `The method was identified as a valid candidate can-execute method for [Command] method ErrorCommandCanExecuteMethodIsAmbiguous.ExecuteFoo() by the default naming convention, but other members also matched.`
+// Warning LAMA5205 on `CanExecuteFoo`: `The method was identified as a valid candidate can-execute method for [Command] method ErrorCommandCanExecuteMethodIsAmbiguous.ExecuteFoo() by the default naming convention, but other members also matched.`

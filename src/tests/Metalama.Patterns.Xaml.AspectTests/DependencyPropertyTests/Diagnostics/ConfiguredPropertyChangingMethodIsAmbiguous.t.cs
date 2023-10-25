@@ -1,1 +1,5 @@
-// Error LAMA5202 on `Foo`: `Class ConfiguredPropertyChangingMethodIsAmbiguous has more than one method named 'Changing'. Resolve the ambiguity or configure a different method name using the PropertyChangedMethod option.`
+// Error LAMA5207 on `Foo`: `No match was found using the explicitly-configured naming convention. See other warnings for details.`
+// Warning LAMA5206 on `Foo`: `No property-changing method was found using the explicitly-configured naming convention, with candidate member name 'OnFooChanging'.`
+// Warning LAMA5206 on `Foo`: `No validate method was found using the explicitly-configured naming convention, with candidate member name 'ValidateFoo'.`
+// Warning LAMA5205 on `Changing`: `The method was identified as a valid candidate property-changed method for [DependencyProperty] property ConfiguredPropertyChangingMethodIsAmbiguous.Foo by the explicitly-configured naming convention, but other members also matched.`
+// Warning LAMA5205 on `Changing`: `The method was identified as a valid candidate property-changed method for [DependencyProperty] property ConfiguredPropertyChangingMethodIsAmbiguous.Foo by the explicitly-configured naming convention, but other members also matched.`

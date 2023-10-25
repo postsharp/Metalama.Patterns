@@ -1,2 +1,2 @@
-// Warning LAMA5210 on `ReturnsVoid`: `No can-execute method or can-execute property was found using the default naming convention candidate member names: 'CanExecuteReturnsVoid'.`
+// Warning LAMA5206 on `ReturnsVoid`: `No can-execute method or can-execute property was found using the default naming convention, with candidate member name 'CanExecuteReturnsVoid'.`
 // Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the method 'MustReturnVoid.ReturnsInt()' because the return type of 'MustReturnVoid.ReturnsInt()' must be of type 'Void'.`

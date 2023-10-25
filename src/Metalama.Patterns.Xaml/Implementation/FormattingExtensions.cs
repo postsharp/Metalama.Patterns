@@ -9,6 +9,9 @@ namespace Metalama.Patterns.Xaml.Implementation;
 internal static class FormattingExtensions
 {
     public static string PrettyList( this IEnumerable<string> words, string conjunction, char quote = default )
+        => PrettyList( words, conjunction, out _, quote );
+
+    public static string PrettyList( this IEnumerable<string> words, string conjunction, out int plurality, char quote = default )
     {
         var iter = words.GetEnumerator();
 
@@ -16,6 +19,7 @@ internal static class FormattingExtensions
 
         if ( a == null )
         {
+            plurality = 0;
             return string.Empty;
         }
 
@@ -23,11 +27,13 @@ internal static class FormattingExtensions
 
         if ( b == null )
         {
+            plurality = 1;
             return quote == default
                 ? a
                 : new StringBuilder().AppendQuoted( a, quote ).ToString();
         }
 
+        plurality = 2;
         var sb = new StringBuilder();
 
         while ( iter.MoveNext() )

@@ -108,7 +108,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             ? NamingConventionEvaluator.Evaluate( new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ), target )
             : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
 
-        ncResult.ReportDiagnostics( new DiagnosticReporter() { Builder = builder } );
+        ncResult.ReportDiagnostics( new DiagnosticReporter( builder ) );
 
         var successfulMatch = ncResult.SuccessfulMatch?.Match;
 
