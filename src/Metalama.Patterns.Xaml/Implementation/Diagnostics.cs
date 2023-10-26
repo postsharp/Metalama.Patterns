@@ -51,7 +51,7 @@ internal static class Diagnostics
             "Notifiable can-execute property is not public." );
 
     /// <summary>
-    /// The name of existing {0} {1}, that is defined in or inherited by class {2}, conflicts with the {3}{4} name deterimed by the {5} naming convention.
+    /// The name of existing {0} {1}, that is defined in or inherited by class {2}, conflicts with the {3}{4} name determined by the {5} naming convention.
     /// </summary>
     public static readonly DiagnosticDefinition<(DeclarationKind ConflictingDeclarationKind, IDeclaration ConflictingDeclaration, INamedType DeclaringType,
             string? Required, string IntroducedMemberDescription, string NamingConvention)>
@@ -59,12 +59,12 @@ internal static class Diagnostics
             new(
                 "LAMA5203",
                 Warning,
-                "The name of existing {0} {1}, that is defined in or inherited by class {2}, conflicts with the {3}{4} name deterimed by the {5} naming convention.",
+                "The name of existing {0} {1}, that is defined in or inherited by class {2}, conflicts with the {3}{4} name determined by the {5} naming convention.",
                 "Existing member conflicts with member to be introduced.",
                 _category );
 
     /// <summary>
-    /// To be appplied to each invalid member:
+    /// To be applied to each invalid member:
     /// The {0} was identified as a candidate {1} for {2}{3} {4}by the {5} naming convention, but the signature is not valid.{6}
     /// For example, "The `method` was a candidate `can-execute method` for `[Command] method ``Foo()`, but the signature is not valid.` The method must blah blah.`".
     /// </summary>

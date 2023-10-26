@@ -58,7 +58,7 @@ internal static class NamingConventionEvaluationResultExtensions
 
                 case DeclarationMatchOutcome.Conflict:
 
-                    this.DiagnosticReporter.ReportConflictingDeclaration( this.NamingConvention, match.Declaration, applicableCategories, isRequired );
+                    this.DiagnosticReporter.ReportConflictingDeclaration( this.NamingConvention, match.Declaration!, applicableCategories, isRequired );
 
                     break;
             }
@@ -71,7 +71,7 @@ internal static class NamingConventionEvaluationResultExtensions
         where TMatch : INamingConventionMatch
         where TDiagnosticReporter : IDiagnosticReporter
     {
-        if ( evaluationResult.SuccessfulMatch != null )
+        if ( evaluationResult.Success )
         {
             var visitor = new ReportDiagnosticsVisitor()
             {

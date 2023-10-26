@@ -12,13 +12,13 @@ internal class NsFabric : NamespaceFabric
     {
         amender.Outbound.ConfigureDependencyProperty(
             b => b.ApplyRegexNamingConvention(
-                    "rx1-key",
-                    "rx1-name",
-                    "^Yoda(?<Name>.+)$",
-                    "The$Name$PropertyItIs",
-                    "^(Do|Make)$Name$Changing$",
-                    "^(Do|Make)$Name$Changed$",
-                    "^Is$Name$Valid" ) );
+                "rx1-key",
+                "rx1-name",
+                "^Yoda(?<Name>.+)$",
+                "The$Name$PropertyItIs",
+                "^(Do|Make)$Name$Changing$",
+                "^(Do|Make)$Name$Changed$",
+                "^Is$Name$Valid" ) );
     }
 }
 

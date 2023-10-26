@@ -16,7 +16,7 @@ internal static class NamingConventionHelper
         where TDeclaration : class, INamedDeclaration
         where TNameMatchPredicate : INameMatchPredicate
     {
-        // NB: The loop is not short-circuited becuase validity checking will build a list of
+        // NB: The loop is not short-circuited because validity checking will build a list of
         // inspected declarations which will be used for diagnostics when applicable.
 
         var candidateCount = 0;
@@ -48,7 +48,7 @@ internal static class NamingConventionHelper
                 break;
 
             case 1:
-                return DeclarationMatch<TDeclaration>.Success( firstEligible );
+                return DeclarationMatch<TDeclaration>.Success( firstEligible! );
 
             case > 1:
                 return DeclarationMatch<TDeclaration>.Ambiguous();
@@ -65,7 +65,7 @@ internal static class NamingConventionHelper
         where TDeclaration : class, INamedDeclaration
         where TNameMatchPredicate : INameMatchPredicate
     {
-        // NB: The loop is not short-circuited becuase validity checking will build a list of
+        // NB: The loop is not short-circuited because validity checking will build a list of
         // inspected declarations which will be used for diagnostics when applicable.
 
         var candidateCount = 0;

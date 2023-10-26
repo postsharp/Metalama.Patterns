@@ -46,8 +46,8 @@ public sealed class CommandOptionsBuilder
     /// </param>
     /// <param name="matchCanExecute">
     /// <para>
-    /// A regex match expression that will be evauluated against method and/or property names to identify candidate can-execute members. 
-    /// All occurences of the substring <see cref="Names.CommandNameToken"/> in <paramref name="matchCanExecute"/> will be replaced with the command name
+    /// A regex match expression that will be evaluated against method and/or property names to identify candidate can-execute members. 
+    /// All occurrences of the substring <see cref="Names.CommandNameToken"/> in <paramref name="matchCanExecute"/> will be replaced with the command name
     /// determined according to <paramref name="matchCommandName"/> before the expression is evaluated.
     /// </para>
     /// <para>

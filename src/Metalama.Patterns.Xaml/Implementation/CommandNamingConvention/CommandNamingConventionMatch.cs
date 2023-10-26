@@ -20,10 +20,10 @@ internal sealed record CommandNamingConventionMatch(
            && (this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Success
                || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound));
 
-    private static readonly IReadOnlyList<string> _commandPropertyCategories = new[] { CommandAttribute._commandPropertyCategory };
+    private static readonly IReadOnlyList<string> _commandPropertyCategories = new[] { CommandAttribute.CommandPropertyCategory };
 
     private static readonly IReadOnlyList<string> _canExecuteCategories =
-        new[] { CommandAttribute._canExecuteMethodCategory, CommandAttribute._canExecutePropertyCategory };
+        new[] { CommandAttribute.CanExecuteMethodCategory, CommandAttribute.CanExecutePropertyCategory };
 
     public void VisitDeclarationMatches<TVisitor>( in TVisitor visitor )
         where TVisitor : IDeclarationMatchVisitor

@@ -7,5 +7,6 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
+// ReSharper disable once RedundantTypeDeclarationBody
 [CompileTime]
 internal interface IDependencyPropertyNamingConvention : INamingConvention<IProperty, DependencyPropertyNamingConventionMatch>, ICompileTimeSerializable { }

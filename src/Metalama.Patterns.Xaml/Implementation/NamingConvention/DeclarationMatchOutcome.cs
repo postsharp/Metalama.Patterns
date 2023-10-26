@@ -8,17 +8,17 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 internal enum DeclarationMatchOutcome
 {
     /// <summary>
-    /// A single elligble member matched, or a member can be introduced without conflict.
+    /// A single eligible member matched, or a member can be introduced without conflict.
     /// </summary>
     Success,
 
     /// <summary>
-    /// No elligible member matched.
+    /// No eligible member matched.
     /// </summary>
     NotFound,
 
     /// <summary>
-    /// Multiple elligble members matched.
+    /// Multiple eligible members matched.
     /// </summary>
     Ambiguous,
 

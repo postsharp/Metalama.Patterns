@@ -28,29 +28,29 @@ internal static class DependencyPropertyNamingConventionHelper
     {
         var assets = targetProperty.Compilation.Cache.GetOrAdd( _ => new DependencyPropertyAssets() );
 
-        IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangingMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
+        IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangingMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations1 )
         {
             var signature = GetChangeHandlerSignature( method, targetProperty, assets, false );
             var isValid = signature != ChangeHandlerSignatureKind.Invalid;
-            inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangingMethodCategory );
+            inspectedDeclarations1.Add( method, isValid, DependencyPropertyAspectBuilder.PropertyChangingMethodCategory );
 
             return new IsValidResult<ChangeHandlerSignatureKind>( isValid, signature );
         }
 
-        IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangedMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
+        IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangedMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations1 )
         {
             var signature = GetChangeHandlerSignature( method, targetProperty, assets, true );
             var isValid = signature != ChangeHandlerSignatureKind.Invalid;
-            inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangedMethodCategory );
+            inspectedDeclarations1.Add( method, isValid, DependencyPropertyAspectBuilder.PropertyChangedMethodCategory );
 
             return new IsValidResult<ChangeHandlerSignatureKind>( isValid, signature );
         }
 
-        IsValidResult<ValidationHandlerSignatureKind> IsValidateMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
+        IsValidResult<ValidationHandlerSignatureKind> IsValidateMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations1 )
         {
             var signature = GetValidationHandlerSignature( method, targetProperty, assets );
             var isValid = signature != ValidationHandlerSignatureKind.Invalid;
-            inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangedMethodCategory );
+            inspectedDeclarations1.Add( method, isValid, DependencyPropertyAspectBuilder.PropertyChangedMethodCategory );
 
             return new IsValidResult<ValidationHandlerSignatureKind>( isValid, signature );
         }

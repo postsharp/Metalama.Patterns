@@ -16,7 +16,7 @@ internal interface INameMatchPredicate
     /// <param name="collection">Set to the collection of candidate names, if there is more than one, otherwise <see langword="null"/>.</param>
     /// <remarks>
     /// The implementation should set at most one of <paramref name="singleValue"/> or <paramref name="collection"/>, whichever is most
-    /// natural for the implementation to provide. Implementations tyically have only one candidate name, but may have several.
+    /// natural for the implementation to provide. Implementations typically have only one candidate name, but may have several.
     /// </remarks>
     void GetCandidateNames( out string? singleValue, out IEnumerable<string>? collection );
 }

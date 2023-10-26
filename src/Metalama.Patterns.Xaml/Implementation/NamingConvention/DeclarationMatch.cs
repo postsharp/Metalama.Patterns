@@ -64,15 +64,16 @@ internal readonly struct DeclarationMatch<TDeclaration>
     }
 
     public DeclarationMatchOutcome? Outcome { get; }
-
+    
     public TDeclaration? Declaration { get; }
 
     [MemberNotNullWhen( true, nameof(CandidateNames) )]
     public bool HasCandidateNames => this._candidateNames != null;
 
     public IEnumerable<string>? CandidateNames
-        => this._candidateNames == null ? null : this._candidateNames as IEnumerable<string> ?? new string[] { (string) this._candidateNames };
+        => this._candidateNames == null ? null : this._candidateNames as IEnumerable<string> ?? new[] { (string) this._candidateNames };
 
-    public DeclarationMatch<TBaseDeclaration> ForDeclarationType<TBaseDeclaration>() where TBaseDeclaration : class, IDeclaration
+    public DeclarationMatch<TBaseDeclaration> ForDeclarationType<TBaseDeclaration>()
+        where TBaseDeclaration : class, IDeclaration
         => new( this.Outcome, (TBaseDeclaration?) (IDeclaration?) this.Declaration, this._candidateNames );
 }

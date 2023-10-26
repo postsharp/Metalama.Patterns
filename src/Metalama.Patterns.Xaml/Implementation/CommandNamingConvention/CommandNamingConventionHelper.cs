@@ -110,7 +110,7 @@ internal static class CommandNamingConventionHelper
     private static bool IsValidCanExecuteMethod( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
     {
         var isValid = IsValidCanExecuteMethod( method );
-        inspectedDeclarations.Add( method, isValid, CommandAttribute._canExecuteMethodCategory );
+        inspectedDeclarations.Add( method, isValid, CommandAttribute.CanExecuteMethodCategory );
 
         return isValid;
     }
@@ -120,7 +120,7 @@ internal static class CommandNamingConventionHelper
     private static bool IsValidCanExecuteProperty( IProperty property, InspectedDeclarationsAdder inspectedDeclarations )
     {
         var isValid = IsValidCanExecuteProperty( property );
-        inspectedDeclarations.Add( property, isValid, CommandAttribute._canExecutePropertyCategory );
+        inspectedDeclarations.Add( property, isValid, CommandAttribute.CanExecutePropertyCategory );
 
         return isValid;
     }

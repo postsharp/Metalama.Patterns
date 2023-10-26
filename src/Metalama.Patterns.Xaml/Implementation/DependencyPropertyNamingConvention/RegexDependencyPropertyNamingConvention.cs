@@ -8,6 +8,12 @@ using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
+// Prevent netframework-only false positives
+
+#if NETFRAMEWORK
+#pragma warning disable CS8604 // Possible null reference argument.
+#endif
+
 [CompileTime]
 internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPropertyNamingConvention
 {
@@ -42,9 +48,9 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
     /// </param>
     /// <param name="matchPropertyChanging">
     /// <para>
-    /// A regex match expression that will be evauluated against method names to identify candidate property-changing methods. 
-    /// All occurences of the substring <see cref="NameToken"/> will be replaced with the name
-    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
+    /// A regex match expression that will be evaluated against method names to identify candidate property-changing methods. 
+    /// All occurrences of the substring <see cref="NameToken"/> will be replaced with the name
+    /// determined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
     /// If <paramref name="matchPropertyChanging"/> is <see langword="null"/>, the name produced by 
@@ -53,9 +59,9 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
     /// </param>
     /// <param name="matchPropertyChanged">
     /// <para>
-    /// A regex match expression that will be evauluated against method names to identify candidate property-changed methods. 
-    /// All occurences of the substring <see cref="NameToken"/> will be replaced with the name
-    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
+    /// A regex match expression that will be evaluated against method names to identify candidate property-changed methods. 
+    /// All occurrences of the substring <see cref="NameToken"/> will be replaced with the name
+    /// determined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
     /// If <paramref name="matchPropertyChanged"/> is <see langword="null"/>, the name produced by 
@@ -64,9 +70,9 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
     /// </param>
     /// <param name="matchValidate">
     /// <para>
-    /// A regex match expression that will be evauluated against method names to identify candidate validate methods. 
-    /// All occurences of the substring <see cref="NameToken"/> will be replaced with the name
-    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
+    /// A regex match expression that will be evaluated against method names to identify candidate validate methods. 
+    /// All occurrences of the substring <see cref="NameToken"/> will be replaced with the name
+    /// determined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
     /// If <paramref name="matchPropertyChanged"/> is <see langword="null"/>, the name produced by 

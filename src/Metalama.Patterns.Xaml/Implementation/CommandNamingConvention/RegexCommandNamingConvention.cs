@@ -8,6 +8,12 @@ using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
+// Prevent netframework-only false positives
+
+#if NETFRAMEWORK
+#pragma warning disable CS8604 // Possible null reference argument.
+#endif
+
 [CompileTime]
 internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
 {
@@ -40,8 +46,8 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
     /// </param>
     /// <param name="matchCanExecute">
     /// <para>
-    /// A regex match expression that will be evauluated against method and/or property names to identify candidate can-execute members. 
-    /// All occurences of the substring <see cref="CommandNameToken"/> in <paramref name="matchCanExecute"/> will be replaced with the command name
+    /// A regex match expression that will be evaluated against method and/or property names to identify candidate can-execute members. 
+    /// All occurrences of the substring <see cref="CommandNameToken"/> in <paramref name="matchCanExecute"/> will be replaced with the command name
     /// determined according to <paramref name="matchCommandName"/> before the expression is evaluated.
     /// </para>
     /// <para>
@@ -49,7 +55,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
     /// <see cref="DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName(string)"/> is matched.
     /// </para>
     /// </param>
-    /// <param name="requireCanExecuteMatch">If <see langword="true"/> (the default), a mathcing can-execute method or property is required
+    /// <param name="requireCanExecuteMatch">If <see langword="true"/> (the default), a matching can-execute method or property is required
     /// for a match to be considered successful.</param>
     /// <param name="considerCanExecuteMethod">
     /// If <see langword="true"/> (the default), can-execute methods named according to <paramref name="matchCanExecute"/> will be considered.

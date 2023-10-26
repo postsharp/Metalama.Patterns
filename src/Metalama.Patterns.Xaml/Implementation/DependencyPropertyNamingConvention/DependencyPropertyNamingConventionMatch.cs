@@ -33,10 +33,10 @@ internal sealed record DependencyPropertyNamingConventionMatch(
            && (this.ValidateMatch.Outcome == DeclarationMatchOutcome.Success
                || (this.RequireValidateMatch == false && this.ValidateMatch.Outcome == DeclarationMatchOutcome.NotFound));
 
-    private static readonly IReadOnlyList<string> _registrationFieldCategories = new[] { DependencyPropertyAspectBuilder._registrationFieldCategory };
-    private static readonly IReadOnlyList<string> _propertyChangingCategories = new[] { DependencyPropertyAspectBuilder._propertyChangingMethodCategory };
-    private static readonly IReadOnlyList<string> _propertyChangedCategories = new[] { DependencyPropertyAspectBuilder._propertyChangedMethodCategory };
-    private static readonly IReadOnlyList<string> _validateCategories = new[] { DependencyPropertyAspectBuilder._validateMethodCategory };
+    private static readonly IReadOnlyList<string> _registrationFieldCategories = new[] { DependencyPropertyAspectBuilder.RegistrationFieldCategory };
+    private static readonly IReadOnlyList<string> _propertyChangingCategories = new[] { DependencyPropertyAspectBuilder.PropertyChangingMethodCategory };
+    private static readonly IReadOnlyList<string> _propertyChangedCategories = new[] { DependencyPropertyAspectBuilder.PropertyChangedMethodCategory };
+    private static readonly IReadOnlyList<string> _validateCategories = new[] { DependencyPropertyAspectBuilder.ValidateMethodCategory };
 
     public void VisitDeclarationMatches<TVisitor>( in TVisitor visitor )
         where TVisitor : IDeclarationMatchVisitor

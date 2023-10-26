@@ -2,4 +2,4 @@
 // Warning LAMA5206 on `Foo`: `No property-changed method was found using the default naming convention, with candidate member name 'OnFooChanged'.`
 // Warning LAMA5206 on `Foo`: `No property-changing method was found using the default naming convention, with candidate member name 'OnFooChanging'.`
 // Warning LAMA5206 on `Foo`: `No validate method was found using the default naming convention, with candidate member name 'ValidateFoo'.`
-// Warning LAMA5203 on `Foo`: `The name of existing method ExistingMemberConflictsWithPropertyField.FooProperty(), that is defined in or inherited by class ExistingMemberConflictsWithPropertyField, conflicts with the required registration field name deterimed by the default naming convention.`
+// Warning LAMA5203 on `Foo`: `The name of existing method ExistingMemberConflictsWithPropertyField.FooProperty(), that is defined in or inherited by class ExistingMemberConflictsWithPropertyField, conflicts with the required registration field name determined by the default naming convention.`

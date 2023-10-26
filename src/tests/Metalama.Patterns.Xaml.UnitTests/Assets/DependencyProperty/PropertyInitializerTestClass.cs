@@ -4,6 +4,8 @@ using System.Windows;
 
 namespace Metalama.Patterns.Xaml.UnitTests.Assets.DependencyPropertyNS;
 
+#pragma warning disable LAMA5206
+
 public sealed partial class PropertyInitializerTestClass : DependencyObject
 {
     public static int DefaultConfigurationInitializerCallCount { get; private set; }
@@ -29,9 +31,9 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
 
     [DependencyProperty( InitializerProvidesDefaultValue = false, InitializerProvidesInitialValue = false )]
 
-#pragma warning disable LAMA5201 // Initializer will not be used.
+#pragma warning disable LAMA5200 // Initializer will not be used.
     public int NotDefaultNotInitial { get; set; } = NotDefaultNotInitialInitializer();
-#pragma warning restore LAMA5201 // Initializer will not be used.
+#pragma warning restore LAMA5200 // Initializer will not be used.
 
     public static int InitialOnlyInitializerCallCount { get; private set; }
 

@@ -14,27 +14,19 @@ namespace Metalama.Patterns.Xaml.Implementation;
 [CompileTime]
 internal sealed partial class DependencyPropertyAspectBuilder
 {
-    internal const string _registrationFieldCategory = "registration field";
-    internal const string _propertyChangingMethodCategory = "property-changing method";
-    internal const string _propertyChangedMethodCategory = "property-changed method";
-    internal const string _validateMethodCategory = "validate method";
+    internal const string RegistrationFieldCategory = "registration field";
+    internal const string PropertyChangingMethodCategory = "property-changing method";
+    internal const string PropertyChangedMethodCategory = "property-changed method";
+    internal const string ValidateMethodCategory = "validate method";
 
     private readonly IAspectBuilder<IProperty> _builder;
     private readonly DependencyPropertyAttribute _attribute;
-    private readonly DependencyPropertyAssets _assets;
-    private readonly IType _propertyType;
-    private readonly INamedType _declaringType;
-    private readonly string _propertyName;
     private readonly DependencyPropertyOptions _options;
 
     public DependencyPropertyAspectBuilder( IAspectBuilder<IProperty> builder, DependencyPropertyAttribute attribute )
     {
         this._builder = builder;
         this._attribute = attribute;
-        this._assets = builder.Target.Compilation.Cache.GetOrAdd( _ => new DependencyPropertyAssets() );
-        this._propertyType = builder.Target.Type;
-        this._declaringType = builder.Target.DeclaringType;
-        this._propertyName = builder.Target.Name;
         this._options = builder.Target.Enhancements().GetOptions<DependencyPropertyOptions>();
     }
 
@@ -42,6 +34,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
     {
         var builder = this._builder;
         var target = builder.Target;
+        var propertyType = builder.Target.Type;
         var declaringType = target.DeclaringType;
         var options = target.Enhancements().GetOptions<DependencyPropertyOptions>();
 
@@ -69,7 +62,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         if ( successfulMatch?.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success )
         {
             introduceRegistrationFieldResult = this._builder.Advice.IntroduceField(
-                this._declaringType,
+                declaringType,
                 successfulMatch.RegistrationFieldName!,
                 typeof(DependencyProperty),
                 IntroductionScope.Static,
@@ -138,7 +131,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         this._builder.Advice.WithTemplateProvider( Templates.Provider )
             .AddInitializer(
-                this._declaringType,
+                declaringType,
                 nameof(Templates.InitializeDependencyProperty),
                 InitializerKind.BeforeTypeConstructor,
                 args: new
@@ -146,8 +139,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     dependencyPropertyField = introduceRegistrationFieldResult.Declaration,
                     options = this._options,
                     propertyName = successfulMatch.DependencyPropertyName,
-                    propertyType = this._propertyType,
-                    declaringType = this._declaringType,
+                    propertyType,
+                    declaringType,
                     defaultValueExpr = this._builder.Target.InitializerExpression,
                     onChangingMethod,
                     onChangingSignatureKind = successfulMatch.PropertyChangingSignatureKind,
@@ -161,7 +154,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             .OverrideAccessors(
                 this._builder.Target,
                 new GetterTemplateSelector( nameof(Templates.OverrideGetter) ),
-                args: new { propertyType = this._propertyType, dependencyPropertyField = introduceRegistrationFieldResult.Declaration } );
+                args: new { propertyType, dependencyPropertyField = introduceRegistrationFieldResult.Declaration } );
 
         if ( this._builder.Target.Writeability != Writeability.None )
         {
@@ -182,7 +175,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         {
             this._builder.Advice.WithTemplateProvider( Templates.Provider )
                 .AddInitializer(
-                    this._declaringType,
+                    declaringType,
                     nameof(Templates.Assign),
                     InitializerKind.BeforeInstanceConstructor,
                     args: new { left = (IExpression) this._builder.Target.Value!, right = this._builder.Target.InitializerExpression } );

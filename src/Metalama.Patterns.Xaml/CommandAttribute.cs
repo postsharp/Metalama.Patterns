@@ -22,9 +22,9 @@ namespace Metalama.Patterns.Xaml;
 [AttributeUsage( AttributeTargets.Method )]
 public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 {
-    internal const string _commandPropertyCategory = "command property";
-    internal const string _canExecuteMethodCategory = "can-execute method";
-    internal const string _canExecutePropertyCategory = "can-execute property";
+    internal const string CommandPropertyCategory = "command property";
+    internal const string CanExecuteMethodCategory = "can-execute method";
+    internal const string CanExecutePropertyCategory = "can-execute property";
 
     /// <summary>
     /// Gets or sets the name of the <see cref="ICommand"/> property that is introduced.
@@ -221,8 +221,9 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             } );
     }
 
-    [Template]
+    // ReSharper disable once UnassignedGetOnlyAutoProperty
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    [Template]
     private static ICommand CommandProperty { get; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 

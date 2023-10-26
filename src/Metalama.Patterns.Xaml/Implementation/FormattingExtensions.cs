@@ -5,6 +5,14 @@ using System.Text;
 
 namespace Metalama.Patterns.Xaml.Implementation;
 
+// Prevent netframework-only false positives
+// ReSharper disable once RedundantBlankLines
+
+#if NETFRAMEWORK
+
+// ReSharper disable AssignNullToNotNullAttribute
+#endif
+
 [CompileTime]
 internal static class FormattingExtensions
 {
@@ -13,7 +21,7 @@ internal static class FormattingExtensions
 
     public static string PrettyList( this IEnumerable<string> words, string conjunction, out int plurality, char quote = default )
     {
-        var iter = words.GetEnumerator();
+        using var iter = words.GetEnumerator();
 
         var a = iter.MoveNext() ? iter.Current : null;
 

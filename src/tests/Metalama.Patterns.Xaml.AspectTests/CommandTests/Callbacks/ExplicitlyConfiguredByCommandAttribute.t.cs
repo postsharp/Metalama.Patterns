@@ -1,7 +1,7 @@
 using System.Windows.Input;
 using Metalama.Patterns.Xaml.Implementation;
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Callbacks;
-public class ExplictlyConfiguredByCommandAttribute
+public class ExplicitlyConfiguredByCommandAttribute
 {
   [Command(CanExecuteMethod = nameof(SomeWeirdName1))]
   private void Exec1()
@@ -19,7 +19,7 @@ public class ExplictlyConfiguredByCommandAttribute
   {
   }
   private bool CanExec2 => true;
-  public ExplictlyConfiguredByCommandAttribute()
+  public ExplicitlyConfiguredByCommandAttribute()
   {
     bool CanExecute_2(object? parameter_4)
     {

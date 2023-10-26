@@ -22,6 +22,7 @@ public sealed class DependencyPropertyOptionsBuilder
 
     public static class Names
     {
+        // ReSharper disable once UnusedMember.Global
         public const string NameGroup = RegexDependencyPropertyNamingConvention.NameGroup;
         public const string NameToken = RegexDependencyPropertyNamingConvention.NameToken;
     }
@@ -60,9 +61,9 @@ public sealed class DependencyPropertyOptionsBuilder
     /// </param>
     /// <param name="matchPropertyChanging">
     /// <para>
-    /// A regex match expression that will be evauluated against method names to identify candidate property-changing methods. 
-    /// All occurences of the substring <see cref="Names.NameToken"/> will be replaced with the name
-    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
+    /// A regex match expression that will be evaluated against method names to identify candidate property-changing methods. 
+    /// All occurrences of the substring <see cref="Names.NameToken"/> will be replaced with the name
+    /// determined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
     /// If <paramref name="matchPropertyChanging"/> is <see langword="null"/>, the name produced by 
@@ -71,9 +72,9 @@ public sealed class DependencyPropertyOptionsBuilder
     /// </param>
     /// <param name="matchPropertyChanged">
     /// <para>
-    /// A regex match expression that will be evauluated against method names to identify candidate property-changed methods. 
-    /// All occurences of the substring <see cref="Names.NameToken"/> will be replaced with the name
-    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
+    /// A regex match expression that will be evaluated against method names to identify candidate property-changed methods. 
+    /// All occurrences of the substring <see cref="Names.NameToken"/> will be replaced with the name
+    /// determined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
     /// If <paramref name="matchPropertyChanged"/> is <see langword="null"/>, the name produced by 
@@ -82,9 +83,9 @@ public sealed class DependencyPropertyOptionsBuilder
     /// </param>
     /// <param name="matchValidate">
     /// <para>
-    /// A regex match expression that will be evauluated against method names to identify candidate validate methods. 
-    /// All occurences of the substring <see cref="Names.NameToken"/> will be replaced with the name
-    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
+    /// A regex match expression that will be evaluated against method names to identify candidate validate methods. 
+    /// All occurrences of the substring <see cref="Names.NameToken"/> will be replaced with the name
+    /// determined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
     /// If <paramref name="matchPropertyChanged"/> is <see langword="null"/>, the name produced by 

@@ -4,6 +4,8 @@ using FluentAssertions;
 using System.Runtime.CompilerServices;
 using System.Windows;
 
+#pragma warning disable LAMA5206
+
 // ReSharper disable UnusedMember.Local
 
 namespace Metalama.Patterns.Xaml.UnitTests.Assets.DependencyPropertyNS;
