@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Observability.UnitTests.Assets.Core;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.UnitTests.Assets.Generic;
@@ -23,13 +24,10 @@ public partial class A<T>
     public T A1 { get; set; }
 }
 
-// TODO: Pending #33805
-#if false
 public partial class AOfSimple : A<Simple>
 {
     public int RefA1S1 => this.A1.S1;
 }
-#endif
 
 [Observable]
 public partial class B<T>
@@ -61,14 +59,11 @@ public partial class D<T>
     public int FooX => this.D1.X;
 }
 
-// TODO: Pending #33805
-#if false
 public partial class DD<T> : D<T> 
     where T : class, INotifyPropertyChanged, IFoo
 {
     public int FooY => this.D1.Y;
 }
-#endif
 
 [Observable]
 public partial class MyFoo : IFoo

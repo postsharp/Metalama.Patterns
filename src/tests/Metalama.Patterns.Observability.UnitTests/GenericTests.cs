@@ -8,8 +8,6 @@ namespace Metalama.Patterns.Observability.UnitTests;
 
 public sealed class GenericTests : InpcTestsBase
 {
-    // TODO: Pending #33805
-#if false
     [Fact]
     public void PropertyOfGenericTypeThatIsClassAndInpc() 
     {
@@ -18,12 +16,11 @@ public sealed class GenericTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.A1 = new() )
-            .Should().Equal( "A1", "RefA1S1" );
+            .Should().Equal( "RefA1S1", "A1" );
 
         this.EventsFrom( () => v.A1.S1 = 1 )
             .Should().Equal( "RefA1S1" );
     }
-#endif
 
     [Fact]
     public void PropertyOfGenericTypeThatIsClassButNotInpc()
@@ -69,8 +66,6 @@ public sealed class GenericTests : InpcTestsBase
             .BeEmpty();
     }
 
-    // TODO: Pending #33805
-#if false
     [Fact]
     public void PropertyOfGenericTypeThatIsClassAndInpcAndIFooDepth2()
     {
@@ -79,7 +74,7 @@ public sealed class GenericTests : InpcTestsBase
         this.SubscribeTo( v );
 
         this.EventsFrom( () => v.D1 = new() )
-            .Should().Equal( "D1", "FooX", "FooY" );
+            .Should().Equal( "FooX", "FooY", "D1" );
 
         this.EventsFrom( () => v.D1.X = 1 )
             .Should().Equal( "FooX" );
@@ -87,5 +82,4 @@ public sealed class GenericTests : InpcTestsBase
         this.EventsFrom( () => v.D1.Y = 1 )
             .Should().Equal( "FooY" );
     }
-#endif
 }
