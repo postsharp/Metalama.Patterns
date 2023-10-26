@@ -26,18 +26,18 @@ namespace Metalama.Patterns.Xaml.Implementation;
 public sealed class DelegateCommand : ICommand
 {
     /* Original comment from PostSharp:
-    * Two options how to support this:
-    *   - have INPC detect dependencies in the CanExecuteChanged method
-    *   - use a property instead of method and route the notification (NPC -> CanExecuteChanged)
-    *     limitation: parameters would not be easily supported
-    * Currently: only property in [NPC] classes is supported.
-    * 
-    * In this (Metalama) implementation: 
-    * 
-    * Currently INPC integration is strictly via INotifyPropertyChanged, where CanExecute must be a public property. 
-    * The only requirement for integration with [NPC] is aspect ordering so that [NPC] aspect is applied before [Command], so [Command]
-    * sees that INotifyPropertyChanged is implemented.
-    */
+     * Two options how to support this:
+     *   - have INPC detect dependencies in the CanExecuteChanged method
+     *   - use a property instead of method and route the notification (NPC -> CanExecuteChanged)
+     *     limitation: parameters would not be easily supported
+     * Currently: only property in [NPC] classes is supported.
+     *
+     * In this (Metalama) implementation:
+     *
+     * Currently INPC integration is strictly via INotifyPropertyChanged, where CanExecute must be a public property.
+     * The only requirement for integration with [NPC] is aspect ordering so that [NPC] aspect is applied before [Command], so [Command]
+     * sees that INotifyPropertyChanged is implemented.
+     */
 
     private static readonly SendOrPostCallback _onCanExecuteChangedDelegate = OnCanExecuteChanged;
 
@@ -84,8 +84,7 @@ public sealed class DelegateCommand : ICommand
         this._execute( parameter );
     }
 
-    public bool CanExecute( object? parameter )
-        => this._canExecute == null || this._canExecute( parameter );
+    public bool CanExecute( object? parameter ) => this._canExecute == null || this._canExecute( parameter );
 
     private void OnPropertyChanged( object? sender, PropertyChangedEventArgs args )
     {

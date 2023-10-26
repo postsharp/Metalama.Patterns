@@ -18,37 +18,34 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 internal readonly struct DeclarationMatch<TDeclaration>
     where TDeclaration : class, IDeclaration
 {
-
     public static DeclarationMatch<TDeclaration> Success( TDeclaration declaration )
-        => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Success, declaration ?? throw new ArgumentNullException( nameof( declaration ) ) );
+        => new( DeclarationMatchOutcome.Success, declaration ?? throw new ArgumentNullException( nameof(declaration) ) );
 
     public static DeclarationMatch<TDeclaration> SuccessOrConflict( TDeclaration? conflictingDeclaration )
-        => new DeclarationMatch<TDeclaration>( conflictingDeclaration == null ? DeclarationMatchOutcome.Success : DeclarationMatchOutcome.Conflict, conflictingDeclaration );
+        => new( conflictingDeclaration == null ? DeclarationMatchOutcome.Success : DeclarationMatchOutcome.Conflict, conflictingDeclaration );
 
-    public static DeclarationMatch<TDeclaration> Ambiguous()
-        => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Ambiguous );
+    public static DeclarationMatch<TDeclaration> Ambiguous() => new( DeclarationMatchOutcome.Ambiguous );
 
     public static DeclarationMatch<TDeclaration> NotFound<TNameMatchPredicate>( in TNameMatchPredicate predicate )
         where TNameMatchPredicate : INameMatchPredicate
     {
         predicate.GetCandidateNames( out var singleValue, out var collection );
+
         return new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.NotFound, candidateNames: (object?) collection ?? singleValue );
     }
 
-    public static DeclarationMatch<TDeclaration> NotFound( string candidateName )
-        => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.NotFound, candidateNames: candidateName );
+    public static DeclarationMatch<TDeclaration> NotFound( string candidateName ) => new( DeclarationMatchOutcome.NotFound, candidateNames: candidateName );
 
     public static DeclarationMatch<TDeclaration> NotFound( IEnumerable<string>? candidateNames = null )
-        => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.NotFound, candidateNames: candidateNames );
+        => new( DeclarationMatchOutcome.NotFound, candidateNames: candidateNames );
 
-    public static DeclarationMatch<TDeclaration> Invalid()
-        => new DeclarationMatch<TDeclaration>( DeclarationMatchOutcome.Invalid );
+    public static DeclarationMatch<TDeclaration> Invalid() => new( DeclarationMatchOutcome.Invalid );
 
     public static DeclarationMatch<TDeclaration> FromOutcome( DeclarationMatchOutcome outcome, TDeclaration? declaration = null, string? candidateName = null )
-        => new DeclarationMatch<TDeclaration>( outcome, declaration, candidateName );
+        => new( outcome, declaration, candidateName );
 
     public static DeclarationMatch<TDeclaration> FromOutcome( DeclarationMatchOutcome outcome, TDeclaration? declaration, IEnumerable<string>? candidateNames )
-        => new DeclarationMatch<TDeclaration>( outcome, declaration, candidateNames );
+        => new( outcome, declaration, candidateNames );
 
     private readonly object? _candidateNames;
 
@@ -70,13 +67,12 @@ internal readonly struct DeclarationMatch<TDeclaration>
 
     public TDeclaration? Declaration { get; }
 
-    [MemberNotNullWhen( true, nameof( CandidateNames ) )]
+    [MemberNotNullWhen( true, nameof(CandidateNames) )]
     public bool HasCandidateNames => this._candidateNames != null;
 
     public IEnumerable<string>? CandidateNames
         => this._candidateNames == null ? null : this._candidateNames as IEnumerable<string> ?? new string[] { (string) this._candidateNames };
 
-    public DeclarationMatch<TBaseDeclaration> ForDeclarationType<TBaseDeclaration>()
-        where TBaseDeclaration : class, IDeclaration
-        => new DeclarationMatch<TBaseDeclaration>( this.Outcome, (TBaseDeclaration?) (IDeclaration?) this.Declaration, this._candidateNames );    
+    public DeclarationMatch<TBaseDeclaration> ForDeclarationType<TBaseDeclaration>() where TBaseDeclaration : class, IDeclaration
+        => new( this.Outcome, (TBaseDeclaration?) (IDeclaration?) this.Declaration, this._candidateNames );
 }

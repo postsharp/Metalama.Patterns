@@ -28,6 +28,7 @@ internal static class NamingConventionHelper
             if ( nameMatchPredicate.IsMatch( declaration.Name ) )
             {
                 ++candidateCount;
+
                 if ( isValid( declaration, inspectedDeclarations ) )
                 {
                     ++eligibleCount;
@@ -43,6 +44,7 @@ internal static class NamingConventionHelper
                 {
                     return DeclarationMatch<TDeclaration>.Invalid();
                 }
+
                 break;
 
             case 1:
@@ -77,6 +79,7 @@ internal static class NamingConventionHelper
             {
                 ++candidateCount;
                 var result = isValid( declaration, inspectedDeclarations );
+
                 if ( result.IsValid )
                 {
                     ++eligibleCount;
@@ -97,6 +100,7 @@ internal static class NamingConventionHelper
                 {
                     return (DeclarationMatch<TDeclaration>.Invalid(), default);
                 }
+
                 break;
 
             case 1:

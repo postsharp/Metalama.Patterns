@@ -6,6 +6,4 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
 internal readonly record struct InspectedNamingConventionMatch<TMatch>( TMatch Match, IEnumerable<InspectedDeclaration> InspectedDeclarations )
-    where TMatch : INamingConventionMatch
-{
-}
+    where TMatch : INamingConventionMatch { }

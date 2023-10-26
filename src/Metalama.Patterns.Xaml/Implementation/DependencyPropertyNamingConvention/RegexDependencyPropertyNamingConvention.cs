@@ -82,9 +82,9 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
     /// <param name="requireValidateMatch">
     /// If <see langword="true"/> (the default), a matching valid unambiguous validate method must be found for a match to be considered successful.
     /// </param>
-    public RegexDependencyPropertyNamingConvention( 
+    public RegexDependencyPropertyNamingConvention(
         string diagnosticName,
-        string? matchName, // get name from target property name, default is the raw property name.
+        string? matchName,                // get name from target property name, default is the raw property name.
         string? registrationFieldPattern, // eg "$Name$Property", else GetRegistrationFieldNameFromPropertyName
         string? matchPropertyChanging,
         string? matchPropertyChanged,
@@ -95,7 +95,7 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
     {
         if ( string.IsNullOrWhiteSpace( diagnosticName ) )
         {
-            throw new ArgumentException( "Must not be null, empty or only white space.", nameof( diagnosticName ) );
+            throw new ArgumentException( "Must not be null, empty or only white space.", nameof(diagnosticName) );
         }
 
         this.DiagnosticName = diagnosticName;
@@ -124,6 +124,7 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
             if ( m.Success )
             {
                 var g = m.Groups[NameGroup];
+
                 if ( g.Success )
                 {
                     propertyName = g.Value;
@@ -135,7 +136,7 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
             propertyName = targetProperty.Name;
         }
 
-        if ( string.IsNullOrWhiteSpace( propertyName))
+        if ( string.IsNullOrWhiteSpace( propertyName ) )
         {
             return new DependencyPropertyNamingConventionMatch(
                 this,
@@ -156,14 +157,14 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
 #if NETCOREAPP
 #pragma warning disable CA1307 // Specify StringComparison for clarity
 #endif
-        var registrationFieldName = this._registrationFieldPattern != null 
-            ? this._registrationFieldPattern.Replace( NameToken, propertyName ) 
+        var registrationFieldName = this._registrationFieldPattern != null
+            ? this._registrationFieldPattern.Replace( NameToken, propertyName )
             : DefaultDependencyPropertyNamingConvention.GetRegistrationFieldNameFromPropertyName( propertyName );
 
         var matchPropertyChanging = this._matchPropertyChanging?.Replace( NameToken, propertyName );
-        
+
         var matchPropertyChanged = this._matchPropertyChanged?.Replace( NameToken, propertyName );
-        
+
         var matchValidate = this._matchValidate?.Replace( NameToken, propertyName );
 #if NETCOREAPP
 #pragma warning restore CA1307 // Specify StringComparison for clarity
@@ -175,9 +176,9 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
             inspectedDeclarations,
             propertyName,
             registrationFieldName,
-            new StringOrRegexNameMatchPredicate( 
+            new StringOrRegexNameMatchPredicate(
                 matchPropertyChanging == null ? DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName( propertyName ) : null,
-                matchPropertyChanging != null ? new Regex(matchPropertyChanging) : null ),
+                matchPropertyChanging != null ? new Regex( matchPropertyChanging ) : null ),
             new StringOrRegexNameMatchPredicate(
                 matchPropertyChanged == null ? DefaultDependencyPropertyNamingConvention.GetPropertyChangedMethodNameFromPropertyName( propertyName ) : null,
                 matchPropertyChanged != null ? new Regex( matchPropertyChanged ) : null ),
@@ -187,5 +188,5 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
             this._requirePropertyChangingMatch,
             this._requirePropertyChangedMatch,
             this._requireValidateMatch );
-    }    
+    }
 }

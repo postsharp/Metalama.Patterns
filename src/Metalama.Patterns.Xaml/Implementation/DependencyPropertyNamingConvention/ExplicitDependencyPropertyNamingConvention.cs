@@ -38,9 +38,12 @@ internal class ExplicitDependencyPropertyNamingConvention : IDependencyPropertyN
             inspectedDeclarations,
             propertyName,
             this._registrationFieldName ?? DefaultDependencyPropertyNamingConvention.GetRegistrationFieldNameFromPropertyName( propertyName ),
-            new StringNameMatchPredicate( this._propertyChangingMethodName ?? DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName( propertyName ) ),
-            new StringNameMatchPredicate( this._propertyChangedMethodName ?? DefaultDependencyPropertyNamingConvention.GetPropertyChangedMethodNameFromPropertyName( propertyName ) ),
-            new StringNameMatchPredicate( this._validateMethodName ?? DefaultDependencyPropertyNamingConvention.GetValidateMethodNameFromPropertyName( propertyName ) ),
+            new StringNameMatchPredicate(
+                this._propertyChangingMethodName ?? DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName( propertyName ) ),
+            new StringNameMatchPredicate(
+                this._propertyChangedMethodName ?? DefaultDependencyPropertyNamingConvention.GetPropertyChangedMethodNameFromPropertyName( propertyName ) ),
+            new StringNameMatchPredicate(
+                this._validateMethodName ?? DefaultDependencyPropertyNamingConvention.GetValidateMethodNameFromPropertyName( propertyName ) ),
             requirePropertyChangingMatch: this._propertyChangingMethodName != null,
             requirePropertyChangedMatch: this._propertyChangedMethodName != null,
             requireValidateMatch: this._validateMethodName != null );

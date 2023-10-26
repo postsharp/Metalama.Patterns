@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConventi
 internal sealed class DefaultDependencyPropertyNamingConvention : IDependencyPropertyNamingConvention
 {
     public static string RegistrationKey { get; } = "{5150E382-3376-44CF-A278-CC7E4C8E5361}";
-    
+
     public string DiagnosticName => "default";
 
     public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, InspectedDeclarationsAdder inspectedDeclarations )
@@ -28,15 +28,11 @@ internal sealed class DefaultDependencyPropertyNamingConvention : IDependencyPro
             new StringNameMatchPredicate( GetValidateMethodNameFromPropertyName( propertyName ) ) );
     }
 
-    internal static string GetRegistrationFieldNameFromPropertyName( string propertyName )
-        => $"{propertyName}Property";
+    internal static string GetRegistrationFieldNameFromPropertyName( string propertyName ) => $"{propertyName}Property";
 
-    internal static string GetPropertyChangingMethodNameFromPropertyName( string propertyName )
-        => $"On{propertyName}Changing";
+    internal static string GetPropertyChangingMethodNameFromPropertyName( string propertyName ) => $"On{propertyName}Changing";
 
-    internal static string GetPropertyChangedMethodNameFromPropertyName( string propertyName )
-        => $"On{propertyName}Changed";
+    internal static string GetPropertyChangedMethodNameFromPropertyName( string propertyName ) => $"On{propertyName}Changed";
 
-    internal static string GetValidateMethodNameFromPropertyName( string propertyName )
-        => $"Validate{propertyName}";
+    internal static string GetValidateMethodNameFromPropertyName( string propertyName ) => $"Validate{propertyName}";
 }

@@ -51,16 +51,15 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     }
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new CommandOptions
-        {
-            EnableINotifyPropertyChangedIntegration = true,
-            NamingConventionRegistrations = DefaultNamingConventionRegistrations()
-        };
+        => new CommandOptions { EnableINotifyPropertyChangedIntegration = true, NamingConventionRegistrations = DefaultNamingConventionRegistrations() };
 
     internal static IncrementalKeyedCollection<string, NamingConventionRegistration<ICommandNamingConvention>> DefaultNamingConventionRegistrations()
     {
         return IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<ICommandNamingConvention>>(
-                new NamingConventionRegistration<ICommandNamingConvention>( DefaultCommandNamingConvention.RegistrationKey, new DefaultCommandNamingConvention(), 1000 ) );
+            new NamingConventionRegistration<ICommandNamingConvention>(
+                DefaultCommandNamingConvention.RegistrationKey,
+                new DefaultCommandNamingConvention(),
+                1000 ) );
     }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )

@@ -128,20 +128,20 @@ public sealed class DependencyPropertyOptionsBuilder
         this._options = this._options with
         {
             NamingConventionRegistrations =
-                this._options.NamingConventionRegistrations.AddOrApplyChanges(
-                    new NamingConventionRegistration<IDependencyPropertyNamingConvention>(
-                        key,
-                        new RegexDependencyPropertyNamingConvention(
-                            diagnosticName,
-                            matchName,
-                            registrationFieldPattern,
-                            matchPropertyChanging,
-                            matchPropertyChanged,
-                            matchValidate,
-                            requirePropertyChangingMatch ?? matchPropertyChanging != null,
-                            requirePropertyChangedMatch ?? matchPropertyChanged != null,
-                            requireValidateMatch ?? matchValidate != null ),
-                        priority ) )
+            this._options.NamingConventionRegistrations.AddOrApplyChanges(
+                new NamingConventionRegistration<IDependencyPropertyNamingConvention>(
+                    key,
+                    new RegexDependencyPropertyNamingConvention(
+                        diagnosticName,
+                        matchName,
+                        registrationFieldPattern,
+                        matchPropertyChanging,
+                        matchPropertyChanged,
+                        matchValidate,
+                        requirePropertyChangingMatch ?? matchPropertyChanging != null,
+                        requirePropertyChangedMatch ?? matchPropertyChanged != null,
+                        requireValidateMatch ?? matchValidate != null ),
+                    priority ) )
         };
     }
 
@@ -150,7 +150,8 @@ public sealed class DependencyPropertyOptionsBuilder
         this._options = this._options with
         {
             NamingConventionRegistrations =
-                this._options.NamingConventionRegistrations.AddOrApplyChanges( new NamingConventionRegistration<IDependencyPropertyNamingConvention>( key, null, priority ) )
+            this._options.NamingConventionRegistrations.AddOrApplyChanges(
+                new NamingConventionRegistration<IDependencyPropertyNamingConvention>( key, null, priority ) )
         };
     }
 
@@ -159,7 +160,7 @@ public sealed class DependencyPropertyOptionsBuilder
         this._options = this._options with
         {
             NamingConventionRegistrations =
-                this._options.NamingConventionRegistrations.Remove( key )
+            this._options.NamingConventionRegistrations.Remove( key )
         };
     }
 
@@ -171,9 +172,9 @@ public sealed class DependencyPropertyOptionsBuilder
         this._options = this._options with
         {
             NamingConventionRegistrations =
-                this._options.NamingConventionRegistrations
-                    .ApplyChanges( IncrementalKeyedCollection.Clear<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(), default )
-                    .AddOrApplyChanges( DependencyPropertyOptions.DefaultNamingConventionRegistrations() )
+            this._options.NamingConventionRegistrations
+                .ApplyChanges( IncrementalKeyedCollection.Clear<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(), default )
+                .AddOrApplyChanges( DependencyPropertyOptions.DefaultNamingConventionRegistrations() )
         };
     }
 

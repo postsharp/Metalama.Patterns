@@ -70,12 +70,13 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
     {
         if ( !(considerCanExecuteMethod || considerCanExecuteProperty) )
         {
-            throw new ArgumentException( "At least one of " + nameof( considerCanExecuteMethod ) + " and " + nameof( considerCanExecuteProperty ) + " must be true." );
+            throw new ArgumentException(
+                "At least one of " + nameof(considerCanExecuteMethod) + " and " + nameof(considerCanExecuteProperty) + " must be true." );
         }
 
         if ( string.IsNullOrWhiteSpace( diagnosticName ) )
         {
-            throw new ArgumentException( "Must not be null, empty or only white space.", nameof( diagnosticName ) );
+            throw new ArgumentException( "Must not be null, empty or only white space.", nameof(diagnosticName) );
         }
 
         this.DiagnosticName = diagnosticName;
@@ -88,7 +89,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
     }
 
     public string DiagnosticName { get; }
-    
+
     public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
     {
         string? commandName = null;
@@ -98,9 +99,11 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
             this._matchCommandNameRegex ??= new Regex( this._matchCommandName );
 
             var m = this._matchCommandNameRegex.Match( executeMethod.Name );
+
             if ( m.Success )
             {
                 var g = m.Groups[CommandNameGroup];
+
                 if ( g.Success )
                 {
                     commandName = g.Value;
@@ -114,7 +117,12 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
 
         if ( string.IsNullOrWhiteSpace( commandName ) )
         {
-            return new CommandNamingConventionMatch( this, null, DeclarationMatch<IMemberOrNamedType>.Invalid(), DeclarationMatch<IMember>.NotFound(), this._requireCanExecuteMatch );
+            return new CommandNamingConventionMatch(
+                this,
+                null,
+                DeclarationMatch<IMemberOrNamedType>.Invalid(),
+                DeclarationMatch<IMember>.NotFound(),
+                this._requireCanExecuteMatch );
         }
 
 #if NETCOREAPP
@@ -123,7 +131,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
         var commandPropertyName = this._commandPropertyPattern != null
             ? this._commandPropertyPattern.Replace( CommandNameToken, commandName )
             : DefaultCommandNamingConvention.GetCommandPropertyNameFromCommandName( commandName );
-        
+
         var matchCanExecuteName = this._matchCanExecute?.Replace( CommandNameToken, commandName );
 #if NETCOREAPP
 #pragma warning restore CA1307 // Specify StringComparison for clarity

@@ -16,7 +16,10 @@ internal static class NamingConventionEvaluationResultExtensions
 
         public INamingConvention NamingConvention { get; init; }
 
-        void IDeclarationMatchVisitor.Visit<TDeclaration>( in DeclarationMatch<TDeclaration> match, bool isRequired, IReadOnlyList<string> applicableCategories )
+        void IDeclarationMatchVisitor.Visit<TDeclaration>(
+            in DeclarationMatch<TDeclaration> match,
+            bool isRequired,
+            IReadOnlyList<string> applicableCategories )
         {
             switch ( match.Outcome )
             {
@@ -25,7 +28,7 @@ internal static class NamingConventionEvaluationResultExtensions
                     foreach ( var inspectedDeclaration in this.InspectedDeclarations )
                     {
                         if ( inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
-                        {                            
+                        {
                             this.DiagnosticReporter.ReportAmbiguousDeclaration( this.NamingConvention, inspectedDeclaration, isRequired );
                         }
                     }
@@ -56,13 +59,15 @@ internal static class NamingConventionEvaluationResultExtensions
                 case DeclarationMatchOutcome.Conflict:
 
                     this.DiagnosticReporter.ReportConflictingDeclaration( this.NamingConvention, match.Declaration, applicableCategories, isRequired );
-                    
+
                     break;
             }
         }
     }
 
-    public static void ReportDiagnostics<TMatch, TDiagnosticReporter>( this INamingConventionEvaluationResult<TMatch> evaluationResult, in TDiagnosticReporter diagnosticReporter )
+    public static void ReportDiagnostics<TMatch, TDiagnosticReporter>(
+        this INamingConventionEvaluationResult<TMatch> evaluationResult,
+        in TDiagnosticReporter diagnosticReporter )
         where TMatch : INamingConventionMatch
         where TDiagnosticReporter : IDiagnosticReporter
     {

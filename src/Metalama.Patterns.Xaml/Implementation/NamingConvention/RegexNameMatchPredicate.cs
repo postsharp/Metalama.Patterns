@@ -11,8 +11,8 @@ internal readonly struct RegexNameMatchPredicate : INameMatchPredicate
     private readonly Regex _matchName;
 
     public RegexNameMatchPredicate( Regex matchName )
-    {        
-        this._matchName = matchName ?? throw new ArgumentNullException( nameof( matchName ) );
+    {
+        this._matchName = matchName ?? throw new ArgumentNullException( nameof(matchName) );
     }
 
     public void GetCandidateNames( out string? singleValue, out IEnumerable<string>? collection )

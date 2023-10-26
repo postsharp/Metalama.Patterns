@@ -10,14 +10,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
     [CompileTime]
     private sealed class DiagnosticReporter : BaseDiagnosticReporter
     {
-        public DiagnosticReporter( IAspectBuilder builder ) : base( builder )
-        {
-        }
+        public DiagnosticReporter( IAspectBuilder builder ) : base( builder ) { }
 
         protected override string GetInvalidityReason( in InspectedDeclaration inspectedDeclaration )
             => " Refer to documentation for supported method signatures.";
 
-        protected override string GetTargetDeclarationDescription( in InspectedDeclaration inspectedDeclaration )
-            => "[DependencyProperty] property ";
+        protected override string GetTargetDeclarationDescription( in InspectedDeclaration inspectedDeclaration ) => "[DependencyProperty] property ";
     }
 }

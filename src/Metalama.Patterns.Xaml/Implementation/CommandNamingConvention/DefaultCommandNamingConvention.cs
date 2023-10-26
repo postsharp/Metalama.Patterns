@@ -58,9 +58,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
         return useName;
     }
 
-    public static string GetCommandPropertyNameFromCommandName( string commandName )
-        => $"{commandName}Command";
+    public static string GetCommandPropertyNameFromCommandName( string commandName ) => $"{commandName}Command";
 
-    public static string GetCanExecuteNameFromCommandName( string commandName )
-        => $"CanExecute{commandName}";
+    public static string GetCanExecuteNameFromCommandName( string commandName ) => $"CanExecute{commandName}";
 }

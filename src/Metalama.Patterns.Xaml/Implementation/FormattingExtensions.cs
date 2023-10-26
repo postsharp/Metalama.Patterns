@@ -20,6 +20,7 @@ internal static class FormattingExtensions
         if ( a == null )
         {
             plurality = 0;
+
             return string.Empty;
         }
 
@@ -28,6 +29,7 @@ internal static class FormattingExtensions
         if ( b == null )
         {
             plurality = 1;
+
             return quote == default
                 ? a
                 : new StringBuilder().AppendQuoted( a, quote ).ToString();
@@ -45,7 +47,7 @@ internal static class FormattingExtensions
         }
 
         sb.AppendQuoted( a, quote ).Append( conjunction ).Append( b );
-        
+
         return sb.ToString();
     }
 
@@ -57,7 +59,7 @@ internal static class FormattingExtensions
         }
         else
         {
-            return sb.Append(quote).Append(s).Append( quote );
+            return sb.Append( quote ).Append( s ).Append( quote );
         }
     }
 }

@@ -66,7 +66,10 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     internal static IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>> DefaultNamingConventionRegistrations()
     {
         return IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(
-                new NamingConventionRegistration<IDependencyPropertyNamingConvention>( DefaultCommandNamingConvention.RegistrationKey, new DefaultDependencyPropertyNamingConvention(), 1000 ) );
+            new NamingConventionRegistration<IDependencyPropertyNamingConvention>(
+                DefaultCommandNamingConvention.RegistrationKey,
+                new DefaultDependencyPropertyNamingConvention(),
+                1000 ) );
     }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )

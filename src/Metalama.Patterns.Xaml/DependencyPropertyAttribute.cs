@@ -117,7 +117,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
         // TODO: Aspect tests for eligibility.
 
         builder.MustNotBeStatic();
-        
+
         // ReSharper disable once RedundantNameQualifier
         builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
         builder.MustBeReadable();

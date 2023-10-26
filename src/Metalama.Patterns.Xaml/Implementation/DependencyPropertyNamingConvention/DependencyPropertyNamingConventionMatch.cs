@@ -22,16 +22,16 @@ internal sealed record DependencyPropertyNamingConventionMatch(
     bool RequirePropertyChangedMatch = false,
     bool RequireValidateMatch = false ) : INamingConventionMatch
 {
-    public bool Success =>
-        !string.IsNullOrWhiteSpace( this.DependencyPropertyName )
-        && !string.IsNullOrWhiteSpace( this.RegistrationFieldName )
-        && this.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success
-        && (this.PropertyChangingMatch.Outcome == DeclarationMatchOutcome.Success
-            || (this.RequirePropertyChangingMatch == false && this.PropertyChangingMatch.Outcome == DeclarationMatchOutcome.NotFound))
-        && (this.PropertyChangedMatch.Outcome == DeclarationMatchOutcome.Success
-            || (this.RequirePropertyChangedMatch == false && this.PropertyChangedMatch.Outcome == DeclarationMatchOutcome.NotFound))
-        && (this.ValidateMatch.Outcome == DeclarationMatchOutcome.Success
-            || (this.RequireValidateMatch == false && this.ValidateMatch.Outcome == DeclarationMatchOutcome.NotFound));
+    public bool Success
+        => !string.IsNullOrWhiteSpace( this.DependencyPropertyName )
+           && !string.IsNullOrWhiteSpace( this.RegistrationFieldName )
+           && this.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success
+           && (this.PropertyChangingMatch.Outcome == DeclarationMatchOutcome.Success
+               || (this.RequirePropertyChangingMatch == false && this.PropertyChangingMatch.Outcome == DeclarationMatchOutcome.NotFound))
+           && (this.PropertyChangedMatch.Outcome == DeclarationMatchOutcome.Success
+               || (this.RequirePropertyChangedMatch == false && this.PropertyChangedMatch.Outcome == DeclarationMatchOutcome.NotFound))
+           && (this.ValidateMatch.Outcome == DeclarationMatchOutcome.Success
+               || (this.RequireValidateMatch == false && this.ValidateMatch.Outcome == DeclarationMatchOutcome.NotFound));
 
     private static readonly IReadOnlyList<string> _registrationFieldCategories = new[] { DependencyPropertyAspectBuilder._registrationFieldCategory };
     private static readonly IReadOnlyList<string> _propertyChangingCategories = new[] { DependencyPropertyAspectBuilder._propertyChangingMethodCategory };

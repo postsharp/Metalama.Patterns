@@ -9,7 +9,8 @@ namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConventi
 [CompileTime]
 internal static class DependencyPropertyNamingConventionHelper
 {
-    public static DependencyPropertyNamingConventionMatch Match<TMatchPropertyChangingNamePredicate, TMatchPropertyChangedNamePredicate, TMatchValidateNamePredicate>(
+    public static DependencyPropertyNamingConventionMatch Match<TMatchPropertyChangingNamePredicate, TMatchPropertyChangedNamePredicate,
+                                                                TMatchValidateNamePredicate>(
         INamingConvention namingConvention,
         IProperty targetProperty,
         InspectedDeclarationsAdder inspectedDeclarations,
@@ -32,6 +33,7 @@ internal static class DependencyPropertyNamingConventionHelper
             var signature = GetChangeHandlerSignature( method, targetProperty, assets, false );
             var isValid = signature != ChangeHandlerSignatureKind.Invalid;
             inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangingMethodCategory );
+
             return new IsValidResult<ChangeHandlerSignatureKind>( isValid, signature );
         }
 
@@ -40,6 +42,7 @@ internal static class DependencyPropertyNamingConventionHelper
             var signature = GetChangeHandlerSignature( method, targetProperty, assets, true );
             var isValid = signature != ChangeHandlerSignatureKind.Invalid;
             inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangedMethodCategory );
+
             return new IsValidResult<ChangeHandlerSignatureKind>( isValid, signature );
         }
 
@@ -48,6 +51,7 @@ internal static class DependencyPropertyNamingConventionHelper
             var signature = GetValidationHandlerSignature( method, targetProperty, assets );
             var isValid = signature != ValidationHandlerSignatureKind.Invalid;
             inspectedDeclarations.Add( method, isValid, DependencyPropertyAspectBuilder._propertyChangedMethodCategory );
+
             return new IsValidResult<ValidationHandlerSignatureKind>( isValid, signature );
         }
 

@@ -14,7 +14,7 @@ internal sealed class NamingConventionRegistration<T> : IIncrementalKeyedCollect
     {
         if ( string.IsNullOrWhiteSpace( key ) )
         {
-            throw new ArgumentException( "Must not be null, empty or only white space.", nameof( key ) );
+            throw new ArgumentException( "Must not be null, empty or only white space.", nameof(key) );
         }
 
         this.Key = key;
@@ -27,6 +27,7 @@ internal sealed class NamingConventionRegistration<T> : IIncrementalKeyedCollect
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (NamingConventionRegistration<T>) changes;
+
         return new NamingConventionRegistration<T>( this.Key, other.NamingConvention ?? this.NamingConvention, other.Priority ?? this.Priority );
     }
 

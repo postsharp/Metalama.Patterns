@@ -37,6 +37,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         this._propertyName = builder.Target.Name;
         this._options = builder.Target.Enhancements().GetOptions<DependencyPropertyOptions>();
     }
+
     public void Build()
     {
         var builder = this._builder;
@@ -44,7 +45,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var declaringType = target.DeclaringType;
         var options = target.Enhancements().GetOptions<DependencyPropertyOptions>();
 
-        var hasExplicitNaming = this._attribute.PropertyChangingMethod != null || this._attribute.PropertyChangedMethod != null || this._attribute.ValidateMethod != null;
+        var hasExplicitNaming = this._attribute.PropertyChangingMethod != null || this._attribute.PropertyChangedMethod != null
+                                                                               || this._attribute.ValidateMethod != null;
 
         var ncResult = hasExplicitNaming
             ? NamingConventionEvaluator.Evaluate(
@@ -59,7 +61,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         ncResult.ReportDiagnostics( new DiagnosticReporter( builder ) );
 
         var successfulMatch = ncResult.SuccessfulMatch?.Match;
-        
+
         // NB: WPF convention requires a specific field name, so we don't try to find an unused name.
 
         IIntroductionAdviceResult<IField>? introduceRegistrationFieldResult = null;
@@ -96,7 +98,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             {
                 this._builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, onChangingMethod );
             }
-            
+
             if ( onChangedMethod != null )
             {
                 this._builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, onChangedMethod );
@@ -119,13 +121,13 @@ internal sealed partial class DependencyPropertyAspectBuilder
         }
 
         /* Regarding setting the initial value, the PostSharp implementation takes care to:
-         * 
+         *
          * - Only set the initial value when definitely supplied via an initializer and not when supplied via the DefaultValue property of the aspect.
          * - Set the initial value using DependencyObject.SetCurrentValue ("otherwise we override value coming from templates").
          * - Suspend enforcement of contracts and explicit validation around that call.
-         * 
+         *
          * See also https://tp.postsharp.net/entity/26136-dependencyproperty-values-are-not-set-when
-         * 
+         *
          * TG: My understanding from a Metalama perspective is that we have easy access and control of the initializer expression, and it can be used
          * to provide the PropertyMetadata.DefaultValue. PostSharp could not do this, so it provided the DefaultValue attribute property as a
          * compromised alternative (only constant default values can be provided that way). So in ML, we should not need the Start/StopIgnoringContracts

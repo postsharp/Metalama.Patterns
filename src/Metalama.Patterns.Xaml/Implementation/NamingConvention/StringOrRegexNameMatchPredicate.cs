@@ -13,17 +13,17 @@ internal readonly struct StringOrRegexNameMatchPredicate : INameMatchPredicate
 
     public StringOrRegexNameMatchPredicate( Regex matchName )
     {
-        this._matchName = matchName ?? throw new ArgumentNullException( nameof( matchName ) );
+        this._matchName = matchName ?? throw new ArgumentNullException( nameof(matchName) );
     }
 
     public StringOrRegexNameMatchPredicate( string name )
     {
-        this._name = name ?? throw new ArgumentNullException( nameof( name ) );
+        this._name = name ?? throw new ArgumentNullException( nameof(name) );
     }
 
     public StringOrRegexNameMatchPredicate( string? name, Regex? matchName )
     {
-        if ( name == null == ( matchName == null ))
+        if ( name == null == (matchName == null) )
         {
             throw new ArgumentException( "Exactly one of name and matchName must be specified." );
         }

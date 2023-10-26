@@ -12,6 +12,7 @@ internal static class StringHelper
         if ( s.StartsWith( trim, stringComparison ) )
         {
             s = s.Substring( trim.Length );
+
             return true;
         }
 
@@ -23,6 +24,7 @@ internal static class StringHelper
         if ( s.EndsWith( trim, stringComparison ) )
         {
             s = s.Substring( 0, s.Length - trim.Length );
+
             return true;
         }
 

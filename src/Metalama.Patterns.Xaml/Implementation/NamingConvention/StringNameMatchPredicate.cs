@@ -11,7 +11,7 @@ internal readonly struct StringNameMatchPredicate : INameMatchPredicate
 
     public StringNameMatchPredicate( string name )
     {
-        this._name = name ?? throw new ArgumentNullException( nameof( name ) );
+        this._name = name ?? throw new ArgumentNullException( nameof(name) );
     }
 
     public void GetCandidateNames( out string? singleValue, out IEnumerable<string>? collection )

@@ -32,7 +32,8 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
             executeMethod,
             inspectedDeclarations,
             commandPropertyName,
-            new StringNameMatchPredicate( this._canExecuteMethodName ?? this._canExecutePropertyName ?? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) ),
+            new StringNameMatchPredicate(
+                this._canExecuteMethodName ?? this._canExecutePropertyName ?? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) ),
             considerMethod: this._canExecuteMethodName != null || this._canExecutePropertyName == null,
             considerProperty: this._canExecutePropertyName != null || this._canExecuteMethodName == null,
             requireCanExecuteMatch: this._canExecuteMethodName != null || this._canExecutePropertyName != null );

@@ -80,7 +80,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
     void IEligible<IMethod>.BuildEligibility( IEligibilityBuilder<IMethod> builder )
     {
-        builder.ReturnType().MustBe( typeof( void ) );
+        builder.ReturnType().MustBe( typeof(void) );
         builder.MustSatisfy( m => m.Parameters.Count is 0 or 1, m => $"{m} must have zero or one parameter" );
         builder.MustNotHaveRefOrOutParameter();
         builder.MustSatisfy( m => m.TypeParameters.Count == 0, m => $"{m} must not be generic" );
@@ -104,7 +104,9 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
         var hasExplicitCanExecuteNaming = this.CanExecuteMethod != null || this.CanExecuteProperty != null;
 
         var ncResult = hasExplicitCanExecuteNaming
-            ? NamingConventionEvaluator.Evaluate( new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ), target )
+            ? NamingConventionEvaluator.Evaluate(
+                new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ),
+                target )
             : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
 
         ncResult.ReportDiagnostics( new DiagnosticReporter( builder ) );
@@ -125,10 +127,12 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
                 case IProperty property:
                     canExecuteProperty = property;
+
                     break;
 
                 case IMethod method:
                     canExecuteMethod = method;
+
                     break;
 
                 default:
@@ -136,7 +140,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             }
 
             var introducePropertyResult = builder.Advice.IntroduceProperty(
-                declaringType,                    
+                declaringType,
                 nameof(CommandProperty),
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
@@ -158,7 +162,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             else
             {
                 canTransform = false;
-            }                    
+            }
         }
         else
         {

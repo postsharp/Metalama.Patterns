@@ -90,27 +90,27 @@ public sealed class CommandOptionsBuilder
         this._options = this._options with
         {
             NamingConventionRegistrations =
-                this._options.NamingConventionRegistrations.AddOrApplyChanges(
-                    new NamingConventionRegistration<ICommandNamingConvention>(
-                        key,
-                        new RegexCommandNamingConvention(
-                            diagnosticName,
-                            matchCommandName,
-                            commandPropertyNamePattern,
-                            matchCanExecute,
-                            requireCanExecuteMatch ?? matchCanExecute != null,
-                            considerCanExecuteMethod,
-                            considerCanExecuteProperty ),
-                        priority ) )
+            this._options.NamingConventionRegistrations.AddOrApplyChanges(
+                new NamingConventionRegistration<ICommandNamingConvention>(
+                    key,
+                    new RegexCommandNamingConvention(
+                        diagnosticName,
+                        matchCommandName,
+                        commandPropertyNamePattern,
+                        matchCanExecute,
+                        requireCanExecuteMatch ?? matchCanExecute != null,
+                        considerCanExecuteMethod,
+                        considerCanExecuteProperty ),
+                    priority ) )
         };
     }
-    
+
     public void SetNamingConventionPriority( string key, int priority )
     {
         this._options = this._options with
         {
             NamingConventionRegistrations =
-                this._options.NamingConventionRegistrations.AddOrApplyChanges( new NamingConventionRegistration<ICommandNamingConvention>( key, null, priority ) )
+            this._options.NamingConventionRegistrations.AddOrApplyChanges( new NamingConventionRegistration<ICommandNamingConvention>( key, null, priority ) )
         };
     }
 
@@ -119,7 +119,7 @@ public sealed class CommandOptionsBuilder
         this._options = this._options with
         {
             NamingConventionRegistrations =
-                this._options.NamingConventionRegistrations.Remove( key )
+            this._options.NamingConventionRegistrations.Remove( key )
         };
     }
 
@@ -131,9 +131,9 @@ public sealed class CommandOptionsBuilder
         this._options = this._options with
         {
             NamingConventionRegistrations =
-                this._options.NamingConventionRegistrations
-                    .ApplyChanges( IncrementalKeyedCollection.Clear<string, NamingConventionRegistration<ICommandNamingConvention>>(), default )
-                    .AddOrApplyChanges( CommandOptions.DefaultNamingConventionRegistrations() )
+            this._options.NamingConventionRegistrations
+                .ApplyChanges( IncrementalKeyedCollection.Clear<string, NamingConventionRegistration<ICommandNamingConvention>>(), default )
+                .AddOrApplyChanges( CommandOptions.DefaultNamingConventionRegistrations() )
         };
     }
 

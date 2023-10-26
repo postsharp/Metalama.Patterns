@@ -8,6 +8,4 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
 [CompileTime]
-internal interface IDependencyPropertyNamingConvention : INamingConvention<IProperty, DependencyPropertyNamingConventionMatch>, ICompileTimeSerializable
-{
-}
+internal interface IDependencyPropertyNamingConvention : INamingConvention<IProperty, DependencyPropertyNamingConventionMatch>, ICompileTimeSerializable { }

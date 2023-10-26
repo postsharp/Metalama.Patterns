@@ -11,7 +11,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
 {
     private readonly IAspectBuilder _builder;
 
-    protected BaseDiagnosticReporter(IAspectBuilder builder)
+    protected BaseDiagnosticReporter( IAspectBuilder builder )
     {
         this._builder = builder;
     }
@@ -33,28 +33,31 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
         this._builder.Diagnostics.Report(
             Diagnostics.WarningValidCandidateDeclarationIsAmbiguous.WithArguments(
                 (
-                inspectedDeclaration.Declaration.DeclarationKind,
-                inspectedDeclaration.Category,
-                this.GetTargetDeclarationDescription( inspectedDeclaration ),
-                this._builder.Target,
-                isRequired ? "as required " : null,
-                namingConvention.DiagnosticName
+                    inspectedDeclaration.Declaration.DeclarationKind,
+                    inspectedDeclaration.Category,
+                    this.GetTargetDeclarationDescription( inspectedDeclaration ),
+                    this._builder.Target,
+                    isRequired ? "as required " : null,
+                    namingConvention.DiagnosticName
                 ) ),
             inspectedDeclaration.Declaration );
     }
 
-    void IDiagnosticReporter.ReportConflictingDeclaration( INamingConvention namingConvention, IDeclaration conflictingDeclaration, IEnumerable<string> applicableCategories, bool isRequired )
+    void IDiagnosticReporter.ReportConflictingDeclaration(
+        INamingConvention namingConvention,
+        IDeclaration conflictingDeclaration,
+        IEnumerable<string> applicableCategories,
+        bool isRequired )
     {
         this._builder.Diagnostics.Report(
             Diagnostics.WarningExistingMemberNameConflict.WithArguments(
                 (
-                conflictingDeclaration.DeclarationKind, 
-                conflictingDeclaration, 
-                (this._builder.Target as IMemberOrNamedType)?.DeclaringType!, 
-                isRequired ? "required " : null,
-                applicableCategories.PrettyList( " or " ), 
-                namingConvention.DiagnosticName)
-                ) );
+                    conflictingDeclaration.DeclarationKind,
+                    conflictingDeclaration,
+                    (this._builder.Target as IMemberOrNamedType)?.DeclaringType!,
+                    isRequired ? "required " : null,
+                    applicableCategories.PrettyList( " or " ),
+                    namingConvention.DiagnosticName) ) );
     }
 
     void IDiagnosticReporter.ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration, bool isRequired )
@@ -62,21 +65,25 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
         this._builder.Diagnostics.Report(
             Diagnostics.WarningInvalidCandidateDeclarationSignature.WithArguments(
                 (
-                inspectedDeclaration.Declaration.DeclarationKind,
-                inspectedDeclaration.Category,
-                this.GetTargetDeclarationDescription( inspectedDeclaration ),
-                this._builder.Target,
-                isRequired ? "as required " : null,
-                namingConvention.DiagnosticName,
-                this.GetInvalidityReason( inspectedDeclaration )
+                    inspectedDeclaration.Declaration.DeclarationKind,
+                    inspectedDeclaration.Category,
+                    this.GetTargetDeclarationDescription( inspectedDeclaration ),
+                    this._builder.Target,
+                    isRequired ? "as required " : null,
+                    namingConvention.DiagnosticName,
+                    this.GetInvalidityReason( inspectedDeclaration )
                 ) ),
             inspectedDeclaration.Declaration );
     }
 
-    void IDiagnosticReporter.ReportDeclarationNotFound( INamingConvention namingConvention, IEnumerable<string> candidateNames, IEnumerable<string> applicableCategories, bool isRequired )
+    void IDiagnosticReporter.ReportDeclarationNotFound(
+        INamingConvention namingConvention,
+        IEnumerable<string> candidateNames,
+        IEnumerable<string> applicableCategories,
+        bool isRequired )
     {
         var candidateNamesList = candidateNames.PrettyList( " or ", out var candidateNamesPlurality, '\'' );
-        
+
         this._builder.Diagnostics.Report(
             Diagnostics.WarningCandidateNamesNotFound.WithArguments(
                 (
@@ -91,7 +98,8 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
     void IDiagnosticReporter.ReportNoNamingConventionMatched( IEnumerable<INamingConvention> namingConventionsTried )
     {
         this._builder.Diagnostics.Report(
-            Diagnostics.ErrorNoNamingConventionMatched.WithArguments( (namingConventionsTried.Select( nc => nc.DiagnosticName ).PrettyList( " and ", out var plurality ), plurality == 2 ? "s" : null) ) );
+            Diagnostics.ErrorNoNamingConventionMatched.WithArguments(
+                (namingConventionsTried.Select( nc => nc.DiagnosticName ).PrettyList( " and ", out var plurality ), plurality == 2 ? "s" : null) ) );
     }
 
     void IDiagnosticReporter.ReportNoConfiguredNamingConventions()
