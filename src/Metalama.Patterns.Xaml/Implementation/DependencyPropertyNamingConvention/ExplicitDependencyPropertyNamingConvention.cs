@@ -36,6 +36,7 @@ internal class ExplicitDependencyPropertyNamingConvention : IDependencyPropertyN
             this,
             targetProperty,
             inspectedDeclarations,
+            propertyName,
             this._registrationFieldName ?? DefaultDependencyPropertyNamingConvention.GetRegistrationFieldNameFromPropertyName( propertyName ),
             new StringNameMatchPredicate( this._propertyChangingMethodName ?? DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName( propertyName ) ),
             new StringNameMatchPredicate( this._propertyChangedMethodName ?? DefaultDependencyPropertyNamingConvention.GetPropertyChangedMethodNameFromPropertyName( propertyName ) ),

@@ -143,7 +143,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 {
                     dependencyPropertyField = introduceRegistrationFieldResult.Declaration,
                     options = this._options,
-                    propertyName = this._propertyName,
+                    propertyName = successfulMatch.DependencyPropertyName,
                     propertyType = this._propertyType,
                     declaringType = this._declaringType,
                     defaultValueExpr = this._builder.Target.InitializerExpression,

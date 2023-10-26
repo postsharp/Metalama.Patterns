@@ -12,11 +12,11 @@ internal interface IDiagnosticReporter
 
     void ReportNoConfiguredNamingConventions();
 
-    void ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration );
+    void ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration, bool isRequired );
 
-    void ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration );
+    void ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration, bool isRequired );
 
-    void ReportConflictingDeclaration( INamingConvention namingConvention, IDeclaration conflictingDeclaration, IEnumerable<string> applicableCategories );
+    void ReportConflictingDeclaration( INamingConvention namingConvention, IDeclaration conflictingDeclaration, IEnumerable<string> applicableCategories, bool isRequired );
 
-    void ReportDeclarationNotFound( INamingConvention namingConvention, IEnumerable<string> candidateNames, IEnumerable<string> applicableCategories );
+    void ReportDeclarationNotFound( INamingConvention namingConvention, IEnumerable<string> candidateNames, IEnumerable<string> applicableCategories, bool isRequired );
 }

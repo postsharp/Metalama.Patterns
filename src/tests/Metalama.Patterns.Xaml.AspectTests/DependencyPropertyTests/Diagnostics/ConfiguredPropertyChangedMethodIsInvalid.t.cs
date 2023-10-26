@@ -1,4 +1,4 @@
 // Error LAMA5207 on `Foo`: `No match was found using the explicitly-configured naming convention. See other warnings for details.`
 // Warning LAMA5206 on `Foo`: `No property-changing method was found using the explicitly-configured naming convention, with candidate member name 'OnFooChanging'.`
 // Warning LAMA5206 on `Foo`: `No validate method was found using the explicitly-configured naming convention, with candidate member name 'ValidateFoo'.`
-// Warning LAMA5204 on `Changed`: `The method was identified as a candidate property-changed method for [DependencyProperty] property ConfiguredPropertyChangedMethodIsInvalid.Foo by the explicitly-configured naming convention, but the signature is not valid. Refer to documentation for supported method signatures.`
+// Warning LAMA5204 on `Changed`: `The method was identified as a candidate property-changed method for [DependencyProperty] property ConfiguredPropertyChangedMethodIsInvalid.Foo as required by the explicitly-configured naming convention, but the signature is not valid. Refer to documentation for supported method signatures.`

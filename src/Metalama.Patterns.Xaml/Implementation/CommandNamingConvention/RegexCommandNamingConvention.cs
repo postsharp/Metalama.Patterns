@@ -11,16 +11,15 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 [CompileTime]
 internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
 {
-    private readonly string _conventionName;
     private readonly string? _matchCommandName;
-    private readonly string _commandPropertyNamePattern;
-    private readonly string _matchCanExecuteName;
+    private readonly string? _commandPropertyPattern;
+    private readonly string? _matchCanExecute;
     private readonly bool _requireCanExecuteMatch;
     private readonly bool _considerCanExecuteMethod;
     private readonly bool _considerCanExecuteProperty;
 
     public const string CommandNameGroup = "CommandName";
-    public const string CommandNameToken = "$" + CommandNameGroup + "$";
+    public const string CommandNameToken = "$CommandName$";
 
     [NonCompileTimeSerialized]
     private Regex? _matchCommandNameRegex;
@@ -28,33 +27,43 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
     /// <summary>
     /// Initializes a new instance of the <see cref="RegexCommandNamingConvention"/> class.
     /// </summary>
-    /// <param name="conventionName">A short name describing the convention. This is used when reporting diagnostics.</param>
+    /// <param name="diagnosticName">A short name describing the convention, used when reporting diagnostics.</param>
     /// <param name="matchCommandName">
-    /// A regex match expression that will be evaluated against the name of the method upon which <see cref="CommandAttribute"/> is applied. 
+    /// A regex match expression that will be evaluated against the name of the target method of the <see cref="CommandAttribute"/> aspect. 
     /// The expression should yield a match group named <see cref="CommandNameGroup"/>. If <paramref name="matchCommandName"/> is <see langword="null"/>,
     /// the name produced by <see cref="DefaultCommandNamingConvention.GetCommandNameFromExecuteMethodName(string)"/> is used.
     /// </param>
-    /// <param name="commandPropertyNamePattern">
-    /// The name of the command property. A string in which the substring <see cref="CommandNameToken"/> will be replaced with the command name.
+    /// <param name="commandPropertyPattern">
+    /// The name of the command property to be introduced. A string in which the substring <see cref="CommandNameToken"/> will be replaced with the
+    /// command name determined according to <paramref name="matchCommandName"/>. If <paramref name="commandPropertyPattern"/> is <see langword="null"/>,
+    /// the name produced by <see cref="DefaultCommandNamingConvention.GetCommandPropertyNameFromCommandName(string)"/> is used.
     /// </param>
-    /// <param name="matchCanExecuteName">
-    /// A regex match expression that will be evauluated against method and/or property names to locate candidate can-execute members. 
-    /// All occurences of the substring <see cref="CommandNameToken"/> in <paramref name="matchCanExecuteName"/> will be replaced with the command name
-    /// before the expression is evaluated.
+    /// <param name="matchCanExecute">
+    /// <para>
+    /// A regex match expression that will be evauluated against method and/or property names to identify candidate can-execute members. 
+    /// All occurences of the substring <see cref="CommandNameToken"/> in <paramref name="matchCanExecute"/> will be replaced with the command name
+    /// determined according to <paramref name="matchCommandName"/> before the expression is evaluated.
+    /// </para>
+    /// <para>
+    /// If <paramref name="matchCanExecute"/> is <see langword="null"/>, the name produced by
+    /// <see cref="DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName(string)"/> is matched.
+    /// </para>
     /// </param>
+    /// <param name="requireCanExecuteMatch">If <see langword="true"/> (the default), a mathcing can-execute method or property is required
+    /// for a match to be considered successful.</param>
     /// <param name="considerCanExecuteMethod">
-    /// If <see langword="true"/> (the default), can-execute methods named according to <paramref name="matchCanExecuteName"/> will be considered.
+    /// If <see langword="true"/> (the default), can-execute methods named according to <paramref name="matchCanExecute"/> will be considered.
     /// At least one of <paramref name="considerCanExecuteMethod"/> and <paramref name="considerCanExecuteProperty"/> must be <see langword="true"/>.
     /// </param>
     /// <param name="considerCanExecuteProperty">
-    /// If <see langword="true"/> (the default), a can-execute property named according to <paramref name="matchCanExecuteName"/> will be considered.
+    /// If <see langword="true"/> (the default), a can-execute property named according to <paramref name="matchCanExecute"/> will be considered.
     /// At least one of <paramref name="considerCanExecuteMethod"/> and <paramref name="considerCanExecuteProperty"/> must be <see langword="true"/>.
     /// </param>
     public RegexCommandNamingConvention(
-        string conventionName,
+        string diagnosticName,
         string? matchCommandName,
-        string commandPropertyNamePattern,
-        string matchCanExecuteName,
+        string? commandPropertyPattern,
+        string? matchCanExecute,
         bool requireCanExecuteMatch = true,
         bool considerCanExecuteMethod = true,
         bool considerCanExecuteProperty = true )
@@ -64,16 +73,21 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
             throw new ArgumentException( "At least one of " + nameof( considerCanExecuteMethod ) + " and " + nameof( considerCanExecuteProperty ) + " must be true." );
         }
 
-        this._conventionName = conventionName ?? throw new ArgumentNullException( nameof( conventionName ) );
+        if ( string.IsNullOrWhiteSpace( diagnosticName ) )
+        {
+            throw new ArgumentException( "Must not be null, empty or only white space.", nameof( diagnosticName ) );
+        }
+
+        this.DiagnosticName = diagnosticName;
         this._matchCommandName = matchCommandName;
-        this._commandPropertyNamePattern = commandPropertyNamePattern ?? throw new ArgumentNullException( nameof( commandPropertyNamePattern ) );
-        this._matchCanExecuteName = matchCanExecuteName ?? throw new ArgumentNullException ( nameof( matchCanExecuteName ) );
+        this._commandPropertyPattern = commandPropertyPattern;
+        this._matchCanExecute = matchCanExecute;
         this._requireCanExecuteMatch = requireCanExecuteMatch;
         this._considerCanExecuteMethod = considerCanExecuteMethod;
         this._considerCanExecuteProperty = considerCanExecuteProperty;
     }
 
-    public string DiagnosticName => $"'{this._conventionName}' regex";
+    public string DiagnosticName { get; }
     
     public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
     {
@@ -106,27 +120,23 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
 #if NETCOREAPP
 #pragma warning disable CA1307 // Specify StringComparison for clarity
 #endif
-        var commandPropertyName = this._commandPropertyNamePattern.Replace( CommandNameToken, commandName );
+        var commandPropertyName = this._commandPropertyPattern != null
+            ? this._commandPropertyPattern.Replace( CommandNameToken, commandName )
+            : DefaultCommandNamingConvention.GetCommandPropertyNameFromCommandName( commandName );
+        
+        var matchCanExecuteName = this._matchCanExecute?.Replace( CommandNameToken, commandName );
 #if NETCOREAPP
 #pragma warning restore CA1307 // Specify StringComparison for clarity
 #endif
-
-#if NETCOREAPP
-#pragma warning disable CA1307 // Specify StringComparison for clarity
-#endif
-        var matchCanExecuteName = this._matchCanExecuteName.Replace( CommandNameToken, commandName );
-#if NETCOREAPP
-#pragma warning restore CA1307 // Specify StringComparison for clarity
-#endif
-
-        var matchCanExecuteNameRegex = new Regex( matchCanExecuteName );
 
         return CommandNamingConventionHelper.Match(
             this,
             executeMethod,
             inspectedDeclarations,
             commandPropertyName,
-            new RegexNameMatchPredicate( matchCanExecuteNameRegex ),
+            new StringOrRegexNameMatchPredicate(
+                matchCanExecuteName == null ? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) : null,
+                matchCanExecuteName != null ? new Regex( matchCanExecuteName ) : null ),
             considerMethod: this._considerCanExecuteMethod,
             considerProperty: this._considerCanExecuteProperty,
             requireCanExecuteMatch: this._requireCanExecuteMatch );

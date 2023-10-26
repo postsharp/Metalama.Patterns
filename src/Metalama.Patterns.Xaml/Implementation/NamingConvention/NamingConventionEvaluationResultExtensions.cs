@@ -25,8 +25,8 @@ internal static class NamingConventionEvaluationResultExtensions
                     foreach ( var inspectedDeclaration in this.InspectedDeclarations )
                     {
                         if ( inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
-                        {
-                            this.DiagnosticReporter.ReportAmbiguousDeclaration( this.NamingConvention, inspectedDeclaration );
+                        {                            
+                            this.DiagnosticReporter.ReportAmbiguousDeclaration( this.NamingConvention, inspectedDeclaration, isRequired );
                         }
                     }
 
@@ -38,7 +38,7 @@ internal static class NamingConventionEvaluationResultExtensions
                     {
                         if ( !inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
                         {
-                            this.DiagnosticReporter.ReportInvalidDeclaration( this.NamingConvention, inspectedDeclaration );
+                            this.DiagnosticReporter.ReportInvalidDeclaration( this.NamingConvention, inspectedDeclaration, isRequired );
                         }
                     }
 
@@ -48,14 +48,14 @@ internal static class NamingConventionEvaluationResultExtensions
 
                     if ( match.HasCandidateNames )
                     {
-                        this.DiagnosticReporter.ReportDeclarationNotFound( this.NamingConvention, match.CandidateNames, applicableCategories );
+                        this.DiagnosticReporter.ReportDeclarationNotFound( this.NamingConvention, match.CandidateNames, applicableCategories, isRequired );
                     }
 
                     break;
 
                 case DeclarationMatchOutcome.Conflict:
 
-                    this.DiagnosticReporter.ReportConflictingDeclaration( this.NamingConvention, match.Declaration, applicableCategories );
+                    this.DiagnosticReporter.ReportConflictingDeclaration( this.NamingConvention, match.Declaration, applicableCategories, isRequired );
                     
                     break;
             }

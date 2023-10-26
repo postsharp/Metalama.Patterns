@@ -11,7 +11,6 @@ using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using Metalama.Patterns.Xaml.Options;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows.Input;
 
 // TODO: Skip [Observable] on [Command]-targeted auto properties. No functional impact, would just avoid unnecessary generated code.

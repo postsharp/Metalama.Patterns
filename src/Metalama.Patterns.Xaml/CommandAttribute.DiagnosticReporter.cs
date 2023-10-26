@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Xaml;
 public sealed partial class CommandAttribute
 {
     [CompileTime]
-    private sealed class DiagnosticReporter : DiagnosticReporterBase
+    private sealed class DiagnosticReporter : BaseDiagnosticReporter
     {
         public DiagnosticReporter( IAspectBuilder builder ) : base( builder )
         {

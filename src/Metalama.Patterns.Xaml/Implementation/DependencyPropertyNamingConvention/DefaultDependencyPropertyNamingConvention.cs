@@ -21,6 +21,7 @@ internal sealed class DefaultDependencyPropertyNamingConvention : IDependencyPro
             this,
             targetProperty,
             inspectedDeclarations,
+            propertyName,
             GetRegistrationFieldNameFromPropertyName( propertyName ),
             new StringNameMatchPredicate( GetPropertyChangingMethodNameFromPropertyName( propertyName ) ),
             new StringNameMatchPredicate( GetPropertyChangedMethodNameFromPropertyName( propertyName ) ),

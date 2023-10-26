@@ -51,52 +51,52 @@ internal static class Diagnostics
             "Notifiable can-execute property is not public." );
 
     /// <summary>
-    /// The name of existing member {0}, that is defined in or inherited by class {1}, conflicts with the required {2} name deterimed by the {3} naming convention.
+    /// The name of existing {0} {1}, that is defined in or inherited by class {2}, conflicts with the {3}{4} name deterimed by the {5} naming convention.
     /// </summary>
-    public static readonly DiagnosticDefinition<(DeclarationKind ConflictingDeclarationKind, IDeclaration ConflictingDeclaration, INamedType DeclaringType, string IntroducedMemberDescription, string NamingConvention)>
+    public static readonly DiagnosticDefinition<(DeclarationKind ConflictingDeclarationKind, IDeclaration ConflictingDeclaration, INamedType DeclaringType, string? Required, string IntroducedMemberDescription, string NamingConvention)>
         WarningExistingMemberNameConflict =
             new(
                 "LAMA5203",
                 Warning,
-                "The name of existing {0} {1}, that is defined in or inherited by class {2}, conflicts with the required {3} name deterimed by the {4} naming convention.",
+                "The name of existing {0} {1}, that is defined in or inherited by class {2}, conflicts with the {3}{4} name deterimed by the {5} naming convention.",
                 "Existing member conflicts with member to be introduced.",
                 _category );
 
     /// <summary>
     /// To be appplied to each invalid member:
-    /// The {0} was identified as candidate {1} for {2}{3} by the {4} naming convention, but the signature is not valid.{5}
+    /// The {0} was identified as a candidate {1} for {2}{3} {4}by the {5} naming convention, but the signature is not valid.{6}
     /// For example, "The `method` was a candidate `can-execute method` for `[Command] method ``Foo()`, but the signature is not valid.` The method must blah blah.`".
     /// </summary>
-    public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetDeclarationDescription, IDeclaration TargetDeclaration, string NamingConvention, string? InvalidityReason)>
+    public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetDeclarationDescription, IDeclaration TargetDeclaration, string? AsRequired, string NamingConvention, string? InvalidityReason)>
         WarningInvalidCandidateDeclarationSignature =
             new(
                 "LAMA5204",
                 Warning,
-                "The {0} was identified as a candidate {1} for {2}{3} by the {4} naming convention, but the signature is not valid.{5}",
+                "The {0} was identified as a candidate {1} for {2}{3} {4}by the {5} naming convention, but the signature is not valid.{6}",
                 "Invalid candidate member signature.",
                 _category );
 
     /// <summary>
-    /// The {0} was identified as a valid candidate {1} for {2}{3} by the {4} naming convention, but other members also matched.
+    /// The {0} was identified as a valid candidate {1} for {2}{3} {4}by the {5} naming convention, but other members also matched.
     /// </summary>
-    public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetDeclarationDescription, IDeclaration TargetDeclaration, string NamingConvention)>
+    public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetDeclarationDescription, IDeclaration TargetDeclaration, string? AsRequired, string NamingConvention)>
         WarningValidCandidateDeclarationIsAmbiguous =
         new(
             "LAMA5205",
             Warning,
-            "The {0} was identified as a valid candidate {1} for {2}{3} by the {4} naming convention, but other members also matched.",
+            "The {0} was identified as a valid candidate {1} for {2}{3} {4}by the {5} naming convention, but other members also matched.",
             "Ambiguous candidate member.",
             _category );
 
     /// <summary>
-    /// No {0} was found using the {1} naming convention, with candidate member name{2} {3}.
+    /// No {0} was found {1} the {2} naming convention, with candidate member name{3} {4}.
     /// </summary>
-    public static readonly DiagnosticDefinition<(string CandidateDescription, string NamingConvention, string? CandidateNamesPluralSuffix, string CandidateNames)>
+    public static readonly DiagnosticDefinition<(string CandidateDescription, string UsingOrAsRequiredBy, string NamingConvention, string? CandidateNamesPluralSuffix, string CandidateNames)>
         WarningCandidateNamesNotFound =
         new(
             "LAMA5206",
             Warning,
-            "No {0} was found using the {1} naming convention, with candidate member name{2} {3}.",
+            "No {0} was found {1} the {2} naming convention, with candidate member name{3} {4}.",
             "Optional member not found.",
             _category );
 

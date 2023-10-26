@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Xaml.Implementation;
 internal sealed partial class DependencyPropertyAspectBuilder
 {
     [CompileTime]
-    private sealed class DiagnosticReporter : DiagnosticReporterBase
+    private sealed class DiagnosticReporter : BaseDiagnosticReporter
     {
         public DiagnosticReporter( IAspectBuilder builder ) : base( builder )
         {

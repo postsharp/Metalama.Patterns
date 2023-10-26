@@ -9,6 +9,7 @@ namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConventi
 [CompileTime]
 internal sealed record DependencyPropertyNamingConventionMatch(
     INamingConvention NamingConvention,
+    string? DependencyPropertyName,
     string? RegistrationFieldName,
     DeclarationMatch<IMemberOrNamedType> RegistrationFieldConflictMatch,
     DeclarationMatch<IMethod> PropertyChangingMatch,
@@ -22,7 +23,8 @@ internal sealed record DependencyPropertyNamingConventionMatch(
     bool RequireValidateMatch = false ) : INamingConventionMatch
 {
     public bool Success =>
-        !string.IsNullOrWhiteSpace( this.RegistrationFieldName )
+        !string.IsNullOrWhiteSpace( this.DependencyPropertyName )
+        && !string.IsNullOrWhiteSpace( this.RegistrationFieldName )
         && this.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success
         && (this.PropertyChangingMatch.Outcome == DeclarationMatchOutcome.Success
             || (this.RequirePropertyChangingMatch == false && this.PropertyChangingMatch.Outcome == DeclarationMatchOutcome.NotFound))

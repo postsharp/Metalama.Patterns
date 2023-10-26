@@ -8,18 +8,18 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 [CompileTime]
 internal readonly struct RegexNameMatchPredicate : INameMatchPredicate
 {
-    private readonly Regex _regex;
+    private readonly Regex _matchName;
 
-    public RegexNameMatchPredicate( Regex regex )
+    public RegexNameMatchPredicate( Regex matchName )
     {        
-        this._regex = regex;
+        this._matchName = matchName ?? throw new ArgumentNullException( nameof( matchName ) );
     }
 
     public void GetCandidateNames( out string? singleValue, out IEnumerable<string>? collection )
     {
-        singleValue = this._regex.ToString();
+        singleValue = this._matchName.ToString();
         collection = null;
     }
 
-    public bool IsMatch( string name ) => this._regex.IsMatch( name );
+    public bool IsMatch( string name ) => this._matchName.IsMatch( name );
 }

@@ -2,6 +2,9 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Options;
+using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
+using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using System.Windows;
 
 namespace Metalama.Patterns.Xaml.Options;
@@ -10,6 +13,19 @@ namespace Metalama.Patterns.Xaml.Options;
 [CompileTime]
 public sealed class DependencyPropertyOptionsBuilder
 {
+    private DependencyPropertyOptions _options = new();
+
+    /// <summary>
+    /// Gets the key of the default naming convention.
+    /// </summary>
+    public static string DefaultNamingConventionKey => DefaultDependencyPropertyNamingConvention.RegistrationKey;
+
+    public static class Names
+    {
+        public const string NameGroup = RegexDependencyPropertyNamingConvention.NameGroup;
+        public const string NameToken = RegexDependencyPropertyNamingConvention.NameToken;
+    }
+
     /// <summary>
     /// Gets or sets a value indicating whether the property should be registered as a read-only property.
     /// </summary>
@@ -27,68 +43,139 @@ public sealed class DependencyPropertyOptionsBuilder
     /// </summary>
     public bool? InitializerProvidesDefaultValue { get; set; }
 
-    // TODO: Document the valid signatures of PropertyChangedMethod, PropertyChangingMethod and ValidateMethod, see project README.md.
-
     /// <summary>
-    /// Gets or sets the name of the method that will be called when the the property value has changed.
+    /// Adds or updates a naming convention identified by the given <paramref name="key"/>.
     /// </summary>
-    /// <remarks>
+    /// <param name="key">A unique identifier used as a key in the keyed collection of naming conventions.</param>
+    /// <param name="diagnosticName">A short name describing the convention, used when reporting diagnostics.</param>
+    /// <param name="matchName">
+    /// A regex match expression that will be evaluated against the name of the target property of the <see cref="DependencyPropertyAttribute"/> aspect. 
+    /// The expression should yield a match group named <see cref="Names.NameGroup"/>. If <paramref name="matchName"/> is <see langword="null"/>,
+    /// the name of the target property is used.
+    /// </param>
+    /// <param name="registrationFieldPattern">
+    /// The name of the registration field to be introduced. A string in which the substring <see cref="Names.NameToken"/> will be replaced with
+    /// the name as determined according to <paramref name="matchName"/>. If <paramref name="registrationFieldPattern"/> is <see langword="null"/>,
+    /// the name produced by <see cref="DefaultDependencyPropertyNamingConvention.GetRegistrationFieldNameFromPropertyName(string)"/> is used.
+    /// </param>
+    /// <param name="matchPropertyChanging">
     /// <para>
-    /// The method must be declared in the same class as the target property.
+    /// A regex match expression that will be evauluated against method names to identify candidate property-changing methods. 
+    /// All occurences of the substring <see cref="Names.NameToken"/> will be replaced with the name
+    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
-    /// If this property is not set then the default <c>OnFooChanged</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// If <paramref name="matchPropertyChanging"/> is <see langword="null"/>, the name produced by 
+    /// <see cref="DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName(string)"/> is matched.
     /// </para>
-    /// </remarks>
-    public string? PropertyChangedMethod { get; set; }
-
-    /// <summary>
-    /// Gets or sets the name of the method that will be called when the property value is about to change.
-    /// </summary>
-    /// <remarks>
+    /// </param>
+    /// <param name="matchPropertyChanged">
     /// <para>
-    /// The method must be declared in the same class as the target property.
+    /// A regex match expression that will be evauluated against method names to identify candidate property-changed methods. 
+    /// All occurences of the substring <see cref="Names.NameToken"/> will be replaced with the name
+    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
-    /// If this property is not set then the default <c>OnFooChanging</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// If <paramref name="matchPropertyChanged"/> is <see langword="null"/>, the name produced by 
+    /// <see cref="DefaultDependencyPropertyNamingConvention.GetPropertyChangedMethodNameFromPropertyName(string)"/> is matched.
     /// </para>
-    /// </remarks>
-    public string? PropertyChangingMethod { get; set; }
-
-    /// <summary>
-    /// Gets or sets the name of the method that validates the value of the property.
-    /// </summary>
-    /// <remarks>
+    /// </param>
+    /// <param name="matchValidate">
     /// <para>
-    /// The method must be declared in the same class as the target property.
+    /// A regex match expression that will be evauluated against method names to identify candidate validate methods. 
+    /// All occurences of the substring <see cref="Names.NameToken"/> will be replaced with the name
+    /// detemined according to <paramref name="matchName"/> before the expression is evaluated.
     /// </para>
     /// <para>
-    /// If this property is not set then the default <c>ValidateFoo</c> value is used, where <c>Foo</c> is the name of the target property.
+    /// If <paramref name="matchPropertyChanged"/> is <see langword="null"/>, the name produced by 
+    /// <see cref="DefaultDependencyPropertyNamingConvention.GetValidateMethodNameFromPropertyName(string)"/> is matched.
     /// </para>
-    /// </remarks>
-    public string? ValidateMethod { get; set; }
-
-    /// <summary>
-    /// Gets or sets the name of the static readonly field that will be generated to expose the instance of the registered <see cref="DependencyProperty"/>.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// If this property is not set then the default <c>FooProperty</c> value is used, where <c>Foo</c> is the name of the target property.
-    /// </para>
-    /// </remarks>
-    public string? RegistrationField { get; set; }
-
-    internal DependencyPropertyOptions Build()
-        => new()
+    /// </param>
+    /// <param name="priority">
+    /// The priority of the naming convention. The default priority is 0. The system-registered default naming convention has priority 1000. Naming conventions are
+    /// matched in ascending priority. The first successful match is used.
+    /// </param>
+    /// <param name="requirePropertyChangingMatch">
+    /// If <see langword="true"/>, a matching valid unambiguous property-changing method must be found for a match to be considered successful.
+    /// The default value is <see langword="true"/> when <paramref name="matchPropertyChanging"/> is specified, otherwise <see langword="false"/>.
+    /// </param>
+    /// <param name="requirePropertyChangedMatch">
+    /// If <see langword="true"/>, a matching valid unambiguous property-changed method must be found for a match to be considered successful.
+    /// The default value is <see langword="true"/> when <paramref name="matchPropertyChanged"/> is specified, otherwise <see langword="false"/>.
+    /// </param>
+    /// <param name="requireValidateMatch">
+    /// If <see langword="true"/>, a matching valid unambiguous validate method must be found for a match to be considered successful.
+    /// The default value is <see langword="true"/> when <paramref name="matchValidate"/> is specified, otherwise <see langword="false"/>.
+    /// </param>
+    public void ApplyRegexNamingConvention(
+        string key,
+        string diagnosticName,
+        string? matchName,
+        string? registrationFieldPattern,
+        string? matchPropertyChanging,
+        string? matchPropertyChanged,
+        string? matchValidate,
+        int priority = 0,
+        bool? requirePropertyChangingMatch = null,
+        bool? requirePropertyChangedMatch = null,
+        bool? requireValidateMatch = null )
+    {
+        if ( key == DefaultDependencyPropertyNamingConvention.RegistrationKey )
         {
-            IsReadOnly = this.IsReadOnly,
-            InitializerProvidesInitialValue = this.InitializerProvidesInitialValue,
-            InitializerProvidesDefaultValue = this.InitializerProvidesDefaultValue,
-            /*
-            PropertyChangedMethod = this.PropertyChangedMethod,
-            PropertyChangingMethod = this.PropertyChangingMethod,
-            ValidateMethod = this.ValidateMethod,
-            RegistrationField = this.RegistrationField
-            */
+            throw new InvalidOperationException( "The default naming convention cannot be modified." );
+        }
+
+        this._options = this._options with
+        {
+            NamingConventionRegistrations =
+                this._options.NamingConventionRegistrations.AddOrApplyChanges(
+                    new NamingConventionRegistration<IDependencyPropertyNamingConvention>(
+                        key,
+                        new RegexDependencyPropertyNamingConvention(
+                            diagnosticName,
+                            matchName,
+                            registrationFieldPattern,
+                            matchPropertyChanging,
+                            matchPropertyChanged,
+                            matchValidate,
+                            requirePropertyChangingMatch ?? matchPropertyChanging != null,
+                            requirePropertyChangedMatch ?? matchPropertyChanged != null,
+                            requireValidateMatch ?? matchValidate != null ),
+                        priority ) )
         };
+    }
+
+    public void SetNamingConventionPriority( string key, int priority )
+    {
+        this._options = this._options with
+        {
+            NamingConventionRegistrations =
+                this._options.NamingConventionRegistrations.AddOrApplyChanges( new NamingConventionRegistration<IDependencyPropertyNamingConvention>( key, null, priority ) )
+        };
+    }
+
+    public void RemoveNamingConvention( string key )
+    {
+        this._options = this._options with
+        {
+            NamingConventionRegistrations =
+                this._options.NamingConventionRegistrations.Remove( key )
+        };
+    }
+
+    /// <summary>
+    /// Resets naming convention registrations to the default state, removing any user-registered naming conventions.
+    /// </summary>
+    public void ResetNamingConventions()
+    {
+        this._options = this._options with
+        {
+            NamingConventionRegistrations =
+                this._options.NamingConventionRegistrations
+                    .ApplyChanges( IncrementalKeyedCollection.Clear<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(), default )
+                    .AddOrApplyChanges( DependencyPropertyOptions.DefaultNamingConventionRegistrations() )
+        };
+    }
+
+    internal DependencyPropertyOptions Build() => this._options;
 }

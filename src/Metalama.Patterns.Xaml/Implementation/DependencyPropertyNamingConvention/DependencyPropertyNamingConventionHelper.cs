@@ -3,8 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
-using System.Diagnostics;
-using System.Windows;
 
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
@@ -15,6 +13,7 @@ internal static class DependencyPropertyNamingConventionHelper
         INamingConvention namingConvention,
         IProperty targetProperty,
         InspectedDeclarationsAdder inspectedDeclarations,
+        string dependencyPropertyName,
         string registrationFieldName,
         in TMatchPropertyChangingNamePredicate matchPropertyChangingPredicate,
         in TMatchPropertyChangedNamePredicate matchPropertyChangedPredicate,
@@ -76,6 +75,7 @@ internal static class DependencyPropertyNamingConventionHelper
 
         return new DependencyPropertyNamingConventionMatch(
             namingConvention,
+            dependencyPropertyName,
             registrationFieldName,
             registrationFieldConflictMatch,
             findPropertyChangingResult.Match,
