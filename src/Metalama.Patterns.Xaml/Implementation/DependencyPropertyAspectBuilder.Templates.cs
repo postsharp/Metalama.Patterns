@@ -47,7 +47,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
             [CompileTime] IMethod? onChangedMethod,
             [CompileTime] ChangeHandlerSignatureKind onChangedSignatureKind,
             [CompileTime] IMethod? validateMethod,
-            [CompileTime] ValidationHandlerSignatureKind validateSignatureKind )
+            [CompileTime] ValidationHandlerSignatureKind validateSignatureKind,
+            [CompileTime] IMethod? applyContractsMethod )
         {
             /* The PostSharp implementation:
              *
@@ -62,19 +63,23 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 defaultValueExpr = null;
             }
 
-            if ( onChangingMethod != null || onChangedMethod != null || validateMethod != null || defaultValueExpr != null )
+            if ( onChangingMethod != null || onChangedMethod != null || validateMethod != null || defaultValueExpr != null || applyContractsMethod != null )
             {
                 IExpression? coerceValueCallbackExpr = null;
 
-                if ( onChangingMethod != null || validateMethod != null )
+                if ( onChangingMethod != null || validateMethod != null || applyContractsMethod != null )
                 {
                     // As per PostSharp implementation, this callback is used for validation and notifying "changing".
 
-                    // TODO: Integration with Contracts
                     // TODO: Integration with INotifyPropertyChanging
 
                     object CoerceValue( DependencyObject d, object value )
                     {
+                        if ( applyContractsMethod != null )
+                        {
+                            value = applyContractsMethod.Invoke( value )!;
+                        }
+
                         if ( validateMethod != null )
                         {
                             InvokeValidateMethod(
@@ -89,6 +94,10 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
                         if ( onChangingMethod != null )
                         {
+                            // This could be a false positive if applyContractsMethod coerces value to be
+                            // the same as the current value. We don't have the current value to hand, so
+                            // we don't check.
+
                             InvokeChangeMethod(
                                 dependencyPropertyField,
                                 onChangingMethod,
@@ -376,6 +385,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
                     break;
             }
+        }
+
+        [Template]
+        internal static T ApplyContracts<[CompileTime] T>( T value )
+        {
+            return value;
         }
 
         [Template]
