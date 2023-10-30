@@ -9,8 +9,12 @@ using Metalama.Patterns.Xaml.Implementation;
 // TODO: #34040 - Replace all code in this file with the following once [AspectOrder] supports ordering by base types, and remove the project reference to Metalama.Patterns.Contracts.
 // [assembly: AspectOrder( "Metalama.Framework.Aspects.ContractAspect:" + ContractAspect.Layer1Build, "Metalama.Patterns.Xaml.DependencyPropertyAttribute:*", "Metalama.Framework.Aspects.ContractAspect:" + ContractAspect.Layer0Apply )]
 
-[assembly: ApplyProjectAspectOrdering]
-[assembly: AspectOrder( "Metalama.Patterns.Contracts.TrimAttribute:" + ContractAspect.Layer1Build, "Metalama.Patterns.Xaml.DependencyPropertyAttribute:*", "Metalama.Patterns.Contracts.TrimAttribute:" + ContractAspect.Layer0Apply )]
+// TODO: Pending "LAMA0021: A cycle was found..." fix, uncomment the following line:
+// [assembly: ApplyProjectAspectOrdering]
+[assembly: AspectOrder( "Metalama.Patterns.Contracts.TrimAttribute:" + ContractAspect.Layer1Build, "Metalama.Patterns.Xaml.DependencyPropertyAttribute", "Metalama.Patterns.Contracts.TrimAttribute:" + ContractAspect.Layer0Apply )]
+
+// TODO: Pending "LAMA0021: A cycle was found..." fix, remove the following line:
+[assembly: AspectOrder( new string[] { "Metalama.Patterns.Contracts.NotNullAttribute:Layer1Build", "Metalama.Patterns.Xaml.DependencyPropertyAttribute", "Metalama.Patterns.Contracts.NotNullAttribute:Layer0Apply" } )]
 
 namespace Metalama.Patterns.Xaml.Implementation;
 
