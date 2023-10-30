@@ -4,15 +4,15 @@ using Metalama.Framework.Aspects;
 using Metalama.Patterns.Contracts;
 
 [assembly: AspectOrder(
-    typeof(SuspendInvariantsAttribute),
-    typeof(CheckInvariantsAspect),
-    typeof(InvariantAttribute),
-    typeof(NotNullAttribute),
-    typeof(RequiredAttribute),
-    typeof(StringLengthAttribute),
-    typeof(NotEmptyAttribute),
-    typeof(RegularExpressionAttribute),
-    typeof(PhoneAttribute),
-    typeof(EmailAttribute),
-    typeof(UrlAttribute),
-    typeof(CreditCardAttribute) )]
+    "Metalama.Patterns.Contracts." + nameof(SuspendInvariantsAttribute) + ":*",
+    "Metalama.Patterns.Contracts." + nameof(CheckInvariantsAspect) + ":*",
+    "Metalama.Patterns.Contracts." + nameof(InvariantAttribute) + ":*",
+    "Metalama.Patterns.Contracts." + nameof(NotNullAttribute) + ":" + ContractAspect.Layer1Build,
+    "Metalama.Patterns.Contracts." + nameof(RequiredAttribute) + ":" + ContractAspect.Layer1Build,
+    "Metalama.Patterns.Contracts." + nameof(StringLengthAttribute) + ":" + ContractAspect.Layer1Build,
+    "Metalama.Patterns.Contracts." + nameof(NotEmptyAttribute) + ":" + ContractAspect.Layer1Build,
+    "Metalama.Patterns.Contracts." + nameof(RegularExpressionAttribute) + ":" + ContractAspect.Layer1Build,
+    "Metalama.Patterns.Contracts." + nameof(PhoneAttribute) + ":" + ContractAspect.Layer1Build,
+    "Metalama.Patterns.Contracts." + nameof(EmailAttribute) + ":" + ContractAspect.Layer1Build,
+    "Metalama.Patterns.Contracts." + nameof(UrlAttribute) + ":" + ContractAspect.Layer1Build,
+    "Metalama.Patterns.Contracts." + nameof(CreditCardAttribute) + ":" + ContractAspect.Layer1Build )]
