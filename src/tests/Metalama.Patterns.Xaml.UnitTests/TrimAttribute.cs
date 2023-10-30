@@ -11,7 +11,6 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// An example of a contract aspect which mutates the value being validated.
 /// </summary>
-[Layers( Layer0Apply, Layer1Build )]
 public sealed class TrimAttribute : ContractAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
