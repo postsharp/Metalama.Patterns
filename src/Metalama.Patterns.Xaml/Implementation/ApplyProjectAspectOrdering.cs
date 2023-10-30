@@ -27,7 +27,7 @@ internal class ApplyProjectAspectOrdering : Attribute, IAspect<ICompilation>
         var contractAspectType = TypeFactory.GetType( typeof( ContractAspect ) );
         var aspectOrderAttributeType = (INamedType) TypeFactory.GetType( typeof( AspectOrderAttribute ) );
 
-        var mpcAssy = compilation.ReferencedAssemblies.OfName( "Metalama.Patterns.Contracts" ).FirstOrDefault();
+        var mpcAssy = compilation.ReferencedAssemblies.OfName( "Metalama.Patterns.Contracts" ).First();
         
         foreach ( var contractType in mpcAssy.AllTypes.Where( t => !t.IsAbstract && t.ForCompilation( compilation ).Is( contractAspectType ) ) )
         {
@@ -38,7 +38,7 @@ internal class ApplyProjectAspectOrdering : Attribute, IAspect<ICompilation>
                 new object[]
                 {
                     $"{fullName}:{ContractAspect.Layer1Build}",
-                    "Metalama.Patterns.Xaml.DependencyPropertyAttribute:*",
+                    "Metalama.Patterns.Xaml.DependencyPropertyAttribute",
                     $"{fullName}:{ContractAspect.Layer0Apply}"
                 } );
 
