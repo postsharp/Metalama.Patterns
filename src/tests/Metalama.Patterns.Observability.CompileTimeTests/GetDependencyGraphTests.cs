@@ -543,7 +543,7 @@ public class A
   Y
 ";
 
-        diagnostics.Should().Equal( "LAMA5162: Method call is not supported for dependency analysis. (Fn(int))@(12,19)-(12,31)" );
+        diagnostics.Should().Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, Fn(int)))@(12,19)-(12,21)" );
         result.ToString().Should().Be( expected );
     }
 
@@ -634,7 +634,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5162: Method call is not supported for dependency analysis. (A.GetZ())@(12,20)-(12,31)" );
+            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, A.GetZ()))@(12,25)-(12,29)" );
 
         result.ToString().Should().Be( expected );
     }
