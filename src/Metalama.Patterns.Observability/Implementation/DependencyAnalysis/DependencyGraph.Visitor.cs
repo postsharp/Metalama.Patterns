@@ -169,7 +169,8 @@ internal static partial class DependencyGraph
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
-                            .WithArguments( "Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed." ),
+                            .WithArguments(
+                                "Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed." ),
                         symbols[index + 1].Node.GetLocation() );
                 }
             }
@@ -235,7 +236,7 @@ internal static partial class DependencyGraph
 
                     // Skip chains which are not read, but are only the target of an assignment.
 
-                    if ( symbols[symbols.Count - 1].Node.GetAccessKind() is not (AccessKind.Read or AccessKind.ReadWrite) )
+                    if ( symbols[^1].Node.GetAccessKind() is not (AccessKind.Read or AccessKind.ReadWrite) )
                     {
                         continue;
                     }
@@ -247,8 +248,8 @@ internal static partial class DependencyGraph
 
                     var supportedStemAndLeafCount = this.IsLocalInstanceMember( firstSymbol )
                         ? symbols.TakeWhile(
-                            sr => sr.Symbol.Kind == SymbolKind.Property
-                                  || (sr.Symbol.Kind == SymbolKind.Field && sr.Symbol.EffectiveAccessibility() == Accessibility.Private) )
+                                sr => sr.Symbol.Kind == SymbolKind.Property
+                                      || (sr.Symbol.Kind == SymbolKind.Field && sr.Symbol.EffectiveAccessibility() == Accessibility.Private) )
                             .Count()
                         : 0;
 
@@ -259,7 +260,9 @@ internal static partial class DependencyGraph
                         var chainSection =
                             i < supportedStemAndLeafCount - 1
                                 ? ChainSection.Stem
-                                : i < supportedStemAndLeafCount ? ChainSection.Leaf : ChainSection.Unsupported;
+                                : i < supportedStemAndLeafCount
+                                    ? ChainSection.Leaf
+                                    : ChainSection.Unsupported;
 
                         this.ValidateChainSymbol( symbols, i, chainSection );
 
@@ -314,15 +317,17 @@ internal static partial class DependencyGraph
 
         public override void VisitVariableDeclaration( VariableDeclarationSyntax node )
         {
-            // TODO: Allow variables of primitive types only, as this is safe and does not require more complex handling elsewhere. TP-33948
-#if false
-            // TODO: Use more correct diagnostic.
-            this._context.ReportDiagnostic(
-                DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments( "Variable declarations are not supported." ),
-                node.GetLocation() );
+            var symbolInfo = this._semanticModel.GetSymbolInfo( node.Type, this._cancellationToken );
+            var variableType = ((ITypeSymbol?) symbolInfo.Symbol)?.GetElementaryType();
 
-            // Best effort
-#endif
+            if ( variableType != null && !(variableType.IsPrimitiveType( this._assets ) || this._context.IsConfiguredAsSafe( variableType )) )
+            {
+                this._context.ReportDiagnostic(
+                    DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments(
+                        "Variables of types other than primitive types and types configured as safe for dependency analysis are not supported." ),
+                    node.GetLocation() );
+            }
+
             base.VisitVariableDeclaration( node );
         }
 
@@ -398,7 +403,7 @@ internal static partial class DependencyGraph
         {
             var ctx = this._gatherManager.Current;
 
-            var symbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
+            var symbol = this._semanticModel.GetSymbolInfo( node, this._cancellationToken ).Symbol;
 
             if ( symbol != null )
             {
