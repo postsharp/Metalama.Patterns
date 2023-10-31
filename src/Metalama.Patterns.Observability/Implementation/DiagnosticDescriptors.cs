@@ -152,7 +152,7 @@ internal static class DiagnosticDescriptors
             "LAMA5162",
             Warning,
             "{0} {1} cannot be analysed, and has not been configured as safe for dependency analysis. Use [SafeForDependencyAnalysis] or "
-            + nameof( DependencyAnalysisExtensions.ConfigureDependencyAnalysis ) + " via a fabric to configure {0} as safe.",
+            + nameof(DependencyAnalysisExtensions.ConfigureDependencyAnalysis) + " via a fabric to configure {0} as safe.",
             "Method or property is not supported for dependency analysis.",
             _category );
 }

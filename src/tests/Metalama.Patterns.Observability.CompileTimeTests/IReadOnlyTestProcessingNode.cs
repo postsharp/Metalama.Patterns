@@ -6,5 +6,6 @@ using Metalama.Patterns.Observability.Implementation.Graph;
 
 namespace Metalama.Patterns.Observability.CompileTimeTests;
 
+// ReSharper disable once RedundantTypeDeclarationBody
 [CompileTime]
 internal interface IReadOnlyTestProcessingNode : IReadOnlyProcessingNode, INode<IReadOnlyTestProcessingNode> { }

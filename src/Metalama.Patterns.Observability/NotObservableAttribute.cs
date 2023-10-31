@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 namespace Metalama.Patterns.Observability;
 
+// ReSharper disable once RedundantTypeDeclarationBody
 /// <summary>
 /// Custom attribute that, when applied to a property, prevents the <see cref="ObservableAttribute"/> aspect
 /// from raising change notifications for this property.

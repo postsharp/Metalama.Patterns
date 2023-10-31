@@ -4,5 +4,6 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Observability.Implementation.Graph;
 
+// ReSharper disable once RedundantTypeDeclarationBody
 [CompileTime]
 internal interface INode<T> : IHasDepth, IHasChildren<T>, IHasParent<T>, IHasReferencedBy<T> { }
