@@ -7,8 +7,11 @@ namespace Metalama.Patterns.Xaml.Implementation;
 [CompileTime]
 internal enum ValidationHandlerSignatureKind
 {
+    // TODO: cleanup
+    /*
     NotFound,
     Ambiguous,
+    */
     Invalid,
     InstanceValue,
     InstanceDependencyPropertyAndValue,

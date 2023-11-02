@@ -1,1 +1,0 @@
-// Error LAMA5202 on `Foo`: `Class DefaultPropertyChangedMethodIsAmbiguous has more than one method named 'OnFooChanged'. Resolve the ambiguity or configure a different method name using the PropertyChangedMethod option.`
