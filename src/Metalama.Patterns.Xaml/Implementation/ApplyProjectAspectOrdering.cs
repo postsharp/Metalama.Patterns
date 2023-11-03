@@ -37,7 +37,7 @@ internal class ApplyProjectAspectOrdering : Attribute, IAspect<ICompilation>
                 aspectOrderAttributeType,
                 new object[]
                 {
-                    $"{fullName}:{ContractAspect.Layer1Build}",
+                    $"{fullName}:{ContractAspect.BuildLayer}",
                     "Metalama.Patterns.Xaml.DependencyPropertyAttribute",
                     fullName
                 } );

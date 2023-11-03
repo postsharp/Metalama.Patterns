@@ -146,7 +146,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
             applyContractsMethod = result.Declaration;
 
-            builder.Advice.AddAnnotation( target, new ContractAspect.RedirectToProxyParameterAnnotation( applyContractsMethod.Parameters[0] ) );
+            ContractAspect.RedirectContracts( this._builder, target, applyContractsMethod.Parameters[0] );
         }
 
         /* Regarding setting the initial value, the PostSharp implementation takes care to:
