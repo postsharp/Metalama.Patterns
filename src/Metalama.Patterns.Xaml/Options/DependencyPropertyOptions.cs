@@ -2,6 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
+using Metalama.Framework.Serialization;
+using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
+using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
+using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using System.Windows;
 
 namespace Metalama.Patterns.Xaml.Options;
@@ -9,6 +13,17 @@ namespace Metalama.Patterns.Xaml.Options;
 internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>,
                                                    IHierarchicalOptions<IProperty>
 {
+    [NonCompileTimeSerialized]
+#pragma warning disable CS0169 // False positive
+    private IReadOnlyList<IDependencyPropertyNamingConvention>? _namingConventions;
+#pragma warning restore CS0169
+
+    /// <summary>
+    /// Gets the list of naming conventions that can be used to provide names and find members used to implement the <see cref="DependencyPropertyAttribute"/> aspect.
+    /// </summary>
+    public IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>> NamingConventionRegistrations { get; init; } =
+        IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>.Empty;
+
     /// <summary>
     /// Gets a value indicating whether the property should be registered as a read-only property.
     /// </summary>
@@ -26,60 +41,35 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     /// </summary>
     public bool? InitializerProvidesDefaultValue { get; init; }
 
-    // TODO: Document the valid signatures of PropertyChangedMethod, PropertyChangingMethod and ValidationMethod, see project README.md.
+    internal IReadOnlyList<IDependencyPropertyNamingConvention> GetSortedNamingConventions()
+    {
+        this._namingConventions ??=
+            this.NamingConventionRegistrations
+                .Where( r => r.NamingConvention != null )
+                .OrderBy( v => v.Priority ?? 0 )
+                .ThenBy( v => v.NamingConvention!.DiagnosticName )
+                .Select( v => v.NamingConvention! )
+                .ToList();
 
-    /// <summary>
-    /// Gets the name of the method that will be called when the the property value has changed.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The method must be declared in the same class as the target property.
-    /// </para>
-    /// <para>
-    /// If this property is not set then the default <c>OnFooChanged</c> value is used, where <c>Foo</c> is the name of the target property.
-    /// </para>
-    /// </remarks>
-    public string? PropertyChangedMethod { get; init; }
-
-    /// <summary>
-    /// Gets the name of the method will be called when the the property value is about to change.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The method must be declared in the same class as the target property.
-    /// </para>
-    /// <para>
-    /// If this property is not set then the default <c>OnFooChanging</c> value is used, where <c>Foo</c> is the name of the target property.
-    /// </para>
-    /// </remarks>
-    public string? PropertyChangingMethod { get; init; }
-
-    /// <summary>
-    /// Gets the name of the method that validates the value of the property.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The method must be declared in the same class as the target property.
-    /// </para>
-    /// <para>
-    /// If this property is not set then the default <c>ValidateFoo</c> value is used, where <c>Foo</c> is the name of the target property.
-    /// </para>
-    /// </remarks>
-    public string? ValidateMethod { get; init; }
-
-    /// <summary>
-    /// Gets the name of the static readonly field that will be generated to expose the instance of the registered <see cref="DependencyProperty"/>.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// If this property is not set then the default <c>FooProperty</c> value is used, where <c>Foo</c> is the name of the target property.
-    /// </para>
-    /// </remarks>
-    public string? RegistrationField { get; init; }
+        return this._namingConventions;
+    }
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
+        => new DependencyPropertyOptions
+        {
+            IsReadOnly = false,
+            InitializerProvidesInitialValue = false,
+            InitializerProvidesDefaultValue = true,
+            NamingConventionRegistrations = DefaultNamingConventionRegistrations()
+        };
+
+    internal static IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>> DefaultNamingConventionRegistrations()
     {
-        return new DependencyPropertyOptions() { IsReadOnly = false, InitializerProvidesInitialValue = false, InitializerProvidesDefaultValue = true };
+        return IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(
+            new NamingConventionRegistration<IDependencyPropertyNamingConvention>(
+                DefaultCommandNamingConvention.RegistrationKey,
+                new DefaultDependencyPropertyNamingConvention(),
+                1000 ) );
     }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
@@ -91,10 +81,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
             IsReadOnly = other.IsReadOnly ?? this.IsReadOnly,
             InitializerProvidesInitialValue = other.InitializerProvidesInitialValue ?? this.InitializerProvidesInitialValue,
             InitializerProvidesDefaultValue = other.InitializerProvidesDefaultValue ?? this.InitializerProvidesDefaultValue,
-            PropertyChangedMethod = other.PropertyChangedMethod ?? this.PropertyChangedMethod,
-            PropertyChangingMethod = other.PropertyChangingMethod ?? this.PropertyChangingMethod,
-            ValidateMethod = other.ValidateMethod ?? this.ValidateMethod,
-            RegistrationField = other.RegistrationField ?? this.RegistrationField
+            NamingConventionRegistrations = this.NamingConventionRegistrations.ApplyChanges( other.NamingConventionRegistrations, context )
         };
     }
 }

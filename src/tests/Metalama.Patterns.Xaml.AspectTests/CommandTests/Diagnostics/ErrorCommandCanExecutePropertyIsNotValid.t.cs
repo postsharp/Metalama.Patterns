@@ -1,0 +1,4 @@
+// Error LAMA5207 on `ExecuteNotBool`: `No match was found using the default naming convention. See other warnings for details.`
+// Warning LAMA5204 on `CanExecuteNotBool`: `The property was identified as a candidate can-execute property for [Command] method ErrorCommandCanExecutePropertyIsNotValid.ExecuteNotBool() by the default naming convention, but the signature is not valid. The property must be of type bool and have a getter.`
+// Error LAMA5207 on `ExecuteNoGetter`: `No match was found using the default naming convention. See other warnings for details.`
+// Warning LAMA5204 on `CanExecuteNoGetter`: `The property was identified as a candidate can-execute property for [Command] method ErrorCommandCanExecutePropertyIsNotValid.ExecuteNoGetter() by the default naming convention, but the signature is not valid. The property must be of type bool and have a getter.`

@@ -1,0 +1,3 @@
+// Error LAMA5207 on `ExecuteFoo`: `No match was found using the default naming convention. See other warnings for details.`
+// Warning LAMA5205 on `CanExecuteFoo`: `The method was identified as a valid candidate can-execute method for [Command] method ErrorCommandCanExecuteMethodIsAmbiguous.ExecuteFoo() by the default naming convention, but other members also matched.`
+// Warning LAMA5205 on `CanExecuteFoo`: `The method was identified as a valid candidate can-execute method for [Command] method ErrorCommandCanExecuteMethodIsAmbiguous.ExecuteFoo() by the default naming convention, but other members also matched.`

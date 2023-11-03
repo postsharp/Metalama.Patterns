@@ -50,11 +50,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
             [CompileTime] ValidationHandlerSignatureKind validateSignatureKind )
         {
             /* The PostSharp implementation:
-             * 
+             *
              * - Uses the coercion callback for validation and notifying "changing"
              * - Appears to always return true for the validation callback
              * - Uses PropertyChanged callback to notify "changed"
-             * 
+             *
              */
 
             if ( options.InitializerProvidesDefaultValue != true )
