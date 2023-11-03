@@ -6,11 +6,8 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Xaml.Implementation;
 
-// TODO: #34040 - Replace all code in this file with the following once [AspectOrder] supports ordering by base types, and remove the project reference to Metalama.Patterns.Contracts.
-// [assembly: AspectOrder( "Metalama.Framework.Aspects.ContractAspect:" + ContractAspect.Layer1Build, "Metalama.Patterns.Xaml.DependencyPropertyAttribute:*", "Metalama.Framework.Aspects.ContractAspect:" + ContractAspect.Layer0Apply )]
-
 [assembly: ApplyProjectAspectOrdering]
-[assembly: AspectOrder( "Metalama.Patterns.Contracts.TrimAttribute:" + ContractAspect.Layer1Build, "Metalama.Patterns.Xaml.DependencyPropertyAttribute", "Metalama.Patterns.Contracts.TrimAttribute" )]
+[assembly: AspectOrder( "Metalama.Patterns.Contracts.ContractAspect:" + ContractAspect.BuildLayer, "Metalama.Patterns.Xaml.DependencyPropertyAttribute", "Metalama.Patterns.Contracts.ContractAspect" )]
 
 namespace Metalama.Patterns.Xaml.Implementation;
 

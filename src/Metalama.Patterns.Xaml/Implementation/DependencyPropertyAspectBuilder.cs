@@ -249,5 +249,4 @@ internal sealed partial class DependencyPropertyAspectBuilder
             }
         }
     }
-
 }

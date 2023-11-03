@@ -8,8 +8,6 @@ using Metalama.Patterns.Xaml.Implementation;
 using Metalama.Patterns.Xaml.Options;
 using System.Windows;
 
-//[assembly: AspectOrder( "Metalama.Patterns.Contracts.TrimAttribute:" + ContractAspect.Layer1Build, "Metalama.Patterns.Xaml.DependencyPropertyAttribute:*", "Metalama.Patterns.Contracts.TrimAttribute:" + ContractAspect.Layer0Apply )]
-
 namespace Metalama.Patterns.Xaml;
 
 [AttributeUsage( AttributeTargets.Property )]
