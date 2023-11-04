@@ -113,6 +113,42 @@ internal sealed partial class DependencyPropertyAspectBuilder
             return;
         }
 
+        // TODO: #34041 - Replace with target.Enhancements().HasAspect<ContractAspect>() once HasAspect supports base types.
+
+        var hasContracts = target.Enhancements().GetAspectInstances().Any( a => typeof( ContractAspect ).IsAssignableFrom( a.AspectClass.Type ) );
+
+        IMethod? applyContractsMethod = null;
+
+        if ( hasContracts )
+        {
+            var name = this.GetAndReserveUnusedMemberName( $"Apply{builder.Target.Name}Contracts" );
+
+            var result = builder.Advice.WithTemplateProvider( Templates.Provider )
+                .IntroduceMethod(
+                    declaringType,
+                    nameof( Templates.ApplyContracts ),
+                    IntroductionScope.Static,
+                    OverrideStrategy.Fail,
+                    b =>
+                    {
+                        b.Name = name;
+                        b.Accessibility = Framework.Code.Accessibility.Private;
+                    },
+                    args: new
+                    {
+                        T = propertyType
+                    } );
+
+            if ( result.Outcome != AdviceOutcome.Default )
+            {
+                return;
+            }
+
+            applyContractsMethod = result.Declaration;
+
+            ContractAspect.RedirectContracts( this._builder, target, applyContractsMethod.Parameters[0] );
+        }
+
         /* Regarding setting the initial value, the PostSharp implementation takes care to:
          *
          * - Only set the initial value when definitely supplied via an initializer and not when supplied via the DefaultValue property of the aspect.
@@ -147,7 +183,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     onChangedMethod,
                     onChangedSignatureKind = successfulMatch.PropertyChangedSignatureKind,
                     validateMethod,
-                    validateSignatureKind = successfulMatch.ValidationSignatureKind
+                    validateSignatureKind = successfulMatch.ValidationSignatureKind,
+                    applyContractsMethod
                 } );
 
         this._builder.Advice.WithTemplateProvider( Templates.Provider )
@@ -179,6 +216,37 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     nameof(Templates.Assign),
                     InitializerKind.BeforeInstanceConstructor,
                     args: new { left = (IExpression) this._builder.Target.Value!, right = this._builder.Target.InitializerExpression } );
+        }
+    }
+
+    private HashSet<string>? _existingMemberNames;
+
+    /// <summary>
+    /// Gets an unused member name for the target type by adding an numeric suffix until an unused name is found.
+    /// </summary>
+    /// <param name="desiredName"></param>
+    /// <returns></returns>
+    private string GetAndReserveUnusedMemberName( string desiredName )
+    {
+        this._existingMemberNames ??= new HashSet<string>(
+            ((IEnumerable<INamedDeclaration>) this._builder.Target.DeclaringType.AllMembers()).Concat( this._builder.Target.DeclaringType.NestedTypes ).Select( m => m.Name ) );
+
+        if ( this._existingMemberNames.Add( desiredName ) )
+        {
+            return desiredName;
+        }
+        else
+        {
+            // ReSharper disable once BadSemicolonSpaces
+            for ( var i = 1; /* Intentionally empty */; i++ )
+            {
+                var adjustedName = $"{desiredName}_{i}";
+
+                if ( this._existingMemberNames.Add( adjustedName ) )
+                {
+                    return adjustedName;
+                }
+            }
         }
     }
 }
