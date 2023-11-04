@@ -57,6 +57,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml.Aspe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml.UnitTests", "src\tests\Metalama.Patterns.Xaml.UnitTests\Metalama.Patterns.Xaml.UnitTests.csproj", "{50756B08-7B60-4B7C-BB38-065413A8E818}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml.CompileTimeTests", "src\tests\Metalama.Patterns.Xaml.CompileTimeTests\Metalama.Patterns.Xaml.CompileTimeTests.csproj", "{AFEBA594-BD9E-468F-8C44-6EC028D9D497}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -114,8 +116,8 @@ Global
 		{B08D040F-6B32-4FCC-93A4-F6EFCD836CF8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
-		{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
+		{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
 		{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C9BF522-C73E-4235-AAB4-8F1BEB0B2231}.Release|Any CPU.Build.0 = Release|Any CPU
 		{001C141A-3D0F-4057-9D9F-3E221DF45B77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -204,14 +206,14 @@ Global
 		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
+		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AE09DAA-B059-4062-80D2-6427B45BD7B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.LamaDebug|Any CPU.ActiveCfg = LamaDebug|Any CPU
+		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{50756B08-7B60-4B7C-BB38-065413A8E818}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -220,6 +222,12 @@ Global
 		{50756B08-7B60-4B7C-BB38-065413A8E818}.LamaDebug|Any CPU.Build.0 = LamaDebug|Any CPU
 		{50756B08-7B60-4B7C-BB38-065413A8E818}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50756B08-7B60-4B7C-BB38-065413A8E818}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFEBA594-BD9E-468F-8C44-6EC028D9D497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFEBA594-BD9E-468F-8C44-6EC028D9D497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFEBA594-BD9E-468F-8C44-6EC028D9D497}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFEBA594-BD9E-468F-8C44-6EC028D9D497}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{AFEBA594-BD9E-468F-8C44-6EC028D9D497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFEBA594-BD9E-468F-8C44-6EC028D9D497}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -240,6 +248,7 @@ Global
 		{E158B92E-F006-4DC7-A0F8-0B46F7A16A14} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{B6335A0E-B9DE-45A6-8A33-308C3FF327DE} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 		{50756B08-7B60-4B7C-BB38-065413A8E818} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
+		{AFEBA594-BD9E-468F-8C44-6EC028D9D497} = {E12768A6-6B76-489F-8328-AECDFD8BC558}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC2B6F6-5623-43F8-BBBB-ED8072670A80}

@@ -1,1 +1,0 @@
-// Warning LAMA5200 on `Foo`: `Class ConfiguredPropertyChangedMethodDoesNotExist does not contain a method named 'DoesNotExist' as configured by the PropertyChangedMethod option.`

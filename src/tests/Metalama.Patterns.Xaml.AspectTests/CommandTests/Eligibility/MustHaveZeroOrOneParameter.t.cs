@@ -1,0 +1,3 @@
+// Warning LAMA5206 on `ZeroParameters`: `No can-execute method or can-execute property was found using the default naming convention, with candidate member name 'CanExecuteZeroParameters'.`
+// Warning LAMA5206 on `OneParameter`: `No can-execute method or can-execute property was found using the default naming convention, with candidate member name 'CanExecuteOneParameter'.`
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the method 'MustHaveZeroOrOneParameter.TwoParameters(int, int)' because 'MustHaveZeroOrOneParameter.TwoParameters(int, int)' must have zero or one parameter.`
