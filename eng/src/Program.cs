@@ -19,10 +19,8 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         "Metalama.Patterns.Caching.Backends.Redis.$(PackageVersion).nupkg",
         "Metalama.Patterns.Contracts.$(PackageVersion).nupkg",
         "Metalama.Patterns.Memoization.$(PackageVersion).nupkg",
-        
         // When changing to non-preview version, remove the version override from Versions.props
         "Metalama.Patterns.Observability.$(PackagePreviewVersion).nupkg",
-        
         // When changing to non-preview version, remove the version override from Versions.props
         "Metalama.Patterns.Xaml.$(PackagePreviewVersion).nupkg",
         "Flashtrace.$(PackageVersion).nupkg",
