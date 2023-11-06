@@ -50,8 +50,10 @@
     <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
 
     <!-- Override versions of preview packages -->
+    <!-- When changing to non-preview version, remove the override here and change the version parameter of the published package in eng\src\Program.cs. -->
     <PropertyGroup>
-        <ObservabilityVersion>$(MetalamaPatternsPreviewVersion)</ObservabilityVersion>
+        <MetalamaPatternsObservabilityVersion>$(MetalamaPatternsPreviewVersion)</MetalamaPatternsObservabilityVersion>
+        <MetalamaPatternsXamlVersion>$(MetalamaPatternsPreviewVersion)</MetalamaPatternsXamlVersion>
     </PropertyGroup>
 
     <PropertyGroup>
