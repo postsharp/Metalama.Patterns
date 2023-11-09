@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FluentAssertions;
+using Metalama.Patterns.Observability.UnitTests.Assets.Core;
 using Metalama.Patterns.Observability.UnitTests.Assets.Generic;
 using Xunit;
 
@@ -9,17 +10,19 @@ namespace Metalama.Patterns.Observability.UnitTests;
 public sealed class GenericTests : InpcTestsBase
 {
     [Fact]
-    public void PropertyOfGenericTypeThatIsClassAndInpc() 
+    public void PropertyOfGenericTypeThatIsClassAndInpc()
     {
         var v = new AOfSimple();
 
         this.SubscribeTo( v );
 
-        this.EventsFrom( () => v.A1 = new() )
-            .Should().Equal( "RefA1S1", "A1" );
+        this.EventsFrom( () => v.A1 = new Simple() )
+            .Should()
+            .Equal( "RefA1S1", "A1" );
 
         this.EventsFrom( () => v.A1.S1 = 1 )
-            .Should().Equal( "RefA1S1" );
+            .Should()
+            .Equal( "RefA1S1" );
     }
 
     [Fact]
@@ -73,13 +76,16 @@ public sealed class GenericTests : InpcTestsBase
 
         this.SubscribeTo( v );
 
-        this.EventsFrom( () => v.D1 = new() )
-            .Should().Equal( "FooX", "FooY", "D1" );
+        this.EventsFrom( () => v.D1 = new MyFoo() )
+            .Should()
+            .Equal( "FooX", "FooY", "D1" );
 
         this.EventsFrom( () => v.D1.X = 1 )
-            .Should().Equal( "FooX" );
+            .Should()
+            .Equal( "FooX" );
 
         this.EventsFrom( () => v.D1.Y = 1 )
-            .Should().Equal( "FooY" );
+            .Should()
+            .Equal( "FooY" );
     }
 }

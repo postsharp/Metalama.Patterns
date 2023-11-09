@@ -22,7 +22,7 @@ public sealed class RedisCacheSynchronizerBuilder : ConcreteCachingBackendBuilde
         this._underlying = underlying;
         this._configuration = configuration;
     }
-    
+
     public override CachingBackend CreateBackend( CreateBackendArgs args )
     {
         var underlying = this._underlying.CreateBackend( args );

@@ -70,7 +70,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 b =>
                 {
                     // ReSharper disable once RedundantNameQualifier
-                    b.Accessibility = Framework.Code.Accessibility.Public;
+                    b.Accessibility = Accessibility.Public;
                     b.Writeability = Writeability.ConstructorOnly;
                 } );
         }
@@ -115,7 +115,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         // TODO: #34041 - Replace with target.Enhancements().HasAspect<ContractAspect>() once HasAspect supports base types.
 
-        var hasContracts = target.Enhancements().GetAspectInstances().Any( a => typeof( ContractAspect ).IsAssignableFrom( a.AspectClass.Type ) );
+        var hasContracts = target.Enhancements().GetAspectInstances().Any( a => typeof(ContractAspect).IsAssignableFrom( a.AspectClass.Type ) );
 
         IMethod? applyContractsMethod = null;
 
@@ -126,18 +126,15 @@ internal sealed partial class DependencyPropertyAspectBuilder
             var result = builder.Advice.WithTemplateProvider( Templates.Provider )
                 .IntroduceMethod(
                     declaringType,
-                    nameof( Templates.ApplyContracts ),
+                    nameof(Templates.ApplyContracts),
                     IntroductionScope.Static,
                     OverrideStrategy.Fail,
                     b =>
                     {
                         b.Name = name;
-                        b.Accessibility = Framework.Code.Accessibility.Private;
+                        b.Accessibility = Accessibility.Private;
                     },
-                    args: new
-                    {
-                        T = propertyType
-                    } );
+                    args: new { T = propertyType } );
 
             if ( result.Outcome != AdviceOutcome.Default )
             {
@@ -229,7 +226,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
     private string GetAndReserveUnusedMemberName( string desiredName )
     {
         this._existingMemberNames ??= new HashSet<string>(
-            ((IEnumerable<INamedDeclaration>) this._builder.Target.DeclaringType.AllMembers()).Concat( this._builder.Target.DeclaringType.NestedTypes ).Select( m => m.Name ) );
+            ((IEnumerable<INamedDeclaration>) this._builder.Target.DeclaringType.AllMembers()).Concat( this._builder.Target.DeclaringType.NestedTypes )
+            .Select( m => m.Name ) );
 
         if ( this._existingMemberNames.Add( desiredName ) )
         {

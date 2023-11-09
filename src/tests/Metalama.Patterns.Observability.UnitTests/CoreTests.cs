@@ -279,7 +279,7 @@ public sealed class CoreTests : InpcTestsBase
         v.SetP1( new_P1 );
 
         var callsToOnChildPropertyChanged = new List<(string ParentPropertyPath, string PropertyName)>();
-        
+
         v.ExposeOnChildPropertyChanged += ( p, n ) => callsToOnChildPropertyChanged.Add( (p, n) );
 
         new_P1.S1 = 42;

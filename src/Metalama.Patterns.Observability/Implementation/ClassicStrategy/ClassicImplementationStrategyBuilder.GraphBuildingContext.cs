@@ -37,7 +37,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder
                 IMember member => member.Enhancements().GetOptions<DependencyAnalysisOptions>(),
                 _ => throw new NotImplementedException()
             };
-            
+
             return options.IsSafe == true;
         }
 

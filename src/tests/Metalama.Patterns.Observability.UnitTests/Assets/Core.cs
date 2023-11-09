@@ -138,7 +138,7 @@ public partial class FieldBackedInpcProperty
 {
     public FieldBackedInpcProperty()
     {
-        this._value = new();
+        this._value = new Simple();
     }
 
     public void SetValue( Simple v ) => this._value = v;
@@ -148,7 +148,7 @@ public partial class FieldBackedInpcProperty
 #pragma warning restore IDE0032 // Use auto property
 
 #pragma warning disable IDE0032 // Use auto property
-    
+
     // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
     public Simple P1 => this._value;
 #pragma warning restore IDE0032 // Use auto property
@@ -179,7 +179,7 @@ public partial class FieldBackedIntProperty
 public partial class PrivateIntProperty
 {
     public void SetP1( int v ) => this.P1 = v;
-    
+
     private int P1 { get; set; }
 
     public int P2 => this.P1;
@@ -197,7 +197,7 @@ public partial class PrivateInpcProperty
 
     private Simple P1 { get; set; }
 
-    public int P2 => this.P1.S1;    
+    public int P2 => this.P1.S1;
 }
 
 [ExcludeAspect( typeof(ObservableAttribute) )]

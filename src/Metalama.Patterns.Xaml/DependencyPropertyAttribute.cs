@@ -119,7 +119,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
         builder.MustNotBeStatic();
 
         // ReSharper disable once RedundantNameQualifier
-        builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
+        builder.MustHaveAccessibility( Accessibility.Public );
         builder.MustBeReadable();
         builder.MustSatisfy( p => p.IsAutoPropertyOrField == true, p => $"{p} must be an auto-property." );
         builder.DeclaringType().MustBe( typeof(DependencyObject), ConversionKind.Reference );

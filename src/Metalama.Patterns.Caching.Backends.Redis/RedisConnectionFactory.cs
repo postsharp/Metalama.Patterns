@@ -38,7 +38,10 @@ internal class RedisConnectionFactory
         }
     }
 
-    internal async Task<IConnectionMultiplexer> GetConnectionAsync( IServiceProvider? serviceProvider, bool logRedisConnection, CancellationToken cancellationToken )
+    internal async Task<IConnectionMultiplexer> GetConnectionAsync(
+        IServiceProvider? serviceProvider,
+        bool logRedisConnection,
+        CancellationToken cancellationToken )
     {
         if ( this.RedisConnection != null )
         {

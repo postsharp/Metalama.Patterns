@@ -7,6 +7,6 @@ internal class MustNotHaveRefOrOutParameter
     [Command]
     private void RefParameter( ref int x ) { }
 
-    [Command] 
+    [Command]
     private void OutParameter( out int x ) { x = default; }
 }

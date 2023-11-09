@@ -47,7 +47,9 @@ public sealed class MemoizeAttribute : Attribute, IAspect<IMethod>, IAspect<IPro
 
         if ( builder.Target.ReturnType is { IsReferenceType: true, IsNullable: false } )
         {
-            var field = builder.Advice.IntroduceField( builder.Target.DeclaringType, fieldName, builder.Target.ReturnType, IntroductionScope.Target ).Declaration;
+            var field = builder.Advice.IntroduceField( builder.Target.DeclaringType, fieldName, builder.Target.ReturnType, IntroductionScope.Target )
+                .Declaration;
+
             builder.Advice.Override( builder.Target, nameof(this.NonNullableReferenceTypeTemplate), args: new { field } );
         }
         else

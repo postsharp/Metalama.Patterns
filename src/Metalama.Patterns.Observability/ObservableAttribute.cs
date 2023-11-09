@@ -33,17 +33,14 @@ public sealed class ObservableAttribute : Attribute, IAspect<INamedType>, IHiera
             this._diagnosticCommentVerbosity = value;
         }
     }
-    
+
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
     {
         IImplementationStrategyFactory? factory = null;
 
-        return new[]
-        {
-            new ObservabilityOptions() { ImplementationStrategyFactory = factory, DiagnosticCommentVerbosity = this._diagnosticCommentVerbosity }
-        };
+        return new[] { new ObservabilityOptions() { ImplementationStrategyFactory = factory, DiagnosticCommentVerbosity = this._diagnosticCommentVerbosity } };
     }
-    
+
     void IEligible<INamedType>.BuildEligibility( IEligibilityBuilder<INamedType> builder )
     {
         builder.MustNotBeStatic();

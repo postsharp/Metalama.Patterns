@@ -149,10 +149,10 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                     b.Name = successfulMatch.CommandPropertyName!;
 
                     // ReSharper disable once RedundantNameQualifier
-                    b.Accessibility = Framework.Code.Accessibility.Public;
+                    b.Accessibility = Accessibility.Public;
 
                     // ReSharper disable once RedundantNameQualifier
-                    b.GetMethod!.Accessibility = Framework.Code.Accessibility.Public;
+                    b.GetMethod!.Accessibility = Accessibility.Public;
                 } );
 
             if ( introducePropertyResult.Outcome == AdviceOutcome.Default )
@@ -176,7 +176,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             if ( declaringType.AllImplementedInterfaces.Contains( typeof(INotifyPropertyChanged) ) )
             {
                 // ReSharper disable once RedundantNameQualifier
-                if ( canExecuteProperty.Accessibility != Framework.Code.Accessibility.Public )
+                if ( canExecuteProperty.Accessibility != Accessibility.Public )
                 {
                     builder.Diagnostics.Report(
                         Diagnostics.WarningCommandNotifiableCanExecutePropertyIsNotPublic.WithArguments( target ),

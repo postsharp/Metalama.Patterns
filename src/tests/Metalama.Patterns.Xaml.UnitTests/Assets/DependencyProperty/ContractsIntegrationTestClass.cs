@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Xaml.UnitTests.Assets.DependencyPropertyNS;
 
 public partial class ContractsIntegrationTestClass : DependencyObject
 {
-    public List<string> Operations { get; } = new List<string>();
+    public List<string> Operations { get; } = new();
 
     private void Log( string? msg = null, [CallerMemberName] string? callerName = null )
     {
@@ -30,6 +30,7 @@ public partial class ContractsIntegrationTestClass : DependencyObject
     private bool ValidateName( string value )
     {
         this.Log( value );
+
         return true;
     }
 }

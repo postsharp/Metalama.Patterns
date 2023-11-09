@@ -19,7 +19,7 @@ public sealed class RangeOnlyTestsRequiredBounds
     public void RangeInt( [Range( 10, 20 )] int x ) { }
 
     public void StrictlyGreaterThanInt( [StrictlyGreaterThan( 42 )] int x ) { }
-    
+
     public void StrictlyLessThanInt( [StrictlyLessThan( 42 )] int x ) { }
 
     public void StrictRangeInt( [StrictRange( 10.0, 20.0 )] int x ) { }
