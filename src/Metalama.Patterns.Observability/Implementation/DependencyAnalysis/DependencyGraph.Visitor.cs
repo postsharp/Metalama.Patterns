@@ -5,18 +5,20 @@
 // related namespaces.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Runtime.CompilerServices;
+using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
 internal static partial class DependencyGraph
 {
     private static void AddReferencedProperties(
-        Framework.Code.ICompilation compilation,
+        ICompilation compilation,
         Node tree,
         IPropertySymbol property,
         IGraphBuildingContext context,
@@ -177,16 +179,18 @@ internal static partial class DependencyGraph
                                         _ => throw new NotImplementedException()
                                     };
 
-                                    fieldOrPropertyType = fieldOrPropertyType.GetElementaryType();                                    
-                                    
+                                    fieldOrPropertyType = fieldOrPropertyType.GetElementaryType();
+
                                     if ( i < stemCount - 1 )
                                     {
                                         // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
 
-                                        if ( !fieldOrPropertyType.IsPrimitiveType( this._assets ) && !this._context.TreatAsImplementingInpc( fieldOrPropertyType ) )
+                                        if ( !fieldOrPropertyType.IsPrimitiveType( this._assets )
+                                             && !this._context.TreatAsImplementingInpc( fieldOrPropertyType ) )
                                         {
                                             this._context.ReportDiagnostic(
-                                                DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( fieldOrPropertyType ),
+                                                DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments(
+                                                    fieldOrPropertyType ),
                                                 sr.Node.GetLocation() );
                                         }
 
@@ -199,7 +203,8 @@ internal static partial class DependencyGraph
                                         {
                                             this._context.ReportDiagnostic(
                                                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
-                                                    .WithArguments( "Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed." ),
+                                                    .WithArguments(
+                                                        "Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed." ),
                                                 symbols[i + 1].Node.GetLocation() );
                                         }
                                     }

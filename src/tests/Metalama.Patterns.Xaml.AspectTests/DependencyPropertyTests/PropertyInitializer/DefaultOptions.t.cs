@@ -5,7 +5,7 @@ using System.Windows;
 namespace Metalama.Patterns.Xaml.AspectTests.DependencyPropertyTests.PropertyInitializer.DefaultOptions;
 public class DefaultOptions : DependencyObject
 {
-  private static List<int> InitMethod() => new List<int>(3)
+  private static List<int> InitMethod() => new(3)
   {
     1,
     2,

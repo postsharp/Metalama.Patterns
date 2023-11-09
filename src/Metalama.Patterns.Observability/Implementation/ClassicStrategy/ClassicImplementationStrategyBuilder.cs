@@ -428,7 +428,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                         {
                             handlerField = this.GetOrCreateHandlerField( node! );
                             subscribeMethod = this.GetOrCreateRootPropertySubscribeMethod( node! );
-                            
+
                             if ( fp.DeclarationKind == DeclarationKind.Property )
                             {
                                 this._propertyPathsForOnChildPropertyChangedMethodAttribute.Add( fp.Name );

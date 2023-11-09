@@ -52,7 +52,7 @@ public class DependencyTreeTests : BaseCachingTests
         public void UpdateOne( int x )
         {
             this._counter++;
-            
+
             CachingService.Default.Invalidate( new Dependency( $"One:{x}", new Dependency( "All" ) ) );
         }
     }

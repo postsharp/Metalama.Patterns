@@ -101,7 +101,11 @@ internal class RedisCachingBackend : CachingBackend
 
     protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
-        this._connection = await this.Configuration.RedisConnectionFactory.GetConnectionAsync( this.ServiceProvider, this.Configuration.LogRedisConnection, cancellationToken );
+        this._connection = await this.Configuration.RedisConnectionFactory.GetConnectionAsync(
+            this.ServiceProvider,
+            this.Configuration.LogRedisConnection,
+            cancellationToken );
+
         this._database = this._databaseFactory( this._connection );
         this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
 

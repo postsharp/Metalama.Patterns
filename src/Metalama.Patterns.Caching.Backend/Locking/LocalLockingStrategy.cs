@@ -57,7 +57,7 @@ public sealed class LocalLockingStrategy : ILockingStrategy
             {
                 throw new InvalidOperationException();
             }
-            
+
             this._acquired = await this._lock.WaitAsync( timeout, cancellationToken );
 
             return this._acquired;

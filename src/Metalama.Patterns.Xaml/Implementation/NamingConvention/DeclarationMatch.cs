@@ -64,7 +64,7 @@ internal readonly struct DeclarationMatch<TDeclaration>
     }
 
     public DeclarationMatchOutcome? Outcome { get; }
-    
+
     public TDeclaration? Declaration { get; }
 
     [MemberNotNullWhen( true, nameof(CandidateNames) )]

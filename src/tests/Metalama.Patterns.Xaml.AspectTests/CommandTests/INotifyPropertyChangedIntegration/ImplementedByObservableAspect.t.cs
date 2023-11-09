@@ -1,5 +1,8 @@
 using System.ComponentModel;
 using System.Windows.Input;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+// TODO: #34044 Can't use RequireOrderedAspects yet. If not fixed, re-enable when DependencyPropertyAttribute aspect is also ordered.
+// __RequireOrderedAspects__
 using Metalama.Patterns.Observability;
 using Metalama.Patterns.Observability.Metadata;
 using Metalama.Patterns.Xaml.Implementation;

@@ -1,4 +1,5 @@
 using System;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 using Metalama.Framework.Fabrics;
 namespace Metalama.Patterns.Contracts.AspectTests.Invariants_Suspend;
 public class BaseClass

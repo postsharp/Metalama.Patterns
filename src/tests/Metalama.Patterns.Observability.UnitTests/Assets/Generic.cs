@@ -59,7 +59,7 @@ public partial class D<T>
     public int FooX => this.D1.X;
 }
 
-public partial class DD<T> : D<T> 
+public partial class DD<T> : D<T>
     where T : class, INotifyPropertyChanged, IFoo
 {
     public int FooY => this.D1.Y;

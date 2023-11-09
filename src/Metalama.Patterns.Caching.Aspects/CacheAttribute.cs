@@ -78,7 +78,7 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
             foreach ( var classifier in options.ParameterClassifiers )
             {
                 var classification = classifier.Classifier.GetClassification( parameter );
-                
+
                 if ( classification.IsIneligible )
                 {
                     builder.Diagnostics.Report( classification.GetDiagnostic( parameter, classifier.Classifier ) );

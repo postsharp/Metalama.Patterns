@@ -16,12 +16,12 @@ public class NullLockingStrategy : ILockingStrategy
     private class LockHandle : ILockHandle
     {
         public static readonly LockHandle Instance = new();
-        
+
         public ValueTask ReleaseAsync() => default;
 
         public bool Acquire( TimeSpan timeout, CancellationToken cancellationToken ) => true;
 
-        public ValueTask<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken ) => new ValueTask<bool>( true );
+        public ValueTask<bool> AcquireAsync( TimeSpan timeout, CancellationToken cancellationToken ) => new( true );
 
         public void Release() { }
 

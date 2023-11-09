@@ -12,6 +12,7 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using Metalama.Patterns.Xaml.Options;
 using System.ComponentModel;
 using System.Windows.Input;
+using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 
 // TODO: Skip [Observable] on [Command]-targeted auto properties. No functional impact, would just avoid unnecessary generated code.
 
@@ -149,10 +150,10 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                     b.Name = successfulMatch.CommandPropertyName!;
 
                     // ReSharper disable once RedundantNameQualifier
-                    b.Accessibility = Framework.Code.Accessibility.Public;
+                    b.Accessibility = MetalamaAccessibility.Public;
 
                     // ReSharper disable once RedundantNameQualifier
-                    b.GetMethod!.Accessibility = Framework.Code.Accessibility.Public;
+                    b.GetMethod!.Accessibility = MetalamaAccessibility.Public;
                 } );
 
             if ( introducePropertyResult.Outcome == AdviceOutcome.Default )
@@ -176,7 +177,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             if ( declaringType.AllImplementedInterfaces.Contains( typeof(INotifyPropertyChanged) ) )
             {
                 // ReSharper disable once RedundantNameQualifier
-                if ( canExecuteProperty.Accessibility != Framework.Code.Accessibility.Public )
+                if ( canExecuteProperty.Accessibility != MetalamaAccessibility.Public )
                 {
                     builder.Diagnostics.Report(
                         Diagnostics.WarningCommandNotifiableCanExecutePropertyIsNotPublic.WithArguments( target ),

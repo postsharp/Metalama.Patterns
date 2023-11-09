@@ -7,7 +7,11 @@ using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Xaml.Implementation;
 
 [assembly: ApplyProjectAspectOrdering]
-[assembly: AspectOrder( "Metalama.Patterns.Contracts.ContractAspect:" + ContractAspect.BuildLayer, "Metalama.Patterns.Xaml.DependencyPropertyAttribute", "Metalama.Patterns.Contracts.ContractAspect" )]
+[assembly:
+    AspectOrder(
+        "Metalama.Patterns.Contracts.ContractAspect:" + ContractAspect.BuildLayer,
+        "Metalama.Patterns.Xaml.DependencyPropertyAttribute",
+        "Metalama.Patterns.Contracts.ContractAspect" )]
 
 namespace Metalama.Patterns.Xaml.Implementation;
 
@@ -21,29 +25,22 @@ internal class ApplyProjectAspectOrdering : Attribute, IAspect<ICompilation>
     {
         var compilation = builder.Target;
 
-        var contractAspectType = TypeFactory.GetType( typeof( ContractAspect ) );
-        var aspectOrderAttributeType = (INamedType) TypeFactory.GetType( typeof( AspectOrderAttribute ) );
+        var contractAspectType = TypeFactory.GetType( typeof(ContractAspect) );
+        var aspectOrderAttributeType = (INamedType) TypeFactory.GetType( typeof(AspectOrderAttribute) );
 
         var mpcAssy = compilation.ReferencedAssemblies.OfName( "Metalama.Patterns.Contracts" ).First();
-        
+
         foreach ( var contractType in mpcAssy.AllTypes.Where( t => !t.IsAbstract && t.ForCompilation( compilation ).Is( contractAspectType ) ) )
         {
             var fullName = contractType.FullName;
 
             var attributeConstruction = AttributeConstruction.Create(
                 aspectOrderAttributeType,
-                new object[]
-                {
-                    $"{fullName}:{ContractAspect.BuildLayer}",
-                    "Metalama.Patterns.Xaml.DependencyPropertyAttribute",
-                    fullName
-                } );
+                new object[] { $"{fullName}:{ContractAspect.BuildLayer}", "Metalama.Patterns.Xaml.DependencyPropertyAttribute", fullName } );
 
             builder.Advice.IntroduceAttribute( compilation, attributeConstruction, OverrideStrategy.New );
         }
     }
 
-    public void BuildEligibility( IEligibilityBuilder<ICompilation> builder )
-    {
-    }
+    public void BuildEligibility( IEligibilityBuilder<ICompilation> builder ) { }
 }

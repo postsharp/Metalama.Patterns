@@ -46,7 +46,7 @@ internal sealed class RoslynAssets
     {
         this._nonSpecialPrimitiveTypes ??= this.GetNonSpecialPrimitiveTypes();
 
-        return type is INamedTypeSymbol namedType && this._nonSpecialPrimitiveTypes.Contains( namedType );            
+        return type is INamedTypeSymbol namedType && this._nonSpecialPrimitiveTypes.Contains( namedType );
     }
 
     public INamedTypeSymbol? DateTimeOffset { get; }

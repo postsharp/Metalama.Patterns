@@ -384,7 +384,7 @@ public class A
     public void TimeSpan()
     {
         using var testContext = this.CreateTestContext();
-        
+
         const string code = @"
 using System;
 public class A
@@ -1194,7 +1194,10 @@ public class A
 ";
 
         result.ToString().Should().Be( expected );
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(8,26)-(8,29)" );
+
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(8,26)-(8,29)" );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -1241,7 +1244,10 @@ public class A
 ";
 
         result.ToString().Should().Be( expected );
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(11,26)-(11,29)" );
+
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(11,26)-(11,29)" );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -1323,7 +1329,10 @@ public class A
 ";
 
         result.ToString().Should().Be( expected );
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
+
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -1453,7 +1462,10 @@ public class A
 ";
 
         result.ToString().Should().Be( expected );
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
+
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
