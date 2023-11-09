@@ -14,7 +14,6 @@ using System.ComponentModel;
 using System.Windows.Input;
 using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 
-
 // TODO: Skip [Observable] on [Command]-targeted auto properties. No functional impact, would just avoid unnecessary generated code.
 
 [assembly: AspectOrder( "Metalama.Patterns.Xaml.CommandAttribute:*", "Metalama.Patterns.Observability.ObservableAttribute:*" )]
