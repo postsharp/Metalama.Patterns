@@ -75,7 +75,7 @@ public partial class A : INotifyPropertyChanged
     void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
     {
       {
-        var propertyName = e!.PropertyName;
+        var propertyName = e.PropertyName;
         if (propertyName == "B2")
         {
           this.UpdateA2B2();
