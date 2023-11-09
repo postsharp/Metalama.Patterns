@@ -49,7 +49,7 @@ public class FieldBackedInpcProperty : INotifyPropertyChanged
     void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
     {
       {
-        var propertyName = e.PropertyName;
+        var propertyName = e!.PropertyName;
         if (propertyName == "A1")
         {
           this.OnPropertyChanged("P2");

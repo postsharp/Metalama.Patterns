@@ -8,6 +8,7 @@ using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using Metalama.Patterns.Xaml.Options;
 using System.Windows;
+using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Patterns.Xaml.Implementation;
 
@@ -70,7 +71,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 b =>
                 {
                     // ReSharper disable once RedundantNameQualifier
-                    b.Accessibility = Accessibility.Public;
+                    b.Accessibility = MetalamaAccessibility.Public;
                     b.Writeability = Writeability.ConstructorOnly;
                 } );
         }
@@ -132,7 +133,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     b =>
                     {
                         b.Name = name;
-                        b.Accessibility = Accessibility.Private;
+                        b.Accessibility = MetalamaAccessibility.Private;
                     },
                     args: new { T = propertyType } );
 
