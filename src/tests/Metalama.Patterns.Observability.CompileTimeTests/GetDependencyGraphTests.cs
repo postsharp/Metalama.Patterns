@@ -4,6 +4,7 @@ using FluentAssertions;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using System.Text.RegularExpressions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -119,7 +120,7 @@ class D
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         // this.TestOutput.WriteLine( result.ToString() );
     }
@@ -158,7 +159,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -167,7 +168,53 @@ public class A
 
     [Trait( "Supported", "Yes" )]
     [Fact]
-    public void Var()
+    public void VariableOfUnsafeType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+using System;
+using System.Collections.Generic;
+
+public class A
+{
+    public int Y { get; set; }
+
+    public int Z
+    {
+        get
+        {
+            var x = new List<int>();
+            return x.Count + Y;
+        }
+    }
+}";
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "A" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = DependencyGraph.GetDependencyGraph(
+            type,
+            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
+
+        const string expected = @"<root>
+  Y [ Z ]
+  Z
+";
+
+        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Variables of types other than primitive types and types configured as safe for dependency analysis are not supported.)@(12,12)-(12,35)" );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
+    }
+
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void VariableOfPrimitiveType()
     {
         using var testContext = this.CreateTestContext();
 
@@ -186,6 +233,10 @@ public class A
         get
         {
             var x = X;
+            for ( int i = 0; i < 10; ++i )
+            {
+                x += i;
+            }
             return x + Y;
         }
     }
@@ -211,7 +262,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -254,7 +305,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -294,7 +345,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -339,7 +390,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -376,7 +427,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -413,7 +464,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -450,7 +501,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -497,7 +548,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -543,8 +594,8 @@ public class A
   Y
 ";
 
-        diagnostics.Should().Equal( "LAMA5162: Method call is not supported for dependency analysis. (Fn(int))@(12,19)-(12,31)" );
-        result.ToString().Should().Be( expected );
+        diagnostics.Should().Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, Fn(int)))@(12,19)-(12,21)" );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -591,7 +642,7 @@ public class A
         diagnostics.Should()
             .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -634,9 +685,9 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5162: Method call is not supported for dependency analysis. (A.GetZ())@(12,20)-(12,31)" );
+            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, A.GetZ()))@(12,25)-(12,29)" );
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -685,7 +736,7 @@ public class A
         diagnostics.Should()
             .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -730,7 +781,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -785,7 +836,7 @@ public class A
         diagnostics.Should()
             .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(17,25)-(17,29)" );
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -835,7 +886,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -908,7 +959,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -974,7 +1025,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -1065,7 +1116,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -1109,7 +1160,7 @@ public class A
 ";
 
         diagnostics.Should().Equal( "LAMA5161: Field or property type does not implement INotifyPropertyChanged. (B)@(12,22)-(12,24)" );
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -1149,7 +1200,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -1193,7 +1244,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
             .Equal(
@@ -1243,7 +1294,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
             .Equal(
@@ -1287,7 +1338,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -1328,7 +1379,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
             .Equal(
@@ -1373,7 +1424,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -1420,7 +1471,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -1461,7 +1512,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
             .Equal(
@@ -1469,5 +1520,10 @@ public class A
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    private static string NormalizeEOL(string text)
+    {
+        return Regex.Replace( text, @"\r\n|\n\r|\n|\r", Environment.NewLine );
     }
 }

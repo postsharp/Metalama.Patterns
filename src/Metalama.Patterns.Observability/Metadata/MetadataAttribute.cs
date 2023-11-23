@@ -2,4 +2,5 @@
 
 namespace Metalama.Patterns.Observability.Metadata;
 
+// ReSharper disable once RedundantTypeDeclarationBody
 public abstract class MetadataAttribute : Attribute { }

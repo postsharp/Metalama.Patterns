@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FluentAssertions;
-using Metalama.Patterns.Observability.UnitTests.Assets.Core;
 using Metalama.Patterns.Observability.UnitTests.Assets.Generic;
 using Xunit;
 
@@ -16,7 +15,7 @@ public sealed class GenericTests : InpcTestsBase
 
         this.SubscribeTo( v );
 
-        this.EventsFrom( () => v.A1 = new Simple() )
+        this.EventsFrom( () => v.A1 = new() )
             .Should()
             .Equal( "RefA1S1", "A1" );
 
@@ -76,7 +75,7 @@ public sealed class GenericTests : InpcTestsBase
 
         this.SubscribeTo( v );
 
-        this.EventsFrom( () => v.D1 = new MyFoo() )
+        this.EventsFrom( () => v.D1 = new() )
             .Should()
             .Equal( "FooX", "FooY", "D1" );
 
