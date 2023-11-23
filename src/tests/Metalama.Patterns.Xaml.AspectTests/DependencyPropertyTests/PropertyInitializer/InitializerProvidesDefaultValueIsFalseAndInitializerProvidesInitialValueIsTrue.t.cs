@@ -5,7 +5,7 @@ using System.Windows;
 namespace Metalama.Patterns.Xaml.AspectTests.DependencyPropertyTests.PropertyInitializer.InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue;
 public class InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue : DependencyObject
 {
-  private static List<int> InitMethod() => new List<int>(3)
+  private static List<int> InitMethod() => new(3)
   {
     1,
     2,

@@ -1,4 +1,5 @@
 using Flashtrace.Formatters;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.Formatters;
 namespace Metalama.Patterns.Caching.AspectTests.CacheKeyTests.Derived;

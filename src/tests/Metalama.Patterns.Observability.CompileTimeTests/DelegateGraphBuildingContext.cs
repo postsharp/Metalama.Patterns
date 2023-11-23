@@ -32,7 +32,8 @@ internal sealed class DelegateGraphBuildingContext : DependencyGraph.IGraphBuild
         this._isAutoPropertyOrField = isAutoPropertyOrField;
     }
 
-    public bool IsAutoPropertyOrField( ISymbol symbol ) => this._isAutoPropertyOrField?.Invoke( symbol ) ?? symbol is { Kind: SymbolKind.Field or SymbolKind.Property };
+    public bool IsAutoPropertyOrField( ISymbol symbol )
+        => this._isAutoPropertyOrField?.Invoke( symbol ) ?? symbol is { Kind: SymbolKind.Field or SymbolKind.Property };
 
     public bool IsConfiguredAsSafe( ISymbol symbol ) => this._isConfiguredAsSafe?.Invoke( symbol ) ?? false;
 

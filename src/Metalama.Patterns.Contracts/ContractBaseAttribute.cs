@@ -24,7 +24,7 @@ public abstract class ContractBaseAttribute : ContractAspect, IConditionallyInhe
     protected override ContractDirection GetActualDirection( IAspectBuilder builder, ContractDirection direction )
     {
         var options = builder.Target.GetContractOptions();
-        
+
         switch ( direction )
         {
             case ContractDirection.Input when options.ArePreconditionsEnabled == false:

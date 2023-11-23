@@ -19,12 +19,8 @@ public sealed record DependencyAnalysisOptions :
     {
         var other = (DependencyAnalysisOptions) changes;
 
-        return new DependencyAnalysisOptions
-        {
-            IsSafe = other.IsSafe ?? this.IsSafe
-        };
+        return new DependencyAnalysisOptions { IsSafe = other.IsSafe ?? this.IsSafe };
     }
 
-    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new DependencyAnalysisOptions() { IsSafe = false };
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context ) => new DependencyAnalysisOptions() { IsSafe = false };
 }

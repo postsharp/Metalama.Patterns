@@ -4,6 +4,7 @@ using FluentAssertions;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using System.Text.RegularExpressions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -119,7 +120,7 @@ class D
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         // this.TestOutput.WriteLine( result.ToString() );
     }
@@ -158,7 +159,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -208,7 +209,7 @@ public class A
 ";
 
         diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Variables of types other than primitive types and types configured as safe for dependency analysis are not supported.)@(12,12)-(12,35)" );
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -261,7 +262,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -304,7 +305,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -344,7 +345,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -389,7 +390,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -426,7 +427,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -434,7 +435,7 @@ public class A
     public void TimeSpan()
     {
         using var testContext = this.CreateTestContext();
-        
+
         const string code = @"
 using System;
 public class A
@@ -463,7 +464,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -500,7 +501,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -547,7 +548,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -594,7 +595,7 @@ public class A
 ";
 
         diagnostics.Should().Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, Fn(int)))@(12,19)-(12,21)" );
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -641,7 +642,7 @@ public class A
         diagnostics.Should()
             .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -686,7 +687,7 @@ public class A
         diagnostics.Should()
             .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, A.GetZ()))@(12,25)-(12,29)" );
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -735,7 +736,7 @@ public class A
         diagnostics.Should()
             .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -780,7 +781,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -835,7 +836,7 @@ public class A
         diagnostics.Should()
             .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(17,25)-(17,29)" );
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -885,7 +886,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -958,7 +959,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -1024,7 +1025,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -1115,7 +1116,7 @@ public class A
 ";
 
         diagnostics.Should().BeEmpty();
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "No" )]
@@ -1159,7 +1160,7 @@ public class A
 ";
 
         diagnostics.Should().Equal( "LAMA5161: Field or property type does not implement INotifyPropertyChanged. (B)@(12,22)-(12,24)" );
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -1199,7 +1200,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -1243,8 +1244,11 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(8,26)-(8,29)" );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
+
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(8,26)-(8,29)" );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -1290,8 +1294,11 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(11,26)-(11,29)" );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
+
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(11,26)-(11,29)" );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -1331,7 +1338,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -1372,8 +1379,11 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
+
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
@@ -1414,7 +1424,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -1461,7 +1471,7 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
         // this.TestOutput.WriteLines( diagnostics );
@@ -1502,10 +1512,18 @@ public class A
   Z
 ";
 
-        result.ToString().Should().Be( expected );
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
+
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
 
         // this.TestOutput.WriteLines( diagnostics );
         // this.TestOutput.WriteLine( result.ToString() );
+    }
+
+    private static string NormalizeEOL(string text)
+    {
+        return Regex.Replace( text, @"\r\n|\n\r|\n|\r", Environment.NewLine );
     }
 }

@@ -23,7 +23,7 @@ public class FormatterOverwritingTest : FormattersTestsBase
         public override string ToString() => this.Description;
     }
 
-    private static IEnumerable<object[]> MakeSerializableBeforeBetweenPermutations( IEnumerable<TestCase> testCases ) 
+    private static IEnumerable<object[]> MakeSerializableBeforeBetweenPermutations( IEnumerable<TestCase> testCases )
         => testCases.Select( t => new object[] { t.ToString() } );
 
     public static IEnumerable<TestCase> EnsureOverwritesTestCases()

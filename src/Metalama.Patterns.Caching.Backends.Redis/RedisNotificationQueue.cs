@@ -414,7 +414,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 #if NETCOREAPP
                         await
 #endif
-                            using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                         {
                             await this._notificationProcessingThreadCompleted.Task;
 

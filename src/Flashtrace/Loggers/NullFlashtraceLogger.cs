@@ -13,7 +13,7 @@ public partial class NullFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalL
 {
     private static bool _warningEmitted;
 
-    public static NullFlashtraceLogger Instance { get; } = new NullFlashtraceLogger(); 
+    public static NullFlashtraceLogger Instance { get; } = new();
 
     private NullFlashtraceLogger() { }
 

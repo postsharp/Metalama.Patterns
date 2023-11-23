@@ -33,7 +33,7 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
     public RedisCachingBackendConfiguration( IConnectionMultiplexer connection, string? keyPrefix = null )
     {
         this.RedisConnectionFactory = new RedisConnectionFactory( connection );
-        
+
         if ( keyPrefix != null )
         {
             this.KeyPrefix = keyPrefix;
@@ -126,7 +126,7 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
     /// The default value is 1 minute.
     /// </remarks>
     public TimeSpan ConnectionTimeout { get; init; } = RedisNotificationQueue.DefaultSubscriptionTimeout;
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether the logs of the <see cref="ConnectionMultiplexer"/> should be captured and
     /// redirected. The default value is <c>false</c>. 

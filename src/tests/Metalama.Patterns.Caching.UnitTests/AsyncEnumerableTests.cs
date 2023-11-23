@@ -38,7 +38,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     public async void IteratesCompletelyOnFirstAwaitedMoveNextAsync()
     {
         _ = await this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
-        
+
         Assert.Equal( "E1.E2.E3", this.StringBuilder.ToString() );
     }
 

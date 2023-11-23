@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 internal static class RoslynExtensions
 {
     public static Accessibility EffectiveAccessibility( this ISymbol symbol )
-    {        
+    {
         if ( symbol.DeclaredAccessibility != Accessibility.NotApplicable )
         {
             return symbol.DeclaredAccessibility;
