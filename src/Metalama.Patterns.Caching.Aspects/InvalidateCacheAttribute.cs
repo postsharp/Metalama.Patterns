@@ -421,7 +421,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
                     continue;
                 }
 
-                invalidatedMethodInfo.ParameterMap[i] = invalidatingMethodParameter.Index;
+                invalidatedMethodInfo.ParameterMap[i] = invalidatedMethodParameter.Index;
             }
 
             if ( !allParametersMatching )
