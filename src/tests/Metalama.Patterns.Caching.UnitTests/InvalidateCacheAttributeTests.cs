@@ -1798,6 +1798,48 @@ namespace Metalama.Patterns.Caching.Tests
 
         #endregion TestNestedContextsAsync
 
+        #region TestParameterMapping
+
+        private const string _testParameterMappingProfileName =
+            _profileNamePrefix + nameof( TestParameterMapping );
+
+        [CachingConfiguration( ProfileName = _testParameterMappingProfileName )]
+        private sealed class TestParameterMappingInvalidatingAndCachingClass
+        {
+            private static int _counter;
+
+            [Cache]
+            public int GetValue( int id ) { return _counter++; }
+
+            [InvalidateCache( nameof( GetValue ) )]
+            public void ResetValue( object arg, int id ) { }
+        }
+
+        [Fact]
+        public void TestParameterMapping()
+        {
+            using var context = this.InitializeTest( _testParameterMappingProfileName );
+
+            var testClass = new TestParameterMappingInvalidatingAndCachingClass();
+
+            Assert.Equal( 0, testClass.GetValue( 1 ) );
+            Assert.Equal( 1, testClass.GetValue( 2 ) );
+            Assert.Equal( 1, testClass.GetValue( 2 ) );
+            Assert.Equal( 0, testClass.GetValue( 1 ) );
+
+            testClass.ResetValue( new(), 2 );
+
+            Assert.Equal( 0, testClass.GetValue( 1 ) );
+            Assert.Equal( 2, testClass.GetValue( 2 ) );
+
+            testClass.ResetValue( new(), 1 );
+
+            Assert.Equal( 3, testClass.GetValue( 1 ) );
+            Assert.Equal( 2, testClass.GetValue( 2 ) );
+        }
+
+        #endregion
+
         public InvalidateCacheAttributeTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
     }
 }

@@ -34,7 +34,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
     /// <summary>
     /// Gets or sets a value indicating whether the current <see cref="InvalidateCacheAttribute"/> can match several overloads of the methods.
-    /// The default value is <c>false</c>, which means that an diagnostic will be emitted if the current <see cref="InvalidateCacheAttribute"/> matches
+    /// The default value is <c>false</c>, which means that an error will be emitted if the current <see cref="InvalidateCacheAttribute"/> matches
     /// several methods of the same name.
     /// </summary>
     public bool AllowMultipleOverloads { get; set; }
