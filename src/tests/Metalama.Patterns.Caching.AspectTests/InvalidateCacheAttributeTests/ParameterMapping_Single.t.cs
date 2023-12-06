@@ -3,7 +3,7 @@ internal class Target
     [Cache]
     public Task<string?> GetResourceNameAsync( Guid resourceId )
     {
-        async Task<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        static async Task<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
         {
             return await ((Target) instance).GetResourceNameAsync_Source( (Guid) args[0] );
         }

@@ -3,7 +3,7 @@ internal class Target
     [Cache]
     public string GetResourceName1( int x, int y, [NotCacheKey] int z )
     {
-        object? Invoke( object? instance, object?[] args )
+        static object? Invoke( object? instance, object?[] args )
         {
             return ((Target) instance).GetResourceName1_Source( (int) args[0], (int) args[1], (int) args[2] );
         }
@@ -13,7 +13,7 @@ internal class Target
     [Cache]
     public string GetResourceName2( int y, [NotCacheKey] string z, int x )
     {
-        object? Invoke( object? instance, object?[] args )
+        static object? Invoke( object? instance, object?[] args )
         {
             return ((Target) instance).GetResourceName2_Source( (int) args[0], (string) args[1], (int) args[2] );
         }
