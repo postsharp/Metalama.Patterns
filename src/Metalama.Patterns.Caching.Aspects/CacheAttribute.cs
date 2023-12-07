@@ -19,10 +19,6 @@ using Metalama.Framework.RunTime;
 
 namespace Metalama.Patterns.Caching.Aspects;
 
-// TODO: #33663 make local functions in templates static where possible
-// ReSharper disable LocalFunctionCanBeMadeStatic 
-#pragma warning disable IDE0062
-
 /// <summary>
 /// Custom attribute that, when applied on a method, causes the return value of the method to be cached
 /// for the specific list of arguments passed to this method call.
@@ -242,8 +238,6 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
         return method.Parameters.Select( GetItem );
     }
 
-    // ReSharper disable once MergeConditionalExpression
-#pragma warning disable IDE0031
     [Template]
     private static void CachedMethodRegistrationInitializer( IMethod method, IField field, IType? awaitableResultType, [CompileTime] CachingOptions options )
         => field.Value = CachedMethodMetadata.Register(
@@ -258,7 +252,6 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
                 SlidingExpiration = options.SlidingExpiration
             },
             method.ReturnType.IsReferenceType == true || method.ReturnType.IsNullable == true );
-#pragma warning restore IDE0031
 
     private static IParameter? GetCancellationTokenParameter() => meta.Target.Method.Parameters.OfParameterType( typeof(CancellationToken) ).LastOrDefault();
 
@@ -278,7 +271,7 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
     [Template]
     public static TReturnType? OverrideMethod<[CompileTime] TReturnType>( IField registrationField, IType TValue /* not used */, IField? cachingServiceField )
     {
-        object? Invoke( object? instance, object?[] args )
+        static object? Invoke( object? instance, object?[] args )
         {
             return meta.Target.Method.With( instance, InvokerOptions.Base )
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), null ) );
@@ -301,7 +294,7 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
     {
         var cancellationTokenExpression = GetCancellationTokenExpression();
 
-        async Task<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        static async Task<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
         {
             return await meta.Target.Method.With( instance, InvokerOptions.Base )
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
@@ -326,7 +319,7 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
     {
         var cancellationTokenExpression = GetCancellationTokenExpression();
 
-        async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        static async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
         {
             return await meta.Target.Method.With( instance, InvokerOptions.Base )
                 .Invoke( GetArgumentExpressions( meta.Target.Method, ExpressionFactory.Capture( args ), ExpressionFactory.Capture( cancellationToken ) ) )!;
@@ -352,7 +345,7 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
     {
         var cancellationTokenExpression = GetCancellationTokenExpression();
 
-        async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        static async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
         {
             var enumerable = (IAsyncEnumerable<TValue>?)
                 meta.Target.Method.With( instance, InvokerOptions.Base )
@@ -392,7 +385,7 @@ public sealed class CacheAttribute : CachingBaseAttribute, IAspect<IMethod>
     {
         var cancellationTokenExpression = GetCancellationTokenExpression();
 
-        async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
+        static async ValueTask<object?> InvokeAsync( object? instance, object?[] args, CancellationToken cancellationToken )
         {
             var enumerator = (IAsyncEnumerator<TValue>?)
                 meta.Target.Method.With( instance, InvokerOptions.Base )

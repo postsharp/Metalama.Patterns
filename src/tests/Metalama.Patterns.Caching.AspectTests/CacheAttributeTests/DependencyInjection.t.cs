@@ -8,7 +8,7 @@ public class C
   [Cache]
   public int M()
   {
-    object? Invoke(object? instance, object? [] args)
+    static object? Invoke(object? instance, object? [] args)
     {
       return ((C)instance).M_Source();
     }

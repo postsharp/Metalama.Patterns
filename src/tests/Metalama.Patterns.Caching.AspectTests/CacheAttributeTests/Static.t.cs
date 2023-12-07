@@ -9,7 +9,7 @@ public class C
   [Cache]
   public static int M()
   {
-    object? Invoke(object? instance, object? [] args)
+    static object? Invoke(object? instance, object? [] args)
     {
       return C.M_Source();
     }
