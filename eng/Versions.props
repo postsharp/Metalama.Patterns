@@ -33,12 +33,12 @@
         <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
         <WindowsAzureServiceBusVersion>4.1.2</WindowsAzureServiceBusVersion>
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
-        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' != 'net471' " >2.2.0</xUnitAssemblyFixtureVersion>
-        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' == 'net471' " >2.0.3</xUnitAssemblyFixtureVersion>
+        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' != 'net471' ">2.2.0</xUnitAssemblyFixtureVersion>
+        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' == 'net471' ">2.0.3</xUnitAssemblyFixtureVersion>
         <XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
         <xUnitVersion>2.4.2</xUnitVersion>
-        <PostSharpEngineeringVersion>2023.2.56</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>2023.2.64</PostSharpEngineeringVersion>
         <MetalamaExtensionsVersion></MetalamaExtensionsVersion>
     </PropertyGroup>
 
