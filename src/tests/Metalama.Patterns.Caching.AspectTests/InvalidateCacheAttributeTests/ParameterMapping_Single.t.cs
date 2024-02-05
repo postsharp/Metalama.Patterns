@@ -41,15 +41,15 @@ internal class Target
     private static MethodInfo[] _methodsInvalidatedBy_UpdateProtectedResourceAsync_AE10A3168F93BA6A187A7E438DE50A40;
     static Target()
     {
-        Target._methodsInvalidatedBy_UpdateProtectedResource2Async_5D88BBAC730DC5F67DE5A9E4107C1BE6 = new MethodInfo[]
-        {
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!, "Target.GetResourceNameAsync(Guid)")
-        };
+        Target._cacheRegistration_GetResourceNameAsync = CachedMethodMetadata.Register( RunTimeHelpers.ThrowIfMissing( typeof( Target ).GetMethod( "GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof( Guid ) }, null )!, "Target.GetResourceNameAsync(Guid)" ), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string?) null, SlidingExpiration = null }, true );
         Target._methodsInvalidatedBy_UpdateProtectedResourceAsync_AE10A3168F93BA6A187A7E438DE50A40 = new MethodInfo[]
         {
       RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!, "Target.GetResourceNameAsync(Guid)")
         };
-        Target._cacheRegistration_GetResourceNameAsync = CachedMethodMetadata.Register( RunTimeHelpers.ThrowIfMissing( typeof( Target ).GetMethod( "GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof( Guid ) }, null )!, "Target.GetResourceNameAsync(Guid)" ), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string?) null, SlidingExpiration = null }, true );
+        Target._methodsInvalidatedBy_UpdateProtectedResource2Async_5D88BBAC730DC5F67DE5A9E4107C1BE6 = new MethodInfo[]
+        {
+      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!, "Target.GetResourceNameAsync(Guid)")
+        };
     }
     public Target( ICachingService? cachingService = default )
     {

@@ -24,24 +24,6 @@ internal class Regex
   private bool ItCanFoo() => true;
   public Regex()
   {
-    bool CanExecute_2(object? parameter_4)
-    {
-      return this.CanExecuteFoo();
-    }
-    void Execute_2(object? parameter_5)
-    {
-      this.ExecuteFoo();
-    }
-    this.FooCommand = new DelegateCommand(Execute_2, CanExecute_2);
-    bool CanExecute_1(object? parameter_2)
-    {
-      return this.UseTheForceItCan();
-    }
-    void Execute_1(object? parameter_3)
-    {
-      this.MakeItUseTheForce();
-    }
-    this.TheUseTheForceCommand = new DelegateCommand(Execute_1, CanExecute_1);
     bool CanExecute(object? parameter)
     {
       return this.CanItBeep();
@@ -51,6 +33,24 @@ internal class Regex
       this.MakeItBeep();
     }
     this.TheBeepCommand = new DelegateCommand(Execute, CanExecute);
+    bool CanExecute_1(object? parameter_2)
+    {
+      return this.UseTheForceItCan();
+    }
+    void Execute_1(object? parameter_3)
+    {
+      this.MakeItUseTheForce();
+    }
+    this.TheUseTheForceCommand = new DelegateCommand(Execute_1, CanExecute_1);
+    bool CanExecute_2(object? parameter_4)
+    {
+      return this.CanExecuteFoo();
+    }
+    void Execute_2(object? parameter_5)
+    {
+      this.ExecuteFoo();
+    }
+    this.FooCommand = new DelegateCommand(Execute_2, CanExecute_2);
   }
   public ICommand FooCommand { get; }
   public ICommand TheBeepCommand { get; }
