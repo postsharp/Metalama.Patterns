@@ -53,18 +53,18 @@ internal class Target
     private static MethodInfo[] _methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632;
     static Target()
     {
-        Target._methodsInvalidatedBy_UpdateProtectedResource2Async_EF4B99F69BA2C549913F60A9CBDD6F66 = new MethodInfo[]
-        {
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!, "Target.GetResourceName1(int, int, int)"),
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!, "Target.GetResourceName2(int, string, int)")
-        };
+        Target._cacheRegistration_GetResourceName1 = CachedMethodMetadata.Register( RunTimeHelpers.ThrowIfMissing( typeof( Target ).GetMethod( "GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof( int ), typeof( int ), typeof( int ) }, null )!, "Target.GetResourceName1(int, int, int)" ), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string?) null, SlidingExpiration = null }, true );
+        Target._cacheRegistration_GetResourceName2 = CachedMethodMetadata.Register( RunTimeHelpers.ThrowIfMissing( typeof( Target ).GetMethod( "GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof( int ), typeof( string ), typeof( int ) }, null )!, "Target.GetResourceName2(int, string, int)" ), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string?) null, SlidingExpiration = null }, true );
         Target._methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632 = new MethodInfo[]
         {
       RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!, "Target.GetResourceName1(int, int, int)"),
       RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!, "Target.GetResourceName2(int, string, int)")
         };
-        Target._cacheRegistration_GetResourceName2 = CachedMethodMetadata.Register( RunTimeHelpers.ThrowIfMissing( typeof( Target ).GetMethod( "GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof( int ), typeof( string ), typeof( int ) }, null )!, "Target.GetResourceName2(int, string, int)" ), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string?) null, SlidingExpiration = null }, true );
-        Target._cacheRegistration_GetResourceName1 = CachedMethodMetadata.Register( RunTimeHelpers.ThrowIfMissing( typeof( Target ).GetMethod( "GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof( int ), typeof( int ), typeof( int ) }, null )!, "Target.GetResourceName1(int, int, int)" ), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string?) null, SlidingExpiration = null }, true );
+        Target._methodsInvalidatedBy_UpdateProtectedResource2Async_EF4B99F69BA2C549913F60A9CBDD6F66 = new MethodInfo[]
+        {
+      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!, "Target.GetResourceName1(int, int, int)"),
+      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!, "Target.GetResourceName2(int, string, int)")
+        };
     }
     public Target( ICachingService? cachingService = default )
     {

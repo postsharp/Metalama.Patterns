@@ -15,15 +15,6 @@ public class CanExecuteProperty
   private static bool CanExecuteStatic => true;
   public CanExecuteProperty()
   {
-    bool CanExecute_1(object? parameter_2)
-    {
-      return CanExecuteProperty.CanExecuteStatic;
-    }
-    void Execute_1(object? parameter_3)
-    {
-      CanExecuteProperty.ExecuteStatic();
-    }
-    this.StaticCommand = new DelegateCommand(Execute_1, CanExecute_1);
     bool CanExecute(object? parameter)
     {
       return this.CanExecuteInstance;
@@ -33,6 +24,15 @@ public class CanExecuteProperty
       this.ExecuteInstance();
     }
     this.InstanceCommand = new DelegateCommand(Execute, CanExecute);
+    bool CanExecute_1(object? parameter_2)
+    {
+      return CanExecuteProperty.CanExecuteStatic;
+    }
+    void Execute_1(object? parameter_3)
+    {
+      CanExecuteProperty.ExecuteStatic();
+    }
+    this.StaticCommand = new DelegateCommand(Execute_1, CanExecute_1);
   }
   public ICommand InstanceCommand { get; }
   public ICommand StaticCommand { get; }
