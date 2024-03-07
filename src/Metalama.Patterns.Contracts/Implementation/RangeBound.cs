@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Contracts.Implementation;
 [RunTimeOrCompileTime]
 public abstract class RangeBound
 {
-    protected RangeBound( bool isAllowed )
+    private protected RangeBound( bool isAllowed )
     {
         this.IsAllowed = isAllowed;
     }
@@ -26,8 +26,6 @@ public abstract class RangeBound
     public bool IsAllowed { get; }
 
     public abstract object ObjectValue { get; }
-
-    public bool SupportsPattern => true;
 
     public abstract bool TryConvertToByte( out byte value, out ConversionResult conversionResult );
 
@@ -235,6 +233,147 @@ public abstract class RangeBound
                 value = null;
 
                 return false;
+        }
+    }
+
+    internal void AppendConvertedValueToExpression( IType type, ExpressionBuilder builder )
+    {
+        switch ( type.SpecialType )
+        {
+            case SpecialType.SByte:
+                if ( this.TryConvertToSByte( out var sbyteValue, out _ ) )
+                {
+                    builder.AppendLiteral( sbyteValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.Int16:
+                if ( this.TryConvertToInt16( out var shortValue, out _ ) )
+                {
+                    builder.AppendLiteral( shortValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.Int32:
+                if ( this.TryConvertToInt32( out var intValue, out _ ) )
+                {
+                    builder.AppendLiteral( intValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.Int64:
+                if ( this.TryConvertToInt64( out var longValue, out _ ) )
+                {
+                    builder.AppendLiteral( longValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.Byte:
+                if ( this.TryConvertToByte( out var byteValue, out _ ) )
+                {
+                    builder.AppendLiteral( byteValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.UInt16:
+                if ( this.TryConvertToUInt16( out var ushortValue, out _ ) )
+                {
+                    builder.AppendLiteral( ushortValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.UInt32:
+                if ( this.TryConvertToUInt32( out var uintValue, out _ ) )
+                {
+                    builder.AppendLiteral( uintValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.UInt64:
+                if ( this.TryConvertToUInt64( out var ulongValue, out _ ) )
+                {
+                    builder.AppendLiteral( ulongValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.Decimal:
+                if ( this.TryConvertToDecimal( out var decimalValue, out _ ) )
+                {
+                    builder.AppendLiteral( decimalValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.Single:
+                if ( this.TryConvertToSingle( out var singleValue, out _ ) )
+                {
+                    builder.AppendLiteral( singleValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            case SpecialType.Double:
+                if ( this.TryConvertToDouble( out var doubleValue, out _ ) )
+                {
+                    builder.AppendLiteral( doubleValue );
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                break;
+
+            default:
+                throw new InvalidOperationException();
         }
     }
 }

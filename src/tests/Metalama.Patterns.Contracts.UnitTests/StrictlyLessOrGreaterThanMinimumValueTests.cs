@@ -14,6 +14,9 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 public sealed class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 {
     private const long _longLimit = long.MinValue + 1;
+    private const long _ulongLimit = 100;
+    private const double _longAsDoubleLimit = 100;
+
     private const double _doubleLimit = double.MinValue / (1 + DoubleTolerance);
 
     // This has to be double because decimal is not allowed as attribute constructor value.
@@ -123,7 +126,7 @@ public sealed class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTe
 
     private static void MethodWithLongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] long? a ) { }
 
-    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( 0 )] ulong? a ) { }
+    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( _ulongLimit )] ulong? a ) { }
 
     private static void MethodWithDoubleStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] double? a ) { }
 
@@ -139,10 +142,10 @@ public sealed class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTe
 
     private static void MethodWithDoubleStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] double? a ) { }
 
-    private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( 0d )] decimal? a ) { }
+    private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] decimal? a ) { }
 
     // Cannot use doubleLimit by design. Covered by build test.
-    private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( 100d )] long? a ) { }
+    private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( _longAsDoubleLimit )] long? a ) { }
 
     private static void MethodWithDoubleStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] double? a ) { }
 

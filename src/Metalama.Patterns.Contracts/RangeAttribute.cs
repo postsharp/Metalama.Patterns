@@ -128,14 +128,13 @@ public class RangeAttribute : ContractBaseAttribute
 
         if ( !this.Range.IsTypeSupported( basicType ) )
         {
-            Debugger.Break();
-
             builder.Diagnostics.Report(
                 ContractDiagnostics.RangeCannotBeApplied
                     .WithArguments(
                         (builder.Target,
                          basicType.Name,
-                         builder.AspectInstance.AspectClass.ShortName) ) );
+                         builder.AspectInstance.AspectClass.ShortName,
+                         this.Range) ) );
 
             builder.SkipAspect();
         }
@@ -159,7 +158,6 @@ public class RangeAttribute : ContractBaseAttribute
     public override void Validate( dynamic? value )
     {
         var type = meta.Target.GetTargetType();
-        var isNullable = type.IsNullable == true;
 
         if ( type.SpecialType == SpecialType.Object )
         {
@@ -176,8 +174,7 @@ public class RangeAttribute : ContractBaseAttribute
         else
         {
             var expressionBuilder = new ExpressionBuilder();
-
-            var expression = isNullable ? (IExpression) value!.Value : (IExpression) value!;
+            var expression = (IExpression) value!;
 
             if ( this.Range.GeneratePattern( type, expressionBuilder, expression ) )
             {
@@ -186,12 +183,16 @@ public class RangeAttribute : ContractBaseAttribute
                     this.OnContractViolated( value );
                 }
             }
+            else
+            {
+                meta.InsertComment( $"The {this.Range} validation on {expression} is fully redundant and has been skipped." );
+            }
         }
     }
 
     [Template]
     protected virtual void OnContractViolated( dynamic? value )
     {
-        meta.Target.GetContractOptions().Templates!.OnRangeContractViolated( value, this.Range.MinValue.ObjectValue, this.Range.MaxValue.ObjectValue );
+        meta.Target.GetContractOptions().Templates!.OnRangeContractViolated( value, this.Range );
     }
 }

@@ -5,6 +5,8 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Patterns.Contracts.Implementation;
 
+#pragma warning disable SA1124
+
 [RunTimeOrCompileTime]
 internal class DecimalRangeBound : RangeBound
 {
@@ -23,6 +25,18 @@ internal class DecimalRangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case byte.MinValue:
+                value = (byte) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case byte.MaxValue:
+                value = (byte) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < byte.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -37,7 +51,7 @@ internal class DecimalRangeBound : RangeBound
 
             default:
                 value = (byte) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -47,6 +61,18 @@ internal class DecimalRangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case sbyte.MinValue:
+                value = (sbyte) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case sbyte.MaxValue:
+                value = (sbyte) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < sbyte.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -61,7 +87,7 @@ internal class DecimalRangeBound : RangeBound
 
             default:
                 value = (sbyte) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -71,6 +97,18 @@ internal class DecimalRangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case short.MinValue:
+                value = (short) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case short.MaxValue:
+                value = (short) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < short.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -85,7 +123,7 @@ internal class DecimalRangeBound : RangeBound
 
             default:
                 value = (short) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -95,6 +133,18 @@ internal class DecimalRangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case ushort.MinValue:
+                value = (ushort) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case ushort.MaxValue:
+                value = (ushort) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < ushort.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -109,7 +159,7 @@ internal class DecimalRangeBound : RangeBound
 
             default:
                 value = (ushort) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -119,6 +169,18 @@ internal class DecimalRangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case int.MinValue:
+                value = (int) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case int.MaxValue:
+                value = (int) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < int.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -133,7 +195,7 @@ internal class DecimalRangeBound : RangeBound
 
             default:
                 value = (int) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -143,6 +205,18 @@ internal class DecimalRangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case uint.MinValue:
+                value = (uint) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case uint.MaxValue:
+                value = (uint) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < uint.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -157,7 +231,7 @@ internal class DecimalRangeBound : RangeBound
 
             default:
                 value = (uint) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -167,6 +241,18 @@ internal class DecimalRangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case long.MinValue:
+                value = (long) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case long.MaxValue:
+                value = (long) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < long.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -181,7 +267,7 @@ internal class DecimalRangeBound : RangeBound
 
             default:
                 value = (long) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -191,6 +277,18 @@ internal class DecimalRangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case ulong.MinValue:
+                value = (ulong) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case ulong.MaxValue:
+                value = (ulong) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < 0:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -205,7 +303,7 @@ internal class DecimalRangeBound : RangeBound
 
             default:
                 value = (ulong) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -213,16 +311,32 @@ internal class DecimalRangeBound : RangeBound
 
     public override bool TryConvertToDecimal( out decimal value, out ConversionResult conversionResult )
     {
-        value = this._value;
-        conversionResult = ConversionResult.Success;
+        switch ( this._value )
+        {
+            case decimal.MinValue:
+                value = this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
 
-        return true;
+                return true;
+
+            case ulong.MaxValue:
+                value = this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
+            default:
+                value = this._value;
+                conversionResult = ConversionResult.WithinRange;
+
+                return true;
+        }
     }
 
     public override bool TryConvertToDouble( out double value, out ConversionResult conversionResult )
     {
         value = (double) this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }
@@ -230,7 +344,7 @@ internal class DecimalRangeBound : RangeBound
     public override bool TryConvertToSingle( out float value, out ConversionResult conversionResult )
     {
         value = (float) this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }

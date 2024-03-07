@@ -5,6 +5,8 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Patterns.Contracts.Implementation;
 
+#pragma warning disable SA1124
+
 [RunTimeOrCompileTime]
 internal sealed class Int64RangeBound : RangeBound
 {
@@ -23,6 +25,18 @@ internal sealed class Int64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case byte.MinValue:
+                value = (byte) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case byte.MaxValue:
+                value = (byte) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < byte.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -37,7 +51,7 @@ internal sealed class Int64RangeBound : RangeBound
 
             default:
                 value = (byte) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -47,6 +61,18 @@ internal sealed class Int64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case sbyte.MinValue:
+                value = (sbyte) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case sbyte.MaxValue:
+                value = (sbyte) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < sbyte.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -61,7 +87,7 @@ internal sealed class Int64RangeBound : RangeBound
 
             default:
                 value = (sbyte) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -71,6 +97,18 @@ internal sealed class Int64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case short.MinValue:
+                value = (short) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case short.MaxValue:
+                value = (short) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < short.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -85,7 +123,7 @@ internal sealed class Int64RangeBound : RangeBound
 
             default:
                 value = (short) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -95,6 +133,18 @@ internal sealed class Int64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case ushort.MinValue:
+                value = (ushort) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case ushort.MaxValue:
+                value = (ushort) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < ushort.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -109,7 +159,7 @@ internal sealed class Int64RangeBound : RangeBound
 
             default:
                 value = (ushort) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -119,6 +169,18 @@ internal sealed class Int64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case int.MinValue:
+                value = (int) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case int.MaxValue:
+                value = (int) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < int.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -133,7 +195,7 @@ internal sealed class Int64RangeBound : RangeBound
 
             default:
                 value = (int) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -143,6 +205,18 @@ internal sealed class Int64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case uint.MinValue:
+                value = (uint) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case uint.MaxValue:
+                value = (uint) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case < uint.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -157,7 +231,7 @@ internal sealed class Int64RangeBound : RangeBound
 
             default:
                 value = (uint) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -165,17 +239,38 @@ internal sealed class Int64RangeBound : RangeBound
 
     public override bool TryConvertToInt64( out long value, out ConversionResult conversionResult )
     {
-        value = this._value;
+        switch ( this._value )
+        {
+            case long.MinValue:
+                value = this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
 
-        conversionResult = ConversionResult.Success;
+                return true;
 
-        return true;
+            case long.MaxValue:
+                value = this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
+            default:
+                value = this._value;
+                conversionResult = ConversionResult.WithinRange;
+
+                return true;
+        }
     }
 
     public override bool TryConvertToUInt64( out ulong value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
+            case 0:
+                value = 0;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
             case < 0:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
@@ -184,7 +279,7 @@ internal sealed class Int64RangeBound : RangeBound
 
             default:
                 value = (ulong) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -193,7 +288,7 @@ internal sealed class Int64RangeBound : RangeBound
     public override bool TryConvertToDecimal( out decimal value, out ConversionResult conversionResult )
     {
         value = this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }
@@ -201,7 +296,7 @@ internal sealed class Int64RangeBound : RangeBound
     public override bool TryConvertToDouble( out double value, out ConversionResult conversionResult )
     {
         value = this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }
@@ -209,7 +304,7 @@ internal sealed class Int64RangeBound : RangeBound
     public override bool TryConvertToSingle( out float value, out ConversionResult conversionResult )
     {
         value = this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }

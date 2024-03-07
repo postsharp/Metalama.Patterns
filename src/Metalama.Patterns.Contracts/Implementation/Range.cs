@@ -4,6 +4,8 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using System.Diagnostics;
+using System.Text;
 
 namespace Metalama.Patterns.Contracts.Implementation;
 
@@ -285,11 +287,40 @@ public readonly struct Range : IExpressionBuilder
         return expressionBuilder.ToExpression();
     }
 
+    private static bool IsUnsignedType( IType type )
+        => type.SpecialType switch
+        {
+            SpecialType.UInt16 => true,
+            SpecialType.UInt32 => true,
+            SpecialType.UInt64 => true,
+            SpecialType.Byte => true,
+            _ => false
+        };
+
     public bool GeneratePattern( IType valueType, ExpressionBuilder builder, IExpression value )
     {
-        var hasMinCheck = this._minValue != null && this._minValue.TryConvert( valueType, out _, out _ );
-        var hasMaxCheck = this._maxValue != null && this._maxValue.TryConvert( valueType, out _, out _ );
         var range = this;
+
+        var nonNullableType = valueType.ToNonNullableType();
+
+        // Check if we have checks of min or max value.
+        ConversionResult minConversionResult = default;
+        ConversionResult maxConversionResult = default;
+        var hasMinCheck = this._minValue != null && this._minValue.TryConvert( nonNullableType, out _, out minConversionResult );
+        var hasMaxCheck = this._maxValue != null && this._maxValue.TryConvert( nonNullableType, out _, out maxConversionResult );
+
+        Debugger.Break();
+
+        // Eliminate redundant checks.
+        if ( hasMinCheck && minConversionResult == ConversionResult.ExactlyMinValue && this._minValue!.IsAllowed )
+        {
+            hasMinCheck = false;
+        }
+
+        if ( hasMaxCheck && maxConversionResult == ConversionResult.ExactlyMaxValue && this._maxValue!.IsAllowed )
+        {
+            hasMaxCheck = false;
+        }
 
         if ( !hasMaxCheck && !hasMinCheck )
         {
@@ -298,41 +329,26 @@ public readonly struct Range : IExpressionBuilder
         }
         else if ( hasMinCheck && hasMaxCheck )
         {
-            if ( this._minValue!.SupportsPattern && this._maxValue!.SupportsPattern )
-            {
-                builder.AppendExpression( value );
-                builder.AppendVerbatim( " is " );
+            builder.AppendExpression( value );
+            builder.AppendVerbatim( " is " );
 
-                AppendMin();
+            AppendMin();
 
-                builder.AppendVerbatim( " or " );
+            builder.AppendVerbatim( " or " );
 
-                AppendMax();
-
-                this._minValue.AppendValueToExpression( builder );
-            }
-            else
-            {
-                builder.AppendExpression( value );
-
-                AppendMin();
-
-                builder.AppendVerbatim( " || " );
-
-                builder.AppendExpression( value );
-
-                AppendMax();
-            }
+            AppendMax();
         }
         else if ( hasMinCheck )
         {
             builder.AppendExpression( value );
+            builder.AppendVerbatim( " is " );
 
             AppendMin();
         }
         else
         {
             builder.AppendExpression( value );
+            builder.AppendVerbatim( " is " );
 
             AppendMax();
         }
@@ -343,28 +359,28 @@ public readonly struct Range : IExpressionBuilder
         {
             if ( range._minValue!.IsAllowed )
             {
-                builder.AppendVerbatim( "< " );
+                builder.AppendVerbatim( " < " );
             }
             else
             {
-                builder.AppendVerbatim( "<= " );
+                builder.AppendVerbatim( " <= " );
             }
 
-            range._minValue.AppendValueToExpression( builder );
+            range._minValue.AppendConvertedValueToExpression( nonNullableType, builder );
         }
 
         void AppendMax()
         {
             if ( range._maxValue!.IsAllowed )
             {
-                builder.AppendVerbatim( "> " );
+                builder.AppendVerbatim( " > " );
             }
             else
             {
-                builder.AppendVerbatim( ">= " );
+                builder.AppendVerbatim( " >= " );
             }
 
-            range._maxValue.AppendValueToExpression( builder );
+            range._maxValue.AppendConvertedValueToExpression( nonNullableType, builder );
         }
     }
 
@@ -394,6 +410,11 @@ public readonly struct Range : IExpressionBuilder
                         {
                             return false;
                         }
+
+                        if ( minConversionResult == ConversionResult.ExactlyMaxValue && !this._minValue.IsAllowed )
+                        {
+                            return false;
+                        }
                     }
                 }
 
@@ -405,6 +426,11 @@ public readonly struct Range : IExpressionBuilder
                         {
                             return false;
                         }
+
+                        if ( maxConversionResult == ConversionResult.ExactlyMinValue && !this._maxValue.IsAllowed )
+                        {
+                            return false;
+                        }
                     }
                 }
 
@@ -413,5 +439,34 @@ public readonly struct Range : IExpressionBuilder
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        var stringBuilder = new StringBuilder();
+
+        if ( this._minValue != null )
+        {
+            stringBuilder.Append( this._minValue.IsAllowed ? '[' : ']' );
+            stringBuilder.Append( this._minValue.ObjectValue );
+        }
+        else
+        {
+            stringBuilder.Append( "[\u221e" );
+        }
+
+        stringBuilder.Append( ", " );
+
+        if ( this._maxValue != null )
+        {
+            stringBuilder.Append( this._maxValue.ObjectValue );
+            stringBuilder.Append( this._maxValue.IsAllowed ? ']' : '[' );
+        }
+        else
+        {
+            stringBuilder.Append( "\u221e]" );
+        }
+
+        return stringBuilder.ToString();
     }
 }

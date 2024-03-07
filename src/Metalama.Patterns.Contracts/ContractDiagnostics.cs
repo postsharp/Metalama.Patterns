@@ -3,17 +3,18 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Range = Metalama.Patterns.Contracts.Implementation.Range;
 
 namespace Metalama.Patterns.Contracts;
 
 [CompileTime]
 internal static class ContractDiagnostics
 {
-    public static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType, string AspectType)> RangeCannotBeApplied { get; }
+    public static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType, string AspectType, Range Range)> RangeCannotBeApplied { get; }
         = new(
             "LAMA5001",
             Severity.Error,
-            "The [{2}] contract cannot be applied to '{0}' because the value range cannot be satisfied by the type {1}.",
+            "The [{2}] contract cannot be applied to '{0}' because the value range {3} cannot be satisfied by the type {1}.",
             $"The Range contract cannot be applied because the range cannot be satisfied by the type of the target declaration.",
             "Metalama.Patterns.Contracts" );
 

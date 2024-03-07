@@ -36,13 +36,8 @@ public sealed class StrictRangeAttributeTests
     [Fact]
     public void TestValuesOnEdges()
     {
-        AssertEx.Throws<ArgumentOutOfRangeException>(
-            () =>
-                TestAllMethods( _longMin, _ulongMin, _doubleMin, _decimalMin ) );
-
-        AssertEx.Throws<ArgumentOutOfRangeException>(
-            () =>
-                TestAllMethods( _longMax, _ulongMax, _doubleMax, _decimalMax ) );
+        TestAllMethods( _longMin, _ulongMin, _doubleMin, _decimalMin );
+        TestAllMethods( _longMax, _ulongMax, _doubleMax, _decimalMax );
     }
 
     [Fact]

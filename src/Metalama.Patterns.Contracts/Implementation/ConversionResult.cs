@@ -7,8 +7,10 @@ namespace Metalama.Patterns.Contracts.Implementation;
 [RunTimeOrCompileTime]
 public enum ConversionResult
 {
-    Success,
+    WithinRange,
+    ExactlyMaxValue,
     TooLarge,
+    ExactlyMinValue,
     TooSmall,
     UnsupportedType
 }

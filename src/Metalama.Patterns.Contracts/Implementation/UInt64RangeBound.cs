@@ -5,6 +5,8 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Patterns.Contracts.Implementation;
 
+#pragma warning disable SA1124
+
 [RunTimeOrCompileTime]
 internal sealed class UInt64RangeBound : RangeBound
 {
@@ -23,6 +25,18 @@ internal sealed class UInt64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case byte.MinValue:
+                value = (byte) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case byte.MaxValue:
+                value = (byte) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case > byte.MaxValue:
                 value = 0;
                 conversionResult = ConversionResult.TooLarge;
@@ -31,7 +45,7 @@ internal sealed class UInt64RangeBound : RangeBound
 
             default:
                 value = (byte) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -41,6 +55,12 @@ internal sealed class UInt64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case (ulong) sbyte.MaxValue:
+                value = (sbyte) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case > (ulong) sbyte.MaxValue:
                 value = 0;
                 conversionResult = ConversionResult.TooLarge;
@@ -49,7 +69,7 @@ internal sealed class UInt64RangeBound : RangeBound
 
             default:
                 value = (sbyte) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -59,6 +79,12 @@ internal sealed class UInt64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case (ulong) short.MaxValue:
+                value = (short) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case > (ulong) short.MaxValue:
                 value = 0;
                 conversionResult = ConversionResult.TooLarge;
@@ -67,7 +93,7 @@ internal sealed class UInt64RangeBound : RangeBound
 
             default:
                 value = (short) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -77,6 +103,18 @@ internal sealed class UInt64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case ushort.MinValue:
+                value = (ushort) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case ushort.MaxValue:
+                value = (ushort) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case > ushort.MaxValue:
                 value = 0;
                 conversionResult = ConversionResult.TooLarge;
@@ -85,7 +123,7 @@ internal sealed class UInt64RangeBound : RangeBound
 
             default:
                 value = (ushort) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -95,6 +133,12 @@ internal sealed class UInt64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case int.MaxValue:
+                value = (int) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case > int.MaxValue:
                 value = 0;
                 conversionResult = ConversionResult.TooLarge;
@@ -103,7 +147,7 @@ internal sealed class UInt64RangeBound : RangeBound
 
             default:
                 value = (int) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -113,6 +157,18 @@ internal sealed class UInt64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case uint.MinValue:
+                value = (uint) this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
+
+                return true;
+
+            case uint.MaxValue:
+                value = (uint) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case > uint.MaxValue:
                 value = 0;
                 conversionResult = ConversionResult.TooLarge;
@@ -121,7 +177,7 @@ internal sealed class UInt64RangeBound : RangeBound
 
             default:
                 value = (uint) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -131,6 +187,12 @@ internal sealed class UInt64RangeBound : RangeBound
     {
         switch ( this._value )
         {
+            case long.MaxValue:
+                value = (long) this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
             case > long.MaxValue:
                 value = 0;
                 conversionResult = ConversionResult.TooLarge;
@@ -139,7 +201,7 @@ internal sealed class UInt64RangeBound : RangeBound
 
             default:
                 value = (uint) this._value;
-                conversionResult = ConversionResult.Success;
+                conversionResult = ConversionResult.WithinRange;
 
                 return true;
         }
@@ -147,16 +209,32 @@ internal sealed class UInt64RangeBound : RangeBound
 
     public override bool TryConvertToUInt64( out ulong value, out ConversionResult conversionResult )
     {
-        value = this._value;
-        conversionResult = ConversionResult.Success;
+        switch ( this._value )
+        {
+            case ulong.MinValue:
+                value = this._value;
+                conversionResult = ConversionResult.ExactlyMinValue;
 
-        return true;
+                return true;
+
+            case ulong.MaxValue:
+                value = this._value;
+                conversionResult = ConversionResult.ExactlyMaxValue;
+
+                return true;
+
+            default:
+                value = this._value;
+                conversionResult = ConversionResult.WithinRange;
+
+                return true;
+        }
     }
 
     public override bool TryConvertToDecimal( out decimal value, out ConversionResult conversionResult )
     {
         value = this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }
@@ -164,7 +242,7 @@ internal sealed class UInt64RangeBound : RangeBound
     public override bool TryConvertToDouble( out double value, out ConversionResult conversionResult )
     {
         value = this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }
@@ -172,7 +250,7 @@ internal sealed class UInt64RangeBound : RangeBound
     public override bool TryConvertToSingle( out float value, out ConversionResult conversionResult )
     {
         value = this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }

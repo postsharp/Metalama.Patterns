@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
+using Range = Metalama.Patterns.Contracts.Implementation.Range;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -167,15 +168,15 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     }
 
     [Template]
-    public virtual void OnRangeContractViolated( dynamic? value, [CompileTime] object minValue, [CompileTime] object maxValue )
+    public virtual void OnRangeContractViolated( dynamic? value, [CompileTime] Range range )
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentOutOfRangeException( $"The {TargetDisplayName} must be between {minValue} and {maxValue}.", TargetParameterName );
+            throw new ArgumentOutOfRangeException( $"The {TargetDisplayName} must be in the range {range}.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {TargetDisplayName} must be between {minValue} and {maxValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be in the range {range}." );
         }
     }
 
@@ -186,11 +187,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         {
             throw new ArgumentOutOfRangeException(
                 TargetParameterName,
-                $"The {TargetDisplayName} must be greater than {minValue}." );
+                $"The {TargetDisplayName} must be greater than or equal to {minValue}." );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {TargetDisplayName} must be greater than {minValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be greater than or equal to {minValue}." );
         }
     }
 
@@ -201,11 +202,11 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         {
             throw new ArgumentOutOfRangeException(
                 TargetParameterName,
-                $"The {TargetDisplayName} must be less than {maxValue}." );
+                $"The {TargetDisplayName} must be less than or equal to {maxValue}." );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {TargetDisplayName} must be less than {maxValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be less than or equal to {maxValue}." );
         }
     }
 
@@ -240,17 +241,15 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     }
 
     [Template]
-    public virtual void OnStrictRangeContractViolated( dynamic? value, [CompileTime] object minValue, [CompileTime] object maxValue )
+    public virtual void OnStrictRangeContractViolated( dynamic? value, [CompileTime] Range range )
     {
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
-            throw new ArgumentOutOfRangeException(
-                TargetParameterName,
-                $"The {TargetDisplayName} must be strictly between {minValue} and {maxValue}." );
+            throw new ArgumentOutOfRangeException( $"The {TargetDisplayName} must be strictly in the range {range}.", TargetParameterName );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {TargetDisplayName} must be strictly between {minValue} and {maxValue}." );
+            throw new PostconditionViolationException( $"The {TargetDisplayName} must be strictly  in the range {range}." );
         }
     }
 

@@ -11,6 +11,7 @@ public sealed class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 {
     private const long _longLimit = -100;
     private const double _doubleLimit = -100;
+    private const double _longAsDoubleLimit = -100;
 
     private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
     private static readonly decimal _decimalStep = FloatingPointHelper.GetDecimalStep( (decimal) _doubleLimit );
@@ -142,7 +143,7 @@ public sealed class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 
     private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( _doubleLimit )] decimal? a ) { }
 
-    private static void MethodWithLongLessThanDouble( [LessThan( 0d )] long? a ) { }
+    private static void MethodWithLongLessThanDouble( [LessThan( _longAsDoubleLimit )] long? a ) { }
 
     private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleLimit )] double? a ) { }
 

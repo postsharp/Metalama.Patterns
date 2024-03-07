@@ -93,7 +93,6 @@ public sealed class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
         decimal? decimalValue )
     {
         MethodWithLongStrictlyLessThanLong( longValue );
-        MethodWithUlongStrictlyLessThanLong( ulongValue );
         MethodWithDoubleStrictlyLessThanLong( doubleValue );
         MethodWithDecimalStrictlyLessThanLong( decimalValue );
 
@@ -102,7 +101,6 @@ public sealed class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
         MethodWithDecimalStrictlyLessThanUlong( decimalValue );
 
         MethodWithLongStrictlyLessThanDouble( longValue );
-        MethodWithUlongStrictlyLessThanDouble( ulongValue );
         MethodWithDoubleStrictlyLessThanDouble( doubleValue );
         MethodWithDecimalStrictlyLessThanDouble( decimalValue );
     }
@@ -118,8 +116,6 @@ public sealed class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
     private static void MethodWithDecimalStrictlyGreaterThanLong( [StrictlyGreaterThan( _longLimit )] decimal? a ) { }
 
     private static void MethodWithLongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] long? a ) { }
-
-    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] ulong? a ) { }
 
     private static void MethodWithDoubleStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] double? a ) { }
 
@@ -156,8 +152,6 @@ public sealed class StrictlyLessOrGreaterThanZeroTests : RangeContractTestsBase
     private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] decimal? a ) { }
 
     private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] long? a ) { }
-
-    private static void MethodWithUlongStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] ulong? a ) { }
 
     private static void MethodWithDoubleStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] double? a ) { }
 

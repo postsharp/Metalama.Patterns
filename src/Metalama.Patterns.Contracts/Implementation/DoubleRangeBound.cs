@@ -5,6 +5,8 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Patterns.Contracts.Implementation;
 
+#pragma warning disable SA1124
+
 [RunTimeOrCompileTime]
 internal class DoubleRangeBound : RangeBound
 {
@@ -37,7 +39,13 @@ internal class DoubleRangeBound : RangeBound
 
             default:
                 value = (byte) this._value;
-                conversionResult = ConversionResult.Success;
+
+                conversionResult = value switch
+                {
+                    byte.MinValue => ConversionResult.ExactlyMinValue,
+                    byte.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -61,7 +69,13 @@ internal class DoubleRangeBound : RangeBound
 
             default:
                 value = (sbyte) this._value;
-                conversionResult = ConversionResult.Success;
+
+                conversionResult = value switch
+                {
+                    sbyte.MinValue => ConversionResult.ExactlyMinValue,
+                    sbyte.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -85,7 +99,13 @@ internal class DoubleRangeBound : RangeBound
 
             default:
                 value = (short) this._value;
-                conversionResult = ConversionResult.Success;
+
+                conversionResult = value switch
+                {
+                    short.MinValue => ConversionResult.ExactlyMinValue,
+                    short.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -109,7 +129,13 @@ internal class DoubleRangeBound : RangeBound
 
             default:
                 value = (ushort) this._value;
-                conversionResult = ConversionResult.Success;
+
+                conversionResult = value switch
+                {
+                    ushort.MinValue => ConversionResult.ExactlyMinValue,
+                    ushort.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -133,7 +159,13 @@ internal class DoubleRangeBound : RangeBound
 
             default:
                 value = (int) this._value;
-                conversionResult = ConversionResult.Success;
+
+                conversionResult = value switch
+                {
+                    int.MinValue => ConversionResult.ExactlyMinValue,
+                    int.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -157,7 +189,13 @@ internal class DoubleRangeBound : RangeBound
 
             default:
                 value = (uint) this._value;
-                conversionResult = ConversionResult.Success;
+
+                conversionResult = value switch
+                {
+                    uint.MinValue => ConversionResult.ExactlyMinValue,
+                    uint.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -167,7 +205,7 @@ internal class DoubleRangeBound : RangeBound
     {
         switch ( this._value )
         {
-            case < 0:
+            case < long.MinValue:
                 value = 0;
                 conversionResult = ConversionResult.TooSmall;
 
@@ -181,7 +219,13 @@ internal class DoubleRangeBound : RangeBound
 
             default:
                 value = (long) this._value;
-                conversionResult = ConversionResult.Success;
+
+                conversionResult = value switch
+                {
+                    long.MinValue => ConversionResult.ExactlyMinValue,
+                    long.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -205,7 +249,13 @@ internal class DoubleRangeBound : RangeBound
 
             default:
                 value = (ulong) this._value;
-                conversionResult = ConversionResult.Success;
+
+                conversionResult = value switch
+                {
+                    ulong.MinValue => ConversionResult.ExactlyMinValue,
+                    ulong.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -228,8 +278,14 @@ internal class DoubleRangeBound : RangeBound
                 return false;
 
             default:
-                value = (ulong) this._value;
-                conversionResult = ConversionResult.Success;
+                value = (decimal) this._value;
+
+                conversionResult = value switch
+                {
+                    decimal.MinValue => ConversionResult.ExactlyMinValue,
+                    decimal.MaxValue => ConversionResult.ExactlyMaxValue,
+                    _ => ConversionResult.WithinRange
+                };
 
                 return true;
         }
@@ -238,7 +294,7 @@ internal class DoubleRangeBound : RangeBound
     public override bool TryConvertToDouble( out double value, out ConversionResult conversionResult )
     {
         value = this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }
@@ -246,7 +302,7 @@ internal class DoubleRangeBound : RangeBound
     public override bool TryConvertToSingle( out float value, out ConversionResult conversionResult )
     {
         value = (float) this._value;
-        conversionResult = ConversionResult.Success;
+        conversionResult = ConversionResult.WithinRange;
 
         return true;
     }
