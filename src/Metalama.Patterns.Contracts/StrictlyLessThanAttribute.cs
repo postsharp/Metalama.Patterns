@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Patterns.Contracts.Implementation;
 
 // Resharper disable RedundantCast
 
@@ -30,60 +31,48 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( long max )
-        : base(
-            long.MinValue,
-            max,
-            long.MinValue,
-            FloatingPointHelper.Int64Maximum.ToInt64( max ),
-            ulong.MinValue,
-            FloatingPointHelper.Int64Maximum.ToUInt64( max ),
-            double.MinValue,
-            FloatingPointHelper.Int64Maximum.ToDouble( max ),
-            decimal.MinValue,
-            FloatingPointHelper.Int64Maximum.ToDecimal( max ),
-            GetInvalidTypes( long.MinValue, FloatingPointHelper.Int64Maximum.ToInt64( max ) ),
-            shouldTestMinBound: false ) { }
+        : base( null, RangeBound.Create( max, false ) ) { }
+
+    public StrictlyLessThanAttribute( int max )
+        : base( null, RangeBound.Create( max, false ) ) { }
+
+    public StrictlyLessThanAttribute( short max )
+        : base( null, RangeBound.Create( max, false ) ) { }
+
+    public StrictlyLessThanAttribute( sbyte max )
+        : base( null, RangeBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying an unsigned integer bound.
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( ulong max )
-        : base(
-            ulong.MinValue,
-            max,
-            long.MinValue,
-            FloatingPointHelper.UInt64Maximum.ToInt64( max ),
-            ulong.MinValue,
-            FloatingPointHelper.UInt64Maximum.ToUInt64( max ),
-            double.MinValue,
-            FloatingPointHelper.UInt64Maximum.ToDouble( max ),
-            decimal.MinValue,
-            FloatingPointHelper.UInt64Maximum.ToDecimal( max ),
-            GetInvalidTypes( 0 ) | (max == 0 ? TypeFlag.UInt16 | TypeFlag.UInt32 | TypeFlag.UInt64 : TypeFlag.None),
-            shouldTestMinBound: false ) { }
+        : base( null, RangeBound.Create( max, false ) ) { }
+
+    public StrictlyLessThanAttribute( uint max )
+        : base( null, RangeBound.Create( max, false ) ) { }
+
+    public StrictlyLessThanAttribute( ushort max )
+        : base( null, RangeBound.Create( max, false ) ) { }
+
+    public StrictlyLessThanAttribute( byte max )
+        : base( null, RangeBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a floating-point bound.
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public StrictlyLessThanAttribute( double max )
-        : base(
-            double.MinValue,
-            max,
-            long.MinValue,
-            FloatingPointHelper.DoubleMaximum.ToInt64( max ),
-            ulong.MinValue,
-            FloatingPointHelper.DoubleMaximum.ToUInt64( max ),
-            double.MinValue,
-            FloatingPointHelper.DoubleMaximum.ToDouble( max ),
-            decimal.MinValue,
-            FloatingPointHelper.DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes( double.MinValue, max > double.MinValue + 1 ? max + 1 : double.MinValue ),
-            shouldTestMinBound: false ) { }
+        : base( null, RangeBound.Create( max, false ) ) { }
+
+    public StrictlyLessThanAttribute( float max )
+        : base( null, RangeBound.Create( max, false ) ) { }
+
+    public StrictlyLessThanAttribute( decimal max )
+        : base( null, RangeBound.Create( max, false ) ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.GetContractOptions().Templates!.OnStrictlyLessThanContractViolated( value, this.DisplayMaxValue );
+        meta.Target.GetContractOptions().Templates!.OnStrictlyLessThanContractViolated( value, this.Range.MaxValue!.ObjectValue );
     }
 }

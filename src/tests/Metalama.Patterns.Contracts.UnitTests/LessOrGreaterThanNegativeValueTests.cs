@@ -142,7 +142,7 @@ public sealed class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 
     private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( _doubleLimit )] decimal? a ) { }
 
-    private static void MethodWithLongLessThanDouble( [LessThan( _doubleLimit )] long? a ) { }
+    private static void MethodWithLongLessThanDouble( [LessThan( 0d )] long? a ) { }
 
     private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleLimit )] double? a ) { }
 

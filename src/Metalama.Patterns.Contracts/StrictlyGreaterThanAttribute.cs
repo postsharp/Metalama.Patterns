@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Patterns.Contracts.Implementation;
 
 // Resharper disable RedundantCast
 
@@ -30,60 +31,48 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public StrictlyGreaterThanAttribute( long min )
-        : base(
-            min,
-            long.MaxValue,
-            FloatingPointHelper.Int64Minimum.ToInt64( min ),
-            long.MaxValue,
-            FloatingPointHelper.Int64Minimum.ToUInt64( min ),
-            ulong.MaxValue,
-            FloatingPointHelper.Int64Minimum.ToDouble( min ),
-            double.MaxValue,
-            FloatingPointHelper.Int64Minimum.ToDecimal( min ),
-            decimal.MaxValue,
-            GetInvalidTypes( FloatingPointHelper.Int64Minimum.ToInt64( min ), long.MaxValue ),
-            shouldTestMaxBound: false ) { }
+        : base( RangeBound.Create( min, false ), null ) { }
+
+    public StrictlyGreaterThanAttribute( int min )
+        : base( RangeBound.Create( min, false ), null ) { }
+
+    public StrictlyGreaterThanAttribute( short min )
+        : base( RangeBound.Create( min, false ), null ) { }
+
+    public StrictlyGreaterThanAttribute( sbyte min )
+        : base( RangeBound.Create( min, false ), null ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying an unsigned integer bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public StrictlyGreaterThanAttribute( ulong min )
-        : base(
-            min,
-            ulong.MaxValue,
-            FloatingPointHelper.UInt64Minimum.ToInt64( min ),
-            long.MaxValue,
-            FloatingPointHelper.UInt64Minimum.ToUInt64( min ),
-            ulong.MaxValue,
-            FloatingPointHelper.UInt64Minimum.ToDouble( min ),
-            double.MaxValue,
-            FloatingPointHelper.UInt64Minimum.ToDecimal( min ),
-            decimal.MaxValue,
-            GetInvalidTypes( FloatingPointHelper.UInt64Minimum.ToUInt64( min ) ),
-            shouldTestMaxBound: false ) { }
+        : base( RangeBound.Create( min, false ), null ) { }
+
+    public StrictlyGreaterThanAttribute( uint min )
+        : base( RangeBound.Create( min, false ), null ) { }
+
+    public StrictlyGreaterThanAttribute( ushort min )
+        : base( RangeBound.Create( min, false ), null ) { }
+
+    public StrictlyGreaterThanAttribute( byte min )
+        : base( RangeBound.Create( min, false ), null ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a floating-point bound.
     /// </summary>
     /// <param name="min">The lower bound.</param>
     public StrictlyGreaterThanAttribute( double min )
-        : base(
-            min,
-            double.MaxValue,
-            FloatingPointHelper.DoubleMinimum.ToInt64( min ),
-            long.MaxValue,
-            FloatingPointHelper.DoubleMinimum.ToUInt64( min ),
-            ulong.MaxValue,
-            FloatingPointHelper.DoubleMinimum.ToDouble( min ),
-            double.MaxValue,
-            FloatingPointHelper.DoubleMinimum.ToDecimal( min ),
-            decimal.MaxValue,
-            GetInvalidTypes( min < double.MaxValue - 1 ? min + 1 : double.MaxValue, double.MaxValue ),
-            shouldTestMaxBound: false ) { }
+        : base( RangeBound.Create( min, false ), null ) { }
+
+    public StrictlyGreaterThanAttribute( decimal min )
+        : base( RangeBound.Create( min, false ), null ) { }
+
+    public StrictlyGreaterThanAttribute( float min )
+        : base( RangeBound.Create( min, false ), null ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.GetContractOptions().Templates!.OnStrictlyGreaterThanContractViolated( value, this.DisplayMinValue );
+        meta.Target.GetContractOptions().Templates!.OnStrictlyGreaterThanContractViolated( value, this.Range.MinValue!.ObjectValue );
     }
 }

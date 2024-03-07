@@ -13,14 +13,14 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 
 public sealed class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 {
-    private const long _longLimit = long.MinValue;
-    private const double _doubleLimit = double.MinValue;
+    private const long _longMin = long.MinValue;
+    private const double _doubleMin = double.MinValue;
 
     // This has to be double because decimal is not allowed as attribute constructor value.
     // Loss of precision is a consequence.
     private const double _decimalLimit = (double) decimal.MinValue / (1 + DoubleTolerance);
 
-    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleMin );
     private static readonly decimal _decimalStep = Math.Abs( decimal.MinValue ) * DecimalTolerance;
 
     [Fact]
@@ -110,37 +110,37 @@ public sealed class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 
     #region Long
 
-    private static void MethodWithLongGreaterThanLong( [GreaterThan( _longLimit )] long? a ) { }
+    private static void MethodWithLongGreaterThanLong( [GreaterThan( _longMin )] long? a ) { }
 
-    private static void MethodWithUlongGreaterThanLong( [GreaterThan( _longLimit )] ulong? a ) { }
+    private static void MethodWithUlongGreaterThanLong( [GreaterThan( _longMin )] ulong? a ) { }
 
-    private static void MethodWithDoubleGreaterThanLong( [GreaterThan( _longLimit )] double? a ) { }
+    private static void MethodWithDoubleGreaterThanLong( [GreaterThan( _longMin )] double? a ) { }
 
-    private static void MethodWithDecimalGreaterThanLong( [GreaterThan( _longLimit )] decimal? a ) { }
+    private static void MethodWithDecimalGreaterThanLong( [GreaterThan( _longMin )] decimal? a ) { }
 
-    private static void MethodWithLongLessThanLong( [LessThan( _longLimit )] long? a ) { }
+    private static void MethodWithLongLessThanLong( [LessThan( _longMin )] long? a ) { }
 
-    private static void MethodWithUlongLessThanLong( [LessThan( _longLimit )] ulong? a ) { }
+    private static void MethodWithUlongLessThanLong( [LessThan( 0 )] ulong? a ) { }
 
-    private static void MethodWithDoubleLessThanLong( [LessThan( _longLimit )] double? a ) { }
+    private static void MethodWithDoubleLessThanLong( [LessThan( _longMin )] double? a ) { }
 
-    private static void MethodWithDecimalLessThanLong( [LessThan( _longLimit )] decimal? a ) { }
+    private static void MethodWithDecimalLessThanLong( [LessThan( _longMin )] decimal? a ) { }
 
     #endregion Long
 
     #region Double
 
-    private static void MethodWithLongGreaterThanDouble( [GreaterThan( _doubleLimit )] long? a ) { }
+    private static void MethodWithLongGreaterThanDouble( [GreaterThan( _doubleMin )] long? a ) { }
 
-    private static void MethodWithUlongGreaterThanDouble( [GreaterThan( _doubleLimit )] ulong? a ) { }
+    private static void MethodWithUlongGreaterThanDouble( [GreaterThan( _doubleMin )] ulong? a ) { }
 
-    private static void MethodWithDoubleGreaterThanDouble( [GreaterThan( _doubleLimit )] double? a ) { }
+    private static void MethodWithDoubleGreaterThanDouble( [GreaterThan( _doubleMin )] double? a ) { }
 
-    private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( _doubleLimit )] decimal? a ) { }
+    private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( 0d )] decimal? a ) { }
 
-    private static void MethodWithLongLessThanDouble( [LessThan( (double) _longLimit )] long? a ) { }
+    private static void MethodWithLongLessThanDouble( [LessThan( 0d )] long? a ) { }
 
-    private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleLimit )] double? a ) { }
+    private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleMin )] double? a ) { }
 
     private static void MethodWithDecimalLessThanDouble( [LessThan( _decimalLimit )] decimal? a ) { }
 

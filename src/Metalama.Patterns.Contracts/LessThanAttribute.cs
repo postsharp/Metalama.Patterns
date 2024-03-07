@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Patterns.Contracts.Implementation;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
 
@@ -26,108 +27,48 @@ public class LessThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public LessThanAttribute( long max )
-        : base(
-            long.MinValue,
-            max,
-            long.MinValue,
-            max,
-            0,
-            max < 0 ? 0 : (ulong) max,
-            double.MinValue,
-            max,
-            decimal.MinValue,
-            max,
-            GetInvalidTypes( long.MinValue, max ),
-            shouldTestMinBound: false ) { }
+        : base( default, RangeBound.Create( max ) ) { }
+
+    public LessThanAttribute( int max )
+        : base( default, RangeBound.Create( max ) ) { }
+
+    public LessThanAttribute( short max )
+        : base( default, RangeBound.Create( max ) ) { }
+
+    public LessThanAttribute( sbyte max )
+        : base( default, RangeBound.Create( max ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying an unsigned integer bound.
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public LessThanAttribute( ulong max )
-        : base(
-            ulong.MinValue,
-            max,
-            long.MinValue,
-            max > (ulong) long.MaxValue ? long.MaxValue : (long) max,
-            0,
-            (ulong) max,
-            double.MinValue,
-            max,
-            decimal.MinValue,
-            max,
-            GetInvalidTypes( ulong.MinValue ),
-            shouldTestMinBound: false ) { }
+        : base( default, RangeBound.Create( max ) ) { }
+
+    public LessThanAttribute( uint max )
+        : base( default, RangeBound.Create( max ) ) { }
+
+    public LessThanAttribute( ushort max )
+        : base( default, RangeBound.Create( max ) ) { }
+
+    public LessThanAttribute( byte max )
+        : base( default, RangeBound.Create( max ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a floating-point bound.
     /// </summary>
     /// <param name="max">The upper bound.</param>
     public LessThanAttribute( double max )
-        : base(
-            double.MinValue,
-            max,
-            long.MinValue,
-            DoubleMaximum.ToInt64( max ),
-            0,
-            DoubleMaximum.ToUInt64( max ),
-            double.MinValue,
-            max,
-            decimal.MinValue,
-            DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes( double.MinValue, max ),
-            shouldTestMinBound: false ) { }
+        : base( default, RangeBound.Create( max ) ) { }
 
-    private static class DoubleMaximum
-    {
-        public static long ToInt64( double max )
-        {
-            if ( max < (double) long.MinValue )
-            {
-                return long.MinValue;
-            }
+    public LessThanAttribute( float max )
+        : base( default, RangeBound.Create( max ) ) { }
 
-            if ( max > (double) long.MaxValue )
-            {
-                return long.MaxValue;
-            }
-
-            return (long) max;
-        }
-
-        public static ulong ToUInt64( double max )
-        {
-            if ( max < 0 )
-            {
-                return 0;
-            }
-
-            if ( max > (double) ulong.MaxValue )
-            {
-                return ulong.MaxValue;
-            }
-
-            return (ulong) max;
-        }
-
-        public static decimal ToDecimal( double max )
-        {
-            if ( max > (double) decimal.MaxValue )
-            {
-                return decimal.MaxValue;
-            }
-
-            if ( max < (double) decimal.MinValue )
-            {
-                return decimal.MinValue;
-            }
-
-            return (decimal) max;
-        }
-    }
+    public LessThanAttribute( decimal max )
+        : base( default, RangeBound.Create( max ) ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.GetContractOptions().Templates!.OnLessThanContractViolated( value, this.DisplayMaxValue );
+        meta.Target.GetContractOptions().Templates!.OnLessThanContractViolated( value, this.Range.MaxValue.ObjectValue );
     }
 }

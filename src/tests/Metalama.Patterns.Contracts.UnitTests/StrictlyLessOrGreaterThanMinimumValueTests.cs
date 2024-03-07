@@ -123,7 +123,7 @@ public sealed class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTe
 
     private static void MethodWithLongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] long? a ) { }
 
-    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] ulong? a ) { }
+    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( 0 )] ulong? a ) { }
 
     private static void MethodWithDoubleStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] double? a ) { }
 
@@ -139,10 +139,10 @@ public sealed class StrictlyLessOrGreaterThanMinimumValueTests : RangeContractTe
 
     private static void MethodWithDoubleStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] double? a ) { }
 
-    private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] decimal? a ) { }
+    private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( 0d )] decimal? a ) { }
 
     // Cannot use doubleLimit by design. Covered by build test.
-    private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( (double) _longLimit )] long? a ) { }
+    private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( 100d )] long? a ) { }
 
     private static void MethodWithDoubleStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] double? a ) { }
 
