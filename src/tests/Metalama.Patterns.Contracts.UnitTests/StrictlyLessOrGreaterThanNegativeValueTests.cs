@@ -5,6 +5,8 @@ using Xunit;
 // This is a modified copy of StrictlyLessOrGreaterThanPositiveValueTests.cs
 // Keep the testing logic equal for all the copies!
 
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
+
 namespace Metalama.Patterns.Contracts.UnitTests;
 
 public sealed class StrictlyLessOrGreaterThanNegativeValueTests : RangeContractTestsBase

@@ -3,6 +3,8 @@
 using Metalama.Patterns.Contracts.UnitTests.Assets;
 using Xunit;
 
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
+
 namespace Metalama.Patterns.Contracts.UnitTests;
 
 // ReSharper disable RedundantSuppressNullableWarningExpression

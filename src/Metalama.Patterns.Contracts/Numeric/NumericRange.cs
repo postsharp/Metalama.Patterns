@@ -411,12 +411,12 @@ public readonly struct NumericRange : IExpressionBuilder
         }
     }
 
-    internal bool IsTypeSupported( IType type )
+    internal NumericRangeTypeSupport IsTypeSupported( IType type )
     {
         switch ( type.ToNonNullableType().SpecialType )
         {
             case SpecialType.Object:
-                return true;
+                return NumericRangeTypeSupport.Supported;
 
             case SpecialType.Byte:
             case SpecialType.SByte:
@@ -429,18 +429,30 @@ public readonly struct NumericRange : IExpressionBuilder
             case SpecialType.Decimal:
             case SpecialType.Single:
             case SpecialType.Double:
+                var isRedundant = true;
+
                 if ( this._minValue != null )
                 {
                     this._minValue.TryConvert( type, out _, out var minConversionResult );
 
                     if ( minConversionResult is ConversionResult.TooLarge or ConversionResult.UnsupportedType )
                     {
-                        return false;
+                        return NumericRangeTypeSupport.NotSupported;
                     }
 
                     if ( minConversionResult == ConversionResult.ExactlyMaxValue && !this._minValue.IsAllowed )
                     {
-                        return false;
+                        return NumericRangeTypeSupport.NotSupported;
+                    }
+
+                    if ( minConversionResult == ConversionResult.TooSmall ||
+                         (minConversionResult == ConversionResult.ExactlyMinValue && !this._minValue.IsAllowed) )
+                    {
+                        // This check is redundant.
+                    }
+                    else
+                    {
+                        isRedundant = false;
                     }
                 }
 
@@ -450,19 +462,34 @@ public readonly struct NumericRange : IExpressionBuilder
 
                     if ( maxConversionResult is ConversionResult.TooSmall or ConversionResult.UnsupportedType )
                     {
-                        return false;
+                        return NumericRangeTypeSupport.NotSupported;
                     }
 
                     if ( maxConversionResult == ConversionResult.ExactlyMinValue && !this._maxValue.IsAllowed )
                     {
-                        return false;
+                        return NumericRangeTypeSupport.NotSupported;
+                    }
+
+                    if ( maxConversionResult == ConversionResult.TooLarge ||
+                         (maxConversionResult == ConversionResult.ExactlyMaxValue && !this._maxValue.IsAllowed) )
+                    {
+                        // This check is redundant.
+                    }
+                    else
+                    {
+                        isRedundant = false;
                     }
                 }
 
-                return true;
+                if ( isRedundant )
+                {
+                    return NumericRangeTypeSupport.Redundant;
+                }
+
+                return NumericRangeTypeSupport.Supported;
 
             default:
-                return false;
+                return NumericRangeTypeSupport.NotSupported;
         }
     }
 

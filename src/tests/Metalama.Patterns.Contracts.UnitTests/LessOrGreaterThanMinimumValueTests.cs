@@ -5,7 +5,8 @@ using Xunit;
 // This is a modified copy of LessOrGreaterThanPositiveValueTests.cs
 // Keep the testing logic equal for all the copies!
 
-#pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+#pragma warning disable IDE0004  // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
 
 // Resharper disable RedundantCast
 
@@ -13,10 +14,10 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 
 public sealed class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 {
-    private const long _longLimit = long.MinValue;
+    private const long _longLimit = long.MinValue + 1;
     private const double _longAsDoubleLimit = -100;
     private const ulong _ulongLimit = 100;
-    private const double _doubleLimit = double.MinValue;
+    private const double _doubleLimit = double.MinValue * (1 - DoubleTolerance);
 
     // This has to be double because decimal is not allowed as attribute constructor value.
     // Loss of precision is a consequence.

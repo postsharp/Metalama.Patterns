@@ -47,4 +47,12 @@ internal static class ContractDiagnostics
             Severity.Warning,
             $"The [{nameof(SuspendInvariantsAttribute)}] aspect on method '{{0}}' is redundant the type '{{1}}' does not contain any invariants.",
             $"The [${nameof(SuspendInvariantsAttribute)}] aspect is redundant because the type does not contain any invariants." );
+
+    public static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType, string AspectType, NumericRange Range)> RangeIsRedundant { get; }
+        = new(
+            "LAMA5006",
+            Severity.Warning,
+            "The [{2}] contract is redundant on '{0}' because the value range {3} is always satisfied by the type {1}.",
+            $"The Range contract is redundant because the range is always satisfied by the type of the target declaration.",
+            "Metalama.Patterns.Contracts" );
 }

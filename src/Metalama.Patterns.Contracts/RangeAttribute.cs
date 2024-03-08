@@ -9,7 +9,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Contracts.Numeric;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -189,19 +188,33 @@ public class RangeAttribute : ContractBaseAttribute
     {
         var basicType = (INamedType) targetType.ToNonNullableType();
 
-        Debugger.Break();
-
-        if ( !this.Range.IsTypeSupported( basicType ) )
+        switch ( this.Range.IsTypeSupported( basicType ) )
         {
-            builder.Diagnostics.Report(
-                ContractDiagnostics.RangeCannotBeApplied
-                    .WithArguments(
-                        (builder.Target,
-                         basicType.Name,
-                         builder.AspectInstance.AspectClass.ShortName,
-                         this.Range) ) );
+            case NumericRangeTypeSupport.NotSupported:
+                builder.Diagnostics.Report(
+                    ContractDiagnostics.RangeCannotBeApplied
+                        .WithArguments(
+                            (builder.Target,
+                             basicType.Name,
+                             builder.AspectInstance.AspectClass.ShortName,
+                             this.Range) ) );
 
-            builder.SkipAspect();
+                builder.SkipAspect();
+
+                break;
+
+            case NumericRangeTypeSupport.Redundant:
+                builder.Diagnostics.Report(
+                    ContractDiagnostics.RangeIsRedundant
+                        .WithArguments(
+                            (builder.Target,
+                             basicType.Name,
+                             builder.AspectInstance.AspectClass.ShortName,
+                             this.Range) ) );
+
+                builder.SkipAspect();
+
+                break;
         }
     }
 
