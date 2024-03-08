@@ -18,6 +18,8 @@ namespace Metalama.Patterns.Contracts;
 ///     </description></item>
 /// </list>
 /// </summary>
+/// <seealso cref="@contract-types"/>
+/// <seealso cref="@enforcing-non-nullability"/> 
 [PublicAPI]
 public sealed class RequiredAttribute : ContractBaseAttribute
 {

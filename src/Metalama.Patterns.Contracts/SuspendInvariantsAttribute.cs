@@ -5,6 +5,12 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Patterns.Contracts;
 
+/// <summary>
+/// Aspect that, when applied to a method or accessor, suspends the execution of invariants for the object while this method is
+/// executing. All threads and execution contexts are affected. The feature must be enabled through the <see cref="ContractOptions.IsInvariantSuspensionSupported"/>
+/// contract option.
+/// </summary>
+/// <seealso cref="@invariants"/>
 public sealed class SuspendInvariantsAttribute : OverrideMethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )

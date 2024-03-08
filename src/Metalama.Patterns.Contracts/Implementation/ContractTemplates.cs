@@ -3,9 +3,8 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
-using Range = Metalama.Patterns.Contracts.Implementation.Range;
 
-namespace Metalama.Patterns.Contracts;
+namespace Metalama.Patterns.Contracts.Implementation;
 
 [PublicAPI]
 public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable

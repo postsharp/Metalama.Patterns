@@ -14,6 +14,7 @@ namespace Metalama.Patterns.Contracts;
 /// If the target is a nullable type, If the target is a nullable type, null strings are accepted and do not
 /// throw an exception.
 /// </summary>
+/// <seealso cref="@contract-types"/>
 [PublicAPI]
 public sealed class UrlAttribute : RegularExpressionBaseAttribute
 {

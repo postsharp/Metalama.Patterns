@@ -9,7 +9,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Contracts.Implementation;
-using System.Diagnostics;
 using Range = Metalama.Patterns.Contracts.Implementation.Range;
 
 namespace Metalama.Patterns.Contracts;
@@ -24,6 +23,7 @@ namespace Metalama.Patterns.Contracts;
 /// </para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used and <value>{5}</value> to refer to the maximum value used.</para>
 /// </remarks>
+/// <seealso cref="@contract-types"/>
 [PublicAPI]
 public class RangeAttribute : ContractBaseAttribute
 {
@@ -37,51 +37,114 @@ public class RangeAttribute : ContractBaseAttribute
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying integer bounds.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="long"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
     public RangeAttribute( long min, long max, bool minAllowed = true, bool maxAllowed = true ) : this(
         RangeBound.Create( min, minAllowed ),
         RangeBound.Create( max, maxAllowed ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying unsigned integer bounds.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="ulong"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
     public RangeAttribute( ulong min, ulong max, bool minAllowed = true, bool maxAllowed = true ) : this(
         RangeBound.Create( min, minAllowed ),
         RangeBound.Create( max, maxAllowed ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying floating-point bounds.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="double"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
     public RangeAttribute( double min, double max, bool minAllowed = true, bool maxAllowed = true ) : this(
         RangeBound.Create( min, minAllowed ),
         RangeBound.Create( max, maxAllowed ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="decimal"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
     public RangeAttribute( decimal min, decimal max, bool minAllowed = true, bool maxAllowed = true ) : this(
         RangeBound.Create( min, minAllowed ),
         RangeBound.Create( max, maxAllowed ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="float"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
     public RangeAttribute( float min, float max, bool minAllowed = true, bool maxAllowed = true ) : this(
         RangeBound.Create( min, minAllowed ),
         RangeBound.Create( max, maxAllowed ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="int"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
     public RangeAttribute( int min, int max, bool minAllowed = true, bool maxAllowed = true ) : this(
         RangeBound.Create( min, minAllowed ),
         RangeBound.Create( max, maxAllowed ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="uint"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
     public RangeAttribute( uint min, uint max, bool minAllowed = true, bool maxAllowed = true ) : this(
         RangeBound.Create( min, minAllowed ),
         RangeBound.Create( max, maxAllowed ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="byte"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
     public RangeAttribute( byte min, sbyte max, bool minAllowed = true, bool maxAllowed = true ) : this(
         RangeBound.Create( min, minAllowed ),
-        RangeBound.Create( max ) ) { }
+        RangeBound.Create( max, maxAllowed ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="short"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( short min, short max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        RangeBound.Create( min, minAllowed ),
+        RangeBound.Create( max, maxAllowed ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="ushort"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( ushort min, ushort max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        RangeBound.Create( min, minAllowed ),
+        RangeBound.Create( max, maxAllowed ) ) { }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )

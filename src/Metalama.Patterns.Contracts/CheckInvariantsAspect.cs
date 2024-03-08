@@ -11,6 +11,9 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Patterns.Contracts;
 
+/// <summary>
+/// Implementation aspect for <see cref="InvariantAttribute"/>.
+/// </summary>
 [Inheritable]
 internal sealed class CheckInvariantsAspect : IAspect<INamedType>
 {

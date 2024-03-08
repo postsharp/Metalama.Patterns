@@ -18,6 +18,8 @@ namespace Metalama.Patterns.Contracts;
 /// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/>, <see cref="IReadOnlyCollection{T}"/>, arrays or <see cref="ImmutableArray{T}"/>
 /// (where empty means zero items).  Null references or default <see cref="ImmutableArray{T}"/> instances are accepted and do not throw an exception.
 /// </summary>
+/// <seealso cref="@contract-types"/>
+/// <seealso cref="@enforcing-non-nullability"/>
 [PublicAPI]
 public sealed class NotEmptyAttribute : ContractBaseAttribute
 {

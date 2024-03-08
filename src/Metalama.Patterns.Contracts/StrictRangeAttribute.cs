@@ -21,56 +21,97 @@ namespace Metalama.Patterns.Contracts;
 ///     of the respective floating-point numerical data type.
 /// </para>
 /// </remarks>
+/// <seealso cref="@contract-types"/>
 [PublicAPI]
 public class StrictRangeAttribute : RangeAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying integer bounds.
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="long"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( long min, long max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="int"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( int min, int max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="short"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( short min, short max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="sbyte"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( sbyte min, sbyte max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying unsigned integer bounds.
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="ulong"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( ulong min, ulong max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
-
-    public StrictRangeAttribute( uint min, uint max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
-
-    public StrictRangeAttribute( ushort min, ushort max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
-
-    public StrictRangeAttribute( byte min, byte max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying floating-point bounds.
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="uint"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( uint min, uint max )
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="ushort"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( ushort min, ushort max )
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="byte"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( byte min, byte max )
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="double"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( double min, double max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="float"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( float min, float max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="decimal"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( decimal min, decimal max )
-        : base( RangeBound.Create( min, true ), RangeBound.Create( max, false ) ) { }
+        : base( RangeBound.Create( min, false ), RangeBound.Create( max, false ) ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {
