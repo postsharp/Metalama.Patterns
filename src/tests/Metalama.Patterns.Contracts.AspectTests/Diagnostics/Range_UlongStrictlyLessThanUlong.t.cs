@@ -1,1 +1,1 @@
-// Error LAMA5001 on `a`: `The [StrictlyLessThan] contract cannot be applied to 'Range_UlongStrictlyLessThanUlong.MethodWithUlongStrictlyLessThanUlong(ulong?)/a' because the value range cannot be satisfied by the type UInt64.`
+// Error LAMA5001 on `a`: `The [StrictlyLessThan] contract cannot be applied to 'Range_UlongStrictlyLessThanUlong.MethodWithUlongStrictlyLessThanUlong(ulong?)/a' because the value range [∞, 0[ cannot be satisfied by the type UInt64.`
