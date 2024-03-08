@@ -7,34 +7,43 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using System.Diagnostics;
 using System.Text;
 
-namespace Metalama.Patterns.Contracts.Implementation;
+namespace Metalama.Patterns.Contracts.Numeric;
 
 #pragma warning disable IDE0032 // Intentionally not using auto-properties.
 
 /// <summary>
-/// Describes a numeric range in the representation of various different numeric types.
+/// Describes a numeric range. Used by <see cref="RangeAttribute"/>.
 /// </summary>
 /// <seealso cref="RangeAttribute"/>
 [PublicAPI]
 [RunTimeOrCompileTime]
-public readonly struct Range : IExpressionBuilder
+public readonly struct NumericRange : IExpressionBuilder
 {
-    private readonly RangeBound? _minValue;
-    private readonly RangeBound? _maxValue;
+    private readonly NumericBound? _minValue;
+    private readonly NumericBound? _maxValue;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Range"/> struct.
+    /// Initializes a new instance of the <see cref="NumericRange"/> struct.
     /// </summary>
-    public Range( RangeBound? min, RangeBound? max )
+    public NumericRange( NumericBound? min, NumericBound? max )
     {
         this._minValue = min;
         this._maxValue = max;
     }
 
-    public RangeBound? MinValue => this._minValue;
+    /// <summary>
+    /// Gets the minimal value, or <c>null</c> if the range has no minimal value.
+    /// </summary>
+    public NumericBound? MinValue => this._minValue;
 
-    public RangeBound? MaxValue => this._maxValue;
+    /// <summary>
+    /// Gets the maximal value, or <c>null</c> if the range has no maximal value.
+    /// </summary>
+    public NumericBound? MaxValue => this._maxValue;
 
+    /// <summary>
+    /// Determines if a value of type <see cref="double"/> is in the current range.
+    /// </summary>
     public bool IsInRange( double value )
     {
         if ( this._minValue != null )
@@ -82,6 +91,9 @@ public readonly struct Range : IExpressionBuilder
         return true;
     }
 
+    /// <summary>
+    /// Determines if a value of type <see cref="decimal"/> is in the current range.
+    /// </summary>
     public bool IsInRange( decimal value )
     {
         if ( this._minValue != null )
@@ -129,6 +141,9 @@ public readonly struct Range : IExpressionBuilder
         return true;
     }
 
+    /// <summary>
+    /// Determines if a value of type <see cref="long"/> is in the current range.
+    /// </summary>
     public bool IsInRange( long value )
     {
         if ( this._minValue != null )
@@ -176,6 +191,9 @@ public readonly struct Range : IExpressionBuilder
         return true;
     }
 
+    /// <summary>
+    /// Determines if a value of type <see cref="ulong"/> is in the current range.
+    /// </summary>
     public bool IsInRange( ulong value )
     {
         if ( this._minValue != null )
@@ -223,6 +241,10 @@ public readonly struct Range : IExpressionBuilder
         return true;
     }
 
+    /// <summary>
+    /// Determines if a value of unknown type is in the current range. Returns <c>false</c> if the type
+    /// is unsupported.
+    /// </summary>
     public bool IsInRange( object? value )
     {
         switch ( value )
@@ -274,7 +296,7 @@ public readonly struct Range : IExpressionBuilder
         var expressionBuilder = new ExpressionBuilder();
 
         expressionBuilder.AppendVerbatim( "new " );
-        expressionBuilder.AppendTypeName( typeof(Range) );
+        expressionBuilder.AppendTypeName( typeof(NumericRange) );
         expressionBuilder.AppendVerbatim( "(" );
 
         if ( this._minValue != null )
@@ -287,17 +309,7 @@ public readonly struct Range : IExpressionBuilder
         return expressionBuilder.ToExpression();
     }
 
-    private static bool IsUnsignedType( IType type )
-        => type.SpecialType switch
-        {
-            SpecialType.UInt16 => true,
-            SpecialType.UInt32 => true,
-            SpecialType.UInt64 => true,
-            SpecialType.Byte => true,
-            _ => false
-        };
-
-    public bool GeneratePattern( IType valueType, ExpressionBuilder builder, IExpression value )
+    internal bool GeneratePattern( IType valueType, ExpressionBuilder builder, IExpression value )
     {
         var range = this;
 
@@ -384,7 +396,7 @@ public readonly struct Range : IExpressionBuilder
         }
     }
 
-    public bool IsTypeSupported( IType type )
+    internal bool IsTypeSupported( IType type )
     {
         switch ( type.ToNonNullableType().SpecialType )
         {

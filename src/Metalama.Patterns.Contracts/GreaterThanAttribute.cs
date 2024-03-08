@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
-using Metalama.Patterns.Contracts.Implementation;
+using Metalama.Patterns.Contracts.Numeric;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
 
@@ -28,77 +28,77 @@ public class GreaterThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( long min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="int"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( int min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="short"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( short min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="sbyte"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( sbyte min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="ulong"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( ulong min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="uint"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( uint min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="ushort"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( ushort min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="byte"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( byte min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="double"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( double min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="float"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( float min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="decimal"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( decimal min )
-        : base( RangeBound.Create( min ), default ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {

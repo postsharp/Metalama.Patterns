@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
-using Metalama.Patterns.Contracts.Implementation;
 
 namespace Metalama.Patterns.Contracts;
 

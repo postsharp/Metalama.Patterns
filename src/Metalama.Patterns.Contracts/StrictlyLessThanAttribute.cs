@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
-using Metalama.Patterns.Contracts.Implementation;
+using Metalama.Patterns.Contracts.Numeric;
 
 // Resharper disable RedundantCast
 
@@ -32,77 +32,77 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( long max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="int"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( int max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="short"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( short max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="sbyte"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( sbyte max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="ulong"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( ulong max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="uint"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( uint max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="ushort"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( ushort max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="byte"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( byte max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="double"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( double max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="float"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( float max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="decimal"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     public StrictlyLessThanAttribute( decimal max )
-        : base( null, RangeBound.Create( max, false ) ) { }
+        : base( null, NumericBound.Create( max, false ) ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {

@@ -2,10 +2,10 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Patterns.Contracts.Implementation;
+namespace Metalama.Patterns.Contracts.Numeric;
 
 [RunTimeOrCompileTime]
-public enum ConversionResult
+internal enum ConversionResult
 {
     WithinRange,
     ExactlyMaxValue,

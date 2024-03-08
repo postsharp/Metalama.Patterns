@@ -3,14 +3,14 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Range = Metalama.Patterns.Contracts.Implementation.Range;
+using Metalama.Patterns.Contracts.Numeric;
 
 namespace Metalama.Patterns.Contracts;
 
 [CompileTime]
 internal static class ContractDiagnostics
 {
-    public static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType, string AspectType, Range Range)> RangeCannotBeApplied { get; }
+    public static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType, string AspectType, NumericRange Range)> RangeCannotBeApplied { get; }
         = new(
             "LAMA5001",
             Severity.Error,

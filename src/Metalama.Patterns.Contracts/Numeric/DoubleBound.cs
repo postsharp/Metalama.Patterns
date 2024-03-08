@@ -3,16 +3,16 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 
-namespace Metalama.Patterns.Contracts.Implementation;
+namespace Metalama.Patterns.Contracts.Numeric;
 
 #pragma warning disable SA1124
 
 [RunTimeOrCompileTime]
-internal class DoubleRangeBound : RangeBound
+internal sealed class DoubleBound : NumericBound
 {
     private readonly double _value;
 
-    public DoubleRangeBound( double value, bool isAllowed ) : base( isAllowed )
+    public DoubleBound( double value, bool isAllowed ) : base( isAllowed )
     {
         this._value = value;
     }
@@ -21,7 +21,7 @@ internal class DoubleRangeBound : RangeBound
 
     #region Conversions
 
-    public override bool TryConvertToByte( out byte value, out ConversionResult conversionResult )
+    internal override bool TryConvertToByte( out byte value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -51,7 +51,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToSByte( out sbyte value, out ConversionResult conversionResult )
+    internal override bool TryConvertToSByte( out sbyte value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -81,7 +81,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToInt16( out short value, out ConversionResult conversionResult )
+    internal override bool TryConvertToInt16( out short value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -111,7 +111,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToUInt16( out ushort value, out ConversionResult conversionResult )
+    internal override bool TryConvertToUInt16( out ushort value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -141,7 +141,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToInt32( out int value, out ConversionResult conversionResult )
+    internal override bool TryConvertToInt32( out int value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -171,7 +171,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToUInt32( out uint value, out ConversionResult conversionResult )
+    internal override bool TryConvertToUInt32( out uint value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -201,7 +201,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToInt64( out long value, out ConversionResult conversionResult )
+    internal override bool TryConvertToInt64( out long value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -231,7 +231,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToUInt64( out ulong value, out ConversionResult conversionResult )
+    internal override bool TryConvertToUInt64( out ulong value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -261,7 +261,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToDecimal( out decimal value, out ConversionResult conversionResult )
+    internal override bool TryConvertToDecimal( out decimal value, out ConversionResult conversionResult )
     {
         switch ( this._value )
         {
@@ -291,7 +291,7 @@ internal class DoubleRangeBound : RangeBound
         }
     }
 
-    public override bool TryConvertToDouble( out double value, out ConversionResult conversionResult )
+    internal override bool TryConvertToDouble( out double value, out ConversionResult conversionResult )
     {
         value = this._value;
         conversionResult = ConversionResult.WithinRange;
@@ -299,7 +299,7 @@ internal class DoubleRangeBound : RangeBound
         return true;
     }
 
-    public override bool TryConvertToSingle( out float value, out ConversionResult conversionResult )
+    internal override bool TryConvertToSingle( out float value, out ConversionResult conversionResult )
     {
         value = (float) this._value;
         conversionResult = ConversionResult.WithinRange;
@@ -309,5 +309,5 @@ internal class DoubleRangeBound : RangeBound
 
     #endregion
 
-    public override void AppendValueToExpression( ExpressionBuilder expressionBuilder ) => expressionBuilder.AppendLiteral( this._value );
+    private protected override void AppendValueToExpression( ExpressionBuilder expressionBuilder ) => expressionBuilder.AppendLiteral( this._value );
 }

@@ -1,61 +1,67 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Patterns.Contracts.Implementation;
+namespace Metalama.Patterns.Contracts.Numeric;
 
+/// <summary>
+/// Represents a single bound of a <see cref="NumericRange"/>.
+/// </summary>
 [RunTimeOrCompileTime]
-public abstract class RangeBound
+public abstract class NumericBound
 {
-    private protected RangeBound( bool isAllowed )
+    protected internal NumericBound( bool isAllowed )
     {
         this.IsAllowed = isAllowed;
     }
 
-    public static RangeBound Create( long min, bool isAllowed = true ) => new Int64RangeBound( min, isAllowed );
+    public static NumericBound Create( long min, bool isAllowed = true ) => new Int64Bound( min, isAllowed );
 
-    public static RangeBound Create( ulong min, bool isAllowed = true ) => new UInt64RangeBound( min, isAllowed );
+    public static NumericBound Create( ulong min, bool isAllowed = true ) => new UInt64Bound( min, isAllowed );
 
-    public static RangeBound Create( decimal min, bool isAllowed = true ) => new DecimalRangeBound( min, isAllowed );
+    public static NumericBound Create( decimal min, bool isAllowed = true ) => new DecimalBound( min, isAllowed );
 
-    public static RangeBound Create( double min, bool isAllowed = true ) => new DoubleRangeBound( min, isAllowed );
+    public static NumericBound Create( double min, bool isAllowed = true ) => new DoubleBound( min, isAllowed );
 
+    [PublicAPI]
     public bool IsAllowed { get; }
 
+    [PublicAPI]
     public abstract object ObjectValue { get; }
 
-    public abstract bool TryConvertToByte( out byte value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToByte( out byte value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToSByte( out sbyte value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToSByte( out sbyte value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToInt16( out short value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToInt16( out short value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToUInt16( out ushort value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToUInt16( out ushort value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToInt32( out int value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToInt32( out int value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToUInt32( out uint value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToUInt32( out uint value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToInt64( out long value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToInt64( out long value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToUInt64( out ulong value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToUInt64( out ulong value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToDecimal( out decimal value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToDecimal( out decimal value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToDouble( out double value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToDouble( out double value, out ConversionResult conversionResult );
 
-    public abstract bool TryConvertToSingle( out float value, out ConversionResult conversionResult );
+    internal abstract bool TryConvertToSingle( out float value, out ConversionResult conversionResult );
 
-    public abstract void AppendValueToExpression( ExpressionBuilder expressionBuilder );
+    private protected abstract void AppendValueToExpression( ExpressionBuilder expressionBuilder );
 
     public override string ToString() => this.ObjectValue.ToString() ?? "null";
 
-    public void AppendToExpression( ExpressionBuilder expressionBuilder )
+    internal void AppendToExpression( ExpressionBuilder expressionBuilder )
     {
-        expressionBuilder.AppendTypeName( typeof(RangeBound) );
+        expressionBuilder.AppendTypeName( typeof(NumericBound) );
         expressionBuilder.AppendVerbatim( "." );
         expressionBuilder.AppendVerbatim( nameof(Create) );
         expressionBuilder.AppendVerbatim( "(" );
