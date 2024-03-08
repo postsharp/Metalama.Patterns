@@ -9,25 +9,20 @@ namespace Metalama.Patterns.Contracts;
 /// method has been invoked.
 /// </summary>
 [PublicAPI]
-public sealed class InvariantSuspensionCounter : IDisposable
+public sealed class InvariantSuspensionCounter
 {
     private int _value;
 
     /// <summary>
-    /// Decrements the counter. Note that this does not verify invariants when the counter is back to zero.
+    /// Decrements the counter and returns <c>true</c> if the counter is back to zero.
+    /// Note that this does not verify invariants in this case.
     /// </summary>
-    public void Dispose()
-    {
-        Interlocked.Decrement( ref this._value );
-    }
+    public bool Decrement() => Interlocked.Decrement( ref this._value ) == 0;
 
     /// <summary>
     /// Increments the counter.
     /// </summary>
-    public void Increment()
-    {
-        Interlocked.Increment( ref this._value );
-    }
+    public void Increment() => Interlocked.Increment( ref this._value );
 
     /// <summary>
     /// Gets a value indicating whether the verification of invariants is currently suspended.

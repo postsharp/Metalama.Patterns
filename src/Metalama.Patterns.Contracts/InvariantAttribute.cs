@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>The aspect defines a protected method <c>VerifyInvariants</c> that calls all invariant methods defined in the object including
 /// in its base classes.</para>
 /// <para>
-///  If the <see cref="ContractOptions.IsInvariantSuspensionSupported"/> contract option is defined, the aspect also
+///  If the <see cref="ContractOptions.IsInvariantSuspensionSupported"/> contract option is defined, the aspect also introduces
 /// the protected methods <c>SuspendInvariants</c>, which allows to suspend the verification of invariants,
 /// and  <c>AreInvariantsSuspended</c>, which determines if the verification of invariants is currently suspended.
 /// </para>

@@ -319,7 +319,7 @@ internal sealed class DecimalBound : NumericBound
 
                 return true;
 
-            case ulong.MaxValue:
+            case decimal.MaxValue:
                 value = this._value;
                 conversionResult = ConversionResult.ExactlyMaxValue;
 

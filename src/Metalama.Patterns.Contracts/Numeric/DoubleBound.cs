@@ -40,6 +40,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (byte) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     byte.MinValue => ConversionResult.ExactlyMinValue,
@@ -70,6 +72,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (sbyte) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     sbyte.MinValue => ConversionResult.ExactlyMinValue,
@@ -100,6 +104,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (short) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     short.MinValue => ConversionResult.ExactlyMinValue,
@@ -130,6 +136,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (ushort) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     ushort.MinValue => ConversionResult.ExactlyMinValue,
@@ -160,6 +168,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (int) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     int.MinValue => ConversionResult.ExactlyMinValue,
@@ -190,6 +200,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (uint) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     uint.MinValue => ConversionResult.ExactlyMinValue,
@@ -220,6 +232,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (long) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     long.MinValue => ConversionResult.ExactlyMinValue,
@@ -250,6 +264,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (ulong) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     ulong.MinValue => ConversionResult.ExactlyMinValue,
@@ -280,6 +296,8 @@ internal sealed class DoubleBound : NumericBound
             default:
                 value = (decimal) this._value;
 
+                // Check the bounds after conversion to the target type, as this is the converted
+                // value that matters when generating the C# code with the condition.
                 conversionResult = value switch
                 {
                     decimal.MinValue => ConversionResult.ExactlyMinValue,

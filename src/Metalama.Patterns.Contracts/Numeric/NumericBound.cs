@@ -19,13 +19,13 @@ public abstract class NumericBound
         this.IsAllowed = isAllowed;
     }
 
-    public static NumericBound Create( long min, bool isAllowed = true ) => new Int64Bound( min, isAllowed );
+    public static NumericBound Create( long value, bool isAllowed = true ) => new Int64Bound( value, isAllowed );
 
-    public static NumericBound Create( ulong min, bool isAllowed = true ) => new UInt64Bound( min, isAllowed );
+    public static NumericBound Create( ulong value, bool isAllowed = true ) => new UInt64Bound( value, isAllowed );
 
-    public static NumericBound Create( decimal min, bool isAllowed = true ) => new DecimalBound( min, isAllowed );
+    public static NumericBound Create( decimal value, bool isAllowed = true ) => new DecimalBound( value, isAllowed );
 
-    public static NumericBound Create( double min, bool isAllowed = true ) => new DoubleBound( min, isAllowed );
+    public static NumericBound Create( double value, bool isAllowed = true ) => new DoubleBound( value, isAllowed );
 
     [PublicAPI]
     public bool IsAllowed { get; }

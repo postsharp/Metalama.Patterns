@@ -64,7 +64,7 @@ public static class ContractHelpers
         RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled );
 
     /// <summary>
-    /// Gets or sets the regular expression used by <see cref="PhoneRegex"/>.
+    /// Gets or sets the regular expression used by <see cref="PhoneAttribute"/>.
     /// </summary>
     /// <seealso href="@configuring-contracts"/>
     public static Regex PhoneRegex { get; set; } = new(

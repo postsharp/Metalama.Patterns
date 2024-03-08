@@ -504,7 +504,7 @@ public readonly struct NumericRange : IExpressionBuilder
         }
         else
         {
-            stringBuilder.Append( "[\u221e" );
+            stringBuilder.Append( "[-\u221e" ); // Add minus infinite symbol.
         }
 
         stringBuilder.Append( ", " );
@@ -516,7 +516,7 @@ public readonly struct NumericRange : IExpressionBuilder
         }
         else
         {
-            stringBuilder.Append( "\u221e]" );
+            stringBuilder.Append( "\u221e]" ); // Add infinite symbol.
         }
 
         return stringBuilder.ToString();
