@@ -307,9 +307,9 @@ public readonly struct NumericRange : IExpressionBuilder
         {
             expressionBuilder.AppendVerbatim( "null" );
         }
-        
+
         expressionBuilder.AppendVerbatim( ", " );
-        
+
         if ( this._maxValue != null )
         {
             this._maxValue.AppendToExpression( expressionBuilder );
@@ -431,33 +431,31 @@ public readonly struct NumericRange : IExpressionBuilder
             case SpecialType.Double:
                 if ( this._minValue != null )
                 {
-                    if ( !this._minValue.TryConvert( type, out _, out var minConversionResult ) )
-                    {
-                        if ( minConversionResult is ConversionResult.TooLarge or ConversionResult.UnsupportedType )
-                        {
-                            return false;
-                        }
+                    this._minValue.TryConvert( type, out _, out var minConversionResult );
 
-                        if ( minConversionResult == ConversionResult.ExactlyMaxValue && !this._minValue.IsAllowed )
-                        {
-                            return false;
-                        }
+                    if ( minConversionResult is ConversionResult.TooLarge or ConversionResult.UnsupportedType )
+                    {
+                        return false;
+                    }
+
+                    if ( minConversionResult == ConversionResult.ExactlyMaxValue && !this._minValue.IsAllowed )
+                    {
+                        return false;
                     }
                 }
 
                 if ( this._maxValue != null )
                 {
-                    if ( !this._maxValue.TryConvert( type, out _, out var maxConversionResult ) )
-                    {
-                        if ( maxConversionResult is ConversionResult.TooSmall or ConversionResult.UnsupportedType )
-                        {
-                            return false;
-                        }
+                    this._maxValue.TryConvert( type, out _, out var maxConversionResult );
 
-                        if ( maxConversionResult == ConversionResult.ExactlyMinValue && !this._maxValue.IsAllowed )
-                        {
-                            return false;
-                        }
+                    if ( maxConversionResult is ConversionResult.TooSmall or ConversionResult.UnsupportedType )
+                    {
+                        return false;
+                    }
+
+                    if ( maxConversionResult == ConversionResult.ExactlyMinValue && !this._maxValue.IsAllowed )
+                    {
+                        return false;
                     }
                 }
 

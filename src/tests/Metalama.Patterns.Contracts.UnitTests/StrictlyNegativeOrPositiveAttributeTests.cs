@@ -69,7 +69,6 @@ public sealed class StrictlyNegativeOrPositiveAttributeTests : RangeContractTest
         decimal? decimalValue )
     {
         MethodWithStrictlyNegativeLong( longValue );
-        MethodWithStrictlyNegativeUlong( ulongValue );
         MethodWithStrictlyNegativeDouble( doubleValue );
         MethodWithStrictlyNegativeDecimal( decimalValue );
     }
@@ -83,8 +82,6 @@ public sealed class StrictlyNegativeOrPositiveAttributeTests : RangeContractTest
     private static void MethodWithStrictlyPositiveDecimal( [StrictlyPositive] decimal? a ) { }
 
     private static void MethodWithStrictlyNegativeLong( [StrictlyNegative] long? a ) { }
-
-    private static void MethodWithStrictlyNegativeUlong( [StrictlyNegative] ulong? a ) { }
 
     private static void MethodWithStrictlyNegativeDouble( [StrictlyNegative] double? a ) { }
 

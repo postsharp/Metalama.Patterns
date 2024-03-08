@@ -6,14 +6,6 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 
 public sealed class StrictlyNegativeTests : RangeContractTestsBase
 {
-    private static void MethodWithByteParameter( [StrictlyNegative] byte a ) { }
-
-    private static void MethodWithUInt16Parameter( [StrictlyNegative] ushort a ) { }
-
-    private static void MethodWithUInt32Parameter( [StrictlyNegative] uint a ) { }
-
-    private static void MethodWithUInt64Parameter( [StrictlyNegative] ulong a ) { }
-
     private static void MethodWithSByteParameter( [StrictlyNegative] sbyte a ) { }
 
     private static void MethodWithInt16Parameter( [StrictlyNegative] short a ) { }
@@ -41,28 +33,16 @@ public sealed class StrictlyNegativeTests : RangeContractTestsBase
         action( () => MethodWithFloatParameter( value ) );
     }
 
-    private static void CallMethodsWithUnsignedParameters( byte value, Action<Action>? action = null )
-    {
-        action ??= a => a();
-
-        action( () => MethodWithByteParameter( value ) );
-        action( () => MethodWithUInt16Parameter( value ) );
-        action( () => MethodWithUInt32Parameter( value ) );
-        action( () => MethodWithUInt64Parameter( value ) );
-    }
-
     [Fact]
     public void ZeroFails()
     {
         CallMethodsWithSignedParameter( 0, a => Assert.Throws<ArgumentOutOfRangeException>( a ) );
-        CallMethodsWithUnsignedParameters( 0, a => Assert.Throws<ArgumentOutOfRangeException>( a ) );
     }
 
     [Fact]
     public void OneFails()
     {
         CallMethodsWithSignedParameter( 1, a => Assert.Throws<ArgumentOutOfRangeException>( a ) );
-        CallMethodsWithUnsignedParameters( 1, a => Assert.Throws<ArgumentOutOfRangeException>( a ) );
     }
 
     [Fact]

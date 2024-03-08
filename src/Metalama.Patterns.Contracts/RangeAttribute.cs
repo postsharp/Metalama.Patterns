@@ -9,6 +9,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Contracts.Numeric;
+using System.Diagnostics;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -187,6 +188,8 @@ public class RangeAttribute : ContractBaseAttribute
     private void BuildAspect( IAspectBuilder builder, IType targetType )
     {
         var basicType = (INamedType) targetType.ToNonNullableType();
+
+        Debugger.Break();
 
         if ( !this.Range.IsTypeSupported( basicType ) )
         {
