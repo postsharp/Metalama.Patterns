@@ -4,6 +4,8 @@ using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
+
 public sealed class PositiveTests : RangeContractTestsBase
 {
     private static void MethodWithByteParameter( [Positive] byte a ) { }

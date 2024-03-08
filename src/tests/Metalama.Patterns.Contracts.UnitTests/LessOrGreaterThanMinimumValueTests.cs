@@ -14,10 +14,10 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 
 public sealed class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
 {
-    private const long _longLimit = long.MinValue + 1;
+    private const long _longLimit = long.MinValue;
     private const double _longAsDoubleLimit = -100;
     private const ulong _ulongLimit = 100;
-    private const double _doubleLimit = double.MinValue * (1 - DoubleTolerance);
+    private const double _doubleLimit = double.MinValue;
 
     // This has to be double because decimal is not allowed as attribute constructor value.
     // Loss of precision is a consequence.

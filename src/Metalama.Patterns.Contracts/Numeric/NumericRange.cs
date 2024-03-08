@@ -446,7 +446,7 @@ public readonly struct NumericRange : IExpressionBuilder
                     }
 
                     if ( minConversionResult == ConversionResult.TooSmall ||
-                         (minConversionResult == ConversionResult.ExactlyMinValue && !this._minValue.IsAllowed) )
+                         (minConversionResult == ConversionResult.ExactlyMinValue && this._minValue.IsAllowed) )
                     {
                         // This check is redundant.
                     }
@@ -471,7 +471,7 @@ public readonly struct NumericRange : IExpressionBuilder
                     }
 
                     if ( maxConversionResult == ConversionResult.TooLarge ||
-                         (maxConversionResult == ConversionResult.ExactlyMaxValue && !this._maxValue.IsAllowed) )
+                         (maxConversionResult == ConversionResult.ExactlyMaxValue && this._maxValue.IsAllowed) )
                     {
                         // This check is redundant.
                     }
