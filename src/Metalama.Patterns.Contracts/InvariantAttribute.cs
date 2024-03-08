@@ -6,6 +6,21 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Patterns.Contracts;
 
+/// <summary>
+/// Aspect that, when added to a parameterless <c>void</c> method, causes this method to be invoked after each property setter
+/// or method (but not property getters), except those annotated with <see cref="DoNotCheckInvariantsAttribute"/>. The target method
+/// must check any relevant condition and throw throw <see cref="InvariantViolationException"/> in case of violation.
+/// </summary>
+/// <remarks>
+/// <para>The aspect defines a protected method <c>VerifyInvariants</c> that calls all invariant methods defined in the object including
+/// in its base classes.</para>
+/// <para>
+///  If the <see cref="ContractOptions.IsInvariantSuspensionSupported"/> contract option is defined, the aspect also introduces
+/// the protected methods <c>SuspendInvariants</c>, which allows to suspend the verification of invariants,
+/// and  <c>AreInvariantsSuspended</c>, which determines if the verification of invariants is currently suspended.
+/// </para>
+/// </remarks>
+/// <seealso href="@invariants"/>
 public sealed class InvariantAttribute : MethodAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )

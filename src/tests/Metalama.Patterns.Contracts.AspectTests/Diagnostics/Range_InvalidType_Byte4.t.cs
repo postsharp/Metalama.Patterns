@@ -1,1 +1,1 @@
-// Error LAMA5001 on `field`: `The [GreaterThan] contract cannot be applied to 'Range_InvalidType_Byte4.field' because the value range cannot be satisfied by the type Byte.`
+// Error LAMA5001 on `field`: `The [GreaterThan] contract cannot be applied to 'Range_InvalidType_Byte4.field' because the value range [256, ∞] cannot be satisfied by the type Byte.`

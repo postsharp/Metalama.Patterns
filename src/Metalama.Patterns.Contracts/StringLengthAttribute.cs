@@ -12,6 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// an <see cref="ArgumentException"/> if the target is assigned a string of invalid length.
 /// If the target is a nullable type, If the target is a nullable type, null strings are accepted and do not throw an exception.
 /// </summary>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public sealed class StringLengthAttribute : ContractBaseAttribute
 {

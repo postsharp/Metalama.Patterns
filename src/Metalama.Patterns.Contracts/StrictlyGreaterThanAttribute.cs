@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Patterns.Contracts.Numeric;
 
 // Resharper disable RedundantCast
 
@@ -22,68 +23,89 @@ namespace Metalama.Patterns.Contracts;
 ///     of the respective floating-point numerical data type.
 /// </para>
 /// </remarks>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public class StrictlyGreaterThanAttribute : RangeAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying an integer bound.
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="long"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
+    /// <param name="min">The minimum allowed value.</param>
     public StrictlyGreaterThanAttribute( long min )
-        : base(
-            min,
-            long.MaxValue,
-            FloatingPointHelper.Int64Minimum.ToInt64( min ),
-            long.MaxValue,
-            FloatingPointHelper.Int64Minimum.ToUInt64( min ),
-            ulong.MaxValue,
-            FloatingPointHelper.Int64Minimum.ToDouble( min ),
-            double.MaxValue,
-            FloatingPointHelper.Int64Minimum.ToDecimal( min ),
-            decimal.MaxValue,
-            GetInvalidTypes( FloatingPointHelper.Int64Minimum.ToInt64( min ), long.MaxValue ),
-            shouldTestMaxBound: false ) { }
+        : base( NumericBound.Create( min, false ), null ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying an unsigned integer bound.
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="int"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
+    /// <param name="min">The minimum allowed value.</param>
+    public StrictlyGreaterThanAttribute( int min )
+        : base( NumericBound.Create( min, false ), null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="short"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public StrictlyGreaterThanAttribute( short min )
+        : base( NumericBound.Create( min, false ), null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="sbyte"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public StrictlyGreaterThanAttribute( sbyte min )
+        : base( NumericBound.Create( min, false ), null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="ulong"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
     public StrictlyGreaterThanAttribute( ulong min )
-        : base(
-            min,
-            ulong.MaxValue,
-            FloatingPointHelper.UInt64Minimum.ToInt64( min ),
-            long.MaxValue,
-            FloatingPointHelper.UInt64Minimum.ToUInt64( min ),
-            ulong.MaxValue,
-            FloatingPointHelper.UInt64Minimum.ToDouble( min ),
-            double.MaxValue,
-            FloatingPointHelper.UInt64Minimum.ToDecimal( min ),
-            decimal.MaxValue,
-            GetInvalidTypes( FloatingPointHelper.UInt64Minimum.ToUInt64( min ) ),
-            shouldTestMaxBound: false ) { }
+        : base( NumericBound.Create( min, false ), null ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a floating-point bound.
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="uint"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
+    /// <param name="min">The minimum allowed value.</param>
+    public StrictlyGreaterThanAttribute( uint min )
+        : base( NumericBound.Create( min, false ), null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="ushort"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public StrictlyGreaterThanAttribute( ushort min )
+        : base( NumericBound.Create( min, false ), null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="byte"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public StrictlyGreaterThanAttribute( byte min )
+        : base( NumericBound.Create( min, false ), null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="double"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
     public StrictlyGreaterThanAttribute( double min )
-        : base(
-            min,
-            double.MaxValue,
-            FloatingPointHelper.DoubleMinimum.ToInt64( min ),
-            long.MaxValue,
-            FloatingPointHelper.DoubleMinimum.ToUInt64( min ),
-            ulong.MaxValue,
-            FloatingPointHelper.DoubleMinimum.ToDouble( min ),
-            double.MaxValue,
-            FloatingPointHelper.DoubleMinimum.ToDecimal( min ),
-            decimal.MaxValue,
-            GetInvalidTypes( min < double.MaxValue - 1 ? min + 1 : double.MaxValue, double.MaxValue ),
-            shouldTestMaxBound: false ) { }
+        : base( NumericBound.Create( min, false ), null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="decimal"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public StrictlyGreaterThanAttribute( decimal min )
+        : base( NumericBound.Create( min, false ), null ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="float"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public StrictlyGreaterThanAttribute( float min )
+        : base( NumericBound.Create( min, false ), null ) { }
 
     protected override void OnContractViolated( dynamic? value )
     {
-        meta.Target.GetContractOptions().Templates!.OnStrictlyGreaterThanContractViolated( value, this.DisplayMinValue );
+        meta.Target.GetContractOptions().Templates!.OnStrictlyGreaterThanContractViolated( value, this.Range.MinValue!.ObjectValue );
     }
 }

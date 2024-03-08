@@ -9,7 +9,10 @@ namespace Metalama.Patterns.Contracts;
 /// </summary>
 /// <remarks>
 /// This custom attribute does not caused methods <i>called</i> by the target method to skip invariant checks.
+/// For this, enable the <see cref="ContractOptions.IsInvariantSuspensionSupported"/> contract option and call the generated <c>SuspendInvariant</c>
+/// method or the <see cref="SuspendInvariantsAttribute"/> aspect.
 /// </remarks>
+/// <seealso href="@invariants"/>
 [AttributeUsage( AttributeTargets.Method )]
 [PublicAPI]
 public sealed class DoNotCheckInvariantsAttribute : Attribute { }

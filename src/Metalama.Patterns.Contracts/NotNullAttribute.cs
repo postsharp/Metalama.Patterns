@@ -11,6 +11,8 @@ namespace Metalama.Patterns.Contracts;
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentNullException"/> if the target is assigned a <see langword="null"/> value.
 /// </summary>
+/// <seealso href="@contract-types"/>
+/// <seealso href="@enforcing-non-nullability"/>
 [PublicAPI]
 public sealed class NotNullAttribute : ContractBaseAttribute
 {

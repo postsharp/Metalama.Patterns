@@ -2,6 +2,7 @@
 
 namespace Metalama.Patterns.Contracts.UnitTests.Assets;
 
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
 public class RangeTestClass
 {
     [GreaterThan( 0 )]

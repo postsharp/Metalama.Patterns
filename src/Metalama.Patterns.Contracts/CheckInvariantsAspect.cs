@@ -11,6 +11,9 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Patterns.Contracts;
 
+/// <summary>
+/// Implementation aspect for <see cref="InvariantAttribute"/>.
+/// </summary>
 [Inheritable]
 internal sealed class CheckInvariantsAspect : IAspect<INamedType>
 {
@@ -61,11 +64,11 @@ internal sealed class CheckInvariantsAspect : IAspect<INamedType>
     private readonly InvariantSuspensionCounter _invariantSuspensionCounter = new();
 
     [Template]
-    protected IDisposable SuspendInvariants( IField counterField )
+    protected SuspendInvariantsCookie SuspendInvariants( IField counterField )
     {
         ((InvariantSuspensionCounter) counterField.Value!).Increment();
 
-        return (InvariantSuspensionCounter) counterField.Value!;
+        return new SuspendInvariantsCookie( (InvariantSuspensionCounter) counterField.Value! );
     }
 
     [Template]

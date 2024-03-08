@@ -18,6 +18,8 @@ namespace Metalama.Patterns.Contracts;
 ///     </description></item>
 /// </list>
 /// </summary>
+/// <seealso href="@contract-types"/>
+/// <seealso href="@enforcing-non-nullability"/> 
 [PublicAPI]
 public sealed class RequiredAttribute : ContractBaseAttribute
 {
@@ -47,7 +49,7 @@ public sealed class RequiredAttribute : ContractBaseAttribute
 
         builder.MustSatisfy(
             f => f.Type.IsReferenceType != false || f.Type.IsNullable != false,
-            f => $"the type of {f} must be a nullable" );
+            f => $"the type of {f} must not be nullable" );
     }
 
     /// <inheritdoc/>
@@ -57,7 +59,7 @@ public sealed class RequiredAttribute : ContractBaseAttribute
 
         builder.MustSatisfy(
             p => p.Type.IsReferenceType != false || p.Type.IsNullable != false,
-            p => $"the type of {p} must be a nullable" );
+            p => $"the type of {p} must not be a nullable" );
     }
 
     /// <inheritdoc/>

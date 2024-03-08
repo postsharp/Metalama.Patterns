@@ -7,13 +7,11 @@ namespace Metalama.Patterns.Contracts.AspectTests;
 // <target>
 public class TestClass
 {
-    public TestClass([NotNull] [NotEmpty] IReadOnlyCollection<int> list )
-    {
-    }
+    public TestClass( [NotNull] [NotEmpty] IReadOnlyCollection<int> list ) { }
 
     [return: NotNull]
     [return: NotEmpty]
-    public IReadOnlyCollection<int> Foo( [NotNull] [NotEmpty] IReadOnlyCollection<int> list)
+    public IReadOnlyCollection<int> Foo( [NotNull] [NotEmpty] IReadOnlyCollection<int> list )
     {
         return list;
     }
@@ -21,5 +19,4 @@ public class TestClass
     [NotNull]
     [NotEmpty]
     public IReadOnlyCollection<int> Property { get; set; }
-
 }

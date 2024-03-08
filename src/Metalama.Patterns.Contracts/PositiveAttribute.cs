@@ -14,6 +14,7 @@ namespace Metalama.Patterns.Contracts;
 ///     <para>Null values are accepted and do not throw an exception.
 /// </para>
 /// </remarks>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 [RunTimeOrCompileTime]
 public class PositiveAttribute : GreaterThanAttribute

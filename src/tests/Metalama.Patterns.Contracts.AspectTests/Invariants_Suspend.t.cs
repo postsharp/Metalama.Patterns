@@ -1,5 +1,3 @@
-using System;
-// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 using Metalama.Framework.Fabrics;
 namespace Metalama.Patterns.Contracts.AspectTests.Invariants_Suspend;
 public class BaseClass
@@ -83,10 +81,10 @@ public class BaseClass
   {
     return _invariantSuspensionCounter.AreInvariantsSuspended;
   }
-  protected IDisposable SuspendInvariants()
+  protected SuspendInvariantsCookie SuspendInvariants()
   {
     this._invariantSuspensionCounter.Increment();
-    return _invariantSuspensionCounter;
+    return new SuspendInvariantsCookie(_invariantSuspensionCounter);
   }
   protected virtual void VerifyInvariants()
   {
