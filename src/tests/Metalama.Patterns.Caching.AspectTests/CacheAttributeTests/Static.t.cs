@@ -13,7 +13,7 @@ public class C
     {
       return C.M_Source();
     }
-    return ((ICachingService)CachingService.Default).GetFromCacheOrExecute<int>(_cacheRegistration_M!, null, new object[] { }, Invoke);
+    return ((ICachingService)CachingService.Default!).GetFromCacheOrExecute<int>(_cacheRegistration_M!, null, new object[] { }, Invoke);
   }
   private static int M_Source() => 5;
   private static readonly CachedMethodMetadata _cacheRegistration_M;
