@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// This class can be derived and templates can be overridden. To register the new template implementations, use the <see cref="ContractOptions.Templates"/>
 /// contract options.
 /// </summary>
-/// <seealso cref="@configuring-contracts"/>
+/// <seealso href="@configuring-contracts"/>
 [PublicAPI]
 public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
 {

@@ -20,7 +20,7 @@ public static class ContractExtensions
     /// </summary>
     /// <param name="compilation">The compilation.</param>
     /// <param name="includeInternalApis">Determines whether the non-public fields, properties and parameters should be included.</param>
-    /// <seealso cref="@enforcing-non-nullability"/>
+    /// <seealso href="@enforcing-non-nullability"/>
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<ICompilation> compilation, bool includeInternalApis = false )
     {
         bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
@@ -38,7 +38,7 @@ public static class ContractExtensions
     /// </summary>
     /// <param name="ns">A collection of namespaces.</param>
     /// <param name="includeInternalApis">Determines whether the non-public fields, properties and parameters should be included.</param>
-    /// <seealso cref="@enforcing-non-nullability"/>
+    /// <seealso href="@enforcing-non-nullability"/>
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<INamespace> ns, bool includeInternalApis = false )
     {
         bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
@@ -56,7 +56,7 @@ public static class ContractExtensions
     /// </summary>
     /// <param name="types">A collection of types.</param>
     /// <param name="includeInternalApis">Determines whether the non-public fields, properties and parameters should be included.</param>
-    /// <seealso cref="@enforcing-non-nullability"/>
+    /// <seealso href="@enforcing-non-nullability"/>
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<INamedType> types, bool includeInternalApis = false )
     {
         bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
@@ -119,37 +119,37 @@ public static class ContractExtensions
     /// Gets the <see cref="ContractOptions"/> in the context of the current template.
     /// </summary>
     /// <param name="target">The value of <c>meta.Target</c>.</param>
-    /// <seealso cref="@configuring-contracts"/>
+    /// <seealso href="@configuring-contracts"/>
     public static ContractOptions GetContractOptions( this IMetaTarget target ) => target.Declaration.GetContractOptions();
 
     /// <summary>
     /// Gets the <see cref="ContractOptions"/> for a given method.
     /// </summary>
-    /// <seealso cref="@configuring-contracts"/>
+    /// <seealso href="@configuring-contracts"/>
     public static ContractOptions GetContractOptions( this IMethod declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
 
     /// <summary>
     /// Gets the <see cref="ContractOptions"/> for a given type.
     /// </summary>
-    /// <seealso cref="@configuring-contracts"/>
+    /// <seealso href="@configuring-contracts"/>
     public static ContractOptions GetContractOptions( this INamedType declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
 
     /// <summary>
     /// Gets the <see cref="ContractOptions"/> for a given field, property, or indexer.
     /// </summary>
-    /// <seealso cref="@configuring-contracts"/>
+    /// <seealso href="@configuring-contracts"/>
     public static ContractOptions GetContractOptions( this IFieldOrPropertyOrIndexer declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
 
     /// <summary>
     /// Gets the <see cref="ContractOptions"/> for a given parameter.
     /// </summary>
-    /// <seealso cref="@configuring-contracts"/>
+    /// <seealso href="@configuring-contracts"/>
     public static ContractOptions GetContractOptions( this IParameter declaration ) => declaration.Enhancements().GetOptions<ContractOptions>();
 
     /// <summary>
     /// Gets the <see cref="ContractOptions"/> for a given declaration.
     /// </summary>
-    /// <seealso cref="@configuring-contracts"/>
+    /// <seealso href="@configuring-contracts"/>
     public static ContractOptions GetContractOptions( this IDeclaration declaration )
         => declaration switch
         {

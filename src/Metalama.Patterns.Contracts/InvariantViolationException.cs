@@ -5,7 +5,7 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// An exception that should be thrown by the target methods of the <see cref="InvariantAttribute"/> aspect.
 /// </summary>
-/// <seealso cref="@invariants"/>
+/// <seealso href="@invariants"/>
 public class InvariantViolationException : ApplicationException
 {
     public InvariantViolationException() { }

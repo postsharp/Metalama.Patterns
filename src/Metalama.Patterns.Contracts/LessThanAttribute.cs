@@ -19,7 +19,7 @@ namespace Metalama.Patterns.Contracts;
 ///     <para>Null values are accepted and do not throw an exception.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
-/// <seealso cref="@contract-types"/>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public class LessThanAttribute : RangeAttribute
 {

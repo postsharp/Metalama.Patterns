@@ -18,7 +18,7 @@ namespace Metalama.Patterns.Contracts;
 /// throw exception.
 /// </para>
 /// </remarks>
-/// <seealso cref="@contract-types"/>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public sealed class EnumDataTypeAttribute : ContractBaseAttribute
 {

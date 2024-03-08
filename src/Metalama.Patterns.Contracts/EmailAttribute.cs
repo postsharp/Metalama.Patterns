@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Contracts;
 /// is not a valid email address. If the target is a nullable type, null strings are accepted and do not
 /// throw an exception.
 /// </summary>
-/// <seealso cref="@contract-types"/>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public sealed class EmailAttribute : RegularExpressionBaseAttribute
 {

@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Contracts;
 /// executing. All threads and execution contexts are affected. The feature must be enabled through the <see cref="ContractOptions.IsInvariantSuspensionSupported"/>
 /// contract option.
 /// </summary>
-/// <seealso cref="@invariants"/>
+/// <seealso href="@invariants"/>
 public sealed class SuspendInvariantsAttribute : OverrideMethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )

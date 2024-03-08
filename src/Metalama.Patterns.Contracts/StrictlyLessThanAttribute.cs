@@ -23,7 +23,7 @@ namespace Metalama.Patterns.Contracts;
 ///     of the respective floating-point numerical data type.
 /// </para>
 /// </remarks>
-/// <seealso cref="@contract-types"/>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public class StrictlyLessThanAttribute : RangeAttribute
 {

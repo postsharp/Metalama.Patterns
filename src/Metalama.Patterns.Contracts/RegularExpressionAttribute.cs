@@ -16,7 +16,7 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the regular expression used.</para>
 /// </remarks>
-/// <seealso cref="@contract-types"/>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public class RegularExpressionAttribute : RegularExpressionBaseAttribute
 {

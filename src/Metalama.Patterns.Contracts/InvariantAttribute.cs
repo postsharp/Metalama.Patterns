@@ -20,7 +20,7 @@ namespace Metalama.Patterns.Contracts;
 /// and  <c>AreInvariantsSuspended</c>, which determines if the verification of invariants is currently suspended.
 /// </para>
 /// </remarks>
-/// <seealso cref="@invariants"/>
+/// <seealso href="@invariants"/>
 public sealed class InvariantAttribute : MethodAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )

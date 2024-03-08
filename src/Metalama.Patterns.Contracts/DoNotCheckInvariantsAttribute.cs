@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// For this, enable the <see cref="ContractOptions.IsInvariantSuspensionSupported"/> contract option and call the generated <c>SuspendInvariant</c>
 /// method or the <see cref="SuspendInvariantsAttribute"/> aspect.
 /// </remarks>
-/// <seealso cref="@invariants"/>
+/// <seealso href="@invariants"/>
 [AttributeUsage( AttributeTargets.Method )]
 [PublicAPI]
 public sealed class DoNotCheckInvariantsAttribute : Attribute { }
