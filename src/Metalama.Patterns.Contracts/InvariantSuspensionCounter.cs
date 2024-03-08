@@ -5,7 +5,8 @@ using JetBrains.Annotations;
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>
-/// A class used by the <see cref="InvariantAttribute"/> aspect to count the number of times the
+/// A class used by the <see cref="InvariantAttribute"/> aspect to count the number of times the <c>SuspendInvariants</c>
+/// method has been invoked.
 /// </summary>
 [PublicAPI]
 public sealed class InvariantSuspensionCounter : IDisposable

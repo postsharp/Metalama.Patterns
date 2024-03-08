@@ -303,6 +303,21 @@ public readonly struct NumericRange : IExpressionBuilder
         {
             this._minValue.AppendToExpression( expressionBuilder );
         }
+        else
+        {
+            expressionBuilder.AppendVerbatim( "null" );
+        }
+        
+        expressionBuilder.AppendVerbatim( ", " );
+        
+        if ( this._maxValue != null )
+        {
+            this._maxValue.AppendToExpression( expressionBuilder );
+        }
+        else
+        {
+            expressionBuilder.AppendVerbatim( "null" );
+        }
 
         expressionBuilder.AppendVerbatim( ")" );
 
