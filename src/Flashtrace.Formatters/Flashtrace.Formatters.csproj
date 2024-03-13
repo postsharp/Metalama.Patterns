@@ -15,6 +15,10 @@
     <InternalsVisibleTo Include="Metalama.Patterns.Caching.UnitTests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<Using Remove="System.Net.Http" />
 	</ItemGroup>
