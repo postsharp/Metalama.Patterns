@@ -5,13 +5,13 @@
 
 ## About
 
-The `Metalama.Pattern.Caching.Aspects` provides an aspect-oriented API that enables caching of method results as a function of their arguments. It also allows for cache item invalidation, cache key construction, and dependency management. This API is built on the [Metalama](https://www.postsharp.net/metalama) aspect framework. The caching abstractions and functionalities are defined in the `Metalama.Pattern.Caching` family of packages.
+The `Metalama.Patterns.Caching.Aspects` package provides an aspect-oriented API that enables caching of method results as a function of their arguments. It also allows for cache item invalidation, cache key construction, and dependency management. This API is built on the Metalama aspect framework. The caching abstractions and functionalities are defined in the `Metalama.Patterns.Caching` family of packages.
 
 ## Key Features
 
 * Caching the return value of a method as a function of its argument.
 * Automatic invalidation of a cached method result when an update method is executed.
-* Dependency collection during the execution of the cached method, and automatic addition of them to the cache item.
+* Dependency collection during the execution of the cached method, and automatic addition of dependencies to the cache item.
 * Automatic and reliable generation of cache keys.
 
 ## Main Types

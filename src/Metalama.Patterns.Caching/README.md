@@ -20,7 +20,7 @@ This package is designed for use with the `Metalama.Patterns.Caching.Aspects` pa
 * Value adapters for caching "special" types like streams or enumerables.
 * Locking to prevent concurrent execution.
 
-This package can interact with any cache implementation. The abstraction is provided by the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) class from the `Metalama.Patterns.Caching.Backends` package.
+This package can interact with any cache implementation. The abstraction is provided by the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) class from the `Metalama.Patterns.Caching.Backend` package.
 
 ## Main Types
 
@@ -41,7 +41,7 @@ The primary types in this package are:
 ## Related Packages
 
 * `Metalama.Patterns.Caching.Aspects` provides an aspect-oriented API for the current package.
-* `Metalama.Patterns.Caching.Backends` defines the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) abstraction and provides core implementations for in-memory and multi-layered caching.
+* `Metalama.Patterns.Caching.Backend` defines the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) abstraction and provides core implementations for in-memory and multi-layered caching.
 * `Metalama.Patterns.Caching.Backends.Redis` offers the `CachingBackend` implementation for Redis.
 * `Metalama.Patterns.Caching.Backends.Azure` implements pub/sub synchronization of distributed in-memory caches through Azure Message Bus.
 * `Flashtrace.Formatters` provides an infrastructure for cache key formatting.

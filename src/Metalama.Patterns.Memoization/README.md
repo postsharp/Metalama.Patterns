@@ -5,7 +5,7 @@
 
 ## About
 
-The `Metalama.Patterns.Memorization` package introduces a memoization aspect via the `MemoizationAttribute`. This attribute caches the return value of a read-only property or a parameterless method within the type itself.
+The `Metalama.Patterns.Memoization` package introduces a memoization aspect via the `MemoizationAttribute`. This attribute caches the return value of a read-only property or a parameterless method within the type itself.
 
 ## Key Features
 
