@@ -19,7 +19,7 @@ This package is designed for use with the `Metalama.Patterns.Caching.Aspects` pa
 * Value adapters for caching "special" types like streams or enumerables.
 * Locking to prevent concurrent execution.
 
-This package can interact with any cache implementation. The abstraction is provided by the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) class from the `Metalama.Patterns.Caching.Backends` package.
+This package can interact with any cache implementation. The abstraction is provided by the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) class from the `Metalama.Patterns.Caching.Backend` package.
 
 ## Main Types
 
