@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 	    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,10 @@
       <PackageReference Include="System.Memory" Version="$(SystemMemoryVersion)"/>
     <InternalsVisibleTo Include="Flashtrace.Formatters.UnitTests" />
     <InternalsVisibleTo Include="Metalama.Patterns.Caching.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 	<ItemGroup>

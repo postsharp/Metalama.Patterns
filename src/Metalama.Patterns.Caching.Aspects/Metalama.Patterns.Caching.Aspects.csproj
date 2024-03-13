@@ -7,8 +7,12 @@
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release;LamaDebug</Configurations>
         <TransformOnBuild>true</TransformOnBuild>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>    
 
     <ItemGroup>
         <PackageReference Include="Metalama.Extensions.DependencyInjection" Version="$(MetalamaExtensionsVersion)" />
