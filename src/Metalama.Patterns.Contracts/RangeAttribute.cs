@@ -236,35 +236,19 @@ public class RangeAttribute : ContractBaseAttribute
     public override void Validate( dynamic? value )
     {
         var type = meta.Target.GetTargetType();
+        var expressionBuilder = new ExpressionBuilder();
+        var expression = (IExpression) value!;
 
-        if ( type.SpecialType == SpecialType.Object )
+        if ( this.Range.GeneratePattern( type, expressionBuilder, expression ) )
         {
-            if ( value != null )
+            if ( expressionBuilder.ToValue() )
             {
-                var range = meta.RunTime( this.Range );
-
-                if ( !range.IsInRange( value ) )
-                {
-                    this.OnContractViolated( value );
-                }
+                this.OnContractViolated( value );
             }
         }
         else
         {
-            var expressionBuilder = new ExpressionBuilder();
-            var expression = (IExpression) value!;
-
-            if ( this.Range.GeneratePattern( type, expressionBuilder, expression ) )
-            {
-                if ( expressionBuilder.ToValue() )
-                {
-                    this.OnContractViolated( value );
-                }
-            }
-            else
-            {
-                meta.InsertComment( $"The {this.Range} validation on {expression} is fully redundant and has been skipped." );
-            }
+            meta.InsertComment( $"The {this.Range} validation on {expression} is fully redundant and has been skipped." );
         }
     }
 

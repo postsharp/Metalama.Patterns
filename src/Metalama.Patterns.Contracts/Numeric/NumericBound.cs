@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Contracts.Numeric;
@@ -12,7 +13,7 @@ namespace Metalama.Patterns.Contracts.Numeric;
 /// Represents a single bound of a <see cref="NumericRange"/>.
 /// </summary>
 [RunTimeOrCompileTime]
-public abstract class NumericBound
+public abstract class NumericBound : ICompileTimeSerializable
 {
     protected internal NumericBound( bool isAllowed )
     {
@@ -55,7 +56,7 @@ public abstract class NumericBound
 
     internal abstract bool TryConvertToSingle( out float value, out ConversionResult conversionResult );
 
-    private protected abstract void AppendValueToExpression( ExpressionBuilder expressionBuilder );
+    internal abstract void AppendValueToExpression( ExpressionBuilder expressionBuilder );
 
     public override string ToString() => this.ObjectValue.ToString() ?? "null";
 
@@ -80,6 +81,12 @@ public abstract class NumericBound
     {
         switch ( valueType.SpecialType )
         {
+            case SpecialType.Object:
+                value = this.ObjectValue;
+                conversionResult = ConversionResult.WithinRange;
+
+                return true;
+
             case SpecialType.SByte:
                 if ( this.TryConvertToSByte( out var sbyteValue, out conversionResult ) )
                 {
