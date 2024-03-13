@@ -4,7 +4,7 @@
 
 ## About
 
-The `Metalama.Patterns.Caching.Backends` package provides an abstraction for a caching back-end, along with core implementations. The main type is the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) class. The back-end implementations are utilized by the front-end package, `Metalama.Patterns.Caching`.
+The `Metalama.Patterns.Caching.Backend` package provides an abstraction for a caching back-end, along with core implementations. The main type is the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) class. The back-end implementations are utilized by the front-end package, `Metalama.Patterns.Caching`.
 
 ## Key Features
 
