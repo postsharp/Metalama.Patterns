@@ -15,27 +15,25 @@ public class TestClass
   [return: NotEmpty]
   public IReadOnlyCollection<int> Foo([NotNull][NotEmpty] IReadOnlyCollection<int> list)
   {
-    IReadOnlyCollection<int> returnValue_1;
     if (list == null !)
     {
       throw new ArgumentNullException("list", "The 'list' parameter must not be null.");
     }
-    IReadOnlyCollection<int> returnValue;
     if (list.Count <= 0)
     {
       throw new ArgumentException("The 'list' parameter must not be null or empty.", "list");
     }
+    IReadOnlyCollection<int> returnValue;
     returnValue = list;
+    if (returnValue == null !)
+    {
+      throw new PostconditionViolationException("The return value must not be null.");
+    }
     if (returnValue.Count <= 0)
     {
       throw new PostconditionViolationException("The return value must not be null or empty.");
     }
-    returnValue_1 = returnValue;
-    if (returnValue_1 == null !)
-    {
-      throw new PostconditionViolationException("The return value must not be null.");
-    }
-    return returnValue_1;
+    return returnValue;
   }
   private IReadOnlyCollection<int> _property = default !;
   [NotNull]
