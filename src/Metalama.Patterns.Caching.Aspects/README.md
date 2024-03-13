@@ -10,7 +10,7 @@ The `Metalama.Patterns.Caching.Aspects` package provides an aspect-oriented API 
 
 * Caching the return value of a method as a function of its argument.
 * Automatic invalidation of a cached method result when an update method is executed.
-* Dependency collection during the execution of the cached method, and automatic addition of them to the cache item.
+* Dependency collection during the execution of the cached method, and automatic addition of dependencies to the cache item.
 * Automatic and reliable generation of cache keys.
 
 ## Main Types
