@@ -40,7 +40,7 @@ The primary types in this package are:
 ## Related Packages
 
 * `Metalama.Patterns.Caching.Aspects` provides an aspect-oriented API for the current package.
-* `Metalama.Patterns.Caching.Backends` defines the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) abstraction and provides core implementations for in-memory and multi-layered caching.
+* `Metalama.Patterns.Caching.Backend` defines the [CachingBackend](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-cachingbackend) abstraction and provides core implementations for in-memory and multi-layered caching.
 * `Metalama.Patterns.Caching.Backends.Redis` offers the `CachingBackend` implementation for Redis.
 * `Metalama.Patterns.Caching.Backends.Azure` implements pub/sub synchronization of distributed in-memory caches through Azure Message Bus.
 * `Flashtrace.Formatters` provides an infrastructure for cache key formatting.
