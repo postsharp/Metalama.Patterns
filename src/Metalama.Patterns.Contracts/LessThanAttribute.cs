@@ -27,15 +27,21 @@ public class LessThanAttribute : RangeAttribute
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="long"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( long max )
-        : base( default, NumericBound.Create( max ) ) { }
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="max"/> number as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="max"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="max"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public LessThanAttribute( long max, int decimalPlaces = 0 )
+        : base( default, NumericBound.Create( max, decimalPlaces: decimalPlaces ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="int"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( int max )
-        : base( default, NumericBound.Create( max ) ) { }
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="max"/> number as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="max"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="max"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public LessThanAttribute( int max, int decimalPlaces = 0 )
+        : base( default, NumericBound.Create( max, decimalPlaces: decimalPlaces ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="short"/>.

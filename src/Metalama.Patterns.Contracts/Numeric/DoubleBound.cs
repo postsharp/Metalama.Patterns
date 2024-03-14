@@ -327,5 +327,5 @@ internal sealed class DoubleBound : NumericBound
 
     #endregion
 
-    private protected override void AppendValueToExpression( ExpressionBuilder expressionBuilder ) => expressionBuilder.AppendLiteral( this._value );
+    internal override void AppendValueToExpression( ExpressionBuilder expressionBuilder ) => expressionBuilder.AppendLiteral( this._value );
 }

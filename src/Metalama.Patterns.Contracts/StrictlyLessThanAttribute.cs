@@ -31,15 +31,21 @@ public class StrictlyLessThanAttribute : RangeAttribute
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="long"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public StrictlyLessThanAttribute( long max )
-        : base( null, NumericBound.Create( max, false ) ) { }
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="max"/> number as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="max"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="max"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public StrictlyLessThanAttribute( long max, int decimalPlaces = 0 )
+        : base( null, NumericBound.Create( max, false, decimalPlaces ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="int"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public StrictlyLessThanAttribute( int max )
-        : base( null, NumericBound.Create( max, false ) ) { }
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="max"/> number as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="max"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="max"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public StrictlyLessThanAttribute( int max, int decimalPlaces = 0 )
+        : base( null, NumericBound.Create( max, false, decimalPlaces ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StrictlyLessThanAttribute"/> class specifying a maximum value of type <see cref="short"/>.

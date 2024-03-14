@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using System.Diagnostics;
+using Metalama.Framework.Serialization;
 using System.Text;
 
 namespace Metalama.Patterns.Contracts.Numeric;
@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Contracts.Numeric;
 /// <seealso cref="RangeAttribute"/>
 [PublicAPI]
 [RunTimeOrCompileTime]
-public readonly struct NumericRange : IExpressionBuilder
+public readonly struct NumericRange : ICompileTimeSerializable
 {
     private readonly NumericBound? _minValue;
     private readonly NumericBound? _maxValue;
@@ -290,53 +290,18 @@ public readonly struct NumericRange : IExpressionBuilder
         }
     }
 
-    // Generates run-time code that represents the current compile-time object.
-    IExpression IExpressionBuilder.ToExpression()
-    {
-        var expressionBuilder = new ExpressionBuilder();
-
-        expressionBuilder.AppendVerbatim( "new " );
-        expressionBuilder.AppendTypeName( typeof(NumericRange) );
-        expressionBuilder.AppendVerbatim( "(" );
-
-        if ( this._minValue != null )
-        {
-            this._minValue.AppendToExpression( expressionBuilder );
-        }
-        else
-        {
-            expressionBuilder.AppendVerbatim( "null" );
-        }
-
-        expressionBuilder.AppendVerbatim( ", " );
-
-        if ( this._maxValue != null )
-        {
-            this._maxValue.AppendToExpression( expressionBuilder );
-        }
-        else
-        {
-            expressionBuilder.AppendVerbatim( "null" );
-        }
-
-        expressionBuilder.AppendVerbatim( ")" );
-
-        return expressionBuilder.ToExpression();
-    }
-
     internal bool GeneratePattern( IType valueType, ExpressionBuilder builder, IExpression value )
     {
         var range = this;
 
         var nonNullableType = valueType.ToNonNullableType();
+        var isObject = nonNullableType.SpecialType == SpecialType.Object;
 
         // Check if we have checks of min or max value.
         ConversionResult minConversionResult = default;
         ConversionResult maxConversionResult = default;
         var hasMinCheck = this._minValue != null && this._minValue.TryConvert( nonNullableType, out _, out minConversionResult );
         var hasMaxCheck = this._maxValue != null && this._maxValue.TryConvert( nonNullableType, out _, out maxConversionResult );
-
-        Debugger.Break();
 
         // Eliminate redundant checks.
         if ( hasMinCheck && minConversionResult == ConversionResult.ExactlyMinValue && this._minValue!.IsAllowed )
@@ -354,61 +319,98 @@ public readonly struct NumericRange : IExpressionBuilder
             // No condition necessary.
             return false;
         }
-        else if ( hasMinCheck && hasMaxCheck )
+
+        if ( isObject )
         {
-            builder.AppendExpression( value );
-            builder.AppendVerbatim( " is " );
+            if ( this._minValue != null )
+            {
+                builder.AppendTypeName( typeof(NumberComparer) );
+                builder.AppendVerbatim( "." );
+                builder.AppendVerbatim( this._minValue.IsAllowed ? nameof(NumberComparer.IsStrictlySmallerThan) : nameof(NumberComparer.IsGreaterThan) );
+                builder.AppendVerbatim( "(" );
+                builder.AppendExpression( value );
+                builder.AppendVerbatim( ", " );
+                this._minValue.AppendValueToExpression( builder );
+                builder.AppendVerbatim( ")" );
+                builder.AppendVerbatim( " == true" );
+            }
 
-            AppendMin();
+            if ( this._maxValue != null )
+            {
+                if ( this._minValue != null )
+                {
+                    builder.AppendVerbatim( " || " );
+                }
 
-            builder.AppendVerbatim( " or " );
-
-            AppendMax();
-        }
-        else if ( hasMinCheck )
-        {
-            builder.AppendExpression( value );
-            builder.AppendVerbatim( " is " );
-
-            AppendMin();
+                builder.AppendTypeName( typeof(NumberComparer) );
+                builder.AppendVerbatim( "." );
+                builder.AppendVerbatim( this._maxValue.IsAllowed ? nameof(NumberComparer.IsStrictlyGreaterThan) : nameof(NumberComparer.IsGreaterThan) );
+                builder.AppendVerbatim( "(" );
+                builder.AppendExpression( value );
+                builder.AppendVerbatim( ", " );
+                this._maxValue.AppendValueToExpression( builder );
+                builder.AppendVerbatim( ")" );
+                builder.AppendVerbatim( " == true" );
+            }
         }
         else
         {
-            builder.AppendExpression( value );
-            builder.AppendVerbatim( " is " );
+            void AppendMin()
+            {
+                if ( range._minValue!.IsAllowed )
+                {
+                    builder.AppendVerbatim( " < " );
+                }
+                else
+                {
+                    builder.AppendVerbatim( " <= " );
+                }
 
-            AppendMax();
+                range._minValue.AppendConvertedValueToExpression( nonNullableType, builder );
+            }
+
+            void AppendMax()
+            {
+                if ( range._maxValue!.IsAllowed )
+                {
+                    builder.AppendVerbatim( " > " );
+                }
+                else
+                {
+                    builder.AppendVerbatim( " >= " );
+                }
+
+                range._maxValue.AppendConvertedValueToExpression( nonNullableType, builder );
+            }
+
+            if ( hasMinCheck && hasMaxCheck )
+            {
+                builder.AppendExpression( value );
+                builder.AppendVerbatim( " is " );
+
+                AppendMin();
+
+                builder.AppendVerbatim( " or " );
+
+                AppendMax();
+            }
+            else if ( hasMinCheck )
+            {
+                builder.AppendExpression( value );
+                builder.AppendVerbatim( " is " );
+
+                AppendMin();
+            }
+            else
+            {
+                builder.AppendExpression( value );
+                builder.AppendVerbatim( " is " );
+
+                AppendMax();
+            }
         }
 
         return true;
-
-        void AppendMin()
-        {
-            if ( range._minValue!.IsAllowed )
-            {
-                builder.AppendVerbatim( " < " );
-            }
-            else
-            {
-                builder.AppendVerbatim( " <= " );
-            }
-
-            range._minValue.AppendConvertedValueToExpression( nonNullableType, builder );
-        }
-
-        void AppendMax()
-        {
-            if ( range._maxValue!.IsAllowed )
-            {
-                builder.AppendVerbatim( " > " );
-            }
-            else
-            {
-                builder.AppendVerbatim( " >= " );
-            }
-
-            range._maxValue.AppendConvertedValueToExpression( nonNullableType, builder );
-        }
     }
 
     internal NumericRangeTypeSupport IsTypeSupported( IType type )
@@ -491,6 +493,38 @@ public readonly struct NumericRange : IExpressionBuilder
             default:
                 return NumericRangeTypeSupport.NotSupported;
         }
+    }
+
+    public static NumericRange Create( long? min, long? max, bool areBoundsAllowed = true )
+    {
+        var minBound = min == null ? null : NumericBound.Create( min.Value, areBoundsAllowed );
+        var maxBound = max == null ? null : NumericBound.Create( max.Value, areBoundsAllowed );
+
+        return new NumericRange( minBound, maxBound );
+    }
+
+    public static NumericRange Create( ulong? min, ulong? max, bool areBoundsAllowed = true )
+    {
+        var minBound = min == null ? null : NumericBound.Create( min.Value, areBoundsAllowed );
+        var maxBound = max == null ? null : NumericBound.Create( max.Value, areBoundsAllowed );
+
+        return new NumericRange( minBound, maxBound );
+    }
+
+    public static NumericRange Create( double? min, double? max, bool areBoundsAllowed = true )
+    {
+        var minBound = min == null ? null : NumericBound.Create( min.Value, areBoundsAllowed );
+        var maxBound = max == null ? null : NumericBound.Create( max.Value, areBoundsAllowed );
+
+        return new NumericRange( minBound, maxBound );
+    }
+
+    public static NumericRange Create( decimal? min, decimal? max, bool areBoundsAllowed = true )
+    {
+        var minBound = min == null ? null : NumericBound.Create( min.Value, areBoundsAllowed );
+        var maxBound = max == null ? null : NumericBound.Create( max.Value, areBoundsAllowed );
+
+        return new NumericRange( minBound, maxBound );
     }
 
     public override string ToString()
