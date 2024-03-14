@@ -41,7 +41,7 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
     /// Initializes a new instance of the <see cref="StrictlyGreaterThanAttribute"/> class specifying a minimum value of type <see cref="int"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> and <paramref name="max"/> numbers as <see cref="decimal"/> instead
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> number <see cref="decimal"/> instead
     /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
     /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
     public StrictlyGreaterThanAttribute( int min, int decimalPlaces = 0 )
