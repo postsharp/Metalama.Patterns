@@ -20,7 +20,20 @@ public abstract class NumericBound : ICompileTimeSerializable
         this.IsAllowed = isAllowed;
     }
 
-    public static NumericBound Create( long value, bool isAllowed = true ) => new Int64Bound( value, isAllowed );
+    public static NumericBound Create( long value, bool isAllowed = true, int decimalPlaces = 0 )
+    {
+        return decimalPlaces switch
+        {
+            0 => new Int64Bound( value, isAllowed ),
+            1 => new DecimalBound( value / 10m, isAllowed ),
+            2 => new DecimalBound( value / 100m, isAllowed ),
+            3 => new DecimalBound( value / 1_000m, isAllowed ),
+            4 => new DecimalBound( value / 10_000m, isAllowed ),
+            5 => new DecimalBound( value / 100_000m, isAllowed ),
+            6 => new DecimalBound( value / 1000_000m, isAllowed ),
+            _ => throw new ArgumentOutOfRangeException( nameof(decimalPlaces), "The number of decimal places must be between 0 and 6." )
+        };
+    }
 
     public static NumericBound Create( ulong value, bool isAllowed = true ) => new UInt64Bound( value, isAllowed );
 

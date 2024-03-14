@@ -41,10 +41,13 @@ public class RangeAttribute : ContractBaseAttribute
     /// <param name="min">The minimum value.</param>
     /// <param name="max">The maximum value.</param>
     /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
-    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
-    public RangeAttribute( long min, long max, bool minAllowed = true, bool maxAllowed = true ) : this(
-        NumericBound.Create( min, minAllowed ),
-        NumericBound.Create( max, maxAllowed ) ) { }
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param>
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> and <paramref name="max"/> numbers as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public RangeAttribute( long min, long max, bool minAllowed = true, bool maxAllowed = true, int decimalPlaces = 0 ) : this(
+        NumericBound.Create( min, minAllowed, decimalPlaces ),
+        NumericBound.Create( max, maxAllowed, decimalPlaces ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="ulong"/>.
@@ -69,17 +72,6 @@ public class RangeAttribute : ContractBaseAttribute
         NumericBound.Create( max, maxAllowed ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="decimal"/>.
-    /// </summary>
-    /// <param name="min">The minimum value.</param>
-    /// <param name="max">The maximum value.</param>
-    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
-    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
-    public RangeAttribute( decimal min, decimal max, bool minAllowed = true, bool maxAllowed = true ) : this(
-        NumericBound.Create( min, minAllowed ),
-        NumericBound.Create( max, maxAllowed ) ) { }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="float"/>.
     /// </summary>
     /// <param name="min">The minimum value.</param>
@@ -96,10 +88,13 @@ public class RangeAttribute : ContractBaseAttribute
     /// <param name="min">The minimum value.</param>
     /// <param name="max">The maximum value.</param>
     /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
-    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
-    public RangeAttribute( int min, int max, bool minAllowed = true, bool maxAllowed = true ) : this(
-        NumericBound.Create( min, minAllowed ),
-        NumericBound.Create( max, maxAllowed ) ) { }
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param>
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> and <paramref name="max"/> numbers as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public RangeAttribute( int min, int max, bool minAllowed = true, bool maxAllowed = true, int decimalPlaces = 0 ) : this(
+        NumericBound.Create( min, minAllowed, decimalPlaces ),
+        NumericBound.Create( max, maxAllowed, decimalPlaces ) ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="uint"/>.
