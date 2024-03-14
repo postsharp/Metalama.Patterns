@@ -5,7 +5,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.ObjectRange;
 internal class C
 {
     [return: StrictlyPositive]
-    public object M( [Positive] object a, [Range( 0, 100 )] object b, [LessThan( 100 )] out object c )
+    public object M( [Positive] object a, [Range( 0, 100 )] object b, [LessThan( 101, decimalPlaces: 2 )] out object c )
     {
         c = a;
 
