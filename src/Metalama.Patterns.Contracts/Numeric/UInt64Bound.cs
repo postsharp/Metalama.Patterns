@@ -257,5 +257,5 @@ internal sealed class UInt64Bound : NumericBound
 
     #endregion
 
-    private protected override void AppendValueToExpression( ExpressionBuilder expressionBuilder ) => expressionBuilder.AppendLiteral( this._value );
+    internal override void AppendValueToExpression( ExpressionBuilder expressionBuilder ) => expressionBuilder.AppendLiteral( this._value );
 }

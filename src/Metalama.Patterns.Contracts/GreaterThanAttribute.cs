@@ -27,15 +27,21 @@ public class GreaterThanAttribute : RangeAttribute
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="long"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( long min )
-        : base( NumericBound.Create( min ), default ) { }
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> number as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public GreaterThanAttribute( long min, int decimalPlaces = 0 )
+        : base( NumericBound.Create( min, decimalPlaces: decimalPlaces ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="int"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( int min )
-        : base( NumericBound.Create( min ), default ) { }
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> number as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public GreaterThanAttribute( int min, int decimalPlaces = 0 )
+        : base( NumericBound.Create( min, decimalPlaces: decimalPlaces ), default ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="short"/>.

@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Contracts.Numeric;
@@ -12,14 +13,27 @@ namespace Metalama.Patterns.Contracts.Numeric;
 /// Represents a single bound of a <see cref="NumericRange"/>.
 /// </summary>
 [RunTimeOrCompileTime]
-public abstract class NumericBound
+public abstract class NumericBound : ICompileTimeSerializable
 {
     protected internal NumericBound( bool isAllowed )
     {
         this.IsAllowed = isAllowed;
     }
 
-    public static NumericBound Create( long value, bool isAllowed = true ) => new Int64Bound( value, isAllowed );
+    public static NumericBound Create( long value, bool isAllowed = true, int decimalPlaces = 0 )
+    {
+        return decimalPlaces switch
+        {
+            0 => new Int64Bound( value, isAllowed ),
+            1 => new DecimalBound( value / 10m, isAllowed ),
+            2 => new DecimalBound( value / 100m, isAllowed ),
+            3 => new DecimalBound( value / 1_000m, isAllowed ),
+            4 => new DecimalBound( value / 10_000m, isAllowed ),
+            5 => new DecimalBound( value / 100_000m, isAllowed ),
+            6 => new DecimalBound( value / 1000_000m, isAllowed ),
+            _ => throw new ArgumentOutOfRangeException( nameof(decimalPlaces), "The number of decimal places must be between 0 and 6." )
+        };
+    }
 
     public static NumericBound Create( ulong value, bool isAllowed = true ) => new UInt64Bound( value, isAllowed );
 
@@ -55,7 +69,7 @@ public abstract class NumericBound
 
     internal abstract bool TryConvertToSingle( out float value, out ConversionResult conversionResult );
 
-    private protected abstract void AppendValueToExpression( ExpressionBuilder expressionBuilder );
+    internal abstract void AppendValueToExpression( ExpressionBuilder expressionBuilder );
 
     public override string ToString() => this.ObjectValue.ToString() ?? "null";
 
@@ -80,6 +94,12 @@ public abstract class NumericBound
     {
         switch ( valueType.SpecialType )
         {
+            case SpecialType.Object:
+                value = this.ObjectValue;
+                conversionResult = ConversionResult.WithinRange;
+
+                return true;
+
             case SpecialType.SByte:
                 if ( this.TryConvertToSByte( out var sbyteValue, out conversionResult ) )
                 {
