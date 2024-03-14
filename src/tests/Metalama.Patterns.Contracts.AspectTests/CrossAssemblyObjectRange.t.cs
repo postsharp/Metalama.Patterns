@@ -4,7 +4,6 @@ internal class C : IValidated
 {
   public object M(object a, object b, out object c)
   {
-    object returnValue_1;
     if (global::Metalama.Patterns.Contracts.Numeric.NumberComparer.IsStrictlySmallerThan(a, 0) == true)
     {
       throw new ArgumentOutOfRangeException("a", "The 'a' parameter must be greater than or equal to 0.");
@@ -16,15 +15,14 @@ internal class C : IValidated
     object returnValue;
     c = a;
     returnValue = b;
-    if (global::Metalama.Patterns.Contracts.Numeric.NumberComparer.IsGreaterThan(returnValue, 0) == true)
-    {
-      throw new PostconditionViolationException("The return value must be strictly greater than 0.");
-    }
-    returnValue_1 = returnValue;
     if (global::Metalama.Patterns.Contracts.Numeric.NumberComparer.IsStrictlyGreaterThan(c, 100) == true)
     {
       throw new PostconditionViolationException("The 'c' parameter must be less than or equal to 100.");
     }
-    return returnValue_1;
+    if (global::Metalama.Patterns.Contracts.Numeric.NumberComparer.IsGreaterThan(returnValue, 0) == true)
+    {
+      throw new PostconditionViolationException("The return value must be strictly greater than 0.");
+    }
+    return returnValue;
   }
 }
