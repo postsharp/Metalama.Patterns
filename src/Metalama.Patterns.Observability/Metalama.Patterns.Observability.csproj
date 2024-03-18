@@ -8,7 +8,14 @@
     <!-- Support unit testing -->
     <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
     <Version Condition="'$(MetalamaPatternsObservabilityVersion)'!=''">$(MetalamaPatternsObservabilityVersion)</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <Using Remove="System.Net.Http" />

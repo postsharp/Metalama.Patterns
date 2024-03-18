@@ -7,7 +7,12 @@
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <TransformOnBuild>true</TransformOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />

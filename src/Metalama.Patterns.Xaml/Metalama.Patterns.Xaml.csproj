@@ -9,6 +9,7 @@
     <!-- Support unit testing -->
     <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
     <Version Condition="'$(MetalamaPatternsXamlVersion)'!=''">$(MetalamaPatternsXamlVersion)</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +26,12 @@
   <ItemGroup>
     <ProjectReference Include="..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
   </ItemGroup>
+
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
 
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
   
