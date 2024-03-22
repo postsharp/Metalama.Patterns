@@ -83,7 +83,7 @@ public class BaseClass
   }
   protected SuspendInvariantsCookie SuspendInvariants()
   {
-    this._invariantSuspensionCounter.Increment();
+    _invariantSuspensionCounter.Increment();
     return new SuspendInvariantsCookie(_invariantSuspensionCounter);
   }
   protected virtual void VerifyInvariants()
