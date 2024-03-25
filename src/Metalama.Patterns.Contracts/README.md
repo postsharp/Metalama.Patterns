@@ -1,7 +1,4 @@
-<p align="center">
-  <img width="450" src="https://github.com/postsharp/Metalama/raw/master/images/metalama-by-postsharp.svg" alt="Metalama logo" />
-  <img referrerpolicy="no-referrer-when-downgrade" src="https://postsharp.matomo.cloud/matomo.php?idsite=1&amp;rec=1" style="border:0" alt="" />
-</p>
+![Metalama Logo](https://raw.githubusercontent.com/postsharp/Metalama/master/images/metalama-by-postsharp.svg)
 
 ## About
 
