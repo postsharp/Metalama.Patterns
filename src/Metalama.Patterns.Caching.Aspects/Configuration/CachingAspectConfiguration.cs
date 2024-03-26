@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Caching.Aspects.Configuration;
 
-
 [PublicAPI]
 [CompileTime]
 internal sealed record CachingAspectConfiguration : CachedMethodConfiguration
