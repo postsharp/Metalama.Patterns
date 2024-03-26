@@ -22,17 +22,13 @@ internal sealed partial class DependencyPropertyAspectBuilder
         internal static dynamic? OverrideGetter(
             [CompileTime] IType propertyType,
             [CompileTime] IField dependencyPropertyField )
-        {
-            return meta.Cast( propertyType, meta.This.GetValue( dependencyPropertyField.Value ) );
-        }
+            => meta.Cast( propertyType, meta.This.GetValue( dependencyPropertyField.Value ) );
 
         [Template]
         internal static void OverrideSetter(
             dynamic? value,
             [CompileTime] IField dependencyPropertyField )
-        {
-            meta.This.SetValue( dependencyPropertyField.Value, value );
-        }
+            => meta.This.SetValue( dependencyPropertyField.Value, value );
 
         [Template]
         internal static void InitializeDependencyProperty(
@@ -388,17 +384,12 @@ internal sealed partial class DependencyPropertyAspectBuilder
         }
 
         [Template]
-        internal static T ApplyContracts<[CompileTime] T>( T value )
-        {
-            return value;
-        }
+        internal static T ApplyContracts<[CompileTime] T>( T value ) => value;
 
         [Template]
         internal static void Assign(
             [CompileTime] IExpression left,
             [CompileTime] IExpression right )
-        {
-            left.Value = right.Value;
-        }
+            => left.Value = right.Value;
     }
 }

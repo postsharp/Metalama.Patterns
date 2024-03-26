@@ -9,6 +9,7 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.Observability.Implementation;
 
+// ReSharper disable InconsistentNaming
 [CompileTime]
 internal static class DiagnosticDescriptors
 {

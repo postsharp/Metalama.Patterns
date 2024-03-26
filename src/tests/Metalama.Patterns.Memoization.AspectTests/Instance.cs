@@ -5,7 +5,6 @@ using System.Globalization;
 // ReSharper disable MemberCanBeMadeStatic.Global
 // ReSharper disable EqualExpressionComparison
 #pragma warning disable CA2201
-#pragma warning disable SA1402
 
 namespace Metalama.Patterns.Memoization.AspectTests.Instance;
 

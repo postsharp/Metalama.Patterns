@@ -19,38 +19,35 @@ namespace Metalama.Patterns.Contracts.Numeric;
 [RunTimeOrCompileTime]
 public readonly struct NumericRange : ICompileTimeSerializable
 {
-    private readonly NumericBound? _minValue;
-    private readonly NumericBound? _maxValue;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="NumericRange"/> struct.
     /// </summary>
     public NumericRange( NumericBound? min, NumericBound? max )
     {
-        this._minValue = min;
-        this._maxValue = max;
+        this.MinValue = min;
+        this.MaxValue = max;
     }
 
     /// <summary>
     /// Gets the minimal value, or <c>null</c> if the range has no minimal value.
     /// </summary>
-    public NumericBound? MinValue => this._minValue;
+    public NumericBound? MinValue { get; }
 
     /// <summary>
     /// Gets the maximal value, or <c>null</c> if the range has no maximal value.
     /// </summary>
-    public NumericBound? MaxValue => this._maxValue;
+    public NumericBound? MaxValue { get; }
 
     /// <summary>
     /// Determines if a value of type <see cref="double"/> is in the current range.
     /// </summary>
     public bool IsInRange( double value )
     {
-        if ( this._minValue != null )
+        if ( this.MinValue != null )
         {
-            if ( this._minValue.TryConvertToDouble( out var minValue, out _ ) )
+            if ( this.MinValue.TryConvertToDouble( out var minValue, out _ ) )
             {
-                if ( this._minValue.IsAllowed )
+                if ( this.MinValue.IsAllowed )
                 {
                     if ( value < minValue )
                     {
@@ -67,11 +64,11 @@ public readonly struct NumericRange : ICompileTimeSerializable
             }
         }
 
-        if ( this._maxValue != null )
+        if ( this.MaxValue != null )
         {
-            if ( this._maxValue.TryConvertToDouble( out var maxValue, out _ ) )
+            if ( this.MaxValue.TryConvertToDouble( out var maxValue, out _ ) )
             {
-                if ( this._maxValue.IsAllowed )
+                if ( this.MaxValue.IsAllowed )
                 {
                     if ( value > maxValue )
                     {
@@ -96,11 +93,11 @@ public readonly struct NumericRange : ICompileTimeSerializable
     /// </summary>
     public bool IsInRange( decimal value )
     {
-        if ( this._minValue != null )
+        if ( this.MinValue != null )
         {
-            if ( this._minValue.TryConvertToDecimal( out var minValue, out _ ) )
+            if ( this.MinValue.TryConvertToDecimal( out var minValue, out _ ) )
             {
-                if ( this._minValue.IsAllowed )
+                if ( this.MinValue.IsAllowed )
                 {
                     if ( value < minValue )
                     {
@@ -117,11 +114,11 @@ public readonly struct NumericRange : ICompileTimeSerializable
             }
         }
 
-        if ( this._maxValue != null )
+        if ( this.MaxValue != null )
         {
-            if ( this._maxValue.TryConvertToDecimal( out var maxValue, out _ ) )
+            if ( this.MaxValue.TryConvertToDecimal( out var maxValue, out _ ) )
             {
-                if ( this._maxValue.IsAllowed )
+                if ( this.MaxValue.IsAllowed )
                 {
                     if ( value > maxValue )
                     {
@@ -146,11 +143,11 @@ public readonly struct NumericRange : ICompileTimeSerializable
     /// </summary>
     public bool IsInRange( long value )
     {
-        if ( this._minValue != null )
+        if ( this.MinValue != null )
         {
-            if ( this._minValue.TryConvertToInt64( out var minValue, out _ ) )
+            if ( this.MinValue.TryConvertToInt64( out var minValue, out _ ) )
             {
-                if ( this._minValue.IsAllowed )
+                if ( this.MinValue.IsAllowed )
                 {
                     if ( value < minValue )
                     {
@@ -167,11 +164,11 @@ public readonly struct NumericRange : ICompileTimeSerializable
             }
         }
 
-        if ( this._maxValue != null )
+        if ( this.MaxValue != null )
         {
-            if ( this._maxValue.TryConvertToInt64( out var maxValue, out _ ) )
+            if ( this.MaxValue.TryConvertToInt64( out var maxValue, out _ ) )
             {
-                if ( this._maxValue.IsAllowed )
+                if ( this.MaxValue.IsAllowed )
                 {
                     if ( value > maxValue )
                     {
@@ -196,11 +193,11 @@ public readonly struct NumericRange : ICompileTimeSerializable
     /// </summary>
     public bool IsInRange( ulong value )
     {
-        if ( this._minValue != null )
+        if ( this.MinValue != null )
         {
-            if ( this._minValue.TryConvertToUInt64( out var minValue, out _ ) )
+            if ( this.MinValue.TryConvertToUInt64( out var minValue, out _ ) )
             {
-                if ( this._minValue.IsAllowed )
+                if ( this.MinValue.IsAllowed )
                 {
                     if ( value < minValue )
                     {
@@ -217,11 +214,11 @@ public readonly struct NumericRange : ICompileTimeSerializable
             }
         }
 
-        if ( this._maxValue != null )
+        if ( this.MaxValue != null )
         {
-            if ( this._maxValue.TryConvertToUInt64( out var maxValue, out _ ) )
+            if ( this.MaxValue.TryConvertToUInt64( out var maxValue, out _ ) )
             {
-                if ( this._maxValue.IsAllowed )
+                if ( this.MaxValue.IsAllowed )
                 {
                     if ( value > maxValue )
                     {
@@ -300,16 +297,16 @@ public readonly struct NumericRange : ICompileTimeSerializable
         // Check if we have checks of min or max value.
         ConversionResult minConversionResult = default;
         ConversionResult maxConversionResult = default;
-        var hasMinCheck = this._minValue != null && this._minValue.TryConvert( nonNullableType, out _, out minConversionResult );
-        var hasMaxCheck = this._maxValue != null && this._maxValue.TryConvert( nonNullableType, out _, out maxConversionResult );
+        var hasMinCheck = this.MinValue != null && this.MinValue.TryConvert( nonNullableType, out _, out minConversionResult );
+        var hasMaxCheck = this.MaxValue != null && this.MaxValue.TryConvert( nonNullableType, out _, out maxConversionResult );
 
         // Eliminate redundant checks.
-        if ( hasMinCheck && minConversionResult == ConversionResult.ExactlyMinValue && this._minValue!.IsAllowed )
+        if ( hasMinCheck && minConversionResult == ConversionResult.ExactlyMinValue && this.MinValue!.IsAllowed )
         {
             hasMinCheck = false;
         }
 
-        if ( hasMaxCheck && maxConversionResult == ConversionResult.ExactlyMaxValue && this._maxValue!.IsAllowed )
+        if ( hasMaxCheck && maxConversionResult == ConversionResult.ExactlyMaxValue && this.MaxValue!.IsAllowed )
         {
             hasMaxCheck = false;
         }
@@ -322,33 +319,33 @@ public readonly struct NumericRange : ICompileTimeSerializable
 
         if ( isObject )
         {
-            if ( this._minValue != null )
+            if ( this.MinValue != null )
             {
                 builder.AppendTypeName( typeof(NumberComparer) );
                 builder.AppendVerbatim( "." );
-                builder.AppendVerbatim( this._minValue.IsAllowed ? nameof(NumberComparer.IsStrictlySmallerThan) : nameof(NumberComparer.IsGreaterThan) );
+                builder.AppendVerbatim( this.MinValue.IsAllowed ? nameof(NumberComparer.IsStrictlySmallerThan) : nameof(NumberComparer.IsGreaterThan) );
                 builder.AppendVerbatim( "(" );
                 builder.AppendExpression( value );
                 builder.AppendVerbatim( ", " );
-                this._minValue.AppendValueToExpression( builder );
+                this.MinValue.AppendValueToExpression( builder );
                 builder.AppendVerbatim( ")" );
                 builder.AppendVerbatim( " == true" );
             }
 
-            if ( this._maxValue != null )
+            if ( this.MaxValue != null )
             {
-                if ( this._minValue != null )
+                if ( this.MinValue != null )
                 {
                     builder.AppendVerbatim( " || " );
                 }
 
                 builder.AppendTypeName( typeof(NumberComparer) );
                 builder.AppendVerbatim( "." );
-                builder.AppendVerbatim( this._maxValue.IsAllowed ? nameof(NumberComparer.IsStrictlyGreaterThan) : nameof(NumberComparer.IsGreaterThan) );
+                builder.AppendVerbatim( this.MaxValue.IsAllowed ? nameof(NumberComparer.IsStrictlyGreaterThan) : nameof(NumberComparer.IsGreaterThan) );
                 builder.AppendVerbatim( "(" );
                 builder.AppendExpression( value );
                 builder.AppendVerbatim( ", " );
-                this._maxValue.AppendValueToExpression( builder );
+                this.MaxValue.AppendValueToExpression( builder );
                 builder.AppendVerbatim( ")" );
                 builder.AppendVerbatim( " == true" );
             }
@@ -357,7 +354,7 @@ public readonly struct NumericRange : ICompileTimeSerializable
         {
             void AppendMin()
             {
-                if ( range._minValue!.IsAllowed )
+                if ( range.MinValue!.IsAllowed )
                 {
                     builder.AppendVerbatim( " < " );
                 }
@@ -366,12 +363,12 @@ public readonly struct NumericRange : ICompileTimeSerializable
                     builder.AppendVerbatim( " <= " );
                 }
 
-                range._minValue.AppendConvertedValueToExpression( nonNullableType, builder );
+                range.MinValue.AppendConvertedValueToExpression( nonNullableType, builder );
             }
 
             void AppendMax()
             {
-                if ( range._maxValue!.IsAllowed )
+                if ( range.MaxValue!.IsAllowed )
                 {
                     builder.AppendVerbatim( " > " );
                 }
@@ -380,7 +377,7 @@ public readonly struct NumericRange : ICompileTimeSerializable
                     builder.AppendVerbatim( " >= " );
                 }
 
-                range._maxValue.AppendConvertedValueToExpression( nonNullableType, builder );
+                range.MaxValue.AppendConvertedValueToExpression( nonNullableType, builder );
             }
 
             if ( hasMinCheck && hasMaxCheck )
@@ -433,22 +430,22 @@ public readonly struct NumericRange : ICompileTimeSerializable
             case SpecialType.Double:
                 var isRedundant = true;
 
-                if ( this._minValue != null )
+                if ( this.MinValue != null )
                 {
-                    this._minValue.TryConvert( type, out _, out var minConversionResult );
+                    this.MinValue.TryConvert( type, out _, out var minConversionResult );
 
                     if ( minConversionResult is ConversionResult.TooLarge or ConversionResult.UnsupportedType )
                     {
                         return NumericRangeTypeSupport.NotSupported;
                     }
 
-                    if ( minConversionResult == ConversionResult.ExactlyMaxValue && !this._minValue.IsAllowed )
+                    if ( minConversionResult == ConversionResult.ExactlyMaxValue && !this.MinValue.IsAllowed )
                     {
                         return NumericRangeTypeSupport.NotSupported;
                     }
 
                     if ( minConversionResult == ConversionResult.TooSmall ||
-                         (minConversionResult == ConversionResult.ExactlyMinValue && this._minValue.IsAllowed) )
+                         (minConversionResult == ConversionResult.ExactlyMinValue && this.MinValue.IsAllowed) )
                     {
                         // This check is redundant.
                     }
@@ -458,22 +455,22 @@ public readonly struct NumericRange : ICompileTimeSerializable
                     }
                 }
 
-                if ( this._maxValue != null )
+                if ( this.MaxValue != null )
                 {
-                    this._maxValue.TryConvert( type, out _, out var maxConversionResult );
+                    this.MaxValue.TryConvert( type, out _, out var maxConversionResult );
 
                     if ( maxConversionResult is ConversionResult.TooSmall or ConversionResult.UnsupportedType )
                     {
                         return NumericRangeTypeSupport.NotSupported;
                     }
 
-                    if ( maxConversionResult == ConversionResult.ExactlyMinValue && !this._maxValue.IsAllowed )
+                    if ( maxConversionResult == ConversionResult.ExactlyMinValue && !this.MaxValue.IsAllowed )
                     {
                         return NumericRangeTypeSupport.NotSupported;
                     }
 
                     if ( maxConversionResult == ConversionResult.TooLarge ||
-                         (maxConversionResult == ConversionResult.ExactlyMaxValue && this._maxValue.IsAllowed) )
+                         (maxConversionResult == ConversionResult.ExactlyMaxValue && this.MaxValue.IsAllowed) )
                     {
                         // This check is redundant.
                     }
@@ -531,10 +528,10 @@ public readonly struct NumericRange : ICompileTimeSerializable
     {
         var stringBuilder = new StringBuilder();
 
-        if ( this._minValue != null )
+        if ( this.MinValue != null )
         {
-            stringBuilder.Append( this._minValue.IsAllowed ? '[' : ']' );
-            stringBuilder.Append( this._minValue.ObjectValue );
+            stringBuilder.Append( this.MinValue.IsAllowed ? '[' : ']' );
+            stringBuilder.Append( this.MinValue.ObjectValue );
         }
         else
         {
@@ -543,10 +540,10 @@ public readonly struct NumericRange : ICompileTimeSerializable
 
         stringBuilder.Append( ", " );
 
-        if ( this._maxValue != null )
+        if ( this.MaxValue != null )
         {
-            stringBuilder.Append( this._maxValue.ObjectValue );
-            stringBuilder.Append( this._maxValue.IsAllowed ? ']' : '[' );
+            stringBuilder.Append( this.MaxValue.ObjectValue );
+            stringBuilder.Append( this.MaxValue.IsAllowed ? ']' : '[' );
         }
         else
         {

@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Patterns.Contracts;
+namespace Metalama.Patterns.Contracts.UnitTests.Utilities;
 
 [RunTimeOrCompileTime]
 internal static partial class FloatingPointHelper

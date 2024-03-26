@@ -5,6 +5,7 @@ using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable UnusedType.Local
 // ReSharper disable MemberCanBeMadeStatic.Local
 #pragma warning disable CA1822
 

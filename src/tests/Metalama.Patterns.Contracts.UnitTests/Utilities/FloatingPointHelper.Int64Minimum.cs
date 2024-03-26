@@ -4,13 +4,15 @@
 
 // Resharper disable RedundantCast
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Patterns.Contracts;
+namespace Metalama.Patterns.Contracts.UnitTests.Utilities;
 
 internal partial class FloatingPointHelper
 {
     [RunTimeOrCompileTime]
+    [UsedImplicitly( ImplicitUseTargetFlags.WithMembers )]
     internal static class Int64Minimum
     {
         public static long ToInt64( long min )

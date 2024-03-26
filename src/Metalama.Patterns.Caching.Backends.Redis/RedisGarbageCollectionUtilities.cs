@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -7,6 +8,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// <summary>
 /// Exposes methods that perform garbage collection in a Redis server used as a cache where dependencies are enabled.
 /// </summary>
+[PublicAPI]
 public static class RedisGarbageCollectionUtilities
 {
     /// <summary>

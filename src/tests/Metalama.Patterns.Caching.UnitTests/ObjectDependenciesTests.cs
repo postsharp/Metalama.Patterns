@@ -127,9 +127,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testNestedDependenciesProfileName = _profileNamePrefix + "TestNestedDependencies";
 
-        private sealed class TestNestedDependenciesCachedValueClass1 : CachedValueClass { }
+        private sealed class TestNestedDependenciesCachedValueClass1 : CachedValueClass;
 
-        private sealed class TestNestedDependenciesCachedValueClass2 : CachedValueClass { }
+        private sealed class TestNestedDependenciesCachedValueClass2 : CachedValueClass;
 
         [CachingConfiguration( ProfileName = _testNestedDependenciesProfileName )]
         private sealed class TestNestedDependenciesCachingClass1 : CachingClass<TestNestedDependenciesCachedValueClass1>
@@ -189,9 +189,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testNestedDependenciesAsyncProfileName = _profileNamePrefix + "TestNestedDependenciesAsync";
 
-        private sealed class TestNestedDependenciesAsyncCachedValueClass1 : CachedValueClass { }
+        private sealed class TestNestedDependenciesAsyncCachedValueClass1 : CachedValueClass;
 
-        private sealed class TestNestedDependenciesAsyncCachedValueClass2 : CachedValueClass { }
+        private sealed class TestNestedDependenciesAsyncCachedValueClass2 : CachedValueClass;
 
         [CachingConfiguration( ProfileName = _testNestedDependenciesAsyncProfileName )]
         private sealed class TestNestedDependenciesAsyncCachingClass1 : CachingClass<TestNestedDependenciesAsyncCachedValueClass1>
@@ -251,9 +251,9 @@ namespace Metalama.Patterns.Caching.Tests
 
         private const string _testNestedDependenciesWithEnumerableProfileName = _profileNamePrefix + "TestNestedDependenciesWithEnumerable";
 
-        private sealed class TestNestedDependenciesWithEnumerableCachedValueClass : CachedValueClass { }
+        private sealed class TestNestedDependenciesWithEnumerableCachedValueClass : CachedValueClass;
 
-        private sealed class TestNestedDependenciesWithEnumerableCachingClass1 : CachingClass<TestNestedDependenciesWithEnumerableCachedValueClass> { }
+        private sealed class TestNestedDependenciesWithEnumerableCachingClass1 : CachingClass<TestNestedDependenciesWithEnumerableCachedValueClass>;
 
         [CachingConfiguration( ProfileName = _testNestedDependenciesWithEnumerableProfileName )]
         private sealed class TestNestedDependenciesWithEnumerableCachingClass2

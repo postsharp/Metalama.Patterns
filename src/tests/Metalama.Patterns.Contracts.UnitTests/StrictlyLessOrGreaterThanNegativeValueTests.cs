@@ -16,8 +16,8 @@ public sealed class StrictlyLessOrGreaterThanNegativeValueTests : RangeContractT
     private const double _doubleLimit = -100;
     private const double _longAsDoubleLimit = -100;
 
-    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
-    private static readonly decimal _decimalStep = FloatingPointHelper.GetDecimalStep( (decimal) _doubleLimit );
+    private static readonly double _doubleStep = Utilities.FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly decimal _decimalStep = Utilities.FloatingPointHelper.GetDecimalStep( (decimal) _doubleLimit );
 
     [Fact]
     public void TestMethodsWithStrictlyGreaterThanAspect_Success()

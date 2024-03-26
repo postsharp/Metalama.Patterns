@@ -43,8 +43,8 @@ public sealed class StrictRangeAttributeTests
     [Fact]
     public void TestDoubleTolerance()
     {
-        MethodWithDoubleInDoubleStrictRange( _doubleMin + FloatingPointHelper.GetDoubleStep( _doubleMin ) );
-        MethodWithDoubleInDoubleStrictRange( _doubleMax - FloatingPointHelper.GetDoubleStep( _doubleMax ) );
+        MethodWithDoubleInDoubleStrictRange( _doubleMin + Utilities.FloatingPointHelper.GetDoubleStep( _doubleMin ) );
+        MethodWithDoubleInDoubleStrictRange( _doubleMax - Utilities.FloatingPointHelper.GetDoubleStep( _doubleMax ) );
     }
 
     private static void TestAllMethods( long longValue, ulong ulongValue, double doubleValue, decimal decimalValue, Action<Action>? action = null )

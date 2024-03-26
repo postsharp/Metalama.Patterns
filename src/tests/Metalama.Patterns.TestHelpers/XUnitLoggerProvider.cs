@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.TestHelpers;
 
-public class XUnitLoggerProvider : ILoggerProvider
+public sealed class XUnitLoggerProvider : ILoggerProvider
 {
     private readonly ConcurrentDictionary<string, XUnitLogger> _loggers = new();
     private readonly ITestOutputHelper _testOutputHelper;

@@ -14,7 +14,7 @@ public class NotNullTestClass
 
     public object ClassParameterMethod( [NotNull] NotNullAttributeTests parameter ) => parameter;
 
-    public class A { }
+    public class A;
 
     public class B<T>
         where T : A

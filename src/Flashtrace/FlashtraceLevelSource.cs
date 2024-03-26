@@ -108,6 +108,7 @@ public sealed class FlashtraceLevelSource
     #region OpenActivity
 
     // ReSharper disable InvalidXmlDocComment
+#pragma warning disable CS1574, CS1584
 
     /// <summary>
     /// Opens an activity that cannot be suspended (e.g. does not wait any <c>await</c>).
@@ -150,8 +151,9 @@ public sealed class FlashtraceLevelSource
 
         return this.OpenAsyncActivity( description, options, callerInfo );
     }
-
+    
     // ReSharper restore InvalidXmlDocComment
+#pragma warning restore CS1574, CS1584
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]

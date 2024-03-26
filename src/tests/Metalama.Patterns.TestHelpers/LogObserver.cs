@@ -2,7 +2,7 @@
 
 namespace Metalama.Patterns.TestHelpers;
 
-public class LogObserver
+public sealed class LogObserver
 {
     private readonly List<string> _log = new();
 

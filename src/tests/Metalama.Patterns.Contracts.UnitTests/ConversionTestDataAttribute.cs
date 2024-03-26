@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 /// <summary>
 /// Test data used by <see cref="NumberComparerTests"/>.
 /// </summary>
-internal class ConversionTestDataAttribute<TBound, TValue> : DataAttribute
+internal sealed class ConversionTestDataAttribute<TBound, TValue> : DataAttribute
 {
     private readonly TValue _value;
     private readonly TBound _bound;
@@ -33,6 +33,6 @@ internal class ConversionTestDataAttribute<TBound, TValue> : DataAttribute
 
     public bool ForgiveRoundingError { get; set; }
 
-    public override IEnumerable<object[]> GetData( MethodInfo testMethod )
+    public override IEnumerable<object?[]> GetData( MethodInfo testMethod )
         => [[this._value, this._bound, this.ForgiveRoundingError ? !this._expectedResult : this._expectedResult, this._tag]];
 }

@@ -148,7 +148,11 @@ public sealed class CommandOptionsBuilder
     /// implementations typically only notify changes to public properties.
     /// </para>
     /// </remarks>
-    public bool? EnableINotifyPropertyChangedIntegration { get; set; }
+    public bool? EnableINotifyPropertyChangedIntegration
+    {
+        get => this._options.EnableINotifyPropertyChangedIntegration;
+        set => this._options = this._options with { EnableINotifyPropertyChangedIntegration = value };
+    }
 
     internal CommandOptions Build() => this._options;
 }

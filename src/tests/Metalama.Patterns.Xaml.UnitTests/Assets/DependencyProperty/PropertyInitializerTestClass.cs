@@ -17,6 +17,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
         return 42;
     }
 
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     [DependencyProperty]
     public int DefaultConfiguration { get; set; } = DefaultConfigurationInitializer();
 
@@ -31,6 +32,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
 
     [DependencyProperty( InitializerProvidesDefaultValue = false, InitializerProvidesInitialValue = false )]
 
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
 #pragma warning disable LAMA5200 // Initializer will not be used.
     public int NotDefaultNotInitial { get; set; } = NotDefaultNotInitialInitializer();
 #pragma warning restore LAMA5200 // Initializer will not be used.
@@ -44,6 +46,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
         return 42;
     }
 
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     [DependencyProperty( InitializerProvidesDefaultValue = false, InitializerProvidesInitialValue = true )]
     public int InitialOnly { get; set; } = InitialOnlyInitializer();
 
@@ -56,6 +59,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
         return 42;
     }
 
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     [DependencyProperty( InitializerProvidesDefaultValue = true, InitializerProvidesInitialValue = true )]
     public int DefaultAndInitial { get; set; } = DefaultAndInitialInitializer();
 }

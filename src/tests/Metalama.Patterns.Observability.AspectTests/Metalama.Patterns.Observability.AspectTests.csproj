@@ -4,6 +4,7 @@
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <Configurations>Debug;Release;LamaDebug</Configurations>
+        <NoWarn>SA1402,SA1649</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>        

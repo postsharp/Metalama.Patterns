@@ -1,12 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Formatters;
 using Metalama.Patterns.Caching.ValueAdapters;
 
 namespace Metalama.Patterns.Caching.Building;
 
+[PublicAPI]
 public interface ICachingServiceBuilder
 {
     /// <summary>

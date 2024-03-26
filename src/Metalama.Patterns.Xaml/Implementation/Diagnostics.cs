@@ -7,7 +7,8 @@ using Metalama.Patterns.Xaml.Options;
 using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.Xaml.Implementation;
-
+    
+// ReSharper disable InconsistentNaming
 [CompileTime]
 internal static class Diagnostics
 {

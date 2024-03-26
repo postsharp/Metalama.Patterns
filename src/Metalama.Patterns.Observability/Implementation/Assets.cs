@@ -8,7 +8,7 @@ using System.ComponentModel;
 namespace Metalama.Patterns.Observability.Implementation;
 
 [CompileTime]
-internal class Assets
+internal sealed class Assets
 {
     public Assets()
     {

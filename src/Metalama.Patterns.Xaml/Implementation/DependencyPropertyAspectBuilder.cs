@@ -65,7 +65,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             introduceRegistrationFieldResult = this._builder.Advice.IntroduceField(
                 declaringType,
                 successfulMatch.RegistrationFieldName!,
-                typeof( DependencyProperty ),
+                typeof(DependencyProperty),
                 IntroductionScope.Static,
                 OverrideStrategy.Fail,
                 b =>
@@ -116,7 +116,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         // TODO: #34041 - Replace with target.Enhancements().HasAspect<ContractAspect>() once HasAspect supports base types.
 
-        var hasContracts = target.Enhancements().GetAspectInstances().Any( a => typeof( ContractAspect ).IsAssignableFrom( a.AspectClass.Type ) );
+        var hasContracts = target.Enhancements().GetAspectInstances().Any( a => typeof(ContractAspect).IsAssignableFrom( a.AspectClass.Type ) );
 
         IMethod? applyContractsMethod = null;
 
@@ -127,7 +127,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             var result = builder.Advice.WithTemplateProvider( Templates.Provider )
                 .IntroduceMethod(
                     declaringType,
-                    nameof( Templates.ApplyContracts ),
+                    nameof(Templates.ApplyContracts),
                     IntroductionScope.Static,
                     OverrideStrategy.Fail,
                     b =>
@@ -135,7 +135,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                         b.Name = name;
                         b.Accessibility = MetalamaAccessibility.Private;
                     },
-                    args: new { T = propertyType } );
+                    new { T = propertyType } );
 
             if ( result.Outcome != AdviceOutcome.Default )
             {
@@ -166,7 +166,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         this._builder.Advice.WithTemplateProvider( Templates.Provider )
             .AddInitializer(
                 declaringType,
-                nameof( Templates.InitializeDependencyProperty ),
+                nameof(Templates.InitializeDependencyProperty),
                 InitializerKind.BeforeTypeConstructor,
                 args: new
                 {
@@ -188,7 +188,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         this._builder.Advice.WithTemplateProvider( Templates.Provider )
             .OverrideAccessors(
                 this._builder.Target,
-                new GetterTemplateSelector( nameof( Templates.OverrideGetter ) ),
+                new GetterTemplateSelector( nameof(Templates.OverrideGetter) ),
                 args: new { propertyType, dependencyPropertyField = introduceRegistrationFieldResult.Declaration } );
 
         if ( this._builder.Target.Writeability != Writeability.None )
@@ -196,7 +196,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             this._builder.Advice.WithTemplateProvider( Templates.Provider )
                 .OverrideAccessors(
                     this._builder.Target,
-                    setTemplate: nameof( Templates.OverrideSetter ),
+                    setTemplate: nameof(Templates.OverrideSetter),
                     args: new { dependencyPropertyField = introduceRegistrationFieldResult.Declaration } );
         }
 
@@ -211,9 +211,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
             this._builder.Advice.WithTemplateProvider( Templates.Provider )
                 .AddInitializer(
                     declaringType,
-                    nameof( Templates.Assign ),
+                    nameof(Templates.Assign),
                     InitializerKind.BeforeInstanceConstructor,
-                    args: new { left = this._builder.Target!, right = this._builder.Target.InitializerExpression } );
+                    args: new { left = this._builder.Target, right = this._builder.Target.InitializerExpression } );
         }
     }
 

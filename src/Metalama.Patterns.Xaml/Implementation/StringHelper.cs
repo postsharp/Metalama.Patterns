@@ -7,6 +7,7 @@ namespace Metalama.Patterns.Xaml.Implementation;
 [CompileTime]
 internal static class StringHelper
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static bool TrimStart( ref string s, string trim, StringComparison stringComparison )
     {
         if ( s.StartsWith( trim, stringComparison ) )

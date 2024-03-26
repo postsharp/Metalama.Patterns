@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplementationStrategyBuilder
+internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplementationStrategyBuilder
 {
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
@@ -129,7 +129,7 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplem
                 } );
     }
 
-    // ReSharper disable UnusedParameter.Local
+    // ReSharper disable UnusedParameter.Global
 
     [Template]
     private static void OnPropertyChanged( string propertyName ) { }

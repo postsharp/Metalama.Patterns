@@ -15,4 +15,4 @@ namespace Metalama.Patterns.Contracts;
 /// <seealso href="@invariants"/>
 [AttributeUsage( AttributeTargets.Method )]
 [PublicAPI]
-public sealed class DoNotCheckInvariantsAttribute : Attribute { }
+public sealed class DoNotCheckInvariantsAttribute : Attribute;

@@ -4,7 +4,7 @@ using Metalama.Framework.Options;
 
 namespace Metalama.Patterns.Caching.Aspects.Configuration;
 
-internal class ParameterFilterRegistration : IIncrementalKeyedCollectionItem<string>
+internal sealed class ParameterFilterRegistration : IIncrementalKeyedCollectionItem<string>
 {
     public object ApplyChanges( object changes, in ApplyChangesContext context ) => changes;
 

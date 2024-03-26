@@ -1522,7 +1522,7 @@ public class A
         // this.TestOutput.WriteLine( result.ToString() );
     }
 
-    private static string NormalizeEOL(string text)
+    private static string NormalizeEOL( string text )
     {
         return Regex.Replace( text, @"\r\n|\n\r|\n|\r", Environment.NewLine );
     }

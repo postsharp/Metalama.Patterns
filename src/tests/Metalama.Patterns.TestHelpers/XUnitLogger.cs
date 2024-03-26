@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Metalama.Patterns.TestHelpers;
 
-public class XUnitLogger : ILogger
+public sealed class XUnitLogger : ILogger
 {
     private readonly XUnitLoggerProvider _provider;
     private readonly string _name;

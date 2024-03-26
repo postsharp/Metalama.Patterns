@@ -6,7 +6,7 @@ using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-internal class RedisConnectionFactory
+internal sealed class RedisConnectionFactory
 {
     public IConnectionMultiplexer? RedisConnection { get; }
 
