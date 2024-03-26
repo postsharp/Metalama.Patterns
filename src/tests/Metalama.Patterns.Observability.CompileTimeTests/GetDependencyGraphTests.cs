@@ -1522,6 +1522,7 @@ public class A
         // this.TestOutput.WriteLine( result.ToString() );
     }
 
+    // ReSharper disable once InconsistentNaming
     private static string NormalizeEOL( string text )
     {
         return Regex.Replace( text, @"\r\n|\n\r|\n|\r", Environment.NewLine );

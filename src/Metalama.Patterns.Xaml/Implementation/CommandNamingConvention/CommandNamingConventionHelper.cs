@@ -105,7 +105,7 @@ internal static class CommandNamingConventionHelper
         }
     }
 
-    internal static Func<IMethod, InspectedDeclarationsAdder, bool> IsValidCanExecuteMethodDelegate { get; } = IsValidCanExecuteMethod;
+    private static Func<IMethod, InspectedDeclarationsAdder, bool> IsValidCanExecuteMethodDelegate { get; } = IsValidCanExecuteMethod;
 
     private static bool IsValidCanExecuteMethod( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
     {
@@ -115,7 +115,7 @@ internal static class CommandNamingConventionHelper
         return isValid;
     }
 
-    internal static Func<IProperty, InspectedDeclarationsAdder, bool> IsValidCanExecutePropertyDelegate { get; } = IsValidCanExecuteProperty;
+    private static Func<IProperty, InspectedDeclarationsAdder, bool> IsValidCanExecutePropertyDelegate { get; } = IsValidCanExecuteProperty;
 
     private static bool IsValidCanExecuteProperty( IProperty property, InspectedDeclarationsAdder inspectedDeclarations )
     {

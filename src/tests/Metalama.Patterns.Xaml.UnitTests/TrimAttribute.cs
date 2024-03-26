@@ -4,7 +4,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
-namespace Metalama.Patterns.Xaml.UnitTests;
+// ReSharper disable once CheckNamespace
+namespace Metalama.Patterns.Contracts;
 
 // TODO: Remove explicit layers when layer issue is fixed.
 

@@ -3,16 +3,16 @@
 namespace Metalama.Patterns.Caching.LoadTests.Tests;
 
 internal sealed record RedisLoadTestConfiguration(
-        int ClientsCount = default,
-        Interval ValueKeyLength = default,
-        int ValueKeysCount = default,
-        Interval ValueKeyExpiry = default,
-        Interval ValueLength = default,
-        Interval DependencyKeyLength = default,
-        int DependencyKeysCount = default,
-        Interval DependenciesPerValueCount = default,
-        Interval ValuesPerSharedDependency = default,
-        int CollectorsCount = default )
+    int ClientsCount = default,
+    Interval ValueKeyLength = default,
+    int ValueKeysCount = default,
+    Interval ValueKeyExpiry = default,
+    Interval ValueLength = default,
+    Interval DependencyKeyLength = default,
+    int DependencyKeysCount = default,
+    Interval DependenciesPerValueCount = default,
+    Interval ValuesPerSharedDependency = default,
+    int CollectorsCount = default )
     : LoadTestConfiguration(
         ClientsCount,
         ValueKeyLength,

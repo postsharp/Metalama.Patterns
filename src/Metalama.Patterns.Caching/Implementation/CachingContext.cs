@@ -136,7 +136,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         }
     }
 
-    internal void AddDependenciesToParent( CachingBackend backend, MethodInfo method )
+    internal void AddDependenciesToParent( CachingBackend backend, [UsedImplicitly] MethodInfo method )
     {
         if ( this.Parent != null )
         {

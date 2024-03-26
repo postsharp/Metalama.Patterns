@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -20,6 +21,7 @@ using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Patterns.Xaml;
 
+[PublicAPI]
 [AttributeUsage( AttributeTargets.Method )]
 public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 {

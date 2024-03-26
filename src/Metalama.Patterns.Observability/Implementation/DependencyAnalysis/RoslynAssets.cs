@@ -49,11 +49,11 @@ internal sealed class RoslynAssets
         return type is INamedTypeSymbol namedType && this._nonSpecialPrimitiveTypes.Contains( namedType );
     }
 
-    public INamedTypeSymbol? DateTimeOffset { get; }
+    private INamedTypeSymbol? DateTimeOffset { get; }
 
-    public INamedTypeSymbol? TimeSpan { get; }
+    private INamedTypeSymbol? TimeSpan { get; }
 
-    public INamedTypeSymbol? DateOnly { get; }
+    private INamedTypeSymbol? DateOnly { get; }
 
-    public INamedTypeSymbol? TimeOnly { get; }
+    private INamedTypeSymbol? TimeOnly { get; }
 }

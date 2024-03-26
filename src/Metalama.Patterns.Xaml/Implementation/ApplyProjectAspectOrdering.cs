@@ -19,7 +19,7 @@ namespace Metalama.Patterns.Xaml.Implementation;
 /// Adds <see cref="AspectOrderAttribute"/> for all concrete types deriving <see cref="ContractAspect"/> in assembly <c>Metalama.Patterns.Contracts</c>.
 /// </summary>
 [AttributeUsage( AttributeTargets.Assembly )]
-internal class ApplyProjectAspectOrdering : Attribute, IAspect<ICompilation>
+internal sealed class ApplyProjectAspectOrdering : Attribute, IAspect<ICompilation>
 {
     public void BuildAspect( IAspectBuilder<ICompilation> builder )
     {

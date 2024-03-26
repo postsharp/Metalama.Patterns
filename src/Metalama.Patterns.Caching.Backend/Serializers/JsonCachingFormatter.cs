@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Text.Json;
 
 namespace Metalama.Patterns.Caching.Serializers;
@@ -7,6 +8,7 @@ namespace Metalama.Patterns.Caching.Serializers;
 /// <summary>
 /// A serialized based on <c>System.Text.Json</c>.
 /// </summary>
+[PublicAPI]
 public class JsonCachingFormatter : ICachingSerializer
 {
     private readonly JsonSerializerOptions _options;

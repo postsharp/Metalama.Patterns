@@ -8,7 +8,7 @@ internal sealed class ParameterFilterRegistration : IIncrementalKeyedCollectionI
 {
     public object ApplyChanges( object changes, in ApplyChangesContext context ) => changes;
 
-    public string Name { get; }
+    private string Name { get; }
 
     public ICacheParameterClassifier Classifier { get; }
 

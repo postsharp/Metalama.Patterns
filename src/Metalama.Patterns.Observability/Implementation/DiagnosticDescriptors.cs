@@ -102,28 +102,6 @@ internal static class DiagnosticDescriptors
             _category );
 
     /// <summary>
-    /// The type specified for {0} must have a public parameterless constructor.
-    /// </summary>
-    public static readonly DiagnosticDefinition<string> ErrorTypeMustHaveAPublicParameterlessConstructor =
-        new(
-            "LAMA5158",
-            Error,
-            "The type specified for {0} must have a public parameterless constructor.",
-            "Type must have a public parameterless constructor.",
-            _category );
-
-    /// <summary>
-    /// The type specified for {0} must implement {1}.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(string MemberName, string InterfaceName)> ErrorTypeMustImplementInterface =
-        new(
-            "LAMA5159",
-            Error,
-            "The type specified for {0} must implement {1}.",
-            "Type must implement the required interface.",
-            _category );
-
-    /// <summary>
     /// Handling for this syntax is not implemented and is not supported for dependency analysis (analyzer reference {0}).
     /// </summary>
     public static readonly DiagnosticDefinition<string> WarningNotImplementedForDependencyAnalysis =

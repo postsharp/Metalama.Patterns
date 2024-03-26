@@ -16,6 +16,8 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
         this._builder = builder;
     }
 
+    // ReSharper disable once UnusedParameter.Global
+    
     /// <summary>
     /// Gets a the <c>TargetDeclarationDescription</c> argument for <see cref="Diagnostics.WarningValidCandidateDeclarationIsAmbiguous"/> and <see cref="Diagnostics.WarningInvalidCandidateDeclarationSignature"/>.
     /// </summary>

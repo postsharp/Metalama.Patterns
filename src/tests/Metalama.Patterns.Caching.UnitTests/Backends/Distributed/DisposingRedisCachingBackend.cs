@@ -7,6 +7,7 @@ using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
+// ReSharper disable once UnusedType.Global
 /// <summary>
 /// This class is now probably not necessary because its "dispose of disposables" features is no longer used by any of our tests.
 /// But it seems to be doing more things, so I'll leave it here.
@@ -18,8 +19,10 @@ internal sealed class DisposingRedisCachingBackend : CachingBackendEnhancer
     // ReSharper disable once UnusedMember.Global
     public IConnectionMultiplexer Connection => this.RedisBackend.Connection;
 
+    // ReSharper disable once UnusedMember.Global
     public IDatabase Database => this.RedisBackend.Database;
 
+    // ReSharper disable once UnusedMember.Global
     public new RedisCachingBackendConfiguration Configuration => this.RedisBackend.Configuration;
 
     private RedisCachingBackend RedisBackend => GetRedisCachingBackend( this );

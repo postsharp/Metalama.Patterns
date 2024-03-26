@@ -9,7 +9,7 @@ public sealed class LogObserver
     // ReSharper disable once InconsistentlySynchronizedField
     public IReadOnlyList<string> Lines => this._log;
 
-    public void WriteLine( string s )
+    internal void WriteLine( string s )
     {
         lock ( this._log )
         {

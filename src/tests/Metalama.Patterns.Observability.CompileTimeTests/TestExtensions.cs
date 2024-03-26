@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Observability.CompileTimeTests;
 
-public static class TestExtensions
+internal static class TestExtensions
 {
     public static void Add( this List<string> strings, IDiagnostic diagnostic, Location? location )
     {

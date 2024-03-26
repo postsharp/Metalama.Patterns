@@ -42,7 +42,7 @@ internal sealed class Assets
 
     public INamedType IgnoreAutoChangeNotificationAttribute { get; }
 
-    public INamedType EqualityComparerOfT { get; }
+    private INamedType EqualityComparerOfT { get; }
 
     /// <summary>
     /// Gets the <see cref="IProperty"/> for property <c>EqualityComparer<paramref name="type"/>>.Default</c>.

@@ -9,7 +9,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
-        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
+        <PackageReference Include="JetBrains.Annotations" Version="$(JetBrainsAnnotationsVersion)" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />

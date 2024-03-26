@@ -60,7 +60,7 @@ internal sealed class ImplementFormattableAspect : TypeAspect
 
     [UsedImplicitly]
     [InterfaceMember( IsExplicit = true, WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
-    internal void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
+    public void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
     {
         this.FormatCacheKey( stringBuilder, formatterRepository );
     }

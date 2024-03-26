@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
+namespace Metalama.Patterns.Memoization.AspectTests.Static;
 // ReSharper disable MemberCanBeMadeStatic.Global
 // ReSharper disable EqualExpressionComparison
+// ReSharper disable ReturnTypeCanBeNotNullable
 #pragma warning disable CA2201
-#pragma warning disable SA1402
-namespace Metalama.Patterns.Memoization.AspectTests.Static;
 internal static class TheClass
 {
   private static int _counter;

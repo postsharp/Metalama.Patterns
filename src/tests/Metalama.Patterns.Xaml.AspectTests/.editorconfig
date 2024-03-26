@@ -49,6 +49,7 @@ dotnet_diagnostic.IDE0060.severity = none
 # CA1822: Member can be marked static
 dotnet_diagnostic.CA1822.severity = none
 
+resharper_check_namespace_highlighting=none
 resharper_inconsistent_naming_highlighting=none
 resharper_redundant_cast_highlighting=none
 resharper_unused_member_global_highlighting=none

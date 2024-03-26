@@ -10,7 +10,7 @@ public sealed class CachingTestBuilder
 {
     private readonly ICachingServiceBuilder _serviceBuilder;
 
-    public CachingTestBuilder( ICachingServiceBuilder serviceBuilder )
+    internal CachingTestBuilder( ICachingServiceBuilder serviceBuilder )
     {
         this._serviceBuilder = serviceBuilder;
     }

@@ -2,11 +2,12 @@
 
 using System.Globalization;
 
+namespace Metalama.Patterns.Memoization.AspectTests.Instance;
+
 // ReSharper disable MemberCanBeMadeStatic.Global
 // ReSharper disable EqualExpressionComparison
+// ReSharper disable ReturnTypeCanBeNotNullable
 #pragma warning disable CA2201
-
-namespace Metalama.Patterns.Memoization.AspectTests.Instance;
 
 internal sealed class TheClass
 {

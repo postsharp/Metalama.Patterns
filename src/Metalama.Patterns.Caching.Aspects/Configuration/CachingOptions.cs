@@ -16,6 +16,7 @@ internal sealed record CachingOptions : IHierarchicalOptions<IMethod>, IHierarch
     // Default compile-time options are all unset (null) because those provided at run-time by the profile must take precedence.
     internal static CachingOptions DefaultCompileTimeOptions { get; } = new();
 
+    // ReSharper disable once UnusedMember.Global
     internal static CachingOptions DefaultProfileOptions { get; } = new()
     {
         UseDependencyInjection = true, Priority = CacheItemPriority.Default, AutoReload = false, IgnoreThisParameter = false

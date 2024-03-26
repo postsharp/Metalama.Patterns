@@ -11,6 +11,7 @@ namespace Metalama.Patterns.Observability.Implementation;
 internal interface IReadOnlyDeferred<T> : IReadOnlyDeferredOptional<T>
     where T : class
 {
+    // ReSharper disable once UnusedMember.Global
     [Obsolete( "The value will always be true for " + nameof(IReadOnlyDeferred<T>) + ", avoid unnecessary conditions." )]
     new bool WillBeDefined { get; }
 
