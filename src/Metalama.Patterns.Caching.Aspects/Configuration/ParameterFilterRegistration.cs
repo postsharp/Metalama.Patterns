@@ -6,17 +6,17 @@ namespace Metalama.Patterns.Caching.Aspects.Configuration;
 
 internal sealed class ParameterFilterRegistration : IIncrementalKeyedCollectionItem<string>
 {
-    public object ApplyChanges( object changes, in ApplyChangesContext context ) => changes;
+    private readonly string _name;
 
-    private string Name { get; }
+    public object ApplyChanges( object changes, in ApplyChangesContext context ) => changes;
 
     public ICacheParameterClassifier Classifier { get; }
 
     public ParameterFilterRegistration( string name, ICacheParameterClassifier classifier )
     {
-        this.Name = name;
+        this._name = name;
         this.Classifier = classifier;
     }
 
-    string IIncrementalKeyedCollectionItem<string>.Key => this.Name;
+    string IIncrementalKeyedCollectionItem<string>.Key => this._name;
 }

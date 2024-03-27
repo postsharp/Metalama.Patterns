@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
@@ -136,7 +135,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         }
     }
 
-    internal void AddDependenciesToParent( CachingBackend backend, [UsedImplicitly] MethodInfo method )
+    internal void AddDependenciesToParent( CachingBackend backend )
     {
         if ( this.Parent != null )
         {

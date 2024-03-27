@@ -15,7 +15,6 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 /// one for each category of declaration that needs to be matched, such as "can execute" and "validate".
 /// </remarks>
 /// <typeparam name="TDeclaration"></typeparam>
-[PublicAPI]
 [CompileTime]
 internal readonly struct DeclarationMatch<TDeclaration>
     where TDeclaration : class, IDeclaration

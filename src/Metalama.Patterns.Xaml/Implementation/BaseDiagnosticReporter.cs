@@ -21,7 +21,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
     /// <summary>
     /// Gets a the <c>TargetDeclarationDescription</c> argument for <see cref="Diagnostics.WarningValidCandidateDeclarationIsAmbiguous"/> and <see cref="Diagnostics.WarningInvalidCandidateDeclarationSignature"/>.
     /// </summary>
-    protected abstract string GetTargetDeclarationDescription( in InspectedDeclaration inspectedDeclaration );
+    protected abstract string GetTargetDeclarationDescription();
 
     /// <summary>
     /// Gets the <c>InvalidityReason</c> argument for <see cref="Diagnostics.WarningInvalidCandidateDeclarationSignature"/>.
@@ -37,7 +37,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                 (
                     inspectedDeclaration.Declaration.DeclarationKind,
                     inspectedDeclaration.Category,
-                    this.GetTargetDeclarationDescription( inspectedDeclaration ),
+                    this.GetTargetDeclarationDescription(),
                     this._builder.Target,
                     isRequired ? "as required " : null,
                     namingConvention.DiagnosticName
@@ -69,7 +69,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                 (
                     inspectedDeclaration.Declaration.DeclarationKind,
                     inspectedDeclaration.Category,
-                    this.GetTargetDeclarationDescription( inspectedDeclaration ),
+                    this.GetTargetDeclarationDescription(),
                     this._builder.Target,
                     isRequired ? "as required " : null,
                     namingConvention.DiagnosticName,

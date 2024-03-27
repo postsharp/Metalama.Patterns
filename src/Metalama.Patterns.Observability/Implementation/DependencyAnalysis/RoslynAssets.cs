@@ -12,12 +12,17 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 [CompileTime]
 internal sealed class RoslynAssets
 {
+    private readonly INamedTypeSymbol? _dateTimeOffset;
+    private readonly INamedTypeSymbol? _timeSpan;
+    private readonly INamedTypeSymbol? _dateOnly;
+    private readonly INamedTypeSymbol? _timeOnly;
+
     public RoslynAssets( Compilation compilation )
     {
-        this.TimeSpan = compilation.GetTypeByMetadataName( "System.TimeSpan" );
-        this.DateTimeOffset = compilation.GetTypeByMetadataName( "System.DateTimeOffset" );
-        this.DateOnly = compilation.GetTypeByMetadataName( "System.DateOnly" );
-        this.TimeOnly = compilation.GetTypeByMetadataName( "System.TimeOnly" );
+        this._timeSpan = compilation.GetTypeByMetadataName( "System.TimeSpan" );
+        this._dateTimeOffset = compilation.GetTypeByMetadataName( "System.DateTimeOffset" );
+        this._dateOnly = compilation.GetTypeByMetadataName( "System.DateOnly" );
+        this._timeOnly = compilation.GetTypeByMetadataName( "System.TimeOnly" );
     }
 
     private HashSet<INamedTypeSymbol>? _nonSpecialPrimitiveTypes;
@@ -26,10 +31,10 @@ internal sealed class RoslynAssets
     {
         var h = new HashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
 
-        AddIfNotNull( h, this.DateTimeOffset );
-        AddIfNotNull( h, this.TimeSpan );
-        AddIfNotNull( h, this.DateOnly );
-        AddIfNotNull( h, this.TimeOnly );
+        AddIfNotNull( h, this._dateTimeOffset );
+        AddIfNotNull( h, this._timeSpan );
+        AddIfNotNull( h, this._dateOnly );
+        AddIfNotNull( h, this._timeOnly );
 
         return h;
 
@@ -48,12 +53,4 @@ internal sealed class RoslynAssets
 
         return type is INamedTypeSymbol namedType && this._nonSpecialPrimitiveTypes.Contains( namedType );
     }
-
-    private INamedTypeSymbol? DateTimeOffset { get; }
-
-    private INamedTypeSymbol? TimeSpan { get; }
-
-    private INamedTypeSymbol? DateOnly { get; }
-
-    private INamedTypeSymbol? TimeOnly { get; }
 }
