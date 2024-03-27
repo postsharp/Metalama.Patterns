@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests;
 
-public class DependencyTreeTests : BaseCachingTests
+public sealed class DependencyTreeTests : BaseCachingTests
 {
     public DependencyTreeTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 

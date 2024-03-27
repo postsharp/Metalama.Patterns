@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
+// ReSharper disable once CheckNamespace
 namespace Metalama.Patterns.Contracts;
 
 // TODO: Remove explicit layers when layer issue is fixed.
@@ -11,7 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// An example of a contract aspect which mutates the value being validated.
 /// </summary>
-public sealed class TrimAttribute : ContractAspect
+internal sealed class TrimAttribute : ContractAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
     {
@@ -27,6 +28,7 @@ public sealed class TrimAttribute : ContractAspect
 
     public override void Validate( dynamic? value )
     {
+        // ReSharper disable once RedundantAssignment
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
         value = value?.Trim();
 #pragma warning restore IDE0059 // Unnecessary assignment of a value

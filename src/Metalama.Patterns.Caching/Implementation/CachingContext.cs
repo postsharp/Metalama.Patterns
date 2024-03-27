@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 namespace Metalama.Patterns.Caching.Implementation;
 
@@ -53,6 +53,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         }
     }
 
+    [UsedImplicitly]
     public ICachingContext? Parent { get; }
 
     ICachingContext? ICachingContext.Parent => this.Parent;
@@ -134,7 +135,7 @@ internal sealed class CachingContext : IDisposable, ICachingContext
         }
     }
 
-    internal void AddDependenciesToParent( CachingBackend backend, MethodInfo method )
+    internal void AddDependenciesToParent( CachingBackend backend )
     {
         if ( this.Parent != null )
         {

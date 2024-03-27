@@ -15,6 +15,6 @@ internal sealed partial class DependencyPropertyAspectBuilder
         protected override string GetInvalidityReason( in InspectedDeclaration inspectedDeclaration )
             => " Refer to documentation for supported method signatures.";
 
-        protected override string GetTargetDeclarationDescription( in InspectedDeclaration inspectedDeclaration ) => "[DependencyProperty] property ";
+        protected override string GetTargetDeclarationDescription() => "[DependencyProperty] property ";
     }
 }

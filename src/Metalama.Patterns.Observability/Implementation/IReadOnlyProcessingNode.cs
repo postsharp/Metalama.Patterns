@@ -3,6 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace Metalama.Patterns.Observability.Implementation;
 
 [CompileTime]

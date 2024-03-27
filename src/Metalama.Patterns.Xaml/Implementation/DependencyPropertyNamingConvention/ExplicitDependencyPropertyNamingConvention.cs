@@ -7,7 +7,7 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
 [CompileTime]
-internal class ExplicitDependencyPropertyNamingConvention : IDependencyPropertyNamingConvention
+internal sealed class ExplicitDependencyPropertyNamingConvention : IDependencyPropertyNamingConvention
 {
     private readonly string? _registrationFieldName;
     private readonly string? _propertyChangingMethodName;

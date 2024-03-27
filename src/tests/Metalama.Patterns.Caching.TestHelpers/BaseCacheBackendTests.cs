@@ -36,11 +36,11 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return TimeSpan.FromSeconds( 0.05 * multiplier );
         }
 
-        protected static Task RepeatUntilNullOrFailAsync<T>( Func<ValueTask<T?>> func )
+        private static Task RepeatUntilNullOrFailAsync<T>( Func<ValueTask<T?>> func )
             where T : class
             => RepeatUntilNullOrFailAsync( () => func().AsTask() );
 
-        protected static async Task RepeatUntilNullOrFailAsync<T>( Func<Task<T?>> func )
+        private static async Task RepeatUntilNullOrFailAsync<T>( Func<Task<T?>> func )
             where T : class
         {
             var stopwatch = Stopwatch.StartNew();
@@ -58,7 +58,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             Assert.Fail( $"The item still exists in cache after the {TimeoutTimeSpan} timeout." );
         }
 
-        protected static void RepeatUntilNullOrFail<T>( Func<T?> func )
+        private static void RepeatUntilNullOrFail<T>( Func<T?> func )
             where T : class
         {
             var stopwatch = Stopwatch.StartNew();
@@ -257,7 +257,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
         /// Gets a value indicating whether the test is run on Windows. We don't run some tests on Linux because, for some reason, the event that an item expired from the cache
         /// arrives up to 20 minutes later on Linux, and I don't know why. So we're just no longer testing this on Linux.
         /// </summary>
-        protected static bool RunningOnWindows => _runningOnWindows ?? (_runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
+        private static bool RunningOnWindows => _runningOnWindows ?? (_runningOnWindows = RuntimeInformation.IsOSPlatform( OSPlatform.Windows )).Value;
 
         [Fact( Timeout = Timeout, Skip = "#33668" )]
         public void TestSlidingExpiration()

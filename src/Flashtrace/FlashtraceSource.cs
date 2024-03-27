@@ -321,6 +321,7 @@ public sealed class FlashtraceSource
     }
 
     // ReSharper disable InvalidXmlDocComment
+#pragma warning disable CS1574, CS1584
 
     /// <summary>
     /// Evaluates whether a transaction needs to be open for a specified <see cref="OpenActivityOptions"/> and updates
@@ -346,4 +347,5 @@ public sealed class FlashtraceSource
     }
 
     // ReSharper restore InvalidXmlDocComment
+#pragma warning restore CS1574, CS1584
 }

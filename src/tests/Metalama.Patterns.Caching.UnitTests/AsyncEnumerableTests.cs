@@ -21,6 +21,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     [Fact]
     public void DoesNotBlockOnGetAsyncEnumerator()
     {
+        // ReSharper disable once NotDisposedResource
         _ = this.Instance.BlockedCachedEnumerable().GetAsyncEnumerator();
 
         // Success is indicated by this method completing.
@@ -29,6 +30,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     [Fact]
     public void DoesNotBlockOnUnawaitedFirstMoveNextAsync()
     {
+        // ReSharper disable once NotDisposedResource
         _ = this.Instance.BlockedCachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
 
         // Success is indicated by this method completing.
@@ -37,6 +39,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     [Fact]
     public async void IteratesCompletelyOnFirstAwaitedMoveNextAsync()
     {
+        // ReSharper disable once NotDisposedResource
         _ = await this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
 
         Assert.Equal( "E1.E2.E3", this.StringBuilder.ToString() );
@@ -45,8 +48,12 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     [Fact]
     public async void DoesNotIterateOnSecondAwaitedMoveNextAsync()
     {
+        // ReSharper disable once NotDisposedResource
         _ = await this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
+        
         this.StringBuilder.Clear();
+        
+        // ReSharper disable once NotDisposedResource
         _ = await this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
 
         Assert.Equal( "", this.StringBuilder.ToString() );

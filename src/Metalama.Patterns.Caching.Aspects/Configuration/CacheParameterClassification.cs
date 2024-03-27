@@ -1,11 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Patterns.Caching.Aspects.Configuration;
 
+[PublicAPI]
 [CompileTime]
 public sealed class CacheParameterClassification
 {
@@ -34,6 +36,7 @@ public sealed class CacheParameterClassification
         return new CacheParameterClassification( ( _, _ ) => diagnostic );
     }
 
+    // ReSharper disable once RedundantSuppressNullableWarningExpression
     public static CacheParameterClassification Ineligible()
         => new(
             ( parameter, classifier )

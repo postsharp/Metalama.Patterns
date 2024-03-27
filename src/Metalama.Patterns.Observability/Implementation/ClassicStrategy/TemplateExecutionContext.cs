@@ -12,6 +12,7 @@ namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
  * should be avoided.
  */
 
+// ReSharper disable once NotAccessedPositionalProperty.Global
 /// <summary>
 /// Immutable context for template execution.
 /// </summary>

@@ -8,7 +8,7 @@ using System.ComponentModel;
 namespace Metalama.Patterns.Observability.Implementation;
 
 [CompileTime]
-internal class Assets
+internal sealed class Assets
 {
     public Assets()
     {
@@ -42,7 +42,7 @@ internal class Assets
 
     public INamedType IgnoreAutoChangeNotificationAttribute { get; }
 
-    public INamedType EqualityComparerOfT { get; }
+    private INamedType EqualityComparerOfT { get; }
 
     /// <summary>
     /// Gets the <see cref="IProperty"/> for property <c>EqualityComparer<paramref name="type"/>>.Default</c>.

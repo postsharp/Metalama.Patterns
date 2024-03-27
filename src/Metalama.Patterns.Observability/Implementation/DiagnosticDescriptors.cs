@@ -9,6 +9,7 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.Observability.Implementation;
 
+// ReSharper disable InconsistentNaming
 [CompileTime]
 internal static class DiagnosticDescriptors
 {
@@ -98,28 +99,6 @@ internal static class DiagnosticDescriptors
             Warning,
             "{0}",
             "Not supported for dependency analysis.",
-            _category );
-
-    /// <summary>
-    /// The type specified for {0} must have a public parameterless constructor.
-    /// </summary>
-    public static readonly DiagnosticDefinition<string> ErrorTypeMustHaveAPublicParameterlessConstructor =
-        new(
-            "LAMA5158",
-            Error,
-            "The type specified for {0} must have a public parameterless constructor.",
-            "Type must have a public parameterless constructor.",
-            _category );
-
-    /// <summary>
-    /// The type specified for {0} must implement {1}.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(string MemberName, string InterfaceName)> ErrorTypeMustImplementInterface =
-        new(
-            "LAMA5159",
-            Error,
-            "The type specified for {0} must implement {1}.",
-            "Type must implement the required interface.",
             _category );
 
     /// <summary>

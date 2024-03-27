@@ -2,14 +2,14 @@
 
 namespace Metalama.Patterns.TestHelpers;
 
-public class LogObserver
+public sealed class LogObserver
 {
     private readonly List<string> _log = new();
 
     // ReSharper disable once InconsistentlySynchronizedField
     public IReadOnlyList<string> Lines => this._log;
 
-    public void WriteLine( string s )
+    internal void WriteLine( string s )
     {
         lock ( this._log )
         {

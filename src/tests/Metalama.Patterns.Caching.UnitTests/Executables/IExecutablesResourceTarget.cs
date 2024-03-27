@@ -2,4 +2,4 @@
 
 namespace Metalama.Patterns.Caching.Tests.Executables;
 
-internal interface IExecutablesResourceTarget { }
+internal interface IExecutablesResourceTarget;

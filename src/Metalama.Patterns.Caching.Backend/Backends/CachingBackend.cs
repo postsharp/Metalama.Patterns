@@ -1108,7 +1108,11 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     /// <returns>A <see cref="Task"/>.</returns>
     public async ValueTask DisposeAsync( CancellationToken cancellationToken )
     {
+#if NET6_0_OR_GREATER
+        await using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
+#else
         using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
+#endif
         {
             if ( this.Status == CachingBackendStatus.Initializing )
             {
@@ -1163,7 +1167,11 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     /// <returns>A <see cref="Task"/>.</returns>
     protected virtual async ValueTask DisposeAsyncCore( CancellationToken cancellationToken )
     {
+#if NET6_0_OR_GREATER
+        await using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
+#else
         using ( cancellationToken.Register( this._disposeCancellationTokenSource.Cancel ) )
+#endif
         {
             await this.WhenBackgroundTasksCompleted( this.DisposeCancellationToken );
         }

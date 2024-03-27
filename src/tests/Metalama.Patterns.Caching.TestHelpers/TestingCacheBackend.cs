@@ -164,6 +164,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
         protected override void DisposeCore( bool disposing, CancellationToken cancellationToken )
         {
+            // ReSharper disable once MethodSupportsCancellation
             this._backend.Dispose();
             AssertEx.Equal( 0, this.BackgroundTaskExceptions, "Exceptions occurred when executing background tasks." );
         }

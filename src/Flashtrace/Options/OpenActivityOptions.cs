@@ -11,6 +11,7 @@ namespace Flashtrace.Options;
 
 // TODO: Modernize. Consider readonly (record) struct and 'with' pattern for non-destructive mutability.
 // ReSharper disable InvalidXmlDocComment
+#pragma warning disable CS1574, CS1584
 /// <summary>
 /// Argument of the <see cref="FlashtraceLevelSource.OpenActivity{T}(in T, in OpenActivityOptions)"/> method and
 /// related overloads.
@@ -19,6 +20,7 @@ namespace Flashtrace.Options;
 public readonly struct OpenActivityOptions
 {
     // ReSharper restore InvalidXmlDocComment
+#pragma warning restore CS1574, CS1584
 
     private readonly short _kind;
     private readonly Flags _flags;
@@ -80,6 +82,7 @@ public readonly struct OpenActivityOptions
     }
 
     // ReSharper disable InvalidXmlDocComment
+#pragma warning disable CS1574, CS1584
 
     /// <summary>
     /// Gets the <see cref="TransactionRequirement"/> for the current activity. These requirements can be set
@@ -89,6 +92,7 @@ public readonly struct OpenActivityOptions
     public TransactionRequirement TransactionRequirement { get; init; }
 
     // ReSharper restore InvalidXmlDocComment
+#pragma warning restore CS1574, CS1584
 
     /// <summary>
     /// Gets a value indicating whether the resulting activity will be assigned a global id, irrespective of the id generation strategy.

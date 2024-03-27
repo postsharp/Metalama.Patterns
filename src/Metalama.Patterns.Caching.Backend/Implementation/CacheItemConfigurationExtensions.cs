@@ -12,7 +12,7 @@ internal static class CacheItemConfigurationExtensions
             _ => other.AsCacheItemConfiguration() with { AutoReload = false }
         };
 
-    public static CacheItemConfiguration AsCacheItemConfiguration( this ICacheItemConfiguration other )
+    private static CacheItemConfiguration AsCacheItemConfiguration( this ICacheItemConfiguration other )
     {
         if ( other is CacheItemConfiguration cacheItemConfiguration )
         {

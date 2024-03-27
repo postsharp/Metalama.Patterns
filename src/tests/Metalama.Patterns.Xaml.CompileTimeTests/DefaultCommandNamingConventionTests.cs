@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Patterns.Xaml.CompileTimeTests;
 
-public class DefaultCommandNamingConventionTests
+public sealed class DefaultCommandNamingConventionTests
 {
     [InlineData( "execute", "execute" )]
     [InlineData( "m_execute", "m_execute" )]

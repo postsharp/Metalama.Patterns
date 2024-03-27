@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -11,6 +12,7 @@ namespace Metalama.Patterns.Caching.Building;
 /// A <see cref="CachingBackendBuilder"/> that adds an in-memory L1 cache in front a another, typically out-of-process,
 /// cache.
 /// </summary>
+[PublicAPI]
 public sealed class LayeredCachingBackendBuilder : ConcreteCachingBackendBuilder
 {
     private readonly ConcreteCachingBackendBuilder _underlying;

@@ -11,6 +11,4 @@ namespace Metalama.Patterns.Xaml.Implementation;
 internal static class Suppressions
 {
     public static readonly SuppressionDefinition SuppressRemoveUnusedPrivateMembersIDE0051 = new( "IDE0051" );
-
-    public static readonly SuppressionDefinition SuppressNonNullableFieldMustContainNonNullValueWhenExitingConstructorCS8618 = new( "CS8618" );
 }

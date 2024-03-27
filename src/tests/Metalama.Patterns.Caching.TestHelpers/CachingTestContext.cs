@@ -10,7 +10,7 @@ public sealed class CachingTestContext<T> : IDisposable, IAsyncDisposable
 {
     public T Backend { get; }
 
-    public CachingTestContext( T backend )
+    internal CachingTestContext( T backend )
     {
         this.Backend = backend;
     }

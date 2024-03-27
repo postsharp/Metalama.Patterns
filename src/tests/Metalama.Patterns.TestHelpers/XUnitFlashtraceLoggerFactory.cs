@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.TestHelpers;
 
-public class XUnitFlashtraceLoggerFactory : IFlashtraceLoggerFactory
+public sealed class XUnitFlashtraceLoggerFactory : IFlashtraceLoggerFactory
 {
     private readonly ITestOutputHelper _testOutputHelper;
 

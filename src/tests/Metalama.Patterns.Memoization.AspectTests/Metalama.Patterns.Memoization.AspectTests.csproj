@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release;LamaDebug</Configurations>
         <StartupObject>Metalama.Patterns.Memoization.AspectTests.Instance.Program</StartupObject>
-        <NoWarn>SA1649,SA1402,SA1649</NoWarn>
+        <NoWarn>SA1402,SA1649</NoWarn>
     </PropertyGroup>
 
 

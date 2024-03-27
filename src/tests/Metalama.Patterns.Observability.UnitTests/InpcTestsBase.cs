@@ -25,10 +25,8 @@ public abstract class InpcTestsBase : IDisposable
             this.Source = source;
         }
 
-        // ReSharper disable once MemberCanBePrivate.Global
         public string Origin { get; }
 
-        // ReSharper disable once MemberCanBePrivate.Global
         public INotifyPropertyChanged Source { get; }
 
         internal bool IsDisposed => this._disposed == 1;
@@ -72,7 +70,6 @@ public abstract class InpcTestsBase : IDisposable
         public override int GetHashCode() => 0;
     }
 
-    // ReSharper disable once MemberCanBePrivate.Global
     protected static readonly Subscription AnySubscription = new( "<any>", null! );
 
     // ReSharper disable NotAccessedPositionalProperty.Global

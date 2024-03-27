@@ -3,16 +3,18 @@
 using Flashtrace.Contexts;
 using Flashtrace.Options;
 using Flashtrace.Records;
+using JetBrains.Annotations;
 using System.Diagnostics;
 
 namespace Flashtrace.Loggers;
 
-// ReSharper disable once UnusedType.Global : Usage is conditional.
-public partial class NullFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalLogger, IFlashtraceRoleLoggerFactory, ILoggingContext, ILogRecordBuilder,
-                                            IFlashtraceLoggerFactory
+[UsedImplicitly]
+public sealed partial class NullFlashtraceLogger : IFlashtraceLogger, IFlashtraceLocalLogger, IFlashtraceRoleLoggerFactory, ILoggingContext, ILogRecordBuilder,
+                                                   IFlashtraceLoggerFactory
 {
     private static bool _warningEmitted;
 
+    [UsedImplicitly]
     public static NullFlashtraceLogger Instance { get; } = new();
 
     private NullFlashtraceLogger() { }

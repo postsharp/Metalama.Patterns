@@ -1,9 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Contracts.Numeric;
 using Xunit;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
+
+#pragma warning disable xUnit1026 // Theory methods should use all of their parameters
 
 public sealed class NumberComparerTests
 {
@@ -54,7 +57,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<long, double>( double.PositiveInfinity, long.MaxValue, true )]
     [ConversionTestData<long, double>( double.NegativeInfinity, long.MaxValue, false )]
     [ConversionNullTestData<long, double>( double.NaN, long.MaxValue )]
-    public void IsGreaterThanInt64( object? value, long min, bool expectedValue, object? tag )
+    public void IsGreaterThanInt64( object? value, long min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsGreaterThan( value, min )!.Value );
 
     [Theory]
@@ -103,7 +106,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<long, double>( double.PositiveInfinity, long.MaxValue, true )]
     [ConversionTestData<long, double>( double.NegativeInfinity, long.MaxValue, false )]
     [ConversionTestData<long, double>( double.NaN, long.MaxValue )]
-    public void IsStrictlyGreaterThanInt64( object? value, long min, bool expectedValue, object? tag )
+    public void IsStrictlyGreaterThanInt64( object? value, long min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsStrictlyGreaterThan( value, min )!.Value );
 
     [Theory]
@@ -199,7 +202,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<long, double>( double.PositiveInfinity, long.MaxValue, false )]
     [ConversionTestData<long, double>( double.NegativeInfinity, long.MinValue, true )]
     [ConversionNullTestData<long, double>( double.NaN, long.MinValue )]
-    public void IsStrictlySmallerThanInt64( object? value, long min, bool expectedValue, object? tag )
+    public void IsStrictlySmallerThanInt64( object? value, long min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsStrictlySmallerThan( value, min )!.Value );
 
     #endregion
@@ -247,7 +250,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<ulong, double>( double.PositiveInfinity, ulong.MaxValue, true )]
     [ConversionTestData<ulong, double>( double.NegativeInfinity, 0, false )]
     [ConversionNullTestData<ulong, double>( double.NaN, ulong.MaxValue )]
-    public void IsGreaterThanUInt64( object? value, ulong min, bool expectedValue, object? tag )
+    public void IsGreaterThanUInt64( object? value, ulong min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsGreaterThan( value, min )!.Value );
 
     [Theory]
@@ -283,7 +286,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<ulong, double>( double.PositiveInfinity, ulong.MaxValue, true )]
     [ConversionTestData<ulong, double>( double.NegativeInfinity, 0, false )]
     [ConversionNullTestData<ulong, double>( double.NaN, ulong.MaxValue )]
-    public void IsStrictlyGreaterThanUInt64( object? value, ulong min, bool expectedValue, object? tag )
+    public void IsStrictlyGreaterThanUInt64( object? value, ulong min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsStrictlyGreaterThan( value, min )!.Value );
 
     [Theory]
@@ -323,7 +326,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<ulong, double>( double.PositiveInfinity, ulong.MaxValue, false )]
     [ConversionTestData<ulong, double>( double.NegativeInfinity, 0, true )]
     [ConversionNullTestData<ulong, double>( double.NaN, ulong.MaxValue )]
-    public void IsSmallerThanUInt64( object? value, ulong min, bool expectedValue, object? tag )
+    public void IsSmallerThanUInt64( object? value, ulong min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsSmallerThan( value, min )!.Value );
 
     [Theory]
@@ -363,7 +366,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<ulong, double>( double.PositiveInfinity, ulong.MaxValue, false )]
     [ConversionTestData<ulong, double>( double.NegativeInfinity, 0, true )]
     [ConversionNullTestData<ulong, double>( double.NaN, ulong.MaxValue )]
-    public void IsStrictlySmallerThanUInt64( object? value, ulong min, bool expectedValue, object? tag )
+    public void IsStrictlySmallerThanUInt64( object? value, ulong min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsStrictlySmallerThan( value, min )!.Value );
 
     #endregion
@@ -415,7 +418,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<double, double>( double.PositiveInfinity, long.MaxValue, true )]
     [ConversionTestData<double, double>( double.NegativeInfinity, long.MaxValue, false )]
     [ConversionNullTestData<double, double>( double.NaN, long.MaxValue )]
-    public void IsGreaterThanDouble( object? value, double min, bool expectedValue, object? tag )
+    public void IsGreaterThanDouble( object? value, double min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsGreaterThan( value, min )!.Value );
 
     [Theory]
@@ -464,7 +467,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<double, double>( double.PositiveInfinity, long.MaxValue, true )]
     [ConversionTestData<double, double>( double.NegativeInfinity, long.MaxValue, false )]
     [ConversionNullTestData<double, double>( double.NaN, long.MaxValue )]
-    public void IsStrictlyGreaterThanDouble( object? value, double min, bool expectedValue, object? tag )
+    public void IsStrictlyGreaterThanDouble( object? value, double min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsStrictlyGreaterThan( value, min )!.Value );
 
     [Theory]
@@ -512,7 +515,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<double, double>( double.PositiveInfinity, long.MaxValue, false )]
     [ConversionTestData<double, double>( double.NegativeInfinity, long.MinValue, true )]
     [ConversionNullTestData<double, double>( double.NaN, long.MinValue )]
-    public void IsSmallerThanDouble( object? value, double min, bool expectedValue, object? tag )
+    public void IsSmallerThanDouble( object? value, double min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsSmallerThan( value, min )!.Value );
 
     [Theory]
@@ -560,7 +563,7 @@ public sealed class NumberComparerTests
     [ConversionNullTestData<double, double>( double.NaN, long.MinValue )]
     [ConversionTestData<double, long>( long.MaxValue - 1, long.MaxValue, true, 36, ForgiveRoundingError = true )]
     [ConversionTestData<double, ulong>( (ulong) long.MaxValue - 1, long.MaxValue, true, 40, ForgiveRoundingError = true )]
-    public void IsStrictlySmallerThanDouble( object? value, double min, bool expectedValue, object? tag )
+    public void IsStrictlySmallerThanDouble( object? value, double min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsStrictlySmallerThan( value, min )!.Value );
 
     #endregion
@@ -612,7 +615,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<long, double>( double.PositiveInfinity, long.MaxValue, true )]
     [ConversionTestData<long, double>( double.NegativeInfinity, long.MaxValue, false )]
     [ConversionNullTestData<long, double>( double.NaN, long.MaxValue )]
-    public void IsGreaterThanDecimal( object? value, decimal min, bool expectedValue, object? tag )
+    public void IsGreaterThanDecimal( object? value, decimal min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsGreaterThan( value, min )!.Value );
 
     [Theory]
@@ -661,7 +664,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<long, double>( double.PositiveInfinity, long.MaxValue, true )]
     [ConversionTestData<long, double>( double.NegativeInfinity, long.MaxValue, false )]
     [ConversionTestData<long, double>( double.NaN, long.MaxValue )]
-    public void IsStrictlyGreaterThanDecimal( object? value, decimal min, bool expectedValue, object? tag )
+    public void IsStrictlyGreaterThanDecimal( object? value, decimal min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsStrictlyGreaterThan( value, min )!.Value );
 
     [Theory]
@@ -709,7 +712,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<long, double>( double.PositiveInfinity, long.MaxValue, false )]
     [ConversionTestData<long, double>( double.NegativeInfinity, long.MinValue, true )]
     [ConversionNullTestData<long, double>( double.NaN, long.MinValue )]
-    public void IsSmallerThanDecimal( object? value, decimal min, bool expectedValue, object? tag )
+    public void IsSmallerThanDecimal( object? value, decimal min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsSmallerThan( value, min )!.Value );
 
     [Theory]
@@ -757,7 +760,7 @@ public sealed class NumberComparerTests
     [ConversionTestData<long, double>( double.PositiveInfinity, long.MaxValue, false )]
     [ConversionTestData<long, double>( double.NegativeInfinity, long.MinValue, true )]
     [ConversionNullTestData<long, double>( double.NaN, long.MinValue )]
-    public void IsStrictlySmallerThanDecimal( object? value, decimal min, bool expectedValue, object? tag )
+    public void IsStrictlySmallerThanDecimal( object? value, decimal min, bool expectedValue, [UsedImplicitly] object? tag )
         => Assert.Equal( expectedValue, NumberComparer.IsStrictlySmallerThan( value, min )!.Value );
 
     #endregion

@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 /// <summary>
 /// Test data used by <see cref="NumberComparerTests"/> that represents a <c>null</c> result.
 /// </summary>
-internal class ConversionNullTestDataAttribute<TBound, TValue> : DataAttribute
+internal sealed class ConversionNullTestDataAttribute<TBound, TValue> : DataAttribute
 {
     private readonly TValue _value;
     private readonly TBound _bound;
@@ -21,5 +21,5 @@ internal class ConversionNullTestDataAttribute<TBound, TValue> : DataAttribute
         this._tag = tag;
     }
 
-    public override IEnumerable<object[]> GetData( MethodInfo testMethod ) => [[this._value, this._bound, null, this._tag]];
+    public override IEnumerable<object?[]> GetData( MethodInfo testMethod ) => [[this._value, this._bound, null, this._tag]];
 }

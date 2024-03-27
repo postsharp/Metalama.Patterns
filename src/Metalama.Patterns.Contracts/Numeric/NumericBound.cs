@@ -71,8 +71,10 @@ public abstract class NumericBound : ICompileTimeSerializable
 
     internal abstract void AppendValueToExpression( ExpressionBuilder expressionBuilder );
 
+    // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
     public override string ToString() => this.ObjectValue.ToString() ?? "null";
 
+    // ReSharper disable once UnusedMember.Global
     internal void AppendToExpression( ExpressionBuilder expressionBuilder )
     {
         expressionBuilder.AppendTypeName( typeof(NumericBound) );
@@ -89,6 +91,7 @@ public abstract class NumericBound : ICompileTimeSerializable
         expressionBuilder.AppendVerbatim( ")" );
     }
 
+    // ReSharper disable once OutParameterValueIsAlwaysDiscarded.Global
     [CompileTime]
     internal bool TryConvert( IType valueType, [NotNullWhen( true )] out object? value, out ConversionResult conversionResult )
     {

@@ -268,6 +268,7 @@ public readonly struct UnknownObjectAccessor : IEquatable<UnknownObjectAccessor>
             return properties;
         }
 
+        [MustDisposeResource]
         internal Dictionary<string, Func<object, object?>>.Enumerator GetAccessorEnumerator() => this._accessors.GetEnumerator();
 
         public static AccessorType GetInstance( Type type )

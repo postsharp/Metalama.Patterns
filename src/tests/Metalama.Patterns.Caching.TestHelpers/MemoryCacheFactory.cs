@@ -9,7 +9,7 @@ namespace Metalama.Patterns.Caching.TestHelpers;
 
 public static class MemoryCacheFactory
 {
-    public static MemoryCache CreateCache() => new( new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds( 10 ) } );
+    private static MemoryCache CreateCache() => new( new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromMilliseconds( 10 ) } );
 
     public static CachingBackend CreateBackend( IServiceProvider? serviceProvider, string debugName = "test", bool withSerializer = false )
     {

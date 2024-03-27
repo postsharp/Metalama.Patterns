@@ -39,6 +39,9 @@ dotnet_diagnostic.CS0169.severity = none
 
 dotnet_diagnostic.SA1402.severity = none
 
+resharper_check_namespace_highlighting=none
+resharper_unassigned_get_only_auto_property_highlighting=none
+resharper_class_can_be_sealed_global_highlighting=none
 resharper_inconsistent_naming_highlighting=none
 resharper_redundant_cast_highlighting=none
 resharper_unused_member_global_highlighting=none

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Observability.Implementation.DesignTimeStrategy;
@@ -8,7 +9,7 @@ using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplementationStrategyBuilder
+internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplementationStrategyBuilder
 {
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
@@ -129,14 +130,15 @@ internal class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplem
                 } );
     }
 
-    // ReSharper disable UnusedParameter.Local
-
+    [UsedImplicitly]
     [Template]
     private static void OnPropertyChanged( string propertyName ) { }
 
+    [UsedImplicitly]
     [Template]
     internal static void OnChildPropertyChanged( string parentPropertyPath, string propertyName ) { }
 
+    [UsedImplicitly]
     [Template]
     internal static void OnUnmonitoredObservablePropertyChanged( string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue ) { }
 }

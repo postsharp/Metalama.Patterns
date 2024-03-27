@@ -15,12 +15,12 @@ internal class Target
     [Cache]
     public string GetResourceName2( int y, [NotCacheKey] string z, int x ) => "resource";
 
-    [InvalidateCache( nameof( GetResourceName1 ) )]
-    [InvalidateCache( nameof( GetResourceName2 ) )]
+    [InvalidateCache( nameof(GetResourceName1) )]
+    [InvalidateCache( nameof(GetResourceName2) )]
     public async Task<ProtectedResource?> UpdateProtectedResourceAsync( int x, int y, UpdateProtectedResource update ) { return new(); }
 
-    [InvalidateCache( nameof( GetResourceName1 ) )]
-    [InvalidateCache( nameof( GetResourceName2 ) )]
+    [InvalidateCache( nameof(GetResourceName1) )]
+    [InvalidateCache( nameof(GetResourceName2) )]
     public async Task<ProtectedResource?> UpdateProtectedResource2Async( UpdateProtectedResource update, int y, int x ) { return new(); }
 }
 

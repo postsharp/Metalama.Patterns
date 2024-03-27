@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
             this._serializer = serializer;
         }
 
-        protected object? RoundTrip( object? cacheItem )
+        private object? RoundTrip( object? cacheItem )
         {
             var serialization = this._serializer.Serialize( cacheItem );
             var newCacheItem = this._serializer.Deserialize( serialization );

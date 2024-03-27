@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+#if NET6_0
 using Xunit;
+#endif
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 

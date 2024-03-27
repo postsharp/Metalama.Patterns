@@ -1,12 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace;
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Formatters;
 using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching;
 
+[PublicAPI]
 public sealed class NullCachingService : ICachingService
 {
     public static NullCachingService Instance { get; } = new();

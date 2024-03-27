@@ -6,11 +6,11 @@ using StackExchange.Redis;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
-internal class RedisConnectionFactory
+internal sealed class RedisConnectionFactory
 {
-    public IConnectionMultiplexer? RedisConnection { get; }
+    private IConnectionMultiplexer? RedisConnection { get; }
 
-    public ConfigurationOptions? RedisConnectionOptions { get; }
+    private ConfigurationOptions? RedisConnectionOptions { get; }
 
     public RedisConnectionFactory( ConfigurationOptions redisConnectionOptions )
     {

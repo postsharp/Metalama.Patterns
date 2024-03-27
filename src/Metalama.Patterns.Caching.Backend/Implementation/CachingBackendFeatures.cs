@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Backends;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -7,6 +8,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <summary>
 /// List of features that can be implemented or not by a <see cref="CachingBackend"/>.
 /// </summary>
+[PublicAPI]
 public class CachingBackendFeatures
 {
     /// <summary>

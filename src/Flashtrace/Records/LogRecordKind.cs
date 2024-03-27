@@ -93,6 +93,8 @@ public enum LogRecordKind
     /// </summary>
     MethodOvertime = 1 << 12,
 
+// ReSharper disable InvalidXmlDocComment
+#pragma warning disable CS1574, CS1584
     /// <summary>
     /// When a activity exits, regardless of success or failure.
     /// </summary>
@@ -104,4 +106,7 @@ public enum LogRecordKind
     ///     <see cref="LogActivity{TActivityDescription}.SetSuccess(in CloseActivityOptions)"/>.
     /// </remarks>
     ActivityExit = 1 << 13
+
+    // ReSharper restore InvalidXmlDocComment
+#pragma warning restore CS1574, CS1584
 }

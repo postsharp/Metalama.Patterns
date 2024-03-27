@@ -6,7 +6,7 @@ using System.Collections;
 namespace Metalama.Patterns.Caching.TestHelpers
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class CachingTestOptions
+    public sealed class CachingTestOptions
     {
         public IDictionary Properties { get; }
 

@@ -23,7 +23,7 @@ public sealed class LessOrGreaterThanMinimumValueTests : RangeContractTestsBase
     // Loss of precision is a consequence.
     private const double _decimalMin = (double) decimal.MinValue / (1 + DoubleTolerance);
 
-    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly double _doubleStep = Utilities.FloatingPointHelper.GetDoubleStep( _doubleLimit );
     private static readonly decimal _decimalStep = Math.Abs( decimal.MinValue ) * DecimalTolerance;
 
     [Fact]

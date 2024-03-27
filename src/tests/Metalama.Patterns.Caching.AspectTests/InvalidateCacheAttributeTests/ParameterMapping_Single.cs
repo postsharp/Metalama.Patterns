@@ -12,10 +12,10 @@ internal class Target
     [Cache]
     public async Task<string?> GetResourceNameAsync( Guid resourceId ) { return "42"; }
 
-    [InvalidateCache( nameof( GetResourceNameAsync ) )]
+    [InvalidateCache( nameof(GetResourceNameAsync) )]
     public async Task<ProtectedResource?> UpdateProtectedResourceAsync( Guid resourceId, UpdateProtectedResource update ) { return new(); }
 
-    [InvalidateCache( nameof( GetResourceNameAsync ) )]
+    [InvalidateCache( nameof(GetResourceNameAsync) )]
     public async Task<ProtectedResource?> UpdateProtectedResource2Async( UpdateProtectedResource update, Guid resourceId ) { return new(); }
 }
 

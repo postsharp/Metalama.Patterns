@@ -18,14 +18,14 @@ public abstract class BaseCachingTests : ICachingExceptionObserver
         var serviceCollection = new ServiceCollection();
 
         // ReSharper disable once VirtualMemberCallInConstructor
-        this.AddLogging( serviceCollection, testOutputHelper );
+        AddLogging( serviceCollection, testOutputHelper );
         serviceCollection.AddSingleton<ICachingExceptionObserver>( this );
 
         this.ServiceProvider = serviceCollection.BuildServiceProvider();
         CachingService.Default = CachingService.CreateUninitialized( this.ServiceProvider );
     }
 
-    protected virtual void AddLogging( IServiceCollection serviceCollection, ITestOutputHelper testOutputHelper )
+    private static void AddLogging( IServiceCollection serviceCollection, ITestOutputHelper testOutputHelper )
     {
         serviceCollection.AddSingleton<IFlashtraceLoggerFactory>( new XUnitFlashtraceLoggerFactory( testOutputHelper ) );
     }

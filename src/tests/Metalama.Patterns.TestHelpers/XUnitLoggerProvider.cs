@@ -6,13 +6,13 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.TestHelpers;
 
-public class XUnitLoggerProvider : ILoggerProvider
+internal sealed class XUnitLoggerProvider : ILoggerProvider
 {
     private readonly ConcurrentDictionary<string, XUnitLogger> _loggers = new();
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly LogObserver _observer;
 
-    public XUnitLoggerProvider( ITestOutputHelper testOutputHelper, LogObserver observer )
+    internal XUnitLoggerProvider( ITestOutputHelper testOutputHelper, LogObserver observer )
     {
         this._testOutputHelper = testOutputHelper;
         this._observer = observer;

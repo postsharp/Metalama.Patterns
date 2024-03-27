@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using static Metalama.Framework.Diagnostics.Severity;
 
+// ReSharper disable InconsistentNaming
+
 namespace Metalama.Patterns.Caching.Aspects;
 
 [CompileTime]

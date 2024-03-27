@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.TestHelpers;
 
-public class XUnitFlashtraceLogger : IFlashtraceRoleLoggerFactory
+internal sealed class XUnitFlashtraceLogger : IFlashtraceRoleLoggerFactory
 {
     private readonly FlashtraceRole _role;
     private readonly ITestOutputHelper _testOutputHelper;

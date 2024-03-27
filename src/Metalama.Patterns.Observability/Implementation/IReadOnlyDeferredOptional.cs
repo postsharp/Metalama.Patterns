@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Aspects;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace Metalama.Patterns.Observability.Implementation;
 
 /// <summary>

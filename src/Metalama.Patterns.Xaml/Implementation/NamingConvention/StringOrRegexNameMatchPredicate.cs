@@ -11,16 +11,6 @@ internal readonly struct StringOrRegexNameMatchPredicate : INameMatchPredicate
     private readonly string? _name;
     private readonly Regex? _matchName;
 
-    public StringOrRegexNameMatchPredicate( Regex matchName )
-    {
-        this._matchName = matchName ?? throw new ArgumentNullException( nameof(matchName) );
-    }
-
-    public StringOrRegexNameMatchPredicate( string name )
-    {
-        this._name = name ?? throw new ArgumentNullException( nameof(name) );
-    }
-
     public StringOrRegexNameMatchPredicate( string? name, Regex? matchName )
     {
         if ( name == null == (matchName == null) )

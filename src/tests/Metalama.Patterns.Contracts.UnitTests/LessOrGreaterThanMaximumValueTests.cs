@@ -23,7 +23,7 @@ public sealed class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
     // Loss of precision is a consequence.
     private const double _decimalLimit = (double) decimal.MaxValue / (1 + DoubleTolerance);
 
-    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly double _doubleStep = Utilities.FloatingPointHelper.GetDoubleStep( _doubleLimit );
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Success()

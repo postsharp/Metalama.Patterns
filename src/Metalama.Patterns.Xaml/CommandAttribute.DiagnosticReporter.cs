@@ -19,6 +19,6 @@ public sealed partial class CommandAttribute
                 ? " The property must be of type bool and have a getter."
                 : " The method must not be generic, must return bool and may optionally have a single parameter of any type, but which must not be a ref or out parameter.";
 
-        protected override string GetTargetDeclarationDescription( in InspectedDeclaration inspectedDeclaration ) => "[Command] method ";
+        protected override string GetTargetDeclarationDescription() => "[Command] method ";
     }
 }

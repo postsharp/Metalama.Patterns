@@ -1,12 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters.Implementations;
+using JetBrains.Annotations;
 using System.Reflection;
 
 namespace Flashtrace.Formatters;
 
 public partial class FormatterRepository
 {
+    [PublicAPI]
     public sealed class Builder : IDisposable
     {
         private readonly FormatterRepository _formatters;

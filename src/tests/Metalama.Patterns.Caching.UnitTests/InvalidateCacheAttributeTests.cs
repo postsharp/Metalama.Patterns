@@ -1801,7 +1801,7 @@ namespace Metalama.Patterns.Caching.Tests
         #region TestParameterMapping
 
         private const string _testParameterMappingProfileName =
-            _profileNamePrefix + nameof( TestParameterMapping );
+            _profileNamePrefix + nameof(TestParameterMapping);
 
         [CachingConfiguration( ProfileName = _testParameterMappingProfileName )]
         private sealed class TestParameterMappingInvalidatingAndCachingClass
@@ -1811,7 +1811,7 @@ namespace Metalama.Patterns.Caching.Tests
             [Cache]
             public int GetValue( int id ) { return _counter++; }
 
-            [InvalidateCache( nameof( GetValue ) )]
+            [InvalidateCache( nameof(GetValue) )]
             public void ResetValue( object arg, int id ) { }
         }
 

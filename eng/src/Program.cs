@@ -10,7 +10,14 @@ using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Defin
 
 var product = new Product( MetalamaDependencies.MetalamaPatterns )
 {
-    Solutions = new Solution[] { new DotNetSolution( "Metalama.Patterns.sln" ) { CanFormatCode = true } },
+    Solutions = new Solution[] 
+    { 
+        new DotNetSolution( "Metalama.Patterns.sln" )
+        { 
+            CanFormatCode = true,
+            FormatExclusions = new[] { "src\\tests\\*AspectTests\\**\\*" },
+        },
+    },
     PublicArtifacts = Pattern.Create(
         "Metalama.Patterns.Caching.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Aspects.$(PackageVersion).nupkg",

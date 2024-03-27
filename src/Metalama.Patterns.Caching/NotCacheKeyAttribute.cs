@@ -10,4 +10,4 @@ namespace Metalama.Patterns.Caching;
 /// </summary>
 [PublicAPI]
 [AttributeUsage( AttributeTargets.Parameter )]
-public sealed class NotCacheKeyAttribute : Attribute { }
+public sealed class NotCacheKeyAttribute : Attribute;
