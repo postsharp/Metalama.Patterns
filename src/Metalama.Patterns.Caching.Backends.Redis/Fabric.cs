@@ -9,5 +9,5 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 [UsedImplicitly]
 internal class Fabric : ProjectFabric
 {
-    public override void AmendProject( IProjectAmender amender ) => amender.Outbound.VerifyNotNullableDeclarations();
+    public override void AmendProject( IProjectAmender amender ) => amender.VerifyNotNullableDeclarations();
 }
