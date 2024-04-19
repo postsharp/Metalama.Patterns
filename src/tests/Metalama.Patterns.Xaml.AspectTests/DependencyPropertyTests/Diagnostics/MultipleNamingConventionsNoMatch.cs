@@ -10,7 +10,7 @@ internal class NsFabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender.Outbound.ConfigureDependencyProperty(
+        amender.ConfigureDependencyProperty(
             b =>
             {
                 b.ApplyRegexNamingConvention(

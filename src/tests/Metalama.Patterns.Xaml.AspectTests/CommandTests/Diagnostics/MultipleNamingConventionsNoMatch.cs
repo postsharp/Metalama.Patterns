@@ -9,7 +9,7 @@ internal class NsFabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender.Outbound.ConfigureCommand(
+        amender.ConfigureCommand(
             b =>
             {
                 b.ApplyRegexNamingConvention(

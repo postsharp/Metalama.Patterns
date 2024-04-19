@@ -17,7 +17,7 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.ConfigureCaching( builder => builder.AddParameterClassifier( "IDisposable", new TheCacheParameterClassifier() ) );
+        amender.ConfigureCaching( builder => builder.AddParameterClassifier( "IDisposable", new TheCacheParameterClassifier() ) );
     }
 }
 

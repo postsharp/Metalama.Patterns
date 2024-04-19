@@ -9,7 +9,7 @@ public sealed class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( c => c.Types.OfName( nameof(OtherClass) ) ).ConfigureDependencyAnalysis( b => b.IsSafeToCall = true );
+        amender.SelectMany( c => c.Types.OfName( nameof(OtherClass) ) ).ConfigureDependencyAnalysis( b => b.IsSafeToCall = true );
     }
 }
 

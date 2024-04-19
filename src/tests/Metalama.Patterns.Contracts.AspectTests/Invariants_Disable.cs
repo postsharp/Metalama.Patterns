@@ -31,6 +31,6 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SetOptions( new ContractOptions { AreInvariantsEnabled = false } );
+        amender.SetOptions( new ContractOptions { AreInvariantsEnabled = false } );
     }
 }

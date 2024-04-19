@@ -22,6 +22,6 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SetOptions( new ContractOptions { IsInvariantSuspensionSupported = true } );
+        amender.SetOptions( new ContractOptions { IsInvariantSuspensionSupported = true } );
     }
 }

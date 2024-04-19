@@ -9,7 +9,7 @@ public class Fabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender.Outbound.ConfigureObservability( b => b.DiagnosticCommentVerbosity = 1 );
+        amender.ConfigureObservability( b => b.DiagnosticCommentVerbosity = 1 );
     }
 }
 

@@ -12,7 +12,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
     {
         public override void AmendProject( IProjectAmender amender )
         {
-            amender.Outbound.VerifyNotNullableDeclarations();
+            amender.VerifyNotNullableDeclarations();
         }
     }
 

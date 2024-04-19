@@ -11,7 +11,7 @@ public sealed class Fabric : ProjectFabric
     public override void AmendProject( IProjectAmender amender )
     {
         var t = (INamedType) TypeFactory.GetType( typeof(ExternalClass) );
-        amender.Outbound.Select( c => t.ForCompilation( c ) ).ConfigureDependencyAnalysis( b => b.IsSafeToCall = true );
+        amender.Select( c => t.ForCompilation( c ) ).ConfigureDependencyAnalysis( b => b.IsSafeToCall = true );
     }
 }
 

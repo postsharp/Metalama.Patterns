@@ -20,7 +20,6 @@ public sealed class DependencyClass
         {
             // ReSharper disable once ArrangeThisQualifier
             amender
-                .Outbound
                 .Select( t => t.Methods.Single( m => m.Name == nameof(CachedUsingFabric) ) )
                 .AddAspect( m => new CacheAttribute() { IgnoreThisParameter = true } );
         }

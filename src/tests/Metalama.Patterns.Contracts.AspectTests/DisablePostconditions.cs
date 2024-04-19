@@ -20,6 +20,6 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SetOptions( new ContractOptions { ArePostconditionsEnabled = false } );
+        amender.SetOptions( new ContractOptions { ArePostconditionsEnabled = false } );
     }
 }
