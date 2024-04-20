@@ -161,7 +161,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             {
                 returnType = asyncInfo.IsAwaitable ? asyncInfo.ResultType : builder.Target.ReturnType,
                 methodsInvalidatedByField = methodsInvalidatedByField.Declaration,
-                invalidatedMethods = invalidatedMethods.Values,
+                invalidatedMethods = invalidatedMethods.Values.OrderBy( x => x.Method.ToString() ),
                 cachingServiceField
             } );
     }
@@ -177,7 +177,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
     {
         var b = new ArrayBuilder( typeof(MethodInfo) );
 
-        foreach ( var method in methods )
+        foreach ( var method in methods.OrderBy( x => x.ToString() ) )
         {
             // ReSharper disable once InvokeAsExtensionMethod
             b.Add( RunTimeHelpers.ThrowIfMissing( method.ToMethodInfo(), method.ToDisplayString() ) );
