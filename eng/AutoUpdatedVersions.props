@@ -2,8 +2,8 @@
 <Project>
 
     <PropertyGroup>
-        <MetalamaVersion>2024.1.13</MetalamaVersion>
-        <MetalamaExtensionsVersion>2024.1.13</MetalamaExtensionsVersion>
+        <MetalamaVersion>2024.1.14</MetalamaVersion>
+        <MetalamaExtensionsVersion>2024.1.14</MetalamaExtensionsVersion>
         <MetalamaBackstageVersion>2024.1.12</MetalamaBackstageVersion>
         <MetalamaCompilerVersion>2024.1.7</MetalamaCompilerVersion>
         <MetalamaFrameworkRunTimeVersion>2024.1.4</MetalamaFrameworkRunTimeVersion>
