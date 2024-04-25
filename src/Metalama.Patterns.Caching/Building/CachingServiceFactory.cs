@@ -22,7 +22,7 @@ public static class CachingServiceFactory
     /// Adds Metalama's <see cref="ICachingService"/> to the <see cref="IServiceCollection"/>.
     /// </summary>
     /// <param name="serviceCollection">The <see cref="IServiceCollection"/>.</param>
-    /// <param name="build">An optional delegate allowing to configuring the <see cref="ICachingService"/>.</param>
+    /// <param name="build">An optional delegate allowing to configure the <see cref="ICachingService"/>.</param>
     /// <returns>The same <paramref name="serviceCollection"/>.</returns>
     public static IServiceCollection AddMetalamaCaching(
         this IServiceCollection serviceCollection,
