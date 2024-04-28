@@ -51,8 +51,8 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
+  [OnObservablePropertyChangedMethod]
+  protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
   public event PropertyChangedEventHandler? PropertyChanged;
@@ -101,9 +101,9 @@ public class ImplementedByBase : ImplementedByObservableAspect
   {
     base.OnPropertyChanged(propertyName);
   }
-  [OnUnmonitoredObservablePropertyChangedMethod]
-  protected override void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
+  [OnObservablePropertyChangedMethod]
+  protected override void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
-    base.OnUnmonitoredObservablePropertyChanged(propertyPath, oldValue, newValue);
+    base.OnObservablePropertyChanged(propertyPath, oldValue, newValue);
   }
 }

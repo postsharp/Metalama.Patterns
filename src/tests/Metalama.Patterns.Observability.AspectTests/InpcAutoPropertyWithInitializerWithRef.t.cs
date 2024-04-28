@@ -1,8 +1,5 @@
 using System.ComponentModel;
-// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
-// @Include(Include/SimpleInpcByHand.cs)
 using Metalama.Patterns.Observability.AspectTests.Include;
-using Metalama.Patterns.Observability.Metadata;
 namespace Metalama.Patterns.Observability.AspectTests.InpcAutoPropertyWithInitializerWithRef;
 [Observable]
 public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
@@ -36,7 +33,7 @@ public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
   {
     this.SubscribeToX(this.X);
   }
-  [OnChildPropertyChangedMethod("X")]
+  [InvokedFor("X")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -44,18 +41,14 @@ public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
-  {
-  }
   private void SubscribeToX(SimpleInpcByHand value)
   {
     if (value != null)
     {
-      this._onXPropertyChangedHandler ??= OnChildPropertyChanged_1;
+      this._onXPropertyChangedHandler ??= Handle;
       value.PropertyChanged += this._onXPropertyChangedHandler;
     }
-    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
+    void Handle(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;

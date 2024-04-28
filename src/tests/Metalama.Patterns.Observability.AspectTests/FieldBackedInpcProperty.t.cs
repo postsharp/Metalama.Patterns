@@ -27,26 +27,18 @@ public class FieldBackedInpcProperty : INotifyPropertyChanged
   public A P1 => this._x;
   public int P2 => this._x.A1;
   private PropertyChangedEventHandler? _on_xPropertyChangedHandler;
-  [OnChildPropertyChangedMethod]
-  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
-  {
-  }
   protected virtual void OnPropertyChanged(string propertyName)
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  [OnUnmonitoredObservablePropertyChangedMethod]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
-  {
   }
   private void SubscribeTo_x(A value)
   {
     if (value != null)
     {
-      this._on_xPropertyChangedHandler ??= OnChildPropertyChanged_1;
+      this._on_xPropertyChangedHandler ??= Handle;
       value.PropertyChanged += this._on_xPropertyChangedHandler;
     }
-    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
+    void Handle(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;

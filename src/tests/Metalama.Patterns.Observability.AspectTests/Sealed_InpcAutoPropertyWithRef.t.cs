@@ -26,7 +26,7 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
   }
   public int Y => this.X.A;
   private PropertyChangedEventHandler? _onXPropertyChangedHandler;
-  [OnChildPropertyChangedMethod("X")]
+  [InvokedFor("X")]
   private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -38,10 +38,10 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
   {
     if (value != null)
     {
-      this._onXPropertyChangedHandler ??= OnChildPropertyChanged_1;
+      this._onXPropertyChangedHandler ??= Handle;
       value.PropertyChanged += this._onXPropertyChangedHandler;
     }
-    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
+    void Handle(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;

@@ -26,7 +26,7 @@ internal interface IReadOnlyClassicProcessingNode : IReadOnlyProcessingNode, INo
     /// will throw if it has not been set. This provides defense against incorrect program design
     /// that could otherwise lead to subtle incorrect behaviour.
     /// </remarks>
-    IReadOnlyDeferredOptional<IMethod> UpdateMethod { get; }
+    IDeferred<IMethod?> UpdateMethod { get; }
 
     /// <summary>
     /// Gets the non-null <see cref="UpdateMethod"/> declarations of the children of the current node.
@@ -38,10 +38,10 @@ internal interface IReadOnlyClassicProcessingNode : IReadOnlyProcessingNode, INo
     /// <summary>
     /// Gets the field like "PropertyChangedEventHandler? _onA2PropertyChangedHandler", if it has been introduced.
     /// </summary>
-    IReadOnlyDeferred<IField> HandlerField { get; }
+    IDeferred<IField> HandlerField { get; }
 
     /// <summary>
     /// Gets the field like "B? _lastA2", if it has been introduced.
     /// </summary>
-    IReadOnlyDeferred<IField> LastValueField { get; }
+    IDeferred<IField> LastValueField { get; }
 }

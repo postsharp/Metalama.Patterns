@@ -1,8 +1,5 @@
 using System.ComponentModel;
-// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
-// @Include(Include/SimpleInpcByHand.cs)
 using Metalama.Patterns.Observability.AspectTests.Include;
-using Metalama.Patterns.Observability.Metadata;
 namespace Metalama.Patterns.Observability.AspectTests.InpcAutoPropertyWithInitializerNoRefs;
 [Observable]
 public class InpcAutoPropertyWithInitializerNoRefs : INotifyPropertyChanged
@@ -20,22 +17,18 @@ public class InpcAutoPropertyWithInitializerNoRefs : INotifyPropertyChanged
       {
         var oldValue = this._x;
         this._x = value;
-        this.OnUnmonitoredObservablePropertyChanged("X", (INotifyPropertyChanged? )oldValue, value);
+        this.OnObservablePropertyChanged("X", (INotifyPropertyChanged? )oldValue, value);
         this.OnPropertyChanged("X");
       }
     }
   }
-  [OnChildPropertyChangedMethod]
-  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
+  [InvokedFor("X")]
+  protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  [OnUnmonitoredObservablePropertyChangedMethod("X")]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
-  {
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

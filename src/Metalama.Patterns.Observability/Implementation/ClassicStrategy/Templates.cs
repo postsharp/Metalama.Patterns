@@ -25,12 +25,12 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     internal static void OverrideInpcRefTypePropertySetter(
         dynamic? value,
-        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
+        [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
         [CompileTime] IField? handlerField,
         [CompileTime] IMethod? subscribeMethod,
         [CompileTime] IReadOnlyClassicProcessingNode? node )
     {
-        var ctx = deferredExecutionContext.Value;
+        var ctx = templateArgs.Value;
         var inpcImplementationKind = node?.PropertyTypeInpcInstrumentationKind ?? ctx.InpcInstrumentationKindLookup.Get( meta.Target.Property.Type );
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
@@ -50,26 +50,26 @@ internal sealed class Templates : ITemplateProvider
             {
                 var oldValue = meta.Target.FieldOrProperty.Value;
 
-                if ( oldValue != null )
-                {
-                    if ( eventRequiresCast )
+                    if ( oldValue != null )
                     {
-                        meta.Cast( ctx.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
-                    }
-                    else
-                    {
-                        oldValue.PropertyChanged -= handlerField.Value;
+                        if ( eventRequiresCast )
+                        {
+                            meta.Cast( ctx.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                        }
+                        else
+                        {
+                            oldValue.PropertyChanged -= handlerField.Value;
                     }
                 }
 
                 meta.Target.FieldOrProperty.Value = value;
             }
-            else if ( ctx.OnUnmonitoredObservablePropertyChangedMethod != null )
+            else if ( ctx.OnObservablePropertyChangedMethod != null )
             {
                 var oldValue = meta.Target.FieldOrProperty.Value;
                 meta.Target.FieldOrProperty.Value = value;
 
-                ctx.OnUnmonitoredObservablePropertyChangedMethod.With( InvokerOptions.Final )
+                ctx.OnObservablePropertyChangedMethod.With( InvokerOptions.Final )
                     .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
             }
             else
@@ -111,18 +111,18 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     internal static void SubscribeTo<[CompileTime] TValue>(
         TValue? value,
-        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
+        [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
         [CompileTime] ClassicProcessingNode node,
         [CompileTime] IField handlerField )
         where TValue : class, INotifyPropertyChanged
     {
-        var ctx = deferredExecutionContext.Value;
+        var ctx = templateArgs.Value;
         var inpcImplementationKind = node.PropertyTypeInpcInstrumentationKind;
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
         if ( value != null )
         {
-            handlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
+            handlerField.Value ??= (PropertyChangedEventHandler) Handle;
 
             if ( eventRequiresCast )
             {
@@ -141,7 +141,7 @@ internal sealed class Templates : ITemplateProvider
         // -----------------------------------------------------------------------
 
         // ReSharper disable once LocalFunctionHidesMethod
-        void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+        void Handle( object? sender, PropertyChangedEventArgs e )
         {
             // We use WithNullability to work around a bug in Metalama.Framework (perhaps rather in Roslyn) that randomly gives no
             // nullability information for 'e'.
@@ -159,13 +159,13 @@ internal sealed class Templates : ITemplateProvider
 
     [Template]
     internal static void UpdateChildInpcProperty(
-        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
+        [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
         [CompileTime] ClassicProcessingNode node,
         [CompileTime] IExpression accessChildExpression,
         [CompileTime] IField lastValueField,
         [CompileTime] IField onPropertyChangedHandlerField )
     {
-        var ctx = deferredExecutionContext.Value;
+        var ctx = templateArgs.Value;
 
         if ( node.Depth <= 1 )
         {
@@ -228,7 +228,7 @@ internal sealed class Templates : ITemplateProvider
                 // Don't notify if we're joining on to existing NotifyChildPropertyChanged support from a base type, or we'll be stuck in a loop.
                 if ( node.Parent.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
                 {
-                    ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.Parent.DottedPropertyPath, node.Name );
+                    ctx.OnChildPropertyChangedMethod!.With( InvokerOptions.Final ).Invoke( node.Parent.DottedPropertyPath, node.Name );
                 }
                 else if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
@@ -246,12 +246,12 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     internal static void OverrideUninstrumentedTypePropertySetter(
         dynamic? value,
-        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext,
+        [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
         [CompileTime] IReadOnlyClassicProcessingNode? node,
         [CompileTime] EqualityComparisonKind compareUsing,
         [CompileTime] InpcInstrumentationKind propertyTypeInstrumentationKind )
     {
-        var ctx = deferredExecutionContext.Value;
+        var ctx = templateArgs.Value;
 
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
@@ -324,25 +324,25 @@ internal sealed class Templates : ITemplateProvider
     [Template]
     internal void OnPropertyChanged(
         string propertyName,
-        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext )
+        [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs )
     {
-        var ctx = deferredExecutionContext.Value;
+        var templateArgsValue = templateArgs.Value;
 
-        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+        if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(this.OnPropertyChanged) );
 
-            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
+            if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
-                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( "[ibh]" ) );
+                meta.InsertComment( "Dependency graph:", "\n" + templateArgsValue.DependencyGraph.ToString( "[ibh]" ) );
             }
         }
 
-        foreach ( var node in ctx.DependencyGraph.Children )
+        foreach ( var node in templateArgsValue.DependencyGraph.Children )
         {
-            if ( node.FieldOrProperty.DeclaringType == ctx.TargetType )
+            if ( node.FieldOrProperty.DeclaringType == templateArgsValue.TargetType )
             {
-                if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+                if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
                     meta.InsertComment( $"Skipping '{node.Name}': The field or property is defined by the current type." );
                 }
@@ -350,12 +350,12 @@ internal sealed class Templates : ITemplateProvider
                 continue;
             }
 
-            if ( node.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged && ctx.OnUnmonitoredObservablePropertyChangedMethod != null )
+            if ( node.InpcBaseHandling == InpcBaseHandling.OnObservablePropertyChanged && templateArgsValue.OnObservablePropertyChangedMethod != null )
             {
-                if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+                if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
                     meta.InsertComment(
-                        $"Skipping '{node.Name}': A base type supports OnUnmonitoredObservablePropertyChanged for this property, and the current type is configured to use that feature." );
+                        $"Skipping '{node.Name}': A base type supports OnObservablePropertyChanged for this property, and the current type is configured to use that feature." );
                 }
 
                 continue;
@@ -371,7 +371,7 @@ internal sealed class Templates : ITemplateProvider
             {
                 if ( node.ReferencedBy.Count == 0 )
                 {
-                    if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+                    if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                     {
                         meta.InsertComment(
                             $"Skipping '{node.Name}': A base type supports OnChildPropertyChanged for this property, and the property itself has no references." );
@@ -397,7 +397,7 @@ internal sealed class Templates : ITemplateProvider
                  || childUpdateMethods.Count > 0
                  || node is
                  {
-                     HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnUnmonitoredObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged
+                     HasChildren: true, InpcBaseHandling: InpcBaseHandling.OnObservablePropertyChanged or InpcBaseHandling.OnPropertyChanged
                  } )
             {
                 var rootPropertyNamesToNotify = refsToNotify
@@ -409,7 +409,7 @@ internal sealed class Templates : ITemplateProvider
                 {
                     var emitDefaultNotifications = meta.CompileTime( true );
 
-                    if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+                    if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                     {
                         meta.InsertComment( $"InpcBaseHandling = {node.InpcBaseHandling}" );
                     }
@@ -427,73 +427,82 @@ internal sealed class Templates : ITemplateProvider
                         case InpcBaseHandling.OnChildPropertyChanged:
                             break;
 
-                        // NB: The OnUnmonitoredObservablePropertyChanged case, when ctx.OnUnmonitoredObservablePropertyChangedMethod.WillBeDefined is true, is handled above.
-                        case InpcBaseHandling.OnUnmonitoredObservablePropertyChanged:
+                        // NB: The OnObservablePropertyChanged case, when ctx.OnObservablePropertyChangedMethod.WillBeDefined is true, is handled above.
+                        case InpcBaseHandling.OnObservablePropertyChanged:
                         case InpcBaseHandling.OnPropertyChanged:
                             if ( node.HasChildren )
                             {
                                 // We get here because the current type as a ref to a base property of an INPC type, but we can't use
-                                // OnChildPropertyChanged or OnUnmonitoredObservablePropertyChanged from the base type (the base doesn't provide support, or we're
+                                // OnChildPropertyChanged or OnObservablePropertyChanged from the base type (the base doesn't provide support, or we're
                                 // configured not to use it). So this is like retrospectively adding a property setter override. Note that
                                 // the base *must* provide OnPropertyChanged support for each of its properties as a minimum contract.
 
                                 var handlerField = node.HandlerField.Value;
-                                var lastValueField = node.LastValueField.Value;
-                                var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
 
-                                var oldValue = lastValueField.Value;
-                                var newValue = node.FieldOrProperty.Value;
-
-                                if ( !ReferenceEquals( oldValue, newValue ) )
+                                if ( !node.LastValueField.HasBeenSet )
                                 {
-                                    if ( oldValue != null )
+                                    meta.InsertComment( $"Error: LastValueField for {node.FieldOrProperty} has not been set." );
+                                }
+                                else
+                                {
+
+                                    var lastValueField = node.LastValueField.Value;
+                                    var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
+
+                                    var oldValue = lastValueField.Value;
+                                    var newValue = node.FieldOrProperty.Value;
+
+                                    if ( !ReferenceEquals( oldValue, newValue ) )
                                     {
-                                        if ( eventRequiresCast )
+                                        if ( oldValue != null )
                                         {
-                                            meta.Cast( ctx.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
-                                        }
-                                        else
-                                        {
-                                            oldValue.PropertyChanged -= handlerField.Value;
-                                        }
-                                    }
-
-                                    lastValueField.Value = newValue;
-
-                                    // Update methods will deal with notifications - * for those children which have update methods *
-                                    foreach ( var method in childUpdateMethods )
-                                    {
-                                        method.With( InvokerOptions.Final ).Invoke();
-                                    }
-
-                                    // rootPropertyNamesToNotify excludes children with update methods
-                                    // ReSharper disable once PossibleMultipleEnumeration
-                                    foreach ( var name in rootPropertyNamesToNotify )
-                                    {
-                                        ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
-                                    }
-
-                                    if ( newValue != null )
-                                    {
-                                        handlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
-
-                                        if ( eventRequiresCast )
-                                        {
-                                            meta.Cast( ctx.Assets.INotifyPropertyChanged, newValue ).PropertyChanged += handlerField.Value;
-                                        }
-                                        else
-                                        {
-                                            newValue.PropertyChanged += handlerField.Value;
+                                            if ( eventRequiresCast )
+                                            {
+                                                meta.Cast( templateArgsValue.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                                            }
+                                            else
+                                            {
+                                                oldValue.PropertyChanged -= handlerField.Value;
+                                            }
                                         }
 
-                                        // -----------------------------------------------------------------------
-                                        //                Local Function: OnChildPropertyChanged
-                                        // -----------------------------------------------------------------------
+                                        lastValueField.Value = newValue;
 
-                                        // ReSharper disable once LocalFunctionHidesMethod
-                                        void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+                                        // Update methods will deal with notifications - * for those children which have update methods *
+                                        foreach ( var method in childUpdateMethods )
                                         {
-                                            OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
+                                            method.With( InvokerOptions.Final ).Invoke();
+                                        }
+
+                                        // rootPropertyNamesToNotify excludes children with update methods
+                                        // ReSharper disable once PossibleMultipleEnumeration
+                                        foreach ( var name in rootPropertyNamesToNotify )
+                                        {
+                                            templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                                        }
+
+                                        if ( newValue != null )
+                                        {
+                                            handlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
+
+                                            if ( eventRequiresCast )
+                                            {
+                                                meta.Cast( templateArgsValue.Assets.INotifyPropertyChanged, newValue )!.PropertyChanged += handlerField.Value;
+                                            }
+                                            else
+                                            {
+                                                newValue.PropertyChanged += handlerField.Value;
+                                            }
+
+                                            // -----------------------------------------------------------------------
+                                            //                Local Function: OnChildPropertyChanged
+                                            // -----------------------------------------------------------------------
+
+                                            // ReSharper disable once LocalFunctionHidesMethod
+                                            void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+                                            {
+                                                OnChildPropertyChangedDelegateBody( templateArgsValue, node, ExpressionFactory.Capture( e ) );
+                                            }
                                         }
                                     }
                                 }
@@ -519,21 +528,21 @@ internal sealed class Templates : ITemplateProvider
                         // ReSharper disable once PossibleMultipleEnumeration
                         foreach ( var name in rootPropertyNamesToNotify )
                         {
-                            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                            templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
                         }
                     }
                 }
             }
             else
             {
-                if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+                if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                 {
                     meta.InsertComment( $"Skipping '{node.Name}' because there is nothing to do." );
                 }
             }
         }
 
-        if ( ctx.BaseOnPropertyChangedMethod == null )
+        if ( templateArgsValue.BaseOnPropertyChangedMethod == null )
         {
             this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
         }
@@ -547,9 +556,10 @@ internal sealed class Templates : ITemplateProvider
     internal static void OnChildPropertyChanged(
         string parentPropertyPath,
         string propertyName,
-        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext )
+        [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
+        IReadOnlyList<IReadOnlyClassicProcessingNode> nodesForOnChildPropertyChanged )
     {
-        var ctx = deferredExecutionContext.Value;
+        var ctx = templateArgs.Value;
 
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
@@ -561,54 +571,9 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
-        foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst().Where( n => n.Depth > 1 ) )
+        foreach ( var node in nodesForOnChildPropertyChanged )
         {
-            var rootPropertyNode = node.AncestorOrSelfAtDepth( 1 );
-
-            if ( rootPropertyNode.FieldOrProperty.DeclaringType == ctx.TargetType )
-            {
-                if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
-                {
-                    meta.InsertComment( $"Skipping '{node.DottedPropertyPath}': Root property '{rootPropertyNode.Name}' is defined by the current type." );
-                }
-
-                continue;
-            }
-
-            var firstAncestorWithNotNoneHandling = node.Ancestors().FirstOrDefault( n => n.InpcBaseHandling != InpcBaseHandling.None );
-
-            if ( firstAncestorWithNotNoneHandling != null )
-            {
-                switch ( firstAncestorWithNotNoneHandling.InpcBaseHandling )
-                {
-                    case InpcBaseHandling.OnUnmonitoredObservablePropertyChanged when ctx.OnUnmonitoredObservablePropertyChangedMethod != null:
-                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
-                        {
-                            meta.InsertComment(
-                                $"Skipping '{node.DottedPropertyPath}': A base type supports OnUnmonitoredObservablePropertyChanged for an ancestor of this property, and the current type is configured to use that feature." );
-                        }
-
-                        continue;
-
-                    case InpcBaseHandling.OnChildPropertyChanged when node.Depth - firstAncestorWithNotNoneHandling.Depth > 1:
-                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
-                        {
-                            meta.InsertComment(
-                                $"Skipping '{node.DottedPropertyPath}': A base type supports OnChildPropertyChanged for a non-immediate ancestor of this property." );
-                        }
-
-                        continue;
-
-                    case InpcBaseHandling.OnPropertyChanged:
-                        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
-                        {
-                            meta.InsertComment(
-                                $"Skipping '{node.DottedPropertyPath}': A base type supports OnPropertyChanged for root property '{rootPropertyNode.Name}'." );
-                        }
-
-                        continue;
-                }
-            }
+            
 
             // NB: The following code is similar to the OnChildPropertyChangedDelegateBody template. Consider keeping any changes to relevant logic in sync.
 
@@ -652,17 +617,18 @@ internal sealed class Templates : ITemplateProvider
     }
 
     [Template]
-    internal static void OnUnmonitoredObservablePropertyChanged(
+    internal static void OnObservablePropertyChanged(
         string propertyPath,
         INotifyPropertyChanged? oldValue,
         INotifyPropertyChanged? newValue,
-        [CompileTime] IReadOnlyDeferred<TemplateExecutionContext> deferredExecutionContext )
+        [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
+        IReadOnlyList<IReadOnlyClassicProcessingNode> nodesProcessedByOnObservablePropertyChanged )
     {
-        var ctx = deferredExecutionContext.Value;
+        var ctx = templateArgs.Value;
 
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
-            meta.InsertComment( "Template: " + nameof(OnUnmonitoredObservablePropertyChanged) );
+            meta.InsertComment( "Template: " + nameof(OnObservablePropertyChanged) );
 
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
@@ -671,21 +637,21 @@ internal sealed class Templates : ITemplateProvider
         }
 
         /*
-         * The generated OnUnmonitoredObservablePropertyChanged method is like an enhanced overload of OnPropertyChanged, the differences
+         * The generated OnObservablePropertyChanged method is like an enhanced overload of OnPropertyChanged, the differences
          * being that the caller provides the old and new values, the method receives a property path rather than a root property name,
          * and it only applies to property types which implement INotifyPropertyChanged.
          *
          * NB:
          *
-         * - In the current implementation (outside this template), the generated OnUnmonitoredObservablePropertyChanged
+         * - In the current implementation (outside this template), the generated OnObservablePropertyChanged
          *   method is only called for root properties. As/when false positive detection is implemented and enabled,
-         *   then the generated OnUnmonitoredObservablePropertyChanged method could receive calls for leaf INotifyPropertyChanged
+         *   then the generated OnObservablePropertyChanged method could receive calls for leaf INotifyPropertyChanged
          *   properties.
          *
-         * - OnUnmonitoredObservablePropertyChanged is only called when a ref has changed - the caller checks this first.
+         * - OnObservablePropertyChanged is only called when a ref has changed - the caller checks this first.
          *
          * - For root properties, the caller will also call OnPropertyChanged - this is to maintain compatibility with derivations
-         *   which do not observe OnUnmonitoredObservablePropertyChanged.
+         *   which do not observe OnObservablePropertyChanged.
          *
          * - Nodes only appear in the graph if they are relevant to the current class.
          *
@@ -693,8 +659,8 @@ internal sealed class Templates : ITemplateProvider
          *   NaturalAspect.AddPropertyPathsForOnChildPropertyChangedMethodAttribute.
          */
 
-        foreach ( var node in ctx.DependencyGraph.DescendantsDepthFirst()
-                     .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnUnmonitoredObservablePropertyChanged ) )
+       
+        foreach ( var node in nodesProcessedByOnObservablePropertyChanged )
         {
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
             {
@@ -746,7 +712,7 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
-        if ( ctx.BaseOnUnmonitoredObservablePropertyChangedMethod != null )
+        if ( ctx.BaseOnObservablePropertyChangedMethod != null )
         {
             meta.Proceed();
         }
@@ -754,17 +720,17 @@ internal sealed class Templates : ITemplateProvider
 
     [Template]
     private static void OnChildPropertyChangedDelegateBody(
-        [CompileTime] TemplateExecutionContext ctx,
+        [CompileTime] ObservabilityTemplateArgs templateArgs,
         [CompileTime] IReadOnlyClassicProcessingNode node,
         [CompileTime] IExpression propertyChangedEventArgs )
     {
-        if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+        if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OnChildPropertyChangedDelegateBody) );
 
-            if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
+            if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
-                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyGraph.ToString( node, "[ibh]" ) );
+                meta.InsertComment( "Dependency graph:", "\n" + templateArgs.DependencyGraph.ToString( node, "[ibh]" ) );
             }
         }
 
@@ -794,12 +760,12 @@ internal sealed class Templates : ITemplateProvider
                                      .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
                                      .OrderBy( n => n.Name ) )
                         {
-                            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                            templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                         }
 
                         if ( nodeIsAccessible )
                         {
-                            ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
+                            templateArgs.OnChildPropertyChangedMethod!.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
                         }
                     }
 
@@ -810,7 +776,7 @@ internal sealed class Templates : ITemplateProvider
 
         if ( nodeIsAccessible )
         {
-            ctx.OnChildPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
+            templateArgs.OnChildPropertyChangedMethod!.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
         }
     }
 }

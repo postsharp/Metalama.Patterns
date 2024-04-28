@@ -7,7 +7,7 @@ using Metalama.Patterns.Observability.Options;
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 /*
- * NB: TemplateExecutionContext members must not hold any reference to the IAspectBuilder<> passed
+ * NB: ObservabilityTemplateArgs members must not hold any reference to the IAspectBuilder<> passed
  * to BuildAspect. Members must be immutable, with the exception of cached computed values. Lazy behaviour
  * should be avoided.
  */
@@ -17,16 +17,16 @@ namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 /// Immutable context for template execution.
 /// </summary>
 [CompileTime]
-internal sealed record TemplateExecutionContext(
+internal sealed record ObservabilityTemplateArgs(
     ObservabilityOptions CommonOptions,
     ClassicImplementationStrategyOptions Options,
     INamedType TargetType,
     Assets Assets,
     InpcInstrumentationKindLookup InpcInstrumentationKindLookup,
     IReadOnlyClassicProcessingNode DependencyGraph,
-    IMethod? OnUnmonitoredObservablePropertyChangedMethod,
+    IMethod? OnObservablePropertyChangedMethod,
     IMethod OnPropertyChangedMethod,
-    IMethod OnChildPropertyChangedMethod,
+    IMethod? OnChildPropertyChangedMethod,
     IMethod? BaseOnPropertyChangedMethod,
     IMethod? BaseOnChildPropertyChangedMethod,
-    IMethod? BaseOnUnmonitoredObservablePropertyChangedMethod );
+    IMethod? BaseOnObservablePropertyChangedMethod );

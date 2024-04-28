@@ -27,7 +27,7 @@ internal enum InpcBaseHandling
     /// <remarks>
     /// <see cref="None"/> is not valid for root property nodes defined by base types: a type must
     /// always provide some support for its root properties via <see cref="OnPropertyChanged"/>
-    /// or <see cref="OnUnmonitoredObservablePropertyChanged"/>.
+    /// or <see cref="OnObservablePropertyChanged"/>.
     /// <see cref="None"/> applies to child properties first referenced in the current target type
     /// (ie, not referenced by any base type).
     /// </remarks>
@@ -40,13 +40,13 @@ internal enum InpcBaseHandling
 
     /// <summary>
     /// The INPC property is partially supported by a base class which will track reference changes
-    /// and call OnUnmonitoredObservablePropertyChanged and then, for root properties only, OnPropertyChanged.
+    /// and call OnObservablePropertyChanged and then, for root properties only, OnPropertyChanged.
     /// </summary>
-    OnUnmonitoredObservablePropertyChanged,
+    OnObservablePropertyChanged,
 
     /// <summary>
     /// Changes to the root property will be reported only by OnPropertyChanged. For INPC root properties, this is the
-    /// most minimal form of support (OnUnmonitoredObservablePropertyChanged will not be called for this property).
+    /// most minimal form of support (OnObservablePropertyChanged will not be called for this property).
     /// </summary>
     OnPropertyChanged
 }

@@ -22,27 +22,27 @@ public sealed class ClassicImplementationStrategyOptionsAttribute
         {
             new ClassicImplementationStrategyOptions
             {
-                EnableOnUnmonitoredObservablePropertyChangedMethod = this._enableOnUnmonitoredObservablePropertyChangedMethod
+                EnableOnObservablePropertyChangedMethod = this._enableOnObservablePropertyChangedMethod
             }
         };
     }
 
-    private bool? _enableOnUnmonitoredObservablePropertyChangedMethod;
+    private bool? _enableOnObservablePropertyChangedMethod;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the <c>OnUnmonitoredObservablePropertyChanged</c> method should be introduced.
+    /// Gets or sets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced.
     /// </summary>
     /// <remarks>
-    /// The <c>OnUnmonitoredObservablePropertyChanged</c> method allows a derived class to efficiently add subscribe/unsubscribe functionality
+    /// The <c>OnObservablePropertyChanged</c> method allows a derived class to efficiently add subscribe/unsubscribe functionality
     /// to a base class property, where the base class itself does not need to observe changes to children of the property.
     /// This only applies to properties where the property type implements <see cref="INotifyPropertyChanged"/>. The introduced
     /// method allows the current target class to use the feature if provided by a base class, and allows the current target class
     /// to provide the feature to derived classes for applicable properties.
     /// </remarks>
-    public bool EnableOnUnmonitoredObservablePropertyChangedMethod
+    public bool EnableOnObservablePropertyChangedMethod
     {
-        get => this._enableOnUnmonitoredObservablePropertyChangedMethod ?? true;
+        get => this._enableOnObservablePropertyChangedMethod ?? true;
 
-        set => this._enableOnUnmonitoredObservablePropertyChangedMethod = value;
+        set => this._enableOnObservablePropertyChangedMethod = value;
     }
 }

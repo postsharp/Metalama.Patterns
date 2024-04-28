@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Patterns.Observability.Metadata;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.Implementation;
@@ -19,15 +18,10 @@ internal sealed class Assets
         this.NullablePropertyChangedEventHandler = this.PropertyChangedEventHandler.ToNullableType();
         this.IgnoreAutoChangeNotificationAttribute = (INamedType) TypeFactory.GetType( typeof(NotObservableAttribute) );
         this.EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof(EqualityComparer<>) );
-        this.OnChildPropertyChangedMethodAttribute = (INamedType) TypeFactory.GetType( typeof(OnChildPropertyChangedMethodAttribute) );
-
-        this.OnUnmonitoredObservablePropertyChangedMethodAttribute =
-            (INamedType) TypeFactory.GetType( typeof(OnUnmonitoredObservablePropertyChangedMethodAttribute) );
+        this.InvokedForAttribute = (INamedType) TypeFactory.GetType( typeof(InvokedForAttribute) );
     }
 
-    public INamedType OnChildPropertyChangedMethodAttribute { get; }
-
-    public INamedType OnUnmonitoredObservablePropertyChangedMethodAttribute { get; }
+    public INamedType InvokedForAttribute { get; }
 
     // ReSharper disable once InconsistentNaming
     public INamedType INotifyPropertyChanged { get; }

@@ -1,31 +1,54 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation;
 
 /// <summary>
-/// A value that will be defined later.
+/// A value that may be defined later.
 /// </summary>
 [CompileTime]
-internal sealed class Deferred<T> : DeferredOptional<T>, IReadOnlyDeferred<T>
-    where T : class
+internal sealed class Deferred<T> : IDeferred<T>
 {
-    public Deferred()
-        : base( true ) { }
-
-    // ReSharper disable once UnusedMember.Global
-    [Obsolete( "The value will always be true for " + nameof(Deferred<T>) + ", avoid unnecessary conditions." )]
-    public new bool WillBeDefined => true;
+    private T? _value;
 
     /// <summary>
-    /// Gets or sets the value. Code that expects to execute before the value will be set can assume
-    /// that the value will be set later. Only get the actual value of <see cref="Value"/> from code that is known 
-    /// to execute after the value should have been set.
+    /// Gets a value indicating whether the <see cref="Value"/> setter has been successfully invoked.
     /// </summary>
-    public new T Value
+    public bool HasBeenSet { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the deferred value. Getting the property throws an <see cref="InvalidOperationException"/> if it has not been set before.
+    /// </summary>
+    public T Value
     {
-        get => base.Value!;
-        set => base.Value = value;
+        get
+        {
+            if ( !this.HasBeenSet )
+            {
+                throw new InvalidOperationException( nameof(this.Value) + " must be set before it can be read." );
+            }
+
+            return this._value!;
+        }
+
+        set
+        {
+            if ( this.HasBeenSet )
+            {
+                throw new InvalidOperationException( "The value has already been set, the value cannot be changed." );
+            }
+
+            this._value = value;
+            this.HasBeenSet = true;
+        }
+    }
+
+    public bool TryGetValue( [MaybeNullWhen( false )] out T value )
+    {
+        value = this._value;
+
+        return this.HasBeenSet;
     }
 }

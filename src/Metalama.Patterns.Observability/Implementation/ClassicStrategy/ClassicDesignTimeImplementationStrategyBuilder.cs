@@ -13,7 +13,7 @@ internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTim
 {
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
-    private readonly IMethod? _baseOnUnmonitoredObservablePropertyChangedMethod;
+    private readonly IMethod? _baseOnObservablePropertyChangedMethod;
 
     public ClassicDesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> builder ) : base( builder )
     {
@@ -22,8 +22,8 @@ internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTim
         this._baseOnPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnPropertyChangedMethod( target );
         this._baseOnChildPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnChildPropertyChangedMethod( target );
 
-        this._baseOnUnmonitoredObservablePropertyChangedMethod =
-            ClassicImplementationStrategyBuilder.GetOnUnmonitoredObservablePropertyChangedMethod( target, elements );
+        this._baseOnObservablePropertyChangedMethod =
+            ClassicImplementationStrategyBuilder.GetOnObservablePropertyChangedMethod( target, elements );
     }
 
     protected override void BuildAspect()
@@ -34,7 +34,7 @@ internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTim
 
         this.IntroduceOnPropertyChangedMethod();
         this.IntroduceOnChildPropertyChangedMethod();
-        this.IntroduceOnUnmonitoredObservablePropertyChanged();
+        this.IntroduceOnObservablePropertyChanged();
     }
 
     private void IntroduceOnPropertyChangedMethod()
@@ -95,36 +95,36 @@ internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTim
                 } );
     }
 
-    private void IntroduceOnUnmonitoredObservablePropertyChanged()
+    private void IntroduceOnObservablePropertyChanged()
     {
-        if ( !this.Builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>().EnableOnUnmonitoredObservablePropertyChangedMethod
+        if ( !this.Builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>().EnableOnObservablePropertyChangedMethod
              == true )
         {
             return;
         }
 
-        var isOverride = this._baseOnUnmonitoredObservablePropertyChangedMethod != null;
+        var isOverride = this._baseOnObservablePropertyChangedMethod != null;
 
         this.Builder.Advice.WithTemplateProvider( this )
             .IntroduceMethod(
                 this.Builder.Target,
-                nameof(OnUnmonitoredObservablePropertyChanged),
+                nameof(OnObservablePropertyChanged),
                 IntroductionScope.Instance,
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Ignore,
                 b =>
                 {
                     if ( isOverride )
                     {
-                        b.Name = this._baseOnUnmonitoredObservablePropertyChangedMethod!.Name;
+                        b.Name = this._baseOnObservablePropertyChangedMethod!.Name;
                     }
 
                     if ( this.Builder.Target.IsSealed )
                     {
-                        b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
+                        b.Accessibility = isOverride ? this._baseOnObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
                     }
                     else
                     {
-                        b.Accessibility = isOverride ? this._baseOnUnmonitoredObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.Accessibility = isOverride ? this._baseOnObservablePropertyChangedMethod!.Accessibility : Accessibility.Protected;
                         b.IsVirtual = !isOverride;
                     }
                 } );
@@ -140,5 +140,5 @@ internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTim
 
     [UsedImplicitly]
     [Template]
-    internal static void OnUnmonitoredObservablePropertyChanged( string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue ) { }
+    internal static void OnObservablePropertyChanged( string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue ) { }
 }
