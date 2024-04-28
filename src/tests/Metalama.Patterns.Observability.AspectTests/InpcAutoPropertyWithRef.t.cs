@@ -18,6 +18,7 @@ public class InpcAutoPropertyWithRef : INotifyPropertyChanged
           oldValue.PropertyChanged -= this._onXPropertyChangedHandler;
         }
         this._x = value;
+        this.OnObservablePropertyChanged("X", oldValue, value);
         this.OnPropertyChanged("Y");
         this.OnPropertyChanged("X");
         this.SubscribeToX(value);
@@ -28,6 +29,10 @@ public class InpcAutoPropertyWithRef : INotifyPropertyChanged
   private PropertyChangedEventHandler? _onXPropertyChangedHandler;
   [InvokedFor("X")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
+  {
+  }
+  [InvokedFor("X")]
+  protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
   protected virtual void OnPropertyChanged(string propertyName)

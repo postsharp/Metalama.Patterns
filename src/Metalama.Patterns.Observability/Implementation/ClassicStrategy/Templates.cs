@@ -46,10 +46,12 @@ internal sealed class Templates : ITemplateProvider
 
         if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
         {
-            if ( handlerField != null )
+            if ( handlerField != null || ctx.OnObservablePropertyChangedMethod != null )
             {
                 var oldValue = meta.Target.FieldOrProperty.Value;
 
+                if ( handlerField != null )
+                {
                     if ( oldValue != null )
                     {
                         if ( eventRequiresCast )
@@ -59,18 +61,17 @@ internal sealed class Templates : ITemplateProvider
                         else
                         {
                             oldValue.PropertyChanged -= handlerField.Value;
+                        }
                     }
                 }
 
                 meta.Target.FieldOrProperty.Value = value;
-            }
-            else if ( ctx.OnObservablePropertyChangedMethod != null )
-            {
-                var oldValue = meta.Target.FieldOrProperty.Value;
-                meta.Target.FieldOrProperty.Value = value;
 
-                ctx.OnObservablePropertyChangedMethod.With( InvokerOptions.Final )
-                    .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
+                if ( ctx.OnObservablePropertyChangedMethod != null )
+                {
+                    ctx.OnObservablePropertyChangedMethod.With( InvokerOptions.Final )
+                        .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
+                }
             }
             else
             {
@@ -445,7 +446,6 @@ internal sealed class Templates : ITemplateProvider
                                 }
                                 else
                                 {
-
                                     var lastValueField = node.LastValueField.Value;
                                     var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
 
@@ -573,8 +573,6 @@ internal sealed class Templates : ITemplateProvider
 
         foreach ( var node in nodesForOnChildPropertyChanged )
         {
-            
-
             // NB: The following code is similar to the OnChildPropertyChangedDelegateBody template. Consider keeping any changes to relevant logic in sync.
 
             var hasUpdateMethod = node.UpdateMethod.Value != null;
@@ -659,7 +657,6 @@ internal sealed class Templates : ITemplateProvider
          *   NaturalAspect.AddPropertyPathsForOnChildPropertyChangedMethodAttribute.
          */
 
-       
         foreach ( var node in nodesProcessedByOnObservablePropertyChanged )
         {
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )

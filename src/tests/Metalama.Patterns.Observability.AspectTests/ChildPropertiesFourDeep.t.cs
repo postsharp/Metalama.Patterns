@@ -40,6 +40,7 @@ public partial class A : INotifyPropertyChanged
           oldValue.PropertyChanged -= this._onA2PropertyChangedHandler;
         }
         this._a2 = value;
+        this.OnObservablePropertyChanged("A2", oldValue, (INotifyPropertyChanged? )value);
         this.UpdateA2B2();
         this.OnPropertyChanged("A2");
         this.SubscribeToA2(value);
@@ -54,6 +55,10 @@ public partial class A : INotifyPropertyChanged
   private PropertyChangedEventHandler? _onA2PropertyChangedHandler;
   [InvokedFor("A2", "A2.B2", "A2.B2.C2")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
+  {
+  }
+  [InvokedFor("A2")]
+  protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
   protected virtual void OnPropertyChanged(string propertyName)

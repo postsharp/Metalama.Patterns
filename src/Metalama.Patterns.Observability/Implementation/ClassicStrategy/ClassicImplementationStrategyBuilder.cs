@@ -528,6 +528,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                             if ( fieldOrProperty.DeclarationKind == DeclarationKind.Property )
                             {
                                 this._propertyPathsForOnChildPropertyChangedMethod.Add( fieldOrProperty.Name );
+                                this._propertyNamesForOnObservablePropertyChangedMethod.Add( fieldOrProperty.Name );
                             }
 
                             if ( fieldOrProperty.InitializerExpression != null )
@@ -537,7 +538,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                                         this._builder.Target,
                                         nameof(Templates.SubscribeInitializer),
                                         InitializerKind.BeforeInstanceConstructor,
-                                        args: new { fieldOrProperty = fieldOrProperty, subscribeMethod } );
+                                        args: new { fieldOrProperty, subscribeMethod } );
                             }
                         }
                         else
