@@ -5,11 +5,11 @@ public partial class InheritsExistingInpcImplWithValidOpcMethodNamedNotifyOfProp
   {
     base.NotifyOfPropertyChange(propertyName);
   }
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  [OnUnmonitoredObservablePropertyChangedMethod]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

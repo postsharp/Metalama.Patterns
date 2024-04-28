@@ -53,7 +53,7 @@ public partial class A : INotifyPropertyChanged
   private PropertyChangedEventHandler? _onA2B2C2PropertyChangedHandler;
   private PropertyChangedEventHandler? _onA2B2PropertyChangedHandler;
   private PropertyChangedEventHandler? _onA2PropertyChangedHandler;
-  [OnChildPropertyChangedMethod(new string[] { "A2", "A2.B2", "A2.B2.C2" })]
+  [OnChildPropertyChangedMethod("A2", "A2.B2", "A2.B2.C2")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -61,7 +61,7 @@ public partial class A : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  [OnUnmonitoredObservablePropertyChangedMethod]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
@@ -191,7 +191,7 @@ public partial class B : INotifyPropertyChanged
       }
     }
   }
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -199,7 +199,7 @@ public partial class B : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { "B2" })]
+  [OnUnmonitoredObservablePropertyChangedMethod("B2")]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
@@ -246,7 +246,7 @@ public partial class C : INotifyPropertyChanged
       }
     }
   }
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -254,7 +254,7 @@ public partial class C : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { "C2" })]
+  [OnUnmonitoredObservablePropertyChangedMethod("C2")]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
@@ -295,7 +295,7 @@ public partial class D : INotifyPropertyChanged
       }
     }
   }
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -303,7 +303,7 @@ public partial class D : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  [OnUnmonitoredObservablePropertyChangedMethod]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

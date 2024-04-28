@@ -36,7 +36,7 @@ public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
   {
     this.SubscribeToX(this.X);
   }
-  [OnChildPropertyChangedMethod(new string[] { "X" })]
+  [OnChildPropertyChangedMethod("X")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -44,7 +44,7 @@ public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  [OnUnmonitoredObservablePropertyChangedMethod]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

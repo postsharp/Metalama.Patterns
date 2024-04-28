@@ -8,7 +8,7 @@ public class UsingAttributeOnMethodOfTargetClass : INotifyPropertyChanged
   public int X => this.Foo();
   [SafeForDependencyAnalysis]
   private int Foo() => 42;
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -16,7 +16,7 @@ public class UsingAttributeOnMethodOfTargetClass : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  [OnUnmonitoredObservablePropertyChangedMethod]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

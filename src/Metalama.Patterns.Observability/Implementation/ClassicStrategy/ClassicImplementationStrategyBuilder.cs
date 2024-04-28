@@ -92,9 +92,20 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
 
             this.AddPropertyPathsForOnChildPropertyChangedMethodAttribute();
 
-            this.IntroduceOnPropertyChangedMethod();
-            this.IntroduceOnChildPropertyChangedMethod();
-            this.IntroduceOnUnmonitoredObservablePropertyChanged();
+            if ( !this.TryIntroduceOnPropertyChangedMethod() )
+            {
+                return;
+            }
+
+            if ( !this.TryIntroduceOnChildPropertyChangedMethod() )
+            {
+                return;
+            }
+
+            if ( !this.TryIntroduceOnUnmonitoredObservablePropertyChanged() )
+            {
+                return;
+            }
 
             this._deferredTemplateExecutionContext.Value = new TemplateExecutionContext(
                 this._commonOptions,
@@ -156,7 +167,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 .Select( n => n.DottedPropertyPath ) );
     }
 
-    private void IntroduceOnPropertyChangedMethod()
+    private bool TryIntroduceOnPropertyChangedMethod()
     {
         var isOverride = this._baseOnPropertyChangedMethod != null;
 
@@ -185,6 +196,11 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 },
                 args: new { deferredExecutionContext = this._deferredTemplateExecutionContext } );
 
+        if ( result.Outcome == AdviceOutcome.Error )
+        {
+            return false;
+        }
+
         this._onPropertyChangedMethod.Value = result.Declaration;
 
         // Ensure that all required fields are generated in advance of template execution.
@@ -205,9 +221,11 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
             _ = this.GetOrCreateHandlerField( node );
             _ = this.GetOrCreateLastValueField( node );
         }
+
+        return true;
     }
 
-    private void IntroduceOnChildPropertyChangedMethod()
+    private bool TryIntroduceOnChildPropertyChangedMethod()
     {
         var isOverride = this._baseOnChildPropertyChangedMethod != null;
 
@@ -222,7 +240,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                     b.AddAttribute(
                         AttributeConstruction.Create(
                             this._assets.OnChildPropertyChangedMethodAttribute,
-                            new[] { this._propertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() } ) );
+                            this._propertyPathsForOnChildPropertyChangedMethodAttribute.OrderBy( s => s ).ToArray() ) );
 
                     if ( isOverride )
                     {
@@ -241,14 +259,23 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 },
                 args: new { deferredExecutionContext = this._deferredTemplateExecutionContext } );
 
-        this._onChildPropertyChangedMethod.Value = result.Declaration;
+        if ( result.Outcome != AdviceOutcome.Error )
+        {
+            this._onChildPropertyChangedMethod.Value = result.Declaration;
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
-    private void IntroduceOnUnmonitoredObservablePropertyChanged()
+    private bool TryIntroduceOnUnmonitoredObservablePropertyChanged()
     {
         if ( !this._onUnmonitoredObservablePropertyChangedMethod.WillBeDefined == true )
         {
-            return;
+            return true;
         }
 
         var isOverride = this._baseOnUnmonitoredObservablePropertyChangedMethod != null;
@@ -283,7 +310,14 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 },
                 args: new { deferredExecutionContext = this._deferredTemplateExecutionContext } );
 
+        if ( result.Outcome == AdviceOutcome.Error )
+        {
+            return false;
+        }
+
         this._onUnmonitoredObservablePropertyChangedMethod.Value = result.Declaration;
+
+        return true;
     }
 
     private bool ValidateBaseImplementation()
@@ -427,7 +461,11 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                         if ( hasDependentProperties )
                         {
                             handlerField = this.GetOrCreateHandlerField( node! );
-                            subscribeMethod = this.GetOrCreateRootPropertySubscribeMethod( node! );
+
+                            if ( !this.TryGetOrCreateRootPropertySubscribeMethod( node!, out subscribeMethod ) )
+                            {
+                                return;
+                            }
 
                             if ( fp.DeclarationKind == DeclarationKind.Property )
                             {
@@ -593,7 +631,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         return node.HandlerField.Value;
     }
 
-    private IMethod GetOrCreateRootPropertySubscribeMethod( ClassicProcessingNode node )
+    private bool TryGetOrCreateRootPropertySubscribeMethod( ClassicProcessingNode node, out IMethod? subscribeMethod )
     {
         if ( node.Depth != 1 )
         {
@@ -619,10 +657,21 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                     },
                     args: new { TValue = node.FieldOrProperty.Type, deferredExecutionContext = this._deferredTemplateExecutionContext, node, handlerField } );
 
-            node.SubscribeMethod.Value = result.Declaration;
+            if ( result.Outcome != AdviceOutcome.Error )
+            {
+                node.SubscribeMethod.Value = result.Declaration;
+            }
+            else
+            {
+                subscribeMethod = null;
+
+                return false;
+            }
         }
 
-        return node.SubscribeMethod.Value;
+        subscribeMethod = node.SubscribeMethod.Value;
+
+        return true;
     }
 
     private HashSet<string>? _existingMemberNames;

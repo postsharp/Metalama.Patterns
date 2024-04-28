@@ -143,7 +143,9 @@ internal sealed class Templates : ITemplateProvider
         // ReSharper disable once LocalFunctionHidesMethod
         void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
         {
-            OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
+            // We use WithNullability to work around a bug in Metalama.Framework (perhaps rather in Roslyn) that randomly gives no
+            // nullability information for 'e'.
+            OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ).WithNullability( false ) );
         }
     }
 
