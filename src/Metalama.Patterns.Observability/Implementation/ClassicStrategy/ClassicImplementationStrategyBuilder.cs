@@ -282,10 +282,13 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
                 b =>
                 {
-                    b.AddAttribute(
-                        AttributeConstruction.Create(
-                            this._assets.InvokedForAttribute,
-                            this._propertyPathsForOnChildPropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
+                    if ( this._propertyPathsForOnChildPropertyChangedMethod.Count > 0 )
+                    {
+                        b.AddAttribute(
+                            AttributeConstruction.Create(
+                                this._assets.InvokedForAttribute,
+                                this._propertyPathsForOnChildPropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
+                    }
 
                     if ( isOverride )
                     {
@@ -346,10 +349,13 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
                 b =>
                 {
-                    b.AddAttribute(
-                        AttributeConstruction.Create(
-                            this._assets.InvokedForAttribute,
-                            this._propertyNamesForOnObservablePropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
+                    if ( this._propertyNamesForOnObservablePropertyChangedMethod.Count > 0 )
+                    {
+                        b.AddAttribute(
+                            AttributeConstruction.Create(
+                                this._assets.InvokedForAttribute,
+                                this._propertyNamesForOnObservablePropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
+                    }
 
                     if ( isOverride )
                     {

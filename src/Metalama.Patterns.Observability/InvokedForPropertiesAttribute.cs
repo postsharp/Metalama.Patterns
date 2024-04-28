@@ -11,15 +11,15 @@ namespace Metalama.Patterns.Observability;
 [PublicAPI]
 [EditorBrowsable( EditorBrowsableState.Never )]
 [AttributeUsage( AttributeTargets.Method )]
-public sealed class InvokedForAttribute : Attribute
+public sealed class InvokedForPropertiesAttribute : Attribute
 {
     // ReSharper disable once UnusedParameter.Local
     /// <summary>
-    /// Initializes a new instance of the <see cref="InvokedForAttribute"/> class.
+    /// Initializes a new instance of the <see cref="InvokedForPropertiesAttribute"/> class.
     /// </summary>
     /// <param name="parentPropertyPaths">
     /// The parent property paths which the declaring class monitors for reference and child property changes,
     /// and for which  <c>OnChildPropertyChanged</c> or <c>OnObservablePropertyChanged</c>  will be called.
     /// </param>
-    public InvokedForAttribute( params string[] parentPropertyPaths ) { }
+    public InvokedForPropertiesAttribute( params string[] parentPropertyPaths ) { }
 }

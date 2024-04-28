@@ -22,7 +22,7 @@ public class InpcAutoPropertyWithInitializerNoRefs : INotifyPropertyChanged
       }
     }
   }
-  [InvokedFor("X")]
+  [InvokedForProperties("X")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

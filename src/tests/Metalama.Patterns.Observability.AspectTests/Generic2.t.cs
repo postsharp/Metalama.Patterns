@@ -35,12 +35,12 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
   }
   public int FooX => this.D1.X;
   private PropertyChangedEventHandler? _onD1PropertyChangedHandler;
-  [InvokedFor("D1")]
+  [InvokedForProperties("D1")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   // Template: OnChildPropertyChanged
   }
-  [InvokedFor("D1")]
+  [InvokedForProperties("D1")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   // Template: OnObservablePropertyChanged
@@ -79,7 +79,6 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
 public partial class DD<T> : D<T> where T : class, INotifyPropertyChanged, IFoo
 {
   public int FooY => this.D1.Y;
-  [InvokedFor]
   protected override void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
     // Template: OnChildPropertyChanged
