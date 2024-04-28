@@ -34,7 +34,7 @@ public partial class A<T> : INotifyPropertyChanged where T : class, INotifyPrope
 public partial class AOfSimple : A<Simple>
 {
   public int RefA1S1 => this.A1.S1;
-  private PropertyChangedEventHandler? _onA1PropertyChangedHandler;
+  private PropertyChangedEventHandler? _handleA1PropertyChanged;
   [InvokedForProperties("A1")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
@@ -45,13 +45,13 @@ public partial class AOfSimple : A<Simple>
     {
       if (oldValue != null)
       {
-        oldValue.PropertyChanged -= this._onA1PropertyChangedHandler;
+        oldValue.PropertyChanged -= this._handleA1PropertyChanged;
       }
       if (newValue != null)
       {
-        this._onA1PropertyChangedHandler ??= OnChildPropertyChanged_1;
-        newValue.PropertyChanged += this._onA1PropertyChangedHandler;
-        void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
+        this._handleA1PropertyChanged ??= HandleChildPropertyChanged;
+        newValue.PropertyChanged += this._handleA1PropertyChanged;
+        void HandleChildPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
           {
             var propertyName = e.PropertyName;

@@ -23,7 +23,7 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
         var oldValue = this._d1;
         if (oldValue != null)
         {
-          oldValue.PropertyChanged -= this._onD1PropertyChangedHandler;
+          oldValue.PropertyChanged -= this._handleD1PropertyChanged;
         }
         this._d1 = value;
         this.OnObservablePropertyChanged("D1", oldValue, value);
@@ -34,7 +34,7 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
     }
   }
   public int FooX => this.D1.X;
-  private PropertyChangedEventHandler? _onD1PropertyChangedHandler;
+  private PropertyChangedEventHandler? _handleD1PropertyChanged;
   [InvokedForProperties("D1")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
@@ -56,13 +56,13 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
   {
     if (value != null)
     {
-      this._onD1PropertyChangedHandler ??= Handle;
-      value.PropertyChanged += this._onD1PropertyChangedHandler;
+      this._handleD1PropertyChanged ??= HandlePropertyChanged;
+      value.PropertyChanged += this._handleD1PropertyChanged;
     }
-    void Handle(object? sender, PropertyChangedEventArgs e)
+    void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
       {
-        // Template: OnChildPropertyChangedDelegateBody
+        // Template: HandleChildPropertyChangedDelegateBody
         var propertyName = e.PropertyName;
         if (propertyName == "X")
         {

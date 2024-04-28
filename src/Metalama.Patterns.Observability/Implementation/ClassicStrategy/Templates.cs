@@ -56,7 +56,7 @@ internal sealed class Templates : ITemplateProvider
                     {
                         if ( eventRequiresCast )
                         {
-                            meta.Cast( ctx.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                            ((INotifyPropertyChanged) oldValue).PropertyChanged -= handlerField.Value;
                         }
                         else
                         {
@@ -123,13 +123,15 @@ internal sealed class Templates : ITemplateProvider
 
         if ( value != null )
         {
-            handlerField.Value ??= (PropertyChangedEventHandler) Handle;
+            handlerField.Value ??= (PropertyChangedEventHandler) HandlePropertyChanged;
 
             if ( eventRequiresCast )
             {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                meta.Cast( ctx.Assets.INotifyPropertyChanged, value ).PropertyChanged += handlerField.Value;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning disable IDE0004
+                
+                // ReSharper disable once RedundantCast
+                ((INotifyPropertyChanged) value).PropertyChanged += handlerField.Value;
+#pragma warning restore IDE0004
             }
             else
             {
@@ -142,11 +144,11 @@ internal sealed class Templates : ITemplateProvider
         // -----------------------------------------------------------------------
 
         // ReSharper disable once LocalFunctionHidesMethod
-        void Handle( object? sender, PropertyChangedEventArgs e )
+        void HandlePropertyChanged( object? sender, PropertyChangedEventArgs e )
         {
             // We use WithNullability to work around a bug in Metalama.Framework (perhaps rather in Roslyn) that randomly gives no
             // nullability information for 'e'.
-            OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ).WithNullability( false ) );
+            HandleChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ).WithNullability( false ) );
         }
     }
 
@@ -194,7 +196,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( newValue != null )
             {
-                onPropertyChangedHandlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
+                onPropertyChangedHandlerField.Value ??= (PropertyChangedEventHandler) HandleChildPropertyChanged;
                 newValue.PropertyChanged += onPropertyChangedHandlerField.Value;
 
                 // -----------------------------------------------------------------------
@@ -202,9 +204,9 @@ internal sealed class Templates : ITemplateProvider
                 // -----------------------------------------------------------------------
 
                 // ReSharper disable once LocalFunctionHidesMethod
-                void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+                void HandleChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                 {
-                    OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
+                    HandleChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
                 }
             }
 
@@ -483,11 +485,11 @@ internal sealed class Templates : ITemplateProvider
 
                                         if ( newValue != null )
                                         {
-                                            handlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
+                                            handlerField.Value ??= (PropertyChangedEventHandler) HandleChildPropertyChanged;
 
                                             if ( eventRequiresCast )
                                             {
-                                                meta.Cast( templateArgsValue.Assets.INotifyPropertyChanged, newValue )!.PropertyChanged += handlerField.Value;
+                                                ((INotifyPropertyChanged) newValue).PropertyChanged += handlerField.Value;
                                             }
                                             else
                                             {
@@ -499,9 +501,9 @@ internal sealed class Templates : ITemplateProvider
                                             // -----------------------------------------------------------------------
 
                                             // ReSharper disable once LocalFunctionHidesMethod
-                                            void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+                                            void HandleChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                                             {
-                                                OnChildPropertyChangedDelegateBody( templateArgsValue, node, ExpressionFactory.Capture( e ) );
+                                                HandleChildPropertyChangedDelegateBody( templateArgsValue, node, ExpressionFactory.Capture( e ) );
                                             }
                                         }
                                     }
@@ -679,7 +681,7 @@ internal sealed class Templates : ITemplateProvider
 
                 if ( newValue != null )
                 {
-                    handlerField.Value ??= (PropertyChangedEventHandler) OnChildPropertyChanged;
+                    handlerField.Value ??= (PropertyChangedEventHandler) HandleChildPropertyChanged;
                     newValue.PropertyChanged += handlerField.Value;
 
                     // -----------------------------------------------------------------------
@@ -687,9 +689,9 @@ internal sealed class Templates : ITemplateProvider
                     // -----------------------------------------------------------------------
 
                     // ReSharper disable once LocalFunctionHidesMethod
-                    void OnChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+                    void HandleChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
                     {
-                        OnChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
+                        HandleChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ) );
                     }
                 }
 
@@ -716,14 +718,14 @@ internal sealed class Templates : ITemplateProvider
     }
 
     [Template]
-    private static void OnChildPropertyChangedDelegateBody(
+    private static void HandleChildPropertyChangedDelegateBody(
         [CompileTime] ObservabilityTemplateArgs templateArgs,
         [CompileTime] IReadOnlyClassicProcessingNode node,
         [CompileTime] IExpression propertyChangedEventArgs )
     {
         if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity! > 0 )
         {
-            meta.InsertComment( "Template: " + nameof(OnChildPropertyChangedDelegateBody) );
+            meta.InsertComment( "Template: " + nameof(HandleChildPropertyChangedDelegateBody) );
 
             if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {

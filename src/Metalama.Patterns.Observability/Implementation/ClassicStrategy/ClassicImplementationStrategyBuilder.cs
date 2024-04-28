@@ -349,12 +349,12 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
                 b =>
                 {
-                    if ( this._propertyNamesForOnObservablePropertyChangedMethod.Count > 0 )
+                    if ( this._propertyNamesForOnObservablePropertyChangedMethod .Count > 0 )
                     {
-                        b.AddAttribute(
-                            AttributeConstruction.Create(
-                                this._assets.InvokedForAttribute,
-                                this._propertyNamesForOnObservablePropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
+                    b.AddAttribute(
+                        AttributeConstruction.Create(
+                            this._assets.InvokedForAttribute,
+                            this._propertyNamesForOnObservablePropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
                     }
 
                     if ( isOverride )
@@ -673,7 +673,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
     {
         if ( !node.HandlerField.HasBeenSet )
         {
-            var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_on{node.ContiguousPropertyPath}PropertyChangedHandler" );
+            var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_handle{node.ContiguousPropertyPath}PropertyChanged" );
 
             var introduceHandlerFieldResult = this._builder.Advice.WithTemplateProvider( Templates.Provider )
                 .IntroduceField(

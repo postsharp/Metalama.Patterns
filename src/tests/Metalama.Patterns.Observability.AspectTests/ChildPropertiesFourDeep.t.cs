@@ -37,7 +37,7 @@ public partial class A : INotifyPropertyChanged
         var oldValue = this._a2;
         if (oldValue != null)
         {
-          oldValue.PropertyChanged -= this._onA2PropertyChangedHandler;
+          oldValue.PropertyChanged -= this._handleA2PropertyChanged;
         }
         this._a2 = value;
         this.OnObservablePropertyChanged("A2", oldValue, (INotifyPropertyChanged? )value);
@@ -48,11 +48,11 @@ public partial class A : INotifyPropertyChanged
     }
   }
   public int A3 => this.A2.B2.C2.D1;
+  private PropertyChangedEventHandler? _handleA2B2C2PropertyChanged;
+  private PropertyChangedEventHandler? _handleA2B2PropertyChanged;
+  private PropertyChangedEventHandler? _handleA2PropertyChanged;
   private C? _lastA2B2;
   private D? _lastA2B2C2;
-  private PropertyChangedEventHandler? _onA2B2C2PropertyChangedHandler;
-  private PropertyChangedEventHandler? _onA2B2PropertyChangedHandler;
-  private PropertyChangedEventHandler? _onA2PropertyChangedHandler;
   [InvokedForProperties("A2", "A2.B2", "A2.B2.C2")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
@@ -69,10 +69,10 @@ public partial class A : INotifyPropertyChanged
   {
     if (value != null)
     {
-      this._onA2PropertyChangedHandler ??= Handle;
-      value.PropertyChanged += this._onA2PropertyChangedHandler;
+      this._handleA2PropertyChanged ??= HandlePropertyChanged;
+      value.PropertyChanged += this._handleA2PropertyChanged;
     }
-    void Handle(object? sender, PropertyChangedEventArgs e)
+    void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;
@@ -92,13 +92,13 @@ public partial class A : INotifyPropertyChanged
     {
       if (!object.ReferenceEquals(this._lastA2B2, null))
       {
-        this._lastA2B2!.PropertyChanged -= this._onA2B2PropertyChangedHandler;
+        this._lastA2B2!.PropertyChanged -= this._handleA2B2PropertyChanged;
       }
       if (newValue != null)
       {
-        this._onA2B2PropertyChangedHandler ??= OnChildPropertyChanged_1;
-        newValue.PropertyChanged += this._onA2B2PropertyChangedHandler;
-        void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
+        this._handleA2B2PropertyChanged ??= HandleChildPropertyChanged;
+        newValue.PropertyChanged += this._handleA2B2PropertyChanged;
+        void HandleChildPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
           {
             var propertyName = e.PropertyName;
@@ -123,13 +123,13 @@ public partial class A : INotifyPropertyChanged
     {
       if (!object.ReferenceEquals(this._lastA2B2C2, null))
       {
-        this._lastA2B2C2!.PropertyChanged -= this._onA2B2C2PropertyChangedHandler;
+        this._lastA2B2C2!.PropertyChanged -= this._handleA2B2C2PropertyChanged;
       }
       if (newValue != null)
       {
-        this._onA2B2C2PropertyChangedHandler ??= OnChildPropertyChanged_1;
-        newValue.PropertyChanged += this._onA2B2C2PropertyChangedHandler;
-        void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
+        this._handleA2B2C2PropertyChanged ??= HandleChildPropertyChanged;
+        newValue.PropertyChanged += this._handleA2B2C2PropertyChanged;
+        void HandleChildPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
           {
             var propertyName = e.PropertyName;
