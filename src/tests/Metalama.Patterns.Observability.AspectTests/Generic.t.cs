@@ -55,13 +55,16 @@ public partial class AOfSimple : A<Simple>
         {
           {
             var propertyName = e.PropertyName;
-            if (propertyName == "S1")
+            switch (propertyName)
             {
-              this.OnPropertyChanged("RefA1S1");
-              this.OnChildPropertyChanged("A1", "S1");
-              return;
+              case "S1":
+                this.OnPropertyChanged("RefA1S1");
+                this.OnChildPropertyChanged("A1", "S1");
+                break;
+              default:
+                this.OnChildPropertyChanged("A1", propertyName);
+                break;
             }
-            this.OnChildPropertyChanged("A1", propertyName);
           }
         }
       }

@@ -42,10 +42,11 @@ public class FieldBackedInpcProperty : INotifyPropertyChanged
     {
       {
         var propertyName = e.PropertyName;
-        if (propertyName == "A1")
+        switch (propertyName)
         {
-          this.OnPropertyChanged("P2");
-          return;
+          case "A1":
+            this.OnPropertyChanged("P2");
+            break;
         }
       }
     }

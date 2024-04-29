@@ -64,13 +64,16 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
       {
         // Template: HandleChildPropertyChangedDelegateBody
         var propertyName = e.PropertyName;
-        if (propertyName == "X")
+        switch (propertyName)
         {
-          this.OnPropertyChanged("FooX");
-          this.OnChildPropertyChanged("D1", "X");
-          return;
+          case "X":
+            this.OnPropertyChanged("FooX");
+            this.OnChildPropertyChanged("D1", "X");
+            break;
+          default:
+            this.OnChildPropertyChanged("D1", propertyName);
+            break;
         }
-        this.OnChildPropertyChanged("D1", propertyName);
       }
     }
   }
@@ -82,23 +85,26 @@ public partial class DD<T> : D<T> where T : class, INotifyPropertyChanged, IFoo
   protected override void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
     // Template: OnChildPropertyChanged
-    if (parentPropertyPath == "D1" && propertyName == "Y")
+    switch (parentPropertyPath, propertyName)
     {
-      this.OnPropertyChanged("FooY");
-      base.OnChildPropertyChanged(parentPropertyPath, propertyName);
-      return;
+      case ("D1", "Y"):
+        this.OnPropertyChanged("FooY");
+        base.OnChildPropertyChanged(parentPropertyPath, propertyName);
+        break;
     }
     base.OnChildPropertyChanged(parentPropertyPath, propertyName);
   }
   protected override void OnPropertyChanged(string propertyName)
   {
     // Template: OnPropertyChanged
-    if (propertyName == "D1")
-    {
-      // InpcBaseHandling = OnChildPropertyChanged
-      this.OnPropertyChanged("FooY");
-    }
     // Skipping 'FooY': The field or property is defined by the current type.
+    switch (propertyName)
+    {
+      case "D1":
+        // InpcBaseHandling = OnChildPropertyChanged
+        this.OnPropertyChanged("FooY");
+        break;
+    }
     base.OnPropertyChanged(propertyName);
   }
 }

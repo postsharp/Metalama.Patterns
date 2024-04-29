@@ -76,12 +76,15 @@ public partial class A : INotifyPropertyChanged
     {
       {
         var propertyName = e.PropertyName;
-        if (propertyName == "B2")
+        switch (propertyName)
         {
-          this.UpdateA2B2();
-          return;
+          case "B2":
+            this.UpdateA2B2();
+            break;
+          default:
+            this.OnChildPropertyChanged("A2", propertyName);
+            break;
         }
-        this.OnChildPropertyChanged("A2", propertyName);
       }
     }
   }
@@ -102,12 +105,15 @@ public partial class A : INotifyPropertyChanged
         {
           {
             var propertyName = e.PropertyName;
-            if (propertyName == "C2")
+            switch (propertyName)
             {
-              this.UpdateA2B2C2();
-              return;
+              case "C2":
+                this.UpdateA2B2C2();
+                break;
+              default:
+                this.OnChildPropertyChanged("A2.B2", propertyName);
+                break;
             }
-            this.OnChildPropertyChanged("A2.B2", propertyName);
           }
         }
       }
@@ -133,13 +139,16 @@ public partial class A : INotifyPropertyChanged
         {
           {
             var propertyName = e.PropertyName;
-            if (propertyName == "D1")
+            switch (propertyName)
             {
-              this.OnPropertyChanged("A3");
-              this.OnChildPropertyChanged("A2.B2.C2", "D1");
-              return;
+              case "D1":
+                this.OnPropertyChanged("A3");
+                this.OnChildPropertyChanged("A2.B2.C2", "D1");
+                break;
+              default:
+                this.OnChildPropertyChanged("A2.B2.C2", propertyName);
+                break;
             }
-            this.OnChildPropertyChanged("A2.B2.C2", propertyName);
           }
         }
       }

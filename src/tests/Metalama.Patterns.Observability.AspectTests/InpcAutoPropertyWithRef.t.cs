@@ -50,13 +50,16 @@ public class InpcAutoPropertyWithRef : INotifyPropertyChanged
     {
       {
         var propertyName = e.PropertyName;
-        if (propertyName == "A")
+        switch (propertyName)
         {
-          this.OnPropertyChanged("Y");
-          this.OnChildPropertyChanged("X", "A");
-          return;
+          case "A":
+            this.OnPropertyChanged("Y");
+            this.OnChildPropertyChanged("X", "A");
+            break;
+          default:
+            this.OnChildPropertyChanged("X", propertyName);
+            break;
         }
-        this.OnChildPropertyChanged("X", propertyName);
       }
     }
   }

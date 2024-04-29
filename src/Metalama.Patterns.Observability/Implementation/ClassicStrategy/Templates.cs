@@ -128,7 +128,7 @@ internal sealed class Templates : ITemplateProvider
             if ( eventRequiresCast )
             {
 #pragma warning disable IDE0004
-                
+
                 // ReSharper disable once RedundantCast
                 ((INotifyPropertyChanged) value).PropertyChanged += handlerField.Value;
 #pragma warning restore IDE0004
@@ -341,6 +341,8 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
+        var switchBuilder = new SwitchStatementBuilder( ExpressionFactory.Capture( propertyName ) );
+
         foreach ( var node in templateArgsValue.DependencyGraph.Children )
         {
             if ( node.FieldOrProperty.DeclaringType == templateArgsValue.TargetType )
@@ -408,132 +410,12 @@ internal sealed class Templates : ITemplateProvider
                     .Select( n => n.Name )
                     .OrderBy( s => s );
 
-                if ( propertyName == node.Name )
-                {
-                    var emitDefaultNotifications = meta.CompileTime( true );
-
-                    if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
-                    {
-                        meta.InsertComment( $"InpcBaseHandling = {node.InpcBaseHandling}" );
-                    }
-
-                    switch ( node.InpcBaseHandling )
-                    {
-                        case InpcBaseHandling.Unknown:
-                            meta.InsertComment(
-                                $"Warning: the type of property '{node.Name}' could not be analysed at design time, so it has been treated",
-                                "as not implementing INotifyPropertyChanged. Code generated at compile time may differ." );
-
-                            break;
-
-                        case InpcBaseHandling.NotApplicable:
-                        case InpcBaseHandling.OnChildPropertyChanged:
-                            break;
-
-                        // NB: The OnObservablePropertyChanged case, when ctx.OnObservablePropertyChangedMethod.WillBeDefined is true, is handled above.
-                        case InpcBaseHandling.OnObservablePropertyChanged:
-                        case InpcBaseHandling.OnPropertyChanged:
-                            if ( node.HasChildren )
-                            {
-                                // We get here because the current type as a ref to a base property of an INPC type, but we can't use
-                                // OnChildPropertyChanged or OnObservablePropertyChanged from the base type (the base doesn't provide support, or we're
-                                // configured not to use it). So this is like retrospectively adding a property setter override. Note that
-                                // the base *must* provide OnPropertyChanged support for each of its properties as a minimum contract.
-
-                                var handlerField = node.HandlerField.Value;
-
-                                if ( !node.LastValueField.HasBeenSet )
-                                {
-                                    meta.InsertComment( $"Error: LastValueField for {node.FieldOrProperty} has not been set." );
-                                }
-                                else
-                                {
-                                    var lastValueField = node.LastValueField.Value;
-                                    var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
-
-                                    var oldValue = lastValueField.Value;
-                                    var newValue = node.FieldOrProperty.Value;
-
-                                    if ( !ReferenceEquals( oldValue, newValue ) )
-                                    {
-                                        if ( oldValue != null )
-                                        {
-                                            if ( eventRequiresCast )
-                                            {
-                                                meta.Cast( templateArgsValue.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
-                                            }
-                                            else
-                                            {
-                                                oldValue.PropertyChanged -= handlerField.Value;
-                                            }
-                                        }
-
-                                        lastValueField.Value = newValue;
-
-                                        // Update methods will deal with notifications - * for those children which have update methods *
-                                        foreach ( var method in childUpdateMethods )
-                                        {
-                                            method.With( InvokerOptions.Final ).Invoke();
-                                        }
-
-                                        // rootPropertyNamesToNotify excludes children with update methods
-                                        // ReSharper disable once PossibleMultipleEnumeration
-                                        foreach ( var name in rootPropertyNamesToNotify )
-                                        {
-                                            templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
-                                        }
-
-                                        if ( newValue != null )
-                                        {
-                                            handlerField.Value ??= (PropertyChangedEventHandler) HandleChildPropertyChanged;
-
-                                            if ( eventRequiresCast )
-                                            {
-                                                ((INotifyPropertyChanged) newValue).PropertyChanged += handlerField.Value;
-                                            }
-                                            else
-                                            {
-                                                newValue.PropertyChanged += handlerField.Value;
-                                            }
-
-                                            // -----------------------------------------------------------------------
-                                            //                Local Function: OnChildPropertyChanged
-                                            // -----------------------------------------------------------------------
-
-                                            // ReSharper disable once LocalFunctionHidesMethod
-                                            void HandleChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
-                                            {
-                                                HandleChildPropertyChangedDelegateBody( templateArgsValue, node, ExpressionFactory.Capture( e ) );
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            emitDefaultNotifications = false;
-
-                            break;
-
-                        default:
-                            CompileTimeThrow( new InvalidOperationException( $"InpcBaseHandling '{node.InpcBaseHandling}' was not expected here." ) );
-
-                            break;
-                    }
-
-                    if ( emitDefaultNotifications )
-                    {
-                        foreach ( var method in childUpdateMethods )
-                        {
-                            method.With( InvokerOptions.Final ).Invoke();
-                        }
-
-                        // ReSharper disable once PossibleMultipleEnumeration
-                        foreach ( var name in rootPropertyNamesToNotify )
-                        {
-                            templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
-                        }
-                    }
-                }
+                switchBuilder.AddCase(
+                    new SwitchStatementLabel( node.Name ),
+                    StatementFactory.FromTemplate(
+                                nameof(OnPropertyChangedSwitchCase),
+                                new { templateArgsValue, node, childUpdateMethods, rootPropertyNamesToNotify } ) 
+                        .UnwrapBlock() );
             }
             else
             {
@@ -544,6 +426,11 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
+        if ( switchBuilder.SectionCount > 0 )
+        {
+            meta.InsertStatement( switchBuilder.ToStatement() );
+        }
+
         if ( templateArgsValue.BaseOnPropertyChangedMethod == null )
         {
             this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
@@ -551,6 +438,138 @@ internal sealed class Templates : ITemplateProvider
         else
         {
             meta.Proceed();
+        }
+    }
+
+    [Template]
+    private static void OnPropertyChangedSwitchCase(
+        ObservabilityTemplateArgs templateArgsValue,
+        IReadOnlyClassicProcessingNode node,
+        IReadOnlyCollection<IMethod> childUpdateMethods,
+        [CompileTime] IOrderedEnumerable<string> rootPropertyNamesToNotify )
+    {
+        var emitDefaultNotifications = meta.CompileTime( true );
+
+        if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+        {
+            meta.InsertComment( $"InpcBaseHandling = {node.InpcBaseHandling}" );
+        }
+
+        switch ( node.InpcBaseHandling )
+        {
+            case InpcBaseHandling.Unknown:
+                meta.InsertComment(
+                    $"Warning: the type of property '{node.Name}' could not be analysed at design time, so it has been treated",
+                    "as not implementing INotifyPropertyChanged. Code generated at compile time may differ." );
+
+                break;
+
+            case InpcBaseHandling.NotApplicable:
+            case InpcBaseHandling.OnChildPropertyChanged:
+                break;
+
+            // NB: The OnObservablePropertyChanged case, when ctx.OnObservablePropertyChangedMethod.WillBeDefined is true, is handled above.
+            case InpcBaseHandling.OnObservablePropertyChanged:
+            case InpcBaseHandling.OnPropertyChanged:
+                if ( node.HasChildren )
+                {
+                    // We get here because the current type as a ref to a base property of an INPC type, but we can't use
+                    // OnChildPropertyChanged or OnObservablePropertyChanged from the base type (the base doesn't provide support, or we're
+                    // configured not to use it). So this is like retrospectively adding a property setter override. Note that
+                    // the base *must* provide OnPropertyChanged support for each of its properties as a minimum contract.
+
+                    var handlerField = node.HandlerField.Value;
+
+                    if ( !node.LastValueField.HasBeenSet )
+                    {
+                        meta.InsertComment( $"Error: LastValueField for {node.FieldOrProperty} has not been set." );
+                    }
+                    else
+                    {
+                        var lastValueField = node.LastValueField.Value;
+                        var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
+
+                        var oldValue = lastValueField.Value;
+                        var newValue = node.FieldOrProperty.Value;
+
+                        if ( !ReferenceEquals( oldValue, newValue ) )
+                        {
+                            if ( oldValue != null )
+                            {
+                                if ( eventRequiresCast )
+                                {
+                                    meta.Cast( templateArgsValue.Assets.INotifyPropertyChanged, oldValue ).PropertyChanged -= handlerField.Value;
+                                }
+                                else
+                                {
+                                    oldValue.PropertyChanged -= handlerField.Value;
+                                }
+                            }
+
+                            lastValueField.Value = newValue;
+
+                            // Update methods will deal with notifications - * for those children which have update methods *
+                            foreach ( var method in childUpdateMethods )
+                            {
+                                method.With( InvokerOptions.Final ).Invoke();
+                            }
+
+                            // rootPropertyNamesToNotify excludes children with update methods
+                            // ReSharper disable once PossibleMultipleEnumeration
+                            foreach ( var name in rootPropertyNamesToNotify )
+                            {
+                                templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                            }
+
+                            if ( newValue != null )
+                            {
+                                handlerField.Value ??= (PropertyChangedEventHandler) HandleChildPropertyChanged;
+
+                                if ( eventRequiresCast )
+                                {
+                                    ((INotifyPropertyChanged) newValue).PropertyChanged += handlerField.Value;
+                                }
+                                else
+                                {
+                                    newValue.PropertyChanged += handlerField.Value;
+                                }
+
+                                // -----------------------------------------------------------------------
+                                //                Local Function: OnChildPropertyChanged
+                                // -----------------------------------------------------------------------
+
+                                // ReSharper disable once LocalFunctionHidesMethod
+                                void HandleChildPropertyChanged( object? sender, PropertyChangedEventArgs e )
+                                {
+                                    HandleChildPropertyChangedDelegateBody( templateArgsValue, node, ExpressionFactory.Capture( e ) );
+                                }
+                            }
+                        }
+                    }
+                }
+
+                emitDefaultNotifications = false;
+
+                break;
+
+            default:
+                CompileTimeThrow( new InvalidOperationException( $"InpcBaseHandling '{node.InpcBaseHandling}' was not expected here." ) );
+
+                break;
+        }
+
+        if ( emitDefaultNotifications )
+        {
+            foreach ( var method in childUpdateMethods )
+            {
+                method.With( InvokerOptions.Final ).Invoke();
+            }
+
+            // ReSharper disable once PossibleMultipleEnumeration
+            foreach ( var name in rootPropertyNamesToNotify )
+            {
+                templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+            }
         }
     }
 
@@ -573,6 +592,8 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
+        var switchBuilder = new SwitchStatementBuilder( ExpressionFactory.Capture( (parentPropertyPath, propertyName) ) );
+
         foreach ( var node in nodesForOnChildPropertyChanged )
         {
             // NB: The following code is similar to the OnChildPropertyChangedDelegateBody template. Consider keeping any changes to relevant logic in sync.
@@ -582,31 +603,44 @@ internal sealed class Templates : ITemplateProvider
 
             if ( hasUpdateMethod || hasRefs )
             {
-                if ( parentPropertyPath == node.Parent.DottedPropertyPath && propertyName == node.Name )
-                {
-                    if ( hasUpdateMethod )
-                    {
-                        // Update method will deal with notifications
-                        node.UpdateMethod.Value!.With( InvokerOptions.Final ).Invoke();
-                    }
-                    else
-                    {
-                        // No update method, notify here.
-                        foreach ( var r in node.AllReferencedBy()
-                                     .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                                     .OrderBy( n => n.Name ) )
-                        {
-                            ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
-                        }
-                    }
+                switchBuilder.AddCase(
+                    new SwitchStatementLabel( node.Parent.DottedPropertyPath, node.Name ),
+                    StatementFactory.FromTemplate(
+                            new TemplateInvocation( nameof(OnChildPropertyChangedMainSwitchCase), arguments: new { node, hasUpdateMethod, ctx } ) )
+                        .UnwrapBlock() );
+            }
+        }
 
-                    if ( ctx.BaseOnChildPropertyChangedMethod != null )
-                    {
-                        meta.Proceed();
-                    }
+        if ( switchBuilder.SectionCount > 0 )
+        {
+            meta.InsertStatement( switchBuilder.ToStatement() );
+        }
 
-                    return;
-                }
+        if ( ctx.BaseOnChildPropertyChangedMethod != null )
+        {
+            meta.Proceed();
+        }
+    }
+
+    [Template]
+    private static void OnChildPropertyChangedMainSwitchCase(
+        IReadOnlyClassicProcessingNode node,
+        [CompileTime] bool hasUpdateMethod,
+        ObservabilityTemplateArgs ctx )
+    {
+        if ( hasUpdateMethod )
+        {
+            // Update method will deal with notifications
+            node.UpdateMethod.Value!.With( InvokerOptions.Final ).Invoke();
+        }
+        else
+        {
+            // No update method, notify here.
+            foreach ( var r in node.AllReferencedBy()
+                         .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
+                         .OrderBy( n => n.Name ) )
+            {
+                ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }
         }
 
@@ -734,7 +768,10 @@ internal sealed class Templates : ITemplateProvider
         }
 
         var propertyName = propertyChangedEventArgs.Value!.PropertyName;
+        var propertyNameExpression = (IExpression) propertyName;
         var nodeIsAccessible = node.FieldOrProperty.Accessibility != Accessibility.Private;
+
+        var switchBuilder = new SwitchStatementBuilder( propertyNameExpression );
 
         foreach ( var childNode in node.Children )
         {
@@ -745,37 +782,75 @@ internal sealed class Templates : ITemplateProvider
 
             if ( hasUpdateMethod || hasRefs )
             {
-                if ( propertyName == childNode.Name )
-                {
-                    if ( hasUpdateMethod )
-                    {
-                        // Update method will deal with notifications
-                        childNode.UpdateMethod.Value!.With( InvokerOptions.Final ).Invoke();
-                    }
-                    else
-                    {
-                        // No update method, notify here.
-                        foreach ( var r in childNode.AllReferencedBy()
-                                     .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                                     .OrderBy( n => n.Name ) )
-                        {
-                            templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
-                        }
-
-                        if ( nodeIsAccessible )
-                        {
-                            templateArgs.OnChildPropertyChangedMethod!.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
-                        }
-                    }
-
-                    return;
-                }
+                switchBuilder.AddCase(
+                    new SwitchStatementLabel( childNode.Name ),
+                    StatementFactory.FromTemplate(
+                                nameof(HandleChildPropertyChangedCase),
+                                args: new
+                                {
+                                    templateArgs,
+                                    node,
+                                    hasUpdateMethod,
+                                    childNode,
+                                    nodeIsAccessible
+                                } ) 
+                        .UnwrapBlock() );
             }
         }
-
+        
         if ( nodeIsAccessible )
         {
-            templateArgs.OnChildPropertyChangedMethod!.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
+            switchBuilder.AddDefault(
+                StatementFactory.FromTemplate(
+                            nameof(HandleChildPropertyChangedDefault),
+                            args: new
+                            {
+                                templateArgs,
+                                node,
+                                propertyName = propertyNameExpression
+                            } ) 
+                    .UnwrapBlock() );
+        }
+
+        if ( switchBuilder.SectionCount > 0 )
+        {
+            meta.InsertStatement( switchBuilder.ToStatement() );
+        }
+
+        
+    }
+
+    [Template]
+    private static void HandleChildPropertyChangedDefault( ObservabilityTemplateArgs templateArgs, IReadOnlyClassicProcessingNode node, IExpression propertyName ) 
+        => templateArgs.OnChildPropertyChangedMethod!.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
+
+    [Template]
+    private static void HandleChildPropertyChangedCase(
+        ObservabilityTemplateArgs templateArgs,
+        IReadOnlyClassicProcessingNode node,
+        [CompileTime] bool hasUpdateMethod,
+        IReadOnlyClassicProcessingNode childNode,
+        [CompileTime] bool nodeIsAccessible )
+    {
+        if ( hasUpdateMethod )
+        {
+            // Update method will deal with notifications
+            childNode.UpdateMethod.Value!.With( InvokerOptions.Final ).Invoke();
+        }
+        else
+        {
+            // No update method, notify here.
+            foreach ( var r in childNode.AllReferencedBy()
+                         .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
+                         .OrderBy( n => n.Name ) )
+            {
+                templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+            }
+
+            if ( nodeIsAccessible )
+            {
+                templateArgs.OnChildPropertyChangedMethod!.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, childNode.Name );
+            }
         }
     }
 }
