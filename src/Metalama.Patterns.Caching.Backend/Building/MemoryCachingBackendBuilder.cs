@@ -43,5 +43,5 @@ public sealed class MemoryCachingBackendBuilder : ConcreteCachingBackendBuilder
     }
 
     public override CachingBackend CreateBackend( CreateBackendArgs args )
-        => new MemoryCachingBackend( this._memoryCache ?? new MemoryCache( new MemoryCacheOptions() ), this._configuration, this.ServiceProvider );
+        => new MemoryCachingBackend( this._memoryCache, this._configuration, this.ServiceProvider );
 }
