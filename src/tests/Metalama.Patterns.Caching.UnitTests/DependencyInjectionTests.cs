@@ -26,7 +26,7 @@ public sealed class DependencyInjectionTests
         TestingCacheBackend? backend = null;
         ServiceCollection serviceCollection = new();
         serviceCollection.AddLogging( logging => logging.AddXUnitLogger( this._testOutputHelper ).SetMinimumLevel( LogLevel.Debug ) );
-        serviceCollection.AddCaching( b => b.WithBackend( backend = new TestingCacheBackend( "test", b.ServiceProvider ) ) );
+        serviceCollection.AddMetalamaCaching( b => b.WithBackend( backend = new TestingCacheBackend( "test", b.ServiceProvider ) ) );
         serviceCollection.AddSingleton<C>();
         var serviceProvider = serviceCollection.BuildServiceProvider();
         await using var initializer = serviceProvider.GetRequiredService<ICachingService>();
