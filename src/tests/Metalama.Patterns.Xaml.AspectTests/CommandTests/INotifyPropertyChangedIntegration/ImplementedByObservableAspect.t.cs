@@ -43,7 +43,7 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
     this.Foo1Command = new DelegateCommand(Execute, CanExecute, this, "CanExecuteFoo1");
   }
   public ICommand Foo1Command { get; }
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -51,7 +51,7 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  [OnUnmonitoredObservablePropertyChangedMethod]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
@@ -92,7 +92,7 @@ public class ImplementedByBase : ImplementedByObservableAspect
     this.Foo2Command = new DelegateCommand(Execute, CanExecute, this, "CanExecuteFoo2");
   }
   public ICommand Foo2Command { get; }
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected override void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
     base.OnChildPropertyChanged(parentPropertyPath, propertyName);
@@ -101,7 +101,7 @@ public class ImplementedByBase : ImplementedByObservableAspect
   {
     base.OnPropertyChanged(propertyName);
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  [OnUnmonitoredObservablePropertyChangedMethod]
   protected override void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
     base.OnUnmonitoredObservablePropertyChanged(propertyPath, oldValue, newValue);

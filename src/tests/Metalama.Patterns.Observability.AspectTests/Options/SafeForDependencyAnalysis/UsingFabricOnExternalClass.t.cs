@@ -2,7 +2,7 @@
 public class UsingFabricOnExternalClass : INotifyPropertyChanged
 {
   public int Count => ExternalClass.Foo();
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -10,7 +10,7 @@ public class UsingFabricOnExternalClass : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { })]
+  [OnUnmonitoredObservablePropertyChangedMethod]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

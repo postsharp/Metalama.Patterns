@@ -4,7 +4,7 @@ namespace Metalama.Patterns.Observability.AspectTests;
 [Observable]
 public sealed class SealedNoProperties : INotifyPropertyChanged
 {
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }

@@ -20,7 +20,7 @@ public sealed class SealedNonInpcAutoProperty : INotifyPropertyChanged
       }
     }
   }
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }

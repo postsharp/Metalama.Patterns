@@ -19,7 +19,7 @@ public class InpcAutoPropertyNoRefs : INotifyPropertyChanged
       }
     }
   }
-  [OnChildPropertyChangedMethod(new string[] { })]
+  [OnChildPropertyChangedMethod]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -27,7 +27,7 @@ public class InpcAutoPropertyNoRefs : INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod(new string[] { "X" })]
+  [OnUnmonitoredObservablePropertyChangedMethod("X")]
   protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
