@@ -67,11 +67,13 @@ internal sealed class Templates : ITemplateProvider
 
                 meta.Target.FieldOrProperty.Value = value;
 
+#pragma warning disable IDE0031
                 if ( ctx.OnObservablePropertyChangedMethod != null )
                 {
                     ctx.OnObservablePropertyChangedMethod.With( InvokerOptions.Final )
                         .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
                 }
+#pragma warning restore IDE0031
             }
             else
             {
@@ -411,10 +413,10 @@ internal sealed class Templates : ITemplateProvider
                     .OrderBy( s => s );
 
                 switchBuilder.AddCase(
-                    new SwitchStatementLabel( node.Name ),
+                    SwitchStatementLabel.CreateLiteral( node.Name ),
                     StatementFactory.FromTemplate(
-                                nameof(OnPropertyChangedSwitchCase),
-                                new { templateArgsValue, node, childUpdateMethods, rootPropertyNamesToNotify } ) 
+                            nameof(OnPropertyChangedSwitchCase),
+                            new { templateArgsValue, node, childUpdateMethods, rootPropertyNamesToNotify } )
                         .UnwrapBlock() );
             }
             else
@@ -604,7 +606,7 @@ internal sealed class Templates : ITemplateProvider
             if ( hasUpdateMethod || hasRefs )
             {
                 switchBuilder.AddCase(
-                    new SwitchStatementLabel( node.Parent.DottedPropertyPath, node.Name ),
+                    SwitchStatementLabel.CreateLiteral( node.Parent.DottedPropertyPath, node.Name ),
                     StatementFactory.FromTemplate(
                             new TemplateInvocation( nameof(OnChildPropertyChangedMainSwitchCase), arguments: new { node, hasUpdateMethod, ctx } ) )
                         .UnwrapBlock() );
@@ -783,32 +785,27 @@ internal sealed class Templates : ITemplateProvider
             if ( hasUpdateMethod || hasRefs )
             {
                 switchBuilder.AddCase(
-                    new SwitchStatementLabel( childNode.Name ),
+                    SwitchStatementLabel.CreateLiteral( childNode.Name ),
                     StatementFactory.FromTemplate(
-                                nameof(HandleChildPropertyChangedCase),
-                                args: new
-                                {
-                                    templateArgs,
-                                    node,
-                                    hasUpdateMethod,
-                                    childNode,
-                                    nodeIsAccessible
-                                } ) 
-                        .UnwrapBlock() );
-            }
-        }
-        
-        if ( nodeIsAccessible )
-        {
-            switchBuilder.AddDefault(
-                StatementFactory.FromTemplate(
-                            nameof(HandleChildPropertyChangedDefault),
+                            nameof(HandleChildPropertyChangedCase),
                             args: new
                             {
                                 templateArgs,
                                 node,
-                                propertyName = propertyNameExpression
-                            } ) 
+                                hasUpdateMethod,
+                                childNode,
+                                nodeIsAccessible
+                            } )
+                        .UnwrapBlock() );
+            }
+        }
+
+        if ( nodeIsAccessible )
+        {
+            switchBuilder.AddDefault(
+                StatementFactory.FromTemplate(
+                        nameof(HandleChildPropertyChangedDefault),
+                        args: new { templateArgs, node, propertyName = propertyNameExpression } )
                     .UnwrapBlock() );
         }
 
@@ -816,12 +813,13 @@ internal sealed class Templates : ITemplateProvider
         {
             meta.InsertStatement( switchBuilder.ToStatement() );
         }
-
-        
     }
 
     [Template]
-    private static void HandleChildPropertyChangedDefault( ObservabilityTemplateArgs templateArgs, IReadOnlyClassicProcessingNode node, IExpression propertyName ) 
+    private static void HandleChildPropertyChangedDefault(
+        ObservabilityTemplateArgs templateArgs,
+        IReadOnlyClassicProcessingNode node,
+        IExpression propertyName )
         => templateArgs.OnChildPropertyChangedMethod!.With( InvokerOptions.Final ).Invoke( node.DottedPropertyPath, propertyName );
 
     [Template]

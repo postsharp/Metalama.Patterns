@@ -9,7 +9,6 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Patterns.Observability.Implementation.Graph;
 using Metalama.Patterns.Observability.Options;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
@@ -349,12 +348,12 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
                 b =>
                 {
-                    if ( this._propertyNamesForOnObservablePropertyChangedMethod .Count > 0 )
+                    if ( this._propertyNamesForOnObservablePropertyChangedMethod.Count > 0 )
                     {
-                    b.AddAttribute(
-                        AttributeConstruction.Create(
-                            this._assets.InvokedForAttribute,
-                            this._propertyNamesForOnObservablePropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
+                        b.AddAttribute(
+                            AttributeConstruction.Create(
+                                this._assets.InvokedForAttribute,
+                                this._propertyNamesForOnObservablePropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
                     }
 
                     if ( isOverride )
