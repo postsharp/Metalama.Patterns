@@ -56,7 +56,7 @@ internal class MemoryCachingBackend : CachingBackend
         serviceProvider )
     {
         configuration ??= new MemoryCachingBackendConfiguration();
-        this._cache = cache ?? new MemoryCache( new MemoryCacheOptions() );
+        this._cache = cache ?? (IMemoryCache?) serviceProvider?.GetService( typeof(IMemoryCache) ) ?? new MemoryCache( new MemoryCacheOptions() );
         this._serializer = configuration.Serializer;
         this._sizeCalculator = this._serializer != null ? item => ((byte[]?) item)?.Length ?? 0 : configuration.SizeCalculator;
     }
