@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Metalama.Patterns.Observability.Metadata;
 namespace Metalama.Patterns.Observability.AspectTests;
 [Observable]
 public sealed class SealedNonInpcAutoProperty : INotifyPropertyChanged
@@ -19,10 +18,6 @@ public sealed class SealedNonInpcAutoProperty : INotifyPropertyChanged
         this.OnPropertyChanged("X");
       }
     }
-  }
-  [OnChildPropertyChangedMethod]
-  private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
-  {
   }
   private void OnPropertyChanged(string propertyName)
   {

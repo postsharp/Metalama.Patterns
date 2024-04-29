@@ -12,15 +12,15 @@ public sealed class ClassicImplementationStrategyOptionsBuilder
     private ClassicImplementationStrategyOptions _options = new();
 
     /// <summary>
-    /// Sets a value indicating whether the <c>OnUnmonitoredObservablePropertyChanged</c> method should be introduced.
+    /// Sets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced.
     /// </summary>
     /// <remarks>
-    /// <inheritdoc cref="ClassicImplementationStrategyOptions.EnableOnUnmonitoredObservablePropertyChangedMethod"/>
+    /// <inheritdoc cref="ClassicImplementationStrategyOptions.EnableOnObservablePropertyChangedMethod"/>
     /// </remarks>
-    public bool EnableOnUnmonitoredObservablePropertyChangedMethod
+    public bool EnableOnObservablePropertyChangedMethod
     {
         // ReSharper disable once WithExpressionModifiesAllMembers
-        set => this._options = this._options with { EnableOnUnmonitoredObservablePropertyChangedMethod = value };
+        set => this._options = this._options with { EnableOnObservablePropertyChangedMethod = value };
     }
 
     internal ClassicImplementationStrategyOptions Build() => this._options;

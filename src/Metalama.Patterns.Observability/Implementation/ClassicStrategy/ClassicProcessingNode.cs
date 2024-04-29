@@ -96,7 +96,7 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
     /// will throw if it has not been set. This provides defense against incorrect program design
     /// that could otherwise lead to subtle incorrect behaviour.
     /// </remarks>
-    public DeferredOptional<IMethod> UpdateMethod { get; } = new( mustBeSetBeforeGet: true );
+    public Deferred<IMethod?> UpdateMethod { get; } = new();
 
     private Deferred<IMethod>? _subscribeMethod;
 
@@ -107,11 +107,11 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
         => this._subscribeMethod ?? throw new InvalidOperationException(
             nameof(this.SubscribeMethod) + " is not applicable to this node, access indicates incorrect program design." );
 
-    IReadOnlyDeferredOptional<IMethod> IReadOnlyClassicProcessingNode.UpdateMethod => this.UpdateMethod;
+    IDeferred<IMethod?> IReadOnlyClassicProcessingNode.UpdateMethod => this.UpdateMethod;
 
-    IReadOnlyDeferred<IField> IReadOnlyClassicProcessingNode.HandlerField => this.HandlerField;
+    IDeferred<IField> IReadOnlyClassicProcessingNode.HandlerField => this.HandlerField;
 
-    IReadOnlyDeferred<IField> IReadOnlyClassicProcessingNode.LastValueField => this.LastValueField;
+    IDeferred<IField> IReadOnlyClassicProcessingNode.LastValueField => this.LastValueField;
 
     IReadOnlyClassicProcessingNode IHasParent<IReadOnlyClassicProcessingNode>.Parent => this.Parent;
 

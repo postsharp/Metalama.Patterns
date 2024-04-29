@@ -225,7 +225,7 @@ public sealed class InheritanceTests : InpcTestsBase
     }
 
     [Fact]
-    public void DerivedReferencesUnmonitoredBaseInpcProperty()
+    public void DerivedReferencesBaseInpcProperty()
     {
         var v = new C18();
 

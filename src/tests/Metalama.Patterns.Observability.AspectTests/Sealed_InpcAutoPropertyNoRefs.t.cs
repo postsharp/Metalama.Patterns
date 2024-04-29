@@ -17,10 +17,6 @@ public sealed class SealedInpcAutoPropertyNoRefs : INotifyPropertyChanged
       }
     }
   }
-  [OnChildPropertyChangedMethod]
-  private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
-  {
-  }
   private void OnPropertyChanged(string propertyName)
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

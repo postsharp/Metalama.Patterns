@@ -15,7 +15,7 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
         var oldValue = this._x;
         if (oldValue != null)
         {
-          oldValue.PropertyChanged -= this._onXPropertyChangedHandler;
+          oldValue.PropertyChanged -= this._handleXPropertyChanged;
         }
         this._x = value;
         this.OnPropertyChanged("Y");
@@ -25,8 +25,8 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
     }
   }
   public int Y => this.X.A;
-  private PropertyChangedEventHandler? _onXPropertyChangedHandler;
-  [OnChildPropertyChangedMethod("X")]
+  private PropertyChangedEventHandler? _handleXPropertyChanged;
+  [InvokedForProperties("X")]
   private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
@@ -38,20 +38,23 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
   {
     if (value != null)
     {
-      this._onXPropertyChangedHandler ??= OnChildPropertyChanged_1;
-      value.PropertyChanged += this._onXPropertyChangedHandler;
+      this._handleXPropertyChanged ??= HandlePropertyChanged;
+      value.PropertyChanged += this._handleXPropertyChanged;
     }
-    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
+    void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;
-        if (propertyName == "A")
+        switch (propertyName)
         {
-          this.OnPropertyChanged("Y");
-          this.OnChildPropertyChanged("X", "A");
-          return;
+          case "A":
+            this.OnPropertyChanged("Y");
+            this.OnChildPropertyChanged("X", "A");
+            break;
+          default:
+            this.OnChildPropertyChanged("X", propertyName);
+            break;
         }
-        this.OnChildPropertyChanged("X", propertyName);
       }
     }
   }

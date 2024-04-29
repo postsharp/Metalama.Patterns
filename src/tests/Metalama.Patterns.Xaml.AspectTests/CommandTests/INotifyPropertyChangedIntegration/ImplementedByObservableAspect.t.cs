@@ -4,7 +4,6 @@ using System.Windows.Input;
 // TODO: #34044 Can't use RequireOrderedAspects yet. If not fixed, re-enable when DependencyPropertyAttribute aspect is also ordered.
 // __RequireOrderedAspects__
 using Metalama.Patterns.Observability;
-using Metalama.Patterns.Observability.Metadata;
 using Metalama.Patterns.Xaml.Implementation;
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.INotifyPropertyChangedIntegration.ImplementedByObservableAspect;
 [Observable]
@@ -43,17 +42,9 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
     this.Foo1Command = new DelegateCommand(Execute, CanExecute, this, "CanExecuteFoo1");
   }
   public ICommand Foo1Command { get; }
-  [OnChildPropertyChangedMethod]
-  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
-  {
-  }
   protected virtual void OnPropertyChanged(string propertyName)
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  [OnUnmonitoredObservablePropertyChangedMethod]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
-  {
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }
@@ -92,18 +83,8 @@ public class ImplementedByBase : ImplementedByObservableAspect
     this.Foo2Command = new DelegateCommand(Execute, CanExecute, this, "CanExecuteFoo2");
   }
   public ICommand Foo2Command { get; }
-  [OnChildPropertyChangedMethod]
-  protected override void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
-  {
-    base.OnChildPropertyChanged(parentPropertyPath, propertyName);
-  }
   protected override void OnPropertyChanged(string propertyName)
   {
     base.OnPropertyChanged(propertyName);
-  }
-  [OnUnmonitoredObservablePropertyChangedMethod]
-  protected override void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
-  {
-    base.OnUnmonitoredObservablePropertyChanged(propertyPath, oldValue, newValue);
   }
 }

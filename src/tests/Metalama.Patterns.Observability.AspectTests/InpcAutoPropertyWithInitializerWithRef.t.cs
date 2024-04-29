@@ -1,8 +1,5 @@
 using System.ComponentModel;
-// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
-// @Include(Include/SimpleInpcByHand.cs)
 using Metalama.Patterns.Observability.AspectTests.Include;
-using Metalama.Patterns.Observability.Metadata;
 namespace Metalama.Patterns.Observability.AspectTests.InpcAutoPropertyWithInitializerWithRef;
 [Observable]
 public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
@@ -21,9 +18,10 @@ public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
         var oldValue = this._x;
         if (oldValue != null)
         {
-          oldValue.PropertyChanged -= this._onXPropertyChangedHandler;
+          oldValue.PropertyChanged -= this._handleXPropertyChanged;
         }
         this._x = value;
+        this.OnObservablePropertyChanged("X", oldValue, value);
         this.OnPropertyChanged("Y");
         this.OnPropertyChanged("X");
         this.SubscribeToX(value);
@@ -31,41 +29,44 @@ public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
     }
   }
   public int Y => this.X.A;
-  private PropertyChangedEventHandler? _onXPropertyChangedHandler;
+  private PropertyChangedEventHandler? _handleXPropertyChanged;
   public InpcAutoPropertyWithInitializerWithRef()
   {
     this.SubscribeToX(this.X);
   }
-  [OnChildPropertyChangedMethod("X")]
+  [InvokedForProperties("X")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
+  {
+  }
+  [InvokedForProperties("X")]
+  protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
-  [OnUnmonitoredObservablePropertyChangedMethod]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
-  {
-  }
   private void SubscribeToX(SimpleInpcByHand value)
   {
     if (value != null)
     {
-      this._onXPropertyChangedHandler ??= OnChildPropertyChanged_1;
-      value.PropertyChanged += this._onXPropertyChangedHandler;
+      this._handleXPropertyChanged ??= HandlePropertyChanged;
+      value.PropertyChanged += this._handleXPropertyChanged;
     }
-    void OnChildPropertyChanged_1(object? sender, PropertyChangedEventArgs e)
+    void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
       {
         var propertyName = e.PropertyName;
-        if (propertyName == "A")
+        switch (propertyName)
         {
-          this.OnPropertyChanged("Y");
-          this.OnChildPropertyChanged("X", "A");
-          return;
+          case "A":
+            this.OnPropertyChanged("Y");
+            this.OnChildPropertyChanged("X", "A");
+            break;
+          default:
+            this.OnChildPropertyChanged("X", propertyName);
+            break;
         }
-        this.OnChildPropertyChanged("X", propertyName);
       }
     }
   }

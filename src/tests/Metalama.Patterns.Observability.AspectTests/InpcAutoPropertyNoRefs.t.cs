@@ -14,22 +14,18 @@ public class InpcAutoPropertyNoRefs : INotifyPropertyChanged
       {
         var oldValue = this._x;
         this._x = value;
-        this.OnUnmonitoredObservablePropertyChanged("X", (INotifyPropertyChanged? )oldValue, value);
+        this.OnObservablePropertyChanged("X", (INotifyPropertyChanged? )oldValue, value);
         this.OnPropertyChanged("X");
       }
     }
   }
-  [OnChildPropertyChangedMethod]
-  protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
+  [InvokedForProperties("X")]
+  protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  [OnUnmonitoredObservablePropertyChangedMethod("X")]
-  protected virtual void OnUnmonitoredObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
-  {
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }
