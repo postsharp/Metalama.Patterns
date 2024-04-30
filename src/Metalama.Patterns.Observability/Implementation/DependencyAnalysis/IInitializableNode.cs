@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Patterns.Observability.Implementation.Graph;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
@@ -13,9 +12,9 @@ internal interface IInitializableNode<in TNode, in TContext>
     /// Sets the data for a node. 
     /// </summary>
     /// <remarks>
-    /// Nodes are initialized in <see cref="GraphExtensions.DescendantsDepthFirst{T}(T)"/> order.
+    /// Nodes are initialized in <see cref="DependencyNodeExtensions.DescendantsDepthFirst{T}(T)"/> order.
     /// </remarks>
-    /// <param name="context">A context object, for example provided by the call to <see cref="DependencyGraphExtensions.DuplicateUsing{TNode, TContext}(DependencyGraph.Node, TContext)"/>.</param>
+    /// <param name="context">A context object, for example provided by the call to <see cref="DependencyGraphExtensions.DuplicateUsing{TNode, TContext}(DependencyNode, TContext)"/>.</param>
     /// <param name="depth">The depth of the node.</param>
     /// <param name="symbol">The symbol of the current node, or <see langword="null"/> if the current node is the root node of a graph.</param>
     /// <param name="parent">The parent of the current node, or <see langword="null"/> if the current node is the root node of a graph.</param>

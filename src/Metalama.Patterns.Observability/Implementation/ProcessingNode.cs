@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
-using Metalama.Patterns.Observability.Implementation.Graph;
 using Microsoft.CodeAnalysis;
 using System.Text;
 
@@ -13,12 +12,12 @@ namespace Metalama.Patterns.Observability.Implementation;
 [CompileTime]
 internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
     IReadOnlyProcessingNode,
-    INode<TDerived>,
+    IDependencyNode<TDerived>,
     IInitializableNode<TDerived, ProcessingNodeInitializationContext>
     where TDerived : ProcessingNode<TDerived, TReadOnlyDerivedInterface>, TReadOnlyDerivedInterface, new()
     where TReadOnlyDerivedInterface :
     IReadOnlyProcessingNode,
-    INode<TReadOnlyDerivedInterface>
+    IDependencyNode<TReadOnlyDerivedInterface>
 {
     private TDerived? _parent;
     private ISymbol? _symbol;
@@ -34,7 +33,7 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
     protected ProcessingNode() { }
 
     /// <summary>
-    /// Initializes the node during duplication from a <see cref="DependencyGraph.Node"/> graph.
+    /// Initializes the node during duplication from a <see cref="DependencyNode"/> graph.
     /// </summary>
     void IInitializableNode<TDerived, ProcessingNodeInitializationContext>.Initialize(
         ProcessingNodeInitializationContext? initializationContext,
@@ -67,7 +66,7 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
 
     public bool IsRoot => this._parent == null;
 
-    public TDerived Parent => this._parent ?? throw GraphExtensions.NewNotSupportedOnRootNodeException();
+    public TDerived Parent => this._parent ?? throw DependencyNodeExtensions.NewNotSupportedOnRootNodeException();
 
     /// <summary>
     /// Gets the depth of a tree node. The root node has depth zero, the children of the root node have depth 1, and so on.
@@ -79,12 +78,12 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
     /// Gets the Roslyn symbol of the node. Use <see cref="FieldOrProperty"/> for the Metalama equivalent.
     /// </summary>
     /// <exception cref="NotSupportedException"><see cref="IsRoot"/> is <see langword="true"/>.</exception>
-    public ISymbol Symbol => this._symbol ?? throw GraphExtensions.NewNotSupportedOnRootNodeException();
+    public ISymbol Symbol => this._symbol ?? throw DependencyNodeExtensions.NewNotSupportedOnRootNodeException();
 
     /// <summary>
     /// Gets the Metalama <see cref="IFieldOrProperty"/> for the node. Use <see cref="Symbol"/> for the Roslyn equivalent.
     /// </summary>
-    public IFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw GraphExtensions.NewNotSupportedOnRootNodeException();
+    public IFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw DependencyNodeExtensions.NewNotSupportedOnRootNodeException();
 
     /// <summary>
     /// Gets a property path like "A1" or "A1.B1".
@@ -92,7 +91,7 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
     public string DottedPropertyPath
         => this._dottedPropertyPath ??=
             this.IsRoot
-                ? throw GraphExtensions.NewNotSupportedOnRootNodeException()
+                ? throw DependencyNodeExtensions.NewNotSupportedOnRootNodeException()
                 : this.Parent.IsRoot
                     ? this.Name
                     : $"{this.Parent.DottedPropertyPath}.{this.Name}";
@@ -103,7 +102,7 @@ internal abstract class ProcessingNode<TDerived, TReadOnlyDerivedInterface> :
     public string ContiguousPropertyPath
         => this._contiguousPropertyPath ??=
             this.IsRoot
-                ? throw GraphExtensions.NewNotSupportedOnRootNodeException()
+                ? throw DependencyNodeExtensions.NewNotSupportedOnRootNodeException()
                 : this.Parent.IsRoot
                     ? this.Name
                     : $"{this.Parent.ContiguousPropertyPath}{this.Name}";

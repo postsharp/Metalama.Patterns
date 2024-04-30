@@ -13,14 +13,15 @@ public sealed record DependencyAnalysisOptions :
     IHierarchicalOptions<INamedType>,
     IHierarchicalOptions<IMember>
 {
-    public bool? IsSafe { get; init; }
+    public bool? IgnoreUnsupportedDependencies { get; init; }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (DependencyAnalysisOptions) changes;
 
-        return new DependencyAnalysisOptions { IsSafe = other.IsSafe ?? this.IsSafe };
+        return new DependencyAnalysisOptions { IgnoreUnsupportedDependencies = other.IgnoreUnsupportedDependencies ?? this.IgnoreUnsupportedDependencies };
     }
 
-    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context ) => new DependencyAnalysisOptions() { IsSafe = false };
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
+        => new DependencyAnalysisOptions() { IgnoreUnsupportedDependencies = false };
 }

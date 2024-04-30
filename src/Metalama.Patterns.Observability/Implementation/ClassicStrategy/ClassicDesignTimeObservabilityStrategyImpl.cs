@@ -3,32 +3,35 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Patterns.Observability.Implementation.DesignTimeStrategy;
 using Metalama.Patterns.Observability.Options;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTimeImplementationStrategyBuilder
+internal sealed class ClassicDesignTimeObservabilityStrategyImpl : DesignTimeObservabilityStrategy
 {
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
     private readonly IMethod? _baseOnObservablePropertyChangedMethod;
 
-    public ClassicDesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> builder ) : base( builder )
+    private IAspectBuilder<INamedType> Builder { get; }
+
+    public ClassicDesignTimeObservabilityStrategyImpl( IAspectBuilder<INamedType> builder )
     {
+        this.Builder = builder;
+
         var target = builder.Target;
         var elements = builder.Target.Compilation.Cache.GetOrAdd( _ => new Assets() );
-        this._baseOnPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnPropertyChangedMethod( target );
-        this._baseOnChildPropertyChangedMethod = ClassicImplementationStrategyBuilder.GetOnChildPropertyChangedMethod( target );
+        this._baseOnPropertyChangedMethod = ClassicObservabilityStrategyImpl.GetOnPropertyChangedMethod( target );
+        this._baseOnChildPropertyChangedMethod = ClassicObservabilityStrategyImpl.GetOnChildPropertyChangedMethod( target );
 
         this._baseOnObservablePropertyChangedMethod =
-            ClassicImplementationStrategyBuilder.GetOnObservablePropertyChangedMethod( target, elements );
+            ClassicObservabilityStrategyImpl.GetOnObservablePropertyChangedMethod( target, elements );
     }
 
-    protected override void BuildAspect()
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect();
+        base.BuildAspect( builder );
 
         // Also introduce any methods which might be introduced by the full builder which might reasonably be observed by other code.
 
@@ -97,7 +100,7 @@ internal sealed class ClassicDesignTimeImplementationStrategyBuilder : DesignTim
 
     private void IntroduceOnObservablePropertyChanged()
     {
-        if ( !this.Builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>().EnableOnObservablePropertyChangedMethod
+        if ( !this.Builder.Target.Enhancements().GetOptions<ClassicObservabilityStrategyOptions>().EnableOnObservablePropertyChangedMethod
              == true )
         {
             return;

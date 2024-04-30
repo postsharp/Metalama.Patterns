@@ -11,23 +11,23 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-internal sealed partial class ClassicImplementationStrategyBuilder
+internal sealed partial class ClassicObservabilityStrategyImpl
 {
     [CompileTime]
-    private sealed class GraphBuildingContext : DependencyGraph.IGraphBuildingContext
+    private sealed class GraphBuildingContext : IGraphBuildingContext
     {
-        private readonly ClassicImplementationStrategyBuilder _strategyBuilder;
+        private readonly ClassicObservabilityStrategyImpl _observabilityStrategyBuilder;
 
-        public GraphBuildingContext( ClassicImplementationStrategyBuilder strategyBuilder )
+        public GraphBuildingContext( ClassicObservabilityStrategyImpl observabilityStrategyBuilder )
         {
-            this._strategyBuilder = strategyBuilder;
+            this._observabilityStrategyBuilder = observabilityStrategyBuilder;
         }
 
         public bool HasReportedErrors { get; private set; }
 
-        public bool IsConfiguredAsSafe( ISymbol symbol )
+        public bool MustIgnoreUnsupportedDependencies( ISymbol symbol )
         {
-            var decl = this._strategyBuilder._builder.Target.Compilation.GetDeclaration( symbol );
+            var decl = this._observabilityStrategyBuilder._builder.Target.Compilation.GetDeclaration( symbol );
 
             var options = decl switch
             {
@@ -38,23 +38,23 @@ internal sealed partial class ClassicImplementationStrategyBuilder
                 _ => throw new NotImplementedException()
             };
 
-            return options.IsSafe == true;
+            return options.IgnoreUnsupportedDependencies == true;
         }
 
         public bool IsAutoPropertyOrField( ISymbol symbol )
-            => this._strategyBuilder._builder.Target.Compilation.GetDeclaration( symbol ) is IFieldOrProperty { IsAutoPropertyOrField: true };
+            => this._observabilityStrategyBuilder._builder.Target.Compilation.GetDeclaration( symbol ) is IFieldOrProperty { IsAutoPropertyOrField: true };
 
         public void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null )
         {
             this.HasReportedErrors |= diagnostic.Definition.Severity == Severity.Error;
-            this._strategyBuilder._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
+            this._observabilityStrategyBuilder._builder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
         }
 
         public bool TreatAsImplementingInpc( ITypeSymbol type )
         {
-            var typeDecl = this._strategyBuilder._builder.Target.Compilation.GetDeclaration( type ) as IType;
+            var typeDecl = this._observabilityStrategyBuilder._builder.Target.Compilation.GetDeclaration( type ) as IType;
 
-            return typeDecl != null && this._strategyBuilder._inpcInstrumentationKindLookup.Get( typeDecl ) != InpcInstrumentationKind.None;
+            return typeDecl != null && this._observabilityStrategyBuilder._inpcInstrumentationKindLookup.Get( typeDecl ) != InpcInstrumentationKind.None;
         }
     }
 }

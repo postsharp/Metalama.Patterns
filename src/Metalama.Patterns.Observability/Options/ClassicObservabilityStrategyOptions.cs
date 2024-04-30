@@ -13,8 +13,8 @@ namespace Metalama.Patterns.Observability.Options;
 /// </summary>
 [PublicAPI]
 [CompileTime]
-internal sealed record ClassicImplementationStrategyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>,
-                                                              IHierarchicalOptions<INamedType>
+internal sealed record ClassicObservabilityStrategyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>,
+                                                             IHierarchicalOptions<INamedType>
 {
     /// <summary>
     /// Gets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced.
@@ -30,15 +30,15 @@ internal sealed record ClassicImplementationStrategyOptions : IHierarchicalOptio
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
-        var other = (ClassicImplementationStrategyOptions) changes;
+        var other = (ClassicObservabilityStrategyOptions) changes;
 
-        return new ClassicImplementationStrategyOptions
+        return new ClassicObservabilityStrategyOptions
         {
             EnableOnObservablePropertyChangedMethod = other.EnableOnObservablePropertyChangedMethod
-                                                                 ?? this.EnableOnObservablePropertyChangedMethod
+                                                      ?? this.EnableOnObservablePropertyChangedMethod
         };
     }
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new ClassicImplementationStrategyOptions() { EnableOnObservablePropertyChangedMethod = true };
+        => new ClassicObservabilityStrategyOptions() { EnableOnObservablePropertyChangedMethod = true };
 }

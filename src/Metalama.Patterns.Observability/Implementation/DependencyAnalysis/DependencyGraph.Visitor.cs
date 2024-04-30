@@ -5,19 +5,21 @@
 // related namespaces.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Runtime.CompilerServices;
+using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
 internal static partial class DependencyGraph
 {
     private static void AddReferencedProperties(
-        Framework.Code.ICompilation compilation,
-        Node tree,
+        ICompilation compilation,
+        DependencyNode tree,
         IPropertySymbol property,
         IGraphBuildingContext context,
         RoslynAssets assets,
@@ -180,7 +182,7 @@ internal static partial class DependencyGraph
                 if ( !(!fieldSymbol.IsStatic && fieldSymbol.EffectiveAccessibility() == Accessibility.Private)
                      && !fieldSymbol.ContainingType.IsPrimitiveType( this._assets )
                      && !(fieldSymbol.IsReadOnly && fieldSymbol.Type.IsPrimitiveType( this._assets ))
-                     && !this._context.IsConfiguredAsSafe( sr.Symbol ) )
+                     && !this._context.MustIgnoreUnsupportedDependencies( sr.Symbol ) )
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
@@ -198,7 +200,7 @@ internal static partial class DependencyGraph
                 {
                     if ( !sr.Symbol.IsStatic )
                     {
-                        isConfiguredAsSafe ??= this._context.IsConfiguredAsSafe( sr.Symbol );
+                        isConfiguredAsSafe ??= this._context.MustIgnoreUnsupportedDependencies( sr.Symbol );
 
                         if ( isConfiguredAsSafe != true )
                         {
@@ -212,7 +214,7 @@ internal static partial class DependencyGraph
                 {
                     // Only members of primitive types are implicitly safe to access.
 
-                    isConfiguredAsSafe ??= this._context.IsConfiguredAsSafe( sr.Symbol );
+                    isConfiguredAsSafe ??= this._context.MustIgnoreUnsupportedDependencies( sr.Symbol );
 
                     if ( isConfiguredAsSafe != true )
                     {
@@ -320,7 +322,7 @@ internal static partial class DependencyGraph
             var symbolInfo = this._semanticModel.GetSymbolInfo( node.Type, this._cancellationToken );
             var variableType = ((ITypeSymbol?) symbolInfo.Symbol)?.GetElementaryType();
 
-            if ( variableType != null && !(variableType.IsPrimitiveType( this._assets ) || this._context.IsConfiguredAsSafe( variableType )) )
+            if ( variableType != null && !(variableType.IsPrimitiveType( this._assets ) || this._context.MustIgnoreUnsupportedDependencies( variableType )) )
             {
                 this._context.ReportDiagnostic(
                     DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments(

@@ -14,13 +14,12 @@ public sealed class ObservableAttribute : Attribute, IAspect<INamedType>
     void IEligible<INamedType>.BuildEligibility( IEligibilityBuilder<INamedType> builder )
     {
         builder.MustNotBeStatic();
+        builder.MustSatisfy( x => x.TypeKind is TypeKind.Class or TypeKind.RecordClass, x => $"{x} must be a class or a record class" );
     }
 
     void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder )
     {
         var options = builder.Target.Enhancements().GetOptions<ObservabilityOptions>();
-        var strategyBuilder = options.ImplementationStrategyFactory!.GetBuilder( builder );
-
-        strategyBuilder.BuildAspect();
+        options.ImplementationStrategy!.BuildAspect( builder );
     }
 }

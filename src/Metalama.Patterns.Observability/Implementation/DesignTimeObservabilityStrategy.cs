@@ -4,30 +4,18 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.ComponentModel;
 
-namespace Metalama.Patterns.Observability.Implementation.DesignTimeStrategy;
+namespace Metalama.Patterns.Observability.Implementation;
 
 /// <summary>
 /// Introduces the minimum set of observable members, without bodies, to suit the Metalama design-time execution scenario.
 /// </summary>
 [CompileTime]
-internal class DesignTimeImplementationStrategyBuilder : IImplementationStrategyBuilder, ITemplateProvider
+internal class DesignTimeObservabilityStrategy : IObservabilityStrategy, ITemplateProvider
 {
-    protected IAspectBuilder<INamedType> Builder { get; }
-
-    protected DesignTimeImplementationStrategyBuilder( IAspectBuilder<INamedType> aspectBuilder )
-    {
-        this.Builder = aspectBuilder;
-    }
-
-    protected virtual void BuildAspect()
+    public virtual void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // Introduce the INotifyPropertyChanged if it's not already implemented.
-        this.Builder.Advice.WithTemplateProvider( this ).ImplementInterface( this.Builder.Target, typeof(INotifyPropertyChanged), OverrideStrategy.Ignore );
-    }
-
-    void IImplementationStrategyBuilder.BuildAspect()
-    {
-        this.BuildAspect();
+        builder.Advice.WithTemplateProvider( this ).ImplementInterface( builder.Target, typeof(INotifyPropertyChanged), OverrideStrategy.Ignore );
     }
 
     // ReSharper disable once EventNeverSubscribedTo.Global

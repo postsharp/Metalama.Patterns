@@ -3,7 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Patterns.Observability.Implementation;
-using Metalama.Patterns.Observability.Implementation.Graph;
+using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
 namespace Metalama.Patterns.Observability.CompileTimeTests;
 
@@ -14,9 +14,9 @@ namespace Metalama.Patterns.Observability.CompileTimeTests;
 [CompileTime]
 internal sealed class TestProcessingNode : ProcessingNode<TestProcessingNode, IReadOnlyTestProcessingNode>, IReadOnlyTestProcessingNode
 {
-    IReadOnlyCollection<IReadOnlyTestProcessingNode> IHasChildren<IReadOnlyTestProcessingNode>.Children => this.Children;
+    IReadOnlyCollection<IReadOnlyTestProcessingNode> IDependencyNode<IReadOnlyTestProcessingNode>.Children => this.Children;
 
-    IReadOnlyTestProcessingNode IHasParent<IReadOnlyTestProcessingNode>.Parent => this.Parent;
+    IReadOnlyTestProcessingNode IDependencyNode<IReadOnlyTestProcessingNode>.Parent => this.Parent;
 
-    IReadOnlyCollection<IReadOnlyTestProcessingNode> IHasReferencedBy<IReadOnlyTestProcessingNode>.ReferencedBy => this.ReferencedBy;
+    IReadOnlyCollection<IReadOnlyTestProcessingNode> IDependencyNode<IReadOnlyTestProcessingNode>.ReferencedBy => this.ReferencedBy;
 }

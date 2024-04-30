@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Patterns.Observability.Implementation.Graph;
+using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using System.Text;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
@@ -43,7 +43,7 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
 
     /// <summary>
     /// Gets the potentially uninitialized field like "B? _lastA2". From non-template code, use
-    /// <see cref="ClassicImplementationStrategyBuilder.GetOrCreateLastValueField(ClassicProcessingNode)"/> instead.
+    /// <see cref="ClassicObservabilityStrategyImpl.GetOrCreateLastValueField(ClassicProcessingNode)"/> instead.
     /// </summary>
     /// <remarks>
     /// The value will only be set for applicable nodes. Template code should only be accessing the value of
@@ -54,7 +54,7 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
 
     /// <summary>
     /// Gets the potentially uninitialized field like "PropertyChangedEventHandler? _onA2PropertyChangedHandler".
-    /// From non-template code, use <see cref="ClassicImplementationStrategyBuilder.GetOrCreateHandlerField(ClassicProcessingNode)"/> instead.
+    /// From non-template code, use <see cref="ClassicObservabilityStrategyImpl.GetOrCreateHandlerField(ClassicProcessingNode)"/> instead.
     /// </summary>
     /// <remarks>
     /// The value will only be set for applicable nodes. Template code should only be accessing the value of
@@ -113,11 +113,11 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
 
     IDeferred<IField> IReadOnlyClassicProcessingNode.LastValueField => this.LastValueField;
 
-    IReadOnlyClassicProcessingNode IHasParent<IReadOnlyClassicProcessingNode>.Parent => this.Parent;
+    IReadOnlyClassicProcessingNode IDependencyNode<IReadOnlyClassicProcessingNode>.Parent => this.Parent;
 
-    IReadOnlyCollection<IReadOnlyClassicProcessingNode> IHasChildren<IReadOnlyClassicProcessingNode>.Children => this.Children;
+    IReadOnlyCollection<IReadOnlyClassicProcessingNode> IDependencyNode<IReadOnlyClassicProcessingNode>.Children => this.Children;
 
-    IReadOnlyCollection<IReadOnlyClassicProcessingNode> IHasReferencedBy<IReadOnlyClassicProcessingNode>.ReferencedBy => this.ReferencedBy;
+    IReadOnlyCollection<IReadOnlyClassicProcessingNode> IDependencyNode<IReadOnlyClassicProcessingNode>.ReferencedBy => this.ReferencedBy;
 
     protected override void ToStringAppendToLine( StringBuilder appendTo, string? format )
     {

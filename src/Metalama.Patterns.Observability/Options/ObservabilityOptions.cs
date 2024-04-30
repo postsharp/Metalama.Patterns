@@ -14,9 +14,9 @@ namespace Metalama.Patterns.Observability.Options;
 internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
 {
     /// <summary>
-    /// Gets the <see cref="IImplementationStrategyFactory"/> used to provide <see cref="IImplementationStrategyBuilder"/> instances.
+    /// Gets the <see cref="IObservabilityStrategy"/> implementing the <see cref="ObservableAttribute"/> aspect.
     /// </summary>
-    public IImplementationStrategyFactory? ImplementationStrategyFactory { get; init; }
+    public IObservabilityStrategy? ImplementationStrategy { get; init; }
 
     private int? _diagnosticCommentVerbosity;
 
@@ -44,7 +44,7 @@ internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>
 
         return new ObservabilityOptions
         {
-            ImplementationStrategyFactory = other.ImplementationStrategyFactory ?? this.ImplementationStrategyFactory,
+            ImplementationStrategy = other.ImplementationStrategy ?? this.ImplementationStrategy,
             DiagnosticCommentVerbosity = other.DiagnosticCommentVerbosity ?? this.DiagnosticCommentVerbosity
         };
     }
@@ -69,7 +69,7 @@ internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>
 
         return new ObservabilityOptions()
         {
-            ImplementationStrategyFactory = ClassicImplementationStrategyFactory.Instance, DiagnosticCommentVerbosity = diagnosticCommentVerbosity
+            ImplementationStrategy = ClassicObservabilityStrategy.Instance, DiagnosticCommentVerbosity = diagnosticCommentVerbosity
         };
     }
 }

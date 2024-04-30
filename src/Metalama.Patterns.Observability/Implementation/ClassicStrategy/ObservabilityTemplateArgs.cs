@@ -19,7 +19,7 @@ namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 [CompileTime]
 internal sealed record ObservabilityTemplateArgs(
     ObservabilityOptions CommonOptions,
-    ClassicImplementationStrategyOptions Options,
+    ClassicObservabilityStrategyOptions Options,
     INamedType TargetType,
     Assets Assets,
     InpcInstrumentationKindLookup InpcInstrumentationKindLookup,

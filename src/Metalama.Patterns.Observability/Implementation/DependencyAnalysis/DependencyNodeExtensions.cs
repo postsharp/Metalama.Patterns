@@ -5,24 +5,24 @@ using System.Runtime.CompilerServices;
 
 // ReSharper disable UnusedMember.Global
 
-namespace Metalama.Patterns.Observability.Implementation.Graph;
+namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
 [CompileTime]
-internal static class GraphExtensions
+internal static class DependencyNodeExtensions
 {
     public static Exception NewNotSupportedOnRootNodeException( [CallerMemberName] string? callerMemberName = null )
         => new InvalidOperationException( $"The operation is not supported on a root node ({callerMemberName})." );
 
     public static IEnumerable<T> DescendantsDepthFirst<T>( this T node )
-        where T : IHasChildren<T>
+        where T : IDependencyNode<T>
         => DescendantsDepthFirst( node, false );
 
     public static IEnumerable<T> SelfAndDescendantsDepthFirst<T>( this T node )
-        where T : IHasChildren<T>
+        where T : IDependencyNode<T>
         => DescendantsDepthFirst( node, true );
 
     private static IEnumerable<T> DescendantsDepthFirst<T>( this T node, bool includeSelf )
-        where T : IHasChildren<T>
+        where T : IDependencyNode<T>
     {
         // NB: No loop detection.
 
@@ -53,7 +53,7 @@ internal static class GraphExtensions
     /// Gets the ancestors of the current node in leaf-to-root order.
     /// </summary>
     public static IEnumerable<T> Ancestors<T>( this T node, bool includeRoot = false )
-        where T : IHasParent<T>
+        where T : IDependencyNode<T>
         => AncestorsCore( node, includeRoot, false );
 
     /// <summary>
@@ -62,11 +62,11 @@ internal static class GraphExtensions
     /// <param name="includeRoot"></param>
     /// <returns></returns>
     public static IEnumerable<T> AncestorsAndSelf<T>( this T node, bool includeRoot = false )
-        where T : IHasParent<T>
+        where T : IDependencyNode<T>
         => AncestorsCore( node, includeRoot, true );
 
     private static IEnumerable<T> AncestorsCore<T>( T node, bool includeRoot, bool includeSelf )
-        where T : IHasParent<T>
+        where T : IDependencyNode<T>
     {
         if ( includeSelf )
         {
@@ -90,7 +90,7 @@ internal static class GraphExtensions
     }
 
     public static T AncestorOrSelfAtDepth<T>( this T node, int depth )
-        where T : IHasParent<T>, IHasDepth
+        where T : IDependencyNode<T>
     {
         if ( depth > node.Depth || depth < 0 )
         {
@@ -118,7 +118,7 @@ internal static class GraphExtensions
     /// </param>
     /// <returns></returns>
     public static IReadOnlyCollection<T> AllReferencedBy<T>( this T node, Func<T, bool>? shouldIncludeImmediateChild = null )
-        where T : IHasReferencedBy<T>, IHasChildren<T>
+        where T : IDependencyNode<T>
     {
         // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
         // However, it's not recursive so there's no risk of stack overflow. So safe, but potentially slow.

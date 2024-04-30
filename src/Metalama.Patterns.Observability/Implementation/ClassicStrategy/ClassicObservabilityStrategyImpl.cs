@@ -7,20 +7,19 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
-using Metalama.Patterns.Observability.Implementation.Graph;
 using Metalama.Patterns.Observability.Options;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-internal sealed partial class ClassicImplementationStrategyBuilder : IImplementationStrategyBuilder, IClassicProcessingNodeInitializationHelper
+internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityStrategy, IClassicProcessingNodeInitializationHelper
 {
     private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
 
     private readonly IAspectBuilder<INamedType> _builder;
     private readonly Deferred<ObservabilityTemplateArgs> _templateArgs = new();
     private readonly ObservabilityOptions _commonOptions;
-    private readonly ClassicImplementationStrategyOptions _classicOptions;
+    private readonly ClassicObservabilityStrategyOptions _classicOptions;
     private readonly Dictionary<IFieldOrProperty, bool> _validateFieldOrPropertyResults = new();
     private readonly IMethod? _baseOnPropertyChangedMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
@@ -39,7 +38,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
     private readonly List<string> _propertyNamesForOnObservablePropertyChangedMethod = new();
     private readonly Deferred<ClassicProcessingNode> _dependencyGraph = new();
 
-    public ClassicImplementationStrategyBuilder( IAspectBuilder<INamedType> builder )
+    public ClassicObservabilityStrategyImpl( IAspectBuilder<INamedType> builder )
     {
         var target = builder.Target;
 
@@ -47,7 +46,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         this._assets = target.Compilation.Cache.GetOrAdd( _ => new Assets() );
         this._inpcInstrumentationKindLookup = new InpcInstrumentationKindLookup( this._builder.Target, this._assets );
         this._commonOptions = builder.Target.Enhancements().GetOptions<ObservabilityOptions>();
-        this._classicOptions = builder.Target.Enhancements().GetOptions<ClassicImplementationStrategyOptions>();
+        this._classicOptions = builder.Target.Enhancements().GetOptions<ClassicObservabilityStrategyOptions>();
 
         // TODO: Consider using BaseType.Definition where possible for better performance.
 
@@ -72,8 +71,13 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
         }
     }
 
-    public void BuildAspect()
+    public void BuildAspect( IAspectBuilder<INamedType> builder )
     {
+        if ( builder != this._builder )
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+
         // Validate, maximising the coverage of diagnostic reporting.
 
         var v1 = this.ValidateBaseImplementation();
@@ -139,7 +143,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 .Where(
                     p =>
                         p is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !p.Attributes.Any( this._assets.IgnoreAutoChangeNotificationAttribute ) );
+                        && !p.Attributes.Any( this._assets.NotObservableAttribute ) );
 
         var allValid = true;
 
@@ -500,7 +504,7 @@ internal sealed partial class ClassicImplementationStrategyBuilder : IImplementa
                 .Where(
                     memberAndNode =>
                         memberAndNode.FieldOrProperty is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !memberAndNode.FieldOrProperty.Attributes.Any( this._assets.IgnoreAutoChangeNotificationAttribute ) )
+                        && !memberAndNode.FieldOrProperty.Attributes.Any( this._assets.NotObservableAttribute ) )
                 .ToList();
 
         foreach ( var memberAndNode in toProcess )

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Patterns.Observability.Implementation.Graph;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
@@ -12,7 +11,7 @@ internal static class DependencyGraphExtensions
     /// Constructs a duplicate of the current graph using the specified node type.
     /// </summary>
     /// <remarks>
-    /// This method will set the <see cref="DependencyGraph.Node.Tag"/> property of all nodes in the graph. By design, the tags
+    /// This method will set the <see cref="DependencyNode.Tag"/> property of all nodes in the graph. By design, the tags
     /// can only be set once.
     /// </remarks>
     /// <typeparam name="TNode"></typeparam>
@@ -20,7 +19,7 @@ internal static class DependencyGraphExtensions
     /// <param name="node">The root node of a graph.</param>
     /// <param name="context">A context object that will be passed to <see cref="IInitializableNode{TNode, TContext}.Initialize"/>.</param>
     /// <returns></returns>    
-    public static TNode DuplicateUsing<[CompileTime] TNode, TContext>( this DependencyGraph.Node node, TContext? context = default )
+    public static TNode DuplicateUsing<[CompileTime] TNode, TContext>( this DependencyNode node, TContext? context = default )
         where TNode : IInitializableNode<TNode, TContext>, new()
     {
         if ( node == null )

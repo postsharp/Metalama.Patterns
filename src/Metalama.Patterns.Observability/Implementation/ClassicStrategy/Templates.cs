@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Patterns.Observability.Implementation.Graph;
+using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;

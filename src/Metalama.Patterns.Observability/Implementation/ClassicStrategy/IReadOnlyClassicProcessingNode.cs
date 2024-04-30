@@ -2,12 +2,12 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Patterns.Observability.Implementation.Graph;
+using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal interface IReadOnlyClassicProcessingNode : IReadOnlyProcessingNode, INode<IReadOnlyClassicProcessingNode>
+internal interface IReadOnlyClassicProcessingNode : IReadOnlyProcessingNode, IDependencyNode<IReadOnlyClassicProcessingNode>
 {
     /// <summary>
     /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.

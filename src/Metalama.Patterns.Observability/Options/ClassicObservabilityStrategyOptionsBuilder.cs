@@ -7,21 +7,24 @@ namespace Metalama.Patterns.Observability.Options;
 
 [PublicAPI]
 [CompileTime]
-public sealed class ClassicImplementationStrategyOptionsBuilder
+public sealed class ClassicObservabilityStrategyOptionsBuilder
 {
-    private ClassicImplementationStrategyOptions _options = new();
+    internal ClassicObservabilityStrategyOptions? Options { get; private set; }
+
+    internal ClassicObservabilityStrategyOptionsBuilder( ClassicObservabilityStrategyOptions? options )
+    {
+        this.Options = options;
+    }
 
     /// <summary>
     /// Sets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced.
     /// </summary>
     /// <remarks>
-    /// <inheritdoc cref="ClassicImplementationStrategyOptions.EnableOnObservablePropertyChangedMethod"/>
+    /// <inheritdoc cref="ClassicObservabilityStrategyOptions.EnableOnObservablePropertyChangedMethod"/>
     /// </remarks>
     public bool EnableOnObservablePropertyChangedMethod
     {
         // ReSharper disable once WithExpressionModifiesAllMembers
-        set => this._options = this._options with { EnableOnObservablePropertyChangedMethod = value };
+        set => this.Options = (this.Options ?? new ClassicObservabilityStrategyOptions()) with { EnableOnObservablePropertyChangedMethod = value };
     }
-
-    internal ClassicImplementationStrategyOptions Build() => this._options;
 }

@@ -5,7 +5,7 @@ public interface IFoo
   int X { get; }
   int Y { get; }
 }
-[Observable(DiagnosticCommentVerbosity = 1)]
+[Observable]
 public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPropertyChanged, IFoo
 {
   private T _d1 = default !;
@@ -17,7 +17,6 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
     }
     set
     {
-      // Template: OverrideInpcRefTypePropertySetter
       if (!object.ReferenceEquals(value, this._d1))
       {
         var oldValue = this._d1;
@@ -38,18 +37,13 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
   [InvokedForProperties("D1")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
-  // Template: OnChildPropertyChanged
   }
   [InvokedForProperties("D1")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
-  // Template: OnObservablePropertyChanged
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    // Template: OnPropertyChanged
-    // Skipping 'D1': The field or property is defined by the current type.
-    // Skipping 'FooX': The field or property is defined by the current type.
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   private void SubscribeToD1(T value)
@@ -62,7 +56,6 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
     void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
       {
-        // Template: HandleChildPropertyChangedDelegateBody
         var propertyName = e.PropertyName;
         switch (propertyName)
         {
@@ -84,7 +77,6 @@ public partial class DD<T> : D<T> where T : class, INotifyPropertyChanged, IFoo
   public int FooY => this.D1.Y;
   protected override void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
-    // Template: OnChildPropertyChanged
     switch (parentPropertyPath, propertyName)
     {
       case ("D1", "Y"):
@@ -96,19 +88,16 @@ public partial class DD<T> : D<T> where T : class, INotifyPropertyChanged, IFoo
   }
   protected override void OnPropertyChanged(string propertyName)
   {
-    // Template: OnPropertyChanged
-    // Skipping 'FooY': The field or property is defined by the current type.
     switch (propertyName)
     {
       case "D1":
-        // InpcBaseHandling = OnChildPropertyChanged
         this.OnPropertyChanged("FooY");
         break;
     }
     base.OnPropertyChanged(propertyName);
   }
 }
-[Observable(DiagnosticCommentVerbosity = 1)]
+[Observable]
 public partial class MyFoo : IFoo, INotifyPropertyChanged
 {
   private int _x;
@@ -120,7 +109,6 @@ public partial class MyFoo : IFoo, INotifyPropertyChanged
     }
     set
     {
-      // Template: OverrideUninstrumentedTypePropertySetter
       if (this._x != value)
       {
         this._x = value;
@@ -137,7 +125,6 @@ public partial class MyFoo : IFoo, INotifyPropertyChanged
     }
     set
     {
-      // Template: OverrideUninstrumentedTypePropertySetter
       if (this._y != value)
       {
         this._y = value;
@@ -147,7 +134,6 @@ public partial class MyFoo : IFoo, INotifyPropertyChanged
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    // Template: OnPropertyChanged
     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;

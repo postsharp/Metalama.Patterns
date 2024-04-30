@@ -5,13 +5,10 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
-internal static partial class DependencyGraph
+[CompileTime]
+internal interface IGraphBuildingNode
 {
-    [CompileTime]
-    private interface IGraphBuildingNode
-    {
-        Node GetOrAddChild( ISymbol childSymbol );
+    DependencyNode GetOrAddChild( ISymbol childSymbol );
 
-        void AddReferencedBy( Node node );
-    }
+    void AddReferencedBy( DependencyNode node );
 }
