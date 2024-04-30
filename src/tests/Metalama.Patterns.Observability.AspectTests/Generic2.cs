@@ -11,7 +11,7 @@ public interface IFoo
     int Y { get; }
 }
 
-[Observable( DiagnosticCommentVerbosity = 1 )]
+[Observable]
 public partial class D<T>
     where T : class, INotifyPropertyChanged, IFoo
 {
@@ -26,7 +26,7 @@ public partial class DD<T> : D<T>
     public int FooY => this.D1.Y;
 }
 
-[Observable( DiagnosticCommentVerbosity = 1 )]
+[Observable]
 public partial class MyFoo : IFoo
 {
     public int X { get; set; }

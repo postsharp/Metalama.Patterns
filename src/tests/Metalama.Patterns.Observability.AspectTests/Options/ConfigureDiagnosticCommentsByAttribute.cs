@@ -3,5 +3,5 @@
 namespace Metalama.Patterns.Observability.AspectTests.ConfigureDiagnosticCommentsByAttribute;
 
 // <target>
-[Observable( DiagnosticCommentVerbosity = 1 )]
+[Observable]
 public class ConfigureDiagnosticCommentsByAttribute { }

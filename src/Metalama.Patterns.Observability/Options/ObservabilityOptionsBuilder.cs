@@ -20,6 +20,7 @@ public sealed class ObservabilityOptionsBuilder
         set => this._options = this._options with { ImplementationStrategyFactory = value };
     }
 
+    #if DEBUG
     /// <summary>
     /// Sets a value indicating the verbosity of diagnostic comments inserted into generated code. Must be a value
     /// between 0 and 3 (inclusive). 0 (default) inserts no comments, 3 is the most verbose.
@@ -28,6 +29,7 @@ public sealed class ObservabilityOptionsBuilder
     {
         set => this._options = this._options with { DiagnosticCommentVerbosity = value };
     }
+    #endif
 
     internal ObservabilityOptions Build() => this._options;
 }
