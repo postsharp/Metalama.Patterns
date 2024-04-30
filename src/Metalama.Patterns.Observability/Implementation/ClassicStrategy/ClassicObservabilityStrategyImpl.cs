@@ -840,32 +840,13 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
             var isValid = true;
 
-            switch ( fp.Type.IsReferenceType )
+            if ( fp.Type.IsReferenceType == false && typeImplementsInpc )
             {
-                case null:
-                    // This might require INPC-type code which is used at runtime only when T implements INPC,
-                    // and non-INPC-type code which is used at runtime when T does not implement INPC.
+                this._builder.Diagnostics.Report(
+                    DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments( (fp.DeclarationKind, fp, fp.Type) ),
+                    fp );
 
-                    this._builder.Diagnostics.Report(
-                        DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsUnconstrainedGeneric.WithArguments( (fp.DeclarationKind, fp, fp.Type) ),
-                        fp );
-
-                    isValid = false;
-
-                    break;
-
-                case false:
-
-                    if ( typeImplementsInpc )
-                    {
-                        this._builder.Diagnostics.Report(
-                            DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments( (fp.DeclarationKind, fp, fp.Type) ),
-                            fp );
-
-                        isValid = false;
-                    }
-
-                    break;
+                isValid = false;
             }
 
             if ( fp.IsVirtual )

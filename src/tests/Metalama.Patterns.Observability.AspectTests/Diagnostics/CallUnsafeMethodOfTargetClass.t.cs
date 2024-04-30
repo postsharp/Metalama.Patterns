@@ -1,1 +1,1 @@
-// Warning LAMA5162 on `Foo`: `method CallUnsafeMethodOfTargetClass.Foo() cannot be analysed, and has not been configured as safe for dependency analysis. Use [IgnoreUnsupportedDependencies] or ConfigureObservability via a fabric to configure method as safe.`
+// Warning LAMA5162 on `Foo`: `The 'CallUnsafeMethodOfTargetClass.Foo()' method cannot be analysed, and has not been configured as safe for dependency analysis. Use [IgnoreUnsupportedDependencies] or ConfigureObservability via a fabric to ignore this warning.`

@@ -24,7 +24,7 @@ internal static class DiagnosticDescriptors
         new(
             "LAMA5150",
             Error,
-            "Class {0} implements INotifyPropertyChanged but does not define a public or protected OnPropertyChanged method with the following signature: "
+            "Class '{0}' implements INotifyPropertyChanged but does not define a public or protected OnPropertyChanged method with the following signature: "
             +
             "virtual void OnPropertyChanged(string propertyName). The method name can also be NotifyOfPropertyChange or RaisePropertyChanged.",
             "OnPropertyChanged is not defined.",
@@ -49,7 +49,7 @@ internal static class DiagnosticDescriptors
             new(
                 "LAMA5152",
                 Error,
-                "The type {2} of {0} {1} is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.",
+                "The type '{2}' of {0} '{1}' is a struct implementing INotifyPropertyChanged. Structs implementing INotifyPropertyChanged are not supported.",
                 "Property type is struct implementing INotifyPropertyChanged.",
                 _category );
 
@@ -61,7 +61,7 @@ internal static class DiagnosticDescriptors
             new(
                 "LAMA5153",
                 Error,
-                "The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.",
+                "The type '{2}' of {0} '{1}' is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.",
                 "Property type is struct implementing INotifyPropertyChanged.",
                 _category );
 
@@ -72,7 +72,7 @@ internal static class DiagnosticDescriptors
         new(
             "LAMA5154",
             Error,
-            "The {0} {1} is virtual. This is not supported.",
+            "The '{1}' {0} is virtual. This is not supported by the [Observable] aspect.",
             "Virtual member is not supported.",
             _category );
 
@@ -83,7 +83,7 @@ internal static class DiagnosticDescriptors
         new(
             "LAMA5155",
             Error,
-            "The {0} {1} is 'new'. This is not supported.",
+            "The '{1}' {0} is 'new'. This is not supported by the [Observable] aspect.",
             "'new' member is not supported.",
             _category );
 
@@ -108,8 +108,8 @@ internal static class DiagnosticDescriptors
         new(
             "LAMA5160",
             Warning,
-            "Handling for this syntax is not implemented and is not supported for dependency analysis (analyzer reference {0}).",
-            "Not implemented for dependency analysis.",
+            "Handling for this syntax is not implemented and is not supported by the [Observable] aspect (analyzer reference {0}).",
+            "Not implemented for dependency analysis by the [Observable] aspect.",
             _category );
 
     /// <summary>
@@ -130,8 +130,8 @@ internal static class DiagnosticDescriptors
         new(
             "LAMA5162",
             Warning,
-            "{0} {1} cannot be analysed, and has not been configured as safe for dependency analysis. Use [IgnoreUnsupportedDependencies] or "
-            + nameof(ObservabilityExtensions.ConfigureObservability) + " via a fabric to configure {0} as safe.",
+            "The '{1}' {0} cannot be analysed, and has not been configured as safe for dependency analysis. Use [IgnoreUnsupportedDependencies] or "
+            + nameof(ObservabilityExtensions.ConfigureObservability) + " via a fabric to ignore this warning.",
             "Method or property is not supported for dependency analysis.",
             _category );
 }
