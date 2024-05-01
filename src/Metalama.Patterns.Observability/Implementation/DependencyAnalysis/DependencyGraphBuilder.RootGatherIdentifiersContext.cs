@@ -8,7 +8,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
-internal static partial class DependencyGraph
+internal partial class DependencyGraphBuilder
 {
     [CompileTime]
     private sealed class RootGatherIdentifiersContext : GatherIdentifiersContext
@@ -31,7 +31,7 @@ internal static partial class DependencyGraph
 
         public override bool IsRoot => true;
 
-        public override IEnumerable<IReadOnlyList<SymbolRecord>> SymbolsForAllForks()
+        public override IEnumerable<IReadOnlyList<DependencyPathElement>> SymbolsForAllForks()
         {
             if ( this._allForks != null && this._allForks.Any( f => !f.IsJoined ) )
             {

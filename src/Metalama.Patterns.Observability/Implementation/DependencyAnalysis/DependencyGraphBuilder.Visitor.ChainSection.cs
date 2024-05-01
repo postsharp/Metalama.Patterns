@@ -8,7 +8,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
-internal static partial class DependencyGraph
+internal partial class DependencyGraphBuilder
 {
     private sealed partial class Visitor
     {

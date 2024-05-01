@@ -12,7 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityStrategy, IClassicProcessingNodeInitializationHelper
+internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 {
     private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
 
@@ -36,7 +36,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     private readonly Deferred<IMethod?>? _onObservablePropertyChangedMethod;
     private readonly List<string> _propertyPathsForOnChildPropertyChangedMethod = new();
     private readonly List<string> _propertyNamesForOnObservablePropertyChangedMethod = new();
-    private readonly Deferred<ClassicProcessingNode> _dependencyGraph = new();
+    private readonly Deferred<ClassicDependencyTypeNode> _dependencyTypeNode = new();
 
     public ClassicObservabilityStrategyImpl( IAspectBuilder<INamedType> builder )
     {
@@ -118,7 +118,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                 this._builder.Target,
                 this._assets,
                 this._inpcInstrumentationKindLookup,
-                this.DependencyGraph,
+                this.DependencyTypeNode,
                 this._onObservablePropertyChangedMethod?.Value,
                 this._onPropertyChangedMethod.Value,
                 this._onChildPropertyChangedMethod.Value,
@@ -160,7 +160,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         // NB: The selection logic here must be kept in sync with the logic in the OnObservablePropertyChanged template.
 
         this._propertyPathsForOnChildPropertyChangedMethod.AddRange(
-            this.DependencyGraph.DescendantsDepthFirst()
+            this.DependencyTypeNode.References
                 .Where(
                     n => n.InpcBaseHandling switch
                     {
@@ -213,14 +213,16 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
         if ( this._onObservablePropertyChangedMethod != null )
         {
-            foreach ( var node in this.DependencyGraph.DescendantsDepthFirst()
+            foreach ( var node in this.DependencyTypeNode
+                         .References
                          .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnObservablePropertyChanged ) )
             {
                 _ = this.GetOrCreateHandlerField( node );
             }
         }
 
-        foreach ( var node in this.DependencyGraph.Children
+        foreach ( var node in this.DependencyTypeNode
+                     .References
                      .Where( node => node.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
         {
             _ = this.GetOrCreateHandlerField( node );
@@ -232,9 +234,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
     private bool TryIntroduceOnChildPropertyChangedMethod()
     {
-        IReadOnlyList<IReadOnlyClassicProcessingNode> nodesForOnChildPropertyChanged =
-            this.DependencyGraph
-                .DescendantsDepthFirst()
+        var nodesForOnChildPropertyChanged =
+            this.DependencyTypeNode
+                .References
                 .Where( n => n.Depth > 1 )
                 .Where(
                     node =>
@@ -329,7 +331,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
             return true;
         }
 
-        var nodesProcessedByOnObservablePropertyChanged = this.DependencyGraph.DescendantsDepthFirst()
+        var nodesProcessedByOnObservablePropertyChanged = this.DependencyTypeNode.References
             .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnObservablePropertyChanged )
             .ToList();
 
@@ -413,8 +415,10 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
     private void IntroduceUpdateMethods()
     {
-        var allNodesDepthFirst = this.DependencyGraph.DescendantsDepthFirst().ToList();
-        allNodesDepthFirst.Reverse();
+        var allNodesDepthFirst = this.DependencyTypeNode.References
+            .OrderByDescending( x => x.Depth )
+            .ThenBy( x => x.DottedPropertyPath )
+            .ToList();
 
         // Process all nodes in depth-first, leaf-to-root order, creating necessary update methods as we go.
         // The order is important, so that parent nodes test if child node methods were necessary and invoke them.
@@ -423,7 +427,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
         foreach ( var node in allNodesDepthFirst )
         {
-            if ( node.Children.Count == 0 || node.Parent.IsRoot )
+            if ( !node.HasChildren || node.IsRoot )
             {
                 // Leaf nodes and root properties should never have update methods.
                 node.UpdateMethod.Value = null;
@@ -485,7 +489,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     }
 
     [CompileTime]
-    private record struct MemberAndNode( IFieldOrProperty FieldOrProperty, ClassicProcessingNode? Node );
+    private record struct MemberAndNode( IFieldOrProperty FieldOrProperty, ClassicDependencyPropertyNode? Node );
 
     private void ProcessAutoPropertiesAndReferencedFields()
     {
@@ -493,12 +497,14 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
         // Override all auto properties, and only those fields that are referenced in the graph.
 
+        var dependencyGraphType = this._dependencyTypeNode.Value;
+
         var toProcess =
             target.Properties
-                .Select( p => new MemberAndNode( p, this.DependencyGraph.Children.FirstOrDefault( n => n.FieldOrProperty == p ) ) )
+                .Select( p => new MemberAndNode( p, (ClassicDependencyPropertyNode) this.DependencyTypeNode.GetOrAddProperty( p ) ) )
                 .Concat(
-                    this._dependencyGraph.Value
-                        .Children
+                    dependencyGraphType
+                        .Properties
                         .Where( n => n.FieldOrProperty.DeclarationKind == DeclarationKind.Field )
                         .Select( n => new MemberAndNode( n.FieldOrProperty, n ) ) )
                 .Where(
@@ -516,7 +522,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
             switch ( fieldOrProperty.Type.IsReferenceType )
             {
-                case true:
+                case null or true:
 
                     if ( propertyTypeImplementsInpc )
                     {
@@ -527,9 +533,10 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
                         if ( hasDependentProperties )
                         {
-                            handlerField = this.GetOrCreateHandlerField( node! );
+                            var rootReference = node!.RootReferenceNode!;
+                            handlerField = this.GetOrCreateHandlerField( rootReference );
 
-                            if ( !this.TryGetOrCreateRootPropertySubscribeMethod( node!, out subscribeMethod ) )
+                            if ( !this.TryGetOrCreateRootPropertySubscribeMethod( rootReference, out subscribeMethod ) )
                             {
                                 return;
                             }
@@ -566,17 +573,15 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                     }
                     else
                     {
+                        var comparer = fieldOrProperty.Type.IsReferenceType == null
+                            ? EqualityComparisonKind.DefaultEqualityComparer
+                            : EqualityComparisonKind.ReferenceEquals;
+
                         this._builder.Advice.WithTemplateProvider( Templates.Provider )
                             .OverrideAccessors(
                                 fieldOrProperty,
                                 setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
-                                args: new
-                                {
-                                    templateArgs = this._templateArgs,
-                                    node,
-                                    compareUsing = EqualityComparisonKind.ReferenceEquals,
-                                    propertyTypeInstrumentationKind
-                                } );
+                                args: new { templateArgs = this._templateArgs, node, compareUsing = comparer, propertyTypeInstrumentationKind } );
                     }
 
                     break;
@@ -628,31 +633,30 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     private bool BuildAndValidateDependencyGraph()
     {
         var graphBuildingContext = new GraphBuildingContext( this );
+        var nodeInitializationContext = new ClassicProcessingNodeInitializationContext( this._builder.Target.Compilation, this );
 
-        var structuralGraph = DependencyAnalysis.DependencyGraph.GetDependencyGraph(
+        var graphBuilder = new ClassicDependencyGraphBuilder( nodeInitializationContext );
+
+        var typeNode = (ClassicDependencyTypeNode) graphBuilder.GetDependencyGraph(
             this._builder.Target,
             graphBuildingContext,
             cancellationToken: this._builder.CancellationToken );
 
-        var processingGraph =
-            structuralGraph.DuplicateUsing<ClassicProcessingNode, ClassicProcessingNodeInitializationContext>(
-                new ClassicProcessingNodeInitializationContext( this._builder.Target.Compilation, this ) );
-
         var hasErrors = graphBuildingContext.HasReportedErrors;
 
-        foreach ( var node in processingGraph.DescendantsDepthFirst() )
+        foreach ( var property in typeNode.Properties )
         {
-            hasErrors |= !this.ValidateFieldOrPropertyIntrinsicCharacteristics( node.FieldOrProperty );
+            hasErrors |= !this.ValidateFieldOrPropertyIntrinsicCharacteristics( property.FieldOrProperty );
         }
 
-        this._dependencyGraph.Value = processingGraph;
+        this._dependencyTypeNode.Value = typeNode;
 
         return !hasErrors;
     }
 
-    private ClassicProcessingNode DependencyGraph => this._dependencyGraph.Value;
+    private ClassicDependencyTypeNode DependencyTypeNode => this._dependencyTypeNode.Value;
 
-    private IField GetOrCreateLastValueField( ClassicProcessingNode node )
+    private IField GetOrCreateLastValueField( ClassicDependencyReferenceNode node )
     {
         if ( !node.LastValueField.HasBeenSet )
         {
@@ -672,7 +676,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         return node.LastValueField.Value;
     }
 
-    private IField GetOrCreateHandlerField( ClassicProcessingNode node )
+    private IField GetOrCreateHandlerField( ClassicDependencyReferenceNode node )
     {
         if ( !node.HandlerField.HasBeenSet )
         {
@@ -693,7 +697,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         return node.HandlerField.Value;
     }
 
-    private bool TryGetOrCreateRootPropertySubscribeMethod( ClassicProcessingNode node, out IMethod? subscribeMethod )
+    private bool TryGetOrCreateRootPropertySubscribeMethod( ClassicDependencyReferenceNode node, out IMethod? subscribeMethod )
     {
         if ( node.Depth != 1 )
         {
@@ -704,7 +708,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         {
             var handlerField = this.GetOrCreateHandlerField( node );
 
-            var subscribeMethodName = this.GetAndReserveUnusedMemberName( $"SubscribeTo{node.Name}" );
+            var subscribeMethodName = this.GetAndReserveUnusedMemberName( $"SubscribeTo{node.ContiguousPropertyPath}" );
 
             var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
                 .IntroduceMethod(
@@ -871,7 +875,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         }
     }
 
-    private InpcBaseHandling DetermineInpcBaseHandlingForNode( ClassicProcessingNode node )
+    internal InpcBaseHandling DetermineInpcBaseHandlingForNode( ClassicDependencyReferenceNode node )
     {
         switch ( node.PropertyTypeInpcInstrumentationKind )
         {
@@ -909,9 +913,5 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         }
     }
 
-    InpcInstrumentationKind IClassicProcessingNodeInitializationHelper.GetInpcInstrumentationKind( IType type )
-        => this._inpcInstrumentationKindLookup.Get( type );
-
-    InpcBaseHandling IClassicProcessingNodeInitializationHelper.DetermineInpcBaseHandlingForNode( ClassicProcessingNode node )
-        => this.DetermineInpcBaseHandlingForNode( node );
+    public InpcInstrumentationKind GetInpcInstrumentationKind( IType type ) => this._inpcInstrumentationKindLookup.Get( type );
 }

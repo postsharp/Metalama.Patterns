@@ -94,6 +94,7 @@ internal sealed class CachingFrontend
             if ( item == null )
             {
 #if DEBUG
+
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
@@ -222,6 +223,7 @@ internal sealed class CachingFrontend
                 // Cache miss.
 
 #if DEBUG
+
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {
@@ -353,6 +355,7 @@ internal sealed class CachingFrontend
                 // Cache miss.
 
 #if DEBUG
+
                 // At this point, we assume we own the lock.
                 if ( lockHandle == null )
                 {

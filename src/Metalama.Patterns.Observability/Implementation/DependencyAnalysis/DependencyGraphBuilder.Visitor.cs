@@ -11,22 +11,22 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
-internal static partial class DependencyGraph
+internal partial class DependencyGraphBuilder
 {
     private static void AddReferencedProperties(
         ICompilation compilation,
-        DependencyNode tree,
-        IPropertySymbol property,
+        DependencyPropertyNode propertyNode,
         IGraphBuildingContext context,
         RoslynAssets assets,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
-        var body = property
+        var body = propertyNode.FieldOrProperty.GetSymbol()!
             .DeclaringSyntaxReferences
             .Select( r => r.GetSyntax( cancellationToken ) )
             .Cast<PropertyDeclarationSyntax>()
@@ -41,7 +41,7 @@ internal static partial class DependencyGraph
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( tree, property, semanticModel, context, assets, trace, cancellationToken );
+        var visitor = new Visitor( propertyNode, semanticModel, context, assets, trace, cancellationToken );
 
         visitor.Visit( body );
     }
@@ -49,22 +49,20 @@ internal static partial class DependencyGraph
     [CompileTime]
     private sealed partial class Visitor : CSharpSyntaxWalker, IGatherIdentifiersContextManagerClient
     {
-        private readonly IGraphBuildingNode _tree;
-        private readonly INamedTypeSymbol _declaringType;
-        private readonly ISymbol _originSymbol;
+        private readonly DependencyPropertyNode _propertyNode;
+        private readonly INamedType _declaringType;
         private readonly SemanticModel _semanticModel;
         private readonly CancellationToken _cancellationToken;
         private readonly Action<string>? _trace;
         private readonly IGraphBuildingContext _context;
         private readonly RoslynAssets _assets;
-
+        private readonly ICompilation _compilation;
         private readonly GatherIdentifiersContextManager _gatherManager;
 
         private int _depth = 1;
 
         public Visitor(
-            IGraphBuildingNode tree,
-            ISymbol originSymbol,
+            DependencyPropertyNode propertyNode,
             SemanticModel semanticModel,
             IGraphBuildingContext context,
             RoslynAssets assets,
@@ -72,14 +70,19 @@ internal static partial class DependencyGraph
             CancellationToken cancellationToken )
         {
             this._trace = trace;
-            this._tree = tree;
-            this._declaringType = originSymbol.ContainingType;
-            this._originSymbol = originSymbol;
+            this._propertyNode = propertyNode;
+            this._declaringType = propertyNode.FieldOrProperty.DeclaringType;
             this._semanticModel = semanticModel;
             this._cancellationToken = cancellationToken;
             this._context = context;
             this._gatherManager = new GatherIdentifiersContextManager( this );
             this._assets = assets;
+            this._compilation = this._declaringType.Compilation;
+        }
+
+        private IFieldOrProperty GetFieldOrProperty( ISymbol symbol )
+        {
+            return (IFieldOrProperty) this._compilation.GetDeclaration( symbol );
         }
 
         void IGatherIdentifiersContextManagerClient.OnRootContextPopped( GatherIdentifiersContext context )
@@ -88,7 +91,7 @@ internal static partial class DependencyGraph
         }
 
         /// <summary>
-        /// Called when an unexpected scenario is encountered during processing. Indicates that the program logic of <see cref="DependencyGraph"/> is not yet implemented
+        /// Called when an unexpected scenario is encountered during processing. Indicates that the program logic of <see cref="DependencyGraphBuilder"/> is not yet implemented
         /// to handle that scenario.
         /// </summary>
         private void ReportWarningNotImplementedForDependencyAnalysis(
@@ -101,7 +104,7 @@ internal static partial class DependencyGraph
                 location );
         }
 
-        private bool IsLocalInstanceMember( ISymbol symbol ) => !symbol.IsStatic && this._declaringType.IsOrInheritsFrom( symbol.ContainingType );
+        private bool IsLocalInstanceMember( ISymbol symbol ) => !symbol.IsStatic && this._declaringType.GetSymbol().IsOrInheritsFrom( symbol.ContainingType );
 
         private void ValidateMethodArgumentType( ExpressionSyntax expression )
         {
@@ -136,8 +139,9 @@ internal static partial class DependencyGraph
             }
         }
 
-        private void ValidateChainSymbol( IReadOnlyList<GatherIdentifiersContext.SymbolRecord> symbols, int index, ChainSection chainSection )
+        private bool ValidateChainSymbol( IReadOnlyList<DependencyPathElement> symbols, int index, ChainSection chainSection )
         {
+            var isSupported = true;
             // Here we report particularly those diagnostics which should be located on a syntax node inside a body. The final dependency
             // graph does not keep track of all the syntax nodes which referenced each dependency node (this would be expensive), so logging
             // diagnostics located on syntax nodes inside bodies is not possible later.
@@ -160,6 +164,8 @@ internal static partial class DependencyGraph
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( fieldOrPropertyType! ),
                         sr.Node.GetLocation() );
+
+                    isSupported = false;
                 }
 
                 // Warn if this is a non-leaf reference to an INPC non-auto property of the target type because we can't
@@ -174,6 +180,7 @@ internal static partial class DependencyGraph
                             .WithArguments(
                                 "Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed." ),
                         symbols[index + 1].Node.GetLocation() );
+                    isSupported = false;
                 }
             }
 
@@ -189,6 +196,7 @@ internal static partial class DependencyGraph
                             .WithArguments(
                                 "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported." ),
                         sr.Node.GetLocation() );
+                    isSupported = false;
                 }
             }
             else if ( sr.Symbol.Kind is SymbolKind.Method )
@@ -196,7 +204,7 @@ internal static partial class DependencyGraph
                 bool? isConfiguredAsSafe = null;
                 var containingType = sr.Symbol.ContainingType;
 
-                if ( this._declaringType.IsOrInheritsFrom( containingType ) )
+                if ( this._declaringType.GetSymbol().IsOrInheritsFrom( containingType ) )
                 {
                     if ( !sr.Symbol.IsStatic )
                     {
@@ -207,6 +215,7 @@ internal static partial class DependencyGraph
                             this._context.ReportDiagnostic(
                                 DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments( (sr.Symbol.Kind, sr.Symbol) ),
                                 sr.Node.GetLocation() );
+                            isSupported = false;
                         }
                     }
                 }
@@ -221,9 +230,12 @@ internal static partial class DependencyGraph
                         this._context.ReportDiagnostic(
                             DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments( (sr.Symbol.Kind, sr.Symbol) ),
                             sr.Node.GetLocation() );
+                        isSupported = false;
                     }
                 }
             }
+
+            return isSupported;
         }
 
         private void ProcessAndResetIfApplicable( GatherIdentifiersContext context )
@@ -255,8 +267,8 @@ internal static partial class DependencyGraph
                             .Count()
                         : 0;
 
-                    var treeNode = this._tree;
-
+                    DependencyReferenceNode? reference = null;
+                    
                     for ( var i = 0; i < symbols.Count; ++i )
                     {
                         var chainSection =
@@ -270,13 +282,18 @@ internal static partial class DependencyGraph
 
                         if ( chainSection is ChainSection.Stem or ChainSection.Leaf )
                         {
-                            treeNode = treeNode.GetOrAddChild( symbols[i].Symbol );
+                            var referencedProperty =
+                                this._propertyNode.DeclaringTypeNode.Builder.GetOrAddPropertyNode( this.GetFieldOrProperty( symbols[i].Symbol ) );
+
+                            reference = reference == null
+                                ? this._propertyNode.DeclaringTypeNode.GetOrAddProperty( this.GetFieldOrProperty( firstSymbol ) ).RootReferenceNode
+                                : reference.GetOrAddChildReference( referencedProperty );
                         }
                     }
 
-                    if ( supportedStemAndLeafCount > 0 )
+                    if ( reference != null && reference.FieldOrProperty != this._propertyNode.FieldOrProperty )
                     {
-                        treeNode.AddReferencedBy( this._tree.GetOrAddChild( this._originSymbol ) );
+                        reference.AddReferencingProperty( this._propertyNode );
                     }
                 }
 

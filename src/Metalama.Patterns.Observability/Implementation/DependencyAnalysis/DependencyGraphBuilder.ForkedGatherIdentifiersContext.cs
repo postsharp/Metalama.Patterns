@@ -8,14 +8,17 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
-internal static partial class DependencyGraph
+internal partial class DependencyGraphBuilder
 {
     [CompileTime]
     private sealed class ForkedGatherIdentifiersContext : GatherIdentifiersContext, IDisposable
     {
         private readonly ForkItem _forkItem;
 
-        public ForkedGatherIdentifiersContext( RootGatherIdentifiersContext rootContext, IReadOnlyCollection<SymbolRecord>? parentSymbols, ForkItem forkItem )
+        public ForkedGatherIdentifiersContext(
+            RootGatherIdentifiersContext rootContext,
+            IReadOnlyCollection<DependencyPathElement>? parentSymbols,
+            ForkItem forkItem )
             : base( parentSymbols )
         {
             this.RootContext = rootContext;

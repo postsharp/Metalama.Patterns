@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Patterns.Observability.Options;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
@@ -23,7 +24,7 @@ internal sealed record ObservabilityTemplateArgs(
     INamedType TargetType,
     Assets Assets,
     InpcInstrumentationKindLookup InpcInstrumentationKindLookup,
-    IReadOnlyClassicProcessingNode DependencyGraph,
+    ClassicDependencyTypeNode DependencyTypeNode,
     IMethod? OnObservablePropertyChangedMethod,
     IMethod OnPropertyChangedMethod,
     IMethod? OnChildPropertyChangedMethod,

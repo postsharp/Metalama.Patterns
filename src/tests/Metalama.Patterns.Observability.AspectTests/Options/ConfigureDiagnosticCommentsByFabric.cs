@@ -14,7 +14,6 @@ public class Fabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-      
         amender.ConfigureObservability( b => b.DiagnosticCommentVerbosity = 1 );
     }
 }

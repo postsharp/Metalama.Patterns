@@ -93,7 +93,7 @@ class D
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -109,6 +109,7 @@ class D
   A12
   A13
   A14
+  A15
   A2 [ A4, A6, A7 ]
   A3 [ A7 ]
   A4 [ A7 ]
@@ -149,7 +150,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -196,7 +197,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -208,7 +209,10 @@ public class A
   Z
 ";
 
-        diagnostics.Should().Equal( "LAMA5156: Not supported for dependency analysis. (Variables of types other than primitive types and types configured as safe for dependency analysis are not supported.)@(12,12)-(12,35)" );
+        diagnostics.Should()
+            .Equal(
+                "LAMA5156: Not supported for dependency analysis. (Variables of types other than primitive types and types configured as safe for dependency analysis are not supported.)@(12,12)-(12,35)" );
+
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
@@ -248,7 +252,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -292,7 +296,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -333,7 +337,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -377,7 +381,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -414,7 +418,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -451,7 +455,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -488,7 +492,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -535,7 +539,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -545,6 +549,7 @@ public class A
         const string expected = @"<root>
   X [ Y ]
   Y
+  Z
 ";
 
         diagnostics.Should().BeEmpty();
@@ -582,7 +587,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -592,6 +597,7 @@ public class A
         const string expected = @"<root>
   X [ Y ]
   Y
+  Z
 ";
 
         diagnostics.Should().Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, Fn(int)))@(12,19)-(12,21)" );
@@ -629,7 +635,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -637,6 +643,9 @@ public class A
         // this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
+  X
+  Y
+  Z
 ";
 
         diagnostics.Should()
@@ -672,7 +681,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -682,6 +691,7 @@ public class A
         const string expected = @"<root>
   X [ Y ]
   Y
+  Z
 ";
 
         diagnostics.Should()
@@ -721,7 +731,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -731,6 +741,7 @@ public class A
         const string expected = @"<root>
   X [ Y ]
   Y
+  Z
 ";
 
         diagnostics.Should()
@@ -768,7 +779,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -818,7 +829,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext(
                 isConfiguredAsSafe: _ => true,
@@ -831,6 +842,7 @@ public class A
         const string expected = @"<root>
   X [ Y ]
   Y
+  Z
 ";
 
         diagnostics.Should()
@@ -870,7 +882,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext(
                 isConfiguredAsSafe: _ => true,
@@ -934,7 +946,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1006,7 +1018,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1085,7 +1097,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1146,7 +1158,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: NeverTreatAsInpc ) );
 
@@ -1190,7 +1202,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1234,7 +1246,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1284,7 +1296,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1328,7 +1340,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1369,7 +1381,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1413,7 +1425,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1459,7 +1471,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
@@ -1502,7 +1514,7 @@ public class A
 
         var diagnostics = new List<string>();
 
-        var result = DependencyGraph.GetDependencyGraph(
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
             new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 

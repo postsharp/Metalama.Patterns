@@ -3,6 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis;
+using System.Collections.ObjectModel;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
@@ -11,8 +13,35 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
  */
 
 [CompileTime]
-internal static partial class DependencyGraph
+internal partial class DependencyGraphBuilder
 {
+    private Dictionary<INamedType, DependencyTypeNode> _types = new();
+
+    public virtual DependencyTypeNode CreateTypeNode( INamedType type ) => new( this, type );
+
+    public virtual DependencyPropertyNode CreatePropertyNode( IFieldOrProperty fieldOrProperty, DependencyTypeNode parent ) => new( fieldOrProperty, parent );
+
+    public virtual DependencyReferenceNode CreateReferenceNode( DependencyPropertyNode propertyNode, DependencyReferenceNode? parent )
+        => new( propertyNode, parent, this );
+
+    public DependencyTypeNode GetOrAddTypeNode( INamedType type )
+    {
+        if ( !this._types.TryGetValue( type, out var typeNode ) )
+        {
+            typeNode = this.CreateTypeNode( type );
+            this._types.Add( type, typeNode );
+        }
+
+        return typeNode;
+    }
+
+    public DependencyPropertyNode GetOrAddPropertyNode( IFieldOrProperty property )
+    {
+        var declaringTypeNode = this.GetOrAddTypeNode( property.DeclaringType );
+
+        return declaringTypeNode.GetOrAddProperty( property );
+    }
+
     /* Dependency Graph Structure
      * --------------------------
      *
@@ -31,14 +60,14 @@ internal static partial class DependencyGraph
      * to determine which properties are affected by a change to a given node.
      */
 
-    public static DependencyNode GetDependencyGraph(
+    public DependencyTypeNode GetDependencyGraph(
         INamedType type,
         IGraphBuildingContext context,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
         var assets = type.Compilation.Cache.GetOrAdd( c => new RoslynAssets( c.GetRoslynCompilation() ) );
-        var tree = new DependencyNode();
+        var graphType = this.GetOrAddTypeNode( type );
 
         foreach ( var p in type.Properties )
         {
@@ -49,16 +78,17 @@ internal static partial class DependencyGraph
                 continue;
             }
 
+            var graphMember = graphType.GetOrAddProperty( (IFieldOrProperty) type.Compilation.GetDeclaration( propertySymbol ) );
+
             AddReferencedProperties(
                 type.Compilation,
-                tree,
-                propertySymbol,
+                graphMember,
                 context,
                 assets,
                 trace,
                 cancellationToken );
         }
 
-        return tree;
+        return graphType;
     }
 }

@@ -14,15 +14,15 @@ internal static class DependencyNodeExtensions
         => new InvalidOperationException( $"The operation is not supported on a root node ({callerMemberName})." );
 
     public static IEnumerable<T> DescendantsDepthFirst<T>( this T node )
-        where T : IDependencyNode<T>
+        where T : DependencyReferenceNode
         => DescendantsDepthFirst( node, false );
 
     public static IEnumerable<T> SelfAndDescendantsDepthFirst<T>( this T node )
-        where T : IDependencyNode<T>
+        where T : DependencyReferenceNode
         => DescendantsDepthFirst( node, true );
 
     private static IEnumerable<T> DescendantsDepthFirst<T>( this T node, bool includeSelf )
-        where T : IDependencyNode<T>
+        where T : DependencyReferenceNode
     {
         // NB: No loop detection.
 
@@ -31,7 +31,7 @@ internal static class DependencyNodeExtensions
             yield return node;
         }
 
-        var stack = new Stack<T>( node.Children );
+        var stack = new Stack<T>( (IEnumerable<T>) node.Children );
 
         while ( stack.Count > 0 )
         {
@@ -43,7 +43,7 @@ internal static class DependencyNodeExtensions
             {
                 foreach ( var child in current.Children )
                 {
-                    stack.Push( child );
+                    stack.Push( (T) child );
                 }
             }
         }
@@ -53,7 +53,7 @@ internal static class DependencyNodeExtensions
     /// Gets the ancestors of the current node in leaf-to-root order.
     /// </summary>
     public static IEnumerable<T> Ancestors<T>( this T node, bool includeRoot = false )
-        where T : IDependencyNode<T>
+        where T : DependencyReferenceNode
         => AncestorsCore( node, includeRoot, false );
 
     /// <summary>
@@ -62,11 +62,11 @@ internal static class DependencyNodeExtensions
     /// <param name="includeRoot"></param>
     /// <returns></returns>
     public static IEnumerable<T> AncestorsAndSelf<T>( this T node, bool includeRoot = false )
-        where T : IDependencyNode<T>
+        where T : DependencyReferenceNode
         => AncestorsCore( node, includeRoot, true );
 
     private static IEnumerable<T> AncestorsCore<T>( T node, bool includeRoot, bool includeSelf )
-        where T : IDependencyNode<T>
+        where T : DependencyReferenceNode
     {
         if ( includeSelf )
         {
@@ -78,7 +78,7 @@ internal static class DependencyNodeExtensions
 
         while ( !node.IsRoot )
         {
-            node = node.Parent;
+            node = (T) node.Parent!;
 
             if ( !includeRoot && node.IsRoot )
             {
@@ -90,7 +90,7 @@ internal static class DependencyNodeExtensions
     }
 
     public static T AncestorOrSelfAtDepth<T>( this T node, int depth )
-        where T : IDependencyNode<T>
+        where T : DependencyReferenceNode
     {
         if ( depth > node.Depth || depth < 0 )
         {
@@ -99,58 +99,9 @@ internal static class DependencyNodeExtensions
 
         while ( node.Depth != depth )
         {
-            node = node.Parent;
+            node = (T) node.Parent!;
         }
 
         return node;
-    }
-
-    /// <summary>
-    /// Gets the distinct set of nodes which directly or indirectly reference the current node, and optionally also those which directly
-    /// or indirectly reference selected children of the current node.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="node"></param>
-    /// <param name="shouldIncludeImmediateChild">
-    /// A predicate that selects the children of <paramref name="node"/> to which references should also be included and followed.
-    /// If <see langword="null"/>, references to immediate children are not included. Note that references to <paramref name="node"/>
-    /// itself are always included and followed, regardless of <paramref name="shouldIncludeImmediateChild"/>.
-    /// </param>
-    /// <returns></returns>
-    public static IReadOnlyCollection<T> AllReferencedBy<T>( this T node, Func<T, bool>? shouldIncludeImmediateChild = null )
-        where T : IDependencyNode<T>
-    {
-        // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
-        // However, it's not recursive so there's no risk of stack overflow. So safe, but potentially slow.
-
-        if ( !node.HasReferencedBy && shouldIncludeImmediateChild == null )
-        {
-            return Array.Empty<T>();
-        }
-
-        var refsToFollow = new Stack<T>(
-            shouldIncludeImmediateChild == null
-                ? node.ReferencedBy
-                : node.Children.Where( shouldIncludeImmediateChild ).SelectMany( n => n.ReferencedBy ).Concat( node.ReferencedBy ) );
-
-        var refsFollowed = new HashSet<T>();
-
-        while ( refsToFollow.Count > 0 )
-        {
-            var r = refsToFollow.Pop();
-
-            if ( refsFollowed.Add( r ) )
-            {
-                if ( r.HasReferencedBy )
-                {
-                    foreach ( var indirectRef in r.ReferencedBy )
-                    {
-                        refsToFollow.Push( indirectRef );
-                    }
-                }
-            }
-        }
-
-        return refsFollowed;
     }
 }

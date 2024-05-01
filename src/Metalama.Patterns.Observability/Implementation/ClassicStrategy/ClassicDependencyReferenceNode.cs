@@ -1,45 +1,15 @@
-﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
-using System.Text;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-/// <summary>
-/// Dependency graph node specialized for the processing using the classic implementation strategy.
-/// </summary>
 [CompileTime]
-internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNode, IReadOnlyClassicProcessingNode>, IReadOnlyClassicProcessingNode
+internal class ClassicDependencyReferenceNode : DependencyReferenceNode
 {
-    protected override void AfterInitializableNodeInitialize( ProcessingNodeInitializationContext initializationContext )
-    {
-        // NB: Nodes are initialized in GraphExtensions.DescendantsDepthFirst{T}(T) order.
-
-        if ( initializationContext is not ClassicProcessingNodeInitializationContext ctx )
-        {
-            throw new ArgumentException( "Must be a " + nameof(ClassicProcessingNodeInitializationContext), nameof(initializationContext) );
-        }
-
-        if ( this.Depth == 1 )
-        {
-            this._subscribeMethod = new Deferred<IMethod>();
-        }
-
-        if ( !this.IsRoot )
-        {
-            this.PropertyTypeInpcInstrumentationKind = ctx.Helper.GetInpcInstrumentationKind( this.FieldOrProperty.Type );
-            this.InpcBaseHandling = ctx.Helper.DetermineInpcBaseHandlingForNode( this );
-        }
-    }
-
-    /// <summary>
-    /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.
-    /// </summary>
-    public InpcInstrumentationKind PropertyTypeInpcInstrumentationKind { get; private set; }
-
-    public InpcBaseHandling InpcBaseHandling { get; private set; }
+    public new IEnumerable<ClassicDependencyReferenceNode> Children => base.Children.Cast<ClassicDependencyReferenceNode>();
 
     /// <summary>
     /// Gets the potentially uninitialized field like "B? _lastA2". From non-template code, use
@@ -76,6 +46,7 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
             // invoked. This ensures that the outcome is consistent and the result can be cached.
 
             this._childUpdateMethods ??= this.Children
+                .Cast<ClassicDependencyReferenceNode>()
                 .Select( n => n.UpdateMethod.Value )
                 .Where( m => m != null )
                 .ToList()!;
@@ -98,38 +69,36 @@ internal sealed class ClassicProcessingNode : ProcessingNode<ClassicProcessingNo
     /// </remarks>
     public Deferred<IMethod?> UpdateMethod { get; } = new();
 
-    private Deferred<IMethod>? _subscribeMethod;
+    public Deferred<IMethod> SubscribeMethod { get; } = new();
 
     /// <summary>
-    /// Gets a method like <c>void SubscribeToA1()</c> for applicable root property (depth 1) nodes.
+    /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.
     /// </summary>
-    public Deferred<IMethod> SubscribeMethod
-        => this._subscribeMethod ?? throw new InvalidOperationException(
-            nameof(this.SubscribeMethod) + " is not applicable to this node, access indicates incorrect program design." );
+    public InpcInstrumentationKind PropertyTypeInpcInstrumentationKind { get; private set; }
 
-    IDeferred<IMethod?> IReadOnlyClassicProcessingNode.UpdateMethod => this.UpdateMethod;
+    public InpcBaseHandling InpcBaseHandling { get; private set; }
 
-    IDeferred<IField> IReadOnlyClassicProcessingNode.HandlerField => this.HandlerField;
+    public string Name => this.Depth == 1 ? this.FieldOrProperty.Name : throw new InvalidOperationException();
 
-    IDeferred<IField> IReadOnlyClassicProcessingNode.LastValueField => this.LastValueField;
-
-    IReadOnlyClassicProcessingNode IDependencyNode<IReadOnlyClassicProcessingNode>.Parent => this.Parent;
-
-    IReadOnlyCollection<IReadOnlyClassicProcessingNode> IDependencyNode<IReadOnlyClassicProcessingNode>.Children => this.Children;
-
-    IReadOnlyCollection<IReadOnlyClassicProcessingNode> IDependencyNode<IReadOnlyClassicProcessingNode>.ReferencedBy => this.ReferencedBy;
-
-    protected override void ToStringAppendToLine( StringBuilder appendTo, string? format )
+    public ClassicDependencyReferenceNode(
+        DependencyPropertyNode referencedPropertyNode,
+        DependencyReferenceNode? parent,
+        ClassicDependencyGraphBuilder builder,
+        ClassicProcessingNodeInitializationContext ctx ) : base(
+        referencedPropertyNode,
+        parent,
+        builder )
     {
-#if NETCOREAPP
-#pragma warning disable CA1307 // Specify StringComparison for clarity
-#endif
-        if ( format != null && format.Contains( "[ibh]" ) )
-        {
-            appendTo.Append( " ibh:" ).Append( this.InpcBaseHandling.ToString() );
-        }
-#if NETCOREAPP
-#pragma warning restore CA1307 // Specify StringComparison for clarity
-#endif
+        this.PropertyTypeInpcInstrumentationKind = ctx.Helper.GetInpcInstrumentationKind( referencedPropertyNode.FieldOrProperty.Type );
+        this.InpcBaseHandling = ctx.Helper.DetermineInpcBaseHandlingForNode( this );
     }
+
+    public new IEnumerable<ClassicDependencyPropertyNode> ReferencingProperties => base.ReferencingProperties.Cast<ClassicDependencyPropertyNode>();
+
+    public IReadOnlyCollection<ClassicDependencyPropertyNode> GetAllReferencingProperties(
+        Func<ClassicDependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
+        => (IReadOnlyCollection<ClassicDependencyPropertyNode>)
+            base.GetAllReferencingProperties( 
+                shouldIncludeImmediateChild == null ? null :
+                node => shouldIncludeImmediateChild.Invoke( (ClassicDependencyReferenceNode) node ) );
 }

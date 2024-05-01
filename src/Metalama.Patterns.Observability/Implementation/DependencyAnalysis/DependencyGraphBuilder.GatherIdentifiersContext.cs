@@ -9,15 +9,19 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
-internal static partial class DependencyGraph
+[CompileTime]
+public readonly record struct DependencyPathElement( ISymbol Symbol, SyntaxNode Node, int Depth );
+
+[CompileTime]
+public readonly record struct DependencyPath( IReadOnlyList<DependencyPathElement> Elements );
+
+internal partial class DependencyGraphBuilder
 {
     [CompileTime]
     private abstract class GatherIdentifiersContext : IDisposable
     {
-        private List<SymbolRecord>? _symbols;
+        private List<DependencyPathElement>? _symbols;
         private List<ForkItem>? _forks;
-
-        public readonly record struct SymbolRecord( ISymbol Symbol, SyntaxNode Node, int Depth );
 
         internal sealed class ForkItem
         {
@@ -26,18 +30,18 @@ internal static partial class DependencyGraph
             public bool IsJoined { get; set; }
         }
 
-        protected GatherIdentifiersContext( IReadOnlyCollection<SymbolRecord>? initialSymbols = null )
+        protected GatherIdentifiersContext( IReadOnlyCollection<DependencyPathElement>? initialSymbols = null )
         {
-            this._symbols = initialSymbols == null ? null : new List<SymbolRecord>( initialSymbols );
+            this._symbols = initialSymbols == null ? null : new List<DependencyPathElement>( initialSymbols );
         }
 
         public abstract void Dispose();
 
         public int StartDepth { get; private set; }
 
-        public IReadOnlyList<SymbolRecord>? Symbols => this._symbols;
+        public IReadOnlyList<DependencyPathElement>? Symbols => this._symbols;
 
-        public virtual IEnumerable<IReadOnlyList<SymbolRecord>> SymbolsForAllForks()
+        public virtual IEnumerable<IReadOnlyList<DependencyPathElement>> SymbolsForAllForks()
             => throw new NotSupportedException( nameof(this.SymbolsForAllForks) + " must only be called on a root " + nameof(GatherIdentifiersContext) + "." );
 
         public abstract bool IsRoot { get; }
@@ -113,13 +117,13 @@ internal static partial class DependencyGraph
         public void AddSymbol( ISymbol symbol, SyntaxNode node, int depth )
         {
             this.ThrowIfJoined();
-            var record = new SymbolRecord( symbol, node, depth );
+            var record = new DependencyPathElement( symbol, node, depth );
             this.AddSymbolUnsafe( record );
         }
 
-        private void AddSymbolUnsafe( in SymbolRecord record )
+        private void AddSymbolUnsafe( in DependencyPathElement reference )
         {
-            (this._symbols ??= new List<SymbolRecord>()).Add( record );
+            (this._symbols ??= new List<DependencyPathElement>()).Add( reference );
 
             if ( this._forks != null )
             {
@@ -127,7 +131,7 @@ internal static partial class DependencyGraph
                 {
                     if ( f.IsJoined )
                     {
-                        f.Fork.AddSymbolUnsafe( record );
+                        f.Fork.AddSymbolUnsafe( reference );
                     }
                 }
             }
