@@ -3,8 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis;
-using System.Collections.ObjectModel;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
@@ -15,16 +13,16 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 [CompileTime]
 internal partial class DependencyGraphBuilder
 {
-    private Dictionary<INamedType, DependencyTypeNode> _types = new();
+    private readonly Dictionary<INamedType, DependencyTypeNode> _types = new();
 
-    public virtual DependencyTypeNode CreateTypeNode( INamedType type ) => new( this, type );
+    protected virtual DependencyTypeNode CreateTypeNode( INamedType type ) => new( this, type );
 
     public virtual DependencyPropertyNode CreatePropertyNode( IFieldOrProperty fieldOrProperty, DependencyTypeNode parent ) => new( fieldOrProperty, parent );
 
     public virtual DependencyReferenceNode CreateReferenceNode( DependencyPropertyNode propertyNode, DependencyReferenceNode? parent )
         => new( propertyNode, parent, this );
 
-    public DependencyTypeNode GetOrAddTypeNode( INamedType type )
+    private DependencyTypeNode GetOrAddTypeNode( INamedType type )
     {
         if ( !this._types.TryGetValue( type, out var typeNode ) )
         {
@@ -35,7 +33,7 @@ internal partial class DependencyGraphBuilder
         return typeNode;
     }
 
-    public DependencyPropertyNode GetOrAddPropertyNode( IFieldOrProperty property )
+    private DependencyPropertyNode GetOrAddPropertyNode( IFieldOrProperty property )
     {
         var declaringTypeNode = this.GetOrAddTypeNode( property.DeclaringType );
 

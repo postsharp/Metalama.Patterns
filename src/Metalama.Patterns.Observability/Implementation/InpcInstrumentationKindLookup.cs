@@ -19,8 +19,7 @@ internal sealed class InpcInstrumentationKindLookup
         this._assets = assets;
     }
 
-    public InpcInstrumentationKind Get( IType type ) 
-        => this._inpcInstrumentationKindLookup.GetOrAdd( type, this.GetCore );
+    public InpcInstrumentationKind Get( IType type ) => this._inpcInstrumentationKindLookup.GetOrAdd( type, this.GetCore );
 
     private InpcInstrumentationKind GetCore( IType type )
     {

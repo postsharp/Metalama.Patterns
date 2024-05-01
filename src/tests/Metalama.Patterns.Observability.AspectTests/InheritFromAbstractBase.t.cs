@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Metalama.Patterns.Observability;
 namespace Metalama.Patterns.Observability.AspectTests.InheritFromAbstractBase;
 public partial class C11 : C10
 {

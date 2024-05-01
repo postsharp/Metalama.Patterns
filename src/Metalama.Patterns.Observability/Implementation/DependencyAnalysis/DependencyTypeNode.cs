@@ -2,11 +2,13 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using System.Diagnostics;
 using System.Text;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
+/// <summary>
+/// Represents a named type in an observability dependency graph.
+/// </summary>
 [CompileTime]
 internal class DependencyTypeNode
 {
@@ -30,7 +32,7 @@ internal class DependencyTypeNode
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine( "<root>" );
 
-        foreach ( var member in this._properties.Values.OrderBy( x=>x.Name ) )
+        foreach ( var member in this._properties.Values.OrderBy( x => x.Name ) )
         {
             member.RootReferenceNode.ToString( stringBuilder, 2, x => x == highlightNode );
         }
@@ -60,6 +62,4 @@ internal class DependencyTypeNode
     public IEnumerable<DependencyPropertyNode> Properties => this._properties.Values;
 
     public IReadOnlyCollection<DependencyReferenceNode> AllReferences => this._allReferences;
-    
-    
 }

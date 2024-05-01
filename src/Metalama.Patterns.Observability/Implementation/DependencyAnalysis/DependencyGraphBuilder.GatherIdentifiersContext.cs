@@ -9,12 +9,6 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
-[CompileTime]
-public readonly record struct DependencyPathElement( ISymbol Symbol, SyntaxNode Node, int Depth );
-
-[CompileTime]
-public readonly record struct DependencyPath( IReadOnlyList<DependencyPathElement> Elements );
-
 internal partial class DependencyGraphBuilder
 {
     [CompileTime]
@@ -117,7 +111,7 @@ internal partial class DependencyGraphBuilder
         public void AddSymbol( ISymbol symbol, SyntaxNode node, int depth )
         {
             this.ThrowIfJoined();
-            var record = new DependencyPathElement( symbol, node, depth );
+            var record = new DependencyPathElement( symbol, node );
             this.AddSymbolUnsafe( record );
         }
 

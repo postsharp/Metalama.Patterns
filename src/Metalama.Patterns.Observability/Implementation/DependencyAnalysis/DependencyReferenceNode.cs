@@ -2,13 +2,15 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis;
-using System.Diagnostics;
-using System.Reflection.PortableExecutable;
 using System.Text;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
+/// <summary>
+/// Represents a reference to a property in an observability dependency graph.
+/// Refererences can be in the recursive form <c>A.B.C.D</c>. In this case, <c>A</c> is said to be the root
+/// of the reference path, <c>B</c> is the parent of <c>C</c>, <c>C</c> is the child of <c>B</c>.
+/// </summary>
 [CompileTime]
 internal class DependencyReferenceNode
 {
@@ -38,17 +40,29 @@ internal class DependencyReferenceNode
                 }
             }
 
-            throw new Exception();
+            throw new ObservabilityAssertionFailedException();
         }
     }
 
+    /// <summary>
+    /// Gets the depth of the current element in the dependency path, where the root has a depth of <c>0</c>.
+    /// </summary>
     public int Depth { get; }
 
+    /// <summary>
+    /// Gets a value indicating whether the current node has direct children.
+    /// </summary>
     public bool HasChildren => this._childReferences != null;
 
+    /// <summary>
+    /// Gets the collection of direct children.
+    /// </summary>
     public IEnumerable<DependencyReferenceNode> Children
         => (IReadOnlyCollection<DependencyReferenceNode>?) this._childReferences?.Values ?? Array.Empty<DependencyReferenceNode>();
 
+    /// <summary>
+    /// Gets the node for the referenced property.
+    /// </summary>
     public DependencyPropertyNode ReferencedPropertyNode { get; }
 
     /// <summary>
@@ -56,38 +70,48 @@ internal class DependencyReferenceNode
     /// </summary>
     public IFieldOrProperty ReferencedFieldOrProperty => this.ReferencedPropertyNode.FieldOrProperty;
 
+    /// <summary>
+    /// Gets the parent node. In <c>A.B.C</c>, <c>A</c> is the parent of <c>B</c>.
+    /// </summary>
     public DependencyReferenceNode? Parent { get; }
 
     public DependencyGraphBuilder Builder { get; }
 
-    private HashSet<DependencyPropertyNode>? _referencingProperties;
+    private HashSet<DependencyPropertyNode>? _leafReferencingProperties;
 
-    public IEnumerable<DependencyPropertyNode> ReferencingProperties
-        => (IEnumerable<DependencyPropertyNode>?) this._referencingProperties ?? Array.Empty<DependencyPropertyNode>();
+    /// <summary>
+    /// Gets the list of properties referencing the current node as a leaf. For instance, if the current node path is <c>A.B</c> and we have two properties
+    /// <c>P1 => A.B</c> and <c>P2 => A.B.C</c>, this property would only return <c>P1</c>.
+    /// </summary>
+    public IEnumerable<DependencyPropertyNode> LeafReferencingProperties
+        => (IEnumerable<DependencyPropertyNode>?) this._leafReferencingProperties ?? Array.Empty<DependencyPropertyNode>();
 
     /// <summary>
     /// Gets a value indicating whether the current node is referenced by some property as a leaf of a property path, not as an intermediate node.
     /// </summary>
-    public bool HasLeafReferencingProperties => this._referencingProperties != null;
-    
+    public bool HasLeafReferencingProperties => this._leafReferencingProperties != null;
+
     /// <summary>
     /// Gets a value indicating whether this node, or any descedent, is referenced from some property.
     /// </summary>
     public bool HasAnyReferencingProperties { get; private set; }
 
-    public void AddReferencingProperty( DependencyPropertyNode reference )
+    /// <summary>
+    /// Adds a property referencing the current node as a leaf.
+    /// </summary>
+    public void AddLeafReferencingProperty( DependencyPropertyNode referencingProperty )
     {
-        this._referencingProperties ??= new HashSet<DependencyPropertyNode>();
+        this._leafReferencingProperties ??= new HashSet<DependencyPropertyNode>();
 
-        if ( !this._referencingProperties.Add( reference ) )
+        if ( !this._leafReferencingProperties.Add( referencingProperty ) )
         {
             // Duplicate.
             return;
         }
-        
-        reference.DeclaringTypeNode.AddReference( this );
 
-        for ( var node = this; node != null; node = node.Parent )
+        referencingProperty.DeclaringTypeNode.AddReference( this );
+
+        for ( var node = this; node is { HasAnyReferencingProperties: false }; node = node.Parent )
         {
             node.HasAnyReferencingProperties = true;
         }
@@ -161,22 +185,19 @@ internal class DependencyReferenceNode
 
     public IReadOnlyCollection<DependencyPropertyNode> GetAllReferencingProperties( Func<DependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
         => this.GetAllReferencingProperties<DependencyPropertyNode>( shouldIncludeImmediateChild );
-    
-      /// <summary>
+
+    /// <summary>
     /// Gets the distinct set of nodes which directly or indirectly reference the current node, and optionally also those which directly
     /// or indirectly reference selected children of the current node.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="node"></param>
     /// <param name="shouldIncludeImmediateChild">
-    /// A predicate that selects the children of <paramref name="node"/> to which references should also be included and followed.
-    /// If <see langword="null"/>, references to immediate children are not included. Note that references to <paramref name="node"/>
+    /// A predicate that selects the children of the current to which references should also be included and followed.
+    /// If <see langword="null"/>, references to immediate children are not included. Note that references to the current node
     /// itself are always included and followed, regardless of <paramref name="shouldIncludeImmediateChild"/>.
     /// </param>
     /// <returns></returns>
-    public IReadOnlyCollection<T> GetAllReferencingProperties<T>(
-        Func<DependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
-      where T : DependencyPropertyNode
+    public IReadOnlyCollection<T> GetAllReferencingProperties<T>( Func<DependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
+        where T : DependencyPropertyNode
     {
         // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
         // However, it's not recursive so there's no risk of stack overflow. So safe, but potentially slow.
@@ -187,10 +208,10 @@ internal class DependencyReferenceNode
         }
 
         var properties = shouldIncludeImmediateChild == null
-            ? this.ReferencingProperties
+            ? this.LeafReferencingProperties
             : this.Children.Where( shouldIncludeImmediateChild )
-                .SelectMany( n => n.ReferencingProperties )
-                .Concat( this.ReferencingProperties );
+                .SelectMany( n => n.LeafReferencingProperties )
+                .Concat( this.LeafReferencingProperties );
 
         var propertiesToFollow = new Stack<DependencyPropertyNode>( properties );
         var analyzedProperties = new HashSet<T>();
@@ -201,7 +222,7 @@ internal class DependencyReferenceNode
 
             if ( analyzedProperties.Add( (T) property ) )
             {
-                foreach ( var referencingProperty in property.RootReferenceNode.ReferencingProperties )
+                foreach ( var referencingProperty in property.RootReferenceNode.LeafReferencingProperties )
                 {
                     propertiesToFollow.Push( referencingProperty );
                 }

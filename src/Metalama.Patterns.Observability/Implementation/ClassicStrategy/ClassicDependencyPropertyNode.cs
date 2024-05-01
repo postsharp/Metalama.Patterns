@@ -11,8 +11,7 @@ internal class ClassicDependencyPropertyNode : DependencyPropertyNode
 {
     public ClassicDependencyPropertyNode(
         IFieldOrProperty fieldOrProperty,
-        DependencyTypeNode declaringTypeNode,
-        ClassicProcessingNodeInitializationContext ctx ) : base( fieldOrProperty, declaringTypeNode ) { }
+        DependencyTypeNode declaringTypeNode ) : base( fieldOrProperty, declaringTypeNode ) { }
 
     public new ClassicDependencyReferenceNode RootReferenceNode => (ClassicDependencyReferenceNode) base.RootReferenceNode;
 }

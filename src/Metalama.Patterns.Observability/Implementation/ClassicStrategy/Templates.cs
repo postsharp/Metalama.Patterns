@@ -4,9 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
@@ -29,12 +27,12 @@ internal sealed class Templates : ITemplateProvider
         [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
         [CompileTime] IField? handlerField,
         [CompileTime] IMethod? subscribeMethod,
-        [CompileTime] ClassicDependencyPropertyNode? node )
+        [CompileTime] ClassicDependencyPropertyNode node )
     {
         var rootReference = node.RootReferenceNode;
 
         var ctx = templateArgs.Value;
-        var inpcImplementationKind = rootReference?.PropertyTypeInpcInstrumentationKind ?? ctx.InpcInstrumentationKindLookup.Get( meta.Target.Property.Type );
+        var inpcImplementationKind = rootReference.PropertyTypeInpcInstrumentationKind;
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
@@ -83,24 +81,21 @@ internal sealed class Templates : ITemplateProvider
                 meta.Target.FieldOrProperty.Value = value;
             }
 
-            if ( node != null )
+            // Update methods will deal with notifications - * for those children which have update methods *
+            foreach ( var method in rootReference.ChildUpdateMethods )
             {
-                // Update methods will deal with notifications - * for those children which have update methods *
-                foreach ( var method in rootReference.ChildUpdateMethods )
-                {
-                    method.With( InvokerOptions.Final ).Invoke();
-                }
-
-                // Notify refs to the current node and any children without an update method.
-                foreach ( var r in rootReference.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
-                             .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                             .OrderBy( n => n.Name ) )
-                {
-                    ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
-                }
+                method.With( InvokerOptions.Final ).Invoke();
             }
 
-            if ( node?.FieldOrProperty.DeclarationKind != DeclarationKind.Field && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
+            // Notify refs to the current node and any children without an update method.
+            foreach ( var r in rootReference.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
+                         .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
+                         .OrderBy( n => n.Name ) )
+            {
+                ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+            }
+
+            if ( node.FieldOrProperty.DeclarationKind != DeclarationKind.Field && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
             {
                 ctx.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
             }
@@ -350,7 +345,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
-                meta.InsertComment( "Dependency graph:", "\n" + templateArgsValue.DependencyTypeNode.ToString() );
+                meta.InsertComment( "Dependency graph:", "\n" + templateArgsValue.DependencyTypeNode );
             }
         }
 
@@ -425,7 +420,7 @@ internal sealed class Templates : ITemplateProvider
                     SwitchStatementLabel.CreateLiteral( node.Name ),
                     StatementFactory.FromTemplate(
                             nameof(OnPropertyChangedSwitchCase),
-                            new { templateArgsValue, node = node, childUpdateMethods, rootPropertyNamesToNotify } )
+                            new { templateArgsValue, node, childUpdateMethods, rootPropertyNamesToNotify } )
                         .UnwrapBlock() );
             }
             else
@@ -607,7 +602,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
-                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyTypeNode.ToString() );
+                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyTypeNode );
             }
         }
 
@@ -618,7 +613,7 @@ internal sealed class Templates : ITemplateProvider
             // NB: The following code is similar to the OnChildPropertyChangedDelegateBody template. Consider keeping any changes to relevant logic in sync.
 
             var hasUpdateMethod = node.UpdateMethod.Value != null;
-            var hasRefs = node.ReferencingProperties.Any();
+            var hasRefs = node.LeafReferencingProperties.Any();
 
             if ( hasUpdateMethod || hasRefs )
             {
@@ -685,7 +680,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
-                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyTypeNode.ToString() );
+                meta.InsertComment( "Dependency graph:", "\n" + ctx.DependencyTypeNode );
             }
         }
 

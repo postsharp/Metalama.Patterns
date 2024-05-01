@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Runtime.CompilerServices;
-using System.Text;
 using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
@@ -139,10 +138,8 @@ internal partial class DependencyGraphBuilder
             }
         }
 
-        private bool ValidateChainSymbol( IReadOnlyList<DependencyPathElement> symbols, int index, ChainSection chainSection )
+        private void ValidateChainSymbol( IReadOnlyList<DependencyPathElement> symbols, int index, ChainSection chainSection )
         {
-            var isSupported = true;
-
             // Here we report particularly those diagnostics which should be located on a syntax node inside a body. The final dependency
             // graph does not keep track of all the syntax nodes which referenced each dependency node (this would be expensive), so logging
             // diagnostics located on syntax nodes inside bodies is not possible later.
@@ -165,8 +162,6 @@ internal partial class DependencyGraphBuilder
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( fieldOrPropertyType! ),
                         sr.Node.GetLocation() );
-
-                    isSupported = false;
                 }
 
                 // Warn if this is a non-leaf reference to an INPC non-auto property of the target type because we can't
@@ -181,8 +176,6 @@ internal partial class DependencyGraphBuilder
                             .WithArguments(
                                 "Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed." ),
                         symbols[index + 1].Node.GetLocation() );
-
-                    isSupported = false;
                 }
             }
 
@@ -198,8 +191,6 @@ internal partial class DependencyGraphBuilder
                             .WithArguments(
                                 "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported." ),
                         sr.Node.GetLocation() );
-
-                    isSupported = false;
                 }
             }
             else if ( sr.Symbol.Kind is SymbolKind.Method )
@@ -218,8 +209,6 @@ internal partial class DependencyGraphBuilder
                             this._context.ReportDiagnostic(
                                 DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments( (sr.Symbol.Kind, sr.Symbol) ),
                                 sr.Node.GetLocation() );
-
-                            isSupported = false;
                         }
                     }
                 }
@@ -234,13 +223,9 @@ internal partial class DependencyGraphBuilder
                         this._context.ReportDiagnostic(
                             DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments( (sr.Symbol.Kind, sr.Symbol) ),
                             sr.Node.GetLocation() );
-
-                        isSupported = false;
                     }
                 }
             }
-
-            return isSupported;
         }
 
         private void ProcessAndResetIfApplicable( GatherIdentifiersContext context )
@@ -298,7 +283,7 @@ internal partial class DependencyGraphBuilder
 
                     if ( reference != null && reference.ReferencedFieldOrProperty != this._propertyNode.FieldOrProperty )
                     {
-                        reference.AddReferencingProperty( this._propertyNode );
+                        reference.AddLeafReferencingProperty( this._propertyNode );
                     }
                 }
 

@@ -59,8 +59,6 @@ internal static class DependencyNodeExtensions
     /// <summary>
     /// Gets the current node and its ancestors in leaf-to-root order.
     /// </summary>
-    /// <param name="includeRoot"></param>
-    /// <returns></returns>
     public static IEnumerable<T> AncestorsAndSelf<T>( this T node )
         where T : DependencyReferenceNode
         => AncestorsCore( node, true );
@@ -76,9 +74,8 @@ internal static class DependencyNodeExtensions
         while ( node.Parent != null )
         {
             node = (T) node.Parent;
-            
+
             yield return node;
         }
     }
-
 }

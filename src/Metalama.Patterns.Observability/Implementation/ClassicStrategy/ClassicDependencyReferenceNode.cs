@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
@@ -14,7 +13,7 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
 
     /// <summary>
     /// Gets the potentially uninitialized field like "B? _lastA2". From non-template code, use
-    /// <see cref="ClassicObservabilityStrategyImpl.GetOrCreateLastValueField(ClassicProcessingNode)"/> instead.
+    /// <see cref="ClassicObservabilityStrategyImpl.GetOrCreateLastValueField"/> instead.
     /// </summary>
     /// <remarks>
     /// The value will only be set for applicable nodes. Template code should only be accessing the value of
@@ -25,7 +24,7 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
 
     /// <summary>
     /// Gets the potentially uninitialized field like "PropertyChangedEventHandler? _onA2PropertyChangedHandler".
-    /// From non-template code, use <see cref="ClassicObservabilityStrategyImpl.GetOrCreateHandlerField(ClassicProcessingNode)"/> instead.
+    /// From non-template code, use <see cref="ClassicObservabilityStrategyImpl.GetOrCreateHandlerField"/> instead.
     /// </summary>
     /// <remarks>
     /// The value will only be set for applicable nodes. Template code should only be accessing the value of
@@ -74,7 +73,7 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
     /// <summary>
     /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.
     /// </summary>
-    public InpcInstrumentationKind PropertyTypeInpcInstrumentationKind { get; private set; }
+    public InpcInstrumentationKind PropertyTypeInpcInstrumentationKind { get; }
 
     public InpcBaseHandling InpcBaseHandling { get; private set; }
 
@@ -118,7 +117,7 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
             };
     }
 
-    public new IEnumerable<ClassicDependencyPropertyNode> ReferencingProperties => base.ReferencingProperties.Cast<ClassicDependencyPropertyNode>();
+    public new IEnumerable<ClassicDependencyPropertyNode> LeafReferencingProperties => base.LeafReferencingProperties.Cast<ClassicDependencyPropertyNode>();
 
     public IReadOnlyCollection<ClassicDependencyPropertyNode> GetAllReferencingProperties(
         Func<ClassicDependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )

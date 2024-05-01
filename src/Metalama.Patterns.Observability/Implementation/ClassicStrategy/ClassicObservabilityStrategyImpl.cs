@@ -8,7 +8,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Patterns.Observability.Options;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
@@ -524,7 +523,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
                         if ( hasDependentProperties )
                         {
-                            var rootReference = propertyNode!.RootReferenceNode!;
+                            var rootReference = propertyNode.RootReferenceNode;
                             handlerField = this.GetOrCreateHandlerField( rootReference );
 
                             if ( !this.TryGetOrCreateRootPropertySubscribeMethod( propertyNode, out subscribeMethod ) )
