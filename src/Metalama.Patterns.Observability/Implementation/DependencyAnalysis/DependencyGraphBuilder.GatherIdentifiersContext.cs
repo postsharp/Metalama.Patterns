@@ -108,7 +108,7 @@ internal partial class DependencyGraphBuilder
             this._forks?.Clear();
         }
 
-        public void AddSymbol( ISymbol symbol, SyntaxNode node, int depth )
+        public void AddSymbol( ISymbol symbol, SyntaxNode node )
         {
             this.ThrowIfJoined();
             var record = new DependencyPathElement( symbol, node );

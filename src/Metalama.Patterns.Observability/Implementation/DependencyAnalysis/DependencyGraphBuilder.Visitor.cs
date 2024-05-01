@@ -21,7 +21,6 @@ internal partial class DependencyGraphBuilder
         ICompilation compilation,
         ObservablePropertyInfo propertyInfo,
         IGraphBuildingContext context,
-        RoslynAssets assets,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
@@ -40,7 +39,7 @@ internal partial class DependencyGraphBuilder
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( propertyInfo, semanticModel, context, assets, trace, cancellationToken );
+        var visitor = new Visitor( propertyInfo, semanticModel, context, trace, cancellationToken );
 
         visitor.Visit( body );
     }
@@ -54,7 +53,6 @@ internal partial class DependencyGraphBuilder
         private readonly CancellationToken _cancellationToken;
         private readonly Action<string>? _trace;
         private readonly IGraphBuildingContext _context;
-        private readonly RoslynAssets _assets;
         private readonly ICompilation _compilation;
         private readonly GatherIdentifiersContextManager _gatherManager;
 
@@ -64,7 +62,6 @@ internal partial class DependencyGraphBuilder
             ObservablePropertyInfo propertyInfo,
             SemanticModel semanticModel,
             IGraphBuildingContext context,
-            RoslynAssets assets,
             Action<string>? trace,
             CancellationToken cancellationToken )
         {
@@ -75,7 +72,6 @@ internal partial class DependencyGraphBuilder
             this._cancellationToken = cancellationToken;
             this._context = context;
             this._gatherManager = new GatherIdentifiersContextManager( this );
-            this._assets = assets;
             this._compilation = this._declaringType.Compilation;
         }
 
@@ -125,7 +121,7 @@ internal partial class DependencyGraphBuilder
                     {
                         var elementaryType = ti.Type.GetElementaryType();
 
-                        if ( !elementaryType.IsPrimitiveType( this._assets ) )
+                        if ( !elementaryType.IsPrimitiveType() )
                         {
                             this._context.ReportDiagnostic(
                                 DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
@@ -157,7 +153,7 @@ internal partial class DependencyGraphBuilder
             {
                 // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
 
-                if ( !fieldOrPropertyType.IsPrimitiveType( this._assets ) && !this._context.TreatAsImplementingInpc( fieldOrPropertyType! ) )
+                if ( !fieldOrPropertyType.IsPrimitiveType() && !this._context.TreatAsImplementingInpc( fieldOrPropertyType! ) )
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( fieldOrPropertyType! ),
@@ -181,9 +177,9 @@ internal partial class DependencyGraphBuilder
 
             if ( sr.Symbol is IFieldSymbol fieldSymbol )
             {
-                if ( !(!fieldSymbol.IsStatic && fieldSymbol.EffectiveAccessibility() == Accessibility.Private)
-                     && !fieldSymbol.ContainingType.IsPrimitiveType( this._assets )
-                     && !(fieldSymbol.IsReadOnly && fieldSymbol.Type.IsPrimitiveType( this._assets ))
+                if ( !(!fieldSymbol.IsStatic && fieldSymbol.GetEffectiveAccessibility() == Accessibility.Private)
+                     && !fieldSymbol.ContainingType.IsPrimitiveType()
+                     && !(fieldSymbol.IsReadOnly && fieldSymbol.Type.IsPrimitiveType())
                      && !this._context.MustIgnoreUnsupportedDependencies( sr.Symbol ) )
                 {
                     this._context.ReportDiagnostic(
@@ -212,7 +208,7 @@ internal partial class DependencyGraphBuilder
                         }
                     }
                 }
-                else if ( !containingType.IsPrimitiveType( this._assets ) )
+                else if ( !containingType.IsPrimitiveType() )
                 {
                     // Only members of primitive types are implicitly safe to access.
 
@@ -253,7 +249,7 @@ internal partial class DependencyGraphBuilder
                     var supportedStemAndLeafCount = this.IsLocalInstanceMember( firstSymbol )
                         ? symbols.TakeWhile(
                                 sr => sr.Symbol.Kind == SymbolKind.Property
-                                      || (sr.Symbol.Kind == SymbolKind.Field && sr.Symbol.EffectiveAccessibility() == Accessibility.Private) )
+                                      || (sr.Symbol.Kind == SymbolKind.Field && sr.Symbol.GetEffectiveAccessibility() == Accessibility.Private) )
                             .Count()
                         : 0;
 
@@ -329,7 +325,7 @@ internal partial class DependencyGraphBuilder
             var symbolInfo = this._semanticModel.GetSymbolInfo( node.Type, this._cancellationToken );
             var variableType = ((ITypeSymbol?) symbolInfo.Symbol)?.GetElementaryType();
 
-            if ( variableType != null && !(variableType.IsPrimitiveType( this._assets ) || this._context.MustIgnoreUnsupportedDependencies( variableType )) )
+            if ( variableType != null && !(variableType.IsPrimitiveType() || this._context.MustIgnoreUnsupportedDependencies( variableType )) )
             {
                 this._context.ReportDiagnostic(
                     DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments(
@@ -428,7 +424,7 @@ internal partial class DependencyGraphBuilder
 
                 if ( ctx.StartDepth > 0 )
                 {
-                    ctx.AddSymbol( symbol, node, this._depth );
+                    ctx.AddSymbol( symbol, node );
                 }
             }
             else

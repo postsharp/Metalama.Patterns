@@ -64,7 +64,6 @@ internal partial class DependencyGraphBuilder
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
-        var assets = type.Compilation.Cache.GetOrAdd( c => new RoslynAssets( c.GetRoslynCompilation() ) );
         var graphType = this.GetOrAddTypeNode( type );
 
         foreach ( var p in type.Properties )
@@ -82,7 +81,6 @@ internal partial class DependencyGraphBuilder
                 type.Compilation,
                 graphMember,
                 context,
-                assets,
                 trace,
                 cancellationToken );
         }

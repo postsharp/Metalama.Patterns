@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
