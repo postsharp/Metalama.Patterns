@@ -15,11 +15,11 @@ public sealed class ObservabilityMemberOptionsBuilder
 {
     internal DependencyAnalysisOptions? DependencyAnalysisOptions { get; private set; }
 
-    public bool? IgnoreUnsupportedDependencies
+    public bool? IgnoreUnobservableExpressions
     {
-        get => this.DependencyAnalysisOptions?.IgnoreUnsupportedDependencies;
+        get => this.DependencyAnalysisOptions?.IgnoreUnobservableExpressions;
         set
             => this.DependencyAnalysisOptions =
-                new DependencyAnalysisOptions { IgnoreUnsupportedDependencies = value };
+                new DependencyAnalysisOptions { IgnoreUnobservableExpressions = value };
     }
 }

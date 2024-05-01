@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
 /* TODO: Detect invalid constructs, including:
- * - Reference to non-INPC property (also INPC property with [IgnoreAutoChangeNotification]), unless the property has [IgnoreUnsupportedDependencies].
+ * - Reference to non-INPC property (also INPC property with [IgnoreAutoChangeNotification]), unless the property has [IgnoreUnobservableExpressions].
  */
 
 [CompileTime]
@@ -60,7 +60,7 @@ internal partial class DependencyGraphBuilder
 
     public ObservableTypeInfo GetDependencyGraph(
         INamedType type,
-        IGraphBuildingContext context,
+        GraphBuildingContext context,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {

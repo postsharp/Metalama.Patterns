@@ -124,13 +124,13 @@ internal static class DiagnosticDescriptors
             _category );
 
     /// <summary>
-    /// {0} {1} cannot be analysed, and has not been configured as safe for dependency analysis. Use [IgnoreUnsupportedDependencies] or ConfigureDependencyAnalysis via a fabric to configure {0} as safe.
+    /// {0} {1} cannot be analysed, and has not been configured as safe for dependency analysis. Use [IgnoreUnobservableExpressions] or ConfigureDependencyAnalysis via a fabric to configure {0} as safe.
     /// </summary>
     public static readonly DiagnosticDefinition<(SymbolKind Kind, ISymbol MethodOrPropertySymbol)> WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis =
         new(
             "LAMA5162",
             Warning,
-            "The '{1}' {0} cannot be analysed, and has not been configured as safe for dependency analysis. Use [IgnoreUnsupportedDependencies] or "
+            "The '{1}' {0} cannot be analysed, and has not been configured with an observability contract. Use [IgnoreUnobservableExpressions] or "
             + nameof(ObservabilityExtensions.ConfigureObservability) + " via a fabric to ignore this warning.",
             "Method or property is not supported for dependency analysis.",
             _category );

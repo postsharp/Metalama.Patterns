@@ -95,7 +95,7 @@ class D
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   A1
@@ -123,7 +123,7 @@ class D
         diagnostics.Should().BeEmpty();
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -152,7 +152,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   X [ Z ]
@@ -163,8 +163,8 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -199,7 +199,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -211,7 +211,7 @@ public class A
 
         diagnostics.Should()
             .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Variables of types other than primitive types and types configured as safe for dependency analysis are not supported.)@(12,12)-(12,35)" );
+                "LAMA5156: Not supported for dependency analysis. (Variables of types other than primitive types and types configured as deeply immutable are not supported.)@(12,12)-(12,35)" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -254,10 +254,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Z ]
@@ -298,10 +298,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -339,10 +339,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   Y
@@ -383,10 +383,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -420,10 +420,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -457,10 +457,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -494,10 +494,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -541,10 +541,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -589,10 +589,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -637,10 +637,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X
@@ -649,7 +649,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
+            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, Fn(A)))@(12,19)-(12,21)" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -683,10 +683,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -733,10 +733,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -745,7 +745,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(12,23)-(12,27)" );
+            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, A.Fn(A)))@(12,19)-(12,21)" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -781,10 +781,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -831,13 +831,14 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext(
+            new TestGraphBuildingContext(
+                compilation,
                 isConfiguredAsSafe: _ => true,
                 reportDiagnostic: diagnostics.Add,
                 treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -846,7 +847,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5156: Not supported for dependency analysis. (Method arguments (including 'this') must be of primitive types.)@(17,25)-(17,29)" );
+            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, P.Fn(A)))@(17,21)-(17,23)" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -884,13 +885,14 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext(
+            new TestGraphBuildingContext(
+                compilation,
                 isConfiguredAsSafe: _ => true,
                 reportDiagnostic: diagnostics.Add,
                 treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   X [ Y ]
@@ -948,10 +950,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   A1
@@ -1020,10 +1022,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   A1
@@ -1099,10 +1101,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   A1
@@ -1160,10 +1162,10 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: NeverTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: NeverTreatAsInpc ) );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = @"<root>
   A1
@@ -1204,7 +1206,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1215,8 +1217,8 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "No" )]
@@ -1248,7 +1250,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1260,10 +1262,10 @@ public class A
 
         diagnostics.Should()
             .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(8,26)-(8,29)" );
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.)@(8,26)-(8,29)" );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "No" )]
@@ -1298,7 +1300,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1310,10 +1312,10 @@ public class A
 
         diagnostics.Should()
             .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(11,26)-(11,29)" );
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.)@(11,26)-(11,29)" );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -1342,7 +1344,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1353,8 +1355,8 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "No" )]
@@ -1383,7 +1385,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1395,10 +1397,10 @@ public class A
 
         diagnostics.Should()
             .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.)@(5,20)-(5,23)" );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -1427,7 +1429,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   _foo [ X, Z ]
@@ -1439,8 +1441,8 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "Yes" )]
@@ -1473,7 +1475,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   _foo
@@ -1486,8 +1488,8 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
         diagnostics.Should().BeEmpty();
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     [Trait( "Supported", "No" )]
@@ -1516,7 +1518,7 @@ public class A
 
         var result = new DependencyGraphBuilder().GetDependencyGraph(
             type,
-            new DelegateGraphBuildingContext( reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1528,10 +1530,10 @@ public class A
 
         diagnostics.Should()
             .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.)@(5,20)-(5,23)" );
+                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.)@(5,20)-(5,23)" );
 
-        // this.TestOutput.WriteLines( diagnostics );
-        // this.TestOutput.WriteLine( result.ToString() );
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
     }
 
     // ReSharper disable once InconsistentNaming

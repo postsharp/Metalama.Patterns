@@ -7,5 +7,5 @@ namespace Metalama.Patterns.Observability.AspectTests.Diagnostics.CallUnsafeMeth
 [Observable]
 public class CallUnsafeMethodOfExternalClass
 {
-    public int Count => ExternalClass.Foo();
+    public int Count => ExternalClass.Foo( this );
 }

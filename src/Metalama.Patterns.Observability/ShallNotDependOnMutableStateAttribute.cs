@@ -7,16 +7,14 @@ using Metalama.Patterns.Observability.Options;
 namespace Metalama.Patterns.Observability;
 
 /// <summary>
-/// Custom attribute that indicates that the target element (or its contained members, when applicable) is safe to access and for which no dependency analysis is required.
+/// Custom attribute that indicates that the target methods are pure, i.e. their result depends only on their inputs.
 /// </summary>
 [PublicAPI]
 [AttributeUsage(
     AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Field
     | AttributeTargets.Property | AttributeTargets.Event )]
-public sealed class IgnoreUnsupportedDependenciesAttribute : Attribute, IHierarchicalOptionsProvider
+public sealed class ShallNotDependOnMutableStateAttribute : Attribute, IHierarchicalOptionsProvider
 {
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
-    {
-        return new[] { new DependencyAnalysisOptions() { IgnoreUnsupportedDependencies = true } };
-    }
+        => new[] { new DependencyAnalysisOptions() { ObservabilityContract = ObservabilityContract.ShallNotDependOnMutableState } };
 }

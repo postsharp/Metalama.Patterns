@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnsupportedDependencies.UsingAttributeOnMethodOfOtherClass;
+namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnobservableExpressions.UsingAttributeOnMethodOfOtherClass;
 
 public static class OtherClass
 {
-    [IgnoreUnsupportedDependencies]
+    [ShallNotDependOnMutableState]
     public static int Foo() => 42;
 }
 

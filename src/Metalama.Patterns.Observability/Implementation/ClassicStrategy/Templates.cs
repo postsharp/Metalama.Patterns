@@ -455,7 +455,6 @@ internal sealed class Templates : ITemplateProvider
         IReadOnlyCollection<IMethod> childUpdateMethods,
         [CompileTime] IReadOnlyCollection<string> rootPropertyNamesToNotify )
     {
-        meta.DebugBreak();
         var emitDefaultNotifications = meta.CompileTime( true );
 
         if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )

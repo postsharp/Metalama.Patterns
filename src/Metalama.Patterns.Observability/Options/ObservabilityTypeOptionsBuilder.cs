@@ -29,12 +29,28 @@ public sealed class ObservabilityTypeOptionsBuilder
         set => this.ObservabilityOptions = (this.ObservabilityOptions ?? new ObservabilityOptions()) with { ImplementationStrategy = value };
     }
 
-    public bool? IgnoreUnsupportedDependencies
+    public bool? IgnoreUnobservableExpressions
     {
-        get => this.DependencyAnalysisOptions?.IgnoreUnsupportedDependencies;
+        get => this.DependencyAnalysisOptions?.IgnoreUnobservableExpressions;
         set
             => this.DependencyAnalysisOptions =
-                new DependencyAnalysisOptions { IgnoreUnsupportedDependencies = value };
+                new DependencyAnalysisOptions { IgnoreUnobservableExpressions = value };
+    }
+
+    public ObservabilityContract? ObservabilityContract
+    {
+        get => this.DependencyAnalysisOptions?.ObservabilityContract;
+        set
+            => this.DependencyAnalysisOptions =
+                new DependencyAnalysisOptions { ObservabilityContract = value };
+    }
+
+    public bool? IsDeeplyImmutableType
+    {
+        get => this.DependencyAnalysisOptions?.IsDeeplyImmutableType;
+        set
+            => this.DependencyAnalysisOptions =
+                new DependencyAnalysisOptions { IsDeeplyImmutableType = value };
     }
 
 #if DEBUG

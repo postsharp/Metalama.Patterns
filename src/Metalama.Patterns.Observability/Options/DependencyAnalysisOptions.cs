@@ -13,15 +13,30 @@ public sealed record DependencyAnalysisOptions :
     IHierarchicalOptions<INamedType>,
     IHierarchicalOptions<IMember>
 {
-    public bool? IgnoreUnsupportedDependencies { get; init; }
+    public bool? IgnoreUnobservableExpressions { get; init; }
+
+    public ObservabilityContract? ObservabilityContract { get; init; }
+
+    public bool? IsDeeplyImmutableType { get; init; }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (DependencyAnalysisOptions) changes;
 
-        return new DependencyAnalysisOptions { IgnoreUnsupportedDependencies = other.IgnoreUnsupportedDependencies ?? this.IgnoreUnsupportedDependencies };
+        return new DependencyAnalysisOptions
+        {
+            IgnoreUnobservableExpressions = other.IgnoreUnobservableExpressions ?? this.IgnoreUnobservableExpressions,
+            ObservabilityContract = other.ObservabilityContract ?? this.ObservabilityContract,
+            IsDeeplyImmutableType = other.IsDeeplyImmutableType ?? this.IsDeeplyImmutableType
+        };
     }
 
-    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new DependencyAnalysisOptions() { IgnoreUnsupportedDependencies = false };
+    internal static DependencyAnalysisOptions Default { get; } = new()
+    {
+        IgnoreUnobservableExpressions = false
+
+        // Other members intentionally null by default because we could have some rules given the default.
+    };
+
+    IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context ) => Default;
 }

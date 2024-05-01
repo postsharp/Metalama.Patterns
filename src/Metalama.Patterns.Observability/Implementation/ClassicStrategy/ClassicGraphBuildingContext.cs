@@ -8,47 +8,30 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Patterns.Observability.Options;
 using Microsoft.CodeAnalysis;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal sealed class ClassicGraphBuildingContext : IGraphBuildingContext
+internal sealed class ClassicGraphBuildingContext : GraphBuildingContext
 {
     private readonly ClassicObservabilityStrategyImpl _strategy;
 
-    public ClassicGraphBuildingContext( ClassicObservabilityStrategyImpl strategy )
+    public ClassicGraphBuildingContext( ClassicObservabilityStrategyImpl strategy ) : base( strategy.CurrentType.Compilation )
     {
         this._strategy = strategy;
     }
 
     public bool HasReportedErrors { get; private set; }
 
-    public bool MustIgnoreUnsupportedDependencies( ISymbol symbol )
-    {
-        var decl = this._strategy.CurrentType.Compilation.GetDeclaration( symbol );
-
-        var options = decl switch
-        {
-            ICompilation compilation => compilation.Enhancements().GetOptions<DependencyAnalysisOptions>(),
-            INamespace ns => ns.Enhancements().GetOptions<DependencyAnalysisOptions>(),
-            INamedType type => type.Enhancements().GetOptions<DependencyAnalysisOptions>(),
-            IMember member => member.Enhancements().GetOptions<DependencyAnalysisOptions>(),
-            _ => throw new NotImplementedException()
-        };
-
-        return options.IgnoreUnsupportedDependencies == true;
-    }
-
-    public bool IsAutoPropertyOrField( ISymbol symbol )
-        => this._strategy.CurrentType.Compilation.GetDeclaration( symbol ) is IFieldOrProperty { IsAutoPropertyOrField: true };
-
-    public void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null )
+    public override void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null )
     {
         this.HasReportedErrors |= diagnostic.Definition.Severity == Severity.Error;
         this._strategy.AspectBuilder.Diagnostics.Report( diagnostic, location.ToDiagnosticLocation() );
     }
 
-    public bool TreatAsImplementingInpc( ITypeSymbol type )
+    public override bool TreatAsImplementingInpc( ITypeSymbol type )
     {
         var typeDecl = this._strategy.CurrentType.Compilation.GetDeclaration( type ) as IType;
 

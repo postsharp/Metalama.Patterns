@@ -1,0 +1,43 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
+using Metalama.Patterns.Observability.Options;
+using Microsoft.CodeAnalysis;
+
+namespace Metalama.Patterns.Observability.CompileTimeTests;
+
+internal sealed class TestGraphBuildingContext : GraphBuildingContext
+{
+    private readonly Func<ISymbol, bool>? _isConfiguredAsSafe;
+    private readonly Action<IDiagnostic, Location?>? _reportDiagnostic;
+    private readonly Func<ITypeSymbol, bool>? _treatAsImplementingInpc;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestGraphBuildingContext"/> class.
+    /// </summary>
+    /// <param name="isConfiguredAsSafe">If <see langword="null"/>, <see cref="GraphBuildingContext.CanIgnoreUnobservableExpressions"/> will always return <see langword="false"/>.</param>
+    /// <param name="reportDiagnostic"></param>
+    /// <param name="treatAsImplementingInpc">If <see langword="null"/>, <see cref="GraphBuildingContext.TreatAsImplementingInpc(ITypeSymbol)"/> will always return <see langword="false"/>.</param>
+    /// <param name="isAutoPropertyOrField">If <see langword="null"/>, <see cref="GraphBuildingContext.IsAutoPropertyOrField(ISymbol)"/> will return <see langword="true"/> for any field or property.</param>
+    public TestGraphBuildingContext(
+        ICompilation compilation,
+        Func<ISymbol, bool>? isConfiguredAsSafe = null,
+        Action<IDiagnostic, Location?>? reportDiagnostic = null,
+        Func<ITypeSymbol, bool>? treatAsImplementingInpc = null ) : base( compilation )
+    {
+        this._isConfiguredAsSafe = isConfiguredAsSafe;
+        this._reportDiagnostic = reportDiagnostic;
+        this._treatAsImplementingInpc = treatAsImplementingInpc;
+    }
+
+    public override bool CanIgnoreUnobservableExpressions( IPropertySymbol symbol )
+        => this._isConfiguredAsSafe?.Invoke( symbol ) ?? base.CanIgnoreUnobservableExpressions( symbol );
+
+    public override void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null ) => this._reportDiagnostic?.Invoke( diagnostic, location );
+
+    public override bool TreatAsImplementingInpc( ITypeSymbol type ) => this._treatAsImplementingInpc?.Invoke( type ) ?? false;
+
+    protected override DependencyAnalysisOptions GetDependencyAnalysisOptions( ISymbol symbol ) => DependencyAnalysisOptions.Default;
+}

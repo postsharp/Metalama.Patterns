@@ -1,1 +1,1 @@
-// Warning LAMA5156 on `_x`: `Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported.`
+// Warning LAMA5156 on `_x`: `Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.`

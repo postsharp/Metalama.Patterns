@@ -5,4 +5,9 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Observability.Implementation;
 
 [CompileTime]
-public class ObservabilityAssertionFailedException : Exception { }
+public class ObservabilityAssertionFailedException : Exception
+{
+    public ObservabilityAssertionFailedException( string message ) : base( message ) { }
+
+    public ObservabilityAssertionFailedException() { }
+}

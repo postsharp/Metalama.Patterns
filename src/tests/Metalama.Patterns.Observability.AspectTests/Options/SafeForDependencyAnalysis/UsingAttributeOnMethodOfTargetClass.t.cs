@@ -1,10 +1,10 @@
 using System.ComponentModel;
-namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnsupportedDependencies.UsingAttributeOnMethodOfTargetClass;
+namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnobservableExpressions.UsingAttributeOnMethodOfTargetClass;
 [Observable]
 public class UsingAttributeOnMethodOfTargetClass : INotifyPropertyChanged
 {
   public int X => this.Foo();
-  [IgnoreUnsupportedDependencies]
+  [ShallNotDependOnMutableState]
   private int Foo() => 42;
   protected virtual void OnPropertyChanged(string propertyName)
   {

@@ -6,11 +6,11 @@ namespace Metalama.Patterns.Observability.AspectTests.Diagnostics.CallUnsafeMeth
 
 public static class OtherClass
 {
-    public static int Foo() => 42;
+    public static int Foo( object x ) => 42;
 }
 
 [Observable]
 public class CallUnsafeMethodOfOtherClass
 {
-    public int X => OtherClass.Foo();
+    public int X => OtherClass.Foo( this );
 }

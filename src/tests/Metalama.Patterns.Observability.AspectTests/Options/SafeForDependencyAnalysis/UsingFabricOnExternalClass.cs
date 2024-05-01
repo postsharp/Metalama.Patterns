@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using Metalama.Patterns.Observability.Options;
 
-namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnsupportedDependencies.UsingFabricOnExternalClass;
+namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnobservableExpressions.UsingFabricOnExternalClass;
 
 public sealed class Fabric : ProjectFabric
 {
@@ -12,7 +12,7 @@ public sealed class Fabric : ProjectFabric
     {
         amender
             .SelectReflectionType( typeof(ExternalClass) )
-            .ConfigureObservability( b => b.IgnoreUnsupportedDependencies = true );
+            .ConfigureObservability( b => b.ObservabilityContract = ObservabilityContract.ShallNotDependOnMutableState );
     }
 }
 

@@ -1,1 +1,1 @@
-// Warning LAMA5162 on `Foo`: `The 'OtherClass.Foo()' method cannot be analysed, and has not been configured as safe for dependency analysis. Use [IgnoreUnsupportedDependencies] or ConfigureObservability via a fabric to ignore this warning.`
+// Warning LAMA5162 on `Foo`: `The 'OtherClass.Foo(object)' method cannot be analysed, and has not been configured with an observability contract. Use [IgnoreUnobservableExpressions] or ConfigureObservability via a fabric to ignore this warning.`
