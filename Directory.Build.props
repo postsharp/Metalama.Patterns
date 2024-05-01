@@ -6,6 +6,11 @@
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);SA0001;SA1402</NoWarn> <!-- XML comment analysis is disabled due to project configuration ; more types in one file analysis is ignored. -->
+
+    
+        
+       <!-- <MetalamaFormatCompileTimeCode>True</MetalamaFormatCompileTimeCode> -->
+
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>

@@ -8,6 +8,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Patterns.Observability.Options;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
@@ -160,7 +161,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         // NB: The selection logic here must be kept in sync with the logic in the OnObservablePropertyChanged template.
 
         this._propertyPathsForOnChildPropertyChangedMethod.AddRange(
-            this.DependencyTypeNode.References
+            this.DependencyTypeNode.AllReferences
                 .Where(
                     n => n.InpcBaseHandling switch
                     {
@@ -214,7 +215,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         if ( this._onObservablePropertyChangedMethod != null )
         {
             foreach ( var node in this.DependencyTypeNode
-                         .References
+                         .AllReferences
                          .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnObservablePropertyChanged ) )
             {
                 _ = this.GetOrCreateHandlerField( node );
@@ -222,7 +223,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         }
 
         foreach ( var node in this.DependencyTypeNode
-                     .References
+                     .AllReferences
                      .Where( node => node.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
         {
             _ = this.GetOrCreateHandlerField( node );
@@ -236,14 +237,14 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     {
         var nodesForOnChildPropertyChanged =
             this.DependencyTypeNode
-                .References
-                .Where( n => n.Depth > 1 )
+                .AllReferences
+                .Where( n => n.Depth > 0 )
                 .Where(
                     node =>
                     {
-                        var rootPropertyNode = node.AncestorOrSelfAtDepth( 1 );
+                        var rootPropertyNode = node.Root;
 
-                        if ( rootPropertyNode.FieldOrProperty.DeclaringType == this._builder.Target )
+                        if ( rootPropertyNode.ReferencedFieldOrProperty.DeclaringType == this._builder.Target )
                         {
                             return false;
                         }
@@ -331,7 +332,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
             return true;
         }
 
-        var nodesProcessedByOnObservablePropertyChanged = this.DependencyTypeNode.References
+        var nodesProcessedByOnObservablePropertyChanged = this.DependencyTypeNode.AllReferences
             .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnObservablePropertyChanged )
             .ToList();
 
@@ -415,15 +416,14 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
     private void IntroduceUpdateMethods()
     {
-        var allNodesDepthFirst = this.DependencyTypeNode.References
+        var allNodesDepthFirst = this.DependencyTypeNode
+            .AllReferences
             .OrderByDescending( x => x.Depth )
             .ThenBy( x => x.DottedPropertyPath )
             .ToList();
 
         // Process all nodes in depth-first, leaf-to-root order, creating necessary update methods as we go.
         // The order is important, so that parent nodes test if child node methods were necessary and invoke them.
-
-        // NB: We might be able do this with DeferredDeclaration<T> and care less about ordering.
 
         foreach ( var node in allNodesDepthFirst )
         {
@@ -488,35 +488,26 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         }
     }
 
-    [CompileTime]
-    private record struct MemberAndNode( IFieldOrProperty FieldOrProperty, ClassicDependencyPropertyNode? Node );
-
     private void ProcessAutoPropertiesAndReferencedFields()
     {
         var target = this._builder.Target;
 
         // Override all auto properties, and only those fields that are referenced in the graph.
 
-        var dependencyGraphType = this._dependencyTypeNode.Value;
-
-        var toProcess =
+        var properties =
             target.Properties
-                .Select( p => new MemberAndNode( p, (ClassicDependencyPropertyNode) this.DependencyTypeNode.GetOrAddProperty( p ) ) )
+                .Where( p => p is { IsStatic: false, IsImplicitlyDeclared: false, Writeability: Writeability.All } )
+                .Select( p => (ClassicDependencyPropertyNode) this.DependencyTypeNode.GetOrAddProperty( p ) )
                 .Concat(
-                    dependencyGraphType
-                        .Properties
-                        .Where( n => n.FieldOrProperty.DeclarationKind == DeclarationKind.Field )
-                        .Select( n => new MemberAndNode( n.FieldOrProperty, n ) ) )
-                .Where(
-                    memberAndNode =>
-                        memberAndNode.FieldOrProperty is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !memberAndNode.FieldOrProperty.Attributes.Any( this._assets.NotObservableAttribute ) )
+                    target.Fields
+                        .Where( f => f is { IsStatic: false, IsImplicitlyDeclared: false, Writeability: Writeability.All } )
+                        .Select( p => (ClassicDependencyPropertyNode) this.DependencyTypeNode.GetOrAddProperty( p ) ) )
+                .Where( node => !node.FieldOrProperty.Attributes.Any( this._assets.NotObservableAttribute ) )
                 .ToList();
 
-        foreach ( var memberAndNode in toProcess )
+        foreach ( var propertyNode in properties )
         {
-            var fieldOrProperty = memberAndNode.FieldOrProperty;
-            var node = memberAndNode.Node;
+            var fieldOrProperty = propertyNode.FieldOrProperty;
             var propertyTypeInstrumentationKind = this._inpcInstrumentationKindLookup.Get( fieldOrProperty.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
 
@@ -526,17 +517,17 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
                     if ( propertyTypeImplementsInpc )
                     {
-                        var hasDependentProperties = node != null;
+                        var hasDependentProperties = propertyNode.RootReferenceNode.HasAnyReferencingProperties;
 
                         IField? handlerField = null;
                         IMethod? subscribeMethod = null;
 
                         if ( hasDependentProperties )
                         {
-                            var rootReference = node!.RootReferenceNode!;
+                            var rootReference = propertyNode!.RootReferenceNode!;
                             handlerField = this.GetOrCreateHandlerField( rootReference );
 
-                            if ( !this.TryGetOrCreateRootPropertySubscribeMethod( rootReference, out subscribeMethod ) )
+                            if ( !this.TryGetOrCreateRootPropertySubscribeMethod( propertyNode, out subscribeMethod ) )
                             {
                                 return;
                             }
@@ -569,7 +560,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                             .OverrideAccessors(
                                 fieldOrProperty,
                                 setTemplate: nameof(Templates.OverrideInpcRefTypePropertySetter),
-                                args: new { templateArgs = this._templateArgs, handlerField, node, subscribeMethod } );
+                                args: new { templateArgs = this._templateArgs, handlerField, node = propertyNode, subscribeMethod } );
                     }
                     else
                     {
@@ -581,7 +572,10 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                             .OverrideAccessors(
                                 fieldOrProperty,
                                 setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
-                                args: new { templateArgs = this._templateArgs, node, compareUsing = comparer, propertyTypeInstrumentationKind } );
+                                args: new
+                                {
+                                    templateArgs = this._templateArgs, node = propertyNode, compareUsing = comparer, propertyTypeInstrumentationKind
+                                } );
                     }
 
                     break;
@@ -596,7 +590,10 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                         .OverrideAccessors(
                             fieldOrProperty,
                             setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
-                            args: new { templateArgs = this._templateArgs, node, compareUsing = comparisonKind, propertyTypeInstrumentationKind } );
+                            args: new
+                            {
+                                templateArgs = this._templateArgs, node = propertyNode, compareUsing = comparisonKind, propertyTypeInstrumentationKind
+                            } );
 
                     break;
             }
@@ -605,7 +602,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
     private HashSet<string>? _inheritedOnChildPropertyChangedPropertyPaths;
 
-    private bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath )
+    public bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath )
     {
         this._inheritedOnChildPropertyChangedPropertyPaths ??=
             BuildPropertyPathLookup( GetPropertyPaths( this._assets.InvokedForAttribute, this._baseOnChildPropertyChangedMethod ) );
@@ -615,7 +612,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
     private HashSet<string>? _inheritedOnObservablePropertyChangedPropertyNames;
 
-    private bool HasInheritedOnObservablePropertyChangedProperty( string propertyName )
+    public bool HasInheritedOnObservablePropertyChangedProperty( string propertyName )
     {
         this._inheritedOnObservablePropertyChangedPropertyNames ??=
             BuildPropertyPathLookup(
@@ -633,7 +630,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     private bool BuildAndValidateDependencyGraph()
     {
         var graphBuildingContext = new GraphBuildingContext( this );
-        var nodeInitializationContext = new ClassicProcessingNodeInitializationContext( this._builder.Target.Compilation, this );
+        var nodeInitializationContext = new ClassicProcessingNodeInitializationContext( this._builder.Target.Compilation, this, this._builder.Target );
 
         var graphBuilder = new ClassicDependencyGraphBuilder( nodeInitializationContext );
 
@@ -665,7 +662,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
             var introduceLastValueFieldResult = this._builder.Advice.IntroduceField(
                 this._builder.Target,
                 lastValueFieldName,
-                node.FieldOrProperty.Type.ToNullableType(),
+                node.ReferencedFieldOrProperty.Type.ToNullableType(),
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
                 b => b.Accessibility = Accessibility.Private );
@@ -697,18 +694,15 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         return node.HandlerField.Value;
     }
 
-    private bool TryGetOrCreateRootPropertySubscribeMethod( ClassicDependencyReferenceNode node, out IMethod? subscribeMethod )
+    private bool TryGetOrCreateRootPropertySubscribeMethod( ClassicDependencyPropertyNode propertyNode, out IMethod? subscribeMethod )
     {
-        if ( node.Depth != 1 )
-        {
-            throw new ArgumentException( "Must be a root property node (depth must be 1).", nameof(node) );
-        }
+        var referenceNode = propertyNode.RootReferenceNode;
 
-        if ( !node.SubscribeMethod.HasBeenSet )
+        if ( !referenceNode.SubscribeMethod.HasBeenSet )
         {
-            var handlerField = this.GetOrCreateHandlerField( node );
+            var handlerField = this.GetOrCreateHandlerField( referenceNode );
 
-            var subscribeMethodName = this.GetAndReserveUnusedMemberName( $"SubscribeTo{node.ContiguousPropertyPath}" );
+            var subscribeMethodName = this.GetAndReserveUnusedMemberName( $"SubscribeTo{referenceNode.ContiguousPropertyPath}" );
 
             var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
                 .IntroduceMethod(
@@ -721,11 +715,11 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                         b.Name = subscribeMethodName;
                         b.Accessibility = Accessibility.Private;
                     },
-                    args: new { TValue = node.FieldOrProperty.Type, templateArgs = this._templateArgs, node, handlerField } );
+                    args: new { TValue = propertyNode.FieldOrProperty.Type, templateArgs = this._templateArgs, node = propertyNode, handlerField } );
 
             if ( result.Outcome != AdviceOutcome.Error )
             {
-                node.SubscribeMethod.Value = result.Declaration;
+                referenceNode.SubscribeMethod.Value = result.Declaration;
             }
             else
             {
@@ -735,7 +729,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
             }
         }
 
-        subscribeMethod = node.SubscribeMethod.Value;
+        subscribeMethod = referenceNode.SubscribeMethod.Value;
 
         return true;
     }
@@ -875,43 +869,5 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         }
     }
 
-    internal InpcBaseHandling DetermineInpcBaseHandlingForNode( ClassicDependencyReferenceNode node )
-    {
-        switch ( node.PropertyTypeInpcInstrumentationKind )
-        {
-            case InpcInstrumentationKind.Unknown:
-                return InpcBaseHandling.Unknown;
-
-            case InpcInstrumentationKind.None:
-                return InpcBaseHandling.NotApplicable;
-
-            case InpcInstrumentationKind.Implicit:
-            case InpcInstrumentationKind.Explicit:
-                if ( node.Depth == 1 )
-                {
-                    // Root property
-                    return node.FieldOrProperty.DeclaringType == this._builder.Target
-                        ? InpcBaseHandling.NotApplicable
-                        : this.HasInheritedOnChildPropertyChangedPropertyPath( node.Name )
-                            ? InpcBaseHandling.OnChildPropertyChanged
-                            : this.HasInheritedOnObservablePropertyChangedProperty( node.Name )
-                                ? InpcBaseHandling.OnObservablePropertyChanged
-                                : InpcBaseHandling.OnPropertyChanged;
-                }
-                else
-                {
-                    // Child property
-                    return this.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath )
-                        ? InpcBaseHandling.OnChildPropertyChanged
-                        : this.HasInheritedOnObservablePropertyChangedProperty( node.DottedPropertyPath )
-                            ? InpcBaseHandling.OnObservablePropertyChanged
-                            : InpcBaseHandling.None;
-                }
-
-            default:
-                throw new NotSupportedException();
-        }
-    }
-
-    public InpcInstrumentationKind GetInpcInstrumentationKind( IType type ) => this._inpcInstrumentationKindLookup.Get( type );
+    public InpcInstrumentationKind GetInpcInstrumentationKind( IType fieldOrPropertyType ) => this._inpcInstrumentationKindLookup.Get( fieldOrPropertyType );
 }

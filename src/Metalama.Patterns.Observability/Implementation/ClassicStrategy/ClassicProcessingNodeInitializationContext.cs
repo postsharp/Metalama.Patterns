@@ -6,5 +6,5 @@ using Metalama.Framework.Code;
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal sealed record ClassicProcessingNodeInitializationContext( ICompilation Compilation, ClassicObservabilityStrategyImpl Helper )
+internal sealed record ClassicProcessingNodeInitializationContext( ICompilation Compilation, ClassicObservabilityStrategyImpl Helper, INamedType CurrentType )
     : ProcessingNodeInitializationContext( Compilation );

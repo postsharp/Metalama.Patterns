@@ -52,56 +52,33 @@ internal static class DependencyNodeExtensions
     /// <summary>
     /// Gets the ancestors of the current node in leaf-to-root order.
     /// </summary>
-    public static IEnumerable<T> Ancestors<T>( this T node, bool includeRoot = false )
+    public static IEnumerable<T> Ancestors<T>( this T node )
         where T : DependencyReferenceNode
-        => AncestorsCore( node, includeRoot, false );
+        => AncestorsCore( node, false );
 
     /// <summary>
     /// Gets the current node and its ancestors in leaf-to-root order.
     /// </summary>
     /// <param name="includeRoot"></param>
     /// <returns></returns>
-    public static IEnumerable<T> AncestorsAndSelf<T>( this T node, bool includeRoot = false )
+    public static IEnumerable<T> AncestorsAndSelf<T>( this T node )
         where T : DependencyReferenceNode
-        => AncestorsCore( node, includeRoot, true );
+        => AncestorsCore( node, true );
 
-    private static IEnumerable<T> AncestorsCore<T>( T node, bool includeRoot, bool includeSelf )
+    private static IEnumerable<T> AncestorsCore<T>( T node, bool includeSelf )
         where T : DependencyReferenceNode
     {
         if ( includeSelf )
         {
-            if ( !node.IsRoot || includeRoot )
-            {
-                yield return node;
-            }
+            yield return node;
         }
 
-        while ( !node.IsRoot )
+        while ( node.Parent != null )
         {
-            node = (T) node.Parent!;
-
-            if ( !includeRoot && node.IsRoot )
-            {
-                break;
-            }
-
+            node = (T) node.Parent;
+            
             yield return node;
         }
     }
 
-    public static T AncestorOrSelfAtDepth<T>( this T node, int depth )
-        where T : DependencyReferenceNode
-    {
-        if ( depth > node.Depth || depth < 0 )
-        {
-            throw new ArgumentOutOfRangeException( nameof(depth), "Must be greater than zero and less than or equal to the depth of the current node." );
-        }
-
-        while ( node.Depth != depth )
-        {
-            node = (T) node.Parent!;
-        }
-
-        return node;
-    }
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System.Diagnostics;
 using System.Text;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
@@ -10,7 +11,7 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 internal class DependencyTypeNode
 {
     private readonly Dictionary<IFieldOrProperty, DependencyPropertyNode> _properties = new();
-    private readonly List<DependencyReferenceNode> _allReferences = new();
+    private readonly HashSet<DependencyReferenceNode> _allReferences = new();
 
     public DependencyGraphBuilder Builder { get; }
 
@@ -50,12 +51,15 @@ internal class DependencyTypeNode
 
     internal void AddReference( DependencyReferenceNode reference )
     {
-        this._allReferences.Add( reference );
+        if ( this._allReferences.Add( reference ) && reference.Parent != null )
+        {
+            this.AddReference( reference.Parent );
+        }
     }
 
     public IEnumerable<DependencyPropertyNode> Properties => this._properties.Values;
 
-    public IReadOnlyList<DependencyReferenceNode> References => this._allReferences;
+    public IReadOnlyCollection<DependencyReferenceNode> AllReferences => this._allReferences;
     
     
 }

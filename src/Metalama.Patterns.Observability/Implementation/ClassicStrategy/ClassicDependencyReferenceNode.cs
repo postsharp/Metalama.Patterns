@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
+using System.Diagnostics;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
@@ -46,7 +47,6 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
             // invoked. This ensures that the outcome is consistent and the result can be cached.
 
             this._childUpdateMethods ??= this.Children
-                .Cast<ClassicDependencyReferenceNode>()
                 .Select( n => n.UpdateMethod.Value )
                 .Where( m => m != null )
                 .ToList()!;
@@ -78,7 +78,7 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
 
     public InpcBaseHandling InpcBaseHandling { get; private set; }
 
-    public string Name => this.Depth == 1 ? this.FieldOrProperty.Name : throw new InvalidOperationException();
+    public string Name => this.ReferencedFieldOrProperty.Name;
 
     public ClassicDependencyReferenceNode(
         DependencyPropertyNode referencedPropertyNode,
@@ -89,16 +89,39 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
         parent,
         builder )
     {
-        this.PropertyTypeInpcInstrumentationKind = ctx.Helper.GetInpcInstrumentationKind( referencedPropertyNode.FieldOrProperty.Type );
-        this.InpcBaseHandling = ctx.Helper.DetermineInpcBaseHandlingForNode( this );
+        var fieldOrProperty = referencedPropertyNode.FieldOrProperty;
+        this.PropertyTypeInpcInstrumentationKind = ctx.Helper.GetInpcInstrumentationKind( fieldOrProperty.DeclaringType );
+
+        this.InpcBaseHandling =
+            this.PropertyTypeInpcInstrumentationKind switch
+            {
+                InpcInstrumentationKind.Unknown => InpcBaseHandling.Unknown,
+
+                InpcInstrumentationKind.None => InpcBaseHandling.NotApplicable,
+
+                InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit when this.IsRoot =>
+                    fieldOrProperty.DeclaringType == ctx.CurrentType
+                        ? InpcBaseHandling.NotApplicable
+                        : ctx.Helper.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
+                            ? InpcBaseHandling.OnChildPropertyChanged
+                            : ctx.Helper.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
+                                ? InpcBaseHandling.OnObservablePropertyChanged
+                                : InpcBaseHandling.OnPropertyChanged,
+                InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit when !this.IsRoot =>
+                    ctx.Helper.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
+                        ? InpcBaseHandling.OnChildPropertyChanged
+                        : ctx.Helper.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
+                            ? InpcBaseHandling.OnObservablePropertyChanged
+                            : InpcBaseHandling.None,
+
+                _ => throw new NotSupportedException()
+            };
     }
 
     public new IEnumerable<ClassicDependencyPropertyNode> ReferencingProperties => base.ReferencingProperties.Cast<ClassicDependencyPropertyNode>();
 
     public IReadOnlyCollection<ClassicDependencyPropertyNode> GetAllReferencingProperties(
         Func<ClassicDependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
-        => (IReadOnlyCollection<ClassicDependencyPropertyNode>)
-            base.GetAllReferencingProperties( 
-                shouldIncludeImmediateChild == null ? null :
-                node => shouldIncludeImmediateChild.Invoke( (ClassicDependencyReferenceNode) node ) );
+        => this.GetAllReferencingProperties<ClassicDependencyPropertyNode>(
+            shouldIncludeImmediateChild == null ? null : node => shouldIncludeImmediateChild.Invoke( (ClassicDependencyReferenceNode) node ) );
 }

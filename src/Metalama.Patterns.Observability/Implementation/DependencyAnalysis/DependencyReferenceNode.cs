@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 using System.Reflection.PortableExecutable;
 using System.Text;
 
@@ -21,10 +22,25 @@ internal class DependencyReferenceNode
         this.Parent = parent;
         this.Builder = builder;
         this.Depth = parent == null ? 0 : parent.Depth + 1;
-        referencedPropertyNode.DeclaringTypeNode.AddReference( this );
     }
 
     public bool IsRoot => this.Depth == 0;
+
+    public DependencyReferenceNode Root
+    {
+        get
+        {
+            for ( var node = this; node != null; node = node.Parent )
+            {
+                if ( node.IsRoot )
+                {
+                    return node;
+                }
+            }
+
+            throw new Exception();
+        }
+    }
 
     public int Depth { get; }
 
@@ -36,9 +52,9 @@ internal class DependencyReferenceNode
     public DependencyPropertyNode ReferencedPropertyNode { get; }
 
     /// <summary>
-    /// Gets the Metalama <see cref="IFieldOrProperty"/> for the node. Use <see cref="Symbol"/> for the Roslyn equivalent.
+    /// Gets the Metalama <see cref="IFieldOrProperty"/> for the node. 
     /// </summary>
-    public IFieldOrProperty FieldOrProperty => this.ReferencedPropertyNode.FieldOrProperty;
+    public IFieldOrProperty ReferencedFieldOrProperty => this.ReferencedPropertyNode.FieldOrProperty;
 
     public DependencyReferenceNode? Parent { get; }
 
@@ -49,12 +65,32 @@ internal class DependencyReferenceNode
     public IEnumerable<DependencyPropertyNode> ReferencingProperties
         => (IEnumerable<DependencyPropertyNode>?) this._referencingProperties ?? Array.Empty<DependencyPropertyNode>();
 
-    public bool HasReferencingProperties => this._referencingProperties != null;
+    /// <summary>
+    /// Gets a value indicating whether the current node is referenced by some property as a leaf of a property path, not as an intermediate node.
+    /// </summary>
+    public bool HasLeafReferencingProperties => this._referencingProperties != null;
+    
+    /// <summary>
+    /// Gets a value indicating whether this node, or any descedent, is referenced from some property.
+    /// </summary>
+    public bool HasAnyReferencingProperties { get; private set; }
 
     public void AddReferencingProperty( DependencyPropertyNode reference )
     {
         this._referencingProperties ??= new HashSet<DependencyPropertyNode>();
-        this._referencingProperties.Add( reference );
+
+        if ( !this._referencingProperties.Add( reference ) )
+        {
+            // Duplicate.
+            return;
+        }
+        
+        reference.DeclaringTypeNode.AddReference( this );
+
+        for ( var node = this; node != null; node = node.Parent )
+        {
+            node.HasAnyReferencingProperties = true;
+        }
     }
 
     /// <summary>
@@ -63,8 +99,8 @@ internal class DependencyReferenceNode
     public string DottedPropertyPath
         => this._dottedPropertyPath ??=
             this.Parent == null
-                ? this.FieldOrProperty.Name
-                : $"{this.Parent.DottedPropertyPath}.{this.FieldOrProperty.Name}";
+                ? this.ReferencedFieldOrProperty.Name
+                : $"{this.Parent.DottedPropertyPath}.{this.ReferencedFieldOrProperty.Name}";
 
     /// <summary>
     /// Gets a property path like "A1" or "A1B1".
@@ -72,8 +108,8 @@ internal class DependencyReferenceNode
     public string ContiguousPropertyPath
         => this._contiguousPropertyPath ??=
             this.Parent == null
-                ? this.FieldOrProperty.Name
-                : $"{this.Parent.ContiguousPropertyPath}.{this.FieldOrProperty.Name}";
+                ? this.ReferencedFieldOrProperty.Name
+                : $"{this.Parent.ContiguousPropertyPath}{this.ReferencedFieldOrProperty.Name}";
 
     public override string ToString() => this.DottedPropertyPath;
 
@@ -101,7 +137,7 @@ internal class DependencyReferenceNode
             appendTo.Append( ' ', indent );
         }
 
-        appendTo.Append( this.FieldOrProperty.Name );
+        appendTo.Append( this.ReferencedFieldOrProperty.Name );
 
         var allRefs = this.GetAllReferencingProperties();
 
@@ -116,12 +152,15 @@ internal class DependencyReferenceNode
 
         if ( this._childReferences != null )
         {
-            foreach ( var child in this._childReferences.Values.OrderBy( x => x.FieldOrProperty.Name ) )
+            foreach ( var child in this._childReferences.Values.OrderBy( x => x.ReferencedFieldOrProperty.Name ) )
             {
                 child.ToString( appendTo, indent + 2, shouldHighlight );
             }
         }
     }
+
+    public IReadOnlyCollection<DependencyPropertyNode> GetAllReferencingProperties( Func<DependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
+        => this.GetAllReferencingProperties<DependencyPropertyNode>( shouldIncludeImmediateChild );
     
       /// <summary>
     /// Gets the distinct set of nodes which directly or indirectly reference the current node, and optionally also those which directly
@@ -135,15 +174,16 @@ internal class DependencyReferenceNode
     /// itself are always included and followed, regardless of <paramref name="shouldIncludeImmediateChild"/>.
     /// </param>
     /// <returns></returns>
-    public IReadOnlyCollection<DependencyPropertyNode> GetAllReferencingProperties(
+    public IReadOnlyCollection<T> GetAllReferencingProperties<T>(
         Func<DependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
+      where T : DependencyPropertyNode
     {
         // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
         // However, it's not recursive so there's no risk of stack overflow. So safe, but potentially slow.
 
-        if ( !this.HasReferencingProperties && shouldIncludeImmediateChild == null )
+        if ( !this.HasAnyReferencingProperties && shouldIncludeImmediateChild == null )
         {
-            return Array.Empty<DependencyPropertyNode>();
+            return Array.Empty<T>();
         }
 
         var properties = shouldIncludeImmediateChild == null
@@ -153,13 +193,13 @@ internal class DependencyReferenceNode
                 .Concat( this.ReferencingProperties );
 
         var propertiesToFollow = new Stack<DependencyPropertyNode>( properties );
-        var analyzedProperties = new HashSet<DependencyPropertyNode>();
+        var analyzedProperties = new HashSet<T>();
 
         while ( propertiesToFollow.Count > 0 )
         {
             var property = propertiesToFollow.Pop();
 
-            if ( analyzedProperties.Add( property ) )
+            if ( analyzedProperties.Add( (T) property ) )
             {
                 foreach ( var referencingProperty in property.RootReferenceNode.ReferencingProperties )
                 {

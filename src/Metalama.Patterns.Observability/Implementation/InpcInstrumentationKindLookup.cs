@@ -10,21 +10,17 @@ namespace Metalama.Patterns.Observability.Implementation;
 internal sealed class InpcInstrumentationKindLookup
 {
     private readonly ConcurrentDictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
-    private readonly Func<IType, InpcInstrumentationKind> _getCore;
     private readonly INamedType _targetType;
     private readonly Assets _assets;
 
     public InpcInstrumentationKindLookup( INamedType targetType, Assets assets )
     {
-        this._getCore = this.GetCore;
         this._targetType = targetType;
         this._assets = assets;
     }
 
-    public InpcInstrumentationKind Get( IType type )
-    {
-        return this._inpcInstrumentationKindLookup.GetOrAdd( type, this._getCore );
-    }
+    public InpcInstrumentationKind Get( IType type ) 
+        => this._inpcInstrumentationKindLookup.GetOrAdd( type, this.GetCore );
 
     private InpcInstrumentationKind GetCore( IType type )
     {

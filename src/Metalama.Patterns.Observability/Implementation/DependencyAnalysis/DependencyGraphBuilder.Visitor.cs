@@ -142,6 +142,7 @@ internal partial class DependencyGraphBuilder
         private bool ValidateChainSymbol( IReadOnlyList<DependencyPathElement> symbols, int index, ChainSection chainSection )
         {
             var isSupported = true;
+
             // Here we report particularly those diagnostics which should be located on a syntax node inside a body. The final dependency
             // graph does not keep track of all the syntax nodes which referenced each dependency node (this would be expensive), so logging
             // diagnostics located on syntax nodes inside bodies is not possible later.
@@ -173,13 +174,14 @@ internal partial class DependencyGraphBuilder
 
                 if ( !this._context.IsAutoPropertyOrField( sr.Symbol )
                      && this._context.TreatAsImplementingInpc( fieldOrPropertyType! )
-                     && sr.Symbol.ContainingType.Equals( this._declaringType ) )
+                     && sr.Symbol.ContainingType.Equals( this._declaringType.GetSymbol() ) )
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
                             .WithArguments(
                                 "Changes to children of non-auto properties declared on the current type, where the property type implements INotifyPropertyChanged, cannot be observed." ),
                         symbols[index + 1].Node.GetLocation() );
+
                     isSupported = false;
                 }
             }
@@ -196,6 +198,7 @@ internal partial class DependencyGraphBuilder
                             .WithArguments(
                                 "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured as safe for dependency analysis are supported." ),
                         sr.Node.GetLocation() );
+
                     isSupported = false;
                 }
             }
@@ -215,6 +218,7 @@ internal partial class DependencyGraphBuilder
                             this._context.ReportDiagnostic(
                                 DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments( (sr.Symbol.Kind, sr.Symbol) ),
                                 sr.Node.GetLocation() );
+
                             isSupported = false;
                         }
                     }
@@ -230,6 +234,7 @@ internal partial class DependencyGraphBuilder
                         this._context.ReportDiagnostic(
                             DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments( (sr.Symbol.Kind, sr.Symbol) ),
                             sr.Node.GetLocation() );
+
                         isSupported = false;
                     }
                 }
@@ -268,7 +273,7 @@ internal partial class DependencyGraphBuilder
                         : 0;
 
                     DependencyReferenceNode? reference = null;
-                    
+
                     for ( var i = 0; i < symbols.Count; ++i )
                     {
                         var chainSection =
@@ -291,7 +296,7 @@ internal partial class DependencyGraphBuilder
                         }
                     }
 
-                    if ( reference != null && reference.FieldOrProperty != this._propertyNode.FieldOrProperty )
+                    if ( reference != null && reference.ReferencedFieldOrProperty != this._propertyNode.FieldOrProperty )
                     {
                         reference.AddReferencingProperty( this._propertyNode );
                     }

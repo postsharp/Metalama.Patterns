@@ -12,7 +12,7 @@ internal class ClassicDependencyTypeNode : DependencyTypeNode
 {
     public ClassicDependencyTypeNode( DependencyGraphBuilder builder, INamedType type ) : base( builder, type ) { }
 
-    public new IEnumerable<ClassicDependencyReferenceNode> References => base.References.Cast<ClassicDependencyReferenceNode>();
+    public new IEnumerable<ClassicDependencyReferenceNode> AllReferences => base.AllReferences.Cast<ClassicDependencyReferenceNode>();
 
     public new IEnumerable<ClassicDependencyPropertyNode> Properties => base.Properties.Cast<ClassicDependencyPropertyNode>();
 }

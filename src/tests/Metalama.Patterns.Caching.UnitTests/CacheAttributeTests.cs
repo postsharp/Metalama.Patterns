@@ -1612,8 +1612,6 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodLevelProfile()
         {
-            Debugger.Break();
-
             using var context =
                 this.InitializeTestWithTestingBackend(
                     _testMethodLevelProfileNameSetInConfigurationAttribute,

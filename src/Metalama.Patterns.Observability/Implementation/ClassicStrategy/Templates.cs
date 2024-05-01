@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
@@ -28,10 +29,12 @@ internal sealed class Templates : ITemplateProvider
         [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
         [CompileTime] IField? handlerField,
         [CompileTime] IMethod? subscribeMethod,
-        [CompileTime] ClassicDependencyReferenceNode? node )
+        [CompileTime] ClassicDependencyPropertyNode? node )
     {
+        var rootReference = node.RootReferenceNode;
+
         var ctx = templateArgs.Value;
-        var inpcImplementationKind = node?.PropertyTypeInpcInstrumentationKind ?? ctx.InpcInstrumentationKindLookup.Get( meta.Target.Property.Type );
+        var inpcImplementationKind = rootReference?.PropertyTypeInpcInstrumentationKind ?? ctx.InpcInstrumentationKindLookup.Get( meta.Target.Property.Type );
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
@@ -40,7 +43,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
-                meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyTypeNode.ToString( node ) );
+                meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyTypeNode.ToString( rootReference ) );
             }
         }
 
@@ -83,13 +86,13 @@ internal sealed class Templates : ITemplateProvider
             if ( node != null )
             {
                 // Update methods will deal with notifications - * for those children which have update methods *
-                foreach ( var method in node.ChildUpdateMethods )
+                foreach ( var method in rootReference.ChildUpdateMethods )
                 {
                     method.With( InvokerOptions.Final ).Invoke();
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var r in node.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
+                foreach ( var r in rootReference.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
                              .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
                              .OrderBy( n => n.Name ) )
                 {
@@ -115,12 +118,12 @@ internal sealed class Templates : ITemplateProvider
     internal static void SubscribeTo<[CompileTime] TValue>(
         TValue? value,
         [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
-        [CompileTime] ClassicDependencyReferenceNode node,
+        [CompileTime] ClassicDependencyPropertyNode node,
         [CompileTime] IField handlerField )
         where TValue : class, INotifyPropertyChanged
     {
         var ctx = templateArgs.Value;
-        var inpcImplementationKind = node.PropertyTypeInpcInstrumentationKind;
+        var inpcImplementationKind = node.RootReferenceNode.PropertyTypeInpcInstrumentationKind;
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
         if ( value != null )
@@ -150,7 +153,7 @@ internal sealed class Templates : ITemplateProvider
         {
             // We use WithNullability to work around a bug in Metalama.Framework (perhaps rather in Roslyn) that randomly gives no
             // nullability information for 'e'.
-            HandleChildPropertyChangedDelegateBody( ctx, node, ExpressionFactory.Capture( e ).WithNullability( false ) );
+            HandleChildPropertyChangedDelegateBody( ctx, node.RootReferenceNode, ExpressionFactory.Capture( e ).WithNullability( false ) );
         }
     }
 
@@ -172,7 +175,7 @@ internal sealed class Templates : ITemplateProvider
     {
         var ctx = templateArgs.Value;
 
-        if ( node.Depth <= 1 )
+        if ( node.IsRoot )
         {
             CompileTimeThrow( new InvalidOperationException( $"{nameof(UpdateChildInpcProperty)} template must not be called on a root property node." ) );
         }
@@ -230,7 +233,7 @@ internal sealed class Templates : ITemplateProvider
 
             var parentNode = (ClassicDependencyReferenceNode) node.Parent!;
 
-            if ( parentNode.FieldOrProperty.Accessibility != Accessibility.Private )
+            if ( parentNode.ReferencedFieldOrProperty.Accessibility != Accessibility.Private )
             {
                 // Don't notify if we're joining on to existing NotifyChildPropertyChanged support from a base type, or we'll be stuck in a loop.
                 if ( parentNode.InpcBaseHandling != InpcBaseHandling.OnChildPropertyChanged )
@@ -254,7 +257,7 @@ internal sealed class Templates : ITemplateProvider
     internal static void OverrideUninstrumentedTypePropertySetter(
         dynamic? value,
         [CompileTime] IDeferred<ObservabilityTemplateArgs> templateArgs,
-        [CompileTime] ClassicDependencyReferenceNode? node,
+        [CompileTime] ClassicDependencyPropertyNode? node,
         [CompileTime] EqualityComparisonKind compareUsing,
         [CompileTime] InpcInstrumentationKind propertyTypeInstrumentationKind )
     {
@@ -266,7 +269,9 @@ internal sealed class Templates : ITemplateProvider
 
             if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 1 )
             {
-                meta.InsertComment( "Dependency graph (current node highlighted if defined):", "\n" + ctx.DependencyTypeNode.ToString( node ) );
+                meta.InsertComment(
+                    "Dependency graph (current node highlighted if defined):",
+                    "\n" + ctx.DependencyTypeNode.ToString( node?.RootReferenceNode ) );
             }
         }
 
@@ -295,7 +300,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( node != null )
             {
-                foreach ( var r in node.GetAllReferencingProperties()
+                foreach ( var r in node.RootReferenceNode.GetAllReferencingProperties()
                              .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
                              .OrderBy( n => n.Name ) )
                 {
@@ -316,7 +321,7 @@ internal sealed class Templates : ITemplateProvider
 
                 if ( node != null )
                 {
-                    foreach ( var r in node.GetAllReferencingProperties()
+                    foreach ( var r in node.RootReferenceNode.GetAllReferencingProperties()
                                  .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
                                  .OrderBy( n => n.Name ) )
                     {
@@ -355,15 +360,21 @@ internal sealed class Templates : ITemplateProvider
         {
             var node = propertyNode.RootReferenceNode;
 
-            if ( node.InpcBaseHandling == InpcBaseHandling.OnObservablePropertyChanged && templateArgsValue.OnObservablePropertyChangedMethod != null )
+            switch ( node.InpcBaseHandling )
             {
-                if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
-                {
-                    meta.InsertComment(
-                        $"Skipping '{node.Name}': A base type supports OnObservablePropertyChanged for this property, and the current type is configured to use that feature." );
-                }
+                case InpcBaseHandling.NotApplicable or InpcBaseHandling.None:
+                    continue;
 
-                continue;
+                case InpcBaseHandling.OnObservablePropertyChanged when templateArgsValue.OnObservablePropertyChangedMethod != null:
+                    {
+                        if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+                        {
+                            meta.InsertComment(
+                                $"Skipping '{node.Name}': A base type supports OnObservablePropertyChanged for this property, and the current type is configured to use that feature." );
+                        }
+
+                        continue;
+                    }
             }
 
             IEnumerable<ClassicDependencyPropertyNode> refsToNotify;
@@ -372,9 +383,9 @@ internal sealed class Templates : ITemplateProvider
             // be notified by OnPropertyChanged (the base won't call OnChildPropertyChanged for each child property
             // when the ref changes).
 
-            if ( node is { InpcBaseHandling: InpcBaseHandling.OnChildPropertyChanged, Depth: > 1 } )
+            if ( node is { InpcBaseHandling: InpcBaseHandling.OnChildPropertyChanged, IsRoot: false } )
             {
-                if ( !node.HasReferencingProperties )
+                if ( !node.HasAnyReferencingProperties )
                 {
                     if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
                     {
@@ -448,6 +459,7 @@ internal sealed class Templates : ITemplateProvider
         IReadOnlyCollection<IMethod> childUpdateMethods,
         [CompileTime] IOrderedEnumerable<string> rootPropertyNamesToNotify )
     {
+        meta.DebugBreak();
         var emitDefaultNotifications = meta.CompileTime( true );
 
         if ( templateArgsValue.CommonOptions.DiagnosticCommentVerbosity! > 0 )
@@ -482,7 +494,7 @@ internal sealed class Templates : ITemplateProvider
 
                     if ( !node.LastValueField.HasBeenSet )
                     {
-                        meta.InsertComment( $"Error: LastValueField for {node.FieldOrProperty} has not been set." );
+                        meta.InsertComment( $"Error: LastValueField for {node.ReferencedFieldOrProperty} has not been set." );
                     }
                     else
                     {
@@ -490,7 +502,7 @@ internal sealed class Templates : ITemplateProvider
                         var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
 
                         var oldValue = lastValueField.Value;
-                        var newValue = node.FieldOrProperty.Value;
+                        var newValue = node.ReferencedFieldOrProperty.Value;
 
                         if ( !ReferenceEquals( oldValue, newValue ) )
                         {
@@ -545,6 +557,13 @@ internal sealed class Templates : ITemplateProvider
                                 }
                             }
                         }
+                    }
+                }
+                else
+                {
+                    foreach ( var name in rootPropertyNamesToNotify )
+                    {
+                        templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
                     }
                 }
 
@@ -769,7 +788,7 @@ internal sealed class Templates : ITemplateProvider
 
         var propertyName = propertyChangedEventArgs.Value!.PropertyName;
         var propertyNameExpression = (IExpression) propertyName;
-        var nodeIsAccessible = node.FieldOrProperty.Accessibility != Accessibility.Private;
+        var nodeIsAccessible = node.ReferencedFieldOrProperty.Accessibility != Accessibility.Private;
 
         var switchBuilder = new SwitchStatementBuilder( propertyNameExpression );
 
@@ -778,7 +797,7 @@ internal sealed class Templates : ITemplateProvider
             // NB: The following code is similar to part of the OnChildPropertyChanged template. Consider keeping any changes to relevant logic in sync.
 
             var hasUpdateMethod = childNode.UpdateMethod.Value != null;
-            var hasRefs = childNode.HasReferencingProperties;
+            var hasRefs = childNode.HasAnyReferencingProperties;
 
             if ( hasUpdateMethod || hasRefs )
             {
