@@ -32,7 +32,7 @@ internal sealed class Templates : ITemplateProvider
         var rootReference = node.RootReferenceNode;
 
         var ctx = templateArgs.Value;
-        var inpcImplementationKind = rootReference.PropertyTypeInpcInstrumentationKind;
+        var inpcImplementationKind = rootReference.InpcInstrumentationKind;
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
         if ( ctx.CommonOptions.DiagnosticCommentVerbosity! > 0 )
@@ -118,7 +118,7 @@ internal sealed class Templates : ITemplateProvider
         where TValue : class, INotifyPropertyChanged
     {
         var ctx = templateArgs.Value;
-        var inpcImplementationKind = node.RootReferenceNode.PropertyTypeInpcInstrumentationKind;
+        var inpcImplementationKind = node.RootReferenceNode.InpcInstrumentationKind;
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
         if ( value != null )
@@ -414,7 +414,8 @@ internal sealed class Templates : ITemplateProvider
                 var rootPropertyNamesToNotify = refsToNotify
                     .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
                     .Select( n => n.Name )
-                    .OrderBy( s => s );
+                    .OrderBy( s => s )
+                    .ToList();
 
                 switchBuilder.AddCase(
                     SwitchStatementLabel.CreateLiteral( node.Name ),
@@ -452,7 +453,7 @@ internal sealed class Templates : ITemplateProvider
         ObservabilityTemplateArgs templateArgsValue,
         ClassicDependencyReferenceNode node,
         IReadOnlyCollection<IMethod> childUpdateMethods,
-        [CompileTime] IOrderedEnumerable<string> rootPropertyNamesToNotify )
+        [CompileTime] IReadOnlyCollection<string> rootPropertyNamesToNotify )
     {
         meta.DebugBreak();
         var emitDefaultNotifications = meta.CompileTime( true );
@@ -494,7 +495,7 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         var lastValueField = node.LastValueField.Value;
-                        var eventRequiresCast = node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Explicit;
+                        var eventRequiresCast = node.InpcInstrumentationKind is InpcInstrumentationKind.Explicit;
 
                         var oldValue = lastValueField.Value;
                         var newValue = node.ReferencedFieldOrProperty.Value;

@@ -437,7 +437,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
             IMethod? thisUpdateMethod = null;
 
             // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-            if ( node.PropertyTypeInpcInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit
+            if ( node.InpcInstrumentationKind is InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit
                  && !this.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath ) )
             {
                 var lastValueField = this.GetOrCreateLastValueField( node );
@@ -508,7 +508,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         {
             var fieldOrProperty = propertyNode.FieldOrProperty;
             var propertyTypeInstrumentationKind = this._inpcInstrumentationKindLookup.Get( fieldOrProperty.Type );
-            var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit;
+            var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit;
 
             switch ( fieldOrProperty.Type.IsReferenceType )
             {
@@ -833,7 +833,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         bool IsValid( IFieldOrProperty fp )
         {
             var typeImplementsInpc =
-                this._inpcInstrumentationKindLookup.Get( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Implicit;
+                this._inpcInstrumentationKindLookup.Get( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Aspect;
 
             var isValid = true;
 

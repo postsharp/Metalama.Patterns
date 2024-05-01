@@ -11,6 +11,9 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
 {
     public new IEnumerable<ClassicDependencyReferenceNode> Children => base.Children.Cast<ClassicDependencyReferenceNode>();
 
+    public InpcInstrumentationKind InpcInstrumentationKind
+        => ((ClassicDependencyTypeNode) this.ReferencedPropertyNode.DeclaringTypeNode).InpcInstrumentationKind;
+
     /// <summary>
     /// Gets the potentially uninitialized field like "B? _lastA2". From non-template code, use
     /// <see cref="ClassicObservabilityStrategyImpl.GetOrCreateLastValueField"/> instead.
@@ -71,10 +74,8 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
     public Deferred<IMethod> SubscribeMethod { get; } = new();
 
     /// <summary>
-    /// Gets the <see cref="InpcInstrumentationKind"/> for the type of the field or property.
+    /// Gets or sets the handling strategy of the current reference by the base type. 
     /// </summary>
-    public InpcInstrumentationKind PropertyTypeInpcInstrumentationKind { get; }
-
     public InpcBaseHandling InpcBaseHandling { get; private set; }
 
     public string Name => this.ReferencedFieldOrProperty.Name;
@@ -89,16 +90,15 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
         builder )
     {
         var fieldOrProperty = referencedPropertyNode.FieldOrProperty;
-        this.PropertyTypeInpcInstrumentationKind = ctx.Helper.GetInpcInstrumentationKind( fieldOrProperty.DeclaringType );
 
         this.InpcBaseHandling =
-            this.PropertyTypeInpcInstrumentationKind switch
+            ((ClassicDependencyTypeNode) this.ReferencedPropertyNode.DeclaringTypeNode).InpcInstrumentationKind switch
             {
                 InpcInstrumentationKind.Unknown => InpcBaseHandling.Unknown,
 
                 InpcInstrumentationKind.None => InpcBaseHandling.NotApplicable,
 
-                InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit when this.IsRoot =>
+                InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit when this.IsRoot =>
                     fieldOrProperty.DeclaringType == ctx.CurrentType
                         ? InpcBaseHandling.NotApplicable
                         : ctx.Helper.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
@@ -106,7 +106,7 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
                             : ctx.Helper.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
                                 ? InpcBaseHandling.OnObservablePropertyChanged
                                 : InpcBaseHandling.OnPropertyChanged,
-                InpcInstrumentationKind.Implicit or InpcInstrumentationKind.Explicit when !this.IsRoot =>
+                InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit when !this.IsRoot =>
                     ctx.Helper.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
                         ? InpcBaseHandling.OnChildPropertyChanged
                         : ctx.Helper.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )

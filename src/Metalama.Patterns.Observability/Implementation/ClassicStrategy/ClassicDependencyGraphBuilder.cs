@@ -16,7 +16,7 @@ internal class ClassicDependencyGraphBuilder : DependencyGraphBuilder
         this._context = context;
     }
 
-    protected override DependencyTypeNode CreateTypeNode( INamedType type ) => new ClassicDependencyTypeNode( this, type );
+    protected override DependencyTypeNode CreateTypeNode( INamedType type ) => new ClassicDependencyTypeNode( this, type, this._context );
 
     public override DependencyPropertyNode CreatePropertyNode( IFieldOrProperty fieldOrProperty, DependencyTypeNode parent )
         => new ClassicDependencyPropertyNode( fieldOrProperty, parent );

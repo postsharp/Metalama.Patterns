@@ -9,7 +9,15 @@ namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 [CompileTime]
 internal class ClassicDependencyTypeNode : DependencyTypeNode
 {
-    public ClassicDependencyTypeNode( DependencyGraphBuilder builder, INamedType type ) : base( builder, type ) { }
+    public ClassicDependencyTypeNode(
+        DependencyGraphBuilder builder,
+        INamedType type,
+        ClassicProcessingNodeInitializationContext ctx ) : base( builder, type )
+    {
+        this.InpcInstrumentationKind = ctx.Helper.GetInpcInstrumentationKind( type );
+    }
+
+    public InpcInstrumentationKind InpcInstrumentationKind { get; }
 
     public new IEnumerable<ClassicDependencyReferenceNode> AllReferences => base.AllReferences.Cast<ClassicDependencyReferenceNode>();
 
