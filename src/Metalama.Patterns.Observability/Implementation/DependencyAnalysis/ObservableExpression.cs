@@ -12,23 +12,25 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 /// of the reference path, <c>B</c> is the parent of <c>C</c>, <c>C</c> is the child of <c>B</c>.
 /// </summary>
 [CompileTime]
-internal class DependencyReferenceNode
+internal class ObservableExpression
 {
     private string? _dottedPropertyPath;
     private string? _contiguousPropertyPath;
-    private Dictionary<IFieldOrProperty, DependencyReferenceNode>? _childReferences;
+    private Dictionary<IFieldOrProperty, ObservableExpression>? _childReferences;
 
-    public DependencyReferenceNode( DependencyPropertyNode referencedPropertyNode, DependencyReferenceNode? parent, DependencyGraphBuilder builder )
+    public ObservableExpression( ObservablePropertyInfo referencedPropertyInfo, ObservableExpression? parent, DependencyGraphBuilder builder )
     {
-        this.ReferencedPropertyNode = referencedPropertyNode;
+        this.ReferencedPropertyInfo = referencedPropertyInfo;
         this.Parent = parent;
         this.Builder = builder;
         this.Depth = parent == null ? 0 : parent.Depth + 1;
     }
 
+    public string Name => this.ReferencedFieldOrProperty.Name;
+
     public bool IsRoot => this.Depth == 0;
 
-    public DependencyReferenceNode Root
+    public ObservableExpression Root
     {
         get
         {
@@ -57,34 +59,34 @@ internal class DependencyReferenceNode
     /// <summary>
     /// Gets the collection of direct children.
     /// </summary>
-    public IEnumerable<DependencyReferenceNode> Children
-        => (IReadOnlyCollection<DependencyReferenceNode>?) this._childReferences?.Values ?? Array.Empty<DependencyReferenceNode>();
+    public IEnumerable<ObservableExpression> Children
+        => (IReadOnlyCollection<ObservableExpression>?) this._childReferences?.Values ?? Array.Empty<ObservableExpression>();
 
     /// <summary>
     /// Gets the node for the referenced property.
     /// </summary>
-    public DependencyPropertyNode ReferencedPropertyNode { get; }
+    public ObservablePropertyInfo ReferencedPropertyInfo { get; }
 
     /// <summary>
     /// Gets the Metalama <see cref="IFieldOrProperty"/> for the node. 
     /// </summary>
-    public IFieldOrProperty ReferencedFieldOrProperty => this.ReferencedPropertyNode.FieldOrProperty;
+    public IFieldOrProperty ReferencedFieldOrProperty => this.ReferencedPropertyInfo.FieldOrProperty;
 
     /// <summary>
     /// Gets the parent node. In <c>A.B.C</c>, <c>A</c> is the parent of <c>B</c>.
     /// </summary>
-    public DependencyReferenceNode? Parent { get; }
+    public ObservableExpression? Parent { get; }
 
     public DependencyGraphBuilder Builder { get; }
 
-    private HashSet<DependencyPropertyNode>? _leafReferencingProperties;
+    private HashSet<ObservablePropertyInfo>? _leafReferencingProperties;
 
     /// <summary>
     /// Gets the list of properties referencing the current node as a leaf. For instance, if the current node path is <c>A.B</c> and we have two properties
     /// <c>P1 => A.B</c> and <c>P2 => A.B.C</c>, this property would only return <c>P1</c>.
     /// </summary>
-    public IEnumerable<DependencyPropertyNode> LeafReferencingProperties
-        => (IEnumerable<DependencyPropertyNode>?) this._leafReferencingProperties ?? Array.Empty<DependencyPropertyNode>();
+    public IEnumerable<ObservablePropertyInfo> LeafReferencingProperties
+        => (IEnumerable<ObservablePropertyInfo>?) this._leafReferencingProperties ?? Array.Empty<ObservablePropertyInfo>();
 
     /// <summary>
     /// Gets a value indicating whether the current node is referenced by some property as a leaf of a property path, not as an intermediate node.
@@ -99,9 +101,9 @@ internal class DependencyReferenceNode
     /// <summary>
     /// Adds a property referencing the current node as a leaf.
     /// </summary>
-    public void AddLeafReferencingProperty( DependencyPropertyNode referencingProperty )
+    public void AddLeafReferencingProperty( ObservablePropertyInfo referencingProperty )
     {
-        this._leafReferencingProperties ??= new HashSet<DependencyPropertyNode>();
+        this._leafReferencingProperties ??= new HashSet<ObservablePropertyInfo>();
 
         if ( !this._leafReferencingProperties.Add( referencingProperty ) )
         {
@@ -109,7 +111,7 @@ internal class DependencyReferenceNode
             return;
         }
 
-        referencingProperty.DeclaringTypeNode.AddReference( this );
+        referencingProperty.DeclaringTypeInfo.AddExpression( this );
 
         for ( var node = this; node is { HasAnyReferencingProperties: false }; node = node.Parent )
         {
@@ -137,20 +139,20 @@ internal class DependencyReferenceNode
 
     public override string ToString() => this.DottedPropertyPath;
 
-    public DependencyReferenceNode GetOrAddChildReference( DependencyPropertyNode propertyNode )
+    public ObservableExpression GetOrAddChildReference( ObservablePropertyInfo propertyInfo )
     {
-        this._childReferences ??= new Dictionary<IFieldOrProperty, DependencyReferenceNode>();
+        this._childReferences ??= new Dictionary<IFieldOrProperty, ObservableExpression>();
 
-        if ( !this._childReferences.TryGetValue( propertyNode.FieldOrProperty, out var childReference ) )
+        if ( !this._childReferences.TryGetValue( propertyInfo.FieldOrProperty, out var childReference ) )
         {
-            childReference = this.Builder.CreateReferenceNode( propertyNode, this );
-            this._childReferences.Add( propertyNode.FieldOrProperty, childReference );
+            childReference = this.Builder.CreateExpression( propertyInfo, this );
+            this._childReferences.Add( propertyInfo.FieldOrProperty, childReference );
         }
 
         return childReference;
     }
 
-    public void ToString( StringBuilder appendTo, int indent, Func<DependencyReferenceNode, bool>? shouldHighlight = null )
+    public void ToString( StringBuilder appendTo, int indent, Func<ObservableExpression, bool>? shouldHighlight = null )
     {
         if ( shouldHighlight != null && shouldHighlight( this ) )
         {
@@ -183,8 +185,8 @@ internal class DependencyReferenceNode
         }
     }
 
-    public IReadOnlyCollection<DependencyPropertyNode> GetAllReferencingProperties( Func<DependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
-        => this.GetAllReferencingProperties<DependencyPropertyNode>( shouldIncludeImmediateChild );
+    public IReadOnlyCollection<ObservablePropertyInfo> GetAllReferencingProperties( Func<ObservableExpression, bool>? shouldIncludeImmediateChild = null )
+        => this.GetAllReferencingProperties<ObservablePropertyInfo>( shouldIncludeImmediateChild );
 
     /// <summary>
     /// Gets the distinct set of nodes which directly or indirectly reference the current node, and optionally also those which directly
@@ -196,8 +198,8 @@ internal class DependencyReferenceNode
     /// itself are always included and followed, regardless of <paramref name="shouldIncludeImmediateChild"/>.
     /// </param>
     /// <returns></returns>
-    public IReadOnlyCollection<T> GetAllReferencingProperties<T>( Func<DependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
-        where T : DependencyPropertyNode
+    public IReadOnlyCollection<T> GetAllReferencingProperties<T>( Func<ObservableExpression, bool>? shouldIncludeImmediateChild = null )
+        where T : ObservablePropertyInfo
     {
         // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.
         // However, it's not recursive so there's no risk of stack overflow. So safe, but potentially slow.
@@ -213,7 +215,7 @@ internal class DependencyReferenceNode
                 .SelectMany( n => n.LeafReferencingProperties )
                 .Concat( this.LeafReferencingProperties );
 
-        var propertiesToFollow = new Stack<DependencyPropertyNode>( properties );
+        var propertiesToFollow = new Stack<ObservablePropertyInfo>( properties );
         var analyzedProperties = new HashSet<T>();
 
         while ( propertiesToFollow.Count > 0 )

@@ -8,15 +8,15 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Patterns.Observability.Options;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityStrategy
+internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 {
     private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
 
-    private readonly IAspectBuilder<INamedType> _builder;
     private readonly Deferred<ObservabilityTemplateArgs> _templateArgs = new();
     private readonly ObservabilityOptions _commonOptions;
     private readonly ClassicObservabilityStrategyOptions _classicOptions;
@@ -25,7 +25,6 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
     private readonly IMethod? _baseOnObservablePropertyChangedMethod;
     private readonly Assets _assets;
-    private readonly InpcInstrumentationKindLookup _inpcInstrumentationKindLookup;
     private readonly bool _targetImplementsInpc;
 
     // Useful to see when debugging:
@@ -36,17 +35,23 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     private readonly Deferred<IMethod?>? _onObservablePropertyChangedMethod;
     private readonly List<string> _propertyPathsForOnChildPropertyChangedMethod = new();
     private readonly List<string> _propertyNamesForOnObservablePropertyChangedMethod = new();
-    private readonly Deferred<ClassicDependencyTypeNode> _dependencyTypeNode = new();
+    private readonly Deferred<ClassicObservableTypeInfo> _dependencyTypeNode = new();
 
-    public ClassicObservabilityStrategyImpl( IAspectBuilder<INamedType> builder )
+    public InpcInstrumentationKindLookup InpcInstrumentationKindLookup { get; }
+
+    public IAspectBuilder<INamedType> AspectBuilder { get; }
+
+    public INamedType CurrentType => this.AspectBuilder.Target;
+
+    public ClassicObservabilityStrategyImpl( IAspectBuilder<INamedType> aspectBuilder )
     {
-        var target = builder.Target;
+        var target = aspectBuilder.Target;
 
-        this._builder = builder;
+        this.AspectBuilder = aspectBuilder;
         this._assets = target.Compilation.Cache.GetOrAdd( _ => new Assets() );
-        this._inpcInstrumentationKindLookup = new InpcInstrumentationKindLookup( this._builder.Target, this._assets );
-        this._commonOptions = builder.Target.Enhancements().GetOptions<ObservabilityOptions>();
-        this._classicOptions = builder.Target.Enhancements().GetOptions<ClassicObservabilityStrategyOptions>();
+        this.InpcInstrumentationKindLookup = new InpcInstrumentationKindLookup( this.CurrentType, this._assets );
+        this._commonOptions = this.CurrentType.Enhancements().GetOptions<ObservabilityOptions>();
+        this._classicOptions = this.CurrentType.Enhancements().GetOptions<ClassicObservabilityStrategyOptions>();
 
         // TODO: Consider using BaseType.Definition where possible for better performance.
 
@@ -73,7 +78,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
     public void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        if ( builder != this._builder )
+        if ( builder != this.AspectBuilder )
         {
             throw new ArgumentOutOfRangeException();
         }
@@ -115,10 +120,10 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
             this._templateArgs.Value = new ObservabilityTemplateArgs(
                 this._commonOptions,
                 this._classicOptions,
-                this._builder.Target,
+                this.CurrentType,
                 this._assets,
-                this._inpcInstrumentationKindLookup,
-                this.DependencyTypeNode,
+                this.InpcInstrumentationKindLookup,
+                this.ObservableTypeInfo,
                 this._onObservablePropertyChangedMethod?.Value,
                 this._onPropertyChangedMethod.Value,
                 this._onChildPropertyChangedMethod.Value,
@@ -139,7 +144,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         // are covered by the dependency graph.
 
         var relevantProperties =
-            this._builder.Target.Properties
+            this.CurrentType.Properties
                 .Where(
                     p =>
                         p is { IsStatic: false, IsAutoPropertyOrField: true }
@@ -160,7 +165,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         // NB: The selection logic here must be kept in sync with the logic in the OnObservablePropertyChanged template.
 
         this._propertyPathsForOnChildPropertyChangedMethod.AddRange(
-            this.DependencyTypeNode.AllReferences
+            this.ObservableTypeInfo.AllExpressions
                 .Where(
                     n => n.InpcBaseHandling switch
                     {
@@ -176,9 +181,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     {
         var isOverride = this._baseOnPropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+        var result = this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
             .IntroduceMethod(
-                this._builder.Target,
+                this.CurrentType,
                 nameof(Templates.OnPropertyChanged),
                 IntroductionScope.Instance,
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -189,7 +194,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                         b.Name = this._baseOnPropertyChangedMethod!.Name;
                     }
 
-                    if ( this._builder.Target.IsSealed )
+                    if ( this.CurrentType.IsSealed )
                     {
                         b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
                     }
@@ -213,16 +218,16 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
         if ( this._onObservablePropertyChangedMethod != null )
         {
-            foreach ( var node in this.DependencyTypeNode
-                         .AllReferences
+            foreach ( var propertyPath in this.ObservableTypeInfo
+                         .AllExpressions
                          .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnObservablePropertyChanged ) )
             {
-                _ = this.GetOrCreateHandlerField( node );
+                _ = this.GetOrCreateHandlerField( propertyPath );
             }
         }
 
-        foreach ( var node in this.DependencyTypeNode
-                     .AllReferences
+        foreach ( var node in this.ObservableTypeInfo
+                     .AllExpressions
                      .Where( node => node.InpcBaseHandling is InpcBaseHandling.OnPropertyChanged && node.HasChildren ) )
         {
             _ = this.GetOrCreateHandlerField( node );
@@ -235,15 +240,15 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     private bool TryIntroduceOnChildPropertyChangedMethod()
     {
         var nodesForOnChildPropertyChanged =
-            this.DependencyTypeNode
-                .AllReferences
+            this.ObservableTypeInfo
+                .AllExpressions
                 .Where( n => n.Depth > 0 )
                 .Where(
                     node =>
                     {
                         var rootPropertyNode = node.Root;
 
-                        if ( rootPropertyNode.ReferencedFieldOrProperty.DeclaringType == this._builder.Target )
+                        if ( rootPropertyNode.ReferencedFieldOrProperty.DeclaringType == this.CurrentType )
                         {
                             return false;
                         }
@@ -279,9 +284,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
         var isOverride = this._baseOnChildPropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+        var result = this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
             .IntroduceMethod(
-                this._builder.Target,
+                this.CurrentType,
                 nameof(Templates.OnChildPropertyChanged),
                 IntroductionScope.Instance,
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -300,7 +305,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                         b.Name = this._baseOnChildPropertyChangedMethod!.Name;
                     }
 
-                    if ( this._builder.Target.IsSealed )
+                    if ( this.CurrentType.IsSealed )
                     {
                         b.Accessibility = isOverride ? this._baseOnChildPropertyChangedMethod!.Accessibility : Accessibility.Private;
                     }
@@ -331,7 +336,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
             return true;
         }
 
-        var nodesProcessedByOnObservablePropertyChanged = this.DependencyTypeNode.AllReferences
+        var nodesProcessedByOnObservablePropertyChanged = this.ObservableTypeInfo.AllExpressions
             .Where( n => n.InpcBaseHandling == InpcBaseHandling.OnObservablePropertyChanged )
             .ToList();
 
@@ -346,9 +351,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
         var isOverride = this._baseOnObservablePropertyChangedMethod != null;
 
-        var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+        var result = this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
             .IntroduceMethod(
-                this._builder.Target,
+                this.CurrentType,
                 nameof(Templates.OnObservablePropertyChanged),
                 IntroductionScope.Instance,
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
@@ -367,7 +372,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                         b.Name = this._baseOnObservablePropertyChangedMethod!.Name;
                     }
 
-                    if ( this._builder.Target.IsSealed )
+                    if ( this.CurrentType.IsSealed )
                     {
                         b.Accessibility = isOverride ? this._baseOnObservablePropertyChangedMethod!.Accessibility : Accessibility.Private;
                     }
@@ -395,9 +400,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
         if ( this._targetImplementsInpc && this._baseOnPropertyChangedMethod == null )
         {
-            this._builder.Diagnostics.Report(
+            this.AspectBuilder.Diagnostics.Report(
                 DiagnosticDescriptors.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
-                    .WithArguments( this._builder.Target ) );
+                    .WithArguments( this.CurrentType ) );
 
             isValid = false;
         }
@@ -409,14 +414,15 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     {
         if ( !this._targetImplementsInpc )
         {
-            this._builder.Advice.WithTemplateProvider( Templates.Provider ).ImplementInterface( this._builder.Target, this._assets.INotifyPropertyChanged );
+            this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
+                .ImplementInterface( this.CurrentType, this._assets.INotifyPropertyChanged );
         }
     }
 
     private void IntroduceUpdateMethods()
     {
-        var allNodesDepthFirst = this.DependencyTypeNode
-            .AllReferences
+        var allNodesDepthFirst = this.ObservableTypeInfo
+            .AllExpressions
             .OrderByDescending( x => x.Depth )
             .ThenBy( x => x.DottedPropertyPath )
             .ToList();
@@ -457,9 +463,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
                 var accessChildExpression = accessChildExprBuilder.ToExpression();
 
-                var introduceUpdateChildPropertyMethodResult = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                var introduceUpdateChildPropertyMethodResult = this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
                     .IntroduceMethod(
-                        this._builder.Target,
+                        this.CurrentType,
                         nameof(Templates.UpdateChildInpcProperty),
                         IntroductionScope.Instance,
                         OverrideStrategy.Fail,
@@ -489,25 +495,25 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
     private void ProcessAutoPropertiesAndReferencedFields()
     {
-        var target = this._builder.Target;
+        var target = this.CurrentType;
 
         // Override all auto properties, and only those fields that are referenced in the graph.
 
         var properties =
             target.Properties
                 .Where( p => p is { IsStatic: false, IsImplicitlyDeclared: false, Writeability: Writeability.All } )
-                .Select( p => (ClassicDependencyPropertyNode) this.DependencyTypeNode.GetOrAddProperty( p ) )
+                .Select( p => (ClassicObservablePropertyInfo) this.ObservableTypeInfo.GetOrAddProperty( p ) )
                 .Concat(
                     target.Fields
                         .Where( f => f is { IsStatic: false, IsImplicitlyDeclared: false, Writeability: Writeability.All } )
-                        .Select( p => (ClassicDependencyPropertyNode) this.DependencyTypeNode.GetOrAddProperty( p ) ) )
+                        .Select( p => (ClassicObservablePropertyInfo) this.ObservableTypeInfo.GetOrAddProperty( p ) ) )
                 .Where( node => !node.FieldOrProperty.Attributes.Any( this._assets.NotObservableAttribute ) )
                 .ToList();
 
-        foreach ( var propertyNode in properties )
+        foreach ( var propertyInfo in properties )
         {
-            var fieldOrProperty = propertyNode.FieldOrProperty;
-            var propertyTypeInstrumentationKind = this._inpcInstrumentationKindLookup.Get( fieldOrProperty.Type );
+            var fieldOrProperty = propertyInfo.FieldOrProperty;
+            var propertyTypeInstrumentationKind = this.InpcInstrumentationKindLookup.Get( fieldOrProperty.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit;
 
             switch ( fieldOrProperty.Type.IsReferenceType )
@@ -516,17 +522,17 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
                     if ( propertyTypeImplementsInpc )
                     {
-                        var hasDependentProperties = propertyNode.RootReferenceNode.HasAnyReferencingProperties;
+                        var hasDependentProperties = propertyInfo.RootReferenceNode.HasAnyReferencingProperties;
 
                         IField? handlerField = null;
                         IMethod? subscribeMethod = null;
 
                         if ( hasDependentProperties )
                         {
-                            var rootReference = propertyNode.RootReferenceNode;
+                            var rootReference = propertyInfo.RootReferenceNode;
                             handlerField = this.GetOrCreateHandlerField( rootReference );
 
-                            if ( !this.TryGetOrCreateRootPropertySubscribeMethod( propertyNode, out subscribeMethod ) )
+                            if ( !this.TryGetOrCreateRootPropertySubscribeMethod( propertyInfo, out subscribeMethod ) )
                             {
                                 return;
                             }
@@ -539,9 +545,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
                             if ( fieldOrProperty.InitializerExpression != null )
                             {
-                                this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                                this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
                                     .AddInitializer(
-                                        this._builder.Target,
+                                        this.CurrentType,
                                         nameof(Templates.SubscribeInitializer),
                                         InitializerKind.BeforeInstanceConstructor,
                                         args: new { fieldOrProperty, subscribeMethod } );
@@ -555,11 +561,11 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                             }
                         }
 
-                        this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                        this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
                             .OverrideAccessors(
                                 fieldOrProperty,
                                 setTemplate: nameof(Templates.OverrideInpcRefTypePropertySetter),
-                                args: new { templateArgs = this._templateArgs, handlerField, node = propertyNode, subscribeMethod } );
+                                args: new { templateArgs = this._templateArgs, handlerField, propertyInfo, subscribeMethod } );
                     }
                     else
                     {
@@ -567,14 +573,11 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                             ? EqualityComparisonKind.DefaultEqualityComparer
                             : EqualityComparisonKind.ReferenceEquals;
 
-                        this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                        this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
                             .OverrideAccessors(
                                 fieldOrProperty,
                                 setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
-                                args: new
-                                {
-                                    templateArgs = this._templateArgs, node = propertyNode, compareUsing = comparer, propertyTypeInstrumentationKind
-                                } );
+                                args: new { templateArgs = this._templateArgs, propertyInfo, compareUsing = comparer, propertyTypeInstrumentationKind } );
                     }
 
                     break;
@@ -585,14 +588,11 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                         ? EqualityComparisonKind.EqualityOperator
                         : EqualityComparisonKind.DefaultEqualityComparer;
 
-                    this._builder.Advice.WithTemplateProvider( Templates.Provider )
+                    this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
                         .OverrideAccessors(
                             fieldOrProperty,
                             setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
-                            args: new
-                            {
-                                templateArgs = this._templateArgs, node = propertyNode, compareUsing = comparisonKind, propertyTypeInstrumentationKind
-                            } );
+                            args: new { templateArgs = this._templateArgs, propertyInfo, compareUsing = comparisonKind, propertyTypeInstrumentationKind } );
 
                     break;
             }
@@ -628,15 +628,13 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     /// <returns>Success. <see langword="true"/> if the graph was built without diagnostic errors, otherwise <see langword="false"/>.</returns>
     private bool BuildAndValidateDependencyGraph()
     {
-        var graphBuildingContext = new GraphBuildingContext( this );
-        var nodeInitializationContext = new ClassicProcessingNodeInitializationContext( this._builder.Target.Compilation, this, this._builder.Target );
+        var graphBuildingContext = new ClassicGraphBuildingContext( this );
+        var graphBuilder = new ClassicDependencyGraphBuilder( graphBuildingContext, this.CurrentType );
 
-        var graphBuilder = new ClassicDependencyGraphBuilder( nodeInitializationContext );
-
-        var typeNode = (ClassicDependencyTypeNode) graphBuilder.GetDependencyGraph(
-            this._builder.Target,
+        var typeNode = (ClassicObservableTypeInfo) graphBuilder.GetDependencyGraph(
+            this.CurrentType,
             graphBuildingContext,
-            cancellationToken: this._builder.CancellationToken );
+            cancellationToken: this.AspectBuilder.CancellationToken );
 
         var hasErrors = graphBuildingContext.HasReportedErrors;
 
@@ -650,16 +648,16 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         return !hasErrors;
     }
 
-    private ClassicDependencyTypeNode DependencyTypeNode => this._dependencyTypeNode.Value;
+    private ClassicObservableTypeInfo ObservableTypeInfo => this._dependencyTypeNode.Value;
 
-    private IField GetOrCreateLastValueField( ClassicDependencyReferenceNode node )
+    private IField GetOrCreateLastValueField( ClassicObservableExpression node )
     {
         if ( !node.LastValueField.HasBeenSet )
         {
             var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.ContiguousPropertyPath}" );
 
-            var introduceLastValueFieldResult = this._builder.Advice.IntroduceField(
-                this._builder.Target,
+            var introduceLastValueFieldResult = this.AspectBuilder.Advice.IntroduceField(
+                this.CurrentType,
                 lastValueFieldName,
                 node.ReferencedFieldOrProperty.Type.ToNullableType(),
                 IntroductionScope.Instance,
@@ -672,15 +670,15 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         return node.LastValueField.Value;
     }
 
-    private IField GetOrCreateHandlerField( ClassicDependencyReferenceNode node )
+    private IField GetOrCreateHandlerField( ClassicObservableExpression node )
     {
         if ( !node.HandlerField.HasBeenSet )
         {
             var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_handle{node.ContiguousPropertyPath}PropertyChanged" );
 
-            var introduceHandlerFieldResult = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            var introduceHandlerFieldResult = this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
                 .IntroduceField(
-                    this._builder.Target,
+                    this.CurrentType,
                     handlerFieldName,
                     this._assets.NullablePropertyChangedEventHandler,
                     IntroductionScope.Instance,
@@ -693,9 +691,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         return node.HandlerField.Value;
     }
 
-    private bool TryGetOrCreateRootPropertySubscribeMethod( ClassicDependencyPropertyNode propertyNode, out IMethod? subscribeMethod )
+    private bool TryGetOrCreateRootPropertySubscribeMethod( ClassicObservablePropertyInfo propertyInfo, out IMethod? subscribeMethod )
     {
-        var referenceNode = propertyNode.RootReferenceNode;
+        var referenceNode = propertyInfo.RootReferenceNode;
 
         if ( !referenceNode.SubscribeMethod.HasBeenSet )
         {
@@ -703,9 +701,9 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
             var subscribeMethodName = this.GetAndReserveUnusedMemberName( $"SubscribeTo{referenceNode.ContiguousPropertyPath}" );
 
-            var result = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            var result = this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
                 .IntroduceMethod(
-                    this._builder.Target,
+                    this.CurrentType,
                     nameof(Templates.SubscribeTo),
                     IntroductionScope.Instance,
                     OverrideStrategy.Fail,
@@ -714,7 +712,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
                         b.Name = subscribeMethodName;
                         b.Accessibility = Accessibility.Private;
                     },
-                    args: new { TValue = propertyNode.FieldOrProperty.Type, templateArgs = this._templateArgs, node = propertyNode, handlerField } );
+                    args: new { TValue = propertyInfo.FieldOrProperty.Type, templateArgs = this._templateArgs, propertyInfo, handlerField } );
 
             if ( result.Outcome != AdviceOutcome.Error )
             {
@@ -743,7 +741,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
     private string GetAndReserveUnusedMemberName( string desiredName )
     {
         this._existingMemberNames ??= new HashSet<string>(
-            ((IEnumerable<INamedDeclaration>) this._builder.Target.AllMembers()).Concat( this._builder.Target.NestedTypes ).Select( m => m.Name ) );
+            ((IEnumerable<INamedDeclaration>) this.CurrentType.AllMembers()).Concat( this.CurrentType.NestedTypes ).Select( m => m.Name ) );
 
         if ( this._existingMemberNames.Add( desiredName ) )
         {
@@ -833,13 +831,13 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         bool IsValid( IFieldOrProperty fp )
         {
             var typeImplementsInpc =
-                this._inpcInstrumentationKindLookup.Get( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Aspect;
+                this.InpcInstrumentationKindLookup.Get( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Aspect;
 
             var isValid = true;
 
             if ( fp.Type.IsReferenceType == false && typeImplementsInpc )
             {
-                this._builder.Diagnostics.Report(
+                this.AspectBuilder.Diagnostics.Report(
                     DiagnosticDescriptors.ErrorFieldOrPropertyTypeIsStructImplementingInpc.WithArguments( (fp.DeclarationKind, fp, fp.Type) ),
                     fp );
 
@@ -848,7 +846,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
             if ( fp.IsVirtual )
             {
-                this._builder.Diagnostics.Report(
+                this.AspectBuilder.Diagnostics.Report(
                     DiagnosticDescriptors.ErrorVirtualMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
                     fp );
 
@@ -857,7 +855,7 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
 
             if ( fp.IsNew )
             {
-                this._builder.Diagnostics.Report(
+                this.AspectBuilder.Diagnostics.Report(
                     DiagnosticDescriptors.ErrorNewMemberIsNotSupported.WithArguments( (fp.DeclarationKind, fp) ),
                     fp );
 
@@ -868,5 +866,5 @@ internal sealed partial class ClassicObservabilityStrategyImpl : IObservabilityS
         }
     }
 
-    public InpcInstrumentationKind GetInpcInstrumentationKind( IType fieldOrPropertyType ) => this._inpcInstrumentationKindLookup.Get( fieldOrPropertyType );
+    public InpcInstrumentationKind GetInpcInstrumentationKind( IType fieldOrPropertyType ) => this.InpcInstrumentationKindLookup.Get( fieldOrPropertyType );
 }

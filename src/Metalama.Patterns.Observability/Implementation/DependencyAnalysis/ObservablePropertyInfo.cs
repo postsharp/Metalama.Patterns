@@ -9,12 +9,12 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 /// Represents a property in an observability dependency graph.
 /// </summary>
 [CompileTime]
-internal class DependencyPropertyNode
+internal class ObservablePropertyInfo
 {
     /// <summary>
     /// Gets the parent node, representing the declaring type.
     /// </summary>
-    public DependencyTypeNode DeclaringTypeNode { get; }
+    public ObservableTypeInfo DeclaringTypeInfo { get; }
 
     /// <summary>
     /// Gets the corresponding <see cref="IFieldOrProperty"/>.
@@ -27,15 +27,15 @@ internal class DependencyPropertyNode
     public string Name => this.FieldOrProperty.Name;
 
     /// <summary>
-    /// Gets the root <see cref="DependencyReferenceNode"/>, i.e. the reference node referencing the current property.
+    /// Gets the root <see cref="ObservableExpression"/>, i.e. the reference node referencing the current property.
     /// </summary>
-    public DependencyReferenceNode RootReferenceNode { get; }
+    public ObservableExpression RootReferenceNode { get; }
 
-    public DependencyPropertyNode( IFieldOrProperty fieldOrProperty, DependencyTypeNode declaringTypeNode )
+    public ObservablePropertyInfo( IFieldOrProperty fieldOrProperty, ObservableTypeInfo declaringTypeInfo )
     {
         this.FieldOrProperty = fieldOrProperty;
-        this.DeclaringTypeNode = declaringTypeNode;
-        this.RootReferenceNode = declaringTypeNode.Builder.CreateReferenceNode( this, null );
+        this.DeclaringTypeInfo = declaringTypeInfo;
+        this.RootReferenceNode = declaringTypeInfo.Builder.CreateExpression( this, null );
     }
 
     public override string ToString() => this.FieldOrProperty.ToString()!;

@@ -3,16 +3,17 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
+using System.Diagnostics;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal class ClassicDependencyReferenceNode : DependencyReferenceNode
+internal class ClassicObservableExpression : ObservableExpression
 {
-    public new IEnumerable<ClassicDependencyReferenceNode> Children => base.Children.Cast<ClassicDependencyReferenceNode>();
+    public new IEnumerable<ClassicObservableExpression> Children => base.Children.Cast<ClassicObservableExpression>();
 
     public InpcInstrumentationKind InpcInstrumentationKind
-        => ((ClassicDependencyTypeNode) this.ReferencedPropertyNode.DeclaringTypeNode).InpcInstrumentationKind;
+        => ((ClassicObservableTypeInfo) this.ReferencedPropertyInfo.DeclaringTypeInfo).InpcInstrumentationKind;
 
     /// <summary>
     /// Gets the potentially uninitialized field like "B? _lastA2". From non-template code, use
@@ -74,42 +75,39 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
     public Deferred<IMethod> SubscribeMethod { get; } = new();
 
     /// <summary>
-    /// Gets or sets the handling strategy of the current reference by the base type. 
+    /// Gets the handling strategy of the current reference by the base type. 
     /// </summary>
     public InpcBaseHandling InpcBaseHandling { get; private set; }
 
-    public string Name => this.ReferencedFieldOrProperty.Name;
-
-    public ClassicDependencyReferenceNode(
-        DependencyPropertyNode referencedPropertyNode,
-        DependencyReferenceNode? parent,
-        ClassicDependencyGraphBuilder builder,
-        ClassicProcessingNodeInitializationContext ctx ) : base(
-        referencedPropertyNode,
+    public ClassicObservableExpression(
+        ObservablePropertyInfo referencedPropertyInfo,
+        ObservableExpression? parent,
+        ClassicDependencyGraphBuilder builder ) : base(
+        referencedPropertyInfo,
         parent,
         builder )
     {
-        var fieldOrProperty = referencedPropertyNode.FieldOrProperty;
+        var fieldOrProperty = referencedPropertyInfo.FieldOrProperty;
 
         this.InpcBaseHandling =
-            ((ClassicDependencyTypeNode) this.ReferencedPropertyNode.DeclaringTypeNode).InpcInstrumentationKind switch
+            ((ClassicObservableTypeInfo) this.ReferencedPropertyInfo.DeclaringTypeInfo).InpcInstrumentationKind switch
             {
                 InpcInstrumentationKind.Unknown => InpcBaseHandling.Unknown,
 
                 InpcInstrumentationKind.None => InpcBaseHandling.NotApplicable,
 
                 InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit when this.IsRoot =>
-                    fieldOrProperty.DeclaringType == ctx.CurrentType
+                    fieldOrProperty.DeclaringType == builder.CurrentType
                         ? InpcBaseHandling.NotApplicable
-                        : ctx.Helper.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
+                        : builder.Context.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
                             ? InpcBaseHandling.OnChildPropertyChanged
-                            : ctx.Helper.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
+                            : builder.Context.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
                                 ? InpcBaseHandling.OnObservablePropertyChanged
                                 : InpcBaseHandling.OnPropertyChanged,
                 InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit when !this.IsRoot =>
-                    ctx.Helper.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
+                    builder.Context.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
                         ? InpcBaseHandling.OnChildPropertyChanged
-                        : ctx.Helper.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
+                        : builder.Context.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
                             ? InpcBaseHandling.OnObservablePropertyChanged
                             : InpcBaseHandling.None,
 
@@ -117,10 +115,10 @@ internal class ClassicDependencyReferenceNode : DependencyReferenceNode
             };
     }
 
-    public new IEnumerable<ClassicDependencyPropertyNode> LeafReferencingProperties => base.LeafReferencingProperties.Cast<ClassicDependencyPropertyNode>();
+    public new IEnumerable<ClassicObservablePropertyInfo> LeafReferencingProperties => base.LeafReferencingProperties.Cast<ClassicObservablePropertyInfo>();
 
-    public IReadOnlyCollection<ClassicDependencyPropertyNode> GetAllReferencingProperties(
-        Func<ClassicDependencyReferenceNode, bool>? shouldIncludeImmediateChild = null )
-        => this.GetAllReferencingProperties<ClassicDependencyPropertyNode>(
-            shouldIncludeImmediateChild == null ? null : node => shouldIncludeImmediateChild.Invoke( (ClassicDependencyReferenceNode) node ) );
+    public IReadOnlyCollection<ClassicObservablePropertyInfo> GetAllReferencingProperties(
+        Func<ClassicObservableExpression, bool>? shouldIncludeImmediateChild = null )
+        => this.GetAllReferencingProperties<ClassicObservablePropertyInfo>(
+            shouldIncludeImmediateChild == null ? null : node => shouldIncludeImmediateChild.Invoke( (ClassicObservableExpression) node ) );
 }

@@ -7,11 +7,11 @@ using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal class ClassicDependencyPropertyNode : DependencyPropertyNode
+internal class ClassicObservablePropertyInfo : ObservablePropertyInfo
 {
-    public ClassicDependencyPropertyNode(
+    public ClassicObservablePropertyInfo(
         IFieldOrProperty fieldOrProperty,
-        DependencyTypeNode declaringTypeNode ) : base( fieldOrProperty, declaringTypeNode ) { }
+        ObservableTypeInfo declaringTypeInfo ) : base( fieldOrProperty, declaringTypeInfo ) { }
 
-    public new ClassicDependencyReferenceNode RootReferenceNode => (ClassicDependencyReferenceNode) base.RootReferenceNode;
+    public new ClassicObservableExpression RootReferenceNode => (ClassicObservableExpression) base.RootReferenceNode;
 }

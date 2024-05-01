@@ -10,16 +10,16 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 /// Represents a named type in an observability dependency graph.
 /// </summary>
 [CompileTime]
-internal class DependencyTypeNode
+internal class ObservableTypeInfo
 {
-    private readonly Dictionary<IFieldOrProperty, DependencyPropertyNode> _properties = new();
-    private readonly HashSet<DependencyReferenceNode> _allReferences = new();
+    private readonly Dictionary<IFieldOrProperty, ObservablePropertyInfo> _properties = new();
+    private readonly HashSet<ObservableExpression> _allExpressions = new();
 
     public DependencyGraphBuilder Builder { get; }
 
     public INamedType Type { get; }
 
-    public DependencyTypeNode( DependencyGraphBuilder builder, INamedType type )
+    public ObservableTypeInfo( DependencyGraphBuilder builder, INamedType type )
     {
         this.Builder = builder;
         this.Type = type;
@@ -27,7 +27,7 @@ internal class DependencyTypeNode
 
     public override string ToString() => this.ToString( null );
 
-    public string ToString( DependencyReferenceNode? highlightNode )
+    public string ToString( ObservableExpression? highlightNode )
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine( "<root>" );
@@ -40,26 +40,26 @@ internal class DependencyTypeNode
         return stringBuilder.ToString();
     }
 
-    public DependencyPropertyNode GetOrAddProperty( IFieldOrProperty fieldOrProperty )
+    public ObservablePropertyInfo GetOrAddProperty( IFieldOrProperty fieldOrProperty )
     {
         if ( !this._properties.TryGetValue( fieldOrProperty, out var member ) )
         {
-            member = this.Builder.CreatePropertyNode( fieldOrProperty, this );
+            member = this.Builder.CreatePropertyInfo( fieldOrProperty, this );
             this._properties.Add( fieldOrProperty, member );
         }
 
         return member;
     }
 
-    internal void AddReference( DependencyReferenceNode reference )
+    internal void AddExpression( ObservableExpression reference )
     {
-        if ( this._allReferences.Add( reference ) && reference.Parent != null )
+        if ( this._allExpressions.Add( reference ) && reference.Parent != null )
         {
-            this.AddReference( reference.Parent );
+            this.AddExpression( reference.Parent );
         }
     }
 
-    public IEnumerable<DependencyPropertyNode> Properties => this._properties.Values;
+    public IEnumerable<ObservablePropertyInfo> Properties => this._properties.Values;
 
-    public IReadOnlyCollection<DependencyReferenceNode> AllReferences => this._allReferences;
+    public IReadOnlyCollection<ObservableExpression> AllExpressions => this._allExpressions;
 }

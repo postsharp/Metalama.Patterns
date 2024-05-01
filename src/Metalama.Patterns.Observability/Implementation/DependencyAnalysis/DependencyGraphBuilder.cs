@@ -13,27 +13,27 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 [CompileTime]
 internal partial class DependencyGraphBuilder
 {
-    private readonly Dictionary<INamedType, DependencyTypeNode> _types = new();
+    private readonly Dictionary<INamedType, ObservableTypeInfo> _types = new();
 
-    protected virtual DependencyTypeNode CreateTypeNode( INamedType type ) => new( this, type );
+    protected virtual ObservableTypeInfo CreateTypeInfo( INamedType type ) => new( this, type );
 
-    public virtual DependencyPropertyNode CreatePropertyNode( IFieldOrProperty fieldOrProperty, DependencyTypeNode parent ) => new( fieldOrProperty, parent );
+    public virtual ObservablePropertyInfo CreatePropertyInfo( IFieldOrProperty fieldOrProperty, ObservableTypeInfo parent ) => new( fieldOrProperty, parent );
 
-    public virtual DependencyReferenceNode CreateReferenceNode( DependencyPropertyNode propertyNode, DependencyReferenceNode? parent )
-        => new( propertyNode, parent, this );
+    public virtual ObservableExpression CreateExpression( ObservablePropertyInfo propertyInfo, ObservableExpression? parent )
+        => new( propertyInfo, parent, this );
 
-    private DependencyTypeNode GetOrAddTypeNode( INamedType type )
+    private ObservableTypeInfo GetOrAddTypeNode( INamedType type )
     {
         if ( !this._types.TryGetValue( type, out var typeNode ) )
         {
-            typeNode = this.CreateTypeNode( type );
+            typeNode = this.CreateTypeInfo( type );
             this._types.Add( type, typeNode );
         }
 
         return typeNode;
     }
 
-    private DependencyPropertyNode GetOrAddPropertyNode( IFieldOrProperty property )
+    private ObservablePropertyInfo GetOrAddPropertyNode( IFieldOrProperty property )
     {
         var declaringTypeNode = this.GetOrAddTypeNode( property.DeclaringType );
 
@@ -58,7 +58,7 @@ internal partial class DependencyGraphBuilder
      * to determine which properties are affected by a change to a given node.
      */
 
-    public DependencyTypeNode GetDependencyGraph(
+    public ObservableTypeInfo GetDependencyGraph(
         INamedType type,
         IGraphBuildingContext context,
         Action<string>? trace = null,

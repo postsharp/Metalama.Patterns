@@ -9,20 +9,25 @@ namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 [CompileTime]
 internal class ClassicDependencyGraphBuilder : DependencyGraphBuilder
 {
-    private readonly ClassicProcessingNodeInitializationContext _context;
+    public ICompilation Compilation => this.CurrentType.Compilation;
 
-    public ClassicDependencyGraphBuilder( ClassicProcessingNodeInitializationContext context )
+    public ClassicGraphBuildingContext Context { get; }
+
+    public INamedType CurrentType { get; }
+
+    public ClassicDependencyGraphBuilder( ClassicGraphBuildingContext context, INamedType currentType )
     {
-        this._context = context;
+        this.Context = context;
+        this.CurrentType = currentType;
     }
 
-    protected override DependencyTypeNode CreateTypeNode( INamedType type ) => new ClassicDependencyTypeNode( this, type, this._context );
+    protected override ObservableTypeInfo CreateTypeInfo( INamedType type ) => new ClassicObservableTypeInfo( this, type );
 
-    public override DependencyPropertyNode CreatePropertyNode( IFieldOrProperty fieldOrProperty, DependencyTypeNode parent )
-        => new ClassicDependencyPropertyNode( fieldOrProperty, parent );
+    public override ObservablePropertyInfo CreatePropertyInfo( IFieldOrProperty fieldOrProperty, ObservableTypeInfo parent )
+        => new ClassicObservablePropertyInfo( fieldOrProperty, parent );
 
-    public override DependencyReferenceNode CreateReferenceNode(
-        DependencyPropertyNode propertyNode,
-        DependencyReferenceNode? parent )
-        => new ClassicDependencyReferenceNode( propertyNode, parent, this, this._context );
+    public override ObservableExpression CreateExpression(
+        ObservablePropertyInfo propertyInfo,
+        ObservableExpression? parent )
+        => new ClassicObservableExpression( propertyInfo, parent, this );
 }

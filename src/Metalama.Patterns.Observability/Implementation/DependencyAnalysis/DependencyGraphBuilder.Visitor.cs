@@ -19,13 +19,13 @@ internal partial class DependencyGraphBuilder
 {
     private static void AddReferencedProperties(
         ICompilation compilation,
-        DependencyPropertyNode propertyNode,
+        ObservablePropertyInfo propertyInfo,
         IGraphBuildingContext context,
         RoslynAssets assets,
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
-        var body = propertyNode.FieldOrProperty.GetSymbol()!
+        var body = propertyInfo.FieldOrProperty.GetSymbol()!
             .DeclaringSyntaxReferences
             .Select( r => r.GetSyntax( cancellationToken ) )
             .Cast<PropertyDeclarationSyntax>()
@@ -40,7 +40,7 @@ internal partial class DependencyGraphBuilder
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( propertyNode, semanticModel, context, assets, trace, cancellationToken );
+        var visitor = new Visitor( propertyInfo, semanticModel, context, assets, trace, cancellationToken );
 
         visitor.Visit( body );
     }
@@ -48,7 +48,7 @@ internal partial class DependencyGraphBuilder
     [CompileTime]
     private sealed partial class Visitor : CSharpSyntaxWalker, IGatherIdentifiersContextManagerClient
     {
-        private readonly DependencyPropertyNode _propertyNode;
+        private readonly ObservablePropertyInfo _propertyInfo;
         private readonly INamedType _declaringType;
         private readonly SemanticModel _semanticModel;
         private readonly CancellationToken _cancellationToken;
@@ -61,7 +61,7 @@ internal partial class DependencyGraphBuilder
         private int _depth = 1;
 
         public Visitor(
-            DependencyPropertyNode propertyNode,
+            ObservablePropertyInfo propertyInfo,
             SemanticModel semanticModel,
             IGraphBuildingContext context,
             RoslynAssets assets,
@@ -69,8 +69,8 @@ internal partial class DependencyGraphBuilder
             CancellationToken cancellationToken )
         {
             this._trace = trace;
-            this._propertyNode = propertyNode;
-            this._declaringType = propertyNode.FieldOrProperty.DeclaringType;
+            this._propertyInfo = propertyInfo;
+            this._declaringType = propertyInfo.FieldOrProperty.DeclaringType;
             this._semanticModel = semanticModel;
             this._cancellationToken = cancellationToken;
             this._context = context;
@@ -257,7 +257,7 @@ internal partial class DependencyGraphBuilder
                             .Count()
                         : 0;
 
-                    DependencyReferenceNode? reference = null;
+                    ObservableExpression? reference = null;
 
                     for ( var i = 0; i < symbols.Count; ++i )
                     {
@@ -273,17 +273,17 @@ internal partial class DependencyGraphBuilder
                         if ( chainSection is ChainSection.Stem or ChainSection.Leaf )
                         {
                             var referencedProperty =
-                                this._propertyNode.DeclaringTypeNode.Builder.GetOrAddPropertyNode( this.GetFieldOrProperty( symbols[i].Symbol ) );
+                                this._propertyInfo.DeclaringTypeInfo.Builder.GetOrAddPropertyNode( this.GetFieldOrProperty( symbols[i].Symbol ) );
 
                             reference = reference == null
-                                ? this._propertyNode.DeclaringTypeNode.GetOrAddProperty( this.GetFieldOrProperty( firstSymbol ) ).RootReferenceNode
+                                ? this._propertyInfo.DeclaringTypeInfo.GetOrAddProperty( this.GetFieldOrProperty( firstSymbol ) ).RootReferenceNode
                                 : reference.GetOrAddChildReference( referencedProperty );
                         }
                     }
 
-                    if ( reference != null && reference.ReferencedFieldOrProperty != this._propertyNode.FieldOrProperty )
+                    if ( reference != null && reference.ReferencedFieldOrProperty != this._propertyInfo.FieldOrProperty )
                     {
-                        reference.AddLeafReferencingProperty( this._propertyNode );
+                        reference.AddLeafReferencingProperty( this._propertyInfo );
                     }
                 }
 

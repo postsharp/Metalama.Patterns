@@ -23,7 +23,7 @@ internal sealed record ObservabilityTemplateArgs(
     INamedType TargetType,
     Assets Assets,
     InpcInstrumentationKindLookup InpcInstrumentationKindLookup,
-    ClassicDependencyTypeNode DependencyTypeNode,
+    ClassicObservableTypeInfo ObservableTypeInfo,
     IMethod? OnObservablePropertyChangedMethod,
     IMethod OnPropertyChangedMethod,
     IMethod? OnChildPropertyChangedMethod,

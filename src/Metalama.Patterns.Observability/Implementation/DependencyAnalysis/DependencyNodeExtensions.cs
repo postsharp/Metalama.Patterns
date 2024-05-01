@@ -14,15 +14,15 @@ internal static class DependencyNodeExtensions
         => new InvalidOperationException( $"The operation is not supported on a root node ({callerMemberName})." );
 
     public static IEnumerable<T> DescendantsDepthFirst<T>( this T node )
-        where T : DependencyReferenceNode
+        where T : ObservableExpression
         => DescendantsDepthFirst( node, false );
 
     public static IEnumerable<T> SelfAndDescendantsDepthFirst<T>( this T node )
-        where T : DependencyReferenceNode
+        where T : ObservableExpression
         => DescendantsDepthFirst( node, true );
 
     private static IEnumerable<T> DescendantsDepthFirst<T>( this T node, bool includeSelf )
-        where T : DependencyReferenceNode
+        where T : ObservableExpression
     {
         // NB: No loop detection.
 
@@ -53,18 +53,18 @@ internal static class DependencyNodeExtensions
     /// Gets the ancestors of the current node in leaf-to-root order.
     /// </summary>
     public static IEnumerable<T> Ancestors<T>( this T node )
-        where T : DependencyReferenceNode
+        where T : ObservableExpression
         => AncestorsCore( node, false );
 
     /// <summary>
     /// Gets the current node and its ancestors in leaf-to-root order.
     /// </summary>
     public static IEnumerable<T> AncestorsAndSelf<T>( this T node )
-        where T : DependencyReferenceNode
+        where T : ObservableExpression
         => AncestorsCore( node, true );
 
     private static IEnumerable<T> AncestorsCore<T>( T node, bool includeSelf )
-        where T : DependencyReferenceNode
+        where T : ObservableExpression
     {
         if ( includeSelf )
         {
