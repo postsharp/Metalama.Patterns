@@ -32,7 +32,7 @@ internal sealed class TestGraphBuildingContext : GraphBuildingContext
         this._treatAsImplementingInpc = treatAsImplementingInpc;
     }
 
-    public override bool CanIgnoreUnobservableExpressions( IPropertySymbol symbol )
+    public override bool CanIgnoreUnobservableExpressions( ISymbol symbol )
         => this._isConfiguredAsSafe?.Invoke( symbol ) ?? base.CanIgnoreUnobservableExpressions( symbol );
 
     public override void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null )

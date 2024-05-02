@@ -17,9 +17,9 @@ public sealed class ObservabilityMemberOptionsBuilder
 
     public bool? IgnoreUnobservableExpressions
     {
-        get => this.DependencyAnalysisOptions?.IgnoreUnobservableExpressions;
+        get => this.DependencyAnalysisOptions?.SuppressWarnings;
         set
             => this.DependencyAnalysisOptions =
-                new DependencyAnalysisOptions { IgnoreUnobservableExpressions = value };
+                new DependencyAnalysisOptions { SuppressWarnings = value };
     }
 }

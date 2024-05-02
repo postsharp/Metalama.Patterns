@@ -87,31 +87,6 @@ internal static class DiagnosticDescriptors
             "'new' member is not supported.",
             _category );
 
-    // TODO: Split into multiple diagnostics or keep as one? Which gives the best user experience wrt warnings-as-errors or suppressing warnings?
-    // NB: See also LAMA5162
-
-    /// <summary>
-    /// [no fixed message] - use messages like `Only method arguments of primary types are supported`.
-    /// </summary>
-    public static readonly DiagnosticDefinition<string> WarningNotSupportedForDependencyAnalysis =
-        new(
-            "LAMA5156",
-            Warning,
-            "{0}",
-            "Not supported for dependency analysis.",
-            _category );
-
-    /// <summary>
-    /// Handling for this syntax is not implemented and is not supported for dependency analysis (analyzer reference {0}).
-    /// </summary>
-    public static readonly DiagnosticDefinition<string> WarningNotImplementedForDependencyAnalysis =
-        new(
-            "LAMA5160",
-            Warning,
-            "Handling for this syntax is not implemented and is not supported by the [Observable] aspect (analyzer reference {0}).",
-            "Not implemented for dependency analysis by the [Observable] aspect.",
-            _category );
-
     /// <summary>
     /// The children of fields or properties of type '{0}' cannot be observed because the type does not implement INotifyPropertyChanged.
     /// </summary>
@@ -130,8 +105,35 @@ internal static class DiagnosticDescriptors
         new(
             "LAMA5162",
             Warning,
-            "The '{1}' {0} cannot be analysed, and has not been configured with an observability contract. Use [IgnoreUnobservableExpressions] or "
-            + nameof(ObservabilityExtensions.ConfigureObservability) + " via a fabric to ignore this warning.",
+            $"The '{{1}}' {{0}} cannot be analysed, and has not been configured with an observability contract. Mark this {{0}} with [{nameof(ConstantAttribute)}] or "
+            + nameof(ObservabilityExtensions.ConfigureObservability) + " via a fabric.",
             "Method or property is not supported for dependency analysis.",
+            _category );
+
+    public static readonly DiagnosticDefinition<(ISymbol Member, INamedTypeSymbol DeclaringType)> DeclaringTypeDoesNotImplementInpc =
+        new(
+            "LAMA5163",
+            Warning,
+            "The '{0}' property cannot be analysed: changes to children of non-auto properties declared on the current type cannot be observed unless the property type implements INotifyPropertyChanged. Consider implementing the INotifyPropertyChanged interface in '{1}', marking '{0}' with [Constant], or using "
+            + nameof(ObservabilityExtensions.ConfigureObservability) + " via a fabric.",
+            "Changes to children of non-auto properties declared on the current type cannot be observed unless the property type implements INotifyPropertyChanged.",
+            _category );
+
+    public static readonly DiagnosticDefinition<IFieldSymbol> NonPrivateFieldsNonSupported =
+        new(
+            "LAMA5164",
+            Warning,
+            "The '{0}' field cannot be analysed: only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported. Consider accessing the field through a property, marking '{0}' with [Constant], or using "
+            + nameof(ObservabilityExtensions.ConfigureObservability) + " via a fabric.",
+            "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.",
+            _category );
+
+    // "" 
+    public static readonly DiagnosticDefinition<ISymbol> LocalVariablesNonSupported =
+        new(
+            "LAMA5165",
+            Warning,
+            "The '{0}' local variable cannot be analysed: variables of types other than primitive types are not supported.",
+            "Variables of types other than primitive types and types configured as deeply immutable are not supported.",
             _category );
 }

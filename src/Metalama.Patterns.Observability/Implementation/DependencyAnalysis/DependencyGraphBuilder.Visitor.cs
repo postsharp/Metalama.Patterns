@@ -26,7 +26,9 @@ internal partial class DependencyGraphBuilder
         Action<string>? trace = null,
         CancellationToken cancellationToken = default )
     {
-        var body = propertyInfo.FieldOrProperty.GetSymbol()!
+        var symbol = propertyInfo.FieldOrProperty.GetSymbol()!;
+        
+        var body = symbol
             .DeclaringSyntaxReferences
             .Select( r => r.GetSyntax( cancellationToken ) )
             .Cast<PropertyDeclarationSyntax>()
@@ -38,10 +40,12 @@ internal partial class DependencyGraphBuilder
             return;
         }
 
+        var ignoreWarnings = context.CanIgnoreUnobservableExpressions( symbol );
+        
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( propertyInfo, semanticModel, context, trace, cancellationToken );
+        var visitor = new Visitor( propertyInfo, semanticModel, context, trace, cancellationToken, ignoreWarnings );
 
         visitor.Visit( body );
     }
@@ -57,6 +61,7 @@ internal partial class DependencyGraphBuilder
         private readonly GraphBuildingContext _context;
         private readonly ICompilation _compilation;
         private readonly GatherIdentifiersContextManager _gatherManager;
+        private bool _ignoreWarnings;
 
         private int _depth = 1;
 
@@ -65,13 +70,15 @@ internal partial class DependencyGraphBuilder
             SemanticModel semanticModel,
             GraphBuildingContext context,
             Action<string>? trace,
-            CancellationToken cancellationToken )
+            CancellationToken cancellationToken,
+            bool ignoreWarnings )
         {
             this._trace = trace;
             this._propertyInfo = propertyInfo;
             this._declaringType = propertyInfo.FieldOrProperty.DeclaringType;
             this._semanticModel = semanticModel;
             this._cancellationToken = cancellationToken;
+            this._ignoreWarnings = ignoreWarnings;
             this._context = context;
             this._gatherManager = new GatherIdentifiersContextManager( this );
             this._compilation = this._declaringType.Compilation;
@@ -91,6 +98,11 @@ internal partial class DependencyGraphBuilder
 
         private void ValidatePathElement( IReadOnlyList<DependencyPathElement> symbols, int index, ChainSection chainSection )
         {
+            if ( this._ignoreWarnings )
+            {
+                return;
+            }
+            
             // Here we report particularly those diagnostics which should be located on a syntax node inside a body. The final dependency
             // graph does not keep track of all the syntax nodes which referenced each dependency node (this would be expensive), so logging
             // diagnostics located on syntax nodes inside bodies is not possible later.
@@ -101,7 +113,7 @@ internal partial class DependencyGraphBuilder
             {
                 IPropertySymbol property => property.Type.GetElementaryType(),
                 IFieldSymbol field => field.Type.GetElementaryType(),
-                _ => chainSection == ChainSection.Unsupported ? null : throw new NotSupportedException()
+                _ => chainSection == ChainSection.Unsupported ? null : throw new ObservabilityAssertionFailedException()
             };
 
             if ( chainSection == ChainSection.Stem )
@@ -123,9 +135,8 @@ internal partial class DependencyGraphBuilder
                      && pathElement.Symbol.ContainingType.Equals( this._declaringType.GetSymbol() ) )
                 {
                     this._context.ReportDiagnostic(
-                        DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
-                            .WithArguments(
-                                "Changes to children of non-auto properties declared on the current type cannot be observed unless the property type implements INotifyPropertyChanged." ),
+                        DiagnosticDescriptors.DeclaringTypeDoesNotImplementInpc
+                            .WithArguments( (pathElement.Symbol, pathElement.Symbol.ContainingType) ),
                         symbols[index + 1].Node.GetLocation() );
                 }
             }
@@ -139,9 +150,8 @@ internal partial class DependencyGraphBuilder
                 if ( !isSafe )
                 {
                     this._context.ReportDiagnostic(
-                        DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
-                            .WithArguments(
-                                "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported." ),
+                        DiagnosticDescriptors.NonPrivateFieldsNonSupported
+                            .WithArguments( fieldSymbol ),
                         pathElement.Node.GetLocation() );
                 }
             }
@@ -162,8 +172,6 @@ internal partial class DependencyGraphBuilder
 
                 if ( !isSafe )
                 {
-                    Debugger.Break();
-
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments(
                             (pathElement.Symbol.Kind, pathElement.Symbol) ),
@@ -275,13 +283,12 @@ internal partial class DependencyGraphBuilder
             var symbolInfo = this._semanticModel.GetSymbolInfo( node.Type, this._cancellationToken );
             var variableType = ((ITypeSymbol?) symbolInfo.Symbol)?.GetElementaryType();
 
-            if ( variableType != null && !this._context.IsConstant( variableType ) )
+            if ( variableType != null && !this._context.IsConstant( variableType ) && !this._ignoreWarnings )
             {
                 foreach ( var variable in node.Variables )
                 {
                     this._context.ReportDiagnostic(
-                        DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments(
-                            "Variables of types other than primitive types and types configured as deeply immutable are not supported." ),
+                        DiagnosticDescriptors.LocalVariablesNonSupported.WithArguments( symbolInfo.Symbol! ),
                         variable.Identifier.GetLocation() );
                 }
             }

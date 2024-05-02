@@ -29,14 +29,21 @@ public sealed class ObservabilityTypeOptionsBuilder
         set => this.ObservabilityOptions = (this.ObservabilityOptions ?? new ObservabilityOptions()) with { ImplementationStrategy = value };
     }
 
-    public bool? IgnoreUnobservableExpressions
+    /// <summary>
+    /// Gets or sets a value whether observability warnings in the target members must be suppressed.
+    /// </summary>
+    public bool? SuppressWarnings
     {
-        get => this.DependencyAnalysisOptions?.IgnoreUnobservableExpressions;
+        get => this.DependencyAnalysisOptions?.SuppressWarnings;
         set
             => this.DependencyAnalysisOptions =
-                new DependencyAnalysisOptions { IgnoreUnobservableExpressions = value };
+                new DependencyAnalysisOptions { SuppressWarnings = value };
     }
 
+    /// <summary>
+    /// Gets or sets an <see cref="ObservabilityContract"/> for the target member, guaranteeing its behavior
+    /// with respect to the <see cref="ObservableAttribute"/> aspect.
+    /// </summary>
     public ObservabilityContract? ObservabilityContract
     {
         get => this.DependencyAnalysisOptions?.ObservabilityContract;

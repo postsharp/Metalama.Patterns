@@ -210,7 +210,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5156@'x'" );
+            .Equal( "LAMA5165@'x'" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -845,8 +845,7 @@ public class A
   Z
 ";
 
-        diagnostics.Should()
-            .Equal( "LAMA5162@'Fn'" );
+        diagnostics.Should().BeEmpty();
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -1260,7 +1259,7 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
-            .Equal( "LAMA5156@'Foo'" );
+            .Equal( "LAMA5164@'Foo'" );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1309,7 +1308,7 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
-            .Equal( "LAMA5156@'Foo'" );
+            .Equal( "LAMA5164@'Foo'" );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1393,7 +1392,7 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
-            .Equal( "LAMA5156@'Foo'" );
+            .Equal( "LAMA5164@'Foo'" );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1525,7 +1524,7 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
-            .Equal( "LAMA5156@'Foo'" );
+            .Equal( "LAMA5164@'Foo'" );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );

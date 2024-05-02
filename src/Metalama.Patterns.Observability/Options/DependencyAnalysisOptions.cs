@@ -13,8 +13,15 @@ public sealed record DependencyAnalysisOptions :
     IHierarchicalOptions<INamedType>,
     IHierarchicalOptions<IMember>
 {
-    public bool? IgnoreUnobservableExpressions { get; init; }
+    /// <summary>
+    /// Gets a value whether observability warnings in the target members must be suppressed.
+    /// </summary>
+    public bool? SuppressWarnings { get; init; }
 
+    /// <summary>
+    /// Gets an <see cref="ObservabilityContract"/> for the target member, guaranteeing its behavior
+    /// with respect to the <see cref="ObservableAttribute"/> aspect.
+    /// </summary>
     public ObservabilityContract? ObservabilityContract { get; init; }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
@@ -23,14 +30,14 @@ public sealed record DependencyAnalysisOptions :
 
         return new DependencyAnalysisOptions
         {
-            IgnoreUnobservableExpressions = other.IgnoreUnobservableExpressions ?? this.IgnoreUnobservableExpressions,
+            SuppressWarnings = other.SuppressWarnings ?? this.SuppressWarnings,
             ObservabilityContract = other.ObservabilityContract ?? this.ObservabilityContract
         };
     }
 
     internal static DependencyAnalysisOptions Default { get; } = new()
     {
-        IgnoreUnobservableExpressions = false
+        SuppressWarnings = false
 
         // Other members intentionally null by default because we could have some rules given the default.
     };

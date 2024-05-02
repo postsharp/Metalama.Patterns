@@ -25,8 +25,8 @@ internal abstract class GraphBuildingContext
 
     public abstract bool TreatAsImplementingInpc( ITypeSymbol type );
 
-    public virtual bool CanIgnoreUnobservableExpressions( IPropertySymbol symbol )
-        => this.GetDependencyAnalysisOptions( symbol ).IgnoreUnobservableExpressions == true;
+    public virtual bool CanIgnoreUnobservableExpressions( ISymbol symbol )
+        => this.GetDependencyAnalysisOptions( symbol ).SuppressWarnings == true;
 
     protected virtual DependencyAnalysisOptions GetDependencyAnalysisOptions( ISymbol symbol )
     {
