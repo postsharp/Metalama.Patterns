@@ -17,8 +17,13 @@ internal class WithValidateMethod : DependencyObject
     }
   }
   private bool ValidateName(string name) => name.Length > 3;
-  public static readonly DependencyProperty NameProperty;
-  static WithValidateMethod()
+  public static readonly DependencyProperty NameProperty = WithValidateMethod.CreateNameDependencyProperty();
+  private static string ApplyNameContracts(string value)
+  {
+    value = value.Trim();
+    return value;
+  }
+  private static DependencyProperty CreateNameDependencyProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -31,11 +36,6 @@ internal class WithValidateMethod : DependencyObject
     }
     var metadata = new PropertyMetadata();
     metadata.CoerceValueCallback = CoerceValue_1;
-    WithValidateMethod.NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(WithValidateMethod), metadata);
-  }
-  private static string ApplyNameContracts(string value)
-  {
-    value = value.Trim();
-    return value;
+    return DependencyProperty.Register("Name", typeof(string), typeof(WithValidateMethod), metadata);
   }
 }

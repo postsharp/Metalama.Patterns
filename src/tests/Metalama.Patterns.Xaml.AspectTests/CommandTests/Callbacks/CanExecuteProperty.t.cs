@@ -15,14 +15,8 @@ public class CanExecuteProperty
   private static bool CanExecuteStatic => true;
   public CanExecuteProperty()
   {
-    this.InstanceCommand = new DelegateCommand(new Action<object>(__1 =>
-    {
-      this.ExecuteInstance();
-    }), new Func<object, bool>(_ => CanExecuteInstance));
-    this.StaticCommand = new DelegateCommand(new Action<object>(__3 =>
-    {
-      CanExecuteProperty.ExecuteStatic();
-    }), new Func<object, bool>(__2 => CanExecuteStatic));
+    this.InstanceCommand = new DelegateCommand(_ => this.ExecuteInstance(), _ => CanExecuteInstance);
+    this.StaticCommand = new DelegateCommand(_ => CanExecuteProperty.ExecuteStatic(), _ => CanExecuteStatic);
   }
   public ICommand InstanceCommand { get; }
   public ICommand StaticCommand { get; }

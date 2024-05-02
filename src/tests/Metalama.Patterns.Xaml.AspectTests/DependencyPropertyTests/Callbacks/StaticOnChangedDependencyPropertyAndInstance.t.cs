@@ -53,25 +53,31 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
   private static void OnAcceptsObjectForInstanceChanged(DependencyProperty d, object instance)
   {
   }
-  public static readonly DependencyProperty AcceptsDependencyObjectForInstanceProperty;
-  public static readonly DependencyProperty AcceptsObjectForInstanceProperty;
-  public static readonly DependencyProperty FooProperty;
-  static StaticOnChangedDependencyPropertyAndInstance()
+  public static readonly DependencyProperty AcceptsDependencyObjectForInstanceProperty = StaticOnChangedDependencyPropertyAndInstance.CreateAcceptsDependencyObjectForInstanceDependencyProperty();
+  public static readonly DependencyProperty AcceptsObjectForInstanceProperty = StaticOnChangedDependencyPropertyAndInstance.CreateAcceptsObjectForInstanceDependencyProperty();
+  public static readonly DependencyProperty FooProperty = StaticOnChangedDependencyPropertyAndInstance.CreateFooDependencyProperty();
+  private static DependencyProperty CreateAcceptsDependencyObjectForInstanceDependencyProperty()
   {
-    void PropertyChanged(DependencyObject d_1, DependencyPropertyChangedEventArgs e)
+    void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedDependencyPropertyAndInstance.OnFooChanged(StaticOnChangedDependencyPropertyAndInstance.FooProperty, (StaticOnChangedDependencyPropertyAndInstance)d_1);
+      StaticOnChangedDependencyPropertyAndInstance.OnAcceptsDependencyObjectForInstanceChanged(StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty, d);
     }
-    StaticOnChangedDependencyPropertyAndInstance.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged));
-    void PropertyChanged_1(DependencyObject d_2, DependencyPropertyChangedEventArgs e_1)
+    return DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged));
+  }
+  private static DependencyProperty CreateAcceptsObjectForInstanceDependencyProperty()
+  {
+    void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedDependencyPropertyAndInstance.OnAcceptsDependencyObjectForInstanceChanged(StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty, d_2);
+      StaticOnChangedDependencyPropertyAndInstance.OnAcceptsObjectForInstanceChanged(StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty, d);
     }
-    StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty = DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged_1));
-    void PropertyChanged_2(DependencyObject d_3, DependencyPropertyChangedEventArgs e_2)
+    return DependencyProperty.Register("AcceptsObjectForInstance", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged));
+  }
+  private static DependencyProperty CreateFooDependencyProperty()
+  {
+    void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedDependencyPropertyAndInstance.OnAcceptsObjectForInstanceChanged(StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty, d_3);
+      StaticOnChangedDependencyPropertyAndInstance.OnFooChanged(StaticOnChangedDependencyPropertyAndInstance.FooProperty, (StaticOnChangedDependencyPropertyAndInstance)d);
     }
-    StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty = DependencyProperty.Register("AcceptsObjectForInstance", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged_2));
+    return DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged));
   }
 }

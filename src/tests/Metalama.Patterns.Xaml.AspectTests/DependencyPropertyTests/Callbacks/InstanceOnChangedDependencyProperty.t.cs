@@ -19,13 +19,13 @@ public partial class InstanceOnChangedDependencyProperty : DependencyObject
   private void OnFooChanged(DependencyProperty d)
   {
   }
-  public static readonly DependencyProperty FooProperty;
-  static InstanceOnChangedDependencyProperty()
+  public static readonly DependencyProperty FooProperty = InstanceOnChangedDependencyProperty.CreateFooDependencyProperty();
+  private static DependencyProperty CreateFooDependencyProperty()
   {
-    void PropertyChanged(DependencyObject d_1, DependencyPropertyChangedEventArgs e)
+    void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      ((InstanceOnChangedDependencyProperty)d_1).OnFooChanged(InstanceOnChangedDependencyProperty.FooProperty);
+      ((InstanceOnChangedDependencyProperty)d).OnFooChanged(InstanceOnChangedDependencyProperty.FooProperty);
     }
-    InstanceOnChangedDependencyProperty.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangedDependencyProperty), new PropertyMetadata(PropertyChanged));
+    return DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangedDependencyProperty), new PropertyMetadata(PropertyChanged));
   }
 }

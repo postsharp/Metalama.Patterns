@@ -19,16 +19,16 @@ public partial class InstanceOnChangingDependencyProperty : DependencyObject
   private void OnFooChanging(DependencyProperty d)
   {
   }
-  public static readonly DependencyProperty FooProperty;
-  static InstanceOnChangingDependencyProperty()
+  public static readonly DependencyProperty FooProperty = InstanceOnChangingDependencyProperty.CreateFooDependencyProperty();
+  private static DependencyProperty CreateFooDependencyProperty()
   {
-    object CoerceValue_1(DependencyObject d_1, object value)
+    object CoerceValue_1(DependencyObject d, object value)
     {
-      ((InstanceOnChangingDependencyProperty)d_1).OnFooChanging(InstanceOnChangingDependencyProperty.FooProperty);
+      ((InstanceOnChangingDependencyProperty)d).OnFooChanging(InstanceOnChangingDependencyProperty.FooProperty);
       return value;
     }
     var metadata = new PropertyMetadata();
     metadata.CoerceValueCallback = CoerceValue_1;
-    InstanceOnChangingDependencyProperty.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangingDependencyProperty), metadata);
+    return DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangingDependencyProperty), metadata);
   }
 }

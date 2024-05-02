@@ -19,13 +19,13 @@ public partial class InstanceOnChangedNoParameters : DependencyObject
   private void OnFooChanged()
   {
   }
-  public static readonly DependencyProperty FooProperty;
-  static InstanceOnChangedNoParameters()
+  public static readonly DependencyProperty FooProperty = InstanceOnChangedNoParameters.CreateFooDependencyProperty();
+  private static DependencyProperty CreateFooDependencyProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       ((InstanceOnChangedNoParameters)d).OnFooChanged();
     }
-    InstanceOnChangedNoParameters.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangedNoParameters), new PropertyMetadata(PropertyChanged));
+    return DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangedNoParameters), new PropertyMetadata(PropertyChanged));
   }
 }

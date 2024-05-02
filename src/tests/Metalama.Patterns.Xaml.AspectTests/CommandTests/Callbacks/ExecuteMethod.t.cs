@@ -25,22 +25,10 @@ public class ExecuteMethod
   }
   public ExecuteMethod()
   {
-    this.InstanceNoParametersCommand = new DelegateCommand(new Action<object>(_ =>
-    {
-      this.ExecuteInstanceNoParameters();
-    }), null);
-    this.StaticNoParametersCommand = new DelegateCommand(new Action<object>(__1 =>
-    {
-      ExecuteMethod.ExecuteStaticNoParameters();
-    }), null);
-    this.InstanceWithParameterCommand = new DelegateCommand(new Action<object>(parameter =>
-    {
-      this.ExecuteInstanceWithParameter((int)parameter);
-    }), null);
-    this.StaticWithParameterCommand = new DelegateCommand(new Action<object>(parameter_1 =>
-    {
-      ExecuteMethod.ExecuteStaticWithParameter((int)parameter_1);
-    }), null);
+    this.InstanceNoParametersCommand = new DelegateCommand(_ => this.ExecuteInstanceNoParameters(), null);
+    this.StaticNoParametersCommand = new DelegateCommand(_ => ExecuteMethod.ExecuteStaticNoParameters(), null);
+    this.InstanceWithParameterCommand = new DelegateCommand(parameter => this.ExecuteInstanceWithParameter((int)parameter), null);
+    this.StaticWithParameterCommand = new DelegateCommand(parameter_1 => ExecuteMethod.ExecuteStaticWithParameter((int)parameter_1), null);
   }
   public ICommand InstanceNoParametersCommand { get; }
   public ICommand InstanceWithParameterCommand { get; }

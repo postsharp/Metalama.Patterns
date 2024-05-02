@@ -262,20 +262,17 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         IExpression? executeExpression;
 
+#pragma warning disable IDE0053
         if ( executeMethod.Parameters.Count == 0 )
         {
-            executeExpression = ExpressionFactory.Capture(
-                new Action<object>( _ => { executeMethod.Invoke(); } ) );
+            executeExpression = ExpressionFactory.Capture( new Action<object>( _ => { executeMethod.Invoke(); } ) );
         }
         else
         {
             executeExpression = ExpressionFactory.Capture(
-                new Action<object>(
-                    parameter =>
-                    {
-                        executeMethod.Invoke( meta.Cast( executeMethod.Parameters[0].Type, parameter ) );
-                    } ) );
+                new Action<object>( parameter => { executeMethod.Invoke( meta.Cast( executeMethod.Parameters[0].Type, parameter ) ); } ) );
         }
+#pragma warning restore IDE0053
 
         if ( useInpcIntegration )
         {

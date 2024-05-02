@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Xaml.Options;
+using System.Runtime.CompilerServices;
 using System.Windows;
 
 // ReSharper disable NotResolvedInText
@@ -33,6 +34,14 @@ internal sealed partial class DependencyPropertyAspectBuilder
         [Template]
         internal static void InitializeDependencyProperty(
             [CompileTime] IField dependencyPropertyField,
+            IMethod createMethod )
+        {
+            dependencyPropertyField.Value = createMethod.Invoke();
+        }
+        
+        [Template]
+        internal static DependencyProperty CreateDependencyProperty(
+            [CompileTime] StrongBox<IField> dependencyPropertyField,
             [CompileTime] DependencyPropertyOptions options,
             [CompileTime] string propertyName,
             [CompileTime] INamedType propertyType,
@@ -79,7 +88,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                         if ( validateMethod != null )
                         {
                             InvokeValidateMethod(
-                                dependencyPropertyField,
+                                dependencyPropertyField.Value,
                                 validateMethod,
                                 validateSignatureKind,
                                 propertyType,
@@ -95,7 +104,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                             // we don't check.
 
                             InvokeChangeMethod(
-                                dependencyPropertyField,
+                                dependencyPropertyField.Value,
                                 onChangingMethod,
                                 onChangingSignatureKind,
                                 propertyType,
@@ -120,7 +129,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     void PropertyChanged( DependencyObject d, DependencyPropertyChangedEventArgs e )
                     {
                         InvokeChangeMethod(
-                            dependencyPropertyField,
+                            dependencyPropertyField.Value,
                             onChangedMethod,
                             onChangedSignatureKind,
                             propertyType,
@@ -190,7 +199,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
                 if ( options.IsReadOnly == true )
                 {
-                    dependencyPropertyField.Value = DependencyProperty.RegisterReadOnly(
+                    return DependencyProperty.RegisterReadOnly(
                             propertyName,
                             propertyType.ToTypeOfExpression().Value,
                             declaringType.ToTypeOfExpression().Value,
@@ -199,7 +208,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 }
                 else
                 {
-                    dependencyPropertyField.Value = DependencyProperty.Register(
+                    return DependencyProperty.Register(
                         propertyName,
                         propertyType.ToTypeOfExpression().Value,
                         declaringType.ToTypeOfExpression().Value,
@@ -210,7 +219,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             {
                 if ( options.IsReadOnly == true )
                 {
-                    dependencyPropertyField.Value = DependencyProperty.RegisterReadOnly(
+                    return DependencyProperty.RegisterReadOnly(
                             propertyName,
                             propertyType.ToTypeOfExpression().Value,
                             declaringType.ToTypeOfExpression().Value,
@@ -219,7 +228,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 }
                 else
                 {
-                    dependencyPropertyField.Value = DependencyProperty.Register(
+                    return DependencyProperty.Register(
                         propertyName,
                         propertyType.ToTypeOfExpression().Value,
                         declaringType.ToTypeOfExpression().Value );

@@ -12,10 +12,7 @@ public class AnyImplementation : INotifyPropertyChanged
   public bool CanExecuteFoo1 => true;
   public AnyImplementation()
   {
-    this.Foo1Command = new DelegateCommand(new Action<object>(_ =>
-    {
-      this.ExecuteFoo1();
-    }), new Func<object, bool>(_ => CanExecuteFoo1), this, "CanExecuteFoo1");
+    this.Foo1Command = new DelegateCommand(_ => this.ExecuteFoo1(), _ => CanExecuteFoo1, this, "CanExecuteFoo1");
   }
   public ICommand Foo1Command { get; }
 }
@@ -28,10 +25,7 @@ public class ImplementedByBase : AnyImplementation
   public bool CanExecuteFoo2 => true;
   public ImplementedByBase()
   {
-    this.Foo2Command = new DelegateCommand(new Action<object>(_ =>
-    {
-      this.ExecuteFoo2();
-    }), new Func<object, bool>(_ => CanExecuteFoo2), this, "CanExecuteFoo2");
+    this.Foo2Command = new DelegateCommand(_ => this.ExecuteFoo2(), _ => CanExecuteFoo2, this, "CanExecuteFoo2");
   }
   public ICommand Foo2Command { get; }
 }

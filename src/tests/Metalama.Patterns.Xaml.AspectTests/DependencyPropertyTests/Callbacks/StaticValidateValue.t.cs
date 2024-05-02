@@ -1,4 +1,4 @@
-    // Warning LAMA5206 on `Foo`: `No property-changed method was found using the default naming convention, with candidate member name 'OnFooChanged'.`
+// Warning LAMA5206 on `Foo`: `No property-changed method was found using the default naming convention, with candidate member name 'OnFooChanged'.`
 // Warning LAMA5206 on `Foo`: `No property-changing method was found using the default naming convention, with candidate member name 'OnFooChanging'.`
 // Warning LAMA5206 on `AcceptsAssignable`: `No property-changed method was found using the default naming convention, with candidate member name 'OnAcceptsAssignableChanged'.`
 // Warning LAMA5206 on `AcceptsAssignable`: `No property-changing method was found using the default naming convention, with candidate member name 'OnAcceptsAssignableChanging'.`
@@ -62,55 +62,64 @@ public partial class StaticValidateValue : DependencyObject
     }
   }
   private static bool ValidateAcceptsObject(object value) => true;
-  public static readonly DependencyProperty AcceptsAssignableProperty;
-  public static readonly DependencyProperty AcceptsGenericProperty;
-  public static readonly DependencyProperty AcceptsObjectProperty;
-  public static readonly DependencyProperty FooProperty;
-  static StaticValidateValue()
+  public static readonly DependencyProperty AcceptsAssignableProperty = StaticValidateValue.CreateAcceptsAssignableDependencyProperty();
+  public static readonly DependencyProperty AcceptsGenericProperty = StaticValidateValue.CreateAcceptsGenericDependencyProperty();
+  public static readonly DependencyProperty AcceptsObjectProperty = StaticValidateValue.CreateAcceptsObjectDependencyProperty();
+  public static readonly DependencyProperty FooProperty = StaticValidateValue.CreateFooDependencyProperty();
+  private static DependencyProperty CreateAcceptsAssignableDependencyProperty()
   {
-    object CoerceValue_1(DependencyObject d, object value_1)
+    object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateValue.ValidateFoo((int)value_1))
+      if (!StaticValidateValue.ValidateAcceptsAssignable((List<int>)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
-      return value_1;
+      return value;
     }
     var metadata = new PropertyMetadata();
     metadata.CoerceValueCallback = CoerceValue_1;
-    StaticValidateValue.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticValidateValue), metadata);
-    object CoerceValue_2(DependencyObject d_1, object value_2)
+    return DependencyProperty.Register("AcceptsAssignable", typeof(List<int>), typeof(StaticValidateValue), metadata);
+  }
+  private static DependencyProperty CreateAcceptsGenericDependencyProperty()
+  {
+    object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateValue.ValidateAcceptsAssignable((List<int>)value_2))
+      if (!StaticValidateValue.ValidateAcceptsGeneric<int>((int)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
-      return value_2;
+      return value;
     }
-    var metadata_1 = new PropertyMetadata();
-    metadata_1.CoerceValueCallback = CoerceValue_2;
-    StaticValidateValue.AcceptsAssignableProperty = DependencyProperty.Register("AcceptsAssignable", typeof(List<int>), typeof(StaticValidateValue), metadata_1);
-    object CoerceValue_3(DependencyObject d_2, object value_3)
+    var metadata = new PropertyMetadata();
+    metadata.CoerceValueCallback = CoerceValue_1;
+    return DependencyProperty.Register("AcceptsGeneric", typeof(int), typeof(StaticValidateValue), metadata);
+  }
+  private static DependencyProperty CreateAcceptsObjectDependencyProperty()
+  {
+    object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateValue.ValidateAcceptsGeneric<int>((int)value_3))
+      if (!StaticValidateValue.ValidateAcceptsObject(value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
-      return value_3;
+      return value;
     }
-    var metadata_2 = new PropertyMetadata();
-    metadata_2.CoerceValueCallback = CoerceValue_3;
-    StaticValidateValue.AcceptsGenericProperty = DependencyProperty.Register("AcceptsGeneric", typeof(int), typeof(StaticValidateValue), metadata_2);
-    object CoerceValue_4(DependencyObject d_3, object value_4)
+    var metadata = new PropertyMetadata();
+    metadata.CoerceValueCallback = CoerceValue_1;
+    return DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticValidateValue), metadata);
+  }
+  private static DependencyProperty CreateFooDependencyProperty()
+  {
+    object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateValue.ValidateAcceptsObject(value_4))
+      if (!StaticValidateValue.ValidateFoo((int)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
-      return value_4;
+      return value;
     }
-    var metadata_3 = new PropertyMetadata();
-    metadata_3.CoerceValueCallback = CoerceValue_4;
-    StaticValidateValue.AcceptsObjectProperty = DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticValidateValue), metadata_3);
+    var metadata = new PropertyMetadata();
+    metadata.CoerceValueCallback = CoerceValue_1;
+    return DependencyProperty.Register("Foo", typeof(int), typeof(StaticValidateValue), metadata);
   }
 }

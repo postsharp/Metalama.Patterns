@@ -7,6 +7,7 @@ using Metalama.Framework.Project;
 using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using Metalama.Patterns.Xaml.Options;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 
@@ -58,23 +59,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         // NB: WPF convention requires a specific field name, so we don't try to find an unused name.
 
-        IIntroductionAdviceResult<IField>? introduceRegistrationFieldResult = null;
-
-        if ( successfulMatch?.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success )
-        {
-            introduceRegistrationFieldResult = this._builder.Advice.IntroduceField(
-                declaringType,
-                successfulMatch.RegistrationFieldName!,
-                typeof(DependencyProperty),
-                IntroductionScope.Static,
-                OverrideStrategy.Fail,
-                b =>
-                {
-                    // ReSharper disable once RedundantNameQualifier
-                    b.Accessibility = MetalamaAccessibility.Public;
-                    b.Writeability = Writeability.ConstructorOnly;
-                } );
-        }
+        
 
         var onChangingMethod = successfulMatch?.PropertyChangingMatch.Declaration;
         var onChangedMethod = successfulMatch?.PropertyChangedMatch.Declaration;
@@ -106,7 +91,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             return;
         }
 
-        if ( successfulMatch == null || introduceRegistrationFieldResult is not { Outcome: AdviceOutcome.Default } )
+        if ( successfulMatch == null  )
         {
             // We cannot proceed with other transformations if there was no naming convention match or
             // we could not introduce the DependencyProperty field.
@@ -163,14 +148,21 @@ internal sealed partial class DependencyPropertyAspectBuilder
          * DependencyPropertyOptions.InitializerProvidesInitialValue).
          */
 
-        this._builder.Advice.WithTemplateProvider( Templates.Provider )
-            .AddInitializer(
+        var dependencyPropertyField = new StrongBox<IField>();
+        
+        var createMethod = this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            .IntroduceMethod(
                 declaringType,
-                nameof(Templates.InitializeDependencyProperty),
-                InitializerKind.BeforeTypeConstructor,
+                nameof(Templates.CreateDependencyProperty),
+                buildMethod: method =>
+                {
+                    method.Name = $"Create{successfulMatch.DependencyPropertyName}DependencyProperty";
+                    method.IsStatic = true;
+                    method.Accessibility = MetalamaAccessibility.Private;
+                },
                 args: new
                 {
-                    dependencyPropertyField = introduceRegistrationFieldResult.Declaration,
+                    dependencyPropertyField,
                     options = this._options,
                     propertyName = successfulMatch.DependencyPropertyName,
                     propertyType,
@@ -183,8 +175,39 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     validateMethod,
                     validateSignatureKind = successfulMatch.ValidationSignatureKind,
                     applyContractsMethod
+                } )
+            .Declaration;
+        
+        IIntroductionAdviceResult<IField>? introduceRegistrationFieldResult = null;
+
+        if ( successfulMatch?.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success )
+        {
+            introduceRegistrationFieldResult = this._builder.Advice.IntroduceField(
+                declaringType,
+                successfulMatch.RegistrationFieldName!,
+                typeof(DependencyProperty),
+                IntroductionScope.Static,
+                OverrideStrategy.Fail,
+                b =>
+                {
+                    // ReSharper disable once RedundantNameQualifier
+                    b.Accessibility = MetalamaAccessibility.Public;
+                    b.Writeability = Writeability.ConstructorOnly;
+                    b.InitializerExpression = (IExpression) createMethod.Invoke()!;
                 } );
 
+            dependencyPropertyField.Value = introduceRegistrationFieldResult.Declaration;
+        }
+
+        /*
+        this._builder.Advice.WithTemplateProvider( Templates.Provider )
+            .AddInitializer(
+                declaringType,
+                nameof(Templates.InitializeDependencyProperty),
+                InitializerKind.BeforeTypeConstructor,
+                args: new { dependencyPropertyField = introduceRegistrationFieldResult.Declaration, createMethod } );
+*/
+        
         this._builder.Advice.WithTemplateProvider( Templates.Provider )
             .OverrideAccessors(
                 this._builder.Target,

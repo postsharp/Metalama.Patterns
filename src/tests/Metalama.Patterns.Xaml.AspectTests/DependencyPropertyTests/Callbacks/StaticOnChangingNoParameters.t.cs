@@ -19,8 +19,8 @@ public partial class StaticOnChangingNoParameters : DependencyObject
   private static void OnFooChanging()
   {
   }
-  public static readonly DependencyProperty FooProperty;
-  static StaticOnChangingNoParameters()
+  public static readonly DependencyProperty FooProperty = StaticOnChangingNoParameters.CreateFooDependencyProperty();
+  private static DependencyProperty CreateFooDependencyProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -29,6 +29,6 @@ public partial class StaticOnChangingNoParameters : DependencyObject
     }
     var metadata = new PropertyMetadata();
     metadata.CoerceValueCallback = CoerceValue_1;
-    StaticOnChangingNoParameters.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingNoParameters), metadata);
+    return DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingNoParameters), metadata);
   }
 }

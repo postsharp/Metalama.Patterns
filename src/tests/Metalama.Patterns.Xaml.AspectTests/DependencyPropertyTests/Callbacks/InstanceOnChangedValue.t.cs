@@ -70,31 +70,40 @@ public partial class InstanceOnChangedValue : DependencyObject
   private void OnAcceptObjectChanged(object value)
   {
   }
-  public static readonly DependencyProperty AcceptAssignableProperty;
-  public static readonly DependencyProperty AcceptGenericProperty;
-  public static readonly DependencyProperty AcceptObjectProperty;
-  public static readonly DependencyProperty FooProperty;
-  static InstanceOnChangedValue()
+  public static readonly DependencyProperty AcceptAssignableProperty = InstanceOnChangedValue.CreateAcceptAssignableDependencyProperty();
+  public static readonly DependencyProperty AcceptGenericProperty = InstanceOnChangedValue.CreateAcceptGenericDependencyProperty();
+  public static readonly DependencyProperty AcceptObjectProperty = InstanceOnChangedValue.CreateAcceptObjectDependencyProperty();
+  public static readonly DependencyProperty FooProperty = InstanceOnChangedValue.CreateFooDependencyProperty();
+  private static DependencyProperty CreateAcceptAssignableDependencyProperty()
+  {
+    void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      ((InstanceOnChangedValue)d).OnAcceptAssignableChanged((List<int>)e.NewValue);
+    }
+    return DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceOnChangedValue), new PropertyMetadata(PropertyChanged));
+  }
+  private static DependencyProperty CreateAcceptGenericDependencyProperty()
+  {
+    void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      ((InstanceOnChangedValue)d).OnAcceptGenericChanged<int>((int)e.NewValue);
+    }
+    return DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceOnChangedValue), new PropertyMetadata(PropertyChanged));
+  }
+  private static DependencyProperty CreateAcceptObjectDependencyProperty()
+  {
+    void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      ((InstanceOnChangedValue)d).OnAcceptObjectChanged(e.NewValue);
+    }
+    return DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceOnChangedValue), new PropertyMetadata(PropertyChanged));
+  }
+  private static DependencyProperty CreateFooDependencyProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
       ((InstanceOnChangedValue)d).OnFooChanged((int)e.NewValue);
     }
-    InstanceOnChangedValue.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangedValue), new PropertyMetadata(PropertyChanged));
-    void PropertyChanged_1(DependencyObject d_1, DependencyPropertyChangedEventArgs e_1)
-    {
-      ((InstanceOnChangedValue)d_1).OnAcceptAssignableChanged((List<int>)e_1.NewValue);
-    }
-    InstanceOnChangedValue.AcceptAssignableProperty = DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceOnChangedValue), new PropertyMetadata(PropertyChanged_1));
-    void PropertyChanged_2(DependencyObject d_2, DependencyPropertyChangedEventArgs e_2)
-    {
-      ((InstanceOnChangedValue)d_2).OnAcceptGenericChanged<int>((int)e_2.NewValue);
-    }
-    InstanceOnChangedValue.AcceptGenericProperty = DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceOnChangedValue), new PropertyMetadata(PropertyChanged_2));
-    void PropertyChanged_3(DependencyObject d_3, DependencyPropertyChangedEventArgs e_3)
-    {
-      ((InstanceOnChangedValue)d_3).OnAcceptObjectChanged(e_3.NewValue);
-    }
-    InstanceOnChangedValue.AcceptObjectProperty = DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceOnChangedValue), new PropertyMetadata(PropertyChanged_3));
+    return DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangedValue), new PropertyMetadata(PropertyChanged));
   }
 }

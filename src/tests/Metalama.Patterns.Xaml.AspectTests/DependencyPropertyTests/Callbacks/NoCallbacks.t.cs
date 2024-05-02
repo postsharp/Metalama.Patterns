@@ -17,9 +17,9 @@ public partial class NoCallbacks : DependencyObject
       this.SetValue(NoCallbacks.FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty;
-  static NoCallbacks()
+  public static readonly DependencyProperty FooProperty = NoCallbacks.CreateFooDependencyProperty();
+  private static DependencyProperty CreateFooDependencyProperty()
   {
-    NoCallbacks.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(NoCallbacks));
+    return DependencyProperty.Register("Foo", typeof(int), typeof(NoCallbacks));
   }
 }

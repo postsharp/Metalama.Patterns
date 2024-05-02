@@ -31,10 +31,7 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
   }
   public ImplementedByObservableAspect()
   {
-    this.Foo1Command = new DelegateCommand(new Action<object>(_ =>
-    {
-      this.ExecuteFoo1();
-    }), new Func<object, bool>(_ => CanExecuteFoo1), this, "CanExecuteFoo1");
+    this.Foo1Command = new DelegateCommand(_ => this.ExecuteFoo1(), _ => CanExecuteFoo1, this, "CanExecuteFoo1");
   }
   public ICommand Foo1Command { get; }
   protected virtual void OnPropertyChanged(string propertyName)
@@ -67,10 +64,7 @@ public class ImplementedByBase : ImplementedByObservableAspect
   }
   public ImplementedByBase()
   {
-    this.Foo2Command = new DelegateCommand(new Action<object>(_ =>
-    {
-      this.ExecuteFoo2();
-    }), new Func<object, bool>(_ => CanExecuteFoo2), this, "CanExecuteFoo2");
+    this.Foo2Command = new DelegateCommand(_ => this.ExecuteFoo2(), _ => CanExecuteFoo2, this, "CanExecuteFoo2");
   }
   public ICommand Foo2Command { get; }
   protected override void OnPropertyChanged(string propertyName)
