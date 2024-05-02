@@ -210,8 +210,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Variables of types other than primitive types and types configured as deeply immutable are not supported.)@(12,12)-(12,35)" );
+            .Equal( "LAMA5156@'x'" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -600,7 +599,7 @@ public class A
   Z
 ";
 
-        diagnostics.Should().Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, Fn(int)))@(12,19)-(12,21)" );
+        diagnostics.Should().Equal( "LAMA5162@'Fn'" );
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
@@ -649,7 +648,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, Fn(A)))@(12,19)-(12,21)" );
+            .Equal( "LAMA5162@'Fn'" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -695,7 +694,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, A.GetZ()))@(12,25)-(12,29)" );
+            .Equal( "LAMA5162@'GetZ'" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -745,7 +744,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, A.Fn(A)))@(12,19)-(12,21)" );
+            .Equal( "LAMA5162@'Fn'" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -847,7 +846,7 @@ public class A
 ";
 
         diagnostics.Should()
-            .Equal( "LAMA5162: Method or property is not supported for dependency analysis. ((Method, P.Fn(A)))@(17,21)-(17,23)" );
+            .Equal( "LAMA5162@'Fn'" );
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
@@ -1173,7 +1172,7 @@ public class A
   A2
 ";
 
-        diagnostics.Should().Equal( "LAMA5161: Field or property type does not implement INotifyPropertyChanged. (B)@(12,22)-(12,24)" );
+        diagnostics.Should().Equal( "LAMA5161@'A1'" );
         result.ToString().Should().Be( NormalizeEOL( expected ) );
     }
 
@@ -1261,8 +1260,7 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
-            .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.)@(8,26)-(8,29)" );
+            .Equal( "LAMA5156@'Foo'" );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1311,8 +1309,7 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
-            .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.)@(11,26)-(11,29)" );
+            .Equal( "LAMA5156@'Foo'" );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1396,8 +1393,7 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
-            .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.)@(5,20)-(5,23)" );
+            .Equal( "LAMA5156@'Foo'" );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1529,8 +1525,7 @@ public class A
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
         diagnostics.Should()
-            .Equal(
-                "LAMA5156: Not supported for dependency analysis. (Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported.)@(5,20)-(5,23)" );
+            .Equal( "LAMA5156@'Foo'" );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );

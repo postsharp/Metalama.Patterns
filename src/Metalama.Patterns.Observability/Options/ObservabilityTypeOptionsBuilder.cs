@@ -45,14 +45,6 @@ public sealed class ObservabilityTypeOptionsBuilder
                 new DependencyAnalysisOptions { ObservabilityContract = value };
     }
 
-    public bool? IsDeeplyImmutableType
-    {
-        get => this.DependencyAnalysisOptions?.IsDeeplyImmutableType;
-        set
-            => this.DependencyAnalysisOptions =
-                new DependencyAnalysisOptions { IsDeeplyImmutableType = value };
-    }
-
 #if DEBUG
     /// <summary>
     /// Sets a value indicating the verbosity of diagnostic comments inserted into generated code. Must be a value

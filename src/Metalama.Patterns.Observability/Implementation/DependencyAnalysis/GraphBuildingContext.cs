@@ -48,16 +48,35 @@ internal abstract class GraphBuildingContext
 
     public ObservabilityContract? GetObservabilityContract( ISymbol symbol ) => this.GetDependencyAnalysisOptions( symbol ).ObservabilityContract;
 
-    public bool IsDeeplyImmutableType( ITypeSymbol type )
+    public bool IsConstant( IFieldSymbol field ) => this.IsConstantMember( field );
+
+    public bool IsConstant( IPropertySymbol property ) => this.IsConstantMember( property );
+
+    public bool IsConstant( IMethodSymbol method ) => this.IsConstantMember( method );
+
+    private bool IsConstantMember( ISymbol symbol )
     {
         // Options take precedence over hard-written rules.
-        var fromOptions = this.GetDependencyAnalysisOptions( type ).IsDeeplyImmutableType;
+        // We have a simple catch-call observability contract at the moment, which conveniently makes all required guarantees.
+        var hasContract = this.GetDependencyAnalysisOptions( symbol ).ObservabilityContract != null;
 
-        if ( fromOptions != null )
+        if ( hasContract )
         {
-            return fromOptions.Value;
+            return true;
         }
 
+        if ( symbol.Kind is SymbolKind.Property or SymbolKind.Field or SymbolKind.Method )
+        {
+            return this.IsConstant( symbol.ContainingType );
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool IsConstant( ITypeSymbol type )
+    {
         return type is {
             SpecialType: SpecialType.System_Boolean or
             SpecialType.System_Byte or

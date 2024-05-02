@@ -10,5 +10,10 @@ public sealed class ObservabilityContract : ICompileTimeSerializable
 {
     private ObservabilityContract() { }
 
-    public static ObservabilityContract ShallNotDependOnMutableState { get; } = new();
+    /// <summary>
+    /// Gets an <see cref="ObservabilityContract"/> that guarantees that the member (1) does not depend on any non-constant
+    /// inputs or factors (i.e. will always return the same output given the same input) and (2) does not return non-constant outputs
+    /// (i.e. even the properties of the outputs are constant).
+    /// </summary>
+    public static ObservabilityContract Constant { get; } = new();
 }

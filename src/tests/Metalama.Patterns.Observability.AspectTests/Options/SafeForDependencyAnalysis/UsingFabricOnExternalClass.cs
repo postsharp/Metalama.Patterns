@@ -12,7 +12,7 @@ public sealed class Fabric : ProjectFabric
     {
         amender
             .SelectReflectionType( typeof(ExternalClass) )
-            .ConfigureObservability( b => b.ObservabilityContract = ObservabilityContract.ShallNotDependOnMutableState );
+            .ConfigureObservability( b => b.ObservabilityContract = ObservabilityContract.Constant );
     }
 }
 

@@ -17,8 +17,6 @@ public sealed record DependencyAnalysisOptions :
 
     public ObservabilityContract? ObservabilityContract { get; init; }
 
-    public bool? IsDeeplyImmutableType { get; init; }
-
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (DependencyAnalysisOptions) changes;
@@ -26,8 +24,7 @@ public sealed record DependencyAnalysisOptions :
         return new DependencyAnalysisOptions
         {
             IgnoreUnobservableExpressions = other.IgnoreUnobservableExpressions ?? this.IgnoreUnobservableExpressions,
-            ObservabilityContract = other.ObservabilityContract ?? this.ObservabilityContract,
-            IsDeeplyImmutableType = other.IsDeeplyImmutableType ?? this.IsDeeplyImmutableType
+            ObservabilityContract = other.ObservabilityContract ?? this.ObservabilityContract
         };
     }
 

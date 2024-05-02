@@ -4,7 +4,7 @@ namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnobservable
 public class UsingAttributeOnMethodOfTargetClass : INotifyPropertyChanged
 {
   public int X => this.Foo();
-  [ShallNotDependOnMutableState]
+  [Constant]
   private int Foo() => 42;
   protected virtual void OnPropertyChanged(string propertyName)
   {

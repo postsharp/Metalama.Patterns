@@ -87,54 +87,7 @@ internal partial class DependencyGraphBuilder
             this.ProcessAndResetIfApplicable( context );
         }
 
-        /// <summary>
-        /// Called when an unexpected scenario is encountered during processing. Indicates that the program logic of <see cref="DependencyGraphBuilder"/> is not yet implemented
-        /// to handle that scenario.
-        /// </summary>
-        private void ReportWarningNotImplementedForDependencyAnalysis(
-            Location location,
-            [CallerMemberName] string? name = null,
-            [CallerLineNumber] int line = 0 )
-        {
-            this._context.ReportDiagnostic(
-                DiagnosticDescriptors.WarningNotImplementedForDependencyAnalysis.WithArguments( $"{name}/{line}" ),
-                location );
-        }
-
         private bool IsLocalInstanceMember( ISymbol symbol ) => !symbol.IsStatic && this._declaringType.GetSymbol().IsOrInheritsFrom( symbol.ContainingType );
-
-        private void ValidateMethodArgumentType( ExpressionSyntax expression )
-        {
-            var ti = this._semanticModel.GetTypeInfo( expression );
-
-            switch ( ti.Type )
-            {
-                case IErrorTypeSymbol:
-                    // Don't report, assume that the compiler will report.
-                    break;
-
-                case null:
-                    // TODO: Decide how to handle when we have a use case.
-                    this.ReportWarningNotImplementedForDependencyAnalysis( expression.GetLocation() );
-
-                    break;
-
-                default:
-                    {
-                        var elementaryType = ti.Type.GetElementaryType();
-
-                        if ( !this._context.IsDeeplyImmutableType( elementaryType ) )
-                        {
-                            this._context.ReportDiagnostic(
-                                DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
-                                    .WithArguments( "Method arguments (including 'this') must be of primitive types." ),
-                                expression.GetLocation() );
-                        }
-
-                        break;
-                    }
-            }
-        }
 
         private void ValidatePathElement( IReadOnlyList<DependencyPathElement> symbols, int index, ChainSection chainSection )
         {
@@ -142,9 +95,9 @@ internal partial class DependencyGraphBuilder
             // graph does not keep track of all the syntax nodes which referenced each dependency node (this would be expensive), so logging
             // diagnostics located on syntax nodes inside bodies is not possible later.
 
-            var sr = symbols[index];
+            var pathElement = symbols[index];
 
-            var fieldOrPropertyType = sr.Symbol switch
+            var fieldOrPropertyType = pathElement.Symbol switch
             {
                 IPropertySymbol property => property.Type.GetElementaryType(),
                 IFieldSymbol field => field.Type.GetElementaryType(),
@@ -155,19 +108,19 @@ internal partial class DependencyGraphBuilder
             {
                 // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
 
-                if ( !this._context.IsDeeplyImmutableType( fieldOrPropertyType ) && !this._context.TreatAsImplementingInpc( fieldOrPropertyType! ) )
+                if ( !this._context.IsConstant( fieldOrPropertyType! ) && !this._context.TreatAsImplementingInpc( fieldOrPropertyType! ) )
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( fieldOrPropertyType! ),
-                        sr.Node.GetLocation() );
+                        pathElement.Node.GetLocation() );
                 }
 
                 // Warn if this is a non-leaf reference to an INPC non-auto property of the target type because we can't
                 // (yet) track changes to children of indirectly-referenced INPC properties.
 
-                if ( !this._context.IsAutoPropertyOrField( sr.Symbol )
+                if ( !this._context.IsAutoPropertyOrField( pathElement.Symbol )
                      && this._context.TreatAsImplementingInpc( fieldOrPropertyType! )
-                     && sr.Symbol.ContainingType.Equals( this._declaringType.GetSymbol() ) )
+                     && pathElement.Symbol.ContainingType.Equals( this._declaringType.GetSymbol() ) )
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
@@ -177,46 +130,44 @@ internal partial class DependencyGraphBuilder
                 }
             }
 
-            if ( sr.Symbol is IFieldSymbol fieldSymbol )
+            if ( pathElement.Symbol is IFieldSymbol fieldSymbol )
             {
-                Debugger.Break();
+                var isSafe = fieldSymbol.IsConst ||
+                             (!fieldSymbol.IsStatic && fieldSymbol.GetEffectiveAccessibility() == Accessibility.Private) ||
+                             (fieldSymbol.IsReadOnly && this._context.IsConstant( fieldSymbol.Type ));
 
-                if ( !(!fieldSymbol.IsStatic && fieldSymbol.GetEffectiveAccessibility() == Accessibility.Private)
-                     && !this._context.IsDeeplyImmutableType( fieldSymbol.ContainingType )
-                     && !(fieldSymbol.IsReadOnly && this._context.IsDeeplyImmutableType( fieldSymbol.Type ))
-                     && this._context.GetObservabilityContract( sr.Symbol ) == null )
+                if ( !isSafe )
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis
                             .WithArguments(
                                 "Only private instance fields of the current type, fields belonging to primitive types, readonly fields of primitive types, and fields configured with an observability contract are supported." ),
-                        sr.Node.GetLocation() );
+                        pathElement.Node.GetLocation() );
                 }
             }
-            else if ( sr.Symbol.Kind is SymbolKind.Method )
+            else if ( pathElement.Symbol.Kind is SymbolKind.Method )
             {
-                var method = (IMethodSymbol) sr.Symbol;
+                var method = (IMethodSymbol) pathElement.Symbol;
 
                 var isSafe =
 
-                    // All members of primitive types are safe.
-                    this._context.IsDeeplyImmutableType( method.ContainingType ) ||
-
-                    // All members that have an observability contract are safe.
-                    // At the moment, contracts don't allow to "push" dependencies.
-                    this._context.GetObservabilityContract( method ) != null ||
+                    // Methods marked as constant are safe
+                    this._context.IsConstant( method ) ||
 
                     // Static methods that have primitive arguments are safe.
-                    (method.IsStatic && method.Parameters.All( p => p.RefKind is RefKind.Out || this._context.IsDeeplyImmutableType( p.Type ) )) ||
+                    (method.IsStatic && method.Parameters.All( p => p.RefKind is RefKind.Out || this._context.IsConstant( p.Type ) )) ||
 
                     // All methods that have no output are safe.
                     (method.ReturnsVoid && !method.Parameters.Any( p => p.RefKind is RefKind.Out or RefKind.Ref ));
 
                 if ( !isSafe )
                 {
+                    Debugger.Break();
+
                     this._context.ReportDiagnostic(
-                        DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments( (sr.Symbol.Kind, sr.Symbol) ),
-                        sr.Node.GetLocation() );
+                        DiagnosticDescriptors.WarningMethodOrPropertyIsNotSupportedForDependencyAnalysis.WithArguments(
+                            (pathElement.Symbol.Kind, pathElement.Symbol) ),
+                        pathElement.Node.GetLocation() );
                 }
             }
         }
@@ -324,12 +275,15 @@ internal partial class DependencyGraphBuilder
             var symbolInfo = this._semanticModel.GetSymbolInfo( node.Type, this._cancellationToken );
             var variableType = ((ITypeSymbol?) symbolInfo.Symbol)?.GetElementaryType();
 
-            if ( variableType != null && !this._context.IsDeeplyImmutableType( variableType ) )
+            if ( variableType != null && !this._context.IsConstant( variableType ) )
             {
-                this._context.ReportDiagnostic(
-                    DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments(
-                        "Variables of types other than primitive types and types configured as deeply immutable are not supported." ),
-                    node.GetLocation() );
+                foreach ( var variable in node.Variables )
+                {
+                    this._context.ReportDiagnostic(
+                        DiagnosticDescriptors.WarningNotSupportedForDependencyAnalysis.WithArguments(
+                            "Variables of types other than primitive types and types configured as deeply immutable are not supported." ),
+                        variable.Identifier.GetLocation() );
+                }
             }
 
             base.VisitVariableDeclaration( node );

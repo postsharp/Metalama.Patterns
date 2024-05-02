@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Observability.CompileTimeTests;
 internal sealed class TestGraphBuildingContext : GraphBuildingContext
 {
     private readonly Func<ISymbol, bool>? _isConfiguredAsSafe;
-    private readonly Action<IDiagnostic, Location?>? _reportDiagnostic;
+    private readonly Action<string>? _reportDiagnostic;
     private readonly Func<ITypeSymbol, bool>? _treatAsImplementingInpc;
 
     /// <summary>
@@ -24,7 +24,7 @@ internal sealed class TestGraphBuildingContext : GraphBuildingContext
     public TestGraphBuildingContext(
         ICompilation compilation,
         Func<ISymbol, bool>? isConfiguredAsSafe = null,
-        Action<IDiagnostic, Location?>? reportDiagnostic = null,
+        Action<string>? reportDiagnostic = null,
         Func<ITypeSymbol, bool>? treatAsImplementingInpc = null ) : base( compilation )
     {
         this._isConfiguredAsSafe = isConfiguredAsSafe;
@@ -35,7 +35,17 @@ internal sealed class TestGraphBuildingContext : GraphBuildingContext
     public override bool CanIgnoreUnobservableExpressions( IPropertySymbol symbol )
         => this._isConfiguredAsSafe?.Invoke( symbol ) ?? base.CanIgnoreUnobservableExpressions( symbol );
 
-    public override void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null ) => this._reportDiagnostic?.Invoke( diagnostic, location );
+    public override void ReportDiagnostic( IDiagnostic diagnostic, Location? location = null )
+    {
+        var formattedDiagnostic = diagnostic.Definition.Id;
+
+        if ( location != null )
+        {
+            formattedDiagnostic += "@'" + location.SourceTree!.GetText().GetSubText( location.SourceSpan ) + "'";
+        }
+
+        this._reportDiagnostic?.Invoke( formattedDiagnostic );
+    }
 
     public override bool TreatAsImplementingInpc( ITypeSymbol type ) => this._treatAsImplementingInpc?.Invoke( type ) ?? false;
 

@@ -4,7 +4,7 @@ namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnobservable
 
 public static class OtherClass
 {
-    [ShallNotDependOnMutableState]
+    [Constant]
     public static int Foo() => 42;
 }
 

@@ -7,6 +7,6 @@ public class UsingAttributeOnMethodOfTargetClass
 {
     public int X => this.Foo();
 
-    [ShallNotDependOnMutableState]
+    [Constant]
     private int Foo() => 42;
 }
