@@ -6,10 +6,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
-using Metalama.Patterns.Observability.Options;
 using Microsoft.CodeAnalysis;
-using SpecialType = Microsoft.CodeAnalysis.SpecialType;
-using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 

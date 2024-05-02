@@ -25,8 +25,7 @@ internal abstract class GraphBuildingContext
 
     public abstract bool TreatAsImplementingInpc( ITypeSymbol type );
 
-    public virtual bool CanIgnoreUnobservableExpressions( ISymbol symbol )
-        => this.GetDependencyAnalysisOptions( symbol ).SuppressWarnings == true;
+    public virtual bool CanIgnoreUnobservableExpressions( ISymbol symbol ) => this.GetDependencyAnalysisOptions( symbol ).SuppressWarnings == true;
 
     protected virtual DependencyAnalysisOptions GetDependencyAnalysisOptions( ISymbol symbol )
     {
@@ -77,6 +76,13 @@ internal abstract class GraphBuildingContext
 
     public bool IsConstant( ITypeSymbol type )
     {
+        var hasContract = this.GetDependencyAnalysisOptions( type ).ObservabilityContract != null;
+
+        if ( hasContract )
+        {
+            return true;
+        }
+        
         return type is {
             SpecialType: SpecialType.System_Boolean or
             SpecialType.System_Byte or

@@ -1,3 +1,5 @@
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
 using Metalama.Framework.Options;
 using Metalama.Patterns.Observability.Options;
 
@@ -16,7 +18,7 @@ public sealed class SuppressObservabilityWarningsAttribute : Attribute, IHierarc
     {
         this._suppressWarnings = suppressWarnings;
     }
-    
+
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
         => new[] { new DependencyAnalysisOptions() { SuppressWarnings = this._suppressWarnings } };
 }
