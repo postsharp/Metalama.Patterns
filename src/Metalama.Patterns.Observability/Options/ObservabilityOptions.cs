@@ -9,8 +9,7 @@ using Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 namespace Metalama.Patterns.Observability.Options;
 
-[PublicAPI]
-[RunTimeOrCompileTime]
+[CompileTime]
 internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
 {
     /// <summary>

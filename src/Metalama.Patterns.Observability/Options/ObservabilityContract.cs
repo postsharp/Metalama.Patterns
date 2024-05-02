@@ -5,15 +5,18 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Patterns.Observability.Options;
 
+/// <summary>
+/// Represents guarantees made by a method, field or property with regards to the <see cref="ObservableAttribute"/> aspect.
+/// </summary>
 [CompileTime]
 public sealed class ObservabilityContract : ICompileTimeSerializable
 {
     private ObservabilityContract() { }
 
     /// <summary>
-    /// Gets an <see cref="ObservabilityContract"/> that guarantees that the member (1) does not depend on any non-constant
-    /// inputs or factors (i.e. will always return the same output given the same input) and (2) does not return non-constant outputs
-    /// (i.e. even the properties of the outputs are constant).
+    /// Gets an <see cref="ObservabilityContract"/> that guarantees that the outputs of the member (1) do depend on any non-constant
+    /// input (i.e. will always be identical given identical inputs) and (2) are themselves constant.
+    /// When applied to a type, the guarantee must hold for all methods and properties.
     /// </summary>
     public static ObservabilityContract Constant { get; } = new();
 }

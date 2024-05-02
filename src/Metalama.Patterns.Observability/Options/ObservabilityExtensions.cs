@@ -6,6 +6,9 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Patterns.Observability.Options;
 
+/// <summary>
+/// Extension methods that configure the <see cref="ObservableAttribute"/> aspect.
+/// </summary>
 [PublicAPI]
 [CompileTime]
 public static class ObservabilityExtensions

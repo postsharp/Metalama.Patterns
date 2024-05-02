@@ -6,8 +6,7 @@ using Metalama.Framework.Options;
 
 namespace Metalama.Patterns.Observability.Options;
 
-[PublicAPI]
-public sealed record DependencyAnalysisOptions :
+internal sealed record DependencyAnalysisOptions :
     IHierarchicalOptions<ICompilation>,
     IHierarchicalOptions<INamespace>,
     IHierarchicalOptions<INamedType>,
