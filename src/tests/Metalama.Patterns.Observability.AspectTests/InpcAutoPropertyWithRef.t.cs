@@ -27,11 +27,11 @@ public class InpcAutoPropertyWithRef : INotifyPropertyChanged
   }
   public int Y => this.X.A;
   private PropertyChangedEventHandler? _handleXPropertyChanged;
-  [InvokedForProperties("X")]
+  [ObservedExpressions("X")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  [InvokedForProperties("X")]
+  [ObservedExpressions("X")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

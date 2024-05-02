@@ -3,7 +3,6 @@
 using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
-using System.Diagnostics;
 using Xunit;
 using Xunit.Abstractions;
 using CacheItemPriority = Metalama.Patterns.Caching.Implementation.CacheItemPriority;
@@ -1612,8 +1611,6 @@ namespace Metalama.Patterns.Caching.Tests
         [Fact]
         public void TestMethodLevelProfile()
         {
-            Debugger.Break();
-
             using var context =
                 this.InitializeTestWithTestingBackend(
                     _testMethodLevelProfileNameSetInConfigurationAttribute,

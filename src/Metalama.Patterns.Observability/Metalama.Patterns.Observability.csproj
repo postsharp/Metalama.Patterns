@@ -25,6 +25,11 @@
     <InternalsVisibleTo Include="Metalama.Patterns.Observability.CompileTimeTests" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Compile Remove="ShallNotDependOnMutableStateAttribute.cs" />
+  </ItemGroup>
+
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
   
 </Project>

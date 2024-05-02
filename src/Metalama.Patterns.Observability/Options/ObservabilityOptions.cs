@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
@@ -9,14 +8,13 @@ using Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 namespace Metalama.Patterns.Observability.Options;
 
-[PublicAPI]
-[RunTimeOrCompileTime]
+[CompileTime]
 internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>
 {
     /// <summary>
-    /// Gets the <see cref="IImplementationStrategyFactory"/> used to provide <see cref="IImplementationStrategyBuilder"/> instances.
+    /// Gets the <see cref="IObservabilityStrategy"/> implementing the <see cref="ObservableAttribute"/> aspect.
     /// </summary>
-    public IImplementationStrategyFactory? ImplementationStrategyFactory { get; init; }
+    public IObservabilityStrategy? ImplementationStrategy { get; init; }
 
     private int? _diagnosticCommentVerbosity;
 
@@ -44,7 +42,7 @@ internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>
 
         return new ObservabilityOptions
         {
-            ImplementationStrategyFactory = other.ImplementationStrategyFactory ?? this.ImplementationStrategyFactory,
+            ImplementationStrategy = other.ImplementationStrategy ?? this.ImplementationStrategy,
             DiagnosticCommentVerbosity = other.DiagnosticCommentVerbosity ?? this.DiagnosticCommentVerbosity
         };
     }
@@ -69,7 +67,7 @@ internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>
 
         return new ObservabilityOptions()
         {
-            ImplementationStrategyFactory = ClassicImplementationStrategyFactory.Instance, DiagnosticCommentVerbosity = diagnosticCommentVerbosity
+            ImplementationStrategy = ClassicObservabilityStrategy.Instance, DiagnosticCommentVerbosity = diagnosticCommentVerbosity
         };
     }
 }

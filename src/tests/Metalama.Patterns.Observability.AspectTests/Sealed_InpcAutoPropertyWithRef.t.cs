@@ -26,7 +26,7 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
   }
   public int Y => this.X.A;
   private PropertyChangedEventHandler? _handleXPropertyChanged;
-  [InvokedForProperties("X")]
+  [ObservedExpressions("X")]
   private void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }

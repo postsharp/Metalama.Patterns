@@ -1,12 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Observability.Options;
-
-namespace Metalama.Patterns.Observability.AspectTests.Options.SafeForDependencyAnalysis.UsingAttributeOnMethodOfOtherClass;
+namespace Metalama.Patterns.Observability.AspectTests.Options.IgnoreUnobservableExpressions.UsingAttributeOnMethodOfOtherClass;
 
 public static class OtherClass
 {
-    [SafeForDependencyAnalysis]
+    [Constant]
     public static int Foo() => 42;
 }
 

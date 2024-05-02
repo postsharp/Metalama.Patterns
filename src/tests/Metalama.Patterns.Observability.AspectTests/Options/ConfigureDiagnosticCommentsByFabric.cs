@@ -1,5 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+#if TEST_OPTIONS
+// @RequiredConstant(DEBUG)
+#endif
+
+#if DEBUG
 using Metalama.Framework.Fabrics;
 using Metalama.Patterns.Observability.Options;
 
@@ -16,3 +21,5 @@ public class Fabric : NamespaceFabric
 // <target>
 [Observable]
 public class ConfigureDiagnosticCommentsByFabric { }
+
+#endif

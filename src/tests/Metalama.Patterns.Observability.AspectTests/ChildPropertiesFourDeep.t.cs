@@ -53,11 +53,11 @@ public partial class A : INotifyPropertyChanged
   private PropertyChangedEventHandler? _handleA2PropertyChanged;
   private C? _lastA2B2;
   private D? _lastA2B2C2;
-  [InvokedForProperties("A2", "A2.B2", "A2.B2.C2")]
+  [ObservedExpressions("A2", "A2.B2", "A2.B2.C2")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  [InvokedForProperties("A2")]
+  [ObservedExpressions("A2")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
@@ -200,7 +200,7 @@ public partial class B : INotifyPropertyChanged
       }
     }
   }
-  [InvokedForProperties("B2")]
+  [ObservedExpressions("B2")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
@@ -251,7 +251,7 @@ public partial class C : INotifyPropertyChanged
       }
     }
   }
-  [InvokedForProperties("C2")]
+  [ObservedExpressions("C2")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

@@ -4,5 +4,5 @@ namespace Metalama.Patterns.Observability.AspectTests.Diagnostics.CallUnsafeMeth
 
 public static class ExternalClass
 {
-    public static int Foo() => 42;
+    public static int Foo( object x ) => x.GetType().Name.Length;
 }

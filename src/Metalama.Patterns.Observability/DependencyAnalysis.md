@@ -35,13 +35,13 @@ Looks at the basic characteristics exposed by `MethodInfo`. Accepts (final):
 
 #### `VirtualMethodCallValidator`
 
-Rejects (final) virtual methods which don't have `[SafeForDependencyAnalysisAttribute]`.
+Rejects (final) virtual methods which don't have `[IgnoreUnobservableExpressionsAttribute]`.
 
 #### `OuterScopeObjectMethodCallValidator`
 
 _PS Specific:_ Abstains from methods that look like lambda method compiler implementation detail.
 
-Rejects (final) calls to methods of a different class unless the method returns `void` and has no ref or out parameters, or is marked `[Pure]`, or the calling method is marked `[SafeForDependencyAnalysisAttribute]`.
+Rejects (final) calls to methods of a different class unless the method returns `void` and has no ref or out parameters, or is marked `[Pure]`, or the calling method is marked `[IgnoreUnobservableExpressionsAttribute]`.
 
 ### Field Validators
 
@@ -55,5 +55,5 @@ Accepts (final) fields of the `Depends` type.
 2. _PS Specific:_ Abstains for access to compiler-generated closure fields.
 3. Abstains for access to `const` fields, and immutable `static readonly` fields.
 4. Abstains for access to fields of `ValueTuple`.
-5. Rejects (final) direct access to fields of another class unless the calling method is marked `[SafeForDependencyAnalysisAttribute]`.
+5. Rejects (final) direct access to fields of another class unless the calling method is marked `[IgnoreUnobservableExpressionsAttribute]`.
 6. Otherwise, accepts (final).

@@ -10,21 +10,16 @@ namespace Metalama.Patterns.Observability.Implementation;
 internal sealed class InpcInstrumentationKindLookup
 {
     private readonly ConcurrentDictionary<IType, InpcInstrumentationKind> _inpcInstrumentationKindLookup = new();
-    private readonly Func<IType, InpcInstrumentationKind> _getCore;
     private readonly INamedType _targetType;
     private readonly Assets _assets;
 
     public InpcInstrumentationKindLookup( INamedType targetType, Assets assets )
     {
-        this._getCore = this.GetCore;
         this._targetType = targetType;
         this._assets = assets;
     }
 
-    public InpcInstrumentationKind Get( IType type )
-    {
-        return this._inpcInstrumentationKindLookup.GetOrAdd( type, this._getCore );
-    }
+    public InpcInstrumentationKind Get( IType type ) => this._inpcInstrumentationKindLookup.GetOrAdd( type, this.GetCore );
 
     private InpcInstrumentationKind GetCore( IType type )
     {
@@ -38,13 +33,13 @@ internal sealed class InpcInstrumentationKindLookup
                 }
                 else if ( namedType.Equals( this._assets.INotifyPropertyChanged ) )
                 {
-                    return InpcInstrumentationKind.Implicit;
+                    return InpcInstrumentationKind.Aspect;
                 }
                 else if ( namedType.Is( this._assets.INotifyPropertyChanged ) )
                 {
                     if ( namedType.TryFindImplementationForInterfaceMember( this._assets.PropertyChangedEventOfINotifyPropertyChanged, out var member ) )
                     {
-                        return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Implicit;
+                        return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Aspect;
                     }
 
                     throw new InvalidOperationException( "Could not find implementation of interface member." );
@@ -61,7 +56,7 @@ internal sealed class InpcInstrumentationKindLookup
                     }
 
                     return namedType.Definition.Enhancements().HasAspect<ObservableAttribute>()
-                        ? InpcInstrumentationKind.Implicit // For now, the aspect always introduces implicit implementation.
+                        ? InpcInstrumentationKind.Aspect // For now, the aspect always introduces implicit implementation.
                         : InpcInstrumentationKind.None;
                 }
 
@@ -74,8 +69,8 @@ internal sealed class InpcInstrumentationKindLookup
 
                     switch ( k )
                     {
-                        case InpcInstrumentationKind.Implicit:
-                            return InpcInstrumentationKind.Implicit;
+                        case InpcInstrumentationKind.Aspect:
+                            return InpcInstrumentationKind.Aspect;
 
                         case InpcInstrumentationKind.Explicit:
                             hasImplicit = true;
@@ -84,7 +79,7 @@ internal sealed class InpcInstrumentationKindLookup
                     }
                 }
 
-                return hasImplicit ? InpcInstrumentationKind.Implicit : InpcInstrumentationKind.None;
+                return hasImplicit ? InpcInstrumentationKind.Aspect : InpcInstrumentationKind.None;
 
             default:
                 return InpcInstrumentationKind.None;

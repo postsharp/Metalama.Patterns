@@ -14,7 +14,7 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 [CompileTime]
 internal static class RoslynExtensions
 {
-    public static Accessibility EffectiveAccessibility( this ISymbol symbol )
+    public static Accessibility GetEffectiveAccessibility( this ISymbol symbol )
     {
         if ( symbol.DeclaredAccessibility != Accessibility.NotApplicable )
         {
@@ -50,31 +50,6 @@ internal static class RoslynExtensions
             default:
                 throw new NotSupportedException();
         }
-    }
-
-    public static bool IsPrimitiveType( this ITypeSymbol? type, RoslynAssets assets )
-    {
-        // ReSharper disable once MissingIndent
-        return type != null && (
-            type is
-            {
-                SpecialType: SpecialType.System_Boolean or
-                SpecialType.System_Byte or
-                SpecialType.System_Char or
-                SpecialType.System_DateTime or
-                SpecialType.System_Decimal or
-                SpecialType.System_Double or
-                SpecialType.System_Int16 or
-                SpecialType.System_Int32 or
-                SpecialType.System_Int64 or
-                SpecialType.System_SByte or
-                SpecialType.System_Single or
-                SpecialType.System_String or
-                SpecialType.System_UInt16 or
-                SpecialType.System_UInt32 or
-                SpecialType.System_UInt64
-            }
-            || assets.IsNonSpecialPrimitiveType( type ));
     }
 
     public static bool IsOrInheritsFrom( this INamedTypeSymbol type, ITypeSymbol? candidateBaseType )

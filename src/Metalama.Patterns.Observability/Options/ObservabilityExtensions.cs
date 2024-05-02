@@ -6,6 +6,9 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Patterns.Observability.Options;
 
+/// <summary>
+/// Extension methods that configure the <see cref="ObservableAttribute"/> aspect.
+/// </summary>
 [PublicAPI]
 [CompileTime]
 public static class ObservabilityExtensions
@@ -17,14 +20,25 @@ public static class ObservabilityExtensions
     /// <param name="configure">A delegate that configures the aspect.</param>
     public static void ConfigureObservability(
         this IAspectReceiver<ICompilation> receiver,
-        Action<ObservabilityOptionsBuilder> configure )
+        Action<ObservabilityTypeOptionsBuilder> configure )
     {
-        var builder = new ObservabilityOptionsBuilder();
+        var builder = new ObservabilityTypeOptionsBuilder();
         configure( builder );
 
-        var options = builder.Build();
+        if ( builder.ObservabilityOptions != null )
+        {
+            receiver.SetOptions( builder.ObservabilityOptions );
+        }
 
-        receiver.SetOptions( options );
+        if ( builder.ClassicStrategyOptions != null )
+        {
+            receiver.SetOptions( builder.ClassicStrategyOptions );
+        }
+
+        if ( builder.DependencyAnalysisOptions != null )
+        {
+            receiver.SetOptions( builder.DependencyAnalysisOptions );
+        }
     }
 
     /// <summary>
@@ -34,14 +48,25 @@ public static class ObservabilityExtensions
     /// <param name="configure">A delegate that configures the aspect.</param>
     public static void ConfigureObservability(
         this IAspectReceiver<INamespace> receiver,
-        Action<ObservabilityOptionsBuilder> configure )
+        Action<ObservabilityTypeOptionsBuilder> configure )
     {
-        var builder = new ObservabilityOptionsBuilder();
+        var builder = new ObservabilityTypeOptionsBuilder();
         configure( builder );
 
-        var options = builder.Build();
+        if ( builder.ObservabilityOptions != null )
+        {
+            receiver.SetOptions( builder.ObservabilityOptions );
+        }
 
-        receiver.SetOptions( options );
+        if ( builder.ClassicStrategyOptions != null )
+        {
+            receiver.SetOptions( builder.ClassicStrategyOptions );
+        }
+
+        if ( builder.DependencyAnalysisOptions != null )
+        {
+            receiver.SetOptions( builder.DependencyAnalysisOptions );
+        }
     }
 
     /// <summary>
@@ -51,13 +76,42 @@ public static class ObservabilityExtensions
     /// <param name="configure">A delegate that configures the aspect.</param>
     public static void ConfigureObservability(
         this IAspectReceiver<INamedType> receiver,
-        Action<ObservabilityOptionsBuilder> configure )
+        Action<ObservabilityTypeOptionsBuilder> configure )
     {
-        var builder = new ObservabilityOptionsBuilder();
+        var builder = new ObservabilityTypeOptionsBuilder();
         configure( builder );
 
-        var options = builder.Build();
+        if ( builder.ObservabilityOptions != null )
+        {
+            receiver.SetOptions( builder.ObservabilityOptions );
+        }
 
-        receiver.SetOptions( options );
+        if ( builder.ClassicStrategyOptions != null )
+        {
+            receiver.SetOptions( builder.ClassicStrategyOptions );
+        }
+
+        if ( builder.DependencyAnalysisOptions != null )
+        {
+            receiver.SetOptions( builder.DependencyAnalysisOptions );
+        }
+    }
+
+    /// <summary>
+    /// Configures <see cref="ObservableAttribute"/> for the current member.
+    /// </summary>
+    /// <param name="receiver">The <see cref="IAspectReceiver{TDeclaration}"/> for the current type.</param>
+    /// <param name="configure">A delegate that configures the aspect.</param>
+    public static void ConfigureObservability(
+        this IAspectReceiver<IMember> receiver,
+        Action<ObservabilityMemberOptionsBuilder> configure )
+    {
+        var builder = new ObservabilityMemberOptionsBuilder();
+        configure( builder );
+
+        if ( builder.DependencyAnalysisOptions != null )
+        {
+            receiver.SetOptions( builder.DependencyAnalysisOptions );
+        }
     }
 }
