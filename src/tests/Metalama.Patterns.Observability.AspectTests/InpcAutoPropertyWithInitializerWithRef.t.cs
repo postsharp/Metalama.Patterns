@@ -34,11 +34,11 @@ public class InpcAutoPropertyWithInitializerWithRef : INotifyPropertyChanged
   {
     this.SubscribeToX(this.X);
   }
-  [InvokedForProperties("X")]
+  [ObservedExpressions("X")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  [InvokedForProperties("X")]
+  [ObservedExpressions("X")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }

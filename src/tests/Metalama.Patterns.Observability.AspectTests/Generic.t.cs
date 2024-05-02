@@ -21,7 +21,7 @@ public partial class A<T> : INotifyPropertyChanged where T : class, INotifyPrope
       }
     }
   }
-  [InvokedForProperties("A1")]
+  [ObservedExpressions("A1")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
@@ -35,7 +35,7 @@ public partial class AOfSimple : A<Simple>
 {
   public int RefA1S1 => this.A1.S1;
   private PropertyChangedEventHandler? _handleA1PropertyChanged;
-  [InvokedForProperties("A1")]
+  [ObservedExpressions("A1")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }

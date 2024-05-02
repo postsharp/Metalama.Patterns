@@ -34,11 +34,11 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
   }
   public int FooX => this.D1.X;
   private PropertyChangedEventHandler? _handleD1PropertyChanged;
-  [InvokedForProperties("D1")]
+  [ObservedExpressions("D1")]
   protected virtual void OnChildPropertyChanged(string parentPropertyPath, string propertyName)
   {
   }
-  [InvokedForProperties("D1")]
+  [ObservedExpressions("D1")]
   protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
   {
   }
