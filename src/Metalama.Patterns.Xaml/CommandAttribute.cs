@@ -242,49 +242,50 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         if ( canExecuteMethod != null || canExecuteProperty != null )
         {
-            bool CanExecute( object? parameter )
+            if ( canExecuteMethod != null )
             {
-                if ( canExecuteMethod != null )
+                if ( canExecuteMethod.Parameters.Count == 0 )
                 {
-                    if ( canExecuteMethod.Parameters.Count == 0 )
-                    {
-                        return canExecuteMethod.Invoke();
-                    }
-                    else
-                    {
-                        return canExecuteMethod.Invoke( meta.Cast( canExecuteMethod.Parameters[0].Type, parameter ) );
-                    }
+                    canExecuteExpression = ExpressionFactory.Capture( new Func<object, bool>( _ => (bool) canExecuteMethod.Invoke()! ) );
                 }
                 else
                 {
-                    return canExecuteProperty!.Value;
+                    canExecuteExpression = ExpressionFactory.Capture(
+                        new Func<object, bool>( parameter => (bool) canExecuteMethod.Invoke( meta.Cast( canExecuteMethod.Parameters[0].Type, parameter ) ) ) );
                 }
-            }
-
-            canExecuteExpression = ExpressionFactory.Capture( (Func<object, bool>) CanExecute );
-        }
-
-        void Execute( object? parameter )
-        {
-            if ( executeMethod.Parameters.Count == 0 )
-            {
-                executeMethod.Invoke();
             }
             else
             {
-                executeMethod.Invoke( meta.Cast( executeMethod.Parameters[0].Type, parameter ) );
+                canExecuteExpression = ExpressionFactory.Capture( new Func<object, bool>( _ => (bool) canExecuteProperty!.Value! ) );
             }
+        }
+
+        IExpression? executeExpression;
+
+        if ( executeMethod.Parameters.Count == 0 )
+        {
+            executeExpression = ExpressionFactory.Capture(
+                new Action<object>( _ => { executeMethod.Invoke(); } ) );
+        }
+        else
+        {
+            executeExpression = ExpressionFactory.Capture(
+                new Action<object>(
+                    parameter =>
+                    {
+                        executeMethod.Invoke( meta.Cast( executeMethod.Parameters[0].Type, parameter ) );
+                    } ) );
         }
 
         if ( useInpcIntegration )
         {
-            commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression!.Value, meta.This, canExecuteProperty!.Name );
+            commandProperty.Value = new DelegateCommand( executeExpression.Value, canExecuteExpression!.Value, meta.This, canExecuteProperty!.Name );
         }
         else
         {
             // ReSharper disable once MergeConditionalExpression
 #pragma warning disable IDE0031 // Use null propagation
-            commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression == null ? null : canExecuteExpression.Value );
+            commandProperty.Value = new DelegateCommand( executeExpression.Value, canExecuteExpression == null ? null : canExecuteExpression.Value );
 #pragma warning restore IDE0031 // Use null propagation
         }
     }

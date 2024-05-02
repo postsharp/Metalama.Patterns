@@ -25,42 +25,22 @@ public class CanExecuteMethod
   private static bool CanExecuteStaticWithParameter(int v) => true;
   public CanExecuteMethod()
   {
-    bool CanExecute(object? parameter)
-    {
-      return this.CanExecuteInstanceNoParameters();
-    }
-    void Execute(object? parameter_1)
+    this.InstanceNoParametersCommand = new DelegateCommand(new Action<object>(__1 =>
     {
       this.ExecuteInstanceNoParameters();
-    }
-    this.InstanceNoParametersCommand = new DelegateCommand(Execute, CanExecute);
-    bool CanExecute_1(object? parameter_2)
-    {
-      return CanExecuteMethod.CanExecuteStaticNoParameters();
-    }
-    void Execute_1(object? parameter_3)
+    }), new Func<object, bool>(_ => this.CanExecuteInstanceNoParameters()));
+    this.StaticNoParametersCommand = new DelegateCommand(new Action<object>(__3 =>
     {
       CanExecuteMethod.ExecuteStaticNoParameters();
-    }
-    this.StaticNoParametersCommand = new DelegateCommand(Execute_1, CanExecute_1);
-    bool CanExecute_2(object? parameter_4)
+    }), new Func<object, bool>(__2 => CanExecuteMethod.CanExecuteStaticNoParameters()));
+    this.InstanceWithParameterCommand = new DelegateCommand(new Action<object>(parameter_1 =>
     {
-      return this.CanExecuteInstanceWithParameter((int)parameter_4);
-    }
-    void Execute_2(object? parameter_5)
+      this.ExecuteInstanceWithParameter((int)parameter_1);
+    }), new Func<object, bool>(parameter => this.CanExecuteInstanceWithParameter((int)parameter)));
+    this.StaticWithParameterCommand = new DelegateCommand(new Action<object>(parameter_3 =>
     {
-      this.ExecuteInstanceWithParameter((int)parameter_5);
-    }
-    this.InstanceWithParameterCommand = new DelegateCommand(Execute_2, CanExecute_2);
-    bool CanExecute_3(object? parameter_6)
-    {
-      return CanExecuteMethod.CanExecuteStaticWithParameter((int)parameter_6);
-    }
-    void Execute_3(object? parameter_7)
-    {
-      CanExecuteMethod.ExecuteStaticWithParameter((int)parameter_7);
-    }
-    this.StaticWithParameterCommand = new DelegateCommand(Execute_3, CanExecute_3);
+      CanExecuteMethod.ExecuteStaticWithParameter((int)parameter_3);
+    }), new Func<object, bool>(parameter_2 => CanExecuteMethod.CanExecuteStaticWithParameter((int)parameter_2)));
   }
   public ICommand InstanceNoParametersCommand { get; }
   public ICommand InstanceWithParameterCommand { get; }
