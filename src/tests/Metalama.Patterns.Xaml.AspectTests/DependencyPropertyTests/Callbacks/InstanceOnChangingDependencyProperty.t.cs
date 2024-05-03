@@ -19,8 +19,8 @@ public partial class InstanceOnChangingDependencyProperty : DependencyObject
   private void OnFooChanging(DependencyProperty d)
   {
   }
-  public static readonly DependencyProperty FooProperty = InstanceOnChangingDependencyProperty.CreateFooDependencyProperty();
-  private static DependencyProperty CreateFooDependencyProperty()
+  public static readonly DependencyProperty FooProperty = InstanceOnChangingDependencyProperty.CreateFooProperty();
+  private static DependencyProperty CreateFooProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {

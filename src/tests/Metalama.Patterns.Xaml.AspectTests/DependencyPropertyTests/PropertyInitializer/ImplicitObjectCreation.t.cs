@@ -17,8 +17,8 @@ public class ImplicitObjectCreation : DependencyObject
       this.SetValue(ImplicitObjectCreation.FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty = ImplicitObjectCreation.CreateFooDependencyProperty();
-  private static DependencyProperty CreateFooDependencyProperty()
+  public static readonly DependencyProperty FooProperty = ImplicitObjectCreation.CreateFooProperty();
+  private static DependencyProperty CreateFooProperty()
   {
     return DependencyProperty.Register("Foo", typeof(List<int>), typeof(ImplicitObjectCreation), new PropertyMetadata((List<int>)new(3) { 1, 2, 3 }));
   }

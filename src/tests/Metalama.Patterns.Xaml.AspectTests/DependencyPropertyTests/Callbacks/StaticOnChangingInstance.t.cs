@@ -53,10 +53,10 @@ public partial class StaticOnChangingInstance : DependencyObject
   private static void OnAcceptsObjectChanging(object instance)
   {
   }
-  public static readonly DependencyProperty AcceptsDependencyObjectProperty = StaticOnChangingInstance.CreateAcceptsDependencyObjectDependencyProperty();
-  public static readonly DependencyProperty AcceptsObjectProperty = StaticOnChangingInstance.CreateAcceptsObjectDependencyProperty();
-  public static readonly DependencyProperty FooProperty = StaticOnChangingInstance.CreateFooDependencyProperty();
-  private static DependencyProperty CreateAcceptsDependencyObjectDependencyProperty()
+  public static readonly DependencyProperty AcceptsDependencyObjectProperty = StaticOnChangingInstance.CreateAcceptsDependencyObjectProperty();
+  public static readonly DependencyProperty AcceptsObjectProperty = StaticOnChangingInstance.CreateAcceptsObjectProperty();
+  public static readonly DependencyProperty FooProperty = StaticOnChangingInstance.CreateFooProperty();
+  private static DependencyProperty CreateAcceptsDependencyObjectProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -67,7 +67,7 @@ public partial class StaticOnChangingInstance : DependencyObject
     metadata.CoerceValueCallback = CoerceValue_1;
     return DependencyProperty.Register("AcceptsDependencyObject", typeof(int), typeof(StaticOnChangingInstance), metadata);
   }
-  private static DependencyProperty CreateAcceptsObjectDependencyProperty()
+  private static DependencyProperty CreateAcceptsObjectProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -78,7 +78,7 @@ public partial class StaticOnChangingInstance : DependencyObject
     metadata.CoerceValueCallback = CoerceValue_1;
     return DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticOnChangingInstance), metadata);
   }
-  private static DependencyProperty CreateFooDependencyProperty()
+  private static DependencyProperty CreateFooProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {

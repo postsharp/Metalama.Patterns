@@ -16,13 +16,13 @@ internal class WithoutValidateMethod : DependencyObject
       this.SetValue(WithoutValidateMethod.NameProperty, value);
     }
   }
-  public static readonly DependencyProperty NameProperty = WithoutValidateMethod.CreateNameDependencyProperty();
+  public static readonly DependencyProperty NameProperty = WithoutValidateMethod.CreateNameProperty();
   private static string ApplyNameContracts(string value)
   {
     value = value.Trim();
     return value;
   }
-  private static DependencyProperty CreateNameDependencyProperty()
+  private static DependencyProperty CreateNameProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {

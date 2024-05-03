@@ -53,10 +53,10 @@ public partial class StaticOnChangedInstance : DependencyObject
   private static void OnAcceptsObjectChanged(object instance)
   {
   }
-  public static readonly DependencyProperty AcceptsDependencyObjectProperty = StaticOnChangedInstance.CreateAcceptsDependencyObjectDependencyProperty();
-  public static readonly DependencyProperty AcceptsObjectProperty = StaticOnChangedInstance.CreateAcceptsObjectDependencyProperty();
-  public static readonly DependencyProperty FooProperty = StaticOnChangedInstance.CreateFooDependencyProperty();
-  private static DependencyProperty CreateAcceptsDependencyObjectDependencyProperty()
+  public static readonly DependencyProperty AcceptsDependencyObjectProperty = StaticOnChangedInstance.CreateAcceptsDependencyObjectProperty();
+  public static readonly DependencyProperty AcceptsObjectProperty = StaticOnChangedInstance.CreateAcceptsObjectProperty();
+  public static readonly DependencyProperty FooProperty = StaticOnChangedInstance.CreateFooProperty();
+  private static DependencyProperty CreateAcceptsDependencyObjectProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -64,7 +64,7 @@ public partial class StaticOnChangedInstance : DependencyObject
     }
     return DependencyProperty.Register("AcceptsDependencyObject", typeof(int), typeof(StaticOnChangedInstance), new PropertyMetadata(PropertyChanged));
   }
-  private static DependencyProperty CreateAcceptsObjectDependencyProperty()
+  private static DependencyProperty CreateAcceptsObjectProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -72,7 +72,7 @@ public partial class StaticOnChangedInstance : DependencyObject
     }
     return DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticOnChangedInstance), new PropertyMetadata(PropertyChanged));
   }
-  private static DependencyProperty CreateFooDependencyProperty()
+  private static DependencyProperty CreateFooProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

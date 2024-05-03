@@ -23,12 +23,12 @@ public class InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultV
       this.SetValue(InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty = InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.CreateFooDependencyProperty();
+  public static readonly DependencyProperty FooProperty = InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue.CreateFooProperty();
   public InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue()
   {
     this.Foo = InitMethod();
   }
-  private static DependencyProperty CreateFooDependencyProperty()
+  private static DependencyProperty CreateFooProperty()
   {
     return DependencyProperty.Register("Foo", typeof(List<int>), typeof(InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue), new PropertyMetadata(InitMethod()));
   }

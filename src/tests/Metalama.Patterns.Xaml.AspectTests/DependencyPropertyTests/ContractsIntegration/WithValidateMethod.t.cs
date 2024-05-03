@@ -17,13 +17,13 @@ internal class WithValidateMethod : DependencyObject
     }
   }
   private bool ValidateName(string name) => name.Length > 3;
-  public static readonly DependencyProperty NameProperty = WithValidateMethod.CreateNameDependencyProperty();
+  public static readonly DependencyProperty NameProperty = WithValidateMethod.CreateNameProperty();
   private static string ApplyNameContracts(string value)
   {
     value = value.Trim();
     return value;
   }
-  private static DependencyProperty CreateNameDependencyProperty()
+  private static DependencyProperty CreateNameProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {

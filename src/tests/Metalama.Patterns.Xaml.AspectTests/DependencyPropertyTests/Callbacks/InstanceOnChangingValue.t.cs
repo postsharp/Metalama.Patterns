@@ -70,11 +70,11 @@ public partial class InstanceOnChangingValue : DependencyObject
   private void OnAcceptObjectChanging(object value)
   {
   }
-  public static readonly DependencyProperty AcceptAssignableProperty = InstanceOnChangingValue.CreateAcceptAssignableDependencyProperty();
-  public static readonly DependencyProperty AcceptGenericProperty = InstanceOnChangingValue.CreateAcceptGenericDependencyProperty();
-  public static readonly DependencyProperty AcceptObjectProperty = InstanceOnChangingValue.CreateAcceptObjectDependencyProperty();
-  public static readonly DependencyProperty FooProperty = InstanceOnChangingValue.CreateFooDependencyProperty();
-  private static DependencyProperty CreateAcceptAssignableDependencyProperty()
+  public static readonly DependencyProperty AcceptAssignableProperty = InstanceOnChangingValue.CreateAcceptAssignableProperty();
+  public static readonly DependencyProperty AcceptGenericProperty = InstanceOnChangingValue.CreateAcceptGenericProperty();
+  public static readonly DependencyProperty AcceptObjectProperty = InstanceOnChangingValue.CreateAcceptObjectProperty();
+  public static readonly DependencyProperty FooProperty = InstanceOnChangingValue.CreateFooProperty();
+  private static DependencyProperty CreateAcceptAssignableProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -85,7 +85,7 @@ public partial class InstanceOnChangingValue : DependencyObject
     metadata.CoerceValueCallback = CoerceValue_1;
     return DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceOnChangingValue), metadata);
   }
-  private static DependencyProperty CreateAcceptGenericDependencyProperty()
+  private static DependencyProperty CreateAcceptGenericProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -96,7 +96,7 @@ public partial class InstanceOnChangingValue : DependencyObject
     metadata.CoerceValueCallback = CoerceValue_1;
     return DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceOnChangingValue), metadata);
   }
-  private static DependencyProperty CreateAcceptObjectDependencyProperty()
+  private static DependencyProperty CreateAcceptObjectProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -107,7 +107,7 @@ public partial class InstanceOnChangingValue : DependencyObject
     metadata.CoerceValueCallback = CoerceValue_1;
     return DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceOnChangingValue), metadata);
   }
-  private static DependencyProperty CreateFooDependencyProperty()
+  private static DependencyProperty CreateFooProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {

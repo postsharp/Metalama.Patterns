@@ -19,8 +19,8 @@ public partial class StaticOnChangedNoParameters : DependencyObject
   private static void OnFooChanged()
   {
   }
-  public static readonly DependencyProperty FooProperty = StaticOnChangedNoParameters.CreateFooDependencyProperty();
-  private static DependencyProperty CreateFooDependencyProperty()
+  public static readonly DependencyProperty FooProperty = StaticOnChangedNoParameters.CreateFooProperty();
+  private static DependencyProperty CreateFooProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

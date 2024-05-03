@@ -23,8 +23,8 @@ public class DefaultOptions : DependencyObject
       this.SetValue(DefaultOptions.FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty = DefaultOptions.CreateFooDependencyProperty();
-  private static DependencyProperty CreateFooDependencyProperty()
+  public static readonly DependencyProperty FooProperty = DefaultOptions.CreateFooProperty();
+  private static DependencyProperty CreateFooProperty()
   {
     return DependencyProperty.Register("Foo", typeof(List<int>), typeof(DefaultOptions), new PropertyMetadata(InitMethod()));
   }

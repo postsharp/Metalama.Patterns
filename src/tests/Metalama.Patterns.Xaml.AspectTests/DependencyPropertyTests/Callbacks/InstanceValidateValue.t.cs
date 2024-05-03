@@ -62,11 +62,11 @@ public partial class InstanceValidateValue : DependencyObject
     }
   }
   private bool ValidateAcceptObject(object value) => true;
-  public static readonly DependencyProperty AcceptAssignableProperty = InstanceValidateValue.CreateAcceptAssignableDependencyProperty();
-  public static readonly DependencyProperty AcceptGenericProperty = InstanceValidateValue.CreateAcceptGenericDependencyProperty();
-  public static readonly DependencyProperty AcceptObjectProperty = InstanceValidateValue.CreateAcceptObjectDependencyProperty();
-  public static readonly DependencyProperty FooProperty = InstanceValidateValue.CreateFooDependencyProperty();
-  private static DependencyProperty CreateAcceptAssignableDependencyProperty()
+  public static readonly DependencyProperty AcceptAssignableProperty = InstanceValidateValue.CreateAcceptAssignableProperty();
+  public static readonly DependencyProperty AcceptGenericProperty = InstanceValidateValue.CreateAcceptGenericProperty();
+  public static readonly DependencyProperty AcceptObjectProperty = InstanceValidateValue.CreateAcceptObjectProperty();
+  public static readonly DependencyProperty FooProperty = InstanceValidateValue.CreateFooProperty();
+  private static DependencyProperty CreateAcceptAssignableProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -80,7 +80,7 @@ public partial class InstanceValidateValue : DependencyObject
     metadata.CoerceValueCallback = CoerceValue_1;
     return DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceValidateValue), metadata);
   }
-  private static DependencyProperty CreateAcceptGenericDependencyProperty()
+  private static DependencyProperty CreateAcceptGenericProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -94,7 +94,7 @@ public partial class InstanceValidateValue : DependencyObject
     metadata.CoerceValueCallback = CoerceValue_1;
     return DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceValidateValue), metadata);
   }
-  private static DependencyProperty CreateAcceptObjectDependencyProperty()
+  private static DependencyProperty CreateAcceptObjectProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
@@ -108,7 +108,7 @@ public partial class InstanceValidateValue : DependencyObject
     metadata.CoerceValueCallback = CoerceValue_1;
     return DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceValidateValue), metadata);
   }
-  private static DependencyProperty CreateFooDependencyProperty()
+  private static DependencyProperty CreateFooProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
