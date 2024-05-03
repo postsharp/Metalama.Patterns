@@ -13,7 +13,7 @@ public partial class StaticOnChangingDependencyProperty : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangingDependencyProperty.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private static void OnFooChanging(DependencyProperty d)
@@ -22,13 +22,12 @@ public partial class StaticOnChangingDependencyProperty : DependencyObject
   public static readonly DependencyProperty FooProperty;
   static StaticOnChangingDependencyProperty()
   {
-    object CoerceValue_1(DependencyObject d_1, object value)
-    {
-      StaticOnChangingDependencyProperty.OnFooChanging(StaticOnChangingDependencyProperty.FooProperty);
-      return value;
-    }
     var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    StaticOnChangingDependencyProperty.FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingDependencyProperty), metadata);
+    metadata.CoerceValueCallback = new CoerceValueCallback((d_1, value) =>
+    {
+      OnFooChanging(FooProperty);
+      return value;
+    });
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingDependencyProperty), metadata);
   }
 }

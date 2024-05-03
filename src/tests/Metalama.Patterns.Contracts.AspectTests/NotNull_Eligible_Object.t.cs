@@ -8,7 +8,7 @@ public class NotNull_Eligible_Object
   {
     get
     {
-      return this._field1;
+      return _field1;
     }
     set
     {
@@ -16,7 +16,7 @@ public class NotNull_Eligible_Object
       {
         throw new ArgumentNullException("value", "The 'field' property must not be null.");
       }
-      this._field1 = value;
+      _field1 = value;
     }
   }
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Utilities;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
@@ -20,10 +21,10 @@ internal class ClassicObservableExpression : ObservableExpression
     /// </summary>
     /// <remarks>
     /// The value will only be set for applicable nodes. Template code should only be accessing the value of
-    /// <see cref="LastValueField"/> when logic determines that it should have been set, and <see cref="Deferred{T}"/>
+    /// <see cref="LastValueField"/> when logic determines that it should have been set, and <see cref="Promise{T}"/>
     /// will helpfully throw if there is an error in the program design.
     /// </remarks>
-    public Deferred<IField> LastValueField { get; } = new();
+    public Promise<IField> LastValueField { get; } = new();
 
     /// <summary>
     /// Gets the potentially uninitialized field like "PropertyChangedEventHandler? _onA2PropertyChangedHandler".
@@ -31,10 +32,10 @@ internal class ClassicObservableExpression : ObservableExpression
     /// </summary>
     /// <remarks>
     /// The value will only be set for applicable nodes. Template code should only be accessing the value of
-    /// <see cref="HandlerField"/> when logic determines that it should have been set, and <see cref="Deferred{T}"/>
+    /// <see cref="HandlerField"/> when logic determines that it should have been set, and <see cref="Promise{T}"/>
     /// will helpfully throw if there is an error in the program design.
     /// </remarks>
-    public Deferred<IField> HandlerField { get; } = new();
+    public Promise<IField> HandlerField { get; } = new();
 
     private IReadOnlyCollection<IMethod>? _childUpdateMethods;
 
@@ -69,9 +70,9 @@ internal class ClassicObservableExpression : ObservableExpression
     /// will throw if it has not been set. This provides defense against incorrect program design
     /// that could otherwise lead to subtle incorrect behaviour.
     /// </remarks>
-    public Deferred<IMethod?> UpdateMethod { get; } = new();
+    public Promise<IMethod?> UpdateMethod { get; } = new();
 
-    public Deferred<IMethod> SubscribeMethod { get; } = new();
+    public Promise<IMethod> SubscribeMethod { get; } = new();
 
     /// <summary>
     /// Gets the handling strategy of the current reference by the base type. 

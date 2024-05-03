@@ -9,20 +9,20 @@ public class PropertyOfUnconstrainedGenericType<T> : INotifyPropertyChanged
   {
     get
     {
-      return this._c1;
+      return _c1;
     }
     set
     {
-      if (!EqualityComparer<T>.Default.Equals(value, this._c1))
+      if (!EqualityComparer<T>.Default.Equals(value, _c1))
       {
-        this._c1 = value;
-        this.OnPropertyChanged("C1");
+        _c1 = value;
+        OnPropertyChanged("C1");
       }
     }
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

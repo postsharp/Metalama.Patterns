@@ -56,13 +56,13 @@ public class BaseClass
   {
     get
     {
-      return this._a;
+      return _a;
     }
     set
     {
       try
       {
-        this._a = value;
+        _a = value;
         return;
       }
       finally
@@ -76,13 +76,13 @@ public class BaseClass
   {
     get
     {
-      return this._b;
+      return _b;
     }
     set
     {
       try
       {
-        this._b = value;
+        _b = value;
         return;
       }
       finally
@@ -93,7 +93,7 @@ public class BaseClass
   }
   protected virtual void VerifyInvariants()
   {
-    this.TheInvariant();
+    TheInvariant();
   }
 }
 public class DerivedClass : BaseClass
@@ -115,13 +115,13 @@ public class DerivedClass : BaseClass
   {
     get
     {
-      return this._c;
+      return _c;
     }
     set
     {
       try
       {
-        this._c = value;
+        _c = value;
         return;
       }
       finally
@@ -133,6 +133,6 @@ public class DerivedClass : BaseClass
   protected override void VerifyInvariants()
   {
     base.VerifyInvariants();
-    this.OtherInvariant();
+    OtherInvariant();
   }
 }

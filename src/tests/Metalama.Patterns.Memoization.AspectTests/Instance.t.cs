@@ -11,7 +11,7 @@ internal sealed class TheClass
   [Memoize]
   public string NonNullableMethod()
   {
-    if (this._NonNullableMethod == null)
+    if (_NonNullableMethod == null)
     {
       string value;
       value = this._counter++.ToString(CultureInfo.InvariantCulture);
@@ -22,7 +22,7 @@ internal sealed class TheClass
   [Memoize]
   public string? NullableMethod()
   {
-    if (this._NullableMethod == null)
+    if (_NullableMethod == null)
     {
       var value = new StrongBox<string?>(this.NullableMethod_Source());
       global::System.Threading.Interlocked.CompareExchange(ref this._NullableMethod, value, null);
@@ -35,7 +35,7 @@ internal sealed class TheClass
   {
     get
     {
-      if (this._NonNullableProperty == null)
+      if (_NonNullableProperty == null)
       {
         string value;
         value = this._counter++.ToString(CultureInfo.InvariantCulture);
@@ -49,9 +49,9 @@ internal sealed class TheClass
   {
     get
     {
-      if (this._NullableProperty == null)
+      if (_NullableProperty == null)
       {
-        var value = new StrongBox<string?>(this.NullableProperty_Source);
+        var value = new StrongBox<string?>(NullableProperty_Source);
         global::System.Threading.Interlocked.CompareExchange(ref this._NullableProperty, value, null);
       }
       return _NullableProperty!.Value;
@@ -61,7 +61,7 @@ internal sealed class TheClass
   [Memoize]
   public Guid MethodReturnsStruct()
   {
-    if (this._MethodReturnsStruct == null)
+    if (_MethodReturnsStruct == null)
     {
       var value = new StrongBox<Guid>(this.MethodReturnsStruct_Source());
       global::System.Threading.Interlocked.CompareExchange(ref this._MethodReturnsStruct, value, null);
@@ -74,9 +74,9 @@ internal sealed class TheClass
   {
     get
     {
-      if (this._PropertyReturnsStruct == null)
+      if (_PropertyReturnsStruct == null)
       {
-        var value = new StrongBox<Guid>(this.PropertyReturnsStruct_Source);
+        var value = new StrongBox<Guid>(PropertyReturnsStruct_Source);
         global::System.Threading.Interlocked.CompareExchange(ref this._PropertyReturnsStruct, value, null);
       }
       return _PropertyReturnsStruct!.Value;

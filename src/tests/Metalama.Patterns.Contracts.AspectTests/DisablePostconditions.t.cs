@@ -10,7 +10,7 @@ public class C
   {
     get
     {
-      return this._p;
+      return _p;
     }
     set
     {
@@ -18,7 +18,7 @@ public class C
       {
         throw new ArgumentException("The 'P' property must not be null or empty.", "value");
       }
-      this._p = value;
+      _p = value;
     }
   }
   public void M([NotEmpty] string a, [NotEmpty] out string b)

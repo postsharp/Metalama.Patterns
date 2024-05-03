@@ -25,8 +25,8 @@ internal class Target
   public async Task<ProtectedResource?> UpdateProtectedResourceAsync(int x, int y, UpdateProtectedResource update)
   {
     var result = await UpdateProtectedResourceAsync_Source(x, y, update);
-    await CachingServiceExtensions.InvalidateAsync(this._cachingService!, Target._methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632![0], this, new object[] { x, y, 0 }, default(CancellationToken));
-    await CachingServiceExtensions.InvalidateAsync(this._cachingService!, Target._methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632![1], this, new object[] { y, 0, x }, default(CancellationToken));
+    await _cachingService!.InvalidateAsync(_methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632![0], this, new object[] { x, y, 0 }, default(CancellationToken));
+    await _cachingService!.InvalidateAsync(_methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632![1], this, new object[] { y, 0, x }, default(CancellationToken));
     return result;
   }
   private async Task<ProtectedResource?> UpdateProtectedResourceAsync_Source(int x, int y, UpdateProtectedResource update)
@@ -38,8 +38,8 @@ internal class Target
   public async Task<ProtectedResource?> UpdateProtectedResource2Async(UpdateProtectedResource update, int y, int x)
   {
     var result = await UpdateProtectedResource2Async_Source(update, y, x);
-    await CachingServiceExtensions.InvalidateAsync(this._cachingService!, Target._methodsInvalidatedBy_UpdateProtectedResource2Async_EF4B99F69BA2C549913F60A9CBDD6F66![0], this, new object[] { x, y, 0 }, default(CancellationToken));
-    await CachingServiceExtensions.InvalidateAsync(this._cachingService!, Target._methodsInvalidatedBy_UpdateProtectedResource2Async_EF4B99F69BA2C549913F60A9CBDD6F66![1], this, new object[] { y, 0, x }, default(CancellationToken));
+    await _cachingService!.InvalidateAsync(_methodsInvalidatedBy_UpdateProtectedResource2Async_EF4B99F69BA2C549913F60A9CBDD6F66![0], this, new object[] { x, y, 0 }, default(CancellationToken));
+    await _cachingService!.InvalidateAsync(_methodsInvalidatedBy_UpdateProtectedResource2Async_EF4B99F69BA2C549913F60A9CBDD6F66![1], this, new object[] { y, 0, x }, default(CancellationToken));
     return result;
   }
   private async Task<ProtectedResource?> UpdateProtectedResource2Async_Source(UpdateProtectedResource update, int y, int x)
@@ -53,17 +53,17 @@ internal class Target
   private static MethodInfo[] _methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632;
   static Target()
   {
-    Target._cacheRegistration_GetResourceName1 = CachedMethodMetadata.Register(RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!, "Target.GetResourceName1(int, int, int)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, true);
-    Target._cacheRegistration_GetResourceName2 = CachedMethodMetadata.Register(RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!, "Target.GetResourceName2(int, string, int)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, true);
-    Target._methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632 = new MethodInfo[]
+    _cacheRegistration_GetResourceName1 = CachedMethodMetadata.Register(typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!.ThrowIfMissing("Target.GetResourceName1(int, int, int)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, true);
+    _cacheRegistration_GetResourceName2 = CachedMethodMetadata.Register(typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!.ThrowIfMissing("Target.GetResourceName2(int, string, int)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, true);
+    _methodsInvalidatedBy_UpdateProtectedResourceAsync_23BEB20FE3CE3EBDD9C65F59C43F5632 = new MethodInfo[]
     {
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!, "Target.GetResourceName1(int, int, int)"),
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!, "Target.GetResourceName2(int, string, int)")
+      typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!.ThrowIfMissing("Target.GetResourceName1(int, int, int)"),
+      typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!.ThrowIfMissing("Target.GetResourceName2(int, string, int)")
     };
-    Target._methodsInvalidatedBy_UpdateProtectedResource2Async_EF4B99F69BA2C549913F60A9CBDD6F66 = new MethodInfo[]
+    _methodsInvalidatedBy_UpdateProtectedResource2Async_EF4B99F69BA2C549913F60A9CBDD6F66 = new MethodInfo[]
     {
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!, "Target.GetResourceName1(int, int, int)"),
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!, "Target.GetResourceName2(int, string, int)")
+      typeof(Target).GetMethod("GetResourceName1", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(int), typeof(int) }, null)!.ThrowIfMissing("Target.GetResourceName1(int, int, int)"),
+      typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!.ThrowIfMissing("Target.GetResourceName2(int, string, int)")
     };
   }
   public Target(ICachingService? cachingService = default)

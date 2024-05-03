@@ -17,7 +17,7 @@ internal class Target
   public async Task<ProtectedResource?> UpdateProtectedResourceAsync(Guid resourceId, UpdateProtectedResource update)
   {
     var result = await UpdateProtectedResourceAsync_Source(resourceId, update);
-    await CachingServiceExtensions.InvalidateAsync(this._cachingService!, Target._methodsInvalidatedBy_UpdateProtectedResourceAsync_AE10A3168F93BA6A187A7E438DE50A40![0], this, new object[] { resourceId }, default(CancellationToken));
+    await _cachingService!.InvalidateAsync(_methodsInvalidatedBy_UpdateProtectedResourceAsync_AE10A3168F93BA6A187A7E438DE50A40![0], this, new object[] { resourceId }, default(CancellationToken));
     return result;
   }
   private async Task<ProtectedResource?> UpdateProtectedResourceAsync_Source(Guid resourceId, UpdateProtectedResource update)
@@ -28,7 +28,7 @@ internal class Target
   public async Task<ProtectedResource?> UpdateProtectedResource2Async(UpdateProtectedResource update, Guid resourceId)
   {
     var result = await UpdateProtectedResource2Async_Source(update, resourceId);
-    await CachingServiceExtensions.InvalidateAsync(this._cachingService!, Target._methodsInvalidatedBy_UpdateProtectedResource2Async_5D88BBAC730DC5F67DE5A9E4107C1BE6![0], this, new object[] { resourceId }, default(CancellationToken));
+    await _cachingService!.InvalidateAsync(_methodsInvalidatedBy_UpdateProtectedResource2Async_5D88BBAC730DC5F67DE5A9E4107C1BE6![0], this, new object[] { resourceId }, default(CancellationToken));
     return result;
   }
   private async Task<ProtectedResource?> UpdateProtectedResource2Async_Source(UpdateProtectedResource update, Guid resourceId)
@@ -41,14 +41,14 @@ internal class Target
   private static MethodInfo[] _methodsInvalidatedBy_UpdateProtectedResourceAsync_AE10A3168F93BA6A187A7E438DE50A40;
   static Target()
   {
-    Target._cacheRegistration_GetResourceNameAsync = CachedMethodMetadata.Register(RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!, "Target.GetResourceNameAsync(Guid)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, true);
-    Target._methodsInvalidatedBy_UpdateProtectedResourceAsync_AE10A3168F93BA6A187A7E438DE50A40 = new MethodInfo[]
+    _cacheRegistration_GetResourceNameAsync = CachedMethodMetadata.Register(typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!.ThrowIfMissing("Target.GetResourceNameAsync(Guid)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, true);
+    _methodsInvalidatedBy_UpdateProtectedResourceAsync_AE10A3168F93BA6A187A7E438DE50A40 = new MethodInfo[]
     {
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!, "Target.GetResourceNameAsync(Guid)")
+      typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!.ThrowIfMissing("Target.GetResourceNameAsync(Guid)")
     };
-    Target._methodsInvalidatedBy_UpdateProtectedResource2Async_5D88BBAC730DC5F67DE5A9E4107C1BE6 = new MethodInfo[]
+    _methodsInvalidatedBy_UpdateProtectedResource2Async_5D88BBAC730DC5F67DE5A9E4107C1BE6 = new MethodInfo[]
     {
-      RunTimeHelpers.ThrowIfMissing(typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!, "Target.GetResourceNameAsync(Guid)")
+      typeof(Target).GetMethod("GetResourceNameAsync", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Guid) }, null)!.ThrowIfMissing("Target.GetResourceNameAsync(Guid)")
     };
   }
   public Target(ICachingService? cachingService = default)

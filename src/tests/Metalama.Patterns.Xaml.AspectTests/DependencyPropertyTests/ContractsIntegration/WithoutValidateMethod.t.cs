@@ -13,20 +13,19 @@ internal class WithoutValidateMethod : DependencyObject
     }
     set
     {
-      this.SetValue(WithoutValidateMethod.NameProperty, value);
+      this.SetValue(NameProperty, value);
     }
   }
   public static readonly DependencyProperty NameProperty;
   static WithoutValidateMethod()
   {
-    object CoerceValue_1(DependencyObject d, object value)
-    {
-      value = WithoutValidateMethod.ApplyNameContracts((string)value);
-      return value;
-    }
     var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    WithoutValidateMethod.NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(WithoutValidateMethod), metadata);
+    metadata.CoerceValueCallback = new CoerceValueCallback((d, value) =>
+    {
+      value = ApplyNameContracts((string)value);
+      return value;
+    });
+    NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(WithoutValidateMethod), metadata);
   }
   private static string ApplyNameContracts(string value)
   {

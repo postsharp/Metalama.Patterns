@@ -11,7 +11,7 @@ public partial class C11 : C10
     switch (propertyName)
     {
       case "C10P1":
-        this.OnPropertyChanged("C11P1");
+        OnPropertyChanged("C11P1");
         break;
     }
     base.OnPropertyChanged(propertyName);
@@ -28,20 +28,20 @@ public abstract partial class C10 : INotifyPropertyChanged
   {
     get
     {
-      return this._c10P1;
+      return _c10P1;
     }
     set
     {
-      if (this._c10P1 != value)
+      if (_c10P1 != value)
       {
-        this._c10P1 = value;
-        this.OnPropertyChanged("C10P1");
+        _c10P1 = value;
+        OnPropertyChanged("C10P1");
       }
     }
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

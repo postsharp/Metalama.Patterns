@@ -6,20 +6,20 @@ public sealed class SealedInpcAutoPropertyNoRefs : INotifyPropertyChanged
   {
     get
     {
-      return this._x;
+      return _x;
     }
     set
     {
-      if (!object.ReferenceEquals(value, this._x))
+      if (!object.ReferenceEquals(value, _x))
       {
-        this._x = value;
-        this.OnPropertyChanged("X");
+        _x = value;
+        OnPropertyChanged("X");
       }
     }
   }
   private void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

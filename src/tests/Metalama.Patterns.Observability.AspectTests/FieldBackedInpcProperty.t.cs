@@ -6,21 +6,21 @@ public class FieldBackedInpcProperty : INotifyPropertyChanged
   {
     get
     {
-      return this._x1;
+      return _x1;
     }
     set
     {
-      if (!object.ReferenceEquals(value, this._x1))
+      if (!object.ReferenceEquals(value, _x1))
       {
-        var oldValue = this._x1;
+        var oldValue = _x1;
         if (oldValue != null)
         {
-          oldValue.PropertyChanged -= this._handle_xPropertyChanged;
+          oldValue.PropertyChanged -= _handle_xPropertyChanged;
         }
-        this._x1 = value;
-        this.OnPropertyChanged("P1");
-        this.OnPropertyChanged("P2");
-        this.SubscribeTo_x(value);
+        _x1 = value;
+        OnPropertyChanged("P1");
+        OnPropertyChanged("P2");
+        SubscribeTo_x(value);
       }
     }
   }
@@ -29,14 +29,14 @@ public class FieldBackedInpcProperty : INotifyPropertyChanged
   private PropertyChangedEventHandler? _handle_xPropertyChanged;
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   private void SubscribeTo_x(A value)
   {
     if (value != null)
     {
-      this._handle_xPropertyChanged ??= HandlePropertyChanged;
-      value.PropertyChanged += this._handle_xPropertyChanged;
+      _handle_xPropertyChanged ??= HandlePropertyChanged;
+      value.PropertyChanged += _handle_xPropertyChanged;
     }
     void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -45,7 +45,7 @@ public class FieldBackedInpcProperty : INotifyPropertyChanged
         switch (propertyName)
         {
           case "A1":
-            this.OnPropertyChanged("P2");
+            OnPropertyChanged("P2");
             break;
         }
       }
