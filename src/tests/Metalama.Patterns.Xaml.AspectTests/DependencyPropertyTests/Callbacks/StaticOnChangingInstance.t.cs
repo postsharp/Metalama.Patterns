@@ -17,7 +17,7 @@ public partial class StaticOnChangingInstance : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangingInstance.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private static void OnFooChanging(StaticOnChangingInstance instance)
@@ -32,7 +32,7 @@ public partial class StaticOnChangingInstance : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangingInstance.AcceptsDependencyObjectProperty, value);
+      this.SetValue(AcceptsDependencyObjectProperty, value);
     }
   }
   private static void OnAcceptsDependencyObjectChanging(DependencyObject instance)
@@ -47,20 +47,20 @@ public partial class StaticOnChangingInstance : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangingInstance.AcceptsObjectProperty, value);
+      this.SetValue(AcceptsObjectProperty, value);
     }
   }
   private static void OnAcceptsObjectChanging(object instance)
   {
   }
-  public static readonly DependencyProperty AcceptsDependencyObjectProperty = StaticOnChangingInstance.CreateAcceptsDependencyObjectProperty();
-  public static readonly DependencyProperty AcceptsObjectProperty = StaticOnChangingInstance.CreateAcceptsObjectProperty();
-  public static readonly DependencyProperty FooProperty = StaticOnChangingInstance.CreateFooProperty();
+  public static readonly DependencyProperty AcceptsDependencyObjectProperty = CreateAcceptsDependencyObjectProperty();
+  public static readonly DependencyProperty AcceptsObjectProperty = CreateAcceptsObjectProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateAcceptsDependencyObjectProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      StaticOnChangingInstance.OnAcceptsDependencyObjectChanging(d);
+      OnAcceptsDependencyObjectChanging(d);
       return value;
     }
     var metadata = new PropertyMetadata();
@@ -71,7 +71,7 @@ public partial class StaticOnChangingInstance : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      StaticOnChangingInstance.OnAcceptsObjectChanging(d);
+      OnAcceptsObjectChanging(d);
       return value;
     }
     var metadata = new PropertyMetadata();
@@ -82,7 +82,7 @@ public partial class StaticOnChangingInstance : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      StaticOnChangingInstance.OnFooChanging((StaticOnChangingInstance)d);
+      OnFooChanging((StaticOnChangingInstance)d);
       return value;
     }
     var metadata = new PropertyMetadata();

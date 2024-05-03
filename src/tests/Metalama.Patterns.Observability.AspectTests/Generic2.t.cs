@@ -13,22 +13,22 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
   {
     get
     {
-      return this._d1;
+      return _d1;
     }
     set
     {
-      if (!object.ReferenceEquals(value, this._d1))
+      if (!object.ReferenceEquals(value, _d1))
       {
-        var oldValue = this._d1;
+        var oldValue = _d1;
         if (oldValue != null)
         {
-          oldValue.PropertyChanged -= this._handleD1PropertyChanged;
+          oldValue.PropertyChanged -= _handleD1PropertyChanged;
         }
-        this._d1 = value;
-        this.OnObservablePropertyChanged("D1", oldValue, value);
-        this.OnPropertyChanged("FooX");
-        this.OnPropertyChanged("D1");
-        this.SubscribeToD1(value);
+        _d1 = value;
+        OnObservablePropertyChanged("D1", oldValue, value);
+        OnPropertyChanged("FooX");
+        OnPropertyChanged("D1");
+        SubscribeToD1(value);
       }
     }
   }
@@ -44,14 +44,14 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   private void SubscribeToD1(T value)
   {
     if (value != null)
     {
-      this._handleD1PropertyChanged ??= HandlePropertyChanged;
-      value.PropertyChanged += this._handleD1PropertyChanged;
+      _handleD1PropertyChanged ??= HandlePropertyChanged;
+      value.PropertyChanged += _handleD1PropertyChanged;
     }
     void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -60,11 +60,11 @@ public partial class D<T> : INotifyPropertyChanged where T : class, INotifyPrope
         switch (propertyName)
         {
           case "X":
-            this.OnPropertyChanged("FooX");
-            this.OnChildPropertyChanged("D1", "X");
+            OnPropertyChanged("FooX");
+            OnChildPropertyChanged("D1", "X");
             break;
           default:
-            this.OnChildPropertyChanged("D1", propertyName);
+            OnChildPropertyChanged("D1", propertyName);
             break;
         }
       }
@@ -80,7 +80,7 @@ public partial class DD<T> : D<T> where T : class, INotifyPropertyChanged, IFoo
     switch (parentPropertyPath, propertyName)
     {
       case ("D1", "Y"):
-        this.OnPropertyChanged("FooY");
+        OnPropertyChanged("FooY");
         base.OnChildPropertyChanged(parentPropertyPath, propertyName);
         break;
     }
@@ -91,7 +91,7 @@ public partial class DD<T> : D<T> where T : class, INotifyPropertyChanged, IFoo
     switch (propertyName)
     {
       case "D1":
-        this.OnPropertyChanged("FooY");
+        OnPropertyChanged("FooY");
         break;
     }
     base.OnPropertyChanged(propertyName);
@@ -105,14 +105,14 @@ public partial class MyFoo : IFoo, INotifyPropertyChanged
   {
     get
     {
-      return this._x;
+      return _x;
     }
     set
     {
-      if (this._x != value)
+      if (_x != value)
       {
-        this._x = value;
-        this.OnPropertyChanged("X");
+        _x = value;
+        OnPropertyChanged("X");
       }
     }
   }
@@ -121,20 +121,20 @@ public partial class MyFoo : IFoo, INotifyPropertyChanged
   {
     get
     {
-      return this._y;
+      return _y;
     }
     set
     {
-      if (this._y != value)
+      if (_y != value)
       {
-        this._y = value;
-        this.OnPropertyChanged("Y");
+        _y = value;
+        OnPropertyChanged("Y");
       }
     }
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

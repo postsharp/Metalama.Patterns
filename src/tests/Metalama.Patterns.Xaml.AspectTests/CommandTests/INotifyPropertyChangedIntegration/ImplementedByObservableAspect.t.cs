@@ -18,20 +18,20 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
   {
     get
     {
-      return this._canExecuteFoo1;
+      return _canExecuteFoo1;
     }
     set
     {
-      if (this._canExecuteFoo1 != value)
+      if (_canExecuteFoo1 != value)
       {
-        this._canExecuteFoo1 = value;
-        this.OnPropertyChanged("CanExecuteFoo1");
+        _canExecuteFoo1 = value;
+        OnPropertyChanged("CanExecuteFoo1");
       }
     }
   }
   public ImplementedByObservableAspect()
   {
-    this.Foo1Command = new DelegateCommand(_ => this.ExecuteFoo1(), _ => CanExecuteFoo1, this, "CanExecuteFoo1");
+    Foo1Command = new DelegateCommand(_ => ExecuteFoo1(), _ => CanExecuteFoo1, this, "CanExecuteFoo1");
   }
   public ICommand Foo1Command { get; }
   protected virtual void OnPropertyChanged(string propertyName)
@@ -51,20 +51,20 @@ public class ImplementedByBase : ImplementedByObservableAspect
   {
     get
     {
-      return this._canExecuteFoo2;
+      return _canExecuteFoo2;
     }
     set
     {
-      if (this._canExecuteFoo2 != value)
+      if (_canExecuteFoo2 != value)
       {
-        this._canExecuteFoo2 = value;
-        this.OnPropertyChanged("CanExecuteFoo2");
+        _canExecuteFoo2 = value;
+        OnPropertyChanged("CanExecuteFoo2");
       }
     }
   }
   public ImplementedByBase()
   {
-    this.Foo2Command = new DelegateCommand(_ => this.ExecuteFoo2(), _ => CanExecuteFoo2, this, "CanExecuteFoo2");
+    Foo2Command = new DelegateCommand(_ => ExecuteFoo2(), _ => CanExecuteFoo2, this, "CanExecuteFoo2");
   }
   public ICommand Foo2Command { get; }
   protected override void OnPropertyChanged(string propertyName)

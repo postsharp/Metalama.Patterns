@@ -42,7 +42,7 @@ public class TestClass
   {
     get
     {
-      return this._property;
+      return _property;
     }
     set
     {
@@ -54,7 +54,7 @@ public class TestClass
       {
         throw new ArgumentException("The 'Property' property must not be null or empty.", "value");
       }
-      this._property = value;
+      _property = value;
     }
   }
 }

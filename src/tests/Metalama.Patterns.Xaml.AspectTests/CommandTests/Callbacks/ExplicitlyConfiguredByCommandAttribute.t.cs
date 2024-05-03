@@ -21,9 +21,9 @@ public class ExplicitlyConfiguredByCommandAttribute
   private bool CanExec2 => true;
   public ExplicitlyConfiguredByCommandAttribute()
   {
-    this.Exec1Command = new DelegateCommand(_ => this.Exec1(), _ => this.SomeWeirdName1());
-    this.ConfiguredCanExecuteMethodCommand = new DelegateCommand(_ => this.ExecuteConfiguredCanExecuteMethod(), _ => this.CanExec1());
-    this.ConfiguredCanExecutePropertyCommand = new DelegateCommand(_ => this.ExecuteConfiguredCanExecuteProperty(), _ => CanExec2);
+    Exec1Command = new DelegateCommand(_ => Exec1(), _ => SomeWeirdName1());
+    ConfiguredCanExecuteMethodCommand = new DelegateCommand(_ => ExecuteConfiguredCanExecuteMethod(), _ => CanExec1());
+    ConfiguredCanExecutePropertyCommand = new DelegateCommand(_ => ExecuteConfiguredCanExecuteProperty(), _ => CanExec2);
   }
   public ICommand ConfiguredCanExecuteMethodCommand { get; }
   public ICommand ConfiguredCanExecutePropertyCommand { get; }

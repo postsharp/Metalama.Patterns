@@ -13,18 +13,18 @@ public partial class StaticOnChangedDependencyProperty : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangedDependencyProperty.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private static void OnFooChanged(DependencyProperty d)
   {
   }
-  public static readonly DependencyProperty FooProperty = StaticOnChangedDependencyProperty.CreateFooProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateFooProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedDependencyProperty.OnFooChanged(StaticOnChangedDependencyProperty.FooProperty);
+      OnFooChanged(FooProperty);
     }
     return DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedDependencyProperty), new PropertyMetadata(PropertyChanged));
   }

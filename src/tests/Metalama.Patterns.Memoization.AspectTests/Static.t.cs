@@ -11,7 +11,7 @@ internal static class TheClass
   [Memoize]
   public static string NonNullableMethod()
   {
-    if (TheClass._NonNullableMethod == null)
+    if (_NonNullableMethod == null)
     {
       string value;
       value = _counter++.ToString(CultureInfo.InvariantCulture);
@@ -22,7 +22,7 @@ internal static class TheClass
   [Memoize]
   public static string? NullableMethod()
   {
-    if (TheClass._NullableMethod == null)
+    if (_NullableMethod == null)
     {
       var value = new StrongBox<string?>(TheClass.NullableMethod_Source());
       global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._NullableMethod, value, null);
@@ -35,7 +35,7 @@ internal static class TheClass
   {
     get
     {
-      if (TheClass._NonNullableProperty == null)
+      if (_NonNullableProperty == null)
       {
         string value;
         value = _counter++.ToString(CultureInfo.InvariantCulture);
@@ -49,9 +49,9 @@ internal static class TheClass
   {
     get
     {
-      if (TheClass._NullableProperty == null)
+      if (_NullableProperty == null)
       {
-        var value = new StrongBox<string?>(TheClass.NullableProperty_Source);
+        var value = new StrongBox<string?>(NullableProperty_Source);
         global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._NullableProperty, value, null);
       }
       return _NullableProperty!.Value;
@@ -61,7 +61,7 @@ internal static class TheClass
   [Memoize]
   public static Guid MethodReturnsStruct()
   {
-    if (TheClass._MethodReturnsStruct == null)
+    if (_MethodReturnsStruct == null)
     {
       var value = new StrongBox<Guid>(TheClass.MethodReturnsStruct_Source());
       global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._MethodReturnsStruct, value, null);
@@ -74,9 +74,9 @@ internal static class TheClass
   {
     get
     {
-      if (TheClass._PropertyReturnsStruct == null)
+      if (_PropertyReturnsStruct == null)
       {
-        var value = new StrongBox<Guid>(TheClass.PropertyReturnsStruct_Source);
+        var value = new StrongBox<Guid>(PropertyReturnsStruct_Source);
         global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._PropertyReturnsStruct, value, null);
       }
       return _PropertyReturnsStruct!.Value;

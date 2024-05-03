@@ -15,13 +15,13 @@ public class BaseClass
   {
     get
     {
-      return this._a;
+      return _a;
     }
     set
     {
       try
       {
-        this._a = value;
+        _a = value;
         return;
       }
       finally
@@ -38,13 +38,13 @@ public class BaseClass
   {
     get
     {
-      return this._b;
+      return _b;
     }
     set
     {
       try
       {
-        this._b = value;
+        _b = value;
         return;
       }
       finally
@@ -88,7 +88,7 @@ public class BaseClass
   }
   protected virtual void VerifyInvariants()
   {
-    this.TheInvariant();
+    TheInvariant();
   }
 }
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052

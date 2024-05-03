@@ -8,20 +8,20 @@ public class NonInpcAutoProperty : INotifyPropertyChanged
   {
     get
     {
-      return this._x;
+      return _x;
     }
     set
     {
-      if (this._x != value)
+      if (_x != value)
       {
-        this._x = value;
-        this.OnPropertyChanged("X");
+        _x = value;
+        OnPropertyChanged("X");
       }
     }
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

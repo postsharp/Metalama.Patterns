@@ -9,16 +9,16 @@ public class InpcAutoPropertyWithInitializerNoRefs : INotifyPropertyChanged
   {
     get
     {
-      return this._x;
+      return _x;
     }
     set
     {
-      if (!object.ReferenceEquals(value, this._x))
+      if (!object.ReferenceEquals(value, _x))
       {
-        var oldValue = this._x;
-        this._x = value;
-        this.OnObservablePropertyChanged("X", (INotifyPropertyChanged? )oldValue, value);
-        this.OnPropertyChanged("X");
+        var oldValue = _x;
+        _x = value;
+        OnObservablePropertyChanged("X", (INotifyPropertyChanged? )oldValue, value);
+        OnPropertyChanged("X");
       }
     }
   }
@@ -28,7 +28,7 @@ public class InpcAutoPropertyWithInitializerNoRefs : INotifyPropertyChanged
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

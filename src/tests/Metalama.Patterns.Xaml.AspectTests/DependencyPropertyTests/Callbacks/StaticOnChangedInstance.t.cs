@@ -17,7 +17,7 @@ public partial class StaticOnChangedInstance : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangedInstance.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private static void OnFooChanged(StaticOnChangedInstance instance)
@@ -32,7 +32,7 @@ public partial class StaticOnChangedInstance : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangedInstance.AcceptsDependencyObjectProperty, value);
+      this.SetValue(AcceptsDependencyObjectProperty, value);
     }
   }
   private static void OnAcceptsDependencyObjectChanged(DependencyObject instance)
@@ -47,20 +47,20 @@ public partial class StaticOnChangedInstance : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangedInstance.AcceptsObjectProperty, value);
+      this.SetValue(AcceptsObjectProperty, value);
     }
   }
   private static void OnAcceptsObjectChanged(object instance)
   {
   }
-  public static readonly DependencyProperty AcceptsDependencyObjectProperty = StaticOnChangedInstance.CreateAcceptsDependencyObjectProperty();
-  public static readonly DependencyProperty AcceptsObjectProperty = StaticOnChangedInstance.CreateAcceptsObjectProperty();
-  public static readonly DependencyProperty FooProperty = StaticOnChangedInstance.CreateFooProperty();
+  public static readonly DependencyProperty AcceptsDependencyObjectProperty = CreateAcceptsDependencyObjectProperty();
+  public static readonly DependencyProperty AcceptsObjectProperty = CreateAcceptsObjectProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateAcceptsDependencyObjectProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedInstance.OnAcceptsDependencyObjectChanged(d);
+      OnAcceptsDependencyObjectChanged(d);
     }
     return DependencyProperty.Register("AcceptsDependencyObject", typeof(int), typeof(StaticOnChangedInstance), new PropertyMetadata(PropertyChanged));
   }
@@ -68,7 +68,7 @@ public partial class StaticOnChangedInstance : DependencyObject
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedInstance.OnAcceptsObjectChanged(d);
+      OnAcceptsObjectChanged(d);
     }
     return DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticOnChangedInstance), new PropertyMetadata(PropertyChanged));
   }
@@ -76,7 +76,7 @@ public partial class StaticOnChangedInstance : DependencyObject
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedInstance.OnFooChanged((StaticOnChangedInstance)d);
+      OnFooChanged((StaticOnChangedInstance)d);
     }
     return DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedInstance), new PropertyMetadata(PropertyChanged));
   }

@@ -9,7 +9,7 @@ public class C
   {
     get
     {
-      var returnValue = this._p;
+      var returnValue = _p;
       if (returnValue.Length <= 0)
       {
         throw new PostconditionViolationException("The 'P' property must not be null or empty.");
@@ -18,7 +18,7 @@ public class C
     }
     set
     {
-      this._p = value;
+      _p = value;
     }
   }
   public void M([NotEmpty] string a, [NotEmpty] out string b)

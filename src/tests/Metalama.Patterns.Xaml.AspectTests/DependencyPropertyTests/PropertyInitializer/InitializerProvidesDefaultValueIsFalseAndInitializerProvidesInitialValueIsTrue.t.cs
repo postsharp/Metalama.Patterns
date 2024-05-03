@@ -20,13 +20,13 @@ public class InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitial
     }
     set
     {
-      this.SetValue(InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty = InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue.CreateFooProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   public InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue()
   {
-    this.Foo = InitMethod();
+    Foo = InitMethod();
   }
   private static DependencyProperty CreateFooProperty()
   {

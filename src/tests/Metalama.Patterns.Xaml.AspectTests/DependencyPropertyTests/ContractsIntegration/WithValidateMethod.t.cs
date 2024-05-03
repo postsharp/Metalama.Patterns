@@ -13,11 +13,11 @@ internal class WithValidateMethod : DependencyObject
     }
     set
     {
-      this.SetValue(WithValidateMethod.NameProperty, value);
+      this.SetValue(NameProperty, value);
     }
   }
   private bool ValidateName(string name) => name.Length > 3;
-  public static readonly DependencyProperty NameProperty = WithValidateMethod.CreateNameProperty();
+  public static readonly DependencyProperty NameProperty = CreateNameProperty();
   private static string ApplyNameContracts(string value)
   {
     value = value.Trim();
@@ -27,7 +27,7 @@ internal class WithValidateMethod : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      value = WithValidateMethod.ApplyNameContracts((string)value);
+      value = ApplyNameContracts((string)value);
       if (!((WithValidateMethod)d).ValidateName((string)value))
       {
         throw new ArgumentException("Invalid property value.", "value");

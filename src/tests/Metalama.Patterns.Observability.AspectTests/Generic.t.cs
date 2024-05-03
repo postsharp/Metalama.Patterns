@@ -8,16 +8,16 @@ public partial class A<T> : INotifyPropertyChanged where T : class, INotifyPrope
   {
     get
     {
-      return this._a1;
+      return _a1;
     }
     set
     {
-      if (!object.ReferenceEquals(value, this._a1))
+      if (!object.ReferenceEquals(value, _a1))
       {
-        var oldValue = this._a1;
-        this._a1 = value;
-        this.OnObservablePropertyChanged("A1", (INotifyPropertyChanged? )oldValue, value);
-        this.OnPropertyChanged("A1");
+        var oldValue = _a1;
+        _a1 = value;
+        OnObservablePropertyChanged("A1", (INotifyPropertyChanged? )oldValue, value);
+        OnPropertyChanged("A1");
       }
     }
   }
@@ -27,7 +27,7 @@ public partial class A<T> : INotifyPropertyChanged where T : class, INotifyPrope
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }
@@ -45,12 +45,12 @@ public partial class AOfSimple : A<Simple>
     {
       if (oldValue != null)
       {
-        oldValue.PropertyChanged -= this._handleA1PropertyChanged;
+        oldValue.PropertyChanged -= _handleA1PropertyChanged;
       }
       if (newValue != null)
       {
-        this._handleA1PropertyChanged ??= HandleChildPropertyChanged;
-        newValue.PropertyChanged += this._handleA1PropertyChanged;
+        _handleA1PropertyChanged ??= HandleChildPropertyChanged;
+        newValue.PropertyChanged += _handleA1PropertyChanged;
         void HandleChildPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
           {
@@ -58,17 +58,17 @@ public partial class AOfSimple : A<Simple>
             switch (propertyName)
             {
               case "S1":
-                this.OnPropertyChanged("RefA1S1");
-                this.OnChildPropertyChanged("A1", "S1");
+                OnPropertyChanged("RefA1S1");
+                OnChildPropertyChanged("A1", "S1");
                 break;
               default:
-                this.OnChildPropertyChanged("A1", propertyName);
+                OnChildPropertyChanged("A1", propertyName);
                 break;
             }
           }
         }
       }
-      this.OnPropertyChanged("RefA1S1");
+      OnPropertyChanged("RefA1S1");
     }
     base.OnObservablePropertyChanged(propertyPath, oldValue, newValue);
   }
@@ -85,14 +85,14 @@ public partial class Simple : INotifyPropertyChanged
   {
     get
     {
-      return this._s1;
+      return _s1;
     }
     set
     {
-      if (this._s1 != value)
+      if (_s1 != value)
       {
-        this._s1 = value;
-        this.OnPropertyChanged("S1");
+        _s1 = value;
+        OnPropertyChanged("S1");
       }
     }
   }
@@ -101,14 +101,14 @@ public partial class Simple : INotifyPropertyChanged
   {
     get
     {
-      return this._s2;
+      return _s2;
     }
     set
     {
-      if (this._s2 != value)
+      if (_s2 != value)
       {
-        this._s2 = value;
-        this.OnPropertyChanged("S2");
+        _s2 = value;
+        OnPropertyChanged("S2");
       }
     }
   }
@@ -117,20 +117,20 @@ public partial class Simple : INotifyPropertyChanged
   {
     get
     {
-      return this._s3;
+      return _s3;
     }
     set
     {
-      if (this._s3 != value)
+      if (_s3 != value)
       {
-        this._s3 = value;
-        this.OnPropertyChanged("S3");
+        _s3 = value;
+        OnPropertyChanged("S3");
       }
     }
   }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

@@ -6,21 +6,21 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
   {
     get
     {
-      return this._x;
+      return _x;
     }
     set
     {
-      if (!object.ReferenceEquals(value, this._x))
+      if (!object.ReferenceEquals(value, _x))
       {
-        var oldValue = this._x;
+        var oldValue = _x;
         if (oldValue != null)
         {
-          oldValue.PropertyChanged -= this._handleXPropertyChanged;
+          oldValue.PropertyChanged -= _handleXPropertyChanged;
         }
-        this._x = value;
-        this.OnPropertyChanged("Y");
-        this.OnPropertyChanged("X");
-        this.SubscribeToX(value);
+        _x = value;
+        OnPropertyChanged("Y");
+        OnPropertyChanged("X");
+        SubscribeToX(value);
       }
     }
   }
@@ -32,14 +32,14 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
   }
   private void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   private void SubscribeToX(SimpleInpcByHand value)
   {
     if (value != null)
     {
-      this._handleXPropertyChanged ??= HandlePropertyChanged;
-      value.PropertyChanged += this._handleXPropertyChanged;
+      _handleXPropertyChanged ??= HandlePropertyChanged;
+      value.PropertyChanged += _handleXPropertyChanged;
     }
     void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -48,11 +48,11 @@ public sealed class SealedInpcAutoPropertyWithRef : INotifyPropertyChanged
         switch (propertyName)
         {
           case "A":
-            this.OnPropertyChanged("Y");
-            this.OnChildPropertyChanged("X", "A");
+            OnPropertyChanged("Y");
+            OnChildPropertyChanged("X", "A");
             break;
           default:
-            this.OnChildPropertyChanged("X", propertyName);
+            OnChildPropertyChanged("X", propertyName);
             break;
         }
       }

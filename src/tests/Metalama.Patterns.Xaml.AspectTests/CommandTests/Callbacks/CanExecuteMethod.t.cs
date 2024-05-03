@@ -25,10 +25,10 @@ public class CanExecuteMethod
   private static bool CanExecuteStaticWithParameter(int v) => true;
   public CanExecuteMethod()
   {
-    this.InstanceNoParametersCommand = new DelegateCommand(_ => this.ExecuteInstanceNoParameters(), _ => this.CanExecuteInstanceNoParameters());
-    this.StaticNoParametersCommand = new DelegateCommand(_ => CanExecuteMethod.ExecuteStaticNoParameters(), _ => CanExecuteMethod.CanExecuteStaticNoParameters());
-    this.InstanceWithParameterCommand = new DelegateCommand(parameter_1 => this.ExecuteInstanceWithParameter((int)parameter_1), parameter => this.CanExecuteInstanceWithParameter((int)parameter));
-    this.StaticWithParameterCommand = new DelegateCommand(parameter_3 => CanExecuteMethod.ExecuteStaticWithParameter((int)parameter_3), parameter_2 => CanExecuteMethod.CanExecuteStaticWithParameter((int)parameter_2));
+    InstanceNoParametersCommand = new DelegateCommand(_ => ExecuteInstanceNoParameters(), _ => CanExecuteInstanceNoParameters());
+    StaticNoParametersCommand = new DelegateCommand(_ => ExecuteStaticNoParameters(), _ => CanExecuteStaticNoParameters());
+    InstanceWithParameterCommand = new DelegateCommand(parameter_1 => ExecuteInstanceWithParameter((int)parameter_1), parameter => CanExecuteInstanceWithParameter((int)parameter));
+    StaticWithParameterCommand = new DelegateCommand(parameter_3 => ExecuteStaticWithParameter((int)parameter_3), parameter_2 => CanExecuteStaticWithParameter((int)parameter_2));
   }
   public ICommand InstanceNoParametersCommand { get; }
   public ICommand InstanceWithParameterCommand { get; }

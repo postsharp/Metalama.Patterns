@@ -13,10 +13,10 @@ internal class WithoutValidateMethod : DependencyObject
     }
     set
     {
-      this.SetValue(WithoutValidateMethod.NameProperty, value);
+      this.SetValue(NameProperty, value);
     }
   }
-  public static readonly DependencyProperty NameProperty = WithoutValidateMethod.CreateNameProperty();
+  public static readonly DependencyProperty NameProperty = CreateNameProperty();
   private static string ApplyNameContracts(string value)
   {
     value = value.Trim();
@@ -26,7 +26,7 @@ internal class WithoutValidateMethod : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      value = WithoutValidateMethod.ApplyNameContracts((string)value);
+      value = ApplyNameContracts((string)value);
       return value;
     }
     var metadata = new PropertyMetadata();

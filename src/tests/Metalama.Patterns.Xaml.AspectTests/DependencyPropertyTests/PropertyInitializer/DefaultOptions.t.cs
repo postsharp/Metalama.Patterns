@@ -20,10 +20,10 @@ public class DefaultOptions : DependencyObject
     }
     set
     {
-      this.SetValue(DefaultOptions.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty = DefaultOptions.CreateFooProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateFooProperty()
   {
     return DependencyProperty.Register("Foo", typeof(List<int>), typeof(DefaultOptions), new PropertyMetadata(InitMethod()));

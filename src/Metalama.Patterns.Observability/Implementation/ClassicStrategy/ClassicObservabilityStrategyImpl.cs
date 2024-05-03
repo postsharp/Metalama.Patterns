@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Utilities;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Patterns.Observability.Options;
 using System.Diagnostics.CodeAnalysis;
@@ -16,7 +17,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 {
     private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
 
-    private readonly Deferred<ObservabilityTemplateArgs> _templateArgs = new();
+    private readonly Promise<ObservabilityTemplateArgs> _templateArgs = new();
     private readonly ObservabilityOptions _commonOptions;
     private readonly ClassicObservabilityStrategyOptions _classicOptions;
     private readonly Dictionary<IFieldOrProperty, bool> _validateFieldOrPropertyResults = new();
@@ -29,12 +30,12 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     // Useful to see when debugging:
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly bool _baseImplementsInpc;
-    private readonly Deferred<IMethod> _onPropertyChangedMethod = new();
-    private readonly Deferred<IMethod?> _onChildPropertyChangedMethod = new();
-    private readonly Deferred<IMethod?>? _onObservablePropertyChangedMethod;
+    private readonly Promise<IMethod> _onPropertyChangedMethod = new();
+    private readonly Promise<IMethod?> _onChildPropertyChangedMethod = new();
+    private readonly Promise<IMethod?>? _onObservablePropertyChangedMethod;
     private readonly List<string> _propertyPathsForOnChildPropertyChangedMethod = new();
     private readonly List<string> _propertyNamesForOnObservablePropertyChangedMethod = new();
-    private readonly Deferred<ClassicObservableTypeInfo> _dependencyTypeNode = new();
+    private readonly Promise<ClassicObservableTypeInfo> _dependencyTypeNode = new();
 
     public InpcInstrumentationKindLookup InpcInstrumentationKindLookup { get; }
 
@@ -71,7 +72,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 
         if ( useOnObservablePropertyChangedMethod )
         {
-            this._onObservablePropertyChangedMethod = new Deferred<IMethod?>();
+            this._onObservablePropertyChangedMethod = new Promise<IMethod?>();
         }
     }
 
@@ -651,7 +652,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 
     private IField GetOrCreateLastValueField( ClassicObservableExpression node )
     {
-        if ( !node.LastValueField.HasBeenSet )
+        if ( !node.LastValueField.IsResolved )
         {
             var lastValueFieldName = this.GetAndReserveUnusedMemberName( $"_last{node.ContiguousPropertyPath}" );
 
@@ -671,7 +672,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 
     private IField GetOrCreateHandlerField( ClassicObservableExpression node )
     {
-        if ( !node.HandlerField.HasBeenSet )
+        if ( !node.HandlerField.IsResolved )
         {
             var handlerFieldName = this.GetAndReserveUnusedMemberName( $"_handle{node.ContiguousPropertyPath}PropertyChanged" );
 
@@ -694,7 +695,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     {
         var referenceNode = propertyInfo.RootReferenceNode;
 
-        if ( !referenceNode.SubscribeMethod.HasBeenSet )
+        if ( !referenceNode.SubscribeMethod.IsResolved )
         {
             var handlerField = this.GetOrCreateHandlerField( referenceNode );
 

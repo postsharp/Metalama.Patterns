@@ -13,18 +13,18 @@ public partial class StaticOnChangingNoParameters : DependencyObject
     }
     set
     {
-      this.SetValue(StaticOnChangingNoParameters.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private static void OnFooChanging()
   {
   }
-  public static readonly DependencyProperty FooProperty = StaticOnChangingNoParameters.CreateFooProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateFooProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      StaticOnChangingNoParameters.OnFooChanging();
+      OnFooChanging();
       return value;
     }
     var metadata = new PropertyMetadata();

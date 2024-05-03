@@ -14,10 +14,10 @@ public class ImplicitObjectCreation : DependencyObject
     }
     set
     {
-      this.SetValue(ImplicitObjectCreation.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty = ImplicitObjectCreation.CreateFooProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateFooProperty()
   {
     return DependencyProperty.Register("Foo", typeof(List<int>), typeof(ImplicitObjectCreation), new PropertyMetadata((List<int>)new(3) { 1, 2, 3 }));

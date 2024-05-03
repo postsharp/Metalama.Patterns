@@ -13,13 +13,13 @@ public partial class InstanceOnChangedNoParameters : DependencyObject
     }
     set
     {
-      this.SetValue(InstanceOnChangedNoParameters.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private void OnFooChanged()
   {
   }
-  public static readonly DependencyProperty FooProperty = InstanceOnChangedNoParameters.CreateFooProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateFooProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

@@ -23,7 +23,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
     }
     set
     {
-      this.SetValue(StaticValidateInstanceAndValue.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private static bool ValidateFoo(StaticValidateInstanceAndValue instance, int value) => true;
@@ -36,7 +36,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
     }
     set
     {
-      this.SetValue(StaticValidateInstanceAndValue.AcceptsAssignableForValueProperty, value);
+      this.SetValue(AcceptsAssignableForValueProperty, value);
     }
   }
   private static bool ValidateAcceptsAssignableForValue(StaticValidateInstanceAndValue instance, IEnumerable<int> value) => true;
@@ -49,7 +49,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
     }
     set
     {
-      this.SetValue(StaticValidateInstanceAndValue.AcceptsGenericForValueProperty, value);
+      this.SetValue(AcceptsGenericForValueProperty, value);
     }
   }
   private static bool ValidateAcceptsGenericForValue<T>(StaticValidateInstanceAndValue instance, T value) => true;
@@ -62,7 +62,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
     }
     set
     {
-      this.SetValue(StaticValidateInstanceAndValue.AcceptsObjectForValueProperty, value);
+      this.SetValue(AcceptsObjectForValueProperty, value);
     }
   }
   private static bool ValidateAcceptsObjectForValue(StaticValidateInstanceAndValue instance, object value) => true;
@@ -75,7 +75,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
     }
     set
     {
-      this.SetValue(StaticValidateInstanceAndValue.AcceptsDependencyObjectForInstanceProperty, value);
+      this.SetValue(AcceptsDependencyObjectForInstanceProperty, value);
     }
   }
   private static bool ValidateAcceptsDependencyObjectForInstance(DependencyObject instance, int value) => true;
@@ -88,21 +88,21 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
     }
     set
     {
-      this.SetValue(StaticValidateInstanceAndValue.AcceptsObjectForInstanceProperty, value);
+      this.SetValue(AcceptsObjectForInstanceProperty, value);
     }
   }
   private static bool ValidateAcceptsObjectForInstance(object instance, int value) => true;
-  public static readonly DependencyProperty AcceptsAssignableForValueProperty = StaticValidateInstanceAndValue.CreateAcceptsAssignableForValueProperty();
-  public static readonly DependencyProperty AcceptsDependencyObjectForInstanceProperty = StaticValidateInstanceAndValue.CreateAcceptsDependencyObjectForInstanceProperty();
-  public static readonly DependencyProperty AcceptsGenericForValueProperty = StaticValidateInstanceAndValue.CreateAcceptsGenericForValueProperty();
-  public static readonly DependencyProperty AcceptsObjectForInstanceProperty = StaticValidateInstanceAndValue.CreateAcceptsObjectForInstanceProperty();
-  public static readonly DependencyProperty AcceptsObjectForValueProperty = StaticValidateInstanceAndValue.CreateAcceptsObjectForValueProperty();
-  public static readonly DependencyProperty FooProperty = StaticValidateInstanceAndValue.CreateFooProperty();
+  public static readonly DependencyProperty AcceptsAssignableForValueProperty = CreateAcceptsAssignableForValueProperty();
+  public static readonly DependencyProperty AcceptsDependencyObjectForInstanceProperty = CreateAcceptsDependencyObjectForInstanceProperty();
+  public static readonly DependencyProperty AcceptsGenericForValueProperty = CreateAcceptsGenericForValueProperty();
+  public static readonly DependencyProperty AcceptsObjectForInstanceProperty = CreateAcceptsObjectForInstanceProperty();
+  public static readonly DependencyProperty AcceptsObjectForValueProperty = CreateAcceptsObjectForValueProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateAcceptsAssignableForValueProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateInstanceAndValue.ValidateAcceptsAssignableForValue((StaticValidateInstanceAndValue)d, (List<int>)value))
+      if (!ValidateAcceptsAssignableForValue((StaticValidateInstanceAndValue)d, (List<int>)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
@@ -116,7 +116,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateInstanceAndValue.ValidateAcceptsDependencyObjectForInstance(d, (int)value))
+      if (!ValidateAcceptsDependencyObjectForInstance(d, (int)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
@@ -130,7 +130,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateInstanceAndValue.ValidateAcceptsGenericForValue<int>((StaticValidateInstanceAndValue)d, (int)value))
+      if (!ValidateAcceptsGenericForValue((StaticValidateInstanceAndValue)d, (int)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
@@ -144,7 +144,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateInstanceAndValue.ValidateAcceptsObjectForInstance(d, (int)value))
+      if (!ValidateAcceptsObjectForInstance(d, (int)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
@@ -158,7 +158,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateInstanceAndValue.ValidateAcceptsObjectForValue((StaticValidateInstanceAndValue)d, value))
+      if (!ValidateAcceptsObjectForValue((StaticValidateInstanceAndValue)d, value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
@@ -172,7 +172,7 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!StaticValidateInstanceAndValue.ValidateFoo((StaticValidateInstanceAndValue)d, (int)value))
+      if (!ValidateFoo((StaticValidateInstanceAndValue)d, (int)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }

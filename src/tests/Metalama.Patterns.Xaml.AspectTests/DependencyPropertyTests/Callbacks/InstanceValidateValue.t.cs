@@ -19,7 +19,7 @@ public partial class InstanceValidateValue : DependencyObject
     }
     set
     {
-      this.SetValue(InstanceValidateValue.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private bool ValidateFoo(int value) => true;
@@ -32,7 +32,7 @@ public partial class InstanceValidateValue : DependencyObject
     }
     set
     {
-      this.SetValue(InstanceValidateValue.AcceptAssignableProperty, value);
+      this.SetValue(AcceptAssignableProperty, value);
     }
   }
   private bool ValidateAcceptAssignable(IEnumerable<int> value) => true;
@@ -45,7 +45,7 @@ public partial class InstanceValidateValue : DependencyObject
     }
     set
     {
-      this.SetValue(InstanceValidateValue.AcceptGenericProperty, value);
+      this.SetValue(AcceptGenericProperty, value);
     }
   }
   private bool ValidateAcceptGeneric<T>(T value) => true;
@@ -58,14 +58,14 @@ public partial class InstanceValidateValue : DependencyObject
     }
     set
     {
-      this.SetValue(InstanceValidateValue.AcceptObjectProperty, value);
+      this.SetValue(AcceptObjectProperty, value);
     }
   }
   private bool ValidateAcceptObject(object value) => true;
-  public static readonly DependencyProperty AcceptAssignableProperty = InstanceValidateValue.CreateAcceptAssignableProperty();
-  public static readonly DependencyProperty AcceptGenericProperty = InstanceValidateValue.CreateAcceptGenericProperty();
-  public static readonly DependencyProperty AcceptObjectProperty = InstanceValidateValue.CreateAcceptObjectProperty();
-  public static readonly DependencyProperty FooProperty = InstanceValidateValue.CreateFooProperty();
+  public static readonly DependencyProperty AcceptAssignableProperty = CreateAcceptAssignableProperty();
+  public static readonly DependencyProperty AcceptGenericProperty = CreateAcceptGenericProperty();
+  public static readonly DependencyProperty AcceptObjectProperty = CreateAcceptObjectProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateAcceptAssignableProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)
@@ -84,7 +84,7 @@ public partial class InstanceValidateValue : DependencyObject
   {
     object CoerceValue_1(DependencyObject d, object value)
     {
-      if (!((InstanceValidateValue)d).ValidateAcceptGeneric<int>((int)value))
+      if (!((InstanceValidateValue)d).ValidateAcceptGeneric((int)value))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }

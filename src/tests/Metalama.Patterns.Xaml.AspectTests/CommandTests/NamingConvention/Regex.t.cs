@@ -24,9 +24,9 @@ internal class Regex
   private bool ItCanFoo() => true;
   public Regex()
   {
-    this.TheBeepCommand = new DelegateCommand(_ => this.MakeItBeep(), _ => this.CanItBeep());
-    this.TheUseTheForceCommand = new DelegateCommand(_ => this.MakeItUseTheForce(), _ => this.UseTheForceItCan());
-    this.FooCommand = new DelegateCommand(_ => this.ExecuteFoo(), _ => this.CanExecuteFoo());
+    TheBeepCommand = new DelegateCommand(_ => MakeItBeep(), _ => CanItBeep());
+    TheUseTheForceCommand = new DelegateCommand(_ => MakeItUseTheForce(), _ => UseTheForceItCan());
+    FooCommand = new DelegateCommand(_ => ExecuteFoo(), _ => CanExecuteFoo());
   }
   public ICommand FooCommand { get; }
   public ICommand TheBeepCommand { get; }

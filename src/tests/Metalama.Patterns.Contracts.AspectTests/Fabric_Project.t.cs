@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
     {
       get
       {
-        return this._publicProperty;
+        return _publicProperty;
       }
       set
       {
@@ -23,7 +23,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
         {
           throw new ArgumentNullException("value", "The 'PublicProperty' property must not be null.");
         }
-        this._publicProperty = value;
+        _publicProperty = value;
       }
     }
     internal string InternalProperty { get; set; }
@@ -33,7 +33,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
     {
       get
       {
-        return this._publicField;
+        return _publicField;
       }
       set
       {
@@ -41,7 +41,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
         {
           throw new ArgumentNullException("value", "The 'PublicField' property must not be null.");
         }
-        this._publicField = value;
+        _publicField = value;
       }
     }
     internal string InternalField;
@@ -50,7 +50,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
     {
       get
       {
-        return this._publicNullableField;
+        return _publicNullableField;
       }
       set
       {
@@ -58,7 +58,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
         {
           throw new ArgumentNullException("value", "The 'PublicNullableField' property must not be null.");
         }
-        this._publicNullableField = value;
+        _publicNullableField = value;
       }
     }
     public void PublicMethod(string nonNullableParam, string? nullableParam)

@@ -13,13 +13,13 @@ public partial class InstanceOnChangingNoParameters : DependencyObject
     }
     set
     {
-      this.SetValue(InstanceOnChangingNoParameters.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private void OnFooChanging()
   {
   }
-  public static readonly DependencyProperty FooProperty = InstanceOnChangingNoParameters.CreateFooProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateFooProperty()
   {
     object CoerceValue_1(DependencyObject d, object value)

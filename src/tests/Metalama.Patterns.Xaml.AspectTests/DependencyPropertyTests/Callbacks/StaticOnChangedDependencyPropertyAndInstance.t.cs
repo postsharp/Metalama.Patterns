@@ -17,7 +17,7 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
     }
     set
     {
-      this.SetValue(StaticOnChangedDependencyPropertyAndInstance.FooProperty, value);
+      this.SetValue(FooProperty, value);
     }
   }
   private static void OnFooChanged(DependencyProperty d, StaticOnChangedDependencyPropertyAndInstance instance)
@@ -32,7 +32,7 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
     }
     set
     {
-      this.SetValue(StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty, value);
+      this.SetValue(AcceptsDependencyObjectForInstanceProperty, value);
     }
   }
   private static void OnAcceptsDependencyObjectForInstanceChanged(DependencyProperty d, DependencyObject instance)
@@ -47,20 +47,20 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
     }
     set
     {
-      this.SetValue(StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty, value);
+      this.SetValue(AcceptsObjectForInstanceProperty, value);
     }
   }
   private static void OnAcceptsObjectForInstanceChanged(DependencyProperty d, object instance)
   {
   }
-  public static readonly DependencyProperty AcceptsDependencyObjectForInstanceProperty = StaticOnChangedDependencyPropertyAndInstance.CreateAcceptsDependencyObjectForInstanceProperty();
-  public static readonly DependencyProperty AcceptsObjectForInstanceProperty = StaticOnChangedDependencyPropertyAndInstance.CreateAcceptsObjectForInstanceProperty();
-  public static readonly DependencyProperty FooProperty = StaticOnChangedDependencyPropertyAndInstance.CreateFooProperty();
+  public static readonly DependencyProperty AcceptsDependencyObjectForInstanceProperty = CreateAcceptsDependencyObjectForInstanceProperty();
+  public static readonly DependencyProperty AcceptsObjectForInstanceProperty = CreateAcceptsObjectForInstanceProperty();
+  public static readonly DependencyProperty FooProperty = CreateFooProperty();
   private static DependencyProperty CreateAcceptsDependencyObjectForInstanceProperty()
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedDependencyPropertyAndInstance.OnAcceptsDependencyObjectForInstanceChanged(StaticOnChangedDependencyPropertyAndInstance.AcceptsDependencyObjectForInstanceProperty, d);
+      OnAcceptsDependencyObjectForInstanceChanged(AcceptsDependencyObjectForInstanceProperty, d);
     }
     return DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged));
   }
@@ -68,7 +68,7 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedDependencyPropertyAndInstance.OnAcceptsObjectForInstanceChanged(StaticOnChangedDependencyPropertyAndInstance.AcceptsObjectForInstanceProperty, d);
+      OnAcceptsObjectForInstanceChanged(AcceptsObjectForInstanceProperty, d);
     }
     return DependencyProperty.Register("AcceptsObjectForInstance", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged));
   }
@@ -76,7 +76,7 @@ public partial class StaticOnChangedDependencyPropertyAndInstance : DependencyOb
   {
     void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      StaticOnChangedDependencyPropertyAndInstance.OnFooChanged(StaticOnChangedDependencyPropertyAndInstance.FooProperty, (StaticOnChangedDependencyPropertyAndInstance)d);
+      OnFooChanged(FooProperty, (StaticOnChangedDependencyPropertyAndInstance)d);
     }
     return DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedDependencyPropertyAndInstance), new PropertyMetadata(PropertyChanged));
   }

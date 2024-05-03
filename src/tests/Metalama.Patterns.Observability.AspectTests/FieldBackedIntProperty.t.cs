@@ -8,15 +8,15 @@ public class FieldBackedIntProperty : INotifyPropertyChanged
   {
     get
     {
-      return this._x1;
+      return _x1;
     }
     set
     {
-      if (this._x1 != value)
+      if (_x1 != value)
       {
-        this._x1 = value;
-        this.OnPropertyChanged("X");
-        this.OnPropertyChanged("Y");
+        _x1 = value;
+        OnPropertyChanged("X");
+        OnPropertyChanged("Y");
       }
     }
   }
@@ -24,7 +24,7 @@ public class FieldBackedIntProperty : INotifyPropertyChanged
   public int Y => this.X;
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }
