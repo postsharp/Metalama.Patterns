@@ -23,13 +23,13 @@ public class InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitial
       this.SetValue(FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty = CreateFooProperty();
+  public static readonly DependencyProperty FooProperty;
+  static InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue()
+  {
+    FooProperty = DependencyProperty.Register("Foo", typeof(List<int>), typeof(InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue));
+  }
   public InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue()
   {
     Foo = InitMethod();
-  }
-  private static DependencyProperty CreateFooProperty()
-  {
-    return DependencyProperty.Register("Foo", typeof(List<int>), typeof(InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue));
   }
 }

@@ -31,7 +31,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             => meta.This.SetValue( dependencyPropertyField.Value, value );
 
         [Template]
-        internal static DependencyProperty CreateDependencyProperty(
+        internal static void InitializeDependencyProperty(
             [CompileTime] IField dependencyPropertyField,
             [CompileTime] DependencyPropertyOptions options,
             [CompileTime] string propertyName,
@@ -69,46 +69,46 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
                     // TODO: Integration with INotifyPropertyChanging
 
-                    object CoerceValue( DependencyObject d, object value )
-                    {
-                        if ( applyContractsMethod != null )
-                        {
-                            value = applyContractsMethod.Invoke( value )!;
-                        }
+                    coerceValueCallbackExpr = ExpressionFactory.Capture(
+                        new CoerceValueCallback(
+                            ( d, value ) =>
+                            {
+                                if ( applyContractsMethod != null )
+                                {
+                                    value = applyContractsMethod.Invoke( value )!;
+                                }
 
-                        if ( validateMethod != null )
-                        {
-                            InvokeValidateMethod(
-                                dependencyPropertyField,
-                                validateMethod,
-                                validateSignatureKind,
-                                propertyType,
-                                declaringType,
-                                ExpressionFactory.Capture( d ),
-                                ExpressionFactory.Capture( value ) );
-                        }
+                                if ( validateMethod != null )
+                                {
+                                    InvokeValidateMethod(
+                                        dependencyPropertyField,
+                                        validateMethod,
+                                        validateSignatureKind,
+                                        propertyType,
+                                        declaringType,
+                                        ExpressionFactory.Capture( d ),
+                                        ExpressionFactory.Capture( value ) );
+                                }
 
-                        if ( onChangingMethod != null )
-                        {
-                            // This could be a false positive if applyContractsMethod coerces value to be
-                            // the same as the current value. We don't have the current value to hand, so
-                            // we don't check.
+                                if ( onChangingMethod != null )
+                                {
+                                    // This could be a false positive if applyContractsMethod coerces value to be
+                                    // the same as the current value. We don't have the current value to hand, so
+                                    // we don't check.
 
-                            InvokeChangeMethod(
-                                dependencyPropertyField,
-                                onChangingMethod,
-                                onChangingSignatureKind,
-                                propertyType,
-                                declaringType,
-                                ExpressionFactory.Capture( d ),
-                                null,
-                                ExpressionFactory.Capture( value ) );
-                        }
+                                    InvokeChangeMethod(
+                                        dependencyPropertyField,
+                                        onChangingMethod,
+                                        onChangingSignatureKind,
+                                        propertyType,
+                                        declaringType,
+                                        ExpressionFactory.Capture( d ),
+                                        null,
+                                        ExpressionFactory.Capture( value ) );
+                                }
 
-                        return value;
-                    }
-
-                    coerceValueCallbackExpr = ExpressionFactory.Capture( (CoerceValueCallback) CoerceValue );
+                                return value;
+                            } ) );
                 }
 
                 IExpression? propertyChangedCallbackExpr = null;
@@ -117,20 +117,20 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 {
                     // TODO: Integration with NotifyPropertyChanged
 
-                    void PropertyChanged( DependencyObject d, DependencyPropertyChangedEventArgs e )
-                    {
-                        InvokeChangeMethod(
-                            dependencyPropertyField,
-                            onChangedMethod,
-                            onChangedSignatureKind,
-                            propertyType,
-                            declaringType,
-                            ExpressionFactory.Capture( d ),
-                            ExpressionFactory.Capture( e.OldValue ),
-                            ExpressionFactory.Capture( e.NewValue ) );
-                    }
-
-                    propertyChangedCallbackExpr = ExpressionFactory.Capture( (PropertyChangedCallback) PropertyChanged );
+                    propertyChangedCallbackExpr = ExpressionFactory.Capture(
+                        new PropertyChangedCallback(
+                            ( d, e ) =>
+                            {
+                                InvokeChangeMethod(
+                                    dependencyPropertyField,
+                                    onChangedMethod,
+                                    onChangedSignatureKind,
+                                    propertyType,
+                                    declaringType,
+                                    ExpressionFactory.Capture( d ),
+                                    ExpressionFactory.Capture( e.OldValue ),
+                                    ExpressionFactory.Capture( e.NewValue ) );
+                            } ) );
                 }
 
                 // ReSharper disable once RedundantAssignment
@@ -190,7 +190,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
                 if ( options.IsReadOnly == true )
                 {
-                    return DependencyProperty.RegisterReadOnly(
+                    dependencyPropertyField.Value = DependencyProperty.RegisterReadOnly(
                             propertyName,
                             propertyType.ToTypeOfExpression().Value,
                             declaringType.ToTypeOfExpression().Value,
@@ -199,7 +199,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 }
                 else
                 {
-                    return DependencyProperty.Register(
+                    dependencyPropertyField.Value = DependencyProperty.Register(
                         propertyName,
                         propertyType.ToTypeOfExpression().Value,
                         declaringType.ToTypeOfExpression().Value,
@@ -210,7 +210,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             {
                 if ( options.IsReadOnly == true )
                 {
-                    return DependencyProperty.RegisterReadOnly(
+                    dependencyPropertyField.Value = DependencyProperty.RegisterReadOnly(
                             propertyName,
                             propertyType.ToTypeOfExpression().Value,
                             declaringType.ToTypeOfExpression().Value,
@@ -219,7 +219,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 }
                 else
                 {
-                    return DependencyProperty.Register(
+                    dependencyPropertyField.Value = DependencyProperty.Register(
                         propertyName,
                         propertyType.ToTypeOfExpression().Value,
                         declaringType.ToTypeOfExpression().Value );
@@ -245,7 +245,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             switch ( signatureKind )
             {
                 case ValidationHandlerSignatureKind.InstanceValue:
-                    if ( !method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
+                    if ( !method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                             .Invoke(
                                 method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
                     {
@@ -255,7 +255,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ValidationHandlerSignatureKind.InstanceDependencyPropertyAndValue:
-                    if ( !method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
+                    if ( !method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                             .Invoke(
                                 dependencyPropertyField.Value,
                                 method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
@@ -330,7 +330,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             switch ( signatureKind )
             {
                 case ChangeHandlerSignatureKind.InstanceNoParameters:
-                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
+                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
 
                     break;
 
@@ -340,14 +340,14 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceValue:
-                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
+                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke(
                             method.Parameters[0].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
 
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceOldValueAndNewValue:
-                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
+                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke(
                             method.Parameters[0].Type.SpecialType == SpecialType.Object ? oldValueExpr!.Value : meta.Cast( propertyType, oldValueExpr!.Value ),
                             method.Parameters[1].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
@@ -355,7 +355,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceDependencyProperty:
-                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
+                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
 
                     break;
 

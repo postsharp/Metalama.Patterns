@@ -62,64 +62,51 @@ public partial class InstanceValidateValue : DependencyObject
     }
   }
   private bool ValidateAcceptObject(object value) => true;
-  public static readonly DependencyProperty AcceptAssignableProperty = CreateAcceptAssignableProperty();
-  public static readonly DependencyProperty AcceptGenericProperty = CreateAcceptGenericProperty();
-  public static readonly DependencyProperty AcceptObjectProperty = CreateAcceptObjectProperty();
-  public static readonly DependencyProperty FooProperty = CreateFooProperty();
-  private static DependencyProperty CreateAcceptAssignableProperty()
+  public static readonly DependencyProperty AcceptAssignableProperty;
+  public static readonly DependencyProperty AcceptGenericProperty;
+  public static readonly DependencyProperty AcceptObjectProperty;
+  public static readonly DependencyProperty FooProperty;
+  static InstanceValidateValue()
   {
-    object CoerceValue_1(DependencyObject d, object value)
+    var metadata = new PropertyMetadata();
+    metadata.CoerceValueCallback = new CoerceValueCallback((d, value_1) =>
     {
-      if (!((InstanceValidateValue)d).ValidateAcceptAssignable((List<int>)value))
+      if (!((InstanceValidateValue)d).ValidateFoo((int)value_1))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
-      return value;
-    }
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    return DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceValidateValue), metadata);
-  }
-  private static DependencyProperty CreateAcceptGenericProperty()
-  {
-    object CoerceValue_1(DependencyObject d, object value)
+      return value_1;
+    });
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceValidateValue), metadata);
+    var metadata_1 = new PropertyMetadata();
+    metadata_1.CoerceValueCallback = new CoerceValueCallback((d_1, value_2) =>
     {
-      if (!((InstanceValidateValue)d).ValidateAcceptGeneric((int)value))
+      if (!((InstanceValidateValue)d_1).ValidateAcceptAssignable((List<int>)value_2))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
-      return value;
-    }
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    return DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceValidateValue), metadata);
-  }
-  private static DependencyProperty CreateAcceptObjectProperty()
-  {
-    object CoerceValue_1(DependencyObject d, object value)
+      return value_2;
+    });
+    AcceptAssignableProperty = DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceValidateValue), metadata_1);
+    var metadata_2 = new PropertyMetadata();
+    metadata_2.CoerceValueCallback = new CoerceValueCallback((d_2, value_3) =>
     {
-      if (!((InstanceValidateValue)d).ValidateAcceptObject(value))
+      if (!((InstanceValidateValue)d_2).ValidateAcceptGeneric((int)value_3))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
-      return value;
-    }
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    return DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceValidateValue), metadata);
-  }
-  private static DependencyProperty CreateFooProperty()
-  {
-    object CoerceValue_1(DependencyObject d, object value)
+      return value_3;
+    });
+    AcceptGenericProperty = DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceValidateValue), metadata_2);
+    var metadata_3 = new PropertyMetadata();
+    metadata_3.CoerceValueCallback = new CoerceValueCallback((d_3, value_4) =>
     {
-      if (!((InstanceValidateValue)d).ValidateFoo((int)value))
+      if (!((InstanceValidateValue)d_3).ValidateAcceptObject(value_4))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
-      return value;
-    }
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    return DependencyProperty.Register("Foo", typeof(int), typeof(InstanceValidateValue), metadata);
+      return value_4;
+    });
+    AcceptObjectProperty = DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceValidateValue), metadata_3);
   }
 }

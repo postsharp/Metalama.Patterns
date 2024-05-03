@@ -70,52 +70,39 @@ public partial class InstanceOnChangingValue : DependencyObject
   private void OnAcceptObjectChanging(object value)
   {
   }
-  public static readonly DependencyProperty AcceptAssignableProperty = CreateAcceptAssignableProperty();
-  public static readonly DependencyProperty AcceptGenericProperty = CreateAcceptGenericProperty();
-  public static readonly DependencyProperty AcceptObjectProperty = CreateAcceptObjectProperty();
-  public static readonly DependencyProperty FooProperty = CreateFooProperty();
-  private static DependencyProperty CreateAcceptAssignableProperty()
+  public static readonly DependencyProperty AcceptAssignableProperty;
+  public static readonly DependencyProperty AcceptGenericProperty;
+  public static readonly DependencyProperty AcceptObjectProperty;
+  public static readonly DependencyProperty FooProperty;
+  static InstanceOnChangingValue()
   {
-    object CoerceValue_1(DependencyObject d, object value)
-    {
-      ((InstanceOnChangingValue)d).OnAcceptAssignableChanging((List<int>)value);
-      return value;
-    }
     var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    return DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceOnChangingValue), metadata);
-  }
-  private static DependencyProperty CreateAcceptGenericProperty()
-  {
-    object CoerceValue_1(DependencyObject d, object value)
+    metadata.CoerceValueCallback = new CoerceValueCallback((d, value_1) =>
     {
-      ((InstanceOnChangingValue)d).OnAcceptGenericChanging((int)value);
-      return value;
-    }
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    return DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceOnChangingValue), metadata);
-  }
-  private static DependencyProperty CreateAcceptObjectProperty()
-  {
-    object CoerceValue_1(DependencyObject d, object value)
+      ((InstanceOnChangingValue)d).OnFooChanging((int)value_1);
+      return value_1;
+    });
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangingValue), metadata);
+    var metadata_1 = new PropertyMetadata();
+    metadata_1.CoerceValueCallback = new CoerceValueCallback((d_1, value_2) =>
     {
-      ((InstanceOnChangingValue)d).OnAcceptObjectChanging(value);
-      return value;
-    }
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    return DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceOnChangingValue), metadata);
-  }
-  private static DependencyProperty CreateFooProperty()
-  {
-    object CoerceValue_1(DependencyObject d, object value)
+      ((InstanceOnChangingValue)d_1).OnAcceptAssignableChanging((List<int>)value_2);
+      return value_2;
+    });
+    AcceptAssignableProperty = DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceOnChangingValue), metadata_1);
+    var metadata_2 = new PropertyMetadata();
+    metadata_2.CoerceValueCallback = new CoerceValueCallback((d_2, value_3) =>
     {
-      ((InstanceOnChangingValue)d).OnFooChanging((int)value);
-      return value;
-    }
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = CoerceValue_1;
-    return DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangingValue), metadata);
+      ((InstanceOnChangingValue)d_2).OnAcceptGenericChanging((int)value_3);
+      return value_3;
+    });
+    AcceptGenericProperty = DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceOnChangingValue), metadata_2);
+    var metadata_3 = new PropertyMetadata();
+    metadata_3.CoerceValueCallback = new CoerceValueCallback((d_3, value_4) =>
+    {
+      ((InstanceOnChangingValue)d_3).OnAcceptObjectChanging(value_4);
+      return value_4;
+    });
+    AcceptObjectProperty = DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceOnChangingValue), metadata_3);
   }
 }

@@ -23,9 +23,9 @@ public class DefaultOptions : DependencyObject
       this.SetValue(FooProperty, value);
     }
   }
-  public static readonly DependencyProperty FooProperty = CreateFooProperty();
-  private static DependencyProperty CreateFooProperty()
+  public static readonly DependencyProperty FooProperty;
+  static DefaultOptions()
   {
-    return DependencyProperty.Register("Foo", typeof(List<int>), typeof(DefaultOptions), new PropertyMetadata(InitMethod()));
+    FooProperty = DependencyProperty.Register("Foo", typeof(List<int>), typeof(DefaultOptions), new PropertyMetadata(InitMethod()));
   }
 }
