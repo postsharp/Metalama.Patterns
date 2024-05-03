@@ -8,7 +8,6 @@ using Metalama.Framework.Utilities;
 using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using Metalama.Patterns.Xaml.Options;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 

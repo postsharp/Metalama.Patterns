@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Patterns.Xaml.Options;
-using System.Runtime.CompilerServices;
 using System.Windows;
 
 // ReSharper disable NotResolvedInText
