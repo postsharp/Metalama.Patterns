@@ -119,6 +119,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
                     propertyChangedCallbackExpr = ExpressionFactory.Capture(
                         new PropertyChangedCallback(
+#pragma warning disable IDE0053
                             ( d, e ) =>
                             {
                                 InvokeChangeMethod(
@@ -131,6 +132,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                                     ExpressionFactory.Capture( e.OldValue ),
                                     ExpressionFactory.Capture( e.NewValue ) );
                             } ) );
+#pragma warning restore IDE0053
                 }
 
                 // ReSharper disable once RedundantAssignment
@@ -245,7 +247,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             switch ( signatureKind )
             {
                 case ValidationHandlerSignatureKind.InstanceValue:
-                    if ( !method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    if ( !method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
                             .Invoke(
                                 method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
                     {
@@ -255,7 +257,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ValidationHandlerSignatureKind.InstanceDependencyPropertyAndValue:
-                    if ( !method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    if ( !method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
                             .Invoke(
                                 dependencyPropertyField.Value,
                                 method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
@@ -330,7 +332,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             switch ( signatureKind )
             {
                 case ChangeHandlerSignatureKind.InstanceNoParameters:
-                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
+                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke();
 
                     break;
 
@@ -340,14 +342,14 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceValue:
-                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke(
                             method.Parameters[0].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
 
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceOldValueAndNewValue:
-                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) )
+                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
                         .Invoke(
                             method.Parameters[0].Type.SpecialType == SpecialType.Object ? oldValueExpr!.Value : meta.Cast( propertyType, oldValueExpr!.Value ),
                             method.Parameters[1].Type.SpecialType == SpecialType.Object ? newValueExpr.Value : meta.Cast( propertyType, newValueExpr.Value ) );
@@ -355,7 +357,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     break;
 
                 case ChangeHandlerSignatureKind.InstanceDependencyProperty:
-                    method.With( (IExpression?) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
+                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) ).Invoke( dependencyPropertyField.Value );
 
                     break;
 
