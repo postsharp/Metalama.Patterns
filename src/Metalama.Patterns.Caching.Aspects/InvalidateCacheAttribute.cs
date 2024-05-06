@@ -10,13 +10,10 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
-using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.Aspects.Helpers;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-
-[assembly: AspectOrder( typeof(InvalidateCacheAttribute), typeof(CacheAttribute) )]
 
 namespace Metalama.Patterns.Caching.Aspects;
 

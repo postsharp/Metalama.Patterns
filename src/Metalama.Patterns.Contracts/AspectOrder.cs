@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Patterns.Contracts;
 
 [assembly: AspectOrder(
+    AspectOrderDirection.RunTime,
     "Metalama.Patterns.Contracts." + nameof(SuspendInvariantsAttribute) + ":*",
     "Metalama.Patterns.Contracts." + nameof(CheckInvariantsAspect) + ":*",
     "Metalama.Patterns.Contracts." + nameof(InvariantAttribute) + ":*",
