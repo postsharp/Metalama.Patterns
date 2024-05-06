@@ -9,44 +9,48 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 [CompileTime]
 internal static class CommandNamingConventionHelper
 {
-    public static CommandNamingConventionMatch Match<TMatchCanExecuteNamePredicate>(
+    public static CommandNamingConventionMatch Match(
         INamingConvention namingConvention,
         IMethod executeMethod,
         InspectedMemberAdder inspectedMember,
         string commandPropertyName,
-        in TMatchCanExecuteNamePredicate matchCanExecuteNamePredicate,
+        INameMatchPredicate matchCanExecuteNamePredicate,
         bool considerMethod = true,
         bool considerProperty = true,
         bool requireCanExecuteMatch = false )
-        where TMatchCanExecuteNamePredicate : INameMatchPredicate
     {
         var declaringType = executeMethod.DeclaringType;
 
         var conflictingMember = (IMemberOrNamedType?) declaringType.AllMembers().FirstOrDefault( m => m.Name == commandPropertyName )
                                 ?? declaringType.NestedTypes.FirstOrDefault( t => t.Name == commandPropertyName );
 
-        var commandPropertyConflictMatch = MemberMatch<IMemberOrNamedType>.SuccessOrConflict( conflictingMember );
+        var commandPropertyConflictMatch =
+            conflictingMember != null
+                ? MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Conflict( conflictingMember )
+                : MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Success( DefaultMatchKind.Default );
 
-        MemberMatch<IMethod>? canExecuteMethodMatch = null;
+        MemberMatch<IMethod, DefaultMatchKind>? canExecuteMethodMatch = null;
 
         if ( considerMethod )
         {
             canExecuteMethodMatch =
                 executeMethod.DeclaringType.Methods.FindValidMatchingDeclaration(
                     matchCanExecuteNamePredicate,
-                    IsValidCanExecuteMethodDelegate,
-                    inspectedMember );
+                    IsValidCanExecuteMethod,
+                    inspectedMember,
+                    CommandAttribute.CanExecuteMethodCategory );
         }
 
-        MemberMatch<IProperty>? canExecutePropertyMatch = null;
+        MemberMatch<IProperty, DefaultMatchKind>? canExecutePropertyMatch = null;
 
         if ( considerProperty )
         {
             canExecutePropertyMatch =
                 executeMethod.DeclaringType.Properties.FindValidMatchingDeclaration(
                     matchCanExecuteNamePredicate,
-                    IsValidCanExecutePropertyDelegate,
-                    inspectedMember );
+                    IsValidCanExecuteProperty,
+                    inspectedMember,
+                    CommandAttribute.CanExecutePropertyCategory );
         }
 
         if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Success && canExecutePropertyMatch?.Outcome == MemberMatchOutcome.Success )
@@ -55,7 +59,7 @@ internal static class CommandNamingConventionHelper
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                MemberMatch<IMember>.Ambiguous(),
+                MemberMatch<IMember, DefaultMatchKind>.Ambiguous(),
                 requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Success )
@@ -82,7 +86,7 @@ internal static class CommandNamingConventionHelper
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                MemberMatch<IMember>.Ambiguous(),
+                MemberMatch<IMember, DefaultMatchKind>.Ambiguous(),
                 requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Invalid || canExecutePropertyMatch?.Outcome == MemberMatchOutcome.Invalid )
@@ -91,7 +95,7 @@ internal static class CommandNamingConventionHelper
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                MemberMatch<IMember>.Invalid(),
+                MemberMatch<IMember, DefaultMatchKind>.Invalid(),
                 requireCanExecuteMatch );
         }
         else
@@ -100,37 +104,21 @@ internal static class CommandNamingConventionHelper
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                MemberMatch<IMember>.NotFound( matchCanExecuteNamePredicate ),
+                MemberMatch<IMember, DefaultMatchKind>.NotFound( matchCanExecuteNamePredicate.Candidates ),
                 requireCanExecuteMatch );
         }
     }
 
-    private static Func<IMethod, InspectedMemberAdder, bool> IsValidCanExecuteMethodDelegate { get; } = IsValidCanExecuteMethod;
-
-    private static bool IsValidCanExecuteMethod( IMethod method, InspectedMemberAdder inspectedMember )
-    {
-        var isValid = IsValidCanExecuteMethod( method );
-        inspectedMember.Add( method, isValid, CommandAttribute.CanExecuteMethodCategory );
-
-        return isValid;
-    }
-
-    private static Func<IProperty, InspectedMemberAdder, bool> IsValidCanExecutePropertyDelegate { get; } = IsValidCanExecuteProperty;
-
-    private static bool IsValidCanExecuteProperty( IProperty property, InspectedMemberAdder inspectedMember )
-    {
-        var isValid = IsValidCanExecuteProperty( property );
-        inspectedMember.Add( property, isValid, CommandAttribute.CanExecutePropertyCategory );
-
-        return isValid;
-    }
-
-    private static bool IsValidCanExecuteMethod( IMethod method )
+    private static DefaultMatchKind? IsValidCanExecuteMethod( IMethod method )
         => method.ReturnType.SpecialType == SpecialType.Boolean
            && method.Parameters is [] or [{ RefKind: RefKind.None or RefKind.In }]
-           && method.TypeParameters.Count == 0;
+           && method.TypeParameters.Count == 0
+            ? DefaultMatchKind.Default
+            : null;
 
-    private static bool IsValidCanExecuteProperty( IProperty property )
+    private static DefaultMatchKind? IsValidCanExecuteProperty( IProperty property )
         => property.Type.SpecialType == SpecialType.Boolean
-           && property.GetMethod != null;
+           && property.GetMethod != null
+            ? DefaultMatchKind.Default
+            : null;
 }

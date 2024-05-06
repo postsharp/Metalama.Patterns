@@ -9,10 +9,6 @@ namespace Metalama.Patterns.Xaml.Implementation;
 [CompileTime]
 internal enum ChangeHandlerSignatureKind
 {
-    // TODO: cleanup
-    /*NotFound,
-    Ambiguous, */
-    Invalid,
     InstanceNoParameters,
     InstanceValue,
     InstanceOldValueAndNewValue,

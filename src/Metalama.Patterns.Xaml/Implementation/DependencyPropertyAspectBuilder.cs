@@ -177,11 +177,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     declaringType,
                     defaultValueExpr = this._builder.Target.InitializerExpression,
                     onChangingMethod,
-                    onChangingSignatureKind = successfulMatch.PropertyChangingSignatureKind,
+                    onChangingSignatureKind = successfulMatch.PropertyChangingMatch.Kind,
                     onChangedMethod,
-                    onChangedSignatureKind = successfulMatch.PropertyChangedSignatureKind,
+                    onChangedSignatureKind = successfulMatch.PropertyChangedMatch.Kind,
                     validateMethod,
-                    validateSignatureKind = successfulMatch.ValidationSignatureKind,
+                    validateSignatureKind = successfulMatch.ValidateMatch.Kind,
                     applyContractsMethod
                 } );
 

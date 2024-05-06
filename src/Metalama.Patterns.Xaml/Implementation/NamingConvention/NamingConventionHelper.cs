@@ -6,15 +6,22 @@ using Metalama.Framework.Code;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
+internal enum DefaultMatchKind
+{
+    Default
+}
+
+[CompileTime]
 internal static class NamingConventionHelper
 {
-    public static MemberMatch<TMember> FindValidMatchingDeclaration<TMember, TNameMatchPredicate>(
+    public static MemberMatch<TMember, TKind> FindValidMatchingDeclaration<TMember, TKind>(
         this IEnumerable<TMember> members,
-        in TNameMatchPredicate nameMatchPredicate,
-        Func<TMember, InspectedMemberAdder, bool> isValid,
-        InspectedMemberAdder inspectedMember )
+        INameMatchPredicate nameMatchPredicate,
+        Func<TMember, TKind?> classifyMember,
+        InspectedMemberAdder inspectedMember,
+        string category )
         where TMember : class, IMemberOrNamedType
-        where TNameMatchPredicate : INameMatchPredicate
+        where TKind : struct
     {
         // NB: The loop is not short-circuited because validity checking will build a list of
         // inspected declarations which will be used for diagnostics when applicable.
@@ -22,6 +29,7 @@ internal static class NamingConventionHelper
         var candidateCount = 0;
         var eligibleCount = 0;
         TMember? firstEligible = null;
+        TKind? firstEligibleKind = null;
 
         foreach ( var declaration in members )
         {
@@ -29,11 +37,16 @@ internal static class NamingConventionHelper
             {
                 ++candidateCount;
 
-                if ( isValid( declaration, inspectedMember ) )
+                var kind = classifyMember( declaration );
+
+                if ( kind != null )
                 {
                     ++eligibleCount;
                     firstEligible ??= declaration;
+                    firstEligibleKind ??= kind;
                 }
+
+                inspectedMember.Add( declaration, kind != null, category );
             }
         }
 
@@ -42,74 +55,18 @@ internal static class NamingConventionHelper
             case 0:
                 if ( candidateCount > 0 )
                 {
-                    return MemberMatch<TMember>.Invalid();
+                    return MemberMatch<TMember, TKind>.Invalid();
                 }
 
                 break;
 
             case 1:
-                return MemberMatch<TMember>.Success( firstEligible! );
+                return MemberMatch<TMember, TKind>.Success( firstEligible!, firstEligibleKind!.Value );
 
             case > 1:
-                return MemberMatch<TMember>.Ambiguous();
+                return MemberMatch<TMember, TKind>.Ambiguous();
         }
 
-        return MemberMatch<TMember>.NotFound( nameMatchPredicate );
-    }
-
-    public static (MemberMatch<TMember> Match, TMetadata? Metadata) FindValidMatchingDeclaration<TMember, TNameMatchPredicate, TMetadata>(
-        this IEnumerable<TMember> declarations,
-        in TNameMatchPredicate nameMatchPredicate,
-        Func<TMember, InspectedMemberAdder, IsValidResult<TMetadata>> isValid,
-        InspectedMemberAdder inspectedMember )
-        where TMember : class, IMemberOrNamedType
-        where TNameMatchPredicate : INameMatchPredicate
-    {
-        // NB: The loop is not short-circuited because validity checking will build a list of
-        // inspected declarations which will be used for diagnostics when applicable.
-
-        var candidateCount = 0;
-        var eligibleCount = 0;
-        TMember? firstEligible = null;
-        TMetadata? firstEligibleMetadata = default;
-
-        foreach ( var declaration in declarations )
-        {
-            if ( nameMatchPredicate.IsMatch( declaration.Name ) )
-            {
-                ++candidateCount;
-                var result = isValid( declaration, inspectedMember );
-
-                if ( result.IsValid )
-                {
-                    ++eligibleCount;
-
-                    if ( firstEligible == null )
-                    {
-                        firstEligible = declaration;
-                        firstEligibleMetadata = result.Metadata;
-                    }
-                }
-            }
-        }
-
-        switch ( eligibleCount )
-        {
-            case 0:
-                if ( candidateCount > 0 )
-                {
-                    return (MemberMatch<TMember>.Invalid(), default);
-                }
-
-                break;
-
-            case 1:
-                return (MemberMatch<TMember>.Success( firstEligible! ), firstEligibleMetadata);
-
-            case > 1:
-                return (MemberMatch<TMember>.Ambiguous(), default);
-        }
-
-        return (MemberMatch<TMember>.NotFound( nameMatchPredicate ), default);
+        return MemberMatch<TMember, TKind>.NotFound( nameMatchPredicate.Candidates );
     }
 }

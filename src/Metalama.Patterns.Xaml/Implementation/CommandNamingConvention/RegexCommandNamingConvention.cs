@@ -126,8 +126,8 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
             return new CommandNamingConventionMatch(
                 this,
                 null,
-                MemberMatch<IMemberOrNamedType>.Invalid(),
-                MemberMatch<IMember>.NotFound(),
+                MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Invalid(),
+                MemberMatch<IMember, DefaultMatchKind>.NotFound(),
                 this._requireCanExecuteMatch );
         }
 
@@ -148,9 +148,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
             executeMethod,
             inspectedMember,
             commandPropertyName,
-            new StringOrRegexNameMatchPredicate(
-                matchCanExecuteName == null ? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) : null,
-                matchCanExecuteName != null ? new Regex( matchCanExecuteName ) : null ),
+            matchCanExecuteName == null ? new StringNameMatchPredicate( commandName ) : new RegexNameMatchPredicate( new Regex( matchCanExecuteName ) ),
             considerMethod: this._considerCanExecuteMethod,
             considerProperty: this._considerCanExecuteProperty,
             requireCanExecuteMatch: this._requireCanExecuteMatch );

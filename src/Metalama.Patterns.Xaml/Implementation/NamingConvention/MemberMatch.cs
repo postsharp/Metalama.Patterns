@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
@@ -13,69 +14,53 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 /// A single <see cref="NamingConventionMatch"/> may contain several <see cref="MemberMatch{TDeclaration}"/> properties,
 /// one for each category of declaration that needs to be matched, such as "can execute" and "validate".
 /// </remarks>
-/// <typeparam name="TDeclaration"></typeparam>
+/// <typeparam name="TMember"></typeparam>
 [CompileTime]
-internal class MemberMatch<TDeclaration> : IMemberMatch
-    where TDeclaration : class, IMemberOrNamedType
+internal sealed class MemberMatch<TMember, TKind> : IMemberMatch
+    where TMember : class, IMemberOrNamedType
+    where TKind : struct
 {
-    public static MemberMatch<TDeclaration> Success( TDeclaration declaration )
-        => new( MemberMatchOutcome.Success, declaration ?? throw new ArgumentNullException( nameof(declaration) ) );
+    public static MemberMatch<TMember, TKind> Success( TMember declaration, TKind kind )
+        => new( MemberMatchOutcome.Success, declaration ?? throw new ArgumentNullException( nameof(declaration) ), kind: kind );
 
-    public static MemberMatch<TDeclaration> SuccessOrConflict( TDeclaration? conflictingDeclaration )
-        => new( conflictingDeclaration == null ? MemberMatchOutcome.Success : MemberMatchOutcome.Conflict, conflictingDeclaration );
+    public static MemberMatch<TMember, TKind> Success( TKind kind ) => new( MemberMatchOutcome.Success, null, kind: kind );
 
-    public static MemberMatch<TDeclaration> Ambiguous() => new( MemberMatchOutcome.Ambiguous );
+    public static MemberMatch<TMember, TKind> Conflict( TMember conflictingDeclaration ) => new( MemberMatchOutcome.Conflict, conflictingDeclaration );
 
-    public static MemberMatch<TDeclaration> NotFound<TNameMatchPredicate>( in TNameMatchPredicate predicate )
-        where TNameMatchPredicate : INameMatchPredicate
-    {
-        predicate.GetCandidateNames( out var singleValue, out var collection );
+    public static MemberMatch<TMember, TKind> Ambiguous() => new( MemberMatchOutcome.Ambiguous );
 
-        return new MemberMatch<TDeclaration>( MemberMatchOutcome.NotFound, candidateNames: (object?) collection ?? singleValue );
-    }
-
-    public static MemberMatch<TDeclaration> NotFound( string candidateName ) => new( MemberMatchOutcome.NotFound, candidateNames: candidateName );
-
-    public static MemberMatch<TDeclaration> NotFound( IEnumerable<string>? candidateNames = null )
+    public static MemberMatch<TMember, TKind> NotFound( ImmutableArray<string> candidateNames )
         => new( MemberMatchOutcome.NotFound, candidateNames: candidateNames );
 
-    public static MemberMatch<TDeclaration> Invalid() => new( MemberMatchOutcome.Invalid );
+    public static MemberMatch<TMember, TKind> NotFound( string candidateName )
+        => new( MemberMatchOutcome.NotFound, candidateNames: ImmutableArray.Create( candidateName ) );
 
-    public static MemberMatch<TDeclaration> FromOutcome( MemberMatchOutcome outcome, TDeclaration? declaration = null, string? candidateName = null )
-        => new( outcome, declaration, candidateName );
+    public static MemberMatch<TMember, TKind> NotFound() => new( MemberMatchOutcome.NotFound, candidateNames: ImmutableArray<string>.Empty );
 
-    public static MemberMatch<TDeclaration> FromOutcome( MemberMatchOutcome outcome, TDeclaration? declaration, IEnumerable<string>? candidateNames )
-        => new( outcome, declaration, candidateNames );
+    public static MemberMatch<TMember, TKind> Invalid() => new( MemberMatchOutcome.Invalid );
 
-    private readonly object? _candidateNames;
-
-    private MemberMatch( MemberMatchOutcome outcome, TDeclaration? member = null, object? candidateNames = null )
+    private MemberMatch( MemberMatchOutcome? outcome, TMember? member = null, ImmutableArray<string> candidateNames = default, TKind kind = default )
     {
         this.Member = member;
+        this.Kind = kind;
         this.Outcome = outcome;
-        this._candidateNames = candidateNames;
-    }
-
-    private MemberMatch( MemberMatchOutcome? outcome, TDeclaration? member, object? candidateNames )
-    {
-        this.Member = member;
-        this.Outcome = outcome;
-        this._candidateNames = candidateNames;
+        this.CandidateNames = candidateNames;
     }
 
     public MemberMatchOutcome? Outcome { get; }
 
-    public TDeclaration? Member { get; }
+    public TMember? Member { get; }
+
+    public TKind Kind { get; }
 
     IMemberOrNamedType? IMemberMatch.Member => this.Member;
 
     [MemberNotNullWhen( true, nameof(CandidateNames) )]
-    public bool HasCandidateNames => this._candidateNames != null;
+    public bool HasCandidateNames => this.CandidateNames != null;
 
-    public IEnumerable<string>? CandidateNames
-        => this._candidateNames == null ? null : this._candidateNames as IEnumerable<string> ?? new[] { (string) this._candidateNames };
+    public ImmutableArray<string> CandidateNames { get; }
 
-    public MemberMatch<TBaseDeclaration> Cast<TBaseDeclaration>()
+    public MemberMatch<TBaseDeclaration, TKind> Cast<TBaseDeclaration>()
         where TBaseDeclaration : class, IMemberOrNamedType
-        => new( this.Outcome, (TBaseDeclaration?) (IDeclaration?) this.Member, this._candidateNames );
+        => new( this.Outcome, (TBaseDeclaration?) (IDeclaration?) this.Member, this.CandidateNames );
 }

@@ -148,13 +148,10 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
                 this,
                 null,
                 null,
-                MemberMatch<IMemberOrNamedType>.Invalid(),
-                MemberMatch<IMethod>.NotFound(),
-                MemberMatch<IMethod>.NotFound(),
-                MemberMatch<IMethod>.NotFound(),
-                ChangeHandlerSignatureKind.Invalid,
-                ChangeHandlerSignatureKind.Invalid,
-                ValidationHandlerSignatureKind.Invalid,
+                MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Invalid(),
+                MemberMatch<IMethod, ChangeHandlerSignatureKind>.NotFound(),
+                MemberMatch<IMethod, ChangeHandlerSignatureKind>.NotFound(),
+                MemberMatch<IMethod, ValidationHandlerSignatureKind>.NotFound(),
                 this._requirePropertyChangingMatch,
                 this._requirePropertyChangedMatch,
                 this._requireValidateMatch );
@@ -176,21 +173,30 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
 #pragma warning restore CA1307 // Specify StringComparison for clarity
 #endif
 
+        var propertyChangingPredicate = matchPropertyChanging == null
+            ? (INameMatchPredicate) new StringNameMatchPredicate(
+                DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName( propertyName ) )
+            : new RegexNameMatchPredicate( new Regex( matchPropertyChanging ) );
+
+        var propertyChangedPredicate = matchPropertyChanged == null
+            ? (INameMatchPredicate) new StringNameMatchPredicate(
+                DefaultDependencyPropertyNamingConvention.GetPropertyChangedMethodNameFromPropertyName( propertyName ) )
+            : new RegexNameMatchPredicate( new Regex( matchPropertyChanged ) );
+
+        var validatePredicate = matchValidate == null
+            ? (INameMatchPredicate) new StringNameMatchPredicate(
+                DefaultDependencyPropertyNamingConvention.GetValidateMethodNameFromPropertyName( propertyName ) )
+            : new RegexNameMatchPredicate( new Regex( matchValidate ) );
+
         return DependencyPropertyNamingConventionHelper.Match(
             this,
             targetProperty,
             inspectedMember,
             propertyName,
             registrationFieldName,
-            new StringOrRegexNameMatchPredicate(
-                matchPropertyChanging == null ? DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName( propertyName ) : null,
-                matchPropertyChanging != null ? new Regex( matchPropertyChanging ) : null ),
-            new StringOrRegexNameMatchPredicate(
-                matchPropertyChanged == null ? DefaultDependencyPropertyNamingConvention.GetPropertyChangedMethodNameFromPropertyName( propertyName ) : null,
-                matchPropertyChanged != null ? new Regex( matchPropertyChanged ) : null ),
-            new StringOrRegexNameMatchPredicate(
-                matchValidate == null ? DefaultDependencyPropertyNamingConvention.GetValidateMethodNameFromPropertyName( propertyName ) : null,
-                matchValidate != null ? new Regex( matchValidate ) : null ),
+            propertyChangingPredicate,
+            propertyChangedPredicate,
+            validatePredicate,
             this._requirePropertyChangingMatch,
             this._requirePropertyChangedMatch,
             this._requireValidateMatch );

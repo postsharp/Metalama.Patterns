@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
@@ -14,5 +15,5 @@ internal interface IMemberMatch
 
     bool HasCandidateNames { get; }
 
-    IEnumerable<string>? CandidateNames { get; }
+    ImmutableArray<string> CandidateNames { get; }
 }

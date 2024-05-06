@@ -11,8 +11,8 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 internal sealed record CommandNamingConventionMatch(
     INamingConvention NamingConvention,
     string? CommandPropertyName,
-    MemberMatch<IMemberOrNamedType> CommandPropertyConflictMatch,
-    MemberMatch<IMember> CanExecuteMatch,
+    MemberMatch<IMemberOrNamedType, DefaultMatchKind> CommandPropertyConflictMatch,
+    MemberMatch<IMember, DefaultMatchKind> CanExecuteMatch,
     bool RequireCanExecuteMatch = false ) : NamingConventionMatch( NamingConvention )
 {
     private static readonly ImmutableArray<string> _commandPropertyCategories = ImmutableArray.Create( CommandAttribute.CommandPropertyCategory );
