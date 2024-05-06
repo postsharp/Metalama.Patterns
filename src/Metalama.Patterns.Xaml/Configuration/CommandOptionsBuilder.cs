@@ -8,7 +8,7 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace Metalama.Patterns.Xaml.Options;
+namespace Metalama.Patterns.Xaml.Configuration;
 
 [PublicAPI]
 [CompileTime]
@@ -20,12 +20,6 @@ public sealed class CommandOptionsBuilder
     /// Gets the key of the default naming convention.
     /// </summary>
     public static string DefaultNamingConventionKey => DefaultCommandNamingConvention.RegistrationKey;
-
-    public static class Names
-    {
-        public const string CommandNameGroup = RegexCommandNamingConvention.CommandNameGroup;
-        public const string CommandNameToken = RegexCommandNamingConvention.CommandNameToken;
-    }
 
     /// <summary>
     /// Adds or updates a naming convention identified by the given <paramref name="key"/>, using a regular expression to select the 
@@ -106,36 +100,30 @@ public sealed class CommandOptionsBuilder
     }
 
     public void SetNamingConventionPriority( string key, int priority )
-    {
-        this._options = this._options with
+        => this._options = this._options with
         {
             NamingConventionRegistrations =
             this._options.NamingConventionRegistrations.AddOrApplyChanges( new NamingConventionRegistration<ICommandNamingConvention>( key, null, priority ) )
         };
-    }
 
     public void RemoveNamingConvention( string key )
-    {
-        this._options = this._options with
+        => this._options = this._options with
         {
             NamingConventionRegistrations =
             this._options.NamingConventionRegistrations.Remove( key )
         };
-    }
 
     /// <summary>
     /// Resets naming convention registrations to the default state, removing any user-registered naming conventions.
     /// </summary>
     public void ResetNamingConventions()
-    {
-        this._options = this._options with
+        => this._options = this._options with
         {
             NamingConventionRegistrations =
             this._options.NamingConventionRegistrations
                 .ApplyChanges( IncrementalKeyedCollection.Clear<string, NamingConventionRegistration<ICommandNamingConvention>>(), default )
                 .AddOrApplyChanges( CommandOptions.DefaultNamingConventionRegistrations() )
         };
-    }
 
     /// <summary>
     /// Gets or sets a value indicating whether integration with <see cref="INotifyPropertyChanged"/> is enabled. The default is <see langword="true"/>.

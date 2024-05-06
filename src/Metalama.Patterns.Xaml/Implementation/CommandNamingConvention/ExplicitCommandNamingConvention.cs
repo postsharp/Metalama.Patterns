@@ -27,7 +27,7 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
         var commandName = DefaultCommandNamingConvention.GetCommandNameFromExecuteMethodName( executeMethod.Name );
         var commandPropertyName = this._commandPropertyName ?? DefaultCommandNamingConvention.GetCommandPropertyNameFromCommandName( commandName );
 
-        return CommandNamingConventionHelper.Match(
+        return CommandNamingConventionMatcher.Match(
             this,
             executeMethod,
             inspectedMember,

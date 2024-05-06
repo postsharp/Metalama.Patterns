@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Xaml.Options;
+using Metalama.Patterns.Xaml.Configuration;
 
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Diagnostics.MultipleNamingConventionsNoMatch;
 
@@ -15,25 +15,25 @@ internal class NsFabric : NamespaceFabric
                 b.ApplyRegexNamingConvention(
                     "rx1-key",
                     "rx1-name",
-                    "^Execute(?<" + CommandOptionsBuilder.Names.CommandNameGroup + ">.+)$",
-                    CommandOptionsBuilder.Names.CommandNameToken + "CommandRx1",
-                    "CanRx1" + CommandOptionsBuilder.Names.CommandNameToken,
+                    "^Execute(?<CommandName>.+)$",
+                    "{CommandName}CommandRx1",
+                    "CanRx1{CommandName}",
                     1 );
 
                 b.ApplyRegexNamingConvention(
                     "rx2-key",
                     "rx2-name",
-                    "^Execute(?<" + CommandOptionsBuilder.Names.CommandNameGroup + ">.+)$",
-                    CommandOptionsBuilder.Names.CommandNameToken + "CommandRx2",
-                    "CanRx2" + CommandOptionsBuilder.Names.CommandNameToken,
+                    "^Execute(?<CommandName>.+)$",
+                    "{CommandName}CommandRx2",
+                    "CanRx2{CommandName}",
                     2 );
 
                 b.ApplyRegexNamingConvention(
                     "rx3-key",
                     "rx3-name",
-                    "^Execute(?<" + CommandOptionsBuilder.Names.CommandNameGroup + ">.+)$",
-                    CommandOptionsBuilder.Names.CommandNameToken + "CommandRx3",
-                    "(CanRx3" + CommandOptionsBuilder.Names.CommandNameToken + ")|(CanRx3" + CommandOptionsBuilder.Names.CommandNameToken + "Property)",
+                    "^Execute(?<CommandName>.+)$",
+                    "{CommandName}CommandRx3",
+                    "(CanRx3{CommandName})|(CanRx3{CommandName}Property)",
                     3 );
 
                 b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionKey );

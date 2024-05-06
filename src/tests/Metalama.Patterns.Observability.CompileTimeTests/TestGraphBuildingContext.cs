@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Patterns.Observability.Configuration;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
-using Metalama.Patterns.Observability.Options;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.CompileTimeTests;

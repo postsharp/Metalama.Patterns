@@ -7,8 +7,8 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Utilities;
+using Metalama.Patterns.Observability.Configuration;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
-using Metalama.Patterns.Observability.Options;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;

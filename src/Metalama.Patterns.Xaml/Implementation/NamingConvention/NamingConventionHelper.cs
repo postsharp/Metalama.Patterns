@@ -14,9 +14,9 @@ internal enum DefaultMatchKind
 [CompileTime]
 internal static class NamingConventionHelper
 {
-    public static MemberMatch<TMember, TKind> FindValidMatchingDeclaration<TMember, TKind>(
+    public static MemberMatch<TMember, TKind> FindMatchingMembers<TMember, TKind>(
         this IEnumerable<TMember> members,
-        INameMatchPredicate nameMatchPredicate,
+        INameMatchPredicate predicate,
         Func<TMember, TKind?> classifyMember,
         InspectedMemberAdder inspectedMember,
         string category )
@@ -33,7 +33,7 @@ internal static class NamingConventionHelper
 
         foreach ( var declaration in members )
         {
-            if ( nameMatchPredicate.IsMatch( declaration.Name ) )
+            if ( predicate.IsMatch( declaration.Name ) )
             {
                 ++candidateCount;
 
@@ -67,6 +67,6 @@ internal static class NamingConventionHelper
                 return MemberMatch<TMember, TKind>.Ambiguous();
         }
 
-        return MemberMatch<TMember, TKind>.NotFound( nameMatchPredicate.Candidates );
+        return MemberMatch<TMember, TKind>.NotFound( predicate.Candidates );
     }
 }

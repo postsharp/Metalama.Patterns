@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Observability.Implementation;
 
-namespace Metalama.Patterns.Observability.Options;
+namespace Metalama.Patterns.Observability.Configuration;
 
 /// <summary>
 /// Builds dependency options. Used at the level of <see cref="ICompilation"/>, <see cref="INamespace"/> and <see cref="INamedType"/>.

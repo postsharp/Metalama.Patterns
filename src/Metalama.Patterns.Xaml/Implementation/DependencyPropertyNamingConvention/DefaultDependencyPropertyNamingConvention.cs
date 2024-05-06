@@ -17,7 +17,7 @@ internal sealed class DefaultDependencyPropertyNamingConvention : IDependencyPro
     {
         var propertyName = targetProperty.Name;
 
-        return DependencyPropertyNamingConventionHelper.Match(
+        return DependencyPropertyNamingConventionMatcher.Match(
             this,
             targetProperty,
             inspectedMember,

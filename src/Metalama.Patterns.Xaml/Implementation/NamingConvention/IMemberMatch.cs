@@ -9,11 +9,9 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 [CompileTime]
 internal interface IMemberMatch
 {
-    MemberMatchOutcome? Outcome { get; }
+    MemberMatchOutcome Outcome { get; }
 
     IMemberOrNamedType? Member { get; }
-
-    bool HasCandidateNames { get; }
 
     ImmutableArray<string> CandidateNames { get; }
 }

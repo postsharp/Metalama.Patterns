@@ -5,8 +5,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Options;
+using Metalama.Patterns.Xaml.Configuration;
 using Metalama.Patterns.Xaml.Implementation;
-using Metalama.Patterns.Xaml.Options;
 using System.Windows;
 
 namespace Metalama.Patterns.Xaml;
@@ -51,8 +51,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
     }
 
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
-    {
-        return new[]
+        => new[]
         {
             new DependencyPropertyOptions()
             {
@@ -61,7 +60,6 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
                 InitializerProvidesDefaultValue = this._initializerProvidesDefaultValue
             }
         };
-    }
 
     // TODO: Document the valid signatures of PropertyChangedMethod, PropertyChangingMethod and ValidateMethod, see project README.md.
 
@@ -121,7 +119,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
         builder.MustNotBeStatic();
 
         // ReSharper disable once RedundantNameQualifier
-        builder.MustHaveAccessibility( Metalama.Framework.Code.Accessibility.Public );
+        builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
         builder.MustBeReadable();
         builder.MustSatisfy( p => p.IsAutoPropertyOrField == true, p => $"{p} must be an auto-property." );
         builder.DeclaringType().MustBe( typeof(DependencyObject), ConversionKind.Reference );

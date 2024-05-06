@@ -31,8 +31,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
     protected abstract string GetInvalidityReason( in InspectedMember inspectedMember );
 
     void IDiagnosticReporter.ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedMember inspectedMember, bool isRequired )
-    {
-        this._builder.Diagnostics.Report(
+        => this._builder.Diagnostics.Report(
             Diagnostics.WarningValidCandidateDeclarationIsAmbiguous.WithArguments(
                 (
                     inspectedMember.Member.DeclarationKind,
@@ -43,15 +42,13 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                     namingConvention.Name
                 ) ),
             inspectedMember.Member );
-    }
 
     void IDiagnosticReporter.ReportConflictingDeclaration(
         INamingConvention namingConvention,
         IDeclaration conflictingDeclaration,
         IEnumerable<string> applicableCategories,
         bool isRequired )
-    {
-        this._builder.Diagnostics.Report(
+        => this._builder.Diagnostics.Report(
             Diagnostics.WarningExistingMemberNameConflict.WithArguments(
                 (
                     conflictingDeclaration.DeclarationKind,
@@ -60,11 +57,9 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                     isRequired ? "required " : null,
                     applicableCategories.PrettyList( " or " ),
                     namingConvention.Name) ) );
-    }
 
     void IDiagnosticReporter.ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedMember inspectedMember, bool isRequired )
-    {
-        this._builder.Diagnostics.Report(
+        => this._builder.Diagnostics.Report(
             Diagnostics.WarningInvalidCandidateDeclarationSignature.WithArguments(
                 (
                     inspectedMember.Member.DeclarationKind,
@@ -76,7 +71,6 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                     this.GetInvalidityReason( inspectedMember )
                 ) ),
             inspectedMember.Member );
-    }
 
     void IDiagnosticReporter.ReportDeclarationNotFound(
         INamingConvention namingConvention,
@@ -98,14 +92,9 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
     }
 
     void IDiagnosticReporter.ReportNoNamingConventionMatched( IEnumerable<INamingConvention> namingConventionsTried )
-    {
-        this._builder.Diagnostics.Report(
+        => this._builder.Diagnostics.Report(
             Diagnostics.ErrorNoNamingConventionMatched.WithArguments(
                 (namingConventionsTried.Select( nc => nc.Name ).PrettyList( " and ", out var plurality ), plurality == 2 ? "s" : null) ) );
-    }
 
-    void IDiagnosticReporter.ReportNoConfiguredNamingConventions()
-    {
-        this._builder.Diagnostics.Report( Diagnostics.ErrorNoConfiguredNamingConventions );
-    }
+    void IDiagnosticReporter.ReportNoConfiguredNamingConventions() => this._builder.Diagnostics.Report( Diagnostics.ErrorNoConfiguredNamingConventions );
 }

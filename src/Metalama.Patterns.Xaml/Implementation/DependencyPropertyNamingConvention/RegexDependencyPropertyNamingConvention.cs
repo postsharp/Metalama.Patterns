@@ -188,7 +188,7 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
                 DefaultDependencyPropertyNamingConvention.GetValidateMethodNameFromPropertyName( propertyName ) )
             : new RegexNameMatchPredicate( new Regex( matchValidate ) );
 
-        return DependencyPropertyNamingConventionHelper.Match(
+        return DependencyPropertyNamingConventionMatcher.Match(
             this,
             targetProperty,
             inspectedMember,

@@ -7,7 +7,7 @@ using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
 [CompileTime]
-internal static class DependencyPropertyNamingConventionHelper
+internal static class DependencyPropertyNamingConventionMatcher
 {
     public static DependencyPropertyNamingConventionMatch Match(
         INamingConvention namingConvention,
@@ -40,19 +40,19 @@ internal static class DependencyPropertyNamingConventionHelper
             registrationFieldMatch = MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Success( DefaultMatchKind.Default );
         }
 
-        var findPropertyChangingResult = declaringType.Methods.FindValidMatchingDeclaration(
+        var findPropertyChangingResult = declaringType.Methods.FindMatchingMembers(
             matchPropertyChangingPredicate,
             m => GetChangeHandlerSignature( m, targetProperty, assets, true ),
             inspectedMember,
             DependencyPropertyAspectBuilder.PropertyChangingMethodCategory );
 
-        var findPropertyChangedResult = declaringType.Methods.FindValidMatchingDeclaration(
+        var findPropertyChangedResult = declaringType.Methods.FindMatchingMembers(
             matchPropertyChangedPredicate,
             m => GetChangeHandlerSignature( m, targetProperty, assets, true ),
             inspectedMember,
             DependencyPropertyAspectBuilder.PropertyChangedMethodCategory );
 
-        var findValidateResult = declaringType.Methods.FindValidMatchingDeclaration(
+        var findValidateResult = declaringType.Methods.FindMatchingMembers(
             matchValidateNamePredicate,
             m => GetValidationHandlerSignature( m, targetProperty, assets ),
             inspectedMember,

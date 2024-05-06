@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Patterns.Observability.Options;
+using Metalama.Patterns.Observability.Configuration;
 using Microsoft.CodeAnalysis;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;

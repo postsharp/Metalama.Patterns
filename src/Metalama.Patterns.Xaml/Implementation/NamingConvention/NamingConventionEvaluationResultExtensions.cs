@@ -41,7 +41,7 @@ internal static class NamingConventionEvaluationResultExtensions
 
             case MemberMatchOutcome.NotFound:
 
-                if ( member.Match.HasCandidateNames )
+                if ( !member.Match.CandidateNames.IsEmpty )
                 {
                     reporter.ReportDeclarationNotFound( namingConvention, member.Match.CandidateNames, member.Categories, member.IsRequired );
                 }

@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 [CompileTime]
 internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 {
-    public static string RegistrationKey { get; } = "{43954F4F-1606-4A44-9DEB-41E7C686C149}";
+    public static string RegistrationKey { get; } = "default";
 
     public string Name => "default";
 
@@ -22,7 +22,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
         var canExecuteName = GetCanExecuteNameFromCommandName( commandName );
 
-        return CommandNamingConventionHelper.Match(
+        return CommandNamingConventionMatcher.Match(
             this,
             executeMethod,
             inspectedMember,

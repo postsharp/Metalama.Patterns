@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Xaml.Options;
+using Metalama.Patterns.Xaml.Configuration;
 
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.NamingConvention.Regex;
 
@@ -13,9 +13,9 @@ internal class NsFabric : NamespaceFabric
             b => b.ApplyRegexNamingConvention(
                 "rx1-key",
                 "rx1-name",
-                "^MakeIt(?<" + CommandOptionsBuilder.Names.CommandNameGroup + ">.+)$",
-                "The" + CommandOptionsBuilder.Names.CommandNameToken + "Command",
-                "(CanIt" + CommandOptionsBuilder.Names.CommandNameToken + ")|(" + CommandOptionsBuilder.Names.CommandNameToken + "ItCan)" ) );
+                "^MakeIt(?<CommandName>.+)$",
+                "The{CommandName}Command",
+                "(CanIt{CommandName})|({CommandName}ItCan)" ) );
     }
 }
 

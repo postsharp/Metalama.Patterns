@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 internal sealed record CommandNamingConventionMatch(
     INamingConvention NamingConvention,
     string? CommandPropertyName,
-    MemberMatch<IMemberOrNamedType, DefaultMatchKind> CommandPropertyConflictMatch,
+    MemberMatch<IMemberOrNamedType, DefaultMatchKind> CommandPropertyMatch,
     MemberMatch<IMember, DefaultMatchKind> CanExecuteMatch,
     bool RequireCanExecuteMatch = false ) : NamingConventionMatch( NamingConvention )
 {
@@ -22,15 +22,12 @@ internal sealed record CommandNamingConventionMatch(
 
     public override bool Success
         => !string.IsNullOrWhiteSpace( this.CommandPropertyName )
-           && this.CommandPropertyConflictMatch.Outcome == MemberMatchOutcome.Success
+           && this.CommandPropertyMatch.Outcome == MemberMatchOutcome.Success
            && (this.CanExecuteMatch.Outcome == MemberMatchOutcome.Success
                || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == MemberMatchOutcome.NotFound));
 
     protected override ImmutableArray<MemberMatchDiagnosticInfo> GetMembers()
-    {
-        return
-            ImmutableArray.Create(
-                new MemberMatchDiagnosticInfo( this.CommandPropertyConflictMatch, true, _commandPropertyCategories ),
-                new MemberMatchDiagnosticInfo( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories ) );
-    }
+        => ImmutableArray.Create(
+            new MemberMatchDiagnosticInfo( this.CommandPropertyMatch, true, _commandPropertyCategories ),
+            new MemberMatchDiagnosticInfo( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories ) );
 }

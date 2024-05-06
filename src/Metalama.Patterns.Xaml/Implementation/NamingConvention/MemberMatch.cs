@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
@@ -39,7 +38,7 @@ internal sealed class MemberMatch<TMember, TKind> : IMemberMatch
 
     public static MemberMatch<TMember, TKind> Invalid() => new( MemberMatchOutcome.Invalid );
 
-    private MemberMatch( MemberMatchOutcome? outcome, TMember? member = null, ImmutableArray<string> candidateNames = default, TKind kind = default )
+    private MemberMatch( MemberMatchOutcome outcome, TMember? member = null, ImmutableArray<string> candidateNames = default, TKind kind = default )
     {
         this.Member = member;
         this.Kind = kind;
@@ -47,16 +46,13 @@ internal sealed class MemberMatch<TMember, TKind> : IMemberMatch
         this.CandidateNames = candidateNames;
     }
 
-    public MemberMatchOutcome? Outcome { get; }
+    public MemberMatchOutcome Outcome { get; }
 
     public TMember? Member { get; }
 
     public TKind Kind { get; }
 
     IMemberOrNamedType? IMemberMatch.Member => this.Member;
-
-    [MemberNotNullWhen( true, nameof(CandidateNames) )]
-    public bool HasCandidateNames => this.CandidateNames != null;
 
     public ImmutableArray<string> CandidateNames { get; }
 

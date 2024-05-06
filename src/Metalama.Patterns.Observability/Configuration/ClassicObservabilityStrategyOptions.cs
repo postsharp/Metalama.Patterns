@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using System.ComponentModel;
 
-namespace Metalama.Patterns.Observability.Options;
+namespace Metalama.Patterns.Observability.Configuration;
 
 /// <summary>
 /// Options specific to the "natural" implementation.

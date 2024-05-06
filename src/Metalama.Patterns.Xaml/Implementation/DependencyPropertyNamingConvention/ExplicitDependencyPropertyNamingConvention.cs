@@ -32,7 +32,7 @@ internal sealed class ExplicitDependencyPropertyNamingConvention : IDependencyPr
     {
         var propertyName = targetProperty.Name;
 
-        return DependencyPropertyNamingConventionHelper.Match(
+        return DependencyPropertyNamingConventionMatcher.Match(
             this,
             targetProperty,
             inspectedMember,

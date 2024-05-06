@@ -104,8 +104,5 @@ public sealed class DelegateCommand : ICommand
         }
     }
 
-    private static void OnCanExecuteChanged( object? obj )
-    {
-        (obj as DelegateCommand)?.CanExecuteChanged?.Invoke( obj, EventArgs.Empty );
-    }
+    private static void OnCanExecuteChanged( object? obj ) => (obj as DelegateCommand)?.CanExecuteChanged?.Invoke( obj, EventArgs.Empty );
 }

@@ -3,7 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 
-namespace Metalama.Patterns.Observability.Options;
+namespace Metalama.Patterns.Observability.Configuration;
 
 /// <summary>
 /// Represents guarantees made by a method, field or property with regards to the <see cref="ObservableAttribute"/> aspect.

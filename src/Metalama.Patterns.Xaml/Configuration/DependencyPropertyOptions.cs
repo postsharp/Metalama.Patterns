@@ -8,7 +8,7 @@ using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using System.Windows;
 
-namespace Metalama.Patterns.Xaml.Options;
+namespace Metalama.Patterns.Xaml.Configuration;
 
 internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>,
                                                    IHierarchicalOptions<IProperty>
@@ -64,13 +64,11 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         };
 
     internal static IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>> DefaultNamingConventionRegistrations()
-    {
-        return IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(
+        => IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(
             new NamingConventionRegistration<IDependencyPropertyNamingConvention>(
                 DefaultCommandNamingConvention.RegistrationKey,
                 new DefaultDependencyPropertyNamingConvention(),
                 1000 ) );
-    }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {

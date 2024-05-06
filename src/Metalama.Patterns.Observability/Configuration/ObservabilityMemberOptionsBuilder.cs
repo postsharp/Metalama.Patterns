@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Patterns.Observability.Options;
+namespace Metalama.Patterns.Observability.Configuration;
 
 /// <summary>
 /// Builds dependency options. Used at the level of <see cref="IMember"/>.

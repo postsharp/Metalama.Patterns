@@ -17,10 +17,7 @@ internal sealed class RegexNameMatchPredicate : INameMatchPredicate
         this.Candidates = ImmutableArray.Create( matchName.ToString() );
     }
 
-    public bool IsMatch( string name )
-    {
-        return this._matchName!.IsMatch( name );
-    }
+    public bool IsMatch( string name ) => this._matchName!.IsMatch( name );
 
     public ImmutableArray<string> Candidates { get; }
 }

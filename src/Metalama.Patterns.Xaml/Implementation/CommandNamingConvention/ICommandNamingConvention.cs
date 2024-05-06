@@ -9,4 +9,4 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
 // ReSharper disable once RedundantTypeDeclarationBody
 [CompileTime]
-internal interface ICommandNamingConvention : INamingConvention<IMethod, CommandNamingConventionMatch>, ICompileTimeSerializable { }
+internal interface ICommandNamingConvention : INamingConvention<IMethod, CommandNamingConventionMatch> { }

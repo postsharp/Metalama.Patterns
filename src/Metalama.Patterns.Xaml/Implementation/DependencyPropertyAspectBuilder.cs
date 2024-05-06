@@ -4,9 +4,9 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Project;
+using Metalama.Patterns.Xaml.Configuration;
 using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
-using Metalama.Patterns.Xaml.Options;
 using System.Windows;
 using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 

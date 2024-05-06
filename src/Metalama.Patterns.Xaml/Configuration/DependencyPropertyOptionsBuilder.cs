@@ -7,7 +7,7 @@ using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 using System.Windows;
 
-namespace Metalama.Patterns.Xaml.Options;
+namespace Metalama.Patterns.Xaml.Configuration;
 
 [PublicAPI]
 [CompileTime]
@@ -147,37 +147,31 @@ public sealed class DependencyPropertyOptionsBuilder
     }
 
     public void SetNamingConventionPriority( string key, int priority )
-    {
-        this._options = this._options with
+        => this._options = this._options with
         {
             NamingConventionRegistrations =
             this._options.NamingConventionRegistrations.AddOrApplyChanges(
                 new NamingConventionRegistration<IDependencyPropertyNamingConvention>( key, null, priority ) )
         };
-    }
 
     public void RemoveNamingConvention( string key )
-    {
-        this._options = this._options with
+        => this._options = this._options with
         {
             NamingConventionRegistrations =
             this._options.NamingConventionRegistrations.Remove( key )
         };
-    }
 
     /// <summary>
     /// Resets naming convention registrations to the default state, removing any user-registered naming conventions.
     /// </summary>
     public void ResetNamingConventions()
-    {
-        this._options = this._options with
+        => this._options = this._options with
         {
             NamingConventionRegistrations =
             this._options.NamingConventionRegistrations
                 .ApplyChanges( IncrementalKeyedCollection.Clear<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(), default )
                 .AddOrApplyChanges( DependencyPropertyOptions.DefaultNamingConventionRegistrations() )
         };
-    }
 
     internal DependencyPropertyOptions Build() => this._options;
 }

@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 
-namespace Metalama.Patterns.Observability.Options;
+namespace Metalama.Patterns.Observability.Configuration;
 
 internal sealed record DependencyAnalysisOptions :
     IHierarchicalOptions<ICompilation>,

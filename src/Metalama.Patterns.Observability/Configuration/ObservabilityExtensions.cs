@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Patterns.Observability.Options;
+namespace Metalama.Patterns.Observability.Configuration;
 
 /// <summary>
 /// Extension methods that configure the <see cref="ObservableAttribute"/> aspect.

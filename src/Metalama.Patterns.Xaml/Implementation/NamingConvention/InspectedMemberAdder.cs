@@ -16,7 +16,5 @@ internal readonly struct InspectedMemberAdder
     }
 
     public void Add( IMemberOrNamedType member, bool isValid, string? category = null )
-    {
-        this._inspectedDeclarations.Add( new InspectedMember( member, isValid, category ) );
-    }
+        => this._inspectedDeclarations.Add( new InspectedMember( member, isValid, category ) );
 }

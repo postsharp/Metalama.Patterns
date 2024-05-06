@@ -6,7 +6,7 @@ using Metalama.Framework.Options;
 using Metalama.Patterns.Observability.Implementation;
 using Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
-namespace Metalama.Patterns.Observability.Options;
+namespace Metalama.Patterns.Observability.Configuration;
 
 [CompileTime]
 internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>

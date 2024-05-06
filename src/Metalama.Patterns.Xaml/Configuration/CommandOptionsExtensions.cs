@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Patterns.Xaml.Options;
+namespace Metalama.Patterns.Xaml.Configuration;
 
 [PublicAPI]
 [CompileTime]
