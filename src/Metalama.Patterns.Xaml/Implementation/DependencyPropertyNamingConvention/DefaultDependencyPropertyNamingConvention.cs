@@ -11,7 +11,7 @@ internal sealed class DefaultDependencyPropertyNamingConvention : IDependencyPro
 {
     public static string RegistrationKey { get; } = "{5150E382-3376-44CF-A278-CC7E4C8E5361}";
 
-    public string DiagnosticName => "default";
+    public string Name => "default";
 
     public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, InspectedDeclarationsAdder inspectedDeclarations )
     {

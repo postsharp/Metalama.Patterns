@@ -20,9 +20,9 @@ internal sealed record DependencyPropertyNamingConventionMatch(
     ValidationHandlerSignatureKind ValidationSignatureKind,
     bool RequirePropertyChangingMatch = false,
     bool RequirePropertyChangedMatch = false,
-    bool RequireValidateMatch = false ) : INamingConventionMatch
+    bool RequireValidateMatch = false ) : NamingConventionMatch( NamingConvention )
 {
-    public bool Success
+    public override bool Success
         => !string.IsNullOrWhiteSpace( this.DependencyPropertyName )
            && !string.IsNullOrWhiteSpace( this.RegistrationFieldName )
            && this.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success
@@ -33,17 +33,17 @@ internal sealed record DependencyPropertyNamingConventionMatch(
            && (this.ValidateMatch.Outcome == DeclarationMatchOutcome.Success
                || (this.RequireValidateMatch == false && this.ValidateMatch.Outcome == DeclarationMatchOutcome.NotFound));
 
+    protected override IReadOnlyList<NamingConventionMatchMember> GetMembers()
+        =>
+        [
+            new NamingConventionMatchMember( this.RegistrationFieldConflictMatch, true, _registrationFieldCategories ),
+            new NamingConventionMatchMember( this.PropertyChangingMatch, this.RequirePropertyChangingMatch, _propertyChangingCategories ),
+            new NamingConventionMatchMember( this.PropertyChangedMatch, this.RequirePropertyChangedMatch, _propertyChangedCategories ),
+            new NamingConventionMatchMember( this.ValidateMatch, this.RequireValidateMatch, _validateCategories )
+        ];
+
     private static readonly IReadOnlyList<string> _registrationFieldCategories = new[] { DependencyPropertyAspectBuilder.RegistrationFieldCategory };
     private static readonly IReadOnlyList<string> _propertyChangingCategories = new[] { DependencyPropertyAspectBuilder.PropertyChangingMethodCategory };
     private static readonly IReadOnlyList<string> _propertyChangedCategories = new[] { DependencyPropertyAspectBuilder.PropertyChangedMethodCategory };
     private static readonly IReadOnlyList<string> _validateCategories = new[] { DependencyPropertyAspectBuilder.ValidateMethodCategory };
-
-    public void VisitDeclarationMatches<TVisitor>( in TVisitor visitor )
-        where TVisitor : IDeclarationMatchVisitor
-    {
-        visitor.Visit( this.RegistrationFieldConflictMatch, true, _registrationFieldCategories );
-        visitor.Visit( this.PropertyChangingMatch, this.RequirePropertyChangingMatch, _propertyChangingCategories );
-        visitor.Visit( this.PropertyChangedMatch, this.RequirePropertyChangedMatch, _propertyChangedCategories );
-        visitor.Visit( this.ValidateMatch, this.RequireValidateMatch, _validateCategories );
-    }
 }

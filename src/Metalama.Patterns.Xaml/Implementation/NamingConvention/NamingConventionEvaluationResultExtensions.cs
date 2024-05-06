@@ -1,86 +1,76 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
 internal static class NamingConventionEvaluationResultExtensions
 {
-    [CompileTime]
-    private readonly struct ReportDiagnosticsVisitor : IDeclarationMatchVisitor
+    private static void ReportDiagnostics(
+        INamingConvention namingConvention,
+        NamingConventionMatchMember member,
+        IDiagnosticReporter reporter,
+        IEnumerable<InspectedDeclaration> inspectedDeclarations )
     {
-        public IDiagnosticReporter DiagnosticReporter { get; init; }
-
-        public IEnumerable<InspectedDeclaration> InspectedDeclarations { get; init; }
-
-        public INamingConvention NamingConvention { get; init; }
-
-        void IDeclarationMatchVisitor.Visit<TDeclaration>(
-            in DeclarationMatch<TDeclaration> match,
-            bool isRequired,
-            IReadOnlyList<string> applicableCategories )
+        switch ( member.Match.Outcome )
         {
-            switch ( match.Outcome )
-            {
-                case DeclarationMatchOutcome.Ambiguous:
+            case DeclarationMatchOutcome.Ambiguous:
 
-                    foreach ( var inspectedDeclaration in this.InspectedDeclarations )
+                foreach ( var inspectedDeclaration in inspectedDeclarations )
+                {
+                    if ( inspectedDeclaration.IsValid && member.Categories.Any( c => c == inspectedDeclaration.Category ) )
                     {
-                        if ( inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
-                        {
-                            this.DiagnosticReporter.ReportAmbiguousDeclaration( this.NamingConvention, inspectedDeclaration, isRequired );
-                        }
+                        reporter.ReportAmbiguousDeclaration( namingConvention, inspectedDeclaration, member.IsRequired );
                     }
+                }
 
-                    break;
+                break;
 
-                case DeclarationMatchOutcome.Invalid:
+            case DeclarationMatchOutcome.Invalid:
 
-                    foreach ( var inspectedDeclaration in this.InspectedDeclarations )
+                foreach ( var inspectedDeclaration in inspectedDeclarations )
+                {
+                    if ( !inspectedDeclaration.IsValid && member.Categories.Any( c => c == inspectedDeclaration.Category ) )
                     {
-                        if ( !inspectedDeclaration.IsValid && applicableCategories.Any( c => c == inspectedDeclaration.Category ) )
-                        {
-                            this.DiagnosticReporter.ReportInvalidDeclaration( this.NamingConvention, inspectedDeclaration, isRequired );
-                        }
+                        reporter.ReportInvalidDeclaration( namingConvention, inspectedDeclaration, member.IsRequired );
                     }
+                }
 
-                    break;
+                break;
 
-                case DeclarationMatchOutcome.NotFound:
+            case DeclarationMatchOutcome.NotFound:
 
-                    if ( match.HasCandidateNames )
-                    {
-                        this.DiagnosticReporter.ReportDeclarationNotFound( this.NamingConvention, match.CandidateNames, applicableCategories, isRequired );
-                    }
+                if ( member.Match.HasCandidateNames )
+                {
+                    reporter.ReportDeclarationNotFound( namingConvention, member.Match.CandidateNames, member.Categories, member.IsRequired );
+                }
 
-                    break;
+                break;
 
-                case DeclarationMatchOutcome.Conflict:
+            case DeclarationMatchOutcome.Conflict:
 
-                    this.DiagnosticReporter.ReportConflictingDeclaration( this.NamingConvention, match.Declaration!, applicableCategories, isRequired );
+                reporter.ReportConflictingDeclaration( namingConvention, member.Match.Declaration!, member.Categories, member.IsRequired );
 
-                    break;
-            }
+                break;
         }
     }
 
     public static void ReportDiagnostics<TMatch, TDiagnosticReporter>(
         this INamingConventionEvaluationResult<TMatch> evaluationResult,
         in TDiagnosticReporter diagnosticReporter )
-        where TMatch : INamingConventionMatch
+        where TMatch : NamingConventionMatch
         where TDiagnosticReporter : IDiagnosticReporter
     {
         if ( evaluationResult.Success )
         {
-            var visitor = new ReportDiagnosticsVisitor()
-            {
-                InspectedDeclarations = evaluationResult.SuccessfulMatch.Value.InspectedDeclarations,
-                NamingConvention = evaluationResult.SuccessfulMatch.Value.Match.NamingConvention,
-                DiagnosticReporter = diagnosticReporter
-            };
+            var match = evaluationResult.SuccessfulMatch.Value.Match;
 
-            evaluationResult.SuccessfulMatch.Value.Match.VisitDeclarationMatches( visitor );
+            foreach ( var member in match.Members )
+            {
+                ReportDiagnostics( match.NamingConvention, member, diagnosticReporter, evaluationResult.SuccessfulMatch.Value.InspectedDeclarations );
+            }
         }
         else
         {
@@ -90,14 +80,10 @@ internal static class NamingConventionEvaluationResultExtensions
 
                 foreach ( var unsuccessfulMatch in evaluationResult.UnsuccessfulMatches )
                 {
-                    var visitor = new ReportDiagnosticsVisitor()
+                    foreach ( var member in unsuccessfulMatch.Match.Members )
                     {
-                        InspectedDeclarations = unsuccessfulMatch.InspectedDeclarations,
-                        NamingConvention = unsuccessfulMatch.Match.NamingConvention,
-                        DiagnosticReporter = diagnosticReporter
-                    };
-
-                    unsuccessfulMatch.Match.VisitDeclarationMatches( visitor );
+                        ReportDiagnostics( unsuccessfulMatch.Match.NamingConvention, member, diagnosticReporter, unsuccessfulMatch.InspectedDeclarations );
+                    }
                 }
             }
             else

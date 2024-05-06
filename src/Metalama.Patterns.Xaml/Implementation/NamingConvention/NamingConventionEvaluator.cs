@@ -10,7 +10,7 @@ internal static class NamingConventionEvaluator
     public static INamingConventionEvaluationResult<TMatch> Evaluate<TArguments, TMatch>(
         IEnumerable<INamingConvention<TArguments, TMatch>> namingConventions,
         TArguments arguments )
-        where TMatch : INamingConventionMatch
+        where TMatch : NamingConventionMatch
     {
         var e = new Evaluator<TArguments, TMatch>();
 
@@ -30,7 +30,7 @@ internal static class NamingConventionEvaluator
     public static INamingConventionEvaluationResult<TMatch> Evaluate<TArguments, TMatch>(
         INamingConvention<TArguments, TMatch> namingConvention,
         TArguments arguments )
-        where TMatch : INamingConventionMatch
+        where TMatch : NamingConventionMatch
     {
         var e = new Evaluator<TArguments, TMatch>();
         e.Evaluate( namingConvention, arguments );
@@ -41,7 +41,7 @@ internal static class NamingConventionEvaluator
 
     [CompileTime]
     private sealed class Evaluator<TArguments, TMatch> : INamingConventionEvaluationResult<TMatch>
-        where TMatch : INamingConventionMatch
+        where TMatch : NamingConventionMatch
     {
         private List<InspectedDeclaration> _inspectedDeclarations = new();
         private List<(TMatch Match, int InspectedDeclarationsStartIndex, int InspectedDeclarationsEndIndex)>? _unsuccessfulMatchDetails;

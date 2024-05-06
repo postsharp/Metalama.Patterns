@@ -20,7 +20,7 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
         this._canExecutePropertyName = canExecutePropertyName;
     }
 
-    public string DiagnosticName => "explicitly-configured";
+    public string Name => "explicitly-configured";
 
     public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
     {

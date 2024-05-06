@@ -64,7 +64,7 @@ internal static class CommandNamingConventionHelper
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                canExecuteMethodMatch.Value.ForDeclarationType<IMember>(),
+                canExecuteMethodMatch.ForDeclarationType<IMember>(),
                 requireCanExecuteMatch );
         }
         else if ( canExecutePropertyMatch?.Outcome == DeclarationMatchOutcome.Success )
@@ -73,7 +73,7 @@ internal static class CommandNamingConventionHelper
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                canExecutePropertyMatch.Value.ForDeclarationType<IMember>(),
+                canExecutePropertyMatch.ForDeclarationType<IMember>(),
                 requireCanExecuteMatch );
         }
         else if ( canExecuteMethodMatch?.Outcome == DeclarationMatchOutcome.Ambiguous || canExecutePropertyMatch?.Outcome == DeclarationMatchOutcome.Ambiguous )

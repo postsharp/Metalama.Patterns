@@ -43,7 +43,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
             this.NamingConventionRegistrations
                 .Where( r => r.NamingConvention != null )
                 .OrderBy( v => v.Priority ?? 0 )
-                .ThenBy( v => v.NamingConvention!.DiagnosticName )
+                .ThenBy( v => v.NamingConvention!.Name )
                 .Select( v => v.NamingConvention! )
                 .ToList();
 

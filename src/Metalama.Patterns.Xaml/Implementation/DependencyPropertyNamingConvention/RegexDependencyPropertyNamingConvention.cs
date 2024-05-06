@@ -104,7 +104,7 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
             throw new ArgumentException( "Must not be null, empty or only white space.", nameof(diagnosticName) );
         }
 
-        this.DiagnosticName = diagnosticName;
+        this.Name = diagnosticName;
         this._matchName = matchName;
         this._registrationFieldPattern = registrationFieldPattern;
         this._matchPropertyChanging = matchPropertyChanging;
@@ -115,7 +115,7 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
         this._requireValidateMatch = requireValidateMatch;
     }
 
-    public string DiagnosticName { get; }
+    public string Name { get; }
 
     public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, InspectedDeclarationsAdder inspectedDeclarations )
     {

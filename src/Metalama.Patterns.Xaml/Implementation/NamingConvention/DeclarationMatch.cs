@@ -6,16 +6,28 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
+[CompileTime]
+internal interface IDeclarationMatch
+{
+    DeclarationMatchOutcome? Outcome { get; }
+
+    IDeclaration? Declaration { get; }
+
+    bool HasCandidateNames { get; }
+
+    IEnumerable<string>? CandidateNames { get; }
+}
+
 /// <summary>
 /// Describes the naming convention match associated with a particular declaration.
 /// </summary>
 /// <remarks>
-/// A single <see cref="INamingConventionMatch"/> may contain several <see cref="DeclarationMatch{TDeclaration}"/> properties,
+/// A single <see cref="NamingConventionMatch"/> may contain several <see cref="DeclarationMatch{TDeclaration}"/> properties,
 /// one for each category of declaration that needs to be matched, such as "can execute" and "validate".
 /// </remarks>
 /// <typeparam name="TDeclaration"></typeparam>
 [CompileTime]
-internal readonly struct DeclarationMatch<TDeclaration>
+internal class DeclarationMatch<TDeclaration> : IDeclarationMatch
     where TDeclaration : class, IDeclaration
 {
     public static DeclarationMatch<TDeclaration> Success( TDeclaration declaration )
@@ -66,6 +78,8 @@ internal readonly struct DeclarationMatch<TDeclaration>
     public DeclarationMatchOutcome? Outcome { get; }
 
     public TDeclaration? Declaration { get; }
+
+    IDeclaration? IDeclarationMatch.Declaration => this.Declaration;
 
     [MemberNotNullWhen( true, nameof(CandidateNames) )]
     public bool HasCandidateNames => this._candidateNames != null;

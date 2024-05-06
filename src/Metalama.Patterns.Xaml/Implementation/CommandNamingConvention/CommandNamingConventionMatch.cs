@@ -12,23 +12,25 @@ internal sealed record CommandNamingConventionMatch(
     string? CommandPropertyName,
     DeclarationMatch<IMemberOrNamedType> CommandPropertyConflictMatch,
     DeclarationMatch<IMember> CanExecuteMatch,
-    bool RequireCanExecuteMatch = false ) : INamingConventionMatch
+    bool RequireCanExecuteMatch = false ) : NamingConventionMatch( NamingConvention )
 {
-    public bool Success
-        => !string.IsNullOrWhiteSpace( this.CommandPropertyName )
-           && this.CommandPropertyConflictMatch.Outcome == DeclarationMatchOutcome.Success
-           && (this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Success
-               || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound));
-
     private static readonly IReadOnlyList<string> _commandPropertyCategories = new[] { CommandAttribute.CommandPropertyCategory };
 
     private static readonly IReadOnlyList<string> _canExecuteCategories =
         new[] { CommandAttribute.CanExecuteMethodCategory, CommandAttribute.CanExecutePropertyCategory };
 
-    public void VisitDeclarationMatches<TVisitor>( in TVisitor visitor )
-        where TVisitor : IDeclarationMatchVisitor
+    public override bool Success
+        => !string.IsNullOrWhiteSpace( this.CommandPropertyName )
+           && this.CommandPropertyConflictMatch.Outcome == DeclarationMatchOutcome.Success
+           && (this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Success
+               || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound));
+
+    protected override IReadOnlyList<NamingConventionMatchMember> GetMembers()
     {
-        visitor.Visit( this.CommandPropertyConflictMatch, true, _commandPropertyCategories );
-        visitor.Visit( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories );
+        return
+        [
+            new NamingConventionMatchMember( this.CommandPropertyConflictMatch, true, _commandPropertyCategories ),
+            new NamingConventionMatchMember( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories )
+        ];
     }
 }

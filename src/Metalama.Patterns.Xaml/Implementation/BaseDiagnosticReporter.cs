@@ -17,7 +17,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
     }
 
     // ReSharper disable once UnusedParameter.Global
-    
+
     /// <summary>
     /// Gets a the <c>TargetDeclarationDescription</c> argument for <see cref="Diagnostics.WarningValidCandidateDeclarationIsAmbiguous"/> and <see cref="Diagnostics.WarningInvalidCandidateDeclarationSignature"/>.
     /// </summary>
@@ -40,7 +40,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                     this.GetTargetDeclarationDescription(),
                     this._builder.Target,
                     isRequired ? "as required " : null,
-                    namingConvention.DiagnosticName
+                    namingConvention.Name
                 ) ),
             inspectedDeclaration.Declaration );
     }
@@ -59,7 +59,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                     (this._builder.Target as IMemberOrNamedType)?.DeclaringType!,
                     isRequired ? "required " : null,
                     applicableCategories.PrettyList( " or " ),
-                    namingConvention.DiagnosticName) ) );
+                    namingConvention.Name) ) );
     }
 
     void IDiagnosticReporter.ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration, bool isRequired )
@@ -72,7 +72,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                     this.GetTargetDeclarationDescription(),
                     this._builder.Target,
                     isRequired ? "as required " : null,
-                    namingConvention.DiagnosticName,
+                    namingConvention.Name,
                     this.GetInvalidityReason( inspectedDeclaration )
                 ) ),
             inspectedDeclaration.Declaration );
@@ -91,7 +91,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                 (
                     applicableCategories.PrettyList( " or " ),
                     isRequired ? "as required by" : "using",
-                    namingConvention.DiagnosticName,
+                    namingConvention.Name,
                     candidateNamesPlurality == 2 ? "s" : null,
                     candidateNamesList
                 ) ) );
@@ -101,7 +101,7 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
     {
         this._builder.Diagnostics.Report(
             Diagnostics.ErrorNoNamingConventionMatched.WithArguments(
-                (namingConventionsTried.Select( nc => nc.DiagnosticName ).PrettyList( " and ", out var plurality ), plurality == 2 ? "s" : null) ) );
+                (namingConventionsTried.Select( nc => nc.Name ).PrettyList( " and ", out var plurality ), plurality == 2 ? "s" : null) ) );
     }
 
     void IDiagnosticReporter.ReportNoConfiguredNamingConventions()

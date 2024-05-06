@@ -7,7 +7,7 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
 internal interface INamingConventionEvaluationResult<TMatch>
-    where TMatch : INamingConventionMatch
+    where TMatch : NamingConventionMatch
 {
     [MemberNotNullWhen( true, nameof(SuccessfulMatch) )]
     bool Success { get; }

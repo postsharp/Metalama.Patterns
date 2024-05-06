@@ -7,12 +7,12 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 [CompileTime]
 internal interface INamingConvention
 {
-    string DiagnosticName { get; }
+    string Name { get; }
 }
 
 [CompileTime]
 internal interface INamingConvention<TArguments, TMatch> : INamingConvention
-    where TMatch : INamingConventionMatch
+    where TMatch : NamingConventionMatch
 {
     TMatch Match( TArguments arguments, InspectedDeclarationsAdder inspectedDeclarations );
 }

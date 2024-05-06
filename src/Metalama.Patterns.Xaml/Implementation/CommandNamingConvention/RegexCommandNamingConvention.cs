@@ -85,7 +85,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
             throw new ArgumentException( "Must not be null, empty or only white space.", nameof(diagnosticName) );
         }
 
-        this.DiagnosticName = diagnosticName;
+        this.Name = diagnosticName;
         this._matchCommandName = matchCommandName;
         this._commandPropertyPattern = commandPropertyPattern;
         this._matchCanExecute = matchCanExecute;
@@ -94,7 +94,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
         this._considerCanExecuteProperty = considerCanExecuteProperty;
     }
 
-    public string DiagnosticName { get; }
+    public string Name { get; }
 
     public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
     {

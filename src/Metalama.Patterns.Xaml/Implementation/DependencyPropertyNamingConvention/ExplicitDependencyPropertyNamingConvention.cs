@@ -26,7 +26,7 @@ internal sealed class ExplicitDependencyPropertyNamingConvention : IDependencyPr
         this._validateMethodName = validateMethodName;
     }
 
-    public string DiagnosticName => "explicitly-configured";
+    public string Name => "explicitly-configured";
 
     public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, InspectedDeclarationsAdder inspectedDeclarations )
     {

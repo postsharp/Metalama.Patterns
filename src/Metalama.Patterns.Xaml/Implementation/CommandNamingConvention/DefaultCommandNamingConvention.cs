@@ -12,7 +12,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 {
     public static string RegistrationKey { get; } = "{43954F4F-1606-4A44-9DEB-41E7C686C149}";
 
-    public string DiagnosticName => "default";
+    public string Name => "default";
 
     public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
     {
