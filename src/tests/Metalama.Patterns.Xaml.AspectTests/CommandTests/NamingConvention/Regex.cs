@@ -10,12 +10,13 @@ internal class NsFabric : NamespaceFabric
     public override void AmendNamespace( INamespaceAmender amender )
     {
         amender.ConfigureCommand(
-            b => b.ApplyRegexNamingConvention(
-                "rx1-key",
-                "rx1-name",
-                "^MakeIt(?<CommandName>.+)$",
-                "The{CommandName}Command",
-                "(CanIt{CommandName})|({CommandName}ItCan)" ) );
+            b => b.AddNamingConvention(
+                new CommandNamingConvention( "rx1" )
+                {
+                    CommandNamePattern = "^MakeIt(?<CommandName>.+)$",
+                    CommandPropertyName = "The{CommandName}Command",
+                    CanExecutePattern = "(CanIt{CommandName})|({CommandName}ItCan)"
+                } ) );
     }
 }
 

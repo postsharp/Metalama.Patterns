@@ -52,7 +52,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 target )
             : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
 
-        ncResult.ReportDiagnostics( new DiagnosticReporter( builder ) );
+        new DiagnosticReporter( builder ).ReportDiagnostics( ncResult );
 
         var successfulMatch = ncResult.SuccessfulMatch?.Match;
 

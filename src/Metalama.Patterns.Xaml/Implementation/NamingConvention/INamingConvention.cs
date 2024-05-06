@@ -15,5 +15,5 @@ internal interface INamingConvention : ICompileTimeSerializable
 internal interface INamingConvention<in TArguments, out TMatch> : INamingConvention
     where TMatch : NamingConventionMatch
 {
-    TMatch Match( TArguments arguments, InspectedMemberAdder inspectedMember );
+    TMatch Match( TArguments arguments, Action<InspectedMember> addInspectedMember );
 }

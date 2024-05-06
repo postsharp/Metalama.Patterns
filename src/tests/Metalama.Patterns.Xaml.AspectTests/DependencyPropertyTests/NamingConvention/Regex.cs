@@ -11,14 +11,15 @@ internal class NsFabric : NamespaceFabric
     public override void AmendNamespace( INamespaceAmender amender )
     {
         amender.ConfigureDependencyProperty(
-            b => b.ApplyRegexNamingConvention(
-                "rx1-key",
-                "rx1-name",
-                "^Yoda(?<Name>.+)$",
-                "The$Name$PropertyItIs",
-                "^(Do|Make)$Name$Changing$",
-                "^(Do|Make)$Name$Changed$",
-                "^Is$Name$Valid" ) );
+            b => b.AddNamingConvention(
+                new DependencyPropertyNamingConvention( "rx1" )
+                {
+                    PropertyNamePattern = "^Yoda(?<Name>.+)$",
+                    OnPropertyChangingPattern = "^(Do|Make){Name}Changing$",
+                    OnPropertyChangedPattern = "^(Do|Make){Name}Changed$",
+                    ValidatePattern = "^Is{Name}Valid",
+                    RegistrationFieldName = "The{Name}PropertyItIs"
+                } ) );
     }
 }
 

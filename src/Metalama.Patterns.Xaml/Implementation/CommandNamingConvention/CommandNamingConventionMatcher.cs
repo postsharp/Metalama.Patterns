@@ -12,7 +12,7 @@ internal static class CommandNamingConventionMatcher
     public static CommandNamingConventionMatch Match(
         INamingConvention namingConvention,
         IMethod executeMethod,
-        InspectedMemberAdder inspectedMember,
+        Action<InspectedMember> addInspectedMember,
         string commandPropertyName,
         INameMatchPredicate matchCanExecuteNamePredicate,
         bool considerMethod = true,
@@ -37,7 +37,7 @@ internal static class CommandNamingConventionMatcher
                 executeMethod.DeclaringType.Methods.FindMatchingMembers(
                     matchCanExecuteNamePredicate,
                     IsValidCanExecuteMethod,
-                    inspectedMember,
+                    addInspectedMember,
                     CommandAttribute.CanExecuteMethodCategory );
         }
 
@@ -49,7 +49,7 @@ internal static class CommandNamingConventionMatcher
                 executeMethod.DeclaringType.Properties.FindMatchingMembers(
                     matchCanExecuteNamePredicate,
                     IsValidCanExecuteProperty,
-                    inspectedMember,
+                    addInspectedMember,
                     CommandAttribute.CanExecutePropertyCategory );
         }
 

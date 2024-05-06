@@ -56,7 +56,7 @@ internal static class NamingConventionEvaluator
         {
             var firstInspectedIndex = this._inspectedDeclarations.Count;
 
-            var match = namingConvention.Match( arguments, new InspectedMemberAdder( this._inspectedDeclarations ) );
+            var match = namingConvention.Match( arguments, this._inspectedDeclarations.Add );
 
             if ( match.Success )
             {

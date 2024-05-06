@@ -12,7 +12,7 @@ internal static class DependencyPropertyNamingConventionMatcher
     public static DependencyPropertyNamingConventionMatch Match(
         INamingConvention namingConvention,
         IProperty targetProperty,
-        InspectedMemberAdder inspectedMember,
+        Action<InspectedMember> addInspectedMember,
         string dependencyPropertyName,
         string registrationFieldName,
         INameMatchPredicate matchPropertyChangingPredicate,
@@ -43,19 +43,19 @@ internal static class DependencyPropertyNamingConventionMatcher
         var findPropertyChangingResult = declaringType.Methods.FindMatchingMembers(
             matchPropertyChangingPredicate,
             m => GetChangeHandlerSignature( m, targetProperty, assets, true ),
-            inspectedMember,
+            addInspectedMember,
             DependencyPropertyAspectBuilder.PropertyChangingMethodCategory );
 
         var findPropertyChangedResult = declaringType.Methods.FindMatchingMembers(
             matchPropertyChangedPredicate,
             m => GetChangeHandlerSignature( m, targetProperty, assets, true ),
-            inspectedMember,
+            addInspectedMember,
             DependencyPropertyAspectBuilder.PropertyChangedMethodCategory );
 
         var findValidateResult = declaringType.Methods.FindMatchingMembers(
             matchValidateNamePredicate,
             m => GetValidationHandlerSignature( m, targetProperty, assets ),
-            inspectedMember,
+            addInspectedMember,
             DependencyPropertyAspectBuilder.ValidateMethodCategory );
 
         return new DependencyPropertyNamingConventionMatch(

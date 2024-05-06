@@ -6,19 +6,13 @@ using Metalama.Framework.Code;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal enum DefaultMatchKind
-{
-    Default
-}
-
-[CompileTime]
-internal static class NamingConventionHelper
+internal static class NamingConventionMatcher
 {
     public static MemberMatch<TMember, TKind> FindMatchingMembers<TMember, TKind>(
         this IEnumerable<TMember> members,
         INameMatchPredicate predicate,
         Func<TMember, TKind?> classifyMember,
-        InspectedMemberAdder inspectedMember,
+        Action<InspectedMember> addInspectedMember,
         string category )
         where TMember : class, IMemberOrNamedType
         where TKind : struct
@@ -46,7 +40,7 @@ internal static class NamingConventionHelper
                     firstEligibleKind ??= kind;
                 }
 
-                inspectedMember.Add( declaration, kind != null, category );
+                addInspectedMember( new InspectedMember( declaration, kind != null, category ) );
             }
         }
 

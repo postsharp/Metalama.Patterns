@@ -10,10 +10,11 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 /// Describes the naming convention match associated with a particular declaration.
 /// </summary>
 /// <remarks>
-/// A single <see cref="NamingConventionMatch"/> may contain several <see cref="MemberMatch{TDeclaration}"/> properties,
+/// A single <see cref="NamingConventionMatch"/> may contain several <see cref="MemberMatch{TDeclaration,TKind}"/> properties,
 /// one for each category of declaration that needs to be matched, such as "can execute" and "validate".
 /// </remarks>
-/// <typeparam name="TMember"></typeparam>
+/// <typeparam name="TMember">The type of member.</typeparam>
+/// <typeparam name="TKind">The signature kind.</typeparam>
 [CompileTime]
 internal sealed class MemberMatch<TMember, TKind> : IMemberMatch
     where TMember : class, IMemberOrNamedType

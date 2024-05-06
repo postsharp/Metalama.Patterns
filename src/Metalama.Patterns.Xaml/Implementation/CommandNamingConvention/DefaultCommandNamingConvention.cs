@@ -14,7 +14,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
     public string Name => "default";
 
-    public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedMemberAdder inspectedMember )
+    public CommandNamingConventionMatch Match( IMethod executeMethod, Action<InspectedMember> addInspectedMember )
     {
         var commandName = GetCommandNameFromExecuteMethodName( executeMethod.Name );
 
@@ -25,7 +25,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
         return CommandNamingConventionMatcher.Match(
             this,
             executeMethod,
-            inspectedMember,
+            addInspectedMember,
             commandPropertyName,
             new StringNameMatchPredicate( canExecuteName ) );
     }

@@ -12,31 +12,31 @@ internal class NsFabric : NamespaceFabric
         amender.ConfigureCommand(
             b =>
             {
-                b.ApplyRegexNamingConvention(
-                    "rx1-key",
-                    "rx1-name",
-                    "^Execute(?<CommandName>.+)$",
-                    "{CommandName}CommandRx1",
-                    "CanRx1{CommandName}",
-                    1 );
+                b.AddNamingConvention(
+                    new CommandNamingConvention( "rx1" )
+                    {
+                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
+                        CommandPropertyName = "{CommandName}CommandRx1",
+                        CanExecutePattern = "CanRx1{CommandName}"
+                    } );
 
-                b.ApplyRegexNamingConvention(
-                    "rx2-key",
-                    "rx2-name",
-                    "^Execute(?<CommandName>.+)$",
-                    "{CommandName}CommandRx2",
-                    "CanRx2{CommandName}",
-                    2 );
+                b.AddNamingConvention(
+                    new CommandNamingConvention( "rx2" )
+                    {
+                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
+                        CommandPropertyName = "{CommandName}CommandRx2",
+                        CanExecutePattern = "CanRx2{CommandName}"
+                    } );
 
-                b.ApplyRegexNamingConvention(
-                    "rx3-key",
-                    "rx3-name",
-                    "^Execute(?<CommandName>.+)$",
-                    "{CommandName}CommandRx3",
-                    "(CanRx3{CommandName})|(CanRx3{CommandName}Property)",
-                    3 );
+                b.AddNamingConvention(
+                    new CommandNamingConvention( "rx3" )
+                    {
+                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
+                        CommandPropertyName = "{CommandName}CommandRx3",
+                        CanExecutePattern = "CanRx3{CommandName}"
+                    } );
 
-                b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionKey );
+                b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionName );
             } );
     }
 }
