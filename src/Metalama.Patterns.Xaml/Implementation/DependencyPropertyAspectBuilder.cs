@@ -60,7 +60,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         IIntroductionAdviceResult<IField>? introduceRegistrationFieldResult = null;
 
-        if ( successfulMatch?.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success )
+        if ( successfulMatch?.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success )
         {
             introduceRegistrationFieldResult = this._builder.Advice.IntroduceField(
                 declaringType,
@@ -76,9 +76,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 } );
         }
 
-        var onChangingMethod = successfulMatch?.PropertyChangingMatch.Declaration;
-        var onChangedMethod = successfulMatch?.PropertyChangedMatch.Declaration;
-        var validateMethod = successfulMatch?.ValidateMatch.Declaration;
+        var onChangingMethod = successfulMatch?.PropertyChangingMatch.Member;
+        var onChangedMethod = successfulMatch?.PropertyChangedMatch.Member;
+        var validateMethod = successfulMatch?.ValidateMatch.Member;
 
         if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue != true
                                                                 && this._options.InitializerProvidesDefaultValue != true )

@@ -6,16 +6,16 @@ using Metalama.Framework.Code;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal readonly struct InspectedDeclaration
+internal readonly struct InspectedMember
 {
-    internal InspectedDeclaration( IDeclaration declaration, bool isValid, string? category )
+    internal InspectedMember( IMemberOrNamedType member, bool isValid, string? category )
     {
-        this.Declaration = declaration;
+        this.Member = member;
         this.IsValid = isValid;
         this.Category = category;
     }
 
-    public IDeclaration Declaration { get; }
+    public IMemberOrNamedType Member { get; }
 
     public bool IsValid { get; }
 

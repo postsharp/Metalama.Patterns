@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
@@ -11,10 +12,10 @@ internal sealed record DependencyPropertyNamingConventionMatch(
     INamingConvention NamingConvention,
     string? DependencyPropertyName,
     string? RegistrationFieldName,
-    DeclarationMatch<IMemberOrNamedType> RegistrationFieldConflictMatch,
-    DeclarationMatch<IMethod> PropertyChangingMatch,
-    DeclarationMatch<IMethod> PropertyChangedMatch,
-    DeclarationMatch<IMethod> ValidateMatch,
+    MemberMatch<IMemberOrNamedType> RegistrationFieldConflictMatch,
+    MemberMatch<IMethod> PropertyChangingMatch,
+    MemberMatch<IMethod> PropertyChangedMatch,
+    MemberMatch<IMethod> ValidateMatch,
     ChangeHandlerSignatureKind PropertyChangingSignatureKind,
     ChangeHandlerSignatureKind PropertyChangedSignatureKind,
     ValidationHandlerSignatureKind ValidationSignatureKind,
@@ -25,25 +26,29 @@ internal sealed record DependencyPropertyNamingConventionMatch(
     public override bool Success
         => !string.IsNullOrWhiteSpace( this.DependencyPropertyName )
            && !string.IsNullOrWhiteSpace( this.RegistrationFieldName )
-           && this.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success
-           && (this.PropertyChangingMatch.Outcome == DeclarationMatchOutcome.Success
-               || (this.RequirePropertyChangingMatch == false && this.PropertyChangingMatch.Outcome == DeclarationMatchOutcome.NotFound))
-           && (this.PropertyChangedMatch.Outcome == DeclarationMatchOutcome.Success
-               || (this.RequirePropertyChangedMatch == false && this.PropertyChangedMatch.Outcome == DeclarationMatchOutcome.NotFound))
-           && (this.ValidateMatch.Outcome == DeclarationMatchOutcome.Success
-               || (this.RequireValidateMatch == false && this.ValidateMatch.Outcome == DeclarationMatchOutcome.NotFound));
+           && this.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success
+           && (this.PropertyChangingMatch.Outcome == MemberMatchOutcome.Success
+               || (this.RequirePropertyChangingMatch == false && this.PropertyChangingMatch.Outcome == MemberMatchOutcome.NotFound))
+           && (this.PropertyChangedMatch.Outcome == MemberMatchOutcome.Success
+               || (this.RequirePropertyChangedMatch == false && this.PropertyChangedMatch.Outcome == MemberMatchOutcome.NotFound))
+           && (this.ValidateMatch.Outcome == MemberMatchOutcome.Success
+               || (this.RequireValidateMatch == false && this.ValidateMatch.Outcome == MemberMatchOutcome.NotFound));
 
-    protected override IReadOnlyList<NamingConventionMatchMember> GetMembers()
-        =>
-        [
-            new NamingConventionMatchMember( this.RegistrationFieldConflictMatch, true, _registrationFieldCategories ),
-            new NamingConventionMatchMember( this.PropertyChangingMatch, this.RequirePropertyChangingMatch, _propertyChangingCategories ),
-            new NamingConventionMatchMember( this.PropertyChangedMatch, this.RequirePropertyChangedMatch, _propertyChangedCategories ),
-            new NamingConventionMatchMember( this.ValidateMatch, this.RequireValidateMatch, _validateCategories )
-        ];
+    protected override ImmutableArray<MemberMatchDiagnosticInfo> GetMembers()
+        => ImmutableArray.Create(
+            new MemberMatchDiagnosticInfo( this.RegistrationFieldConflictMatch, true, _registrationFieldCategories ),
+            new MemberMatchDiagnosticInfo( this.PropertyChangingMatch, this.RequirePropertyChangingMatch, _propertyChangingCategories ),
+            new MemberMatchDiagnosticInfo( this.PropertyChangedMatch, this.RequirePropertyChangedMatch, _propertyChangedCategories ),
+            new MemberMatchDiagnosticInfo( this.ValidateMatch, this.RequireValidateMatch, _validateCategories ) );
 
-    private static readonly IReadOnlyList<string> _registrationFieldCategories = new[] { DependencyPropertyAspectBuilder.RegistrationFieldCategory };
-    private static readonly IReadOnlyList<string> _propertyChangingCategories = new[] { DependencyPropertyAspectBuilder.PropertyChangingMethodCategory };
-    private static readonly IReadOnlyList<string> _propertyChangedCategories = new[] { DependencyPropertyAspectBuilder.PropertyChangedMethodCategory };
-    private static readonly IReadOnlyList<string> _validateCategories = new[] { DependencyPropertyAspectBuilder.ValidateMethodCategory };
+    private static readonly ImmutableArray<string> _registrationFieldCategories =
+        ImmutableArray.Create( DependencyPropertyAspectBuilder.RegistrationFieldCategory );
+
+    private static readonly ImmutableArray<string> _propertyChangingCategories =
+        ImmutableArray.Create( DependencyPropertyAspectBuilder.PropertyChangingMethodCategory );
+
+    private static readonly ImmutableArray<string> _propertyChangedCategories =
+        ImmutableArray.Create( DependencyPropertyAspectBuilder.PropertyChangedMethodCategory );
+
+    private static readonly ImmutableArray<string> _validateCategories = ImmutableArray.Create( DependencyPropertyAspectBuilder.ValidateMethodCategory );
 }

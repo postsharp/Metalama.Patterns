@@ -14,5 +14,5 @@ internal interface INamingConvention
 internal interface INamingConvention<TArguments, TMatch> : INamingConvention
     where TMatch : NamingConventionMatch
 {
-    TMatch Match( TArguments arguments, InspectedDeclarationsAdder inspectedDeclarations );
+    TMatch Match( TArguments arguments, InspectedMemberAdder inspectedMember );
 }

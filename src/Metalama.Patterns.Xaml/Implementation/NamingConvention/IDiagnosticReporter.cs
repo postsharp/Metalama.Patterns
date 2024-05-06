@@ -12,9 +12,9 @@ internal interface IDiagnosticReporter
 
     void ReportNoConfiguredNamingConventions();
 
-    void ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration, bool isRequired );
+    void ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedMember inspectedMember, bool isRequired );
 
-    void ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration, bool isRequired );
+    void ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedMember inspectedMember, bool isRequired );
 
     void ReportConflictingDeclaration(
         INamingConvention namingConvention,

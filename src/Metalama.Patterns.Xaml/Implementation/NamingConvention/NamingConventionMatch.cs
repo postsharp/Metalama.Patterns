@@ -1,21 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
+using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
 internal abstract record NamingConventionMatch( INamingConvention NamingConvention )
 {
-    private IReadOnlyList<NamingConventionMatchMember>? _members;
+    private ImmutableArray<MemberMatchDiagnosticInfo> _members;
 
     public abstract bool Success { get; }
 
-    protected abstract IReadOnlyList<NamingConventionMatchMember> GetMembers();
+    protected abstract ImmutableArray<MemberMatchDiagnosticInfo> GetMembers();
 
-    public IReadOnlyList<NamingConventionMatchMember> Members => this._members ??= this.GetMembers();
+    public ImmutableArray<MemberMatchDiagnosticInfo> Members => this._members.IsDefault ? this._members = this.GetMembers() : this._members;
 }
-
-[CompileTime]
-internal sealed record NamingConventionMatchMember( IDeclarationMatch Match, bool IsRequired, IReadOnlyList<string> Categories );

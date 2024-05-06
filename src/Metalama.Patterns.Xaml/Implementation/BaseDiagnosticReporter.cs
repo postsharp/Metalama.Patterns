@@ -26,23 +26,23 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
     /// <summary>
     /// Gets the <c>InvalidityReason</c> argument for <see cref="Diagnostics.WarningInvalidCandidateDeclarationSignature"/>.
     /// </summary>
-    /// <param name="inspectedDeclaration"></param>
+    /// <param name="inspectedMember"></param>
     /// <returns></returns>
-    protected abstract string GetInvalidityReason( in InspectedDeclaration inspectedDeclaration );
+    protected abstract string GetInvalidityReason( in InspectedMember inspectedMember );
 
-    void IDiagnosticReporter.ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration, bool isRequired )
+    void IDiagnosticReporter.ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedMember inspectedMember, bool isRequired )
     {
         this._builder.Diagnostics.Report(
             Diagnostics.WarningValidCandidateDeclarationIsAmbiguous.WithArguments(
                 (
-                    inspectedDeclaration.Declaration.DeclarationKind,
-                    inspectedDeclaration.Category,
+                    inspectedMember.Member.DeclarationKind,
+                    inspectedMember.Category,
                     this.GetTargetDeclarationDescription(),
                     this._builder.Target,
                     isRequired ? "as required " : null,
                     namingConvention.Name
                 ) ),
-            inspectedDeclaration.Declaration );
+            inspectedMember.Member );
     }
 
     void IDiagnosticReporter.ReportConflictingDeclaration(
@@ -62,20 +62,20 @@ internal abstract class BaseDiagnosticReporter : IDiagnosticReporter
                     namingConvention.Name) ) );
     }
 
-    void IDiagnosticReporter.ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedDeclaration inspectedDeclaration, bool isRequired )
+    void IDiagnosticReporter.ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedMember inspectedMember, bool isRequired )
     {
         this._builder.Diagnostics.Report(
             Diagnostics.WarningInvalidCandidateDeclarationSignature.WithArguments(
                 (
-                    inspectedDeclaration.Declaration.DeclarationKind,
-                    inspectedDeclaration.Category,
+                    inspectedMember.Member.DeclarationKind,
+                    inspectedMember.Category,
                     this.GetTargetDeclarationDescription(),
                     this._builder.Target,
                     isRequired ? "as required " : null,
                     namingConvention.Name,
-                    this.GetInvalidityReason( inspectedDeclaration )
+                    this.GetInvalidityReason( inspectedMember )
                 ) ),
-            inspectedDeclaration.Declaration );
+            inspectedMember.Member );
     }
 
     void IDiagnosticReporter.ReportDeclarationNotFound(

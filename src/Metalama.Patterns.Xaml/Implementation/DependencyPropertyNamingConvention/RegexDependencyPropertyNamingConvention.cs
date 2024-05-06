@@ -117,7 +117,7 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
 
     public string Name { get; }
 
-    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, InspectedDeclarationsAdder inspectedDeclarations )
+    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, InspectedMemberAdder inspectedMember )
     {
         string? propertyName = null;
 
@@ -148,10 +148,10 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
                 this,
                 null,
                 null,
-                DeclarationMatch<IMemberOrNamedType>.Invalid(),
-                DeclarationMatch<IMethod>.NotFound(),
-                DeclarationMatch<IMethod>.NotFound(),
-                DeclarationMatch<IMethod>.NotFound(),
+                MemberMatch<IMemberOrNamedType>.Invalid(),
+                MemberMatch<IMethod>.NotFound(),
+                MemberMatch<IMethod>.NotFound(),
+                MemberMatch<IMethod>.NotFound(),
                 ChangeHandlerSignatureKind.Invalid,
                 ChangeHandlerSignatureKind.Invalid,
                 ValidationHandlerSignatureKind.Invalid,
@@ -179,7 +179,7 @@ internal sealed class RegexDependencyPropertyNamingConvention : IDependencyPrope
         return DependencyPropertyNamingConventionHelper.Match(
             this,
             targetProperty,
-            inspectedDeclarations,
+            inspectedMember,
             propertyName,
             registrationFieldName,
             new StringOrRegexNameMatchPredicate(

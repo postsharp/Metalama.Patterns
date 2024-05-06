@@ -12,7 +12,7 @@ internal static class CommandNamingConventionHelper
     public static CommandNamingConventionMatch Match<TMatchCanExecuteNamePredicate>(
         INamingConvention namingConvention,
         IMethod executeMethod,
-        InspectedDeclarationsAdder inspectedDeclarations,
+        InspectedMemberAdder inspectedMember,
         string commandPropertyName,
         in TMatchCanExecuteNamePredicate matchCanExecuteNamePredicate,
         bool considerMethod = true,
@@ -25,9 +25,9 @@ internal static class CommandNamingConventionHelper
         var conflictingMember = (IMemberOrNamedType?) declaringType.AllMembers().FirstOrDefault( m => m.Name == commandPropertyName )
                                 ?? declaringType.NestedTypes.FirstOrDefault( t => t.Name == commandPropertyName );
 
-        var commandPropertyConflictMatch = DeclarationMatch<IMemberOrNamedType>.SuccessOrConflict( conflictingMember );
+        var commandPropertyConflictMatch = MemberMatch<IMemberOrNamedType>.SuccessOrConflict( conflictingMember );
 
-        DeclarationMatch<IMethod>? canExecuteMethodMatch = null;
+        MemberMatch<IMethod>? canExecuteMethodMatch = null;
 
         if ( considerMethod )
         {
@@ -35,10 +35,10 @@ internal static class CommandNamingConventionHelper
                 executeMethod.DeclaringType.Methods.FindValidMatchingDeclaration(
                     matchCanExecuteNamePredicate,
                     IsValidCanExecuteMethodDelegate,
-                    inspectedDeclarations );
+                    inspectedMember );
         }
 
-        DeclarationMatch<IProperty>? canExecutePropertyMatch = null;
+        MemberMatch<IProperty>? canExecutePropertyMatch = null;
 
         if ( considerProperty )
         {
@@ -46,52 +46,52 @@ internal static class CommandNamingConventionHelper
                 executeMethod.DeclaringType.Properties.FindValidMatchingDeclaration(
                     matchCanExecuteNamePredicate,
                     IsValidCanExecutePropertyDelegate,
-                    inspectedDeclarations );
+                    inspectedMember );
         }
 
-        if ( canExecuteMethodMatch?.Outcome == DeclarationMatchOutcome.Success && canExecutePropertyMatch?.Outcome == DeclarationMatchOutcome.Success )
+        if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Success && canExecutePropertyMatch?.Outcome == MemberMatchOutcome.Success )
         {
             return new CommandNamingConventionMatch(
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                DeclarationMatch<IMember>.Ambiguous(),
+                MemberMatch<IMember>.Ambiguous(),
                 requireCanExecuteMatch );
         }
-        else if ( canExecuteMethodMatch?.Outcome == DeclarationMatchOutcome.Success )
+        else if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Success )
         {
             return new CommandNamingConventionMatch(
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                canExecuteMethodMatch.ForDeclarationType<IMember>(),
+                canExecuteMethodMatch.Cast<IMember>(),
                 requireCanExecuteMatch );
         }
-        else if ( canExecutePropertyMatch?.Outcome == DeclarationMatchOutcome.Success )
+        else if ( canExecutePropertyMatch?.Outcome == MemberMatchOutcome.Success )
         {
             return new CommandNamingConventionMatch(
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                canExecutePropertyMatch.ForDeclarationType<IMember>(),
+                canExecutePropertyMatch.Cast<IMember>(),
                 requireCanExecuteMatch );
         }
-        else if ( canExecuteMethodMatch?.Outcome == DeclarationMatchOutcome.Ambiguous || canExecutePropertyMatch?.Outcome == DeclarationMatchOutcome.Ambiguous )
+        else if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Ambiguous || canExecutePropertyMatch?.Outcome == MemberMatchOutcome.Ambiguous )
         {
             return new CommandNamingConventionMatch(
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                DeclarationMatch<IMember>.Ambiguous(),
+                MemberMatch<IMember>.Ambiguous(),
                 requireCanExecuteMatch );
         }
-        else if ( canExecuteMethodMatch?.Outcome == DeclarationMatchOutcome.Invalid || canExecutePropertyMatch?.Outcome == DeclarationMatchOutcome.Invalid )
+        else if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Invalid || canExecutePropertyMatch?.Outcome == MemberMatchOutcome.Invalid )
         {
             return new CommandNamingConventionMatch(
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                DeclarationMatch<IMember>.Invalid(),
+                MemberMatch<IMember>.Invalid(),
                 requireCanExecuteMatch );
         }
         else
@@ -100,27 +100,27 @@ internal static class CommandNamingConventionHelper
                 namingConvention,
                 commandPropertyName,
                 commandPropertyConflictMatch,
-                DeclarationMatch<IMember>.NotFound( matchCanExecuteNamePredicate ),
+                MemberMatch<IMember>.NotFound( matchCanExecuteNamePredicate ),
                 requireCanExecuteMatch );
         }
     }
 
-    private static Func<IMethod, InspectedDeclarationsAdder, bool> IsValidCanExecuteMethodDelegate { get; } = IsValidCanExecuteMethod;
+    private static Func<IMethod, InspectedMemberAdder, bool> IsValidCanExecuteMethodDelegate { get; } = IsValidCanExecuteMethod;
 
-    private static bool IsValidCanExecuteMethod( IMethod method, InspectedDeclarationsAdder inspectedDeclarations )
+    private static bool IsValidCanExecuteMethod( IMethod method, InspectedMemberAdder inspectedMember )
     {
         var isValid = IsValidCanExecuteMethod( method );
-        inspectedDeclarations.Add( method, isValid, CommandAttribute.CanExecuteMethodCategory );
+        inspectedMember.Add( method, isValid, CommandAttribute.CanExecuteMethodCategory );
 
         return isValid;
     }
 
-    private static Func<IProperty, InspectedDeclarationsAdder, bool> IsValidCanExecutePropertyDelegate { get; } = IsValidCanExecuteProperty;
+    private static Func<IProperty, InspectedMemberAdder, bool> IsValidCanExecutePropertyDelegate { get; } = IsValidCanExecuteProperty;
 
-    private static bool IsValidCanExecuteProperty( IProperty property, InspectedDeclarationsAdder inspectedDeclarations )
+    private static bool IsValidCanExecuteProperty( IProperty property, InspectedMemberAdder inspectedMember )
     {
         var isValid = IsValidCanExecuteProperty( property );
-        inspectedDeclarations.Add( property, isValid, CommandAttribute.CanExecutePropertyCategory );
+        inspectedMember.Add( property, isValid, CommandAttribute.CanExecutePropertyCategory );
 
         return isValid;
     }

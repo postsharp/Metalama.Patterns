@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
@@ -10,13 +9,13 @@ internal static class NamingConventionEvaluationResultExtensions
 {
     private static void ReportDiagnostics(
         INamingConvention namingConvention,
-        NamingConventionMatchMember member,
+        MemberMatchDiagnosticInfo member,
         IDiagnosticReporter reporter,
-        IEnumerable<InspectedDeclaration> inspectedDeclarations )
+        IEnumerable<InspectedMember> inspectedDeclarations )
     {
         switch ( member.Match.Outcome )
         {
-            case DeclarationMatchOutcome.Ambiguous:
+            case MemberMatchOutcome.Ambiguous:
 
                 foreach ( var inspectedDeclaration in inspectedDeclarations )
                 {
@@ -28,7 +27,7 @@ internal static class NamingConventionEvaluationResultExtensions
 
                 break;
 
-            case DeclarationMatchOutcome.Invalid:
+            case MemberMatchOutcome.Invalid:
 
                 foreach ( var inspectedDeclaration in inspectedDeclarations )
                 {
@@ -40,7 +39,7 @@ internal static class NamingConventionEvaluationResultExtensions
 
                 break;
 
-            case DeclarationMatchOutcome.NotFound:
+            case MemberMatchOutcome.NotFound:
 
                 if ( member.Match.HasCandidateNames )
                 {
@@ -49,9 +48,9 @@ internal static class NamingConventionEvaluationResultExtensions
 
                 break;
 
-            case DeclarationMatchOutcome.Conflict:
+            case MemberMatchOutcome.Conflict:
 
-                reporter.ReportConflictingDeclaration( namingConvention, member.Match.Declaration!, member.Categories, member.IsRequired );
+                reporter.ReportConflictingDeclaration( namingConvention, member.Match.Member!, member.Categories, member.IsRequired );
 
                 break;
         }

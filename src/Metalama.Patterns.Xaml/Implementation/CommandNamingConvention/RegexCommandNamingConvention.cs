@@ -96,7 +96,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
 
     public string Name { get; }
 
-    public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedDeclarationsAdder inspectedDeclarations )
+    public CommandNamingConventionMatch Match( IMethod executeMethod, InspectedMemberAdder inspectedMember )
     {
         string? commandName = null;
 
@@ -126,8 +126,8 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
             return new CommandNamingConventionMatch(
                 this,
                 null,
-                DeclarationMatch<IMemberOrNamedType>.Invalid(),
-                DeclarationMatch<IMember>.NotFound(),
+                MemberMatch<IMemberOrNamedType>.Invalid(),
+                MemberMatch<IMember>.NotFound(),
                 this._requireCanExecuteMatch );
         }
 
@@ -146,7 +146,7 @@ internal sealed class RegexCommandNamingConvention : ICommandNamingConvention
         return CommandNamingConventionHelper.Match(
             this,
             executeMethod,
-            inspectedDeclarations,
+            inspectedMember,
             commandPropertyName,
             new StringOrRegexNameMatchPredicate(
                 matchCanExecuteName == null ? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) : null,

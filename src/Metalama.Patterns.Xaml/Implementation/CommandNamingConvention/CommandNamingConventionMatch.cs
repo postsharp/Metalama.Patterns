@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
@@ -10,27 +11,26 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 internal sealed record CommandNamingConventionMatch(
     INamingConvention NamingConvention,
     string? CommandPropertyName,
-    DeclarationMatch<IMemberOrNamedType> CommandPropertyConflictMatch,
-    DeclarationMatch<IMember> CanExecuteMatch,
+    MemberMatch<IMemberOrNamedType> CommandPropertyConflictMatch,
+    MemberMatch<IMember> CanExecuteMatch,
     bool RequireCanExecuteMatch = false ) : NamingConventionMatch( NamingConvention )
 {
-    private static readonly IReadOnlyList<string> _commandPropertyCategories = new[] { CommandAttribute.CommandPropertyCategory };
+    private static readonly ImmutableArray<string> _commandPropertyCategories = ImmutableArray.Create( CommandAttribute.CommandPropertyCategory );
 
-    private static readonly IReadOnlyList<string> _canExecuteCategories =
-        new[] { CommandAttribute.CanExecuteMethodCategory, CommandAttribute.CanExecutePropertyCategory };
+    private static readonly ImmutableArray<string> _canExecuteCategories =
+        ImmutableArray.Create( CommandAttribute.CanExecuteMethodCategory, CommandAttribute.CanExecutePropertyCategory );
 
     public override bool Success
         => !string.IsNullOrWhiteSpace( this.CommandPropertyName )
-           && this.CommandPropertyConflictMatch.Outcome == DeclarationMatchOutcome.Success
-           && (this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Success
-               || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound));
+           && this.CommandPropertyConflictMatch.Outcome == MemberMatchOutcome.Success
+           && (this.CanExecuteMatch.Outcome == MemberMatchOutcome.Success
+               || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == MemberMatchOutcome.NotFound));
 
-    protected override IReadOnlyList<NamingConventionMatchMember> GetMembers()
+    protected override ImmutableArray<MemberMatchDiagnosticInfo> GetMembers()
     {
         return
-        [
-            new NamingConventionMatchMember( this.CommandPropertyConflictMatch, true, _commandPropertyCategories ),
-            new NamingConventionMatchMember( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories )
-        ];
+            ImmutableArray.Create(
+                new MemberMatchDiagnosticInfo( this.CommandPropertyConflictMatch, true, _commandPropertyCategories ),
+                new MemberMatchDiagnosticInfo( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories ) );
     }
 }

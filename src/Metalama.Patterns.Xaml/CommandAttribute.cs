@@ -123,7 +123,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         if ( successfulMatch != null )
         {
-            switch ( successfulMatch.CanExecuteMatch.Declaration )
+            switch ( successfulMatch.CanExecuteMatch.Member )
             {
                 case null:
                     break;
@@ -264,8 +264,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         if ( executeMethod.Parameters.Count == 0 )
         {
-            executeExpression = ExpressionFactory.Capture(
-                new Action<object>( _ => { executeMethod.Invoke(); } ) );
+            executeExpression = ExpressionFactory.Capture( new Action<object>( _ => { executeMethod.Invoke(); } ) );
         }
         else
         {

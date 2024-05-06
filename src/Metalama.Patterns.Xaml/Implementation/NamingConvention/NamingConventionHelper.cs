@@ -8,12 +8,12 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 [CompileTime]
 internal static class NamingConventionHelper
 {
-    public static DeclarationMatch<TDeclaration> FindValidMatchingDeclaration<TDeclaration, TNameMatchPredicate>(
-        this IEnumerable<TDeclaration> declarations,
+    public static MemberMatch<TMember> FindValidMatchingDeclaration<TMember, TNameMatchPredicate>(
+        this IEnumerable<TMember> members,
         in TNameMatchPredicate nameMatchPredicate,
-        Func<TDeclaration, InspectedDeclarationsAdder, bool> isValid,
-        InspectedDeclarationsAdder inspectedDeclarations )
-        where TDeclaration : class, INamedDeclaration
+        Func<TMember, InspectedMemberAdder, bool> isValid,
+        InspectedMemberAdder inspectedMember )
+        where TMember : class, IMemberOrNamedType
         where TNameMatchPredicate : INameMatchPredicate
     {
         // NB: The loop is not short-circuited because validity checking will build a list of
@@ -21,15 +21,15 @@ internal static class NamingConventionHelper
 
         var candidateCount = 0;
         var eligibleCount = 0;
-        TDeclaration? firstEligible = null;
+        TMember? firstEligible = null;
 
-        foreach ( var declaration in declarations )
+        foreach ( var declaration in members )
         {
             if ( nameMatchPredicate.IsMatch( declaration.Name ) )
             {
                 ++candidateCount;
 
-                if ( isValid( declaration, inspectedDeclarations ) )
+                if ( isValid( declaration, inspectedMember ) )
                 {
                     ++eligibleCount;
                     firstEligible ??= declaration;
@@ -42,27 +42,27 @@ internal static class NamingConventionHelper
             case 0:
                 if ( candidateCount > 0 )
                 {
-                    return DeclarationMatch<TDeclaration>.Invalid();
+                    return MemberMatch<TMember>.Invalid();
                 }
 
                 break;
 
             case 1:
-                return DeclarationMatch<TDeclaration>.Success( firstEligible! );
+                return MemberMatch<TMember>.Success( firstEligible! );
 
             case > 1:
-                return DeclarationMatch<TDeclaration>.Ambiguous();
+                return MemberMatch<TMember>.Ambiguous();
         }
 
-        return DeclarationMatch<TDeclaration>.NotFound( nameMatchPredicate );
+        return MemberMatch<TMember>.NotFound( nameMatchPredicate );
     }
 
-    public static (DeclarationMatch<TDeclaration> Match, TMetadata? Metadata) FindValidMatchingDeclaration<TDeclaration, TNameMatchPredicate, TMetadata>(
-        this IEnumerable<TDeclaration> declarations,
+    public static (MemberMatch<TMember> Match, TMetadata? Metadata) FindValidMatchingDeclaration<TMember, TNameMatchPredicate, TMetadata>(
+        this IEnumerable<TMember> declarations,
         in TNameMatchPredicate nameMatchPredicate,
-        Func<TDeclaration, InspectedDeclarationsAdder, IsValidResult<TMetadata>> isValid,
-        InspectedDeclarationsAdder inspectedDeclarations )
-        where TDeclaration : class, INamedDeclaration
+        Func<TMember, InspectedMemberAdder, IsValidResult<TMetadata>> isValid,
+        InspectedMemberAdder inspectedMember )
+        where TMember : class, IMemberOrNamedType
         where TNameMatchPredicate : INameMatchPredicate
     {
         // NB: The loop is not short-circuited because validity checking will build a list of
@@ -70,7 +70,7 @@ internal static class NamingConventionHelper
 
         var candidateCount = 0;
         var eligibleCount = 0;
-        TDeclaration? firstEligible = null;
+        TMember? firstEligible = null;
         TMetadata? firstEligibleMetadata = default;
 
         foreach ( var declaration in declarations )
@@ -78,7 +78,7 @@ internal static class NamingConventionHelper
             if ( nameMatchPredicate.IsMatch( declaration.Name ) )
             {
                 ++candidateCount;
-                var result = isValid( declaration, inspectedDeclarations );
+                var result = isValid( declaration, inspectedMember );
 
                 if ( result.IsValid )
                 {
@@ -98,18 +98,18 @@ internal static class NamingConventionHelper
             case 0:
                 if ( candidateCount > 0 )
                 {
-                    return (DeclarationMatch<TDeclaration>.Invalid(), default);
+                    return (MemberMatch<TMember>.Invalid(), default);
                 }
 
                 break;
 
             case 1:
-                return (DeclarationMatch<TDeclaration>.Success( firstEligible! ), firstEligibleMetadata);
+                return (MemberMatch<TMember>.Success( firstEligible! ), firstEligibleMetadata);
 
             case > 1:
-                return (DeclarationMatch<TDeclaration>.Ambiguous(), default);
+                return (MemberMatch<TMember>.Ambiguous(), default);
         }
 
-        return (DeclarationMatch<TDeclaration>.NotFound( nameMatchPredicate ), default);
+        return (MemberMatch<TMember>.NotFound( nameMatchPredicate ), default);
     }
 }

@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal enum DeclarationMatchOutcome
+internal enum MemberMatchOutcome
 {
     /// <summary>
     /// A single eligible member matched, or a member can be introduced without conflict.

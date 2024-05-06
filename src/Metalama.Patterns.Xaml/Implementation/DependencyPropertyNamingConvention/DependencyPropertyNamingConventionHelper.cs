@@ -13,7 +13,7 @@ internal static class DependencyPropertyNamingConventionHelper
                                                                 TMatchValidateNamePredicate>(
         INamingConvention namingConvention,
         IProperty targetProperty,
-        InspectedDeclarationsAdder inspectedDeclarations,
+        InspectedMemberAdder inspectedMember,
         string dependencyPropertyName,
         string registrationFieldName,
         in TMatchPropertyChangingNamePredicate matchPropertyChangingPredicate,
@@ -28,7 +28,7 @@ internal static class DependencyPropertyNamingConventionHelper
     {
         var assets = targetProperty.Compilation.Cache.GetOrAdd( _ => new DependencyPropertyAssets() );
 
-        IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangingMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations1 )
+        IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangingMethodValid( IMethod method, InspectedMemberAdder inspectedDeclarations1 )
         {
             var signature = GetChangeHandlerSignature( method, targetProperty, assets, false );
             var isValid = signature != ChangeHandlerSignatureKind.Invalid;
@@ -37,7 +37,7 @@ internal static class DependencyPropertyNamingConventionHelper
             return new IsValidResult<ChangeHandlerSignatureKind>( isValid, signature );
         }
 
-        IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangedMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations1 )
+        IsValidResult<ChangeHandlerSignatureKind> IsPropertyChangedMethodValid( IMethod method, InspectedMemberAdder inspectedDeclarations1 )
         {
             var signature = GetChangeHandlerSignature( method, targetProperty, assets, true );
             var isValid = signature != ChangeHandlerSignatureKind.Invalid;
@@ -46,7 +46,7 @@ internal static class DependencyPropertyNamingConventionHelper
             return new IsValidResult<ChangeHandlerSignatureKind>( isValid, signature );
         }
 
-        IsValidResult<ValidationHandlerSignatureKind> IsValidateMethodValid( IMethod method, InspectedDeclarationsAdder inspectedDeclarations1 )
+        IsValidResult<ValidationHandlerSignatureKind> IsValidateMethodValid( IMethod method, InspectedMemberAdder inspectedDeclarations1 )
         {
             var signature = GetValidationHandlerSignature( method, targetProperty, assets );
             var isValid = signature != ValidationHandlerSignatureKind.Invalid;
@@ -60,22 +60,22 @@ internal static class DependencyPropertyNamingConventionHelper
         var conflictingMember = (IMemberOrNamedType?) declaringType.AllMembers().FirstOrDefault( m => m.Name == registrationFieldName )
                                 ?? declaringType.NestedTypes.FirstOrDefault( t => t.Name == registrationFieldName );
 
-        var registrationFieldConflictMatch = DeclarationMatch<IMemberOrNamedType>.SuccessOrConflict( conflictingMember );
+        var registrationFieldConflictMatch = MemberMatch<IMemberOrNamedType>.SuccessOrConflict( conflictingMember );
 
         var findPropertyChangingResult = declaringType.Methods.FindValidMatchingDeclaration(
             matchPropertyChangingPredicate,
             IsPropertyChangingMethodValid,
-            inspectedDeclarations );
+            inspectedMember );
 
         var findPropertyChangedResult = declaringType.Methods.FindValidMatchingDeclaration(
             matchPropertyChangedPredicate,
             IsPropertyChangedMethodValid,
-            inspectedDeclarations );
+            inspectedMember );
 
         var findValidateResult = declaringType.Methods.FindValidMatchingDeclaration(
             matchValidateNamePredicate,
             IsValidateMethodValid,
-            inspectedDeclarations );
+            inspectedMember );
 
         return new DependencyPropertyNamingConventionMatch(
             namingConvention,
