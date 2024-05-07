@@ -3,7 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Patterns.Xaml.Options;
+using Metalama.Patterns.Xaml.Configuration;
 using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.Xaml.Implementation;

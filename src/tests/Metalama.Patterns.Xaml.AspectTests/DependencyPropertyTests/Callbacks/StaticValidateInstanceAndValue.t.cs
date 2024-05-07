@@ -100,65 +100,53 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
   public static readonly DependencyProperty FooProperty;
   static StaticValidateInstanceAndValue()
   {
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = new CoerceValueCallback((d, value_1) =>
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticValidateInstanceAndValue), new PropertyMetadata() { CoerceValueCallback = (d, value_1) =>
     {
       if (!ValidateFoo((StaticValidateInstanceAndValue)d, (int)value_1))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_1;
-    });
-    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticValidateInstanceAndValue), metadata);
-    var metadata_1 = new PropertyMetadata();
-    metadata_1.CoerceValueCallback = new CoerceValueCallback((d_1, value_2) =>
+    } });
+    AcceptsAssignableForValueProperty = DependencyProperty.Register("AcceptsAssignableForValue", typeof(List<int>), typeof(StaticValidateInstanceAndValue), new PropertyMetadata() { CoerceValueCallback = (d_1, value_2) =>
     {
       if (!ValidateAcceptsAssignableForValue((StaticValidateInstanceAndValue)d_1, (List<int>)value_2))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_2;
-    });
-    AcceptsAssignableForValueProperty = DependencyProperty.Register("AcceptsAssignableForValue", typeof(List<int>), typeof(StaticValidateInstanceAndValue), metadata_1);
-    var metadata_2 = new PropertyMetadata();
-    metadata_2.CoerceValueCallback = new CoerceValueCallback((d_2, value_3) =>
+    } });
+    AcceptsGenericForValueProperty = DependencyProperty.Register("AcceptsGenericForValue", typeof(int), typeof(StaticValidateInstanceAndValue), new PropertyMetadata() { CoerceValueCallback = (d_2, value_3) =>
     {
       if (!ValidateAcceptsGenericForValue((StaticValidateInstanceAndValue)d_2, (int)value_3))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_3;
-    });
-    AcceptsGenericForValueProperty = DependencyProperty.Register("AcceptsGenericForValue", typeof(int), typeof(StaticValidateInstanceAndValue), metadata_2);
-    var metadata_3 = new PropertyMetadata();
-    metadata_3.CoerceValueCallback = new CoerceValueCallback((d_3, value_4) =>
+    } });
+    AcceptsObjectForValueProperty = DependencyProperty.Register("AcceptsObjectForValue", typeof(int), typeof(StaticValidateInstanceAndValue), new PropertyMetadata() { CoerceValueCallback = (d_3, value_4) =>
     {
       if (!ValidateAcceptsObjectForValue((StaticValidateInstanceAndValue)d_3, value_4))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_4;
-    });
-    AcceptsObjectForValueProperty = DependencyProperty.Register("AcceptsObjectForValue", typeof(int), typeof(StaticValidateInstanceAndValue), metadata_3);
-    var metadata_4 = new PropertyMetadata();
-    metadata_4.CoerceValueCallback = new CoerceValueCallback((d_4, value_5) =>
+    } });
+    AcceptsDependencyObjectForInstanceProperty = DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(int), typeof(StaticValidateInstanceAndValue), new PropertyMetadata() { CoerceValueCallback = (d_4, value_5) =>
     {
       if (!ValidateAcceptsDependencyObjectForInstance(d_4, (int)value_5))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_5;
-    });
-    AcceptsDependencyObjectForInstanceProperty = DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(int), typeof(StaticValidateInstanceAndValue), metadata_4);
-    var metadata_5 = new PropertyMetadata();
-    metadata_5.CoerceValueCallback = new CoerceValueCallback((d_5, value_6) =>
+    } });
+    AcceptsObjectForInstanceProperty = DependencyProperty.Register("AcceptsObjectForInstance", typeof(int), typeof(StaticValidateInstanceAndValue), new PropertyMetadata() { CoerceValueCallback = (d_5, value_6) =>
     {
       if (!ValidateAcceptsObjectForInstance(d_5, (int)value_6))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_6;
-    });
-    AcceptsObjectForInstanceProperty = DependencyProperty.Register("AcceptsObjectForInstance", typeof(int), typeof(StaticValidateInstanceAndValue), metadata_5);
+    } });
   }
 }

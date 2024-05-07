@@ -4,9 +4,9 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Project;
+using Metalama.Patterns.Xaml.Configuration;
 using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
-using Metalama.Patterns.Xaml.Options;
 using System.Windows;
 using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 
@@ -52,7 +52,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 target )
             : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
 
-        ncResult.ReportDiagnostics( new DiagnosticReporter( builder ) );
+        new DiagnosticReporter( builder ).ReportDiagnostics( ncResult );
 
         var successfulMatch = ncResult.SuccessfulMatch?.Match;
 
@@ -60,7 +60,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         IIntroductionAdviceResult<IField>? introduceRegistrationFieldResult = null;
 
-        if ( successfulMatch?.RegistrationFieldConflictMatch.Outcome == DeclarationMatchOutcome.Success )
+        if ( successfulMatch?.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success )
         {
             introduceRegistrationFieldResult = this._builder.Advice.IntroduceField(
                 declaringType,
@@ -76,9 +76,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 } );
         }
 
-        var onChangingMethod = successfulMatch?.PropertyChangingMatch.Declaration;
-        var onChangedMethod = successfulMatch?.PropertyChangedMatch.Declaration;
-        var validateMethod = successfulMatch?.ValidateMatch.Declaration;
+        var onChangingMethod = successfulMatch?.PropertyChangingMatch.Member;
+        var onChangedMethod = successfulMatch?.PropertyChangedMatch.Member;
+        var validateMethod = successfulMatch?.ValidateMatch.Member;
 
         if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue != true
                                                                 && this._options.InitializerProvidesDefaultValue != true )
@@ -177,11 +177,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     declaringType,
                     defaultValueExpr = this._builder.Target.InitializerExpression,
                     onChangingMethod,
-                    onChangingSignatureKind = successfulMatch.PropertyChangingSignatureKind,
+                    onChangingSignatureKind = successfulMatch.PropertyChangingMatch.Kind,
                     onChangedMethod,
-                    onChangedSignatureKind = successfulMatch.PropertyChangedSignatureKind,
+                    onChangedSignatureKind = successfulMatch.PropertyChangedMatch.Kind,
                     validateMethod,
-                    validateSignatureKind = successfulMatch.ValidationSignatureKind,
+                    validateSignatureKind = successfulMatch.ValidateMatch.Kind,
                     applyContractsMethod
                 } );
 

@@ -3,7 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Patterns.Observability.Options;
+using Metalama.Patterns.Observability.Configuration;
 
 namespace Metalama.Patterns.Observability;
 

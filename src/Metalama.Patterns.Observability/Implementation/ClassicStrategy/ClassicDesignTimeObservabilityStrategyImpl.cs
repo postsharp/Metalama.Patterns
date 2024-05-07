@@ -3,7 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Patterns.Observability.Options;
+using Metalama.Patterns.Observability.Configuration;
 using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;

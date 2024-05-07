@@ -9,18 +9,18 @@ namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConventi
 [CompileTime]
 internal sealed class DefaultDependencyPropertyNamingConvention : IDependencyPropertyNamingConvention
 {
-    public static string RegistrationKey { get; } = "{5150E382-3376-44CF-A278-CC7E4C8E5361}";
+    public static string RegistrationKey { get; } = "default";
 
-    public string DiagnosticName => "default";
+    public string Name => "default";
 
-    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, InspectedDeclarationsAdder inspectedDeclarations )
+    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, Action<InspectedMember> addInspectedMember )
     {
         var propertyName = targetProperty.Name;
 
-        return DependencyPropertyNamingConventionHelper.Match(
+        return DependencyPropertyNamingConventionMatcher.Match(
             this,
             targetProperty,
-            inspectedDeclarations,
+            addInspectedMember,
             propertyName,
             GetRegistrationFieldNameFromPropertyName( propertyName ),
             new StringNameMatchPredicate( GetPropertyChangingMethodNameFromPropertyName( propertyName ) ),

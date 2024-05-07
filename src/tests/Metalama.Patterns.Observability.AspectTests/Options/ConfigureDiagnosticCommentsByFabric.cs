@@ -6,7 +6,7 @@
 
 #if DEBUG
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Observability.Options;
+using Metalama.Patterns.Observability.Configuration;
 
 namespace Metalama.Patterns.Observability.AspectTests.ConfigureDiagnosticCommentsByFabric;
 

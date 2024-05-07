@@ -22,12 +22,10 @@ public partial class InstanceOnChangingDependencyProperty : DependencyObject
   public static readonly DependencyProperty FooProperty;
   static InstanceOnChangingDependencyProperty()
   {
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = new CoerceValueCallback((d_1, value) =>
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangingDependencyProperty), new PropertyMetadata() { CoerceValueCallback = (d_1, value) =>
     {
       ((InstanceOnChangingDependencyProperty)d_1).OnFooChanging(FooProperty);
       return value;
-    });
-    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceOnChangingDependencyProperty), metadata);
+    } });
   }
 }

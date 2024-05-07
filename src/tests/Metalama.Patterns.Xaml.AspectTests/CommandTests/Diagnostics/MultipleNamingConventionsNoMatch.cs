@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Xaml.Options;
+using Metalama.Patterns.Xaml.Configuration;
 
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Diagnostics.MultipleNamingConventionsNoMatch;
 
@@ -12,31 +12,31 @@ internal class NsFabric : NamespaceFabric
         amender.ConfigureCommand(
             b =>
             {
-                b.ApplyRegexNamingConvention(
-                    "rx1-key",
-                    "rx1-name",
-                    "^Execute(?<" + CommandOptionsBuilder.Names.CommandNameGroup + ">.+)$",
-                    CommandOptionsBuilder.Names.CommandNameToken + "CommandRx1",
-                    "CanRx1" + CommandOptionsBuilder.Names.CommandNameToken,
-                    1 );
+                b.AddNamingConvention(
+                    new CommandNamingConvention( "rx1" )
+                    {
+                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
+                        CommandPropertyName = "{CommandName}CommandRx1",
+                        CanExecutePattern = "CanRx1{CommandName}"
+                    } );
 
-                b.ApplyRegexNamingConvention(
-                    "rx2-key",
-                    "rx2-name",
-                    "^Execute(?<" + CommandOptionsBuilder.Names.CommandNameGroup + ">.+)$",
-                    CommandOptionsBuilder.Names.CommandNameToken + "CommandRx2",
-                    "CanRx2" + CommandOptionsBuilder.Names.CommandNameToken,
-                    2 );
+                b.AddNamingConvention(
+                    new CommandNamingConvention( "rx2" )
+                    {
+                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
+                        CommandPropertyName = "{CommandName}CommandRx2",
+                        CanExecutePattern = "CanRx2{CommandName}"
+                    } );
 
-                b.ApplyRegexNamingConvention(
-                    "rx3-key",
-                    "rx3-name",
-                    "^Execute(?<" + CommandOptionsBuilder.Names.CommandNameGroup + ">.+)$",
-                    CommandOptionsBuilder.Names.CommandNameToken + "CommandRx3",
-                    "(CanRx3" + CommandOptionsBuilder.Names.CommandNameToken + ")|(CanRx3" + CommandOptionsBuilder.Names.CommandNameToken + "Property)",
-                    3 );
+                b.AddNamingConvention(
+                    new CommandNamingConvention( "rx3" )
+                    {
+                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
+                        CommandPropertyName = "{CommandName}CommandRx3",
+                        CanExecutePattern = "CanRx3{CommandName}"
+                    } );
 
-                b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionKey );
+                b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionName );
             } );
     }
 }

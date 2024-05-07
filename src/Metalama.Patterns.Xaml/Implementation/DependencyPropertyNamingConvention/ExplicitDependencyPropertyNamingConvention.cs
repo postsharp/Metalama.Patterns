@@ -26,16 +26,16 @@ internal sealed class ExplicitDependencyPropertyNamingConvention : IDependencyPr
         this._validateMethodName = validateMethodName;
     }
 
-    public string DiagnosticName => "explicitly-configured";
+    public string Name => "explicitly-configured";
 
-    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, InspectedDeclarationsAdder inspectedDeclarations )
+    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, Action<InspectedMember> addInspectedMember )
     {
         var propertyName = targetProperty.Name;
 
-        return DependencyPropertyNamingConventionHelper.Match(
+        return DependencyPropertyNamingConventionMatcher.Match(
             this,
             targetProperty,
-            inspectedDeclarations,
+            addInspectedMember,
             propertyName,
             this._registrationFieldName ?? DefaultDependencyPropertyNamingConvention.GetRegistrationFieldNameFromPropertyName( propertyName ),
             new StringNameMatchPredicate(

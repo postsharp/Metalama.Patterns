@@ -19,13 +19,11 @@ internal class WithoutValidateMethod : DependencyObject
   public static readonly DependencyProperty NameProperty;
   static WithoutValidateMethod()
   {
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = new CoerceValueCallback((d, value) =>
+    NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(WithoutValidateMethod), new PropertyMetadata() { CoerceValueCallback = (d, value) =>
     {
       value = ApplyNameContracts((string)value);
       return value;
-    });
-    NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(WithoutValidateMethod), metadata);
+    } });
   }
   private static string ApplyNameContracts(string value)
   {

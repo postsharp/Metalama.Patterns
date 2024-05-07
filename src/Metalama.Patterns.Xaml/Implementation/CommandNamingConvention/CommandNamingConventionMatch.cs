@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
@@ -10,25 +11,23 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 internal sealed record CommandNamingConventionMatch(
     INamingConvention NamingConvention,
     string? CommandPropertyName,
-    DeclarationMatch<IMemberOrNamedType> CommandPropertyConflictMatch,
-    DeclarationMatch<IMember> CanExecuteMatch,
-    bool RequireCanExecuteMatch = false ) : INamingConventionMatch
+    MemberMatch<IMemberOrNamedType, DefaultMatchKind> CommandPropertyMatch,
+    MemberMatch<IMember, DefaultMatchKind> CanExecuteMatch,
+    bool RequireCanExecuteMatch = false ) : NamingConventionMatch( NamingConvention )
 {
-    public bool Success
+    private static readonly ImmutableArray<string> _commandPropertyCategories = ImmutableArray.Create( CommandAttribute.CommandPropertyCategory );
+
+    private static readonly ImmutableArray<string> _canExecuteCategories =
+        ImmutableArray.Create( CommandAttribute.CanExecuteMethodCategory, CommandAttribute.CanExecutePropertyCategory );
+
+    public override bool Success
         => !string.IsNullOrWhiteSpace( this.CommandPropertyName )
-           && this.CommandPropertyConflictMatch.Outcome == DeclarationMatchOutcome.Success
-           && (this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.Success
-               || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == DeclarationMatchOutcome.NotFound));
+           && this.CommandPropertyMatch.Outcome == MemberMatchOutcome.Success
+           && (this.CanExecuteMatch.Outcome == MemberMatchOutcome.Success
+               || (this.RequireCanExecuteMatch == false && this.CanExecuteMatch.Outcome == MemberMatchOutcome.NotFound));
 
-    private static readonly IReadOnlyList<string> _commandPropertyCategories = new[] { CommandAttribute.CommandPropertyCategory };
-
-    private static readonly IReadOnlyList<string> _canExecuteCategories =
-        new[] { CommandAttribute.CanExecuteMethodCategory, CommandAttribute.CanExecutePropertyCategory };
-
-    public void VisitDeclarationMatches<TVisitor>( in TVisitor visitor )
-        where TVisitor : IDeclarationMatchVisitor
-    {
-        visitor.Visit( this.CommandPropertyConflictMatch, true, _commandPropertyCategories );
-        visitor.Visit( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories );
-    }
+    protected override ImmutableArray<MemberMatchDiagnosticInfo> GetMembers()
+        => ImmutableArray.Create(
+            new MemberMatchDiagnosticInfo( this.CommandPropertyMatch, true, _commandPropertyCategories ),
+            new MemberMatchDiagnosticInfo( this.CanExecuteMatch, this.RequireCanExecuteMatch, _canExecuteCategories ) );
 }

@@ -8,12 +8,11 @@ namespace Metalama.Patterns.Xaml.Implementation;
 internal sealed partial class DependencyPropertyAspectBuilder
 {
     [CompileTime]
-    private sealed class DiagnosticReporter : BaseDiagnosticReporter
+    private sealed class DiagnosticReporter : NamingConvention.DiagnosticReporter
     {
         public DiagnosticReporter( IAspectBuilder builder ) : base( builder ) { }
 
-        protected override string GetInvalidityReason( in InspectedDeclaration inspectedDeclaration )
-            => " Refer to documentation for supported method signatures.";
+        protected override string GetInvalidityReason( in InspectedMember addInspectedMember ) => " Refer to documentation for supported method signatures.";
 
         protected override string GetTargetDeclarationDescription() => "[DependencyProperty] property ";
     }

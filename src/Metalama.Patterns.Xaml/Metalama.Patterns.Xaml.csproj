@@ -32,6 +32,11 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  
+  <ItemGroup>
+    <Compile Remove="Implementation\ApplyProjectAspectOrdering.cs" />
+  </ItemGroup>
+
 
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
   

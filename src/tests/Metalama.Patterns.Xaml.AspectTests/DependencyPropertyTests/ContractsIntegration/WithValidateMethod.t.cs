@@ -20,8 +20,7 @@ internal class WithValidateMethod : DependencyObject
   public static readonly DependencyProperty NameProperty;
   static WithValidateMethod()
   {
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = new CoerceValueCallback((d, value) =>
+    NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(WithValidateMethod), new PropertyMetadata() { CoerceValueCallback = (d, value) =>
     {
       value = ApplyNameContracts((string)value);
       if (!((WithValidateMethod)d).ValidateName((string)value))
@@ -29,8 +28,7 @@ internal class WithValidateMethod : DependencyObject
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value;
-    });
-    NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(WithValidateMethod), metadata);
+    } });
   }
   private static string ApplyNameContracts(string value)
   {

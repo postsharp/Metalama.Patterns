@@ -2,11 +2,10 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Serialization;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
 // ReSharper disable once RedundantTypeDeclarationBody
 [CompileTime]
-internal interface ICommandNamingConvention : INamingConvention<IMethod, CommandNamingConventionMatch>, ICompileTimeSerializable { }
+internal interface ICommandNamingConvention : INamingConvention<IMethod, CommandNamingConventionMatch> { }

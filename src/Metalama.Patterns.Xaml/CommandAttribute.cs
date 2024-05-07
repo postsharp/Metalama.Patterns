@@ -7,17 +7,15 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
+using Metalama.Patterns.Xaml.Configuration;
 using Metalama.Patterns.Xaml.Implementation;
 using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
-using Metalama.Patterns.Xaml.Options;
 using System.ComponentModel;
 using System.Windows.Input;
 using MetalamaAccessibility = Metalama.Framework.Code.Accessibility;
 
 // TODO: Skip [Observable] on [Command]-targeted auto properties. No functional impact, would just avoid unnecessary generated code.
-
-[assembly: AspectOrder( "Metalama.Patterns.Xaml.CommandAttribute:*", "Metalama.Patterns.Observability.ObservableAttribute:*" )]
 
 namespace Metalama.Patterns.Xaml;
 
@@ -112,7 +110,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                 target )
             : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
 
-        ncResult.ReportDiagnostics( new DiagnosticReporter( builder ) );
+        new DiagnosticReporter( builder ).ReportDiagnostics( ncResult );
 
         var successfulMatch = ncResult.SuccessfulMatch?.Match;
 
@@ -123,7 +121,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         if ( successfulMatch != null )
         {
-            switch ( successfulMatch.CanExecuteMatch.Declaration )
+            switch ( successfulMatch.CanExecuteMatch.Member )
             {
                 case null:
                     break;
@@ -264,8 +262,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         if ( executeMethod.Parameters.Count == 0 )
         {
-            executeExpression = ExpressionFactory.Capture(
-                new Action<object>( _ => { executeMethod.Invoke(); } ) );
+            executeExpression = ExpressionFactory.Capture( new Action<object>( _ => { executeMethod.Invoke(); } ) );
         }
         else
         {

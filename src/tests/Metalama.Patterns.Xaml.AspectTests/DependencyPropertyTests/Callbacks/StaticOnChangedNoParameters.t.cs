@@ -22,9 +22,6 @@ public partial class StaticOnChangedNoParameters : DependencyObject
   public static readonly DependencyProperty FooProperty;
   static StaticOnChangedNoParameters()
   {
-    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedNoParameters), new PropertyMetadata((d, e) =>
-    {
-      OnFooChanged();
-    }));
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangedNoParameters), new PropertyMetadata((d, e) => OnFooChanged()));
   }
 }

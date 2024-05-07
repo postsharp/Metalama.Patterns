@@ -3,4 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Patterns.Caching.Aspects;
 
-[assembly: AspectOrder( typeof(ImplementFormattableAspect), typeof(CacheKeyAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.CompileTime, typeof(CacheKeyAttribute), typeof(ImplementFormattableAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ContractAspect), typeof(CacheAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(InvalidateCacheAttribute), typeof(CacheAttribute) )]

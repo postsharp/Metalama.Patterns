@@ -3,7 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Patterns.Observability.Options;
+using Metalama.Patterns.Observability.Configuration;
 using Microsoft.CodeAnalysis;
 using static Metalama.Framework.Diagnostics.Severity;
 

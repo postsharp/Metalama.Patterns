@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Xaml.Options;
+using Metalama.Patterns.Xaml.Configuration;
 using System.Windows;
 
 namespace Metalama.Patterns.Xaml.AspectTests.DependencyPropertyTests.Diagnostics.MultipleNamingConventionsNoMatch;
@@ -13,37 +13,25 @@ internal class NsFabric : NamespaceFabric
         amender.ConfigureDependencyProperty(
             b =>
             {
-                b.ApplyRegexNamingConvention(
-                    "rx1-key",
-                    "rx1-name",
-                    null,
-                    null,
-                    DependencyPropertyOptionsBuilder.Names.NameToken + "Rx1Ing",
-                    DependencyPropertyOptionsBuilder.Names.NameToken + "Rx1Ed",
-                    null,
-                    1 );
+                b.AddNamingConvention(
+                    new DependencyPropertyNamingConvention( "rx1" )
+                    {
+                        OnPropertyChangedPattern = "{Name}" + "Rx1Ed", OnPropertyChangingPattern = "{Name}" + "Rx1Ing"
+                    } );
 
-                b.ApplyRegexNamingConvention(
-                    "rx2-key",
-                    "rx2-name",
-                    null,
-                    null,
-                    DependencyPropertyOptionsBuilder.Names.NameToken + "Rx2Ing",
-                    null,
-                    null,
-                    2 );
+                b.AddNamingConvention(
+                    new DependencyPropertyNamingConvention( "rx2" )
+                    {
+                        OnPropertyChangedPattern = "{Name}" + "Rx2Ed", OnPropertyChangingPattern = "{Name}" + "Rx2Ing"
+                    } );
 
-                b.ApplyRegexNamingConvention(
-                    "rx3-key",
-                    "rx3-name",
-                    null,
-                    null,
-                    DependencyPropertyOptionsBuilder.Names.NameToken + "Rx3Ing",
-                    null,
-                    null,
-                    3 );
+                b.AddNamingConvention(
+                    new DependencyPropertyNamingConvention( "rx3" )
+                    {
+                        OnPropertyChangedPattern = "{Name}" + "Rx3Ed", OnPropertyChangingPattern = "{Name}" + "Rx3Ing"
+                    } );
 
-                b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionKey );
+                b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionName );
             } );
     }
 }

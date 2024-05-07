@@ -58,26 +58,20 @@ public partial class StaticOnChangingDependencyPropertyAndInstance : DependencyO
   public static readonly DependencyProperty FooProperty;
   static StaticOnChangingDependencyPropertyAndInstance()
   {
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = new CoerceValueCallback((d_1, value) =>
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingDependencyPropertyAndInstance), new PropertyMetadata() { CoerceValueCallback = (d_1, value) =>
     {
       OnFooChanging(FooProperty, (StaticOnChangingDependencyPropertyAndInstance)d_1);
       return value;
-    });
-    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingDependencyPropertyAndInstance), metadata);
-    var metadata_1 = new PropertyMetadata();
-    metadata_1.CoerceValueCallback = new CoerceValueCallback((d_2, value_1) =>
+    } });
+    AcceptsDependencyObjectForInstanceProperty = DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(int), typeof(StaticOnChangingDependencyPropertyAndInstance), new PropertyMetadata() { CoerceValueCallback = (d_2, value_1) =>
     {
       OnAcceptsDependencyObjectForInstanceChanging(AcceptsDependencyObjectForInstanceProperty, d_2);
       return value_1;
-    });
-    AcceptsDependencyObjectForInstanceProperty = DependencyProperty.Register("AcceptsDependencyObjectForInstance", typeof(int), typeof(StaticOnChangingDependencyPropertyAndInstance), metadata_1);
-    var metadata_2 = new PropertyMetadata();
-    metadata_2.CoerceValueCallback = new CoerceValueCallback((d_3, value_2) =>
+    } });
+    AcceptsObjectForInstanceProperty = DependencyProperty.Register("AcceptsObjectForInstance", typeof(int), typeof(StaticOnChangingDependencyPropertyAndInstance), new PropertyMetadata() { CoerceValueCallback = (d_3, value_2) =>
     {
       OnAcceptsObjectForInstanceChanging(AcceptsObjectForInstanceProperty, d_3);
       return value_2;
-    });
-    AcceptsObjectForInstanceProperty = DependencyProperty.Register("AcceptsObjectForInstance", typeof(int), typeof(StaticOnChangingDependencyPropertyAndInstance), metadata_2);
+    } });
   }
 }

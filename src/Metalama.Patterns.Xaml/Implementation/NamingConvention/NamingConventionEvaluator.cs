@@ -10,7 +10,7 @@ internal static class NamingConventionEvaluator
     public static INamingConventionEvaluationResult<TMatch> Evaluate<TArguments, TMatch>(
         IEnumerable<INamingConvention<TArguments, TMatch>> namingConventions,
         TArguments arguments )
-        where TMatch : INamingConventionMatch
+        where TMatch : NamingConventionMatch
     {
         var e = new Evaluator<TArguments, TMatch>();
 
@@ -30,7 +30,7 @@ internal static class NamingConventionEvaluator
     public static INamingConventionEvaluationResult<TMatch> Evaluate<TArguments, TMatch>(
         INamingConvention<TArguments, TMatch> namingConvention,
         TArguments arguments )
-        where TMatch : INamingConventionMatch
+        where TMatch : NamingConventionMatch
     {
         var e = new Evaluator<TArguments, TMatch>();
         e.Evaluate( namingConvention, arguments );
@@ -41,9 +41,9 @@ internal static class NamingConventionEvaluator
 
     [CompileTime]
     private sealed class Evaluator<TArguments, TMatch> : INamingConventionEvaluationResult<TMatch>
-        where TMatch : INamingConventionMatch
+        where TMatch : NamingConventionMatch
     {
-        private List<InspectedDeclaration> _inspectedDeclarations = new();
+        private List<InspectedMember> _inspectedDeclarations = new();
         private List<(TMatch Match, int InspectedDeclarationsStartIndex, int InspectedDeclarationsEndIndex)>? _unsuccessfulMatchDetails;
 
         public bool Success => this.SuccessfulMatch != null;
@@ -56,7 +56,7 @@ internal static class NamingConventionEvaluator
         {
             var firstInspectedIndex = this._inspectedDeclarations.Count;
 
-            var match = namingConvention.Match( arguments, new InspectedDeclarationsAdder( this._inspectedDeclarations ) );
+            var match = namingConvention.Match( arguments, this._inspectedDeclarations.Add );
 
             if ( match.Success )
             {
@@ -75,11 +75,11 @@ internal static class NamingConventionEvaluator
             }
         }
 
-        private IEnumerable<InspectedDeclaration> GetInspectedDeclarationsSlice( int startIndex, int endIndex, bool isSuccess )
+        private IEnumerable<InspectedMember> GetInspectedDeclarationsSlice( int startIndex, int endIndex, bool isSuccess )
         {
             if ( startIndex == endIndex )
             {
-                return Array.Empty<InspectedDeclaration>();
+                return Array.Empty<InspectedMember>();
             }
 
             if ( isSuccess && startIndex == 0 && endIndex == this._inspectedDeclarations.Count )
