@@ -41,7 +41,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     /// </summary>
     public bool? InitializerProvidesDefaultValue { get; init; }
 
-    internal IReadOnlyList<IDependencyPropertyNamingConvention> GetSortedNamingConventions()
+    internal IReadOnlyCollection<IDependencyPropertyNamingConvention> GetSortedNamingConventions()
     {
         this._namingConventions ??=
             this.NamingConventionRegistrations

@@ -151,43 +151,54 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     defaultValueExpr = (IExpression) meta.Cast( TypeFactory.GetType( SpecialType.Object ), defaultValueExpr.Value );
                 }
 
-                if ( defaultValueExpr != null && propertyChangedCallbackExpr != null && coerceValueCallbackExpr != null )
+                switch (defaultValueExpr, propertyChangedCallbackExpr, coerceValueCallbackExpr)
                 {
-                    metadataExpr = ExpressionFactory.Capture(
-                        new PropertyMetadata( defaultValueExpr.Value, propertyChangedCallbackExpr.Value, coerceValueCallbackExpr.Value ) );
-                }
-                else if ( defaultValueExpr != null && propertyChangedCallbackExpr != null && coerceValueCallbackExpr == null )
-                {
-                    metadataExpr = ExpressionFactory.Capture( new PropertyMetadata( defaultValueExpr.Value, propertyChangedCallbackExpr.Value ) );
-                }
-                else if ( defaultValueExpr != null && propertyChangedCallbackExpr == null && coerceValueCallbackExpr == null )
-                {
-                    metadataExpr = ExpressionFactory.Capture( new PropertyMetadata( defaultValueExpr.Value ) );
-                }
-                else if ( defaultValueExpr == null && propertyChangedCallbackExpr != null && coerceValueCallbackExpr == null )
-                {
-                    metadataExpr = ExpressionFactory.Capture( new PropertyMetadata( propertyChangedCallbackExpr.Value ) );
-                }
-                else
-                {
-                    var metadata = new PropertyMetadata();
+                    case (not null, not null, not null):
+                        metadataExpr = ExpressionFactory.Capture(
+                            new PropertyMetadata( defaultValueExpr.Value, propertyChangedCallbackExpr.Value, coerceValueCallbackExpr.Value ) );
 
-                    if ( defaultValueExpr != null )
-                    {
-                        metadata.DefaultValue = defaultValueExpr.Value;
-                    }
+                        break;
 
-                    if ( propertyChangedCallbackExpr != null )
-                    {
-                        metadata.PropertyChangedCallback = propertyChangedCallbackExpr.Value;
-                    }
+                    case (not null, not null, null):
+                        metadataExpr = ExpressionFactory.Capture( new PropertyMetadata( defaultValueExpr.Value, propertyChangedCallbackExpr.Value ) );
 
-                    if ( coerceValueCallbackExpr != null )
-                    {
-                        metadata.CoerceValueCallback = coerceValueCallbackExpr.Value;
-                    }
+                        break;
 
-                    metadataExpr = ExpressionFactory.Capture( metadata );
+                    case (not null, null, null):
+                        metadataExpr = ExpressionFactory.Capture( new PropertyMetadata( defaultValueExpr.Value ) );
+
+                        break;
+
+                    case (not null, null, not null):
+                        metadataExpr = ExpressionFactory.Capture(
+                            new PropertyMetadata( defaultValueExpr.Value ) { CoerceValueCallback = coerceValueCallbackExpr.Value } );
+
+                        break;
+
+                    case (null, not null, not null):
+                        metadataExpr = ExpressionFactory.Capture(
+                            new PropertyMetadata()
+                            {
+                                PropertyChangedCallback = propertyChangedCallbackExpr.Value, CoerceValueCallback = coerceValueCallbackExpr.Value
+                            } );
+
+                        break;
+
+                    case (null, not null, null):
+                        metadataExpr = ExpressionFactory.Capture( new PropertyMetadata( propertyChangedCallbackExpr.Value ) );
+
+                        break;
+
+                    case (null, null, not null):
+                        metadataExpr = ExpressionFactory.Capture( new PropertyMetadata() { CoerceValueCallback = coerceValueCallbackExpr.Value } );
+
+                        break;
+
+                    case (null, null, null):
+                        // We should not get here.
+                        metadataExpr = ExpressionFactory.Capture( new PropertyMetadata() );
+
+                        break;
                 }
 
                 if ( options.IsReadOnly == true )

@@ -11,7 +11,7 @@ using System.Windows.Input;
 namespace Metalama.Patterns.Xaml.Configuration;
 
 /// <summary>
-/// Arguments of the <see cref="CommandOptionsExtensions.ConfigureCommand(Metalama.Framework.Aspects.IAspectReceiver{Metalama.Framework.Code.ICompilation},System.Action{Metalama.Patterns.Xaml.Configuration.CommandOptionsBuilder})"/>
+/// Arguments of the <see cref="CommandExtensions.ConfigureCommand(Metalama.Framework.Aspects.IAspectReceiver{Metalama.Framework.Code.ICompilation},System.Action{Metalama.Patterns.Xaml.Configuration.CommandOptionsBuilder})"/>
 /// method.
 /// </summary>
 [PublicAPI]

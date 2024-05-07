@@ -22,12 +22,10 @@ public partial class StaticOnChangingNoParameters : DependencyObject
   public static readonly DependencyProperty FooProperty;
   static StaticOnChangingNoParameters()
   {
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = new CoerceValueCallback((d, value) =>
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingNoParameters), new PropertyMetadata() { CoerceValueCallback = (d, value) =>
     {
       OnFooChanging();
       return value;
-    });
-    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticOnChangingNoParameters), metadata);
+    } });
   }
 }

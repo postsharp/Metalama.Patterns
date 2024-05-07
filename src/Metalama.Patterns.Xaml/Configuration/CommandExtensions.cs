@@ -8,18 +8,18 @@ namespace Metalama.Patterns.Xaml.Configuration;
 
 [PublicAPI]
 [CompileTime]
-public static class DependencyPropertyOptionsExtensions
+public static class CommandExtensions
 {
     /// <summary>
-    /// Configures <see cref="DependencyPropertyAttribute"/> for the current project.
+    /// Configures <see cref="CommandAttribute"/> for the current project.
     /// </summary>
     /// <param name="receiver">The <see cref="IAspectReceiver{TDeclaration}"/> for the current compilation.</param>
     /// <param name="configure">A delegate that configures the aspect.</param>
-    public static void ConfigureDependencyProperty(
+    public static void ConfigureCommand(
         this IAspectReceiver<ICompilation> receiver,
-        Action<DependencyPropertyOptionsBuilder> configure )
+        Action<CommandOptionsBuilder> configure )
     {
-        var builder = new DependencyPropertyOptionsBuilder();
+        var builder = new CommandOptionsBuilder();
         configure( builder );
 
         var options = builder.Build();
@@ -27,15 +27,15 @@ public static class DependencyPropertyOptionsExtensions
     }
 
     /// <summary>
-    /// Configures <see cref="DependencyPropertyAttribute"/> for the current namespace.
+    /// Configures <see cref="CommandAttribute"/> for the current namespace.
     /// </summary>
     /// <param name="receiver">The <see cref="IAspectReceiver{TDeclaration}"/> for the current namespace.</param>
     /// <param name="configure">A delegate that configures the aspect.</param>
-    public static void ConfigureDependencyProperty(
+    public static void ConfigureCommand(
         this IAspectReceiver<INamespace> receiver,
-        Action<DependencyPropertyOptionsBuilder> configure )
+        Action<CommandOptionsBuilder> configure )
     {
-        var builder = new DependencyPropertyOptionsBuilder();
+        var builder = new CommandOptionsBuilder();
         configure( builder );
 
         var options = builder.Build();
@@ -43,15 +43,15 @@ public static class DependencyPropertyOptionsExtensions
     }
 
     /// <summary>
-    /// Configures <see cref="DependencyPropertyAttribute"/> for the current type.
+    /// Configures <see cref="CommandAttribute"/> for the current type.
     /// </summary>
     /// <param name="receiver">The <see cref="IAspectReceiver{TDeclaration}"/> for the current type.</param>
     /// <param name="configure">A delegate that configures the aspect.</param>
-    public static void ConfigureDependencyProperty(
+    public static void ConfigureCommand(
         this IAspectReceiver<INamedType> receiver,
-        Action<DependencyPropertyOptionsBuilder> configure )
+        Action<CommandOptionsBuilder> configure )
     {
-        var builder = new DependencyPropertyOptionsBuilder();
+        var builder = new CommandOptionsBuilder();
         configure( builder );
 
         var options = builder.Build();
@@ -59,15 +59,15 @@ public static class DependencyPropertyOptionsExtensions
     }
 
     /// <summary>
-    /// Configures <see cref="DependencyPropertyAttribute"/> for the current property.
+    /// Configures <see cref="CommandAttribute"/> for the current method.
     /// </summary>
     /// <param name="receiver">The <see cref="IAspectReceiver{TDeclaration}"/> for the current property.</param>
     /// <param name="configure">A delegate that configures the aspect.</param>
-    public static void ConfigureDependencyProperty(
-        this IAspectReceiver<IProperty> receiver,
-        Action<DependencyPropertyOptionsBuilder> configure )
+    public static void ConfigureCommand(
+        this IAspectReceiver<IMethod> receiver,
+        Action<CommandOptionsBuilder> configure )
     {
-        var builder = new DependencyPropertyOptionsBuilder();
+        var builder = new CommandOptionsBuilder();
         configure( builder );
 
         var options = builder.Build();

@@ -68,45 +68,37 @@ public partial class StaticValidateDependencyPropertyAndValue : DependencyObject
   public static readonly DependencyProperty FooProperty;
   static StaticValidateDependencyPropertyAndValue()
   {
-    var metadata = new PropertyMetadata();
-    metadata.CoerceValueCallback = new CoerceValueCallback((d_1, value_1) =>
+    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticValidateDependencyPropertyAndValue), new PropertyMetadata() { CoerceValueCallback = (d_1, value_1) =>
     {
       if (!ValidateFoo(FooProperty, (int)value_1))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_1;
-    });
-    FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticValidateDependencyPropertyAndValue), metadata);
-    var metadata_1 = new PropertyMetadata();
-    metadata_1.CoerceValueCallback = new CoerceValueCallback((d_2, value_2) =>
+    } });
+    AcceptsAssignableProperty = DependencyProperty.Register("AcceptsAssignable", typeof(List<int>), typeof(StaticValidateDependencyPropertyAndValue), new PropertyMetadata() { CoerceValueCallback = (d_2, value_2) =>
     {
       if (!ValidateAcceptsAssignable(AcceptsAssignableProperty, (List<int>)value_2))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_2;
-    });
-    AcceptsAssignableProperty = DependencyProperty.Register("AcceptsAssignable", typeof(List<int>), typeof(StaticValidateDependencyPropertyAndValue), metadata_1);
-    var metadata_2 = new PropertyMetadata();
-    metadata_2.CoerceValueCallback = new CoerceValueCallback((d_3, value_3) =>
+    } });
+    AcceptsGenericProperty = DependencyProperty.Register("AcceptsGeneric", typeof(int), typeof(StaticValidateDependencyPropertyAndValue), new PropertyMetadata() { CoerceValueCallback = (d_3, value_3) =>
     {
       if (!ValidateAcceptsGeneric(AcceptsGenericProperty, (int)value_3))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_3;
-    });
-    AcceptsGenericProperty = DependencyProperty.Register("AcceptsGeneric", typeof(int), typeof(StaticValidateDependencyPropertyAndValue), metadata_2);
-    var metadata_3 = new PropertyMetadata();
-    metadata_3.CoerceValueCallback = new CoerceValueCallback((d_4, value_4) =>
+    } });
+    AcceptsObjectProperty = DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticValidateDependencyPropertyAndValue), new PropertyMetadata() { CoerceValueCallback = (d_4, value_4) =>
     {
       if (!ValidateAcceptsObject(AcceptsObjectProperty, value_4))
       {
         throw new ArgumentException("Invalid property value.", "value");
       }
       return value_4;
-    });
-    AcceptsObjectProperty = DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticValidateDependencyPropertyAndValue), metadata_3);
+    } });
   }
 }
