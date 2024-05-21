@@ -54,7 +54,7 @@ public partial class AOfSimple : A<Simple>
         void HandleChildPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
           {
-            var propertyName = e!.PropertyName;
+            var propertyName = e.PropertyName;
             switch (propertyName)
             {
               case "S1":
