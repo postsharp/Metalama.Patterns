@@ -24,7 +24,7 @@ internal sealed class TheClass
   {
     if (this._NullableMethod == null)
     {
-      var value = new StrongBox<string?>(this.NullableMethod_Source());
+      var value = new StrongBox<string?>(this.NullableMethod_Source()!);
       global::System.Threading.Interlocked.CompareExchange(ref this._NullableMethod, value, null);
     }
     return _NullableMethod!.Value;
@@ -51,7 +51,7 @@ internal sealed class TheClass
     {
       if (this._NullableProperty == null)
       {
-        var value = new StrongBox<string?>(this.NullableProperty_Source);
+        var value = new StrongBox<string?>(this.NullableProperty_Source!);
         global::System.Threading.Interlocked.CompareExchange(ref this._NullableProperty, value, null);
       }
       return _NullableProperty!.Value;
