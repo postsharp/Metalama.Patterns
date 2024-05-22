@@ -276,16 +276,18 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             }
         }
 
+#pragma warning disable IDE0004 // Cast is redundant
         if ( useInpcIntegration )
         {
-            commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression!.Value, meta.This, canExecuteProperty!.Name );
+            commandProperty.Value = new DelegateCommand( (Action<object?>) Execute, canExecuteExpression!.Value!, meta.This, canExecuteProperty!.Name );
         }
         else
         {
             // ReSharper disable once MergeConditionalExpression
 #pragma warning disable IDE0031 // Use null propagation
-            commandProperty.Value = new DelegateCommand( (Action<object>) Execute, canExecuteExpression == null ? null : canExecuteExpression.Value );
+            commandProperty.Value = new DelegateCommand( (Action<object?>) Execute, canExecuteExpression == null ? null : canExecuteExpression.Value );
 #pragma warning restore IDE0031 // Use null propagation
         }
+#pragma warning restore IDE0004
     }
 }
