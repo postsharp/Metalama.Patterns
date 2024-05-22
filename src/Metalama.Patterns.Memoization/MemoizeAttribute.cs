@@ -107,7 +107,7 @@ public sealed class MemoizeAttribute : Attribute, IAspect<IMethod>, IAspect<IPro
     {
         if ( field.Value == null )
         {
-            var value = new StrongBox<T>( meta.Proceed() );
+            var value = new StrongBox<T>( meta.Proceed()! );
 
             var statementBuilder = new StatementBuilder();
             statementBuilder.AppendTypeName( typeof(Interlocked) );
