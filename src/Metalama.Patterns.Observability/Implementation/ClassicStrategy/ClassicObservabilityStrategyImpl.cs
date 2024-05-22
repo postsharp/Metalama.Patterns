@@ -741,7 +741,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     private string GetAndReserveUnusedMemberName( string desiredName )
     {
         this._existingMemberNames ??= new HashSet<string>(
-            ((IEnumerable<INamedDeclaration>) this.CurrentType.AllMembers()).Concat( this.CurrentType.NestedTypes ).Select( m => m.Name ) );
+            ((IEnumerable<INamedDeclaration>) this.CurrentType.AllMembers()).Concat( this.CurrentType.Types ).Select( m => m.Name ) );
 
         if ( this._existingMemberNames.Add( desiredName ) )
         {

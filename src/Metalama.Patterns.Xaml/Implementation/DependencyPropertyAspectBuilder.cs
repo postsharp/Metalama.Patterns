@@ -227,7 +227,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
     private string GetAndReserveUnusedMemberName( string desiredName )
     {
         this._existingMemberNames ??= new HashSet<string>(
-            ((IEnumerable<INamedDeclaration>) this._builder.Target.DeclaringType.AllMembers()).Concat( this._builder.Target.DeclaringType.NestedTypes )
+            ((IEnumerable<INamedDeclaration>) this._builder.Target.DeclaringType.AllMembers()).Concat( this._builder.Target.DeclaringType.Types )
             .Select( m => m.Name ) );
 
         if ( this._existingMemberNames.Add( desiredName ) )
