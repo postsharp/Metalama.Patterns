@@ -276,13 +276,13 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         if ( useInpcIntegration )
         {
-            commandProperty.Value = new DelegateCommand( executeExpression.Value, canExecuteExpression!.Value, meta.This, canExecuteProperty!.Name );
+            commandProperty.Value = new DelegateCommand( executeExpression.Value!, canExecuteExpression!.Value!, meta.This, canExecuteProperty!.Name );
         }
         else
         {
             // ReSharper disable once MergeConditionalExpression
 #pragma warning disable IDE0031 // Use null propagation
-            commandProperty.Value = new DelegateCommand( executeExpression.Value, canExecuteExpression == null ? null : canExecuteExpression.Value );
+            commandProperty.Value = new DelegateCommand( executeExpression.Value!, canExecuteExpression == null ? null : canExecuteExpression.Value );
 #pragma warning restore IDE0031 // Use null propagation
         }
     }
