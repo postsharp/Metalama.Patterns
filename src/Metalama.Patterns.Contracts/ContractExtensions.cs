@@ -23,7 +23,7 @@ public static class ContractExtensions
     /// <seealso href="@enforcing-non-nullability"/>
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<ICompilation> compilation, bool includeInternalApis = false )
     {
-        bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
+        bool IsVisible( INamedType t ) => includeInternalApis || t.Accessibility.IsSupersetOrEqual( Accessibility.Protected );
 
         // Select types.
         var types = compilation.SelectMany( t => t.AllTypes )
@@ -41,7 +41,7 @@ public static class ContractExtensions
     /// <seealso href="@enforcing-non-nullability"/>
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<INamespace> ns, bool includeInternalApis = false )
     {
-        bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
+        bool IsVisible( INamedType t ) => includeInternalApis || t.Accessibility.IsSupersetOrEqual( Accessibility.Protected );
 
         // Select types.
         var types = ns.SelectMany( t => t.Types )
@@ -59,7 +59,7 @@ public static class ContractExtensions
     /// <seealso href="@enforcing-non-nullability"/>
     public static void VerifyNotNullableDeclarations( this IAspectReceiver<INamedType> types, bool includeInternalApis = false )
     {
-        bool IsVisible( IMemberOrNamedType t ) => includeInternalApis || t.Accessibility is Accessibility.Public or Accessibility.ProtectedInternal;
+        bool IsVisible( IMember t ) => includeInternalApis || t.Accessibility.IsSupersetOrEqual( Accessibility.Protected );
 
         var requiredAttribute = (INamedType) TypeFactory.GetType( typeof(RequiredAttribute) );
         var notNullableAttribute = (INamedType) TypeFactory.GetType( typeof(NotNullAttribute) );
@@ -70,28 +70,28 @@ public static class ContractExtensions
             => d.Attributes.OfAttributeType( requiredAttribute ).FirstOrDefault() ??
                d.Attributes.OfAttributeType( notNullableAttribute ).FirstOrDefault();
 
-        // Add aspects to fields and properties.
+        // Add aspects to fields, properties and indexers.
         var fieldsAndProperties = types
             .SelectMany(
                 t => t.Properties
-                    .Cast<IFieldOrProperty>()
-                    .Union( t.Fields ) )
+                    .Union<IFieldOrPropertyOrIndexer>( t.Fields )
+                    .Union( t.Indexers ) )
             .Where( f => IsVisible( f ) && IsNullableType( f ) && f.Attributes.All( a => a.Type.Name != "AllowNullAttribute" ) );
 
         fieldsAndProperties
             .Where( f => GetNotNullAspectAttribute( f ) == null && f.Writeability is Writeability.InitOnly or Writeability.All )
-            .RequireAspect<NotNullAttribute>();
+            .AddAspectIfEligible<NotNullAttribute>();
 
-        // Add aspects to method parameters.
+        // Add aspects to method, constructor and indexer parameters.
         var parameters = types
-            .SelectMany( t => t.Methods.Cast<IMethodBase>().Concat( t.Constructors ) )
+            .SelectMany( t => t.Methods.Concat<IHasParameters>( t.Constructors ).Concat( t.Indexers ) )
             .Where( IsVisible )
             .SelectMany( t => t.Parameters )
             .Where( IsNullableType );
 
         parameters
             .Where( parameter => GetNotNullAspectAttribute( parameter ) == null )
-            .RequireAspect<NotNullAttribute>();
+            .AddAspectIfEligible<NotNullAttribute>();
 
         // Warn if the attribute is duplicate.
         fieldsAndProperties.Where( f => GetNotNullAspectAttribute( f ) != null )
