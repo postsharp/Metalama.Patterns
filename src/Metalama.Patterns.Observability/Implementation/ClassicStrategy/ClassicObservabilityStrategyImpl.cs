@@ -736,12 +736,10 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     /// <summary>
     /// Gets an unused member name for the target type by adding an numeric suffix until an unused name is found.
     /// </summary>
-    /// <param name="desiredName"></param>
-    /// <returns></returns>
     private string GetAndReserveUnusedMemberName( string desiredName )
     {
         this._existingMemberNames ??= new HashSet<string>(
-            ((IEnumerable<INamedDeclaration>) this.CurrentType.AllMembers()).Concat( this.CurrentType.NestedTypes ).Select( m => m.Name ) );
+            ((IEnumerable<INamedDeclaration>) this.CurrentType.AllMembers()).Concat( this.CurrentType.Types ).Select( m => m.Name ) );
 
         if ( this._existingMemberNames.Add( desiredName ) )
         {

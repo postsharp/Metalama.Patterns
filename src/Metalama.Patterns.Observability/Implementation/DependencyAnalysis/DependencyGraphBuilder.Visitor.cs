@@ -92,7 +92,7 @@ internal partial class DependencyGraphBuilder
             this.ProcessAndResetIfApplicable( context );
         }
 
-        private bool IsLocalInstanceMember( ISymbol symbol ) => !symbol.IsStatic && this._declaringType.GetSymbol().IsOrInheritsFrom( symbol.ContainingType );
+        private bool IsLocalInstanceMember( ISymbol symbol ) => !symbol.IsStatic && this._declaringType.GetSymbol()!.IsOrInheritsFrom( symbol.ContainingType );
 
         private void ValidatePathElement( IReadOnlyList<DependencyPathElement> symbols, int index, ChainSection chainSection )
         {

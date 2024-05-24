@@ -27,7 +27,7 @@ internal static class DependencyPropertyNamingConventionMatcher
         var declaringType = targetProperty.DeclaringType;
 
         var conflictingMember = (IMemberOrNamedType?) declaringType.AllMembers().FirstOrDefault( m => m.Name == registrationFieldName )
-                                ?? declaringType.NestedTypes.FirstOrDefault( t => t.Name == registrationFieldName );
+                                ?? declaringType.Types.FirstOrDefault( t => t.Name == registrationFieldName );
 
         MemberMatch<IMemberOrNamedType, DefaultMatchKind> registrationFieldMatch;
 

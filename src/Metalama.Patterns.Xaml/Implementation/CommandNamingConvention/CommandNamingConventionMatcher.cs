@@ -22,7 +22,7 @@ internal static class CommandNamingConventionMatcher
         var declaringType = executeMethod.DeclaringType;
 
         var conflictingMember = (IMemberOrNamedType?) declaringType.AllMembers().FirstOrDefault( m => m.Name == commandPropertyName )
-                                ?? declaringType.NestedTypes.FirstOrDefault( t => t.Name == commandPropertyName );
+                                ?? declaringType.Types.FirstOrDefault( t => t.Name == commandPropertyName );
 
         var commandPropertyConflictMatch =
             conflictingMember != null
