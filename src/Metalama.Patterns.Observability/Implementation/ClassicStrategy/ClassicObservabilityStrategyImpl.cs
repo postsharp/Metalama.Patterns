@@ -414,8 +414,8 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     {
         if ( !this._targetImplementsInpc )
         {
-            this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
-                .ImplementInterface( this.CurrentType, this._assets.INotifyPropertyChanged );
+            this.AspectBuilder.ImplementInterface( this._assets.INotifyPropertyChanged );
+            this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider ).IntroduceEvent( this.CurrentType, nameof(Templates.PropertyChanged) );
         }
     }
 

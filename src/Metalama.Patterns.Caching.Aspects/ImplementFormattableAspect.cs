@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Formatters;
-using JetBrains.Annotations;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -58,8 +58,7 @@ internal sealed class ImplementFormattableAspect : TypeAspect
         ((IFormatterRepository) formatterRepository.Value!).Get<T>().Format( stringBuilder.Value, fieldOrProperty.Value );
     }
 
-    [UsedImplicitly]
-    [InterfaceMember( IsExplicit = true, WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
+    [Template]
     public void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
     {
         this.FormatCacheKey( stringBuilder, formatterRepository );
@@ -67,7 +66,9 @@ internal sealed class ImplementFormattableAspect : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.ImplementInterface( builder.Target, typeof(IFormattable<CacheKeyFormatting>), whenExists: OverrideStrategy.Ignore );
+        var implementInterfaceResult = builder.Advice.ImplementInterface( builder.Target, typeof(IFormattable<CacheKeyFormatting>), whenExists: OverrideStrategy.Ignore );
+
+        implementInterfaceResult.ExplicitImplementation.IntroduceMethod( nameof(this.Format), whenExists: OverrideStrategy.Ignore );
 
         builder.Advice.IntroduceMethod(
             builder.Target,
