@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
@@ -10,14 +11,14 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
 {
     private readonly string? _commandPropertyName;
-    private readonly string? _canExecuteMethodName;
-    private readonly string? _canExecutePropertyName;
+    private readonly ImmutableArray<string>? _canExecuteMethodName;
+    private readonly ImmutableArray<string>? _canExecutePropertyName;
 
     public ExplicitCommandNamingConvention( string? commandPropertyName, string? canExecuteMethodName, string? canExecutePropertyName )
     {
         this._commandPropertyName = commandPropertyName;
-        this._canExecuteMethodName = canExecuteMethodName;
-        this._canExecutePropertyName = canExecutePropertyName;
+        this._canExecuteMethodName = canExecuteMethodName == null ? default : ImmutableArray.Create( canExecuteMethodName );
+        this._canExecutePropertyName = canExecutePropertyName == null ? default : ImmutableArray.Create( canExecutePropertyName );
     }
 
     public string Name => "explicitly-configured";

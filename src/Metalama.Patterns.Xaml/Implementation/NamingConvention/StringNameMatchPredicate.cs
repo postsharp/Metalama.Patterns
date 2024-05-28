@@ -8,15 +8,29 @@ namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 [CompileTime]
 internal sealed class StringNameMatchPredicate : INameMatchPredicate
 {
-    private readonly string _name;
-
+    
     public StringNameMatchPredicate( string name )
     {
-        this._name = name ?? throw new ArgumentNullException( nameof(name) );
         this.Candidates = ImmutableArray.Create( name );
     }
 
-    public bool IsMatch( string name ) => string.Equals( name, this._name, StringComparison.Ordinal );
+    public StringNameMatchPredicate( ImmutableArray<string> names )
+    {
+        this.Candidates = names;
+    }
+
+    public bool IsMatch( string name )
+    {
+        foreach ( var candidate in this.Candidates )
+        {
+            if ( candidate.Equals( name, StringComparison.Ordinal ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public ImmutableArray<string> Candidates { get; }
 }

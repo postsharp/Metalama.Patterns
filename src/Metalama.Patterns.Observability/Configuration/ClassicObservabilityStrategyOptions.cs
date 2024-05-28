@@ -16,16 +16,6 @@ namespace Metalama.Patterns.Observability.Configuration;
 internal sealed record ClassicObservabilityStrategyOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>,
                                                              IHierarchicalOptions<INamedType>
 {
-    /// <summary>
-    /// Gets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced.
-    /// </summary>
-    /// <remarks>
-    /// The <c>OnObservablePropertyChanged</c> method allows a derived class to efficiently add subscribe/unsubscribe functionality
-    /// to a base class property, where the base class itself does not need to observe changes to children of the property.
-    /// This only applies to properties where the property type implements <see cref="INotifyPropertyChanged"/>. The introduced
-    /// method allows the current target class to use the feature if provided by a base class, and allows the current target class
-    /// to provide the feature to derived classes for applicable properties.
-    /// </remarks>
     public bool? EnableOnObservablePropertyChangedMethod { get; init; }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )

@@ -64,14 +64,22 @@ public sealed class ObservabilityTypeOptionsBuilder
 #endif
 
     /// <summary>
-    /// Configures <c>Metalama.Patterns.Observability.Implementation.ClassicStrategy</c> for the current project.
+    /// Gets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced. The default value is <c>true</c>.
     /// </summary>
-    /// <param name="configure">A delegate that configures the strategy.</param>
-    public void ConfigureClassicStrategy( Action<ClassicObservabilityStrategyOptionsBuilder> configure )
+    /// <remarks>
+    /// The <c>OnObservablePropertyChanged</c> method allows a derived class to efficiently add subscribe/unsubscribe functionality
+    /// to a base class property, where the base class itself does not need to observe changes to children of the property.
+    /// This only applies to properties where the property type implements <see cref="INotifyPropertyChanged"/>. The introduced
+    /// method allows the current target class to use the feature if provided by a base class, and allows the current target class
+    /// to provide the feature to derived classes for applicable properties.
+    /// </remarks>
+    public bool? EnableOnObservablePropertyChangedMethod
     {
-        var builder = new ClassicObservabilityStrategyOptionsBuilder( this.ClassicStrategyOptions );
-        configure( builder );
-
-        this.ClassicStrategyOptions = builder.Options;
+        get => this.ClassicStrategyOptions?.EnableOnObservablePropertyChangedMethod;
+        set
+            => this.ClassicStrategyOptions = (this.ClassicStrategyOptions ?? new ClassicObservabilityStrategyOptions()) with
+            {
+                EnableOnObservablePropertyChangedMethod = value
+            };
     }
 }
