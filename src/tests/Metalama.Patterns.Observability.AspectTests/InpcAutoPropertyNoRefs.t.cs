@@ -1,31 +1,31 @@
 [Observable]
 public class InpcAutoPropertyNoRefs : INotifyPropertyChanged
 {
-  private SimpleInpcByHand _x = default !;
-  public SimpleInpcByHand X
-  {
-    get
+    private SimpleInpcByHand _x = default!;
+    public SimpleInpcByHand X
     {
-      return _x;
+        get
+        {
+            return _x;
+        }
+        set
+        {
+            if ( !object.ReferenceEquals( value, _x ) )
+            {
+                var oldValue = _x;
+                _x = value;
+                OnObservablePropertyChanged( "X", (INotifyPropertyChanged?) oldValue, value );
+                OnPropertyChanged( "X" );
+            }
+        }
     }
-    set
+    [ObservedExpressions( "X" )]
+    protected virtual void OnObservablePropertyChanged( string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue )
     {
-      if (!object.ReferenceEquals(value, _x))
-      {
-        var oldValue = _x;
-        _x = value;
-        OnObservablePropertyChanged("X", (INotifyPropertyChanged? )oldValue, value);
-        OnPropertyChanged("X");
-      }
     }
-  }
-  [ObservedExpressions("X")]
-  protected virtual void OnObservablePropertyChanged(string propertyPath, INotifyPropertyChanged? oldValue, INotifyPropertyChanged? newValue)
-  {
-  }
-  protected virtual void OnPropertyChanged(string propertyName)
-  {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  public event PropertyChangedEventHandler? PropertyChanged;
+    protected virtual void OnPropertyChanged( string propertyName )
+    {
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
+    }
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

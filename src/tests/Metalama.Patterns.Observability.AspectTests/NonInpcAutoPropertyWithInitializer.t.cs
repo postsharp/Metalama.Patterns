@@ -3,25 +3,25 @@ namespace Metalama.Patterns.Observability.AspectTests.NonInpcAutoPropertyWithIni
 [Observable]
 public class NonInpcAutoPropertyWithInitializer : INotifyPropertyChanged
 {
-  private int _x = 42;
-  public int X
-  {
-    get
+    private int _x = 42;
+    public int X
     {
-      return _x;
+        get
+        {
+            return _x;
+        }
+        set
+        {
+            if ( _x != value )
+            {
+                _x = value;
+                OnPropertyChanged( "X" );
+            }
+        }
     }
-    set
+    protected virtual void OnPropertyChanged( string propertyName )
     {
-      if (_x != value)
-      {
-        _x = value;
-        OnPropertyChanged("X");
-      }
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
-  }
-  protected virtual void OnPropertyChanged(string propertyName)
-  {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

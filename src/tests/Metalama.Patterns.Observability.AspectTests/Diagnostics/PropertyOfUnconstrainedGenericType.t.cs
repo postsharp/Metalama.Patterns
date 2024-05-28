@@ -4,25 +4,25 @@ namespace Metalama.Patterns.Observability.AspectTests.Diagnostics;
 [Observable]
 public class PropertyOfUnconstrainedGenericType<T> : INotifyPropertyChanged
 {
-  private T _c1 = default !;
-  public T C1
-  {
-    get
+    private T _c1 = default!;
+    public T C1
     {
-      return _c1;
+        get
+        {
+            return _c1;
+        }
+        set
+        {
+            if ( !EqualityComparer<T>.Default.Equals( value, _c1 ) )
+            {
+                _c1 = value;
+                OnPropertyChanged( "C1" );
+            }
+        }
     }
-    set
+    protected virtual void OnPropertyChanged( string propertyName )
     {
-      if (!EqualityComparer<T>.Default.Equals(value, _c1))
-      {
-        _c1 = value;
-        OnPropertyChanged("C1");
-      }
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
-  }
-  protected virtual void OnPropertyChanged(string propertyName)
-  {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

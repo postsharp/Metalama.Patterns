@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.ComponentModel;
@@ -15,11 +16,12 @@ internal class DesignTimeObservabilityStrategy : IObservabilityStrategy, ITempla
     public virtual void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // Introduce the INotifyPropertyChanged if it's not already implemented.
-        builder.Advice.WithTemplateProvider( this ).ImplementInterface( builder.Target, typeof(INotifyPropertyChanged), OverrideStrategy.Ignore );
+        builder.ImplementInterface( typeof( INotifyPropertyChanged ), OverrideStrategy.Ignore );
+        builder.Advice.WithTemplateProvider( this ).IntroduceEvent( builder.Target, nameof(this.PropertyChanged), whenExists: OverrideStrategy.Ignore );
     }
 
     // ReSharper disable once EventNeverSubscribedTo.Global
-    [InterfaceMember]
+    [Template]
 #pragma warning disable CS0067
     public event PropertyChangedEventHandler? PropertyChanged;
 #pragma warning restore CS0067

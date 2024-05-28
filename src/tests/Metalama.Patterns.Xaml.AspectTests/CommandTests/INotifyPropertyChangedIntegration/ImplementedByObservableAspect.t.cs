@@ -36,7 +36,7 @@ public class ImplementedByObservableAspect : INotifyPropertyChanged
   public ICommand Foo1Command { get; }
   protected virtual void OnPropertyChanged(string propertyName)
   {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
   }
   public event PropertyChangedEventHandler? PropertyChanged;
 }

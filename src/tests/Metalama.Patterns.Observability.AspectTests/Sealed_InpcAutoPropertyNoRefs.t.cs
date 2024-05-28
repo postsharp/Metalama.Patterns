@@ -1,25 +1,25 @@
 [Observable]
 public sealed class SealedInpcAutoPropertyNoRefs : INotifyPropertyChanged
 {
-  private SimpleInpcByHand _x = default !;
-  public SimpleInpcByHand X
-  {
-    get
+    private SimpleInpcByHand _x = default!;
+    public SimpleInpcByHand X
     {
-      return _x;
+        get
+        {
+            return _x;
+        }
+        set
+        {
+            if ( !object.ReferenceEquals( value, _x ) )
+            {
+                _x = value;
+                OnPropertyChanged( "X" );
+            }
+        }
     }
-    set
+    private void OnPropertyChanged( string propertyName )
     {
-      if (!object.ReferenceEquals(value, _x))
-      {
-        _x = value;
-        OnPropertyChanged("X");
-      }
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
-  }
-  private void OnPropertyChanged(string propertyName)
-  {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

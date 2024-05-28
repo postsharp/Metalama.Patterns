@@ -3,25 +3,25 @@ namespace Metalama.Patterns.Observability.AspectTests;
 [Observable]
 public sealed class SealedNonInpcAutoProperty : INotifyPropertyChanged
 {
-  private int _x;
-  public int X
-  {
-    get
+    private int _x;
+    public int X
     {
-      return _x;
+        get
+        {
+            return _x;
+        }
+        set
+        {
+            if ( _x != value )
+            {
+                _x = value;
+                OnPropertyChanged( "X" );
+            }
+        }
     }
-    set
+    private void OnPropertyChanged( string propertyName )
     {
-      if (_x != value)
-      {
-        _x = value;
-        OnPropertyChanged("X");
-      }
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
-  }
-  private void OnPropertyChanged(string propertyName)
-  {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

@@ -3,28 +3,28 @@ namespace Metalama.Patterns.Observability.AspectTests.FieldBackedIntProperty;
 [Observable]
 public class FieldBackedIntProperty : INotifyPropertyChanged
 {
-  private int _x1;
-  private int _x
-  {
-    get
+    private int _x1;
+    private int _x
     {
-      return _x1;
+        get
+        {
+            return _x1;
+        }
+        set
+        {
+            if ( _x1 != value )
+            {
+                _x1 = value;
+                OnPropertyChanged( "X" );
+                OnPropertyChanged( "Y" );
+            }
+        }
     }
-    set
+    public int X => this._x;
+    public int Y => this.X;
+    protected virtual void OnPropertyChanged( string propertyName )
     {
-      if (_x1 != value)
-      {
-        _x1 = value;
-        OnPropertyChanged("X");
-        OnPropertyChanged("Y");
-      }
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
-  }
-  public int X => this._x;
-  public int Y => this.X;
-  protected virtual void OnPropertyChanged(string propertyName)
-  {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

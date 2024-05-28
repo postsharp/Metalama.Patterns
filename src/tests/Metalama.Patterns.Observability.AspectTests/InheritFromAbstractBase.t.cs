@@ -2,46 +2,46 @@ using System.ComponentModel;
 namespace Metalama.Patterns.Observability.AspectTests.InheritFromAbstractBase;
 public partial class C11 : C10
 {
-  /// <summary>
-  /// Ref to <see cref = "C10.C10P1"/>.
-  /// </summary>
-  public int C11P1 => this.C10P1;
-  protected override void OnPropertyChanged(string propertyName)
-  {
-    switch (propertyName)
+    /// <summary>
+    /// Ref to <see cref = "C10.C10P1"/>.
+    /// </summary>
+    public int C11P1 => this.C10P1;
+    protected override void OnPropertyChanged( string propertyName )
     {
-      case "C10P1":
-        OnPropertyChanged("C11P1");
-        break;
+        switch ( propertyName )
+        {
+            case "C10P1":
+                OnPropertyChanged( "C11P1" );
+                break;
+        }
+        base.OnPropertyChanged( propertyName );
     }
-    base.OnPropertyChanged(propertyName);
-  }
 }
 [Observable]
 public abstract partial class C10 : INotifyPropertyChanged
 {
-  private int _c10P1;
-  /// <summary>
-  /// Auto
-  /// </summary>
-  public int C10P1
-  {
-    get
+    private int _c10P1;
+    /// <summary>
+    /// Auto
+    /// </summary>
+    public int C10P1
     {
-      return _c10P1;
+        get
+        {
+            return _c10P1;
+        }
+        set
+        {
+            if ( _c10P1 != value )
+            {
+                _c10P1 = value;
+                OnPropertyChanged( "C10P1" );
+            }
+        }
     }
-    set
+    protected virtual void OnPropertyChanged( string propertyName )
     {
-      if (_c10P1 != value)
-      {
-        _c10P1 = value;
-        OnPropertyChanged("C10P1");
-      }
+        this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     }
-  }
-  protected virtual void OnPropertyChanged(string propertyName)
-  {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
-  public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

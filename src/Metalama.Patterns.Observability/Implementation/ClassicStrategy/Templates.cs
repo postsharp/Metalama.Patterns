@@ -18,7 +18,7 @@ internal sealed class Templates : ITemplateProvider
     private static void CompileTimeThrow( Exception e ) => throw e;
 
     // ReSharper disable once EventNeverSubscribedTo.Global
-    [InterfaceMember]
+    [Template]
     public event PropertyChangedEventHandler? PropertyChanged;
 
     [Template]
@@ -438,7 +438,7 @@ internal sealed class Templates : ITemplateProvider
 
         if ( templateArgsValue.BaseOnPropertyChangedMethod == null )
         {
-            this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
+            meta.This.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
         }
         else
         {
