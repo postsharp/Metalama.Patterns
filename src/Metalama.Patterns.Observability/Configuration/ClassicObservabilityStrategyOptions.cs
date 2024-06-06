@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
-using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.Configuration;
 

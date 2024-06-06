@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Observability.Implementation;
+using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability.Configuration;
 
@@ -64,7 +65,7 @@ public sealed class ObservabilityTypeOptionsBuilder
 #endif
 
     /// <summary>
-    /// Gets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced. The default value is <c>true</c>.
+    /// Gets or sets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced. The default value is <c>true</c>.
     /// </summary>
     /// <remarks>
     /// The <c>OnObservablePropertyChanged</c> method allows a derived class to efficiently add subscribe/unsubscribe functionality

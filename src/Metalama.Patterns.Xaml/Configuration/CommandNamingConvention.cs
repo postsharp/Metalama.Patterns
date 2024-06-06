@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Serialization;
 using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
-using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Xaml.Configuration;
@@ -48,11 +47,11 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
     /// In this pattern, all occurrences of the substring <c>{CommandName}</c> will be replaced with the command name
     /// determined according to <see cref="CommandNamePattern"/> before the expression is evaluated.
     /// </summary>
-    public ImmutableArray<string> CanExecutePattern { get; init; }
+    public string[]? CanExecutePatterns { get; init; }
 
     /// <summary>
     /// Gets or sets a value indicating whether a matching valid unambiguous can-execute method or property must be found for a match to be considered successful.
-    /// The default value is <see langword="true"/> when <see cref="CanExecutePattern"/> is specified, otherwise <see langword="false"/>.
+    /// The default value is <see langword="true"/> when <see cref="CanExecutePatterns"/> is specified, otherwise <see langword="false"/>.
     /// </summary>
     public bool? IsCanExecuteRequired { get; init; }
 
@@ -108,7 +107,7 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
                 null,
                 MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Invalid(),
                 MemberMatch<IMember, DefaultMatchKind>.NotFound(),
-                this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePattern != null ) );
+                this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePatterns != null ) );
         }
 
 #if NETCOREAPP
@@ -120,9 +119,9 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
 
         INameMatchPredicate canExecutePredicate;
 
-        if ( this.CanExecutePattern != null )
+        if ( this.CanExecutePatterns != null )
         {
-            var pattern = string.Join( "|", this.CanExecutePattern.Select( x => x.Replace( _commandNameToken, commandName ) ) );
+            var pattern = string.Join( "|", this.CanExecutePatterns.Select( x => x.Replace( _commandNameToken, commandName ) ) );
 
             canExecutePredicate =
                 new RegexNameMatchPredicate( new Regex( $"^{pattern}$" ) );
@@ -144,6 +143,6 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
             canExecutePredicate,
             considerMethod: this.ConsiderCanExecuteMethod,
             considerProperty: this.ConsiderCanExecuteProperty,
-            requireCanExecuteMatch: this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePattern != null ) );
+            requireCanExecuteMatch: this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePatterns != null ) );
     }
 }

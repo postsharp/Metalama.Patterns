@@ -110,7 +110,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                 target )
             : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
 
-        new DiagnosticReporter( builder, options.ReportWarningOnMissingMember ?? false ).ReportDiagnostics( ncResult );
+        new DiagnosticReporter( builder ).ReportDiagnostics( ncResult );
 
         var successfulMatch = ncResult.SuccessfulMatch?.Match;
 

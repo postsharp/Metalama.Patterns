@@ -6,6 +6,7 @@ using Metalama.Framework.Serialization;
 using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Windows;
 
 namespace Metalama.Patterns.Xaml.Configuration;
 
