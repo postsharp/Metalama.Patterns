@@ -29,6 +29,7 @@ internal static class CompileTimeHelpers
             DeclarationKind.Parameter => $"'{target.Parameter.Name}' parameter",
             DeclarationKind.Property => $"'{target.Property.Name}' property",
             DeclarationKind.Field => $"'{target.Field.Name}' field",
+            DeclarationKind.Indexer => "indexer",
             _ => throw new ArgumentOutOfRangeException(
                 nameof(target) + "." + nameof(target.Declaration) + "." +
                 nameof(target.Declaration.DeclarationKind) )
@@ -40,7 +41,7 @@ internal static class CompileTimeHelpers
         return target.Declaration.DeclarationKind switch
         {
             DeclarationKind.Parameter => target.Parameter.Name,
-            DeclarationKind.Property or DeclarationKind.Field => "value",
+            DeclarationKind.Property or DeclarationKind.Field or DeclarationKind.Indexer => "value",
             _ => throw new ArgumentOutOfRangeException(
                 nameof(target) + "." + nameof(target.Declaration) + "." +
                 nameof(target.Declaration.DeclarationKind) )

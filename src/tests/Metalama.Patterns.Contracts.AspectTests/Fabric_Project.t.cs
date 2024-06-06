@@ -10,6 +10,13 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
   public class PublicClass
   {
+    public PublicClass(string nonNullableParam, string? nullableParam)
+    {
+      if (nonNullableParam == null !)
+      {
+        throw new ArgumentNullException("nonNullableParam", "The 'nonNullableParam' parameter must not be null.");
+      }
+    }
     private string _publicProperty = default !;
     public string PublicProperty
     {
@@ -45,20 +52,27 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
       }
     }
     internal string InternalField;
-    private string _publicNullableField = default !;
-    public string PublicNullableField
+    public string? PublicNullableField;
+    public string this[string key]
     {
       get
       {
-        return _publicNullableField;
+        if (key == null !)
+        {
+          throw new ArgumentNullException("key", "The 'key' parameter must not be null.");
+        }
+        return key;
       }
       set
       {
+        if (key == null !)
+        {
+          throw new ArgumentNullException("key", "The 'key' parameter must not be null.");
+        }
         if (value == null !)
         {
-          throw new ArgumentNullException("value", "The 'PublicNullableField' property must not be null.");
+          throw new ArgumentNullException("value", "The indexer must not be null.");
         }
-        _publicNullableField = value;
       }
     }
     public void PublicMethod(string nonNullableParam, string? nullableParam)
@@ -70,6 +84,26 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
     }
     internal void InternalMethod(string nonNullableParam, string? nullableParam)
     {
+    }
+    private void PrivateMethod(string nonNullableParam, string? nullableParam)
+    {
+    }
+    protected void ProtectedMethod(string nonNullableParam, string? nullableParam)
+    {
+      if (nonNullableParam == null !)
+      {
+        throw new ArgumentNullException("nonNullableParam", "The 'nonNullableParam' parameter must not be null.");
+      }
+    }
+    private protected void PrivateProtectedMethod(string nonNullableParam, string? nullableParam)
+    {
+    }
+    protected internal void ProtectedInternalMethod(string nonNullableParam, string? nullableParam)
+    {
+      if (nonNullableParam == null !)
+      {
+        throw new ArgumentNullException("nonNullableParam", "The 'nonNullableParam' parameter must not be null.");
+      }
     }
   }
 }
