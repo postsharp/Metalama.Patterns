@@ -18,7 +18,8 @@ public sealed class PropertyInitializerTests
 
         PropertyInitializerTestClass.DefaultConfigurationInitializerCallCount.Should().Be( 1 );
         var instance = new PropertyInitializerTestClass();
-        PropertyInitializerTestClass.DefaultConfigurationInitializerCallCount.Should().Be( 1 );
         instance.DefaultConfiguration.Should().Be( 42 );
+        
+        PropertyInitializerTestClass.DefaultConfigurationInitializerCallCount.Should().Be( 2 );
     }
 }

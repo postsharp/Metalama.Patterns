@@ -54,6 +54,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
              *
              */
 
+            if ( options.InitializerProvidesDefaultValue != true )
+            {
+                defaultValueExpr = null;
+            }
+
             if ( onChangingMethod != null || onChangedMethod != null || validateMethod != null || defaultValueExpr != null || applyContractsMethod != null )
             {
                 IExpression? coerceValueCallbackExpr = null;

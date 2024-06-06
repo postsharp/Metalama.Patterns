@@ -197,8 +197,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
         // Here we avoid the temptation to generate a static field to store the result of the initializer expression
         // and use the same result for the default value and as the initial value of all instances of the declaring type. This
         // pattern does not have the same semantics as a regular property initializer, which would be invoked for each instance
-        // of the declaring type. So we now emulate normal semantics to avoid surprise. If required, the user can themself implement
-        // singleton semantics as they would for any regular property initializer.
+        // of the declaring type, while the default value is evaluated just once as this is a statically scoped value.
+        // Therefore we evaluate the initializer expression once for the default value and a second time for each object instance.
+        
 
         if ( this._builder.Target.InitializerExpression != null )
         {

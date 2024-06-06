@@ -28,6 +28,12 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     /// </summary>
     public bool? IsReadOnly { get; init; }
 
+    /// <summary>
+    /// Gets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
+    /// The default is <see langword="true"/>.
+    /// </summary>
+    public bool? InitializerProvidesDefaultValue { get; init; }
+
     internal IReadOnlyCollection<IDependencyPropertyNamingConvention> GetSortedNamingConventions()
     {
         this._namingConventions ??=
@@ -42,7 +48,12 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     }
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new DependencyPropertyOptions { IsReadOnly = false, NamingConventionRegistrations = DefaultNamingConventionRegistrations() };
+        => new DependencyPropertyOptions
+        {
+            IsReadOnly = false,
+            InitializerProvidesDefaultValue = true,
+            NamingConventionRegistrations = DefaultNamingConventionRegistrations()
+        };
 
     internal static IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>> DefaultNamingConventionRegistrations()
         => IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(
@@ -58,6 +69,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         return new DependencyPropertyOptions
         {
             IsReadOnly = other.IsReadOnly ?? this.IsReadOnly,
+            InitializerProvidesDefaultValue = other.InitializerProvidesDefaultValue ?? this.InitializerProvidesDefaultValue,
             NamingConventionRegistrations = this.NamingConventionRegistrations.ApplyChanges( other.NamingConventionRegistrations, context )
         };
     }
