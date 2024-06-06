@@ -285,7 +285,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
             arrayBuilder.Add(
                 mappedArgumentPosition >= 0
                     ? invalidatedMethod.Method.Parameters[mappedArgumentPosition]
-                    : 0 );
+                    : ExpressionFactory.Literal( 0 ) );
         }
 
         return arrayBuilder.ToExpression();
