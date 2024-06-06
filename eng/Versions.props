@@ -21,7 +21,7 @@
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
         <MicrosoftWindowsAzureConfigurationManagerVersion>3.2.3</MicrosoftWindowsAzureConfigurationManagerVersion>
         <StackExchangeRedisVersion>2.0.601</StackExchangeRedisVersion>
-        <SystemCollectionsImmutableVersion>7.0.0</SystemCollectionsImmutableVersion>
+        <SystemCollectionsImmutableVersion>8.0.0</SystemCollectionsImmutableVersion>
         <SystemRuntimeCachingVersion>7.0.0</SystemRuntimeCachingVersion>
         <SystemRuntimeSerializationPrimitivesVersion>4.3.0</SystemRuntimeSerializationPrimitivesVersion>
         <SystemRuntimeSerializationXmlVersion>4.3.0</SystemRuntimeSerializationXmlVersion>
