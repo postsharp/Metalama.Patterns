@@ -39,6 +39,6 @@ public sealed class DefaultCommandNamingConventionTests
     [Fact]
     public void GetCanExecuteNameFromCommandName()
     {
-        DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( "Foo" ).Should().Be( "CanExecuteFoo" );
+        DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( "Foo" ).Should().Contain( "CanExecuteFoo" );
     }
 }

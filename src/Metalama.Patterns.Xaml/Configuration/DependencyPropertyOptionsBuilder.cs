@@ -27,18 +27,6 @@ public sealed class DependencyPropertyOptionsBuilder
     public bool? IsReadOnly { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>
-    /// in the instance constructor of the declaring class of the target property. The default is <see langword="false"/>.
-    /// </summary>
-    public bool? InitializerProvidesInitialValue { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
-    /// The default is <see langword="true"/>.
-    /// </summary>
-    public bool? InitializerProvidesDefaultValue { get; set; }
-
-    /// <summary>
     /// Adds or updates a naming convention that specifies, based on the name of the target method of the <see cref="DependencyProperty"/>
     /// aspect: the name of the registration field and of the <c>OnChanging</c>, <c>OnChanged</c> and <c>Validate</c> methods.
     /// </summary>

@@ -11,14 +11,14 @@ namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
 {
     private readonly string? _commandPropertyName;
-    private readonly ImmutableArray<string>? _canExecuteMethodName;
-    private readonly ImmutableArray<string>? _canExecutePropertyName;
+    private readonly string? _canExecuteMethodName;
+    private readonly string? _canExecutePropertyName;
 
     public ExplicitCommandNamingConvention( string? commandPropertyName, string? canExecuteMethodName, string? canExecutePropertyName )
     {
         this._commandPropertyName = commandPropertyName;
-        this._canExecuteMethodName = canExecuteMethodName == null ? default : ImmutableArray.Create( canExecuteMethodName );
-        this._canExecutePropertyName = canExecutePropertyName == null ? default : ImmutableArray.Create( canExecutePropertyName );
+        this._canExecuteMethodName = canExecuteMethodName;
+        this._canExecutePropertyName = canExecutePropertyName;
     }
 
     public string Name => "explicitly-configured";
@@ -34,7 +34,11 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
             addInspectedMember,
             commandPropertyName,
             new StringNameMatchPredicate(
-                this._canExecuteMethodName ?? this._canExecutePropertyName ?? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) ),
+                this._canExecuteMethodName != null
+                    ? ImmutableArray.Create( this._canExecuteMethodName )
+                    : this._canExecutePropertyName != null
+                        ? ImmutableArray.Create( this._canExecutePropertyName )
+                        : DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) ),
             considerMethod: this._canExecuteMethodName != null || this._canExecutePropertyName == null,
             considerProperty: this._canExecutePropertyName != null || this._canExecuteMethodName == null,
             requireCanExecuteMatch: this._canExecuteMethodName != null || this._canExecutePropertyName != null );

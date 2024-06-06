@@ -6,7 +6,6 @@ using Metalama.Framework.Serialization;
 using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
-using System.Windows;
 
 namespace Metalama.Patterns.Xaml.Configuration;
 
@@ -29,18 +28,6 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     /// </summary>
     public bool? IsReadOnly { get; init; }
 
-    /// <summary>
-    /// Gets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>
-    /// in the instance constructor of the declaring class of the target property. The default is <see langword="false"/>.
-    /// </summary>
-    public bool? InitializerProvidesInitialValue { get; init; }
-
-    /// <summary>
-    /// Gets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
-    /// The default is <see langword="true"/>.
-    /// </summary>
-    public bool? InitializerProvidesDefaultValue { get; init; }
-
     internal IReadOnlyCollection<IDependencyPropertyNamingConvention> GetSortedNamingConventions()
     {
         this._namingConventions ??=
@@ -55,13 +42,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     }
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new DependencyPropertyOptions
-        {
-            IsReadOnly = false,
-            InitializerProvidesInitialValue = false,
-            InitializerProvidesDefaultValue = true,
-            NamingConventionRegistrations = DefaultNamingConventionRegistrations()
-        };
+        => new DependencyPropertyOptions { IsReadOnly = false, NamingConventionRegistrations = DefaultNamingConventionRegistrations() };
 
     internal static IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>> DefaultNamingConventionRegistrations()
         => IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(
@@ -77,8 +58,6 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         return new DependencyPropertyOptions
         {
             IsReadOnly = other.IsReadOnly ?? this.IsReadOnly,
-            InitializerProvidesInitialValue = other.InitializerProvidesInitialValue ?? this.InitializerProvidesInitialValue,
-            InitializerProvidesDefaultValue = other.InitializerProvidesDefaultValue ?? this.InitializerProvidesDefaultValue,
             NamingConventionRegistrations = this.NamingConventionRegistrations.ApplyChanges( other.NamingConventionRegistrations, context )
         };
     }

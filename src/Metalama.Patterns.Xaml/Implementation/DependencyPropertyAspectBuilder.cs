@@ -80,12 +80,6 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var onChangedMethod = successfulMatch?.PropertyChangedMatch.Member;
         var validateMethod = successfulMatch?.ValidateMatch.Member;
 
-        if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue != true
-                                                                && this._options.InitializerProvidesDefaultValue != true )
-        {
-            this._builder.Diagnostics.Report( Diagnostics.WarningDependencyPropertyInitializerWillNotBeUsed.WithArguments( this._builder.Target ) );
-        }
-
         if ( !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
         {
             if ( onChangingMethod != null )
@@ -206,7 +200,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         // of the declaring type. So we now emulate normal semantics to avoid surprise. If required, the user can themself implement
         // singleton semantics as they would for any regular property initializer.
 
-        if ( this._builder.Target.InitializerExpression != null && this._options.InitializerProvidesInitialValue == true )
+        if ( this._builder.Target.InitializerExpression != null )
         {
             this._builder.Advice.WithTemplateProvider( Templates.Provider )
                 .AddInitializer(

@@ -37,6 +37,8 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     /// </remarks>
     public bool? EnableINotifyPropertyChangedIntegration { get; init; }
 
+    public bool? ReportWarningOnMissingMember { get; init; }
+
     internal IReadOnlyList<ICommandNamingConvention> GetSortedNamingConventions()
     {
         this._namingConventions ??=

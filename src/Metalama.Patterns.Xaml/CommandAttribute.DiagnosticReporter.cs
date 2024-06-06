@@ -11,7 +11,7 @@ public sealed partial class CommandAttribute
     [CompileTime]
     private sealed class DiagnosticReporter : Implementation.NamingConvention.DiagnosticReporter
     {
-        public DiagnosticReporter( IAspectBuilder builder ) : base( builder ) { }
+        public DiagnosticReporter( IAspectBuilder builder, bool reportWarningOnMissingMember ) : base( builder ) { }
 
         protected override string GetInvalidityReason( in InspectedMember addInspectedMember )
             => addInspectedMember.Member.DeclarationKind == DeclarationKind.Property

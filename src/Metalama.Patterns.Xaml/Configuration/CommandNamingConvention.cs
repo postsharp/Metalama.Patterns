@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Serialization;
 using Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
 namespace Metalama.Patterns.Xaml.Configuration;
@@ -43,11 +44,11 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
     public string? CommandPropertyName { get; init; }
 
     /// <summary>
-    /// Gets or sets a regular expression pattern that will be evaluated against method and/or property names to identify candidate can-execute members. 
+    /// Gets or sets a list of regular expression patterns that will be evaluated against method and/or property names to identify candidate can-execute members. 
     /// In this pattern, all occurrences of the substring <c>{CommandName}</c> will be replaced with the command name
     /// determined according to <see cref="CommandNamePattern"/> before the expression is evaluated.
     /// </summary>
-    public string? CanExecutePattern { get; init; }
+    public ImmutableArray<string> CanExecutePattern { get; init; }
 
     /// <summary>
     /// Gets or sets a value indicating whether a matching valid unambiguous can-execute method or property must be found for a match to be considered successful.
@@ -117,9 +118,19 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
             ? this.CommandPropertyName.Replace( _commandNameToken, commandName )
             : DefaultCommandNamingConvention.GetCommandPropertyNameFromCommandName( commandName );
 
-        var canExecutePredicate = this.CanExecutePattern != null
-            ? (INameMatchPredicate) new RegexNameMatchPredicate( new Regex( this.CanExecutePattern.Replace( _commandNameToken, commandName ) ) )
-            : new StringNameMatchPredicate( DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) );
+        INameMatchPredicate canExecutePredicate;
+
+        if ( this.CanExecutePattern != null )
+        {
+            var pattern = string.Join( "|", this.CanExecutePattern.Select( x => x.Replace( _commandNameToken, commandName ) ) );
+
+            canExecutePredicate =
+                new RegexNameMatchPredicate( new Regex( $"^{pattern}$" ) );
+        }
+        else
+        {
+            canExecutePredicate = new StringNameMatchPredicate( DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) );
+        }
 
 #if NETCOREAPP
 #pragma warning restore CA1307 // Specify StringComparison for clarity

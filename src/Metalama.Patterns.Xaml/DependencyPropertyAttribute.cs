@@ -26,40 +26,8 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
         set => this._isReadOnly = value;
     }
 
-    private bool? _initializerProvidesInitialValue;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>
-    /// in the instance constructor of the declaring class of the target property. The default is <see langword="false"/>.
-    /// </summary>
-    public bool InitializerProvidesInitialValue
-    {
-        get => this._initializerProvidesInitialValue ?? false;
-        set => this._initializerProvidesInitialValue = value;
-    }
-
-    private bool? _initializerProvidesDefaultValue;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
-    /// The default is <see langword="true"/>.
-    /// </summary>
-    public bool InitializerProvidesDefaultValue
-    {
-        get => this._initializerProvidesDefaultValue ?? true;
-        set => this._initializerProvidesDefaultValue = value;
-    }
-
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
-        => new[]
-        {
-            new DependencyPropertyOptions()
-            {
-                IsReadOnly = this._isReadOnly,
-                InitializerProvidesInitialValue = this._initializerProvidesInitialValue,
-                InitializerProvidesDefaultValue = this._initializerProvidesDefaultValue
-            }
-        };
+        => new[] { new DependencyPropertyOptions() { IsReadOnly = this._isReadOnly } };
 
     // TODO: Document the valid signatures of PropertyChangedMethod, PropertyChangingMethod and ValidateMethod, see project README.md.
 
@@ -119,7 +87,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
         builder.MustNotBeStatic();
 
         // ReSharper disable once RedundantNameQualifier
-        builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
+        builder.MustHaveAccessibility( Accessibility.Public );
         builder.MustBeReadable();
         builder.MustSatisfy( p => p.IsAutoPropertyOrField == true, p => $"{p} must be an auto-property." );
         builder.DeclaringType().MustBe( typeof(DependencyObject), ConversionKind.Reference );

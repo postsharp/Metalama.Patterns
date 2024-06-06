@@ -112,5 +112,11 @@ public sealed class CommandOptionsBuilder
         set => this._options = this._options with { EnableINotifyPropertyChangedIntegration = value };
     }
 
+    public bool? ReportWarningOnMissingCanExecute
+    {
+        get => this._options.ReportWarningOnMissingMember;
+        set => this._options = this._options with { ReportWarningOnMissingMember = value };
+    }
+
     internal CommandOptions Build() => this._options;
 }
