@@ -27,9 +27,9 @@
 
 
   <ItemGroup>
-    <Compile Remove="ShallNotDependOnMutableStateAttribute.cs" />
+    <ProjectReference Include="..\Metalama.Patterns.Immutability\Metalama.Patterns.Immutability.csproj" />
   </ItemGroup>
-
+  
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
   
 </Project>

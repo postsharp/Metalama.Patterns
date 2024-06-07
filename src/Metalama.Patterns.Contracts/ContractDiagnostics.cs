@@ -10,6 +10,8 @@ namespace Metalama.Patterns.Contracts;
 [CompileTime]
 internal static class ContractDiagnostics
 {
+    // Reserved range: 5000-5019
+
     public static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType, string AspectType, NumericRange Range)> RangeCannotBeApplied { get; }
         = new(
             "LAMA5001",
