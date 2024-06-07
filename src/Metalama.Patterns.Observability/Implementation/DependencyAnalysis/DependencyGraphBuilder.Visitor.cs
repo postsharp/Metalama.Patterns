@@ -25,7 +25,7 @@ internal partial class DependencyGraphBuilder
         CancellationToken cancellationToken = default )
     {
         var symbol = propertyInfo.FieldOrProperty.GetSymbol()!;
-        
+
         var body = symbol
             .DeclaringSyntaxReferences
             .Select( r => r.GetSyntax( cancellationToken ) )
@@ -39,7 +39,7 @@ internal partial class DependencyGraphBuilder
         }
 
         var ignoreWarnings = context.CanIgnoreUnobservableExpressions( symbol );
-        
+
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
@@ -100,7 +100,7 @@ internal partial class DependencyGraphBuilder
             {
                 return;
             }
-            
+
             // Here we report particularly those diagnostics which should be located on a syntax node inside a body. The final dependency
             // graph does not keep track of all the syntax nodes which referenced each dependency node (this would be expensive), so logging
             // diagnostics located on syntax nodes inside bodies is not possible later.
@@ -118,7 +118,7 @@ internal partial class DependencyGraphBuilder
             {
                 // Warn if this is a non-leaf reference to a non-primitive or non-INPC type.
 
-                if ( !this._context.IsConstant( fieldOrPropertyType! ) && !this._context.TreatAsImplementingInpc( fieldOrPropertyType! ) )
+                if ( !this._context.IsDeeplyImmutable( fieldOrPropertyType! ) && !this._context.TreatAsImplementingInpc( fieldOrPropertyType! ) )
                 {
                     this._context.ReportDiagnostic(
                         DiagnosticDescriptors.WarningChildrenOfNonInpcFieldsOrPropertiesAreNotObservable.WithArguments( fieldOrPropertyType! ),
@@ -143,7 +143,7 @@ internal partial class DependencyGraphBuilder
             {
                 var isSafe = fieldSymbol.IsConst ||
                              (!fieldSymbol.IsStatic && fieldSymbol.GetEffectiveAccessibility() == Accessibility.Private) ||
-                             (fieldSymbol.IsReadOnly && this._context.IsConstant( fieldSymbol.Type ));
+                             (fieldSymbol.IsReadOnly && this._context.IsDeeplyImmutable( fieldSymbol.Type ));
 
                 if ( !isSafe )
                 {
@@ -163,7 +163,7 @@ internal partial class DependencyGraphBuilder
                     this._context.IsConstant( method ) ||
 
                     // Static methods that have primitive arguments are safe.
-                    (method.IsStatic && method.Parameters.All( p => p.RefKind is RefKind.Out || this._context.IsConstant( p.Type ) )) ||
+                    (method.IsStatic && method.Parameters.All( p => p.RefKind is RefKind.Out || this._context.IsDeeplyImmutable( p.Type ) )) ||
 
                     // All methods that have no output are safe.
                     (method.ReturnsVoid && !method.Parameters.Any( p => p.RefKind is RefKind.Out or RefKind.Ref ));
@@ -281,7 +281,7 @@ internal partial class DependencyGraphBuilder
             var symbolInfo = this._semanticModel.GetSymbolInfo( node.Type, this._cancellationToken );
             var variableType = ((ITypeSymbol?) symbolInfo.Symbol)?.GetElementaryType();
 
-            if ( variableType != null && !this._context.IsConstant( variableType ) && !this._ignoreWarnings )
+            if ( variableType != null && !this._context.IsDeeplyImmutable( variableType ) && !this._ignoreWarnings )
             {
                 foreach ( var variable in node.Variables )
                 {
