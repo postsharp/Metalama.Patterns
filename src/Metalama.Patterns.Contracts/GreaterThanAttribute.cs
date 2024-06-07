@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Aspects;
+using Metalama.Patterns.Contracts.Numeric;
 
 #pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
 
@@ -18,127 +18,96 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 ///     <para>Null values are accepted and do not throw an exception.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.GreaterThanErrorMessage"/>.</para>
-/// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public class GreaterThanAttribute : RangeAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying an integer bound.
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="long"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    public GreaterThanAttribute( long min )
-        : base(
-            min,
-            long.MaxValue,
-            min,
-            long.MaxValue,
-            min < 0 ? 0 : (ulong) min,
-            ulong.MaxValue,
-            min,
-            double.MaxValue,
-            min,
-            decimal.MaxValue,
-            GetInvalidTypes( min, long.MaxValue ) ) { }
+    /// <param name="min">The minimum allowed value.</param>
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> number as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public GreaterThanAttribute( long min, int decimalPlaces = 0 )
+        : base( NumericBound.Create( min, decimalPlaces: decimalPlaces ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying an unsigned integer bound.
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="int"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
+    /// <param name="min">The minimum allowed value.</param>
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> number as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public GreaterThanAttribute( int min, int decimalPlaces = 0 )
+        : base( NumericBound.Create( min, decimalPlaces: decimalPlaces ), default ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="short"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public GreaterThanAttribute( short min )
+        : base( NumericBound.Create( min ), default ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="sbyte"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public GreaterThanAttribute( sbyte min )
+        : base( NumericBound.Create( min ), default ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="ulong"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( ulong min )
-        : base(
-            min,
-            ulong.MaxValue,
-            min > (ulong) long.MaxValue ? long.MaxValue : (long) min,
-            long.MaxValue,
-            min,
-            ulong.MaxValue,
-            min,
-            double.MaxValue,
-            min,
-            decimal.MaxValue,
-            GetInvalidTypes( min ) ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a floating-point bound.
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="uint"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
+    /// <param name="min">The minimum allowed value.</param>
+    public GreaterThanAttribute( uint min )
+        : base( NumericBound.Create( min ), default ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="ushort"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public GreaterThanAttribute( ushort min )
+        : base( NumericBound.Create( min ), default ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="byte"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public GreaterThanAttribute( byte min )
+        : base( NumericBound.Create( min ), default ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="double"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
     public GreaterThanAttribute( double min )
-        : base(
-            min,
-            double.MaxValue,
-            DoubleMinimum.ToInt64( min ),
-            long.MaxValue,
-            DoubleMinimum.ToUInt64( min ),
-            ulong.MaxValue,
-            min,
-            double.MaxValue,
-            DoubleMinimum.ToDecimal( min ),
-            decimal.MaxValue,
-            GetInvalidTypes( min, double.MaxValue ) ) { }
+        : base( NumericBound.Create( min ), default ) { }
 
-    private static class DoubleMinimum
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="float"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public GreaterThanAttribute( float min )
+        : base( NumericBound.Create( min ), default ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="decimal"/>.
+    /// </summary>
+    /// <param name="min">The minimum allowed value.</param>
+    public GreaterThanAttribute( decimal min )
+        : base( NumericBound.Create( min ), default ) { }
+
+    protected override void OnContractViolated( dynamic? value )
     {
-        public static long ToInt64( double min )
-        {
-            if ( min < (double) long.MinValue )
-            {
-                return long.MinValue;
-            }
-
-            if ( min > (double) long.MaxValue )
-            {
-                return long.MaxValue;
-            }
-
-            return (long) min;
-        }
-
-        public static ulong ToUInt64( double min )
-        {
-            if ( min < 0 )
-            {
-                return 0;
-            }
-
-            if ( min > (double) ulong.MaxValue )
-            {
-                return ulong.MaxValue;
-            }
-
-            return (ulong) min;
-        }
-
-        public static decimal ToDecimal( double min )
-        {
-            if ( min > (double) decimal.MaxValue )
-            {
-                return decimal.MaxValue;
-            }
-
-            if ( min < (double) decimal.MinValue )
-            {
-                return decimal.MinValue;
-            }
-
-            return (decimal) min;
-        }
+        meta.Target.GetContractOptions().Templates!.OnGreaterThanContractViolated( value, this.Range.MinValue!.ObjectValue );
     }
-
-    /// <inheritdoc/>
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .GreaterThanErrorMessage) ),
-            true,
-            false );
-
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5001", nameof(GreaterThanAttribute) );
-
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
 }

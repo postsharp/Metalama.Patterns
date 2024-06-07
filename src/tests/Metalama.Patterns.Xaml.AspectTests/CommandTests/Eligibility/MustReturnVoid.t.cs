@@ -1,0 +1,1 @@
+// Error LAMA0037 on `Command`: `The aspect 'Command' cannot be applied to the method 'MustReturnVoid.ReturnsInt()' because the return type of 'MustReturnVoid.ReturnsInt()' must be of type 'Void'.`

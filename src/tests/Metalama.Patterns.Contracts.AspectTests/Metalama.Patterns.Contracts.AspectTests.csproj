@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <Configurations>Debug;Release;LamaDebug</Configurations>
+        <NoWarn>SA1649,SA1402</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>        

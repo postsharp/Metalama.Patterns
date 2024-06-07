@@ -19,10 +19,10 @@ public sealed class StrictRangeAttributeTests
     private const decimal _decimalMax = 200;
 
     [Fact]
-    public void TestValuesInsideRange() => TestAllMethods( 150, 150, 150, 150 );
+    public void TestValuesInsideRangeSucceed() => TestAllMethods( 150, 150, 150, 150 );
 
     [Fact]
-    public void TestValuesOutsideRange()
+    public void TestValuesOutsideRangeSucceed()
     {
         AssertEx.Throws<ArgumentOutOfRangeException>(
             () =>
@@ -34,40 +34,37 @@ public sealed class StrictRangeAttributeTests
     }
 
     [Fact]
-    public void TestValuesOnEdges()
+    public void TestValuesOnEdgesFail()
     {
-        AssertEx.Throws<ArgumentOutOfRangeException>(
-            () =>
-                TestAllMethods( _longMin, _ulongMin, _doubleMin, _decimalMin ) );
-
-        AssertEx.Throws<ArgumentOutOfRangeException>(
-            () =>
-                TestAllMethods( _longMax, _ulongMax, _doubleMax, _decimalMax ) );
+        TestAllMethods( _longMin, _ulongMin, _doubleMin, _decimalMin, a => Assert.Throws<ArgumentOutOfRangeException>( a ) );
+        TestAllMethods( _longMax, _ulongMax, _doubleMax, _decimalMax, a => Assert.Throws<ArgumentOutOfRangeException>( a ) );
     }
 
     [Fact]
     public void TestDoubleTolerance()
     {
-        MethodWithDoubleInDoubleStrictRange( _doubleMin + FloatingPointHelper.GetDoubleStep( _doubleMin ) );
-        MethodWithDoubleInDoubleStrictRange( _doubleMax - FloatingPointHelper.GetDoubleStep( _doubleMax ) );
+        MethodWithDoubleInDoubleStrictRange( _doubleMin + Utilities.FloatingPointHelper.GetDoubleStep( _doubleMin ) );
+        MethodWithDoubleInDoubleStrictRange( _doubleMax - Utilities.FloatingPointHelper.GetDoubleStep( _doubleMax ) );
     }
 
-    private static void TestAllMethods( long longValue, ulong ulongValue, double doubleValue, decimal decimalValue )
+    private static void TestAllMethods( long longValue, ulong ulongValue, double doubleValue, decimal decimalValue, Action<Action>? action = null )
     {
-        MethodWithLongInLongStrictRange( longValue );
-        MethodWithUlongInLongStrictRange( ulongValue );
-        MethodWithDoubleInLongStrictRange( doubleValue );
-        MethodWithDecimalInLongStrictRange( decimalValue );
+        action ??= a => a();
 
-        MethodWithLongInULongStrictRange( longValue );
-        MethodWithUlongInULongStrictRange( ulongValue );
-        MethodWithDoubleInULongStrictRange( doubleValue );
-        MethodWithDecimalInULongStrictRange( decimalValue );
+        action( () => MethodWithLongInLongStrictRange( longValue ) );
+        action( () => MethodWithUlongInLongStrictRange( ulongValue ) );
+        action( () => MethodWithDoubleInLongStrictRange( doubleValue ) );
+        action( () => MethodWithDecimalInLongStrictRange( decimalValue ) );
 
-        MethodWithLongInDoubleStrictRange( longValue );
-        MethodWithUlongInDoubleStrictRange( ulongValue );
-        MethodWithDoubleInDoubleStrictRange( doubleValue );
-        MethodWithDecimalInDoubleStrictRange( decimalValue );
+        action( () => MethodWithLongInULongStrictRange( longValue ) );
+        action( () => MethodWithUlongInULongStrictRange( ulongValue ) );
+        action( () => MethodWithDoubleInULongStrictRange( doubleValue ) );
+        action( () => MethodWithDecimalInULongStrictRange( decimalValue ) );
+
+        action( () => MethodWithLongInDoubleStrictRange( longValue ) );
+        action( () => MethodWithUlongInDoubleStrictRange( ulongValue ) );
+        action( () => MethodWithDoubleInDoubleStrictRange( doubleValue ) );
+        action( () => MethodWithDecimalInDoubleStrictRange( decimalValue ) );
     }
 
     #region long

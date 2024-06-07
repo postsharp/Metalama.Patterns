@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Flashtrace.Formatters.UnitTests.Assets;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using Xunit;
@@ -23,15 +24,7 @@ public class FormatterOverwritingTest : FormattersTestsBase
     }
 
     private static IEnumerable<object[]> MakeSerializableBeforeBetweenPermutations( IEnumerable<TestCase> testCases )
-    {
-        foreach ( var testCase in testCases )
-        {
-            yield return new object[] { testCase.ToString(), false, false };
-            yield return new object[] { testCase.ToString(), false, true };
-            yield return new object[] { testCase.ToString(), true, false };
-            yield return new object[] { testCase.ToString(), true, true };
-        }
-    }
+        => testCases.Select( t => new object[] { t.ToString() } );
 
     public static IEnumerable<TestCase> EnsureOverwritesTestCases()
         => new TestCase[]
@@ -203,7 +196,7 @@ public class FormatterOverwritingTest : FormattersTestsBase
 
     [MemberData( nameof(EnsureOverwritesSerializablePermutations) )]
     [Theory]
-    public void EnsureOverwrites( string testCase, bool logBefore, bool logBetween )
+    public void EnsureOverwrites( string testCase )
     {
         var testCaseRecord = EnsureOverwritesTestCases().Single( t => t.Description == testCase );
 
@@ -216,9 +209,7 @@ public class FormatterOverwritingTest : FormattersTestsBase
                     testCaseRecord.OldFormatterTargetType,
                     testCaseRecord.OldFormatterType,
                     testCaseRecord.NewFormatterTargetType,
-                    testCaseRecord.NewFormatterType,
-                    logBefore,
-                    logBetween
+                    testCaseRecord.NewFormatterType
                 } );
     }
 
@@ -226,32 +217,18 @@ public class FormatterOverwritingTest : FormattersTestsBase
         Type oldFormatterTargetType,
         Type oldFormatterType,
         Type newFormatterTargetType,
-        Type newFormatterType,
-        bool logBefore,
-        bool logBetween )
+        Type newFormatterType )
     {
-        const string oldExpectedOutput = "0";
         const string newExpectedOutput = "1";
 
-        string? result;
+        var formatters = CreateRepository(
+            b =>
+            {
+                b.AddFormatter( oldFormatterTargetType, oldFormatterType );
+                b.AddFormatter( newFormatterTargetType, newFormatterType );
+            } );
 
-        if ( logBefore )
-        {
-            this.DefaultRepository.Get<TValue>();
-        }
-
-        this.DefaultRepository.Register( oldFormatterTargetType, oldFormatterType );
-
-        if ( logBetween )
-        {
-            result = this.FormatDefault( default(TValue) );
-
-            Assert.Equal( oldExpectedOutput, result );
-        }
-
-        this.DefaultRepository.Register( newFormatterTargetType, newFormatterType );
-
-        result = this.FormatDefault( default(TValue) );
+        var result = this.Format( formatters, default(TValue) );
 
         Assert.Equal( newExpectedOutput, result );
     }
@@ -364,7 +341,7 @@ public class FormatterOverwritingTest : FormattersTestsBase
 
     [MemberData( nameof(EnsureDoesntOverwritesSerializablePermutations) )]
     [Theory]
-    public void EnsureDoesntOverwrite( string testCase, bool logBefore, bool logBetween )
+    public void EnsureDoesntOverwrite( string testCase )
     {
         var testCaseRecord = EnsureDoesntOverwriteTestCases().Single( t => t.Description == testCase );
 
@@ -377,9 +354,7 @@ public class FormatterOverwritingTest : FormattersTestsBase
                     testCaseRecord.OldFormatterTargetType,
                     testCaseRecord.OldFormatterType,
                     testCaseRecord.NewFormatterTargetType,
-                    testCaseRecord.NewFormatterType,
-                    logBefore,
-                    logBetween
+                    testCaseRecord.NewFormatterType
                 } );
     }
 
@@ -387,31 +362,18 @@ public class FormatterOverwritingTest : FormattersTestsBase
         Type oldFormatterTargetType,
         Type oldFormatterType,
         Type newFormatterTargetType,
-        Type newFormatterType,
-        bool logBefore,
-        bool logBetween )
+        Type newFormatterType )
     {
         const string oldExpectedOutput = "0";
 
-        string? result;
+        var formatters = CreateRepository(
+            b =>
+            {
+                b.AddFormatter( oldFormatterTargetType, oldFormatterType );
+                b.AddFormatter( newFormatterTargetType, newFormatterType );
+            } );
 
-        if ( logBefore )
-        {
-            this.DefaultRepository.Get<TValue>();
-        }
-
-        this.DefaultRepository.Register( oldFormatterTargetType, oldFormatterType );
-
-        if ( logBetween )
-        {
-            result = this.FormatDefault( default(TValue) );
-
-            Assert.Equal( oldExpectedOutput, result );
-        }
-
-        this.DefaultRepository.Register( newFormatterTargetType, newFormatterType );
-
-        result = this.FormatDefault( default(TValue) );
+        var result = this.Format( formatters, default(TValue) );
 
         Assert.Equal( oldExpectedOutput, result );
     }

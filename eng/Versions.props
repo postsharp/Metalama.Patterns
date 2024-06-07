@@ -8,16 +8,40 @@
         <MetalamaPatternsVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaPatternsVersion>
         <MetalamaPatternsAssemblyVersion>$(MainVersion)</MetalamaPatternsAssemblyVersion>
     </PropertyGroup>
-
     
     <!-- Set the default versions of dependencies -->
     <PropertyGroup>
+        <AzureIdentityVersion>1.10.1</AzureIdentityVersion>
+        <AzureSecurityKeyVaultSecretsVersion>4.5.0</AzureSecurityKeyVaultSecretsVersion>
+        <FluentAssertionsVersion>6.12.0</FluentAssertionsVersion>
+        <JetBrainsAnnotationsVersion>2023.3.0</JetBrainsAnnotationsVersion>
+        <MicrosoftAzureManagementServiceBusVersion>2.1.0</MicrosoftAzureManagementServiceBusVersion>
+        <MicrosoftAzureServiceBusVersion>5.2.0</MicrosoftAzureServiceBusVersion>
+        <MicrosoftExtensionsCachingMemoryVersion>7.0.0</MicrosoftExtensionsCachingMemoryVersion>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
-        <xUnitVersion>2.4.1</xUnitVersion>
+        <MicrosoftWindowsAzureConfigurationManagerVersion>3.2.3</MicrosoftWindowsAzureConfigurationManagerVersion>
+        <StackExchangeRedisVersion>2.0.601</StackExchangeRedisVersion>
+        <SystemCollectionsImmutableVersion>8.0.0</SystemCollectionsImmutableVersion>
+        <SystemRuntimeCachingVersion>7.0.0</SystemRuntimeCachingVersion>
+        <SystemRuntimeSerializationPrimitivesVersion>4.3.0</SystemRuntimeSerializationPrimitivesVersion>
+        <SystemRuntimeSerializationXmlVersion>4.3.0</SystemRuntimeSerializationXmlVersion>
+        <SystemTextRegularExpressionsVersion>4.3.1</SystemTextRegularExpressionsVersion>
+        <SystemThreadingThreadPoolVersion>4.3.0</SystemThreadingThreadPoolVersion>
+        <SystemThreadingThreadVersion>4.3.0</SystemThreadingThreadVersion>
+        <SystemThreadingVersion>4.3.0</SystemThreadingVersion>
+		<SystemThreadingTasksExtensionsVersion>4.5.4</SystemThreadingTasksExtensionsVersion>
+		<SystemValueTupleVersion>4.5.0</SystemValueTupleVersion>
+        <SystemXmlXmlSerializerVersion>4.3.0</SystemXmlXmlSerializerVersion>
+        <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
+        <WindowsAzureServiceBusVersion>4.1.2</WindowsAzureServiceBusVersion>
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
-		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
+        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' != 'net471' ">2.2.0</xUnitAssemblyFixtureVersion>
+        <xUnitAssemblyFixtureVersion Condition=" '$(TargetFramework)' == 'net471' ">2.0.3</xUnitAssemblyFixtureVersion>
+        <XUnitRunnerVisualStudioVersion>2.5.1</XUnitRunnerVisualStudioVersion>
         <XunitSkippableFactVersion>1.4.13</XunitSkippableFactVersion>
-        <PostSharpEngineeringVersion>2023.2.56</PostSharpEngineeringVersion>
+        <xUnitVersion>2.5.1</xUnitVersion>
+        <PostSharpEngineeringVersion>2023.2.83</PostSharpEngineeringVersion>
+        <MetalamaExtensionsVersion></MetalamaExtensionsVersion>
     </PropertyGroup>
 
     <!-- Set the deafult versions of auto-updated dependencies -->
@@ -25,6 +49,13 @@
 
     <!-- Import overrides for the local build -->
     <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
+
+    <!-- Override versions of preview packages -->
+    <!-- When changing to non-preview version, remove the override here and change the version parameter of the published package in eng\src\Program.cs. -->
+    <PropertyGroup>
+        <MetalamaPatternsObservabilityVersion>$(MetalamaPatternsPreviewVersion)</MetalamaPatternsObservabilityVersion>
+        <MetalamaPatternsXamlVersion>$(MetalamaPatternsPreviewVersion)</MetalamaPatternsXamlVersion>
+    </PropertyGroup>
 
     <PropertyGroup>
         <AssemblyVersion>$(MetalamaPatternsAssemblyVersion)</AssemblyVersion>

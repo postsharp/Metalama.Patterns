@@ -1,8 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+
 <Project>
 
     <PropertyGroup>
-        <MetalamaVersion></MetalamaVersion>
+        <MetalamaVersion>2024.2.8-preview</MetalamaVersion>
+        <MetalamaExtensionsVersion>2024.2.8-preview</MetalamaExtensionsVersion>
+        <MetalamaBackstageVersion>2024.2.6-preview</MetalamaBackstageVersion>
+        <MetalamaCompilerVersion>2024.2.5-preview</MetalamaCompilerVersion>
+        <MetalamaFrameworkRunTimeVersion>2024.2.2-preview</MetalamaFrameworkRunTimeVersion>
     </PropertyGroup>
 
 </Project>

@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Aspects;
+using Metalama.Patterns.Contracts.Numeric;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -20,86 +20,107 @@ namespace Metalama.Patterns.Contracts;
 ///     of the value closest to the bounds according to the precision
 ///     of the respective floating-point numerical data type.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.StrictRangeErrorMessage"/>.</para>
-/// <para>Error message can use additional arguments <value>{4}</value> and <value>{5}</value> to refer to the bounds.</para>
 /// </remarks>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
 public class StrictRangeAttribute : RangeAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying integer bounds.
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="long"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
-    public StrictRangeAttribute( long min, long max )
-        : base(
-            min,
-            max,
-            StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
-            StrictlyLessThanAttribute.Int64Maximum.ToInt64( max ),
-            StrictlyGreaterThanAttribute.Int64Minimum.ToUInt64( min ),
-            StrictlyLessThanAttribute.Int64Maximum.ToUInt64( max ),
-            StrictlyGreaterThanAttribute.Int64Minimum.ToDouble( min ),
-            StrictlyLessThanAttribute.Int64Maximum.ToDouble( max ),
-            StrictlyGreaterThanAttribute.Int64Minimum.ToDecimal( min ),
-            StrictlyLessThanAttribute.Int64Maximum.ToDecimal( max ),
-            GetInvalidTypes(
-                StrictlyGreaterThanAttribute.Int64Minimum.ToInt64( min ),
-                StrictlyLessThanAttribute.Int64Maximum.ToInt64( max ) ) ) { }
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> and <paramref name="max"/> numbers as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public StrictRangeAttribute( long min, long max, int decimalPlaces = 0 )
+        : base( NumericBound.Create( min, false, decimalPlaces ), NumericBound.Create( max, false, decimalPlaces ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying unsigned integer bounds.
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="int"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> and <paramref name="max"/> numbers as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public StrictRangeAttribute( int min, int max, int decimalPlaces = 0 )
+        : base( NumericBound.Create( min, false, decimalPlaces ), NumericBound.Create( max, false, decimalPlaces ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="short"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( short min, short max )
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="sbyte"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( sbyte min, sbyte max )
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="ulong"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( ulong min, ulong max )
-        : base(
-            min,
-            max,
-            StrictlyGreaterThanAttribute.UInt64Minimum.ToInt64( min ),
-            StrictlyLessThanAttribute.UInt64Maximum.ToInt64( max ),
-            StrictlyGreaterThanAttribute.UInt64Minimum.ToUInt64( min ),
-            StrictlyLessThanAttribute.UInt64Maximum.ToUInt64( max ),
-            StrictlyGreaterThanAttribute.UInt64Minimum.ToDouble( min ),
-            StrictlyLessThanAttribute.UInt64Maximum.ToDouble( max ),
-            StrictlyGreaterThanAttribute.UInt64Minimum.ToDecimal( min ),
-            StrictlyLessThanAttribute.UInt64Maximum.ToDecimal( max ),
-            GetInvalidTypes( StrictlyGreaterThanAttribute.UInt64Minimum.ToUInt64( min ) ) ) { }
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying floating-point bounds.
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="uint"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( uint min, uint max )
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="ushort"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( ushort min, ushort max )
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="byte"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( byte min, byte max )
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="double"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
     public StrictRangeAttribute( double min, double max )
-        : base(
-            min,
-            max,
-            StrictlyGreaterThanAttribute.DoubleMinimum.ToInt64( min ),
-            StrictlyLessThanAttribute.DoubleMaximum.ToInt64( max ),
-            StrictlyGreaterThanAttribute.DoubleMinimum.ToUInt64( min ),
-            StrictlyLessThanAttribute.DoubleMaximum.ToUInt64( max ),
-            StrictlyGreaterThanAttribute.DoubleMinimum.ToDouble( min ),
-            StrictlyLessThanAttribute.DoubleMaximum.ToDouble( max ),
-            StrictlyGreaterThanAttribute.DoubleMinimum.ToDecimal( min ),
-            StrictlyLessThanAttribute.DoubleMaximum.ToDecimal( max ),
-            GetInvalidTypes(
-                min < double.MaxValue - 1 ? min + 1 : double.MaxValue,
-                max > double.MinValue + 1 ? max - 1 : double.MinValue ) ) { }
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
 
-    /// <inheritdoc/>
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .StrictRangeErrorMessage) ),
-            true,
-            true );
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="float"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( float min, float max )
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
 
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5009", nameof(StrictRangeAttribute) );
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StrictRangeAttribute"/> class specifying bounds of type <see cref="decimal"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    public StrictRangeAttribute( decimal min, decimal max )
+        : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
 
-    /// <inheritdoc/>
-    protected override DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition()
-        => _rangeCannotBeApplied;
+    protected override void OnContractViolated( dynamic? value )
+    {
+        meta.Target.GetContractOptions().Templates!.OnStrictRangeContractViolated( value, this.Range );
+    }
 }

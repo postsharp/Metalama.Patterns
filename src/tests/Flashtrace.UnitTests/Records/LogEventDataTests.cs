@@ -1,11 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Flashtrace.Records;
+using Flashtrace.UnitTests.Assets;
 using Xunit;
 
 namespace Flashtrace.UnitTests.Records;
 
-public sealed partial class LogEventDataTests
+public sealed class LogEventDataTests
 {
     [Fact]
     public void TestAnonymous()
@@ -60,7 +61,7 @@ public sealed partial class LogEventDataTests
 
         var properties = data.ToDictionary();
 
-        Assert.Equal( 1, properties.Count );
+        Assert.Single( properties );
         Assert.Equal( 1.2, properties["Name3"] );
     }
 
@@ -72,7 +73,7 @@ public sealed partial class LogEventDataTests
 
         var expressionModel = data.GetExpressionModel<TestExpressionModel>();
         Assert.NotNull( expressionModel );
-        Assert.Same( rawData, expressionModel!.Data );
+        Assert.Same( rawData, expressionModel.Data );
     }
 
     [Fact]
@@ -89,6 +90,6 @@ public sealed partial class LogEventDataTests
 
         var properties = eventData.ToDictionary();
 
-        Assert.Equal( 1, properties.Count );
+        Assert.Single( properties );
     }
 }

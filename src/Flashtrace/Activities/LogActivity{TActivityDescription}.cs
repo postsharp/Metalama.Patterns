@@ -19,12 +19,12 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
 {
     private readonly TActivityDescription _description;
 
-    internal IContextLocalLogger Logger { get; }
+    internal IFlashtraceLocalLogger Logger { get; }
 
-    private readonly ActivityLogLevels _levels;
+    private readonly ActivityLevels _levels;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] // To avoid copying the struct.
-    internal LogActivity( IContextLocalLogger logger, in ActivityLogLevels levels, ILoggingContext? context, in TActivityDescription description )
+    internal LogActivity( IFlashtraceLocalLogger logger, in ActivityLevels levels, ILoggingContext? context, in TActivityDescription description )
     {
         this._description = description;
         this.Logger = logger;
@@ -37,11 +37,11 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
 
     [MethodImpl( MethodImplOptions.NoInlining )]
     private void SetOutcomeImpl<TMessage>(
-        LogLevel level,
+        FlashtraceLevel level,
         in TMessage message,
         Exception? exception,
         in CloseActivityOptions options,
-        ref CallerInfo callerInfo,
+        in CallerInfo callerInfo,
         int skipFrames = 1 )
         where TMessage : IMessage
     {
@@ -60,18 +60,13 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
             {
                 if ( contextLocalLogger.IsEnabled( level ) )
                 {
-                    if ( callerInfo.IsNull )
-                    {
-                        callerInfo = CallerInfo.GetDynamic( skipFrames + 1 );
-                    }
-
                     using ( var builder = contextLocalLogger.GetRecordBuilder(
                                new LogRecordOptions(
                                    level,
                                    LogRecordKind.Message,
                                    LogRecordAttributes.WriteActivityDescriptionAndOutcome,
                                    options.Data ),
-                               ref callerInfo ) )
+                               callerInfo.GetDynamicWhenNull( skipFrames ) ) )
                     {
                         // The context was not opened because default verbosity was lower than the minimal one.
 
@@ -93,18 +88,13 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
                 {
                     if ( contextLocalLogger.IsEnabled( level ) )
                     {
-                        if ( callerInfo.IsNull )
-                        {
-                            callerInfo = CallerInfo.GetDynamic( skipFrames + 1 );
-                        }
-
                         using ( var builder = contextLocalLogger.GetRecordBuilder(
                                    new LogRecordOptions(
                                        level,
                                        LogRecordKind.ActivityExit,
                                        LogRecordAttributes.WriteActivityOutcome,
                                        options.Data ),
-                                   ref callerInfo,
+                                   callerInfo.GetDynamicWhenNull( skipFrames ),
                                    this.Context ) )
                         {
                             message.Write( builder, LogRecordItem.ActivityOutcome );
@@ -140,7 +130,7 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
         {
             if ( this.Context is { IsDisposed: false } )
             {
-                this.SetOutcome( LogLevel.Warning, SemanticMessageBuilder.Semantic( "Indeterminate" ) );
+                this.SetOutcome( FlashtraceLevel.Warning, SemanticMessageBuilder.Semantic( "Indeterminate" ) );
             }
         }
         catch ( Exception e )
@@ -153,71 +143,72 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
     [MethodImpl( MethodImplOptions.NoInlining )]
     public void SetSuccess( in CloseActivityOptions options = default )
     {
-        CallerInfo callerInfo = default;
-        this.SetOutcomeImpl( this._levels.DefaultLevel, SemanticMessageBuilder.Semantic( "Succeeded" ), null, options, ref callerInfo );
+        this.SetOutcomeImpl( this._levels.DefaultLevel, SemanticMessageBuilder.Semantic( "Succeeded" ), null, options, default );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void SetSuccess( in CloseActivityOptions options, ref CallerInfo callerInfo )
+    public void SetSuccess( in CloseActivityOptions options, in CallerInfo callerInfo )
     {
-        this.SetOutcomeImpl( this._levels.DefaultLevel, SemanticMessageBuilder.Semantic( "Succeeded" ), null, options, ref callerInfo );
+        this.SetOutcomeImpl( this._levels.DefaultLevel, SemanticMessageBuilder.Semantic( "Succeeded" ), null, options, in callerInfo );
     }
 
     /// <inheritdoc />
     [MethodImpl( MethodImplOptions.NoInlining )]
     public void SetResult<TResult>( TResult result, in CloseActivityOptions options = default )
     {
-        CallerInfo callerInfo = default;
-        this.SetOutcomeImpl( this._levels.DefaultLevel, SemanticMessageBuilder.Semantic( "Succeeded", "result", result ), null, options, ref callerInfo );
+        this.SetOutcomeImpl( this._levels.DefaultLevel, SemanticMessageBuilder.Semantic( "Succeeded", "result", result ), null, options, default );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void SetResult<TResult>( TResult result, in CloseActivityOptions options, ref CallerInfo callerInfo )
+    public void SetResult<TResult>( TResult result, in CloseActivityOptions options, in CallerInfo callerInfo )
     {
-        this.SetOutcomeImpl( this._levels.DefaultLevel, SemanticMessageBuilder.Semantic( "Succeeded", "result", result ), null, options, ref callerInfo );
+        this.SetOutcomeImpl( this._levels.DefaultLevel, SemanticMessageBuilder.Semantic( "Succeeded", "result", result ), null, options, callerInfo );
     }
 
     /// <inheritdoc />
-    public void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception? exception = null, in CloseActivityOptions options = default )
+    public void SetOutcome<TMessage>( FlashtraceLevel level, in TMessage message, Exception? exception = null, in CloseActivityOptions options = default )
         where TMessage : IMessage
     {
-        CallerInfo callerInfo = default;
-        this.SetOutcomeImpl( level, message, exception, options, ref callerInfo );
+        this.SetOutcomeImpl( level, message, exception, options, default );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo )
+    public void SetOutcome<TMessage>(
+        FlashtraceLevel level,
+        in TMessage message,
+        Exception exception,
+        in CloseActivityOptions options,
+        in CallerInfo callerInfo )
         where TMessage : IMessage
     {
-        this.SetOutcomeImpl( level, message, exception, options, ref callerInfo );
+        this.SetOutcomeImpl( level, message, exception, options, default );
     }
 
     /// <inheritdoc />
     public void SetException( Exception exception, in CloseActivityOptions options = default )
     {
-        CallerInfo callerInfo = default;
-        this.SetOutcomeImpl( this._levels.FailureLevel, SemanticMessageBuilder.Semantic( "Failed" ), exception, options, ref callerInfo );
+        this.SetOutcomeImpl( this._levels.FailureLevel, SemanticMessageBuilder.Semantic( "Failed" ), exception, options, default );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void SetException( Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo )
+    public void SetException( Exception exception, in CloseActivityOptions options, in CallerInfo callerInfo )
     {
-        this.SetOutcomeImpl( this._levels.FailureLevel, SemanticMessageBuilder.Semantic( "Failed" ), exception, options, ref callerInfo );
+        this.SetOutcomeImpl( this._levels.FailureLevel, SemanticMessageBuilder.Semantic( "Failed" ), exception, options, callerInfo );
     }
 
     /// <inheritdoc />
     public void Resume()
     {
-        this.Resume( ref CallerInfo.Null );
+        this.Resume( in CallerInfo.Null );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void Resume( ref CallerInfo callerInfo )
+    public void Resume( in CallerInfo callerInfo )
     {
         if ( this.Context == null )
         {
@@ -226,14 +217,14 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
 
         if ( !this.Context.IsAsync )
         {
-            this.Logger.OnInvalidUserCode( ref callerInfo, "Cannot call Resume outside of an async activity." );
+            this.Logger.OnInvalidUserCode( callerInfo, "Cannot call Resume outside of an async activity." );
 
             return;
         }
 
         try
         {
-            this.Logger.ResumeActivity( this.Context, ref callerInfo );
+            this.Logger.ResumeActivity( this.Context, callerInfo );
         }
         catch ( Exception e )
         {
@@ -244,12 +235,12 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
     /// <inheritdoc />
     public void Suspend()
     {
-        this.Suspend( ref CallerInfo.Null );
+        this.Suspend( in CallerInfo.Null );
     }
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public void Suspend( ref CallerInfo callerInfo )
+    public void Suspend( in CallerInfo callerInfo )
     {
         if ( this.Context == null )
         {
@@ -258,14 +249,14 @@ public readonly struct LogActivity<TActivityDescription> : ILogActivity
 
         if ( !this.Context.IsAsync )
         {
-            this.Logger.OnInvalidUserCode( ref callerInfo, "Cannot call Suspend outside of an async activity." );
+            this.Logger.OnInvalidUserCode( callerInfo, "Cannot call Suspend outside of an async activity." );
 
             return;
         }
 
         try
         {
-            this.Logger.SuspendActivity( this.Context, ref callerInfo );
+            this.Logger.SuspendActivity( this.Context, callerInfo );
         }
         catch ( Exception e )
         {

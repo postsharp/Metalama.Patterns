@@ -1,7 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Contracts.UnitTests;
+namespace Metalama.Patterns.Contracts.UnitTests.Assets;
 
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
 public class RangeTestClass
 {
     [GreaterThan( 0 )]

@@ -23,7 +23,7 @@ public class FormattersTests : FormattersTestsBase
     {
         public TestStructFormatter( IFormatterRepository repository ) : base( repository ) { }
 
-        public override void Write( UnsafeStringBuilder stringBuilder, TestStruct value )
+        public override void Format( UnsafeStringBuilder stringBuilder, TestStruct value )
         {
             stringBuilder.Append( "formatter" );
         }
@@ -32,14 +32,13 @@ public class FormattersTests : FormattersTestsBase
     [Fact]
     public void StronglyTypedUnregisteredType()
     {
-        _ = this.DefaultRepository.Get<TestStruct>();
+        _ = CreateRepository().Get<TestStruct>();
     }
 
     [Fact]
     public void NullableUsesFormatter()
     {
-        var repo = GetNewRepository();
-        repo.Register( new TestStructFormatter( repo ) );
+        var repo = CreateRepository( b => b.AddFormatter( x => new TestStructFormatter( x ) ) );
 
         Assert.Equal( "formatter", this.Format<TestStruct?>( repo, default(TestStruct) ) );
     }
@@ -47,8 +46,7 @@ public class FormattersTests : FormattersTestsBase
     [Fact]
     public void NullableNull()
     {
-        var repo = GetNewRepository();
-        repo.Register( new TestStructFormatter( repo ) );
+        var repo = CreateRepository( b => b.AddFormatter( x => new TestStructFormatter( x ) ) );
 
         Assert.Equal( "null", this.Format<TestStruct?>( repo, null ) );
     }
@@ -58,6 +56,14 @@ public class FormattersTests : FormattersTestsBase
     {
         Assert.Equal( "Formattable", this.FormatDefault( new FormattableObject() ) );
     }
+
+#if NET6_0_OR_GREATER
+    [Fact]
+    public void SpanFormattable()
+    {
+        Assert.Equal( "SpanFormattable", this.FormatDefault( new SpanFormattableObject() ) );
+    }
+#endif
 
     [Fact]
     public void NullToString()
@@ -186,22 +192,38 @@ public class FormattersTests : FormattersTestsBase
     [Fact]
     public void DifferentRepositoriesAreDifferent()
     {
-        var repo1 = GetNewRepository();
-        repo1.Register( new TestStructFormatter( repo1 ) );
+        var repo1 = CreateRepository( b => b.AddFormatter( r => new TestStructFormatter( r ) ) );
 
-        var repo2 = GetNewRepository();
+        var repo2 = CreateRepository();
 
         Assert.Equal( "formatter", this.Format( repo1, default(TestStruct) ) );
         Assert.Equal( "{ToString}", this.Format( repo2, default(TestStruct) ) );
     }
 
-    private sealed class FormattableObject : IFormattable
+    private sealed class FormattableObject : IFormattable<TestRole>
     {
         public void Format( UnsafeStringBuilder stringBuilder, IFormatterRepository formatterRepository )
         {
             stringBuilder.Append( "Formattable" );
         }
     }
+
+#if NET6_0_OR_GREATER
+    private sealed class SpanFormattableObject : ISpanFormattable
+    {
+        // ToString should not be invoked.
+        public string ToString( string? format, IFormatProvider? formatProvider ) => throw new NotImplementedException();
+
+        public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+        {
+            const string str = "SpanFormattable";
+            new Span<char>( str.ToCharArray() ).CopyTo( destination );
+            charsWritten = str.Length;
+
+            return true;
+        }
+    }
+#endif
 
     private sealed class NullToStringClass
     {

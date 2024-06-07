@@ -7,8 +7,8 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
+using Metalama.Patterns.Contracts.Numeric;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -20,394 +20,125 @@ namespace Metalama.Patterns.Contracts;
 /// <remarks>
 ///     <para>Null values are accepted and do not throw an exception.
 /// </para>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.RangeErrorMessage"/>.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used and <value>{5}</value> to refer to the maximum value used.</para>
 /// </remarks>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
-[Inheritable]
-public class RangeAttribute : ContractAspect
+public class RangeAttribute : ContractBaseAttribute
 {
-    [Flags]
-    internal enum TypeFlag
-    {
-        None = 0,
-        Single = 1,
-        Byte = 2,
-        Int16 = 4,
-        UInt16 = 8,
-        Int32 = 16,
-        UInt32 = 32,
-        Int64 = 64,
-        UInt64 = 128,
-        Decimal = 256,
-        SByte = 512,
-        Double = 1024
-    }
-
-    /// <summary>
-    /// Gets the minimal value to be used when generating the error message.
-    /// </summary>
-    protected object DisplayMinValue { get; }
-
-    /// <summary>
-    /// Gets the maximal value to be used when generating the error message.
-    /// </summary>
-    protected object DisplayMaxValue { get; }
-
-    private readonly long _minInt64;
-    private readonly long _maxInt64;
-
-    private readonly ulong _minUInt64;
-    private readonly ulong _maxUInt64;
-
-    private readonly double _minDouble;
-    private readonly double _maxDouble;
-
-    private readonly decimal _minDecimal;
-    private readonly decimal _maxDecimal;
-
-    private readonly TypeFlag _invalidTypes;
+    protected NumericRange Range { get; private set; }
 
     internal RangeAttribute(
-        object displayMin,
-        object displayMax,
-        long minInt64,
-        long maxInt64,
-        ulong minUInt64,
-        ulong maxUInt64,
-        double minDouble,
-        double maxDouble,
-        decimal minDecimal,
-        decimal maxDecimal,
-        TypeFlag invalidTypes )
+        NumericBound? minValue,
+        NumericBound? maxValue )
     {
-        this.DisplayMinValue = displayMin;
-        this.DisplayMaxValue = displayMax;
-        this._minInt64 = minInt64;
-        this._maxInt64 = maxInt64;
-        this._minUInt64 = minUInt64;
-        this._maxUInt64 = maxUInt64;
-        this._minDouble = minDouble;
-        this._maxDouble = maxDouble;
-        this._minDecimal = minDecimal;
-        this._maxDecimal = maxDecimal;
-        this._invalidTypes = invalidTypes;
+        this.Range = new NumericRange( minValue, maxValue );
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying integer bounds.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="long"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
-    public RangeAttribute( long min, long max )
-    {
-        this.DisplayMinValue = min;
-        this.DisplayMaxValue = max;
-
-        this._minInt64 = min;
-        this._maxInt64 = max;
-
-        this._minUInt64 = min >= 0 ? (ulong) min : 0;
-        this._maxUInt64 = max >= 0 ? (ulong) max : 0;
-
-        this._minDouble = min;
-        this._maxDouble = max;
-
-        this._minDecimal = min;
-        this._maxDecimal = max;
-
-        this._invalidTypes = GetInvalidTypes( min, max );
-    }
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param>
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> and <paramref name="max"/> numbers as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public RangeAttribute( long min, long max, bool minAllowed = true, bool maxAllowed = true, int decimalPlaces = 0 ) : this(
+        NumericBound.Create( min, minAllowed, decimalPlaces ),
+        NumericBound.Create( max, maxAllowed, decimalPlaces ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying unsigned integer bounds.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="ulong"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
-    public RangeAttribute( ulong min, ulong max )
-    {
-        this.DisplayMinValue = min;
-        this.DisplayMaxValue = max;
-
-        this._minUInt64 = min;
-        this._maxUInt64 = max;
-
-        this._minInt64 = ConvertUInt64ToInt64( min );
-        this._maxInt64 = ConvertUInt64ToInt64( max );
-
-        this._minDouble = min;
-        this._maxDouble = max;
-
-        this._minDecimal = min;
-        this._maxDecimal = max;
-
-        this._invalidTypes = GetInvalidTypes( min );
-    }
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( ulong min, ulong max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        NumericBound.Create( min, minAllowed ),
+        NumericBound.Create( max, maxAllowed ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying floating-point bounds.
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="double"/>.
     /// </summary>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
-    public RangeAttribute( double min, double max )
-    {
-        this.DisplayMinValue = min;
-        this.DisplayMaxValue = max;
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( double min, double max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        NumericBound.Create( min, minAllowed ),
+        NumericBound.Create( max, maxAllowed ) ) { }
 
-        this._minDouble = min;
-        this._maxDouble = max;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="float"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( float min, float max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        NumericBound.Create( min, minAllowed ),
+        NumericBound.Create( max, maxAllowed ) ) { }
 
-        this._minDecimal = ConvertDoubleToDecimal( min );
-        this._maxDecimal = ConvertDoubleToDecimal( max );
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="int"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param>
+    /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> and <paramref name="max"/> numbers as <see cref="decimal"/> instead
+    /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
+    /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
+    public RangeAttribute( int min, int max, bool minAllowed = true, bool maxAllowed = true, int decimalPlaces = 0 ) : this(
+        NumericBound.Create( min, minAllowed, decimalPlaces ),
+        NumericBound.Create( max, maxAllowed, decimalPlaces ) ) { }
 
-        this._minInt64 = ConvertDoubleToInt64( min );
-        this._maxInt64 = ConvertDoubleToInt64( max );
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="uint"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( uint min, uint max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        NumericBound.Create( min, minAllowed ),
+        NumericBound.Create( max, maxAllowed ) ) { }
 
-        this._minUInt64 = ConvertDoubleToUInt64( min );
-        this._maxUInt64 = ConvertDoubleToUInt64( max );
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="byte"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( byte min, sbyte max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        NumericBound.Create( min, minAllowed ),
+        NumericBound.Create( max, maxAllowed ) ) { }
 
-        this._invalidTypes = GetInvalidTypes( min, max );
-    }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="short"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( short min, short max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        NumericBound.Create( min, minAllowed ),
+        NumericBound.Create( max, maxAllowed ) ) { }
 
-    internal static TypeFlag GetInvalidTypes( long min, long max )
-    {
-        var invalidTypes = TypeFlag.None;
-
-        if ( min > byte.MaxValue || max < byte.MinValue )
-        {
-            invalidTypes |= TypeFlag.Byte;
-        }
-
-        if ( min > sbyte.MaxValue || max < sbyte.MinValue )
-        {
-            invalidTypes |= TypeFlag.SByte;
-        }
-
-        if ( min > short.MaxValue || max < short.MinValue )
-        {
-            invalidTypes |= TypeFlag.Int16;
-        }
-
-        if ( min > ushort.MaxValue || max < ushort.MinValue )
-        {
-            invalidTypes |= TypeFlag.UInt16;
-        }
-
-        if ( min > int.MaxValue || max < int.MinValue )
-        {
-            invalidTypes |= TypeFlag.Int32;
-        }
-
-        if ( min > uint.MaxValue || max < uint.MinValue )
-        {
-            invalidTypes |= TypeFlag.UInt32;
-        }
-
-        return invalidTypes;
-    }
-
-    internal static TypeFlag GetInvalidTypes( ulong min )
-    {
-        var invalidTypes = TypeFlag.None;
-
-        if ( min > byte.MaxValue )
-        {
-            invalidTypes |= TypeFlag.Byte;
-        }
-
-        if ( min > (ulong) sbyte.MaxValue )
-        {
-            invalidTypes |= TypeFlag.SByte;
-        }
-
-        if ( min > (ulong) short.MaxValue )
-        {
-            invalidTypes |= TypeFlag.Int16;
-        }
-
-        if ( min > ushort.MaxValue )
-        {
-            invalidTypes |= TypeFlag.UInt16;
-        }
-
-        if ( min > int.MaxValue )
-        {
-            invalidTypes |= TypeFlag.Int32;
-        }
-
-        if ( min > uint.MaxValue )
-        {
-            invalidTypes |= TypeFlag.UInt32;
-        }
-
-        if ( min > long.MaxValue )
-        {
-            invalidTypes |= TypeFlag.Int64;
-        }
-
-        return invalidTypes;
-    }
-
-    internal static TypeFlag GetInvalidTypes( double min, double max )
-    {
-        var invalidTypes = TypeFlag.None;
-
-        if ( min > byte.MaxValue || max < byte.MinValue )
-        {
-            invalidTypes |= TypeFlag.Byte;
-        }
-
-        if ( min > sbyte.MaxValue || max < sbyte.MinValue )
-        {
-            invalidTypes |= TypeFlag.SByte;
-        }
-
-        if ( min > short.MaxValue || max < short.MinValue )
-        {
-            invalidTypes |= TypeFlag.Int16;
-        }
-
-        if ( min > ushort.MaxValue || max < ushort.MinValue )
-        {
-            invalidTypes |= TypeFlag.UInt16;
-        }
-
-        if ( min > int.MaxValue || max < int.MinValue )
-        {
-            invalidTypes |= TypeFlag.Int32;
-        }
-
-        if ( min > uint.MaxValue || max < uint.MinValue )
-        {
-            invalidTypes |= TypeFlag.UInt32;
-        }
-
-        if ( min > long.MaxValue || max < long.MinValue )
-        {
-            invalidTypes |= TypeFlag.Int64;
-        }
-
-        if ( min > ulong.MaxValue || max < ulong.MinValue )
-        {
-            invalidTypes |= TypeFlag.UInt64;
-        }
-
-        if ( min > (double) decimal.MaxValue || max < (double) decimal.MinValue )
-        {
-            invalidTypes |= TypeFlag.Decimal;
-        }
-
-        return invalidTypes;
-    }
-
-    internal static TypeFlag GetInvalidTypes( decimal min, decimal max )
-    {
-        var invalidTypes = TypeFlag.None;
-
-        if ( min > byte.MaxValue || max < byte.MinValue )
-        {
-            invalidTypes |= TypeFlag.Byte;
-        }
-
-        if ( min > sbyte.MaxValue || max < sbyte.MinValue )
-        {
-            invalidTypes |= TypeFlag.SByte;
-        }
-
-        if ( min > short.MaxValue || max < short.MinValue )
-        {
-            invalidTypes |= TypeFlag.Int16;
-        }
-
-        if ( min > ushort.MaxValue || max < ushort.MinValue )
-        {
-            invalidTypes |= TypeFlag.UInt16;
-        }
-
-        if ( min > int.MaxValue || max < int.MinValue )
-        {
-            invalidTypes |= TypeFlag.Int32;
-        }
-
-        if ( min > uint.MaxValue || max < uint.MinValue )
-        {
-            invalidTypes |= TypeFlag.UInt32;
-        }
-
-        if ( min > long.MaxValue || max < long.MinValue )
-        {
-            invalidTypes |= TypeFlag.Int64;
-        }
-
-        if ( min > ulong.MaxValue || max < ulong.MinValue )
-        {
-            invalidTypes |= TypeFlag.UInt64;
-        }
-
-        return invalidTypes;
-    }
-
-    internal static long ConvertUInt64ToInt64( ulong value ) => value <= long.MaxValue ? (long) value : long.MaxValue;
-
-    internal static decimal ConvertDoubleToDecimal( double value )
-    {
-        if ( value < (double) decimal.MinValue )
-        {
-            return decimal.MinValue;
-        }
-        else if ( value > (double) decimal.MaxValue )
-        {
-            return decimal.MaxValue;
-        }
-
-        return (decimal) value;
-    }
-
-    internal static long ConvertDoubleToInt64( double value )
-    {
-        if ( value < long.MinValue )
-        {
-            return long.MinValue;
-        }
-        else if ( value > long.MaxValue )
-        {
-            return long.MaxValue;
-        }
-
-        return (long) value;
-    }
-
-    private static ulong ConvertDoubleToUInt64( double value )
-    {
-        if ( value < ulong.MinValue )
-        {
-            return ulong.MinValue;
-        }
-        else if ( value > long.MaxValue )
-        {
-            return long.MaxValue;
-        }
-
-        return (ulong) value;
-    }
-
-    [CompileTime]
-    private static TypeFlag GetTypeFlag( IType locationType )
-        => locationType.SpecialType switch
-        {
-            SpecialType.Byte => TypeFlag.Byte,
-            SpecialType.SByte => TypeFlag.SByte,
-            SpecialType.Single => TypeFlag.Single,
-            SpecialType.Decimal => TypeFlag.Decimal,
-            SpecialType.Double => TypeFlag.Double,
-            SpecialType.Int16 => TypeFlag.Int16,
-            SpecialType.Int32 => TypeFlag.Int32,
-            SpecialType.Int64 => TypeFlag.Int64,
-            SpecialType.UInt16 => TypeFlag.UInt16,
-            SpecialType.UInt32 => TypeFlag.UInt32,
-            SpecialType.UInt64 => TypeFlag.UInt64,
-            _ => TypeFlag.None
-        };
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RangeAttribute"/> class specifying bounds of type <see cref="ushort"/>.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="minAllowed">Determines if the <paramref name="min"/> value is allowed (i.e. if the inequality is <c>&gt;=</c> instead of <c>&gt;</c>.</param>
+    /// <param name="maxAllowed">Determines if the <paramref name="max"/> value is allowed (i.e. if the inequality is <c>&lt;=</c> instead of <c>&lt;</c>.</param> 
+    public RangeAttribute( ushort min, ushort max, bool minAllowed = true, bool maxAllowed = true ) : this(
+        NumericBound.Create( min, minAllowed ),
+        NumericBound.Create( max, maxAllowed ) ) { }
 
     /// <inheritdoc/>
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -448,42 +179,37 @@ public class RangeAttribute : ContractAspect
             _ => false
         };
 
-    /// <summary>
-    /// Creates a <see cref="DiagnosticDefinition"/> using the standard template for errors like "RangeAttribute cannot be
-    /// applied to Foo/A because the value range cannot be satisfied by the type int", where the title and diagnostic ID must be
-    /// specific to each derived aspect. Derived aspects should store the result in a <c>readonly static</c> field, the value of
-    /// which should be returned by an override of <see cref="GetCannotBeAppliedDiagnosticDefinition"/>.
-    /// </summary>
-    /// <param name="id">The diagnostic ID, for example "LAMA5000".</param>
-    /// <param name="attributeTypeName">The name of the attribute type (for example, "RangeAttribute").</param>
-    protected static DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> CreateCannotBeAppliedDiagnosticDefinition(
-        string id,
-        string attributeTypeName )
-        => new(
-            id,
-            Severity.Error,
-            $"{attributeTypeName} cannot be applied to {{0}} because the value range cannot be satisfied by the type {{1}}.",
-            $"{attributeTypeName} cannot be applied.",
-            "Metalama.Patterns.Contracts" );
-
-    // Was COM010 in PostSharp
-    private static readonly DiagnosticDefinition<(IDeclaration, string)> _rangeCannotBeApplied =
-        CreateCannotBeAppliedDiagnosticDefinition( "LAMA5000", nameof(RangeAttribute) );
-
-    protected virtual DiagnosticDefinition<(IDeclaration Declaration, string TargetBasicType)> GetCannotBeAppliedDiagnosticDefinition() => _rangeCannotBeApplied;
-
     private void BuildAspect( IAspectBuilder builder, IType targetType )
     {
         var basicType = (INamedType) targetType.ToNonNullableType();
-        var typeFlag = GetTypeFlag( basicType );
 
-        if ( (typeFlag & this._invalidTypes) != 0 )
+        switch ( this.Range.IsTypeSupported( basicType ) )
         {
-            builder.Diagnostics.Report(
-                this.GetCannotBeAppliedDiagnosticDefinition()
-                    .WithArguments(
-                        (builder.Target,
-                         basicType.Name) ) );
+            case NumericRangeTypeSupport.NotSupported:
+                builder.Diagnostics.Report(
+                    ContractDiagnostics.RangeCannotBeApplied
+                        .WithArguments(
+                            (builder.Target,
+                             basicType.Name,
+                             builder.AspectInstance.AspectClass.ShortName,
+                             this.Range) ) );
+
+                builder.SkipAspect();
+
+                break;
+
+            case NumericRangeTypeSupport.Redundant:
+                builder.Diagnostics.Report(
+                    ContractDiagnostics.RangeIsRedundant
+                        .WithArguments(
+                            (builder.Target,
+                             basicType.Name,
+                             builder.AspectInstance.AspectClass.ShortName,
+                             this.Range) ) );
+
+                builder.SkipAspect();
+
+                break;
         }
     }
 
@@ -501,160 +227,29 @@ public class RangeAttribute : ContractAspect
         this.BuildAspect( builder, builder.Target.Type );
     }
 
-    [CompileTime]
-    private (IExpression Min, IExpression Max) GetMinAndMaxExpressions( SpecialType specialType )
-    {
-        var minBuilder = new ExpressionBuilder();
-        var maxBuilder = new ExpressionBuilder();
-
-        switch ( specialType )
-        {
-            case SpecialType.Byte:
-            case SpecialType.UInt16:
-            case SpecialType.UInt32:
-            case SpecialType.UInt64:
-                minBuilder.AppendLiteral( this._minUInt64 );
-                maxBuilder.AppendLiteral( this._maxUInt64 );
-
-                break;
-
-            case SpecialType.SByte:
-            case SpecialType.Int16:
-            case SpecialType.Int32:
-            case SpecialType.Int64:
-                minBuilder.AppendLiteral( this._minInt64 );
-                maxBuilder.AppendLiteral( this._maxInt64 );
-
-                break;
-
-            case SpecialType.Single:
-            case SpecialType.Double:
-                minBuilder.AppendLiteral( this._minDouble );
-                maxBuilder.AppendLiteral( this._maxDouble );
-
-                break;
-
-            case SpecialType.Decimal:
-                minBuilder.AppendLiteral( this._minDecimal );
-                maxBuilder.AppendLiteral( this._maxDecimal );
-
-                break;
-
-            default:
-                throw new InvalidOperationException( $"SpecialType.{specialType} was not expected here." );
-        }
-
-        return (minBuilder.ToExpression(), maxBuilder.ToExpression());
-    }
-
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
         var type = meta.Target.GetTargetType();
-        var basicType = (INamedType) type.ToNonNullableType();
-        var isNullable = type.IsNullable == true;
-        var exceptionInfo = this.GetExceptionInfo();
-        var aspectType = meta.CompileTime( this.GetType() );
+        var expressionBuilder = new ExpressionBuilder();
+        var expression = (IExpression) value!;
 
-        if ( type.SpecialType == SpecialType.Object )
+        if ( this.Range.GeneratePattern( type, expressionBuilder, expression ) )
         {
-            if ( value != null )
+            if ( expressionBuilder.ToValue() )
             {
-                var rangeValues = new RangeValues(
-                    this._minInt64,
-                    this._maxInt64,
-                    this._minUInt64,
-                    this._maxUInt64,
-                    this._minDouble,
-                    this._maxDouble,
-                    this._minDecimal,
-                    this._maxDecimal );
-
-                var validateResult = RangeAttributeHelpers.Validate( value, rangeValues );
-
-                // TODO: Maybe include validateResult.UnderlyingType in the message?
-
-                if ( !validateResult.IsInRange )
-                {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentOutOfRangeException),
-                            aspectType,
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            exceptionInfo.MessageIdExpression.Value,
-                            exceptionInfo.IncludeMinValue
-                                ? this.DisplayMinValue
-                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
-                }
+                this.OnContractViolated( value );
             }
         }
         else
         {
-            var (min, max) = this.GetMinAndMaxExpressions( basicType.SpecialType );
-
-            if ( isNullable )
-            {
-                if ( value!.HasValue && (value < min.Value || value > max.Value) )
-                {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentOutOfRangeException),
-                            aspectType,
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            exceptionInfo.MessageIdExpression.Value,
-                            exceptionInfo.IncludeMinValue
-                                ? this.DisplayMinValue
-                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
-                }
-            }
-            else
-            {
-                if ( value < min.Value || value > max.Value )
-                {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentOutOfRangeException),
-                            aspectType,
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            exceptionInfo.MessageIdExpression.Value,
-                            exceptionInfo.IncludeMinValue
-                                ? this.DisplayMinValue
-                                : meta.CompileTime( exceptionInfo.IncludeMaxValue ? this.DisplayMaxValue : null ),
-                            exceptionInfo is { IncludeMinValue: true, IncludeMaxValue: true } ? this.DisplayMaxValue : null ) );
-                }
-            }
+            meta.InsertComment( $"The {this.Range} validation on {expression} is fully redundant and has been skipped." );
         }
     }
 
-    /// <summary>
-    /// Describes exception information as returned by <see cref="GetExceptionInfo"/>.
-    /// </summary>
-    [CompileTime]
-    protected record struct ExceptionInfo( IExpression MessageIdExpression, bool IncludeMinValue, bool IncludeMaxValue );
-
-    /// <summary>
-    /// Called by <see cref="Validate(object?)"/> to determine the message to emit, and whether the minimum and maximum values
-    /// should be provided as formatting arguments.
-    /// </summary>
-    [CompileTime]
-    protected virtual ExceptionInfo GetExceptionInfo()
-        => new(
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .RangeErrorMessage) ),
-            true,
-            true );
+    [Template]
+    protected virtual void OnContractViolated( dynamic? value )
+    {
+        meta.Target.GetContractOptions().Templates!.OnRangeContractViolated( value, this.Range );
+    }
 }

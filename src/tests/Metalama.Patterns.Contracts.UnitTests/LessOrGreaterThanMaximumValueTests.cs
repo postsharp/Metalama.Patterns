@@ -5,7 +5,8 @@ using Xunit;
 // This is a modified copy of LessOrGreaterThanPositiveValueTests.cs
 // Keep the testing logic equal for all the copies!
 
-#pragma warning disable IDE0004 // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+#pragma warning disable IDE0004  // Remove Unnecessary Cast: in this problem domain, explicit casts add clarity.
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
 
 // Resharper disable RedundantCast
 
@@ -22,7 +23,7 @@ public sealed class LessOrGreaterThanMaximumValueTests : RangeContractTestsBase
     // Loss of precision is a consequence.
     private const double _decimalLimit = (double) decimal.MaxValue / (1 + DoubleTolerance);
 
-    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly double _doubleStep = Utilities.FloatingPointHelper.GetDoubleStep( _doubleLimit );
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Success()

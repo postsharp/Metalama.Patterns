@@ -5,15 +5,18 @@ using Xunit;
 // This is a modified copy of LessOrGreaterThanPositiveValueTests.cs
 // Keep the testing logic equal for all the copies!
 
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
+
 namespace Metalama.Patterns.Contracts.UnitTests;
 
 public sealed class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 {
     private const long _longLimit = -100;
     private const double _doubleLimit = -100;
+    private const double _longAsDoubleLimit = -100;
 
-    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
-    private static readonly decimal _decimalStep = FloatingPointHelper.GetDecimalStep( (decimal) _doubleLimit );
+    private static readonly double _doubleStep = Utilities.FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly decimal _decimalStep = Utilities.FloatingPointHelper.GetDecimalStep( (decimal) _doubleLimit );
 
     [Fact]
     public void TestMethodsWithGreaterThanAspect_Success()
@@ -142,7 +145,7 @@ public sealed class LessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 
     private static void MethodWithDecimalGreaterThanDouble( [GreaterThan( _doubleLimit )] decimal? a ) { }
 
-    private static void MethodWithLongLessThanDouble( [LessThan( _doubleLimit )] long? a ) { }
+    private static void MethodWithLongLessThanDouble( [LessThan( _longAsDoubleLimit )] long? a ) { }
 
     private static void MethodWithDoubleLessThanDouble( [LessThan( _doubleLimit )] double? a ) { }
 

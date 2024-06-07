@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;LamaDebug</Configurations>
+    <!-- Support unit testing -->
+    <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
+    <Version Condition="'$(MetalamaPatternsObservabilityVersion)'!=''">$(MetalamaPatternsObservabilityVersion)</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Using Remove="System.Net.Http" />
+    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+    <PackageReference Include="Metalama.Framework.Sdk" Version="$(MetalamaVersion)" PrivateAssets="all" />
+    <PackageReference Include="JetBrains.Annotations" Version="$(JetBrainsAnnotationsVersion)" PrivateAssets="all" />
+    <InternalsVisibleTo Include="Metalama.Patterns.Observability.CompileTimeTests" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Compile Remove="ShallNotDependOnMutableStateAttribute.cs" />
+  </ItemGroup>
+
+  <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
+  
+</Project>

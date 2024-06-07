@@ -11,8 +11,8 @@ public sealed class PrecisionTests : RangeContractTestsBase
     public void CheckDoubleTolerance()
         => Assert.Equal(
             DoubleTolerance.ToString( CultureInfo.InvariantCulture ),
-            FloatingPointHelper.DoubleTolerance.ToString( CultureInfo.InvariantCulture ) );
+            Utilities.FloatingPointHelper.DoubleTolerance.ToString( CultureInfo.InvariantCulture ) );
 
     [Fact]
-    public void CheckDecimalTolerance() => Assert.Equal( DecimalTolerance, FloatingPointHelper.DecimalTolerance );
+    public void CheckDecimalTolerance() => Assert.Equal( DecimalTolerance, Utilities.FloatingPointHelper.DecimalTolerance );
 }

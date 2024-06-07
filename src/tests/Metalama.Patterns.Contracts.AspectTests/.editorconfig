@@ -34,6 +34,7 @@ dotnet_diagnostic.CS0649.severity = none
 # CS0169: The private field 'class member' is never used
 dotnet_diagnostic.CS0169.severity = none
 
+resharper_check_namespace_highlighting=none
 resharper_inconsistent_naming_highlighting=none
 resharper_redundant_cast_highlighting=none
 resharper_unused_member_global_highlighting=none

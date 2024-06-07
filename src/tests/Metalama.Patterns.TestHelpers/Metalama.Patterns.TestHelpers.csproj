@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Azure.Identity" Version="$(AzureIdentityVersion)"/>
+        <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="$(AzureSecurityKeyVaultSecretsVersion)"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+        <PackageReference Include="xunit.abstractions" Version="$(xUnitAbstractionsVersion)" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\Flashtrace\Flashtrace.csproj" />
+    </ItemGroup>
+
+</Project>

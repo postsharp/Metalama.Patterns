@@ -5,15 +5,19 @@ using Xunit;
 // This is a modified copy of StrictlyLessOrGreaterThanPositiveValueTests.cs
 // Keep the testing logic equal for all the copies!
 
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
+
 namespace Metalama.Patterns.Contracts.UnitTests;
 
 public sealed class StrictlyLessOrGreaterThanNegativeValueTests : RangeContractTestsBase
 {
     private const long _longLimit = -100;
+    private const long _ulongLimit = 100;
     private const double _doubleLimit = -100;
+    private const double _longAsDoubleLimit = -100;
 
-    private static readonly double _doubleStep = FloatingPointHelper.GetDoubleStep( _doubleLimit );
-    private static readonly decimal _decimalStep = FloatingPointHelper.GetDecimalStep( (decimal) _doubleLimit );
+    private static readonly double _doubleStep = Utilities.FloatingPointHelper.GetDoubleStep( _doubleLimit );
+    private static readonly decimal _decimalStep = Utilities.FloatingPointHelper.GetDecimalStep( (decimal) _doubleLimit );
 
     [Fact]
     public void TestMethodsWithStrictlyGreaterThanAspect_Success()
@@ -138,7 +142,7 @@ public sealed class StrictlyLessOrGreaterThanNegativeValueTests : RangeContractT
 
     private static void MethodWithLongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] long? a ) { }
 
-    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] ulong? a ) { }
+    private static void MethodWithUlongStrictlyLessThanLong( [StrictlyLessThan( _ulongLimit )] ulong? a ) { }
 
     private static void MethodWithDoubleStrictlyLessThanLong( [StrictlyLessThan( _longLimit )] double? a ) { }
 
@@ -156,7 +160,7 @@ public sealed class StrictlyLessOrGreaterThanNegativeValueTests : RangeContractT
 
     private static void MethodWithDecimalStrictlyGreaterThanDouble( [StrictlyGreaterThan( _doubleLimit )] decimal? a ) { }
 
-    private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] long? a ) { }
+    private static void MethodWithLongStrictlyLessThanDouble( [StrictlyLessThan( _longAsDoubleLimit )] long? a ) { }
 
     private static void MethodWithDoubleStrictlyLessThanDouble( [StrictlyLessThan( _doubleLimit )] double? a ) { }
 

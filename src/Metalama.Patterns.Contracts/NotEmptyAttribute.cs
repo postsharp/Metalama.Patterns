@@ -3,25 +3,25 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Eligibility;
 using System.Collections;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
-/// an <see cref="ArgumentNullException"/> if the target is assigned a null or empty value.
+/// an <see cref="ArgumentException"/> if the target is assigned an empty value.
 /// The custom attributes can be added to locations of type <see cref="string"/> (where empty
-/// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/> or <see cref="IReadOnlyCollection{T}"/>
-/// (where empty means zero items). 
+/// means zero characters), or <see cref="ICollection"/>, <see cref="ICollection{T}"/>, <see cref="IReadOnlyCollection{T}"/>, arrays or <see cref="ImmutableArray{T}"/>
+/// (where empty means zero items).  Null references or default <see cref="ImmutableArray{T}"/> instances are accepted and do not throw an exception.
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.NotEmptyErrorMessage"/>.</para>
-/// </remarks>
+/// <seealso href="@contract-types"/>
+/// <seealso href="@enforcing-non-nullability"/>
 [PublicAPI]
-[Inheritable]
-public sealed class NotEmptyAttribute : ContractAspect
+public sealed class NotEmptyAttribute : ContractBaseAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotEmptyAttribute"/> class.
@@ -33,67 +33,83 @@ public sealed class NotEmptyAttribute : ContractAspect
     {
         base.BuildEligibility( builder );
 
-        // TODO: #33296 Fails during eligibility rule evaluation because TypeFactory.GetType leads to service is not available.
-#if false
         builder.MustSatisfy(
-            f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )), 
+            f => f.Type is INamedType t && (t.Equals( SpecialType.String ) || TryGetCompatibleTargetInterface( t, out _, out _ )),
             f => $"the type of {f} must string or implement ICollection, ICollection<T> or IReadOnlyCollection<T>" );
-#endif
     }
 
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetKind = meta.Target.GetTargetKind();
-        var targetName = meta.Target.GetTargetName();
-        var targetType = (INamedType) meta.Target.GetTargetType();
+        var targetType = meta.Target.GetTargetType();
+        var requiresNullCheck = targetType.IsNullable != false;
 
-        if ( targetType.Equals( SpecialType.String ) )
+        if ( targetType.Equals( SpecialType.String ) || targetType is IArrayType )
         {
-            if ( string.IsNullOrEmpty( value ) )
+            if ( requiresNullCheck )
             {
-                throw ContractsServices.Default.ExceptionFactory.CreateException(
-                    ContractExceptionInfo.Create(
-                        typeof(ArgumentNullException),
-                        typeof(NotEmptyAttribute),
-                        value,
-                        targetName,
-                        targetKind,
-                        meta.Target.ContractDirection,
-                        ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
-            }
-        }
-        else if ( TryGetCompatibleTargetInterface( targetType, out var interfaceType, out var requiresCast ) )
-        {
-            if ( requiresCast )
-            {
-                if ( value == null || meta.Cast( interfaceType, value )!.Count <= 0 )
+                if ( value != null && value!.Length <= 0 )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentNullException),
-                            typeof(NotEmptyAttribute),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
                 }
             }
             else
             {
-                if ( value == null || value!.Count <= 0 )
+                if ( value!.Length <= 0 )
                 {
-                    throw ContractsServices.Default.ExceptionFactory.CreateException(
-                        ContractExceptionInfo.Create(
-                            typeof(ArgumentNullException),
-                            typeof(NotEmptyAttribute),
-                            value,
-                            targetName,
-                            targetKind,
-                            meta.Target.ContractDirection,
-                            ContractLocalizedTextProvider.NotEmptyErrorMessage ) );
+                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
                 }
+            }
+        }
+        else if ( targetType is INamedType namedType )
+        {
+            if ( namedType.Definition.Is( typeof(ImmutableArray<>) ) )
+            {
+                if ( !value!.IsDefault && value.IsEmpty )
+                {
+                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                }
+            }
+            else if ( TryGetCompatibleTargetInterface( namedType, out var interfaceType, out var requiresCast ) )
+            {
+                if ( requiresCast )
+                {
+                    if ( requiresNullCheck )
+                    {
+                        if ( value != null && meta.Cast( interfaceType, value )!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                    else
+                    {
+                        if ( meta.Cast( interfaceType, value )!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                }
+                else
+                {
+                    if ( requiresNullCheck )
+                    {
+                        if ( value != null && value!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                    else
+                    {
+                        if ( value!.Count <= 0 )
+                        {
+                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                        }
+                    }
+                }
+            }
+            else
+            {
+                ThrowValidateCalledOnIneligibleTarget();
             }
         }
         else
@@ -135,7 +151,7 @@ public sealed class NotEmptyAttribute : ContractAspect
             {
                 if ( t.IsGeneric )
                 {
-                    var originalDefinition = t.GetOriginalDefinition();
+                    var originalDefinition = t.Definition;
 
                     if ( originalDefinition.Equals( typeOfIReadOnlyCollection1 ) ||
                          originalDefinition.Equals( typeOfICollection1 ) )

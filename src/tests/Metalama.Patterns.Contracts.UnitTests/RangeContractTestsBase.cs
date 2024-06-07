@@ -71,7 +71,5 @@ public abstract class RangeContractTestsBase
     }
 
     // Incorrect warning.
-#pragma warning disable CS8603 // Possible null reference return.
-    private static string NullableToString( object? nullable ) => nullable == null ? "null" : nullable.ToString();
-#pragma warning restore CS8603 // Possible null reference return.
+    private static string NullableToString( object? nullable ) => nullable?.ToString() ?? "null";
 }

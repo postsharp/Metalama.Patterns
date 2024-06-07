@@ -1,9 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Contracts.UnitTests.Assets;
 using Xunit;
+
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
+// ReSharper disable RedundantSuppressNullableWarningExpression
 public sealed class RangeAttributeTests
 {
     [Fact]
@@ -249,7 +253,7 @@ public sealed class RangeAttributeTests
 
         long? p = 1;
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>(
+        var e = TestHelpers.RecordException<PostconditionViolationException>(
             () =>
                 cut.ZeroToTenNullableIntRef( -1, ref p ) );
 
@@ -262,7 +266,7 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>(
+        var e = TestHelpers.RecordException<PostconditionViolationException>(
             () =>
                 cut.ZeroToTenNullableIntOut( -1, out _ ) );
 
@@ -275,7 +279,7 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionFailedException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
+        var e = TestHelpers.RecordException<PostconditionViolationException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
 
         Assert.NotNull( e );
         Assert.Contains( "return value", e!.Message, StringComparison.Ordinal );

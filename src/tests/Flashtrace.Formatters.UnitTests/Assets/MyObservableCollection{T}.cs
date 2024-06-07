@@ -2,6 +2,6 @@
 
 using System.Collections.ObjectModel;
 
-namespace Flashtrace.Formatters.UnitTests;
+namespace Flashtrace.Formatters.UnitTests.Assets;
 
 internal class MyObservableCollection<T> : ObservableCollection<T> { }

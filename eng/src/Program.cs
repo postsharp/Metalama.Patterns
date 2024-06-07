@@ -6,24 +6,38 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Build.Solutions;
 using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using Spectre.Console.Cli;
-using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2023_2;
+using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_2;
 
 var product = new Product( MetalamaDependencies.MetalamaPatterns )
 {
-    Solutions = new Solution[] { new DotNetSolution( "Metalama.Patterns.sln" ) { CanFormatCode = true } },
-  
-    // PublicArtifacts = Pattern.Create( "Metalama.Patterns.$(PackageVersion).nupkg" ),
-    Dependencies = new[] { DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.Metalama },
+    Solutions = new Solution[] 
+    { 
+        new DotNetSolution( "Metalama.Patterns.sln" )
+        { 
+            CanFormatCode = true,
+            FormatExclusions = new[] { "src\\tests\\*AspectTests\\**\\*" },
+        },
+    },
+    PublicArtifacts = Pattern.Create(
+        "Metalama.Patterns.Caching.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Caching.Aspects.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Caching.Backend.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Caching.Backends.Azure.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Caching.Backends.Redis.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Contracts.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Memoization.$(PackageVersion).nupkg",
+        // When changing to non-preview version, remove the version override from Versions.props
+        "Metalama.Patterns.Observability.$(PackagePreviewVersion).nupkg",
+        // When changing to non-preview version, remove the version override from Versions.props
+        "Metalama.Patterns.Xaml.$(PackagePreviewVersion).nupkg",
+        "Flashtrace.$(PackageVersion).nupkg",
+        "Flashtrace.Formatters.$(PackageVersion).nupkg" ),
+    Dependencies = new[] { DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions },
     MainVersionDependency = MetalamaDependencies.Metalama,
-    Configurations = Product.DefaultConfigurations.WithValue( 
+    Configurations = Product.DefaultConfigurations.WithValue(
         BuildConfiguration.Public,
         Product.DefaultConfigurations.Public with
         {
-            // TODO: We don't have any packages to publish yet.
-            // To start publishing the packages, set the public artifacts above and remove
-            // this assignment to Configurations property.
-            ExportsToTeamCityDeploy = false,
-            
             // This is the first version of Patters.
             // This line should be removed in the next version.
             RequiresUpstreamCheck = false

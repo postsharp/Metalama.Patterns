@@ -12,9 +12,9 @@ namespace Flashtrace.Formatters;
 public interface IFormatter<in T> : IFormatter
 {
     /// <summary>
-    /// Appends the description of an object into given <see cref="UnsafeStringBuilder"/> (weakly-typed variant).
+    /// Appends the description of an object into given <see cref="UnsafeStringBuilder"/> (strongly-typed variant).
     /// </summary>
     /// <param name="stringBuilder">The target <see cref="UnsafeStringBuilder"/>.</param>
     /// <param name="value">The value to be formatted.</param>
-    void Write( UnsafeStringBuilder stringBuilder, T? value );
+    void Format( UnsafeStringBuilder stringBuilder, T? value );
 }

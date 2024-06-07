@@ -2,38 +2,33 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
-using System.Text.RegularExpressions;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Patterns.Contracts;
 
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentException"/> if the target is assigned a value that
-/// is not a valid phone number. Null strings are accepted and do not
+/// is not a valid phone number. If the target is a nullable type, null strings are accepted and do not
 /// throw an exception.
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.PhoneErrorMessage"/>.</para>
-/// </remarks>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
-public sealed class PhoneAttribute : RegularExpressionAttribute
+public sealed class PhoneAttribute : RegularExpressionBaseAttribute
 {
-    private const string _pattern =
-        "^(\\+\\s?)?((?<!\\+.*)\\(\\+?\\d+([\\s\\-\\.]?\\d+)?\\)|\\d+)([\\s\\-\\.]?(\\(\\d+([\\s\\-\\.]?\\d+)?\\)|\\d+))*(\\s?(x|ext\\.?)\\s?\\d+)?$";
+    protected override IExpression GetRegex()
+    {
+        var builder = new ExpressionBuilder();
+        builder.AppendTypeName( typeof(ContractHelpers) );
+        builder.AppendVerbatim( "." );
+        builder.AppendVerbatim( nameof(ContractHelpers.PhoneRegex) );
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PhoneAttribute"/> class.
-    /// </summary>
-    public PhoneAttribute()
-        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
+        return builder.ToExpression();
+    }
 
-    /// <inheritdoc/>
-    [CompileTime]
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .PhoneErrorMessage) ),
-            false );
+    protected override void OnContractViolated( dynamic? value, dynamic regex )
+    {
+        meta.Target.GetContractOptions().Templates!.OnPhoneContractViolated( value );
+    }
 }

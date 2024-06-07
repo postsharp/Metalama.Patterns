@@ -1,0 +1,2 @@
+// Error LAMA5207 on `Foo`: `No match was found using the default naming convention. See other warnings for details.`
+// Warning LAMA5204 on `OnFooChanged`: `The method was identified as a candidate property-changed method for [DependencyProperty] property DefaultPropertyChangedMethodIsInvalid.Foo by the default naming convention, but the signature is not valid. Refer to documentation for supported method signatures.`

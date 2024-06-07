@@ -27,10 +27,10 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void SetSuccess( in CloseActivityOptions options, ref CallerInfo callerInfo );
+    void SetSuccess( in CloseActivityOptions options, in CallerInfo callerInfo );
 
     /// <summary>
-    /// Closes the activity with success and sets includes a result in the outcome message.
+    /// Closes the activity with success and includes a result in the outcome message.
     /// </summary>
     /// <param name="result">The result of the activity.</param>
     /// <param name="options">Options.</param>
@@ -38,7 +38,7 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void SetResult<TResult>( TResult result, in CloseActivityOptions options, ref CallerInfo callerInfo );
+    void SetResult<TResult>( TResult result, in CloseActivityOptions options, in CallerInfo callerInfo );
 
     /// <summary>
     /// Closes the activity and sets its outcome.
@@ -48,12 +48,12 @@ public interface ILogActivity : IDisposable
     /// <param name="message">The description of the activity outcome, typically created using the <see cref="SemanticMessageBuilder"/> or <see cref="FormattedMessageBuilder"/> class.</param>
     /// <param name="exception">An optional <see cref="System.Exception"/>.</param>
     /// <param name="options">Options.</param>
-    void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception? exception = null, in CloseActivityOptions options = default )
+    void SetOutcome<TMessage>( FlashtraceLevel level, in TMessage message, Exception? exception = null, in CloseActivityOptions options = default )
         where TMessage : IMessage;
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void SetOutcome<TMessage>( LogLevel level, in TMessage message, Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo )
+    void SetOutcome<TMessage>( FlashtraceLevel level, in TMessage message, Exception exception, in CloseActivityOptions options, in CallerInfo callerInfo )
         where TMessage : IMessage;
 
     /// <summary>
@@ -65,28 +65,26 @@ public interface ILogActivity : IDisposable
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void SetException( Exception exception, in CloseActivityOptions options, ref CallerInfo callerInfo );
+    void SetException( Exception exception, in CloseActivityOptions options, in CallerInfo callerInfo );
 
-#pragma warning disable CA1716 // Identifiers should not match keywords
     /// <summary>
     /// Resumes the current async activity after it has been suspended by a call to <see cref="LogActivity{TActivityDescription}.Suspend()"/>. There is typically no need
-    /// to invoke this method in user code because all async methods that use the <see cref="LogLevelSource"/> class are automatically instrumented.
+    /// to invoke this method in user code because all async methods that use the <see cref="FlashtraceLevelSource"/> class are automatically instrumented.
     /// </summary>
     void Resume();
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void Resume( ref CallerInfo callerInfo );
-#pragma warning restore CA1716 // Identifiers should not match keywords
+    void Resume( in CallerInfo callerInfo );
 
     /// <summary>
     /// Suspends the current async activity.
     /// The activity must than be resumed by a call of the <see cref="LogActivity{TActivityDescription}.Resume()"/> method.
-    /// There is typically no need to invoke this method in user code because all async methods that use the <see cref="LogLevelSource"/> class are automatically instrumented.
+    /// There is typically no need to invoke this method in user code because all async methods that use the <see cref="FlashtraceLevelSource"/> class are automatically instrumented.
     /// </summary>
     void Suspend();
 
     /// <excludeOverload />
     [EditorBrowsable( EditorBrowsableState.Never )]
-    void Suspend( ref CallerInfo callerInfo );
+    void Suspend( in CallerInfo callerInfo );
 }

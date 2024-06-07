@@ -2,6 +2,8 @@
 
 using Xunit;
 
+#pragma warning disable LAMA5006 // Intentionally with redundant checks.
+
 namespace Metalama.Patterns.Contracts.UnitTests;
 
 public sealed class NegativeOrPositiveAttributeTests : RangeContractTestsBase

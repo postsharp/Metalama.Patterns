@@ -1,1 +1,0 @@
-// Error LAMA5005 on `a`: `StrictlyGreaterThanAttribute cannot be applied to Range_DecimalStrictlyGreaterThanDouble.MethodWithDecimalStrictlyGreaterThanDouble(decimal?)/a because the value range cannot be satisfied by the type Decimal.`

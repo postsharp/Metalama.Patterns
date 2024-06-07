@@ -1,0 +1,2 @@
+// Error LAMA5207 on `Foo`: `No match was found using the explicitly-configured naming convention. See other warnings for details.`
+// Error LAMA5206 on `Foo`: `No property-changed method was found using the explicitly-configured naming convention, with candidate member name 'DoesNotExist'.`

@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Patterns.Contracts.UnitTests;
+namespace Metalama.Patterns.Contracts.UnitTests.Assets;
 
 public class RegexTestClass
 {
     [RegularExpression( ".+@.+" )]
     public string Email;
 
-    [EmailAddress]
+    [Email]
     public string Email2;
 
     [Phone]
@@ -17,10 +17,10 @@ public class RegexTestClass
     public string UrlField;
 
     // Incorrect warning at build time, but no squiggly.
+    // ReSharper disable once RedundantSuppressNullableWarningExpression
+
 #pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable CS8603  // Possible null reference return.
-    public string SetEmail( [RegularExpression( ".+@.+" )] string email ) => email;
-#pragma warning restore CS8603  // Possible null reference return.
+    public string SetEmail( [RegularExpression( ".+@.+" )] string email ) => email!;
 #pragma warning restore IDE0079 // Remove unnecessary suppression
 
     [RegularExpression( @"^[a-z]{4}$" )]

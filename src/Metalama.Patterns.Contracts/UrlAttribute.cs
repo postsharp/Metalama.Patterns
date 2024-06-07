@@ -2,7 +2,8 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
-using System.Text.RegularExpressions;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Patterns.Contracts;
 
@@ -10,31 +11,25 @@ namespace Metalama.Patterns.Contracts;
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentException"/> if the target is assigned a value that
 /// is not a valid URL starting with <c>http://</c>, <c>https://</c> or <c>ftp://</c>.
-///  Null strings are accepted and do not
+/// If the target is a nullable type, If the target is a nullable type, null strings are accepted and do not
 /// throw an exception.
 /// </summary>
-/// <remarks>
-/// <para>Error message is identified by <see cref="ContractLocalizedTextProvider.UrlErrorMessage"/>.</para>
-/// </remarks>
+/// <seealso href="@contract-types"/>
 [PublicAPI]
-public sealed class UrlAttribute : RegularExpressionAttribute
+public sealed class UrlAttribute : RegularExpressionBaseAttribute
 {
-    private const string _pattern =
-        "^(https?|ftp):\\/\\/(((([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(%[\\da-f]{2})|[!\\$&'\\(\\)\\*\\+,;=]|:)*@)?(((\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]))|((([a-z]|\\d|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(([a-z]|\\d|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])*([a-z]|\\d|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])))\\.)+(([a-z]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(([a-z]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])*([a-z]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])))\\.?)(:\\d*)?)(\\/((([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(%[\\da-f]{2})|[!\\$&'\\(\\)\\*\\+,;=]|:|@)+(\\/(([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(%[\\da-f]{2})|[!\\$&'\\(\\)\\*\\+,;=]|:|@)*)*)?)?(\\?((([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(%[\\da-f]{2})|[!\\$&'\\(\\)\\*\\+,;=]|:|@)|[\\uE000-\\uF8FF]|\\/|\\?)*)?(\\#((([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(%[\\da-f]{2})|[!\\$&'\\(\\)\\*\\+,;=]|:|@)|\\/|\\?)*)?$";
+    protected override void OnContractViolated( dynamic? value, dynamic regex )
+    {
+        meta.Target.GetContractOptions().Templates!.OnUrlContractViolated( value );
+    }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UrlAttribute"/> class.
-    /// </summary>
-    public UrlAttribute()
-        : base( _pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture ) { }
+    protected override IExpression GetRegex()
+    {
+        var builder = new ExpressionBuilder();
+        builder.AppendTypeName( typeof(ContractHelpers) );
+        builder.AppendVerbatim( "." );
+        builder.AppendVerbatim( nameof(ContractHelpers.UrlRegex) );
 
-    /// <inheritdoc/>
-    [CompileTime]
-    protected override ExceptionInfo GetExceptionInfo()
-        => new(
-            typeof(ArgumentException),
-            CompileTimeHelpers.GetContractLocalizedTextProviderField(
-                nameof(ContractLocalizedTextProvider
-                           .UrlErrorMessage) ),
-            false );
+        return builder.ToExpression();
+    }
 }
