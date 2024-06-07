@@ -4,6 +4,11 @@
 // @RemoveOutputCode
 #endif
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+#pragma warning disable SA1401
+
+// ReSharper disable UnusedMember.Global
+
 namespace Metalama.Patterns.Immutability.AspectTests.ShallowAttributeAndWarnings;
 
 [Immutable]

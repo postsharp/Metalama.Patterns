@@ -25,7 +25,7 @@ public class C
     private class Fabric : TypeFabric
     {
         [Introduce]
-        public void PrintImmutability()
+        public static void PrintImmutability()
         {
             foreach ( var type in meta.Target.Compilation.Types.OrderBy( t => t.Name ) )
             {
