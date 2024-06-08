@@ -3,17 +3,21 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Immutability.Configuration;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Immutability;
 
+/// <summary>
+/// Provides the <see cref="GetImmutabilityKind"/> method that returns the <see cref="ImmutabilityKind"/>
+/// for a given type.
+/// </summary>
 [CompileTime]
 public static class ImmutabilityExtensions
 {
+    /// <summary>
+    /// Returns the <see cref="ImmutabilityKind"/> for a given type.
+    /// </summary>
     public static ImmutabilityKind GetImmutabilityKind( this IType type )
     {
-        Debugger.Break();
-
         if ( type is {
                 SpecialType: SpecialType.Boolean or
                 SpecialType.Byte or

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
@@ -147,8 +146,6 @@ internal abstract class DiagnosticReporter
     public void ReportDiagnostics<TMatch>( INamingConventionEvaluationResult<TMatch> evaluationResult )
         where TMatch : NamingConventionMatch
     {
-        Debugger.Break();
-        
         if ( evaluationResult.Success )
         {
             var match = evaluationResult.SuccessfulMatch.Value.Match;

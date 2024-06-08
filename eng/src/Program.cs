@@ -27,9 +27,10 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         "Metalama.Patterns.Contracts.$(PackageVersion).nupkg",
         "Metalama.Patterns.Memoization.$(PackageVersion).nupkg",
         // When changing to non-preview version, remove the version override from Versions.props
-        "Metalama.Patterns.Observability.$(PackagePreviewVersion).nupkg",
+        "Metalama.Patterns.Immutability.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Observability.$(PackageVersion).nupkg",
         // When changing to non-preview version, remove the version override from Versions.props
-        "Metalama.Patterns.Xaml.$(PackagePreviewVersion).nupkg",
+        "Metalama.Patterns.Xaml.$(PackageVersion).nupkg",
         "Flashtrace.$(PackageVersion).nupkg",
         "Flashtrace.Formatters.$(PackageVersion).nupkg" ),
     Dependencies = new[] { DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions },

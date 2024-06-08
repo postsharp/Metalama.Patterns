@@ -9,17 +9,26 @@ using Metalama.Patterns.Immutability.Configuration;
 
 namespace Metalama.Patterns.Immutability;
 
+/// <summary>
+/// An aspect that marks the target type as immutable (shallowly or deeply) and reports warnings
+/// for mutable fields.
+/// </summary>
 [Inheritable]
 public class ImmutableAttribute : TypeAspect, IHierarchicalOptionsProvider
 {
     private readonly ImmutabilityKind _kind;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ImmutableAttribute"/> class.
+    /// </summary>
+    /// <param name="kind">The kind of immutability of the target type. The default value is <see cref="ImmutabilityKind.Shallow"/>.</param>
     public ImmutableAttribute( ImmutabilityKind kind = ImmutabilityKind.Shallow )
     {
         this._kind = kind;
     }
 
-    public IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context ) => new[] { new ImmutabilityOptions() { Kind = this._kind } };
+    IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
+        => new[] { new ImmutabilityOptions() { Kind = this._kind } };
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
