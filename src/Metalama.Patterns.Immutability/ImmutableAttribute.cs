@@ -34,11 +34,11 @@ public class ImmutableAttribute : TypeAspect, IHierarchicalOptionsProvider
     {
         foreach ( var field in builder.Target.Fields )
         {
-            if ( !field.IsImplicitlyDeclared )
+            if ( !field.IsImplicitlyDeclared && !field.IsStatic )
             {
                 if ( field is { Writeability: > Writeability.InitOnly } )
                 {
-                    builder.Diagnostics.Report( ImmutabilityDiagnostics.FieldMustBeReadOnly.WithArguments( field ) );
+                    builder.Diagnostics.Report( ImmutabilityDiagnostics.FieldMustBeReadOnly.WithArguments( field ), field );
                 }
                 else
                 {
@@ -49,12 +49,12 @@ public class ImmutableAttribute : TypeAspect, IHierarchicalOptionsProvider
 
         foreach ( var property in builder.Target.Properties )
         {
-            if ( property.IsAutoPropertyOrField == true )
+            if ( property.IsAutoPropertyOrField == true && !property.IsStatic )
             {
                 switch ( property.Writeability )
                 {
                     case Writeability.All:
-                        builder.Diagnostics.Report( ImmutabilityDiagnostics.PropertyMustHaveNoSetter.WithArguments( property ) );
+                        builder.Diagnostics.Report( ImmutabilityDiagnostics.PropertyMustHaveNoSetter.WithArguments( property ), property );
 
                         break;
 
